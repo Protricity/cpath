@@ -40,7 +40,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
 
     public function render(Array $args) {
 
-        $req = strcasecmp($_SERVER['REQUEST_METHOD'], 'get') === 0
+        $req = strcasecmp(Util::getUrl('method'), 'get') === 0
             ? $_GET
             : $_POST;
 
@@ -100,6 +100,13 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
                             echo "<pre>$log</pre>";
                     }
                     return;
+                case 'text/plain':
+                    $response->sendHeaders($mimeType);
+                    echo $response;
+                    if(Base::isDebug()) {
+                        foreach(Base::getLog() as $log)
+                            echo "$log\n";
+                    }
             }
         }
     }

@@ -11,35 +11,36 @@ namespace CPath;
 class Util {
 
     private static $mHeaders = null;
+    private static $mUrl;
+
+    public static function init() {
+        if(empty($_SERVER["REQUEST_URI"])) {
+            self::$mUrl = parse_url($_SERVER['argv'][2]);
+            self::$mUrl['method'] = isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : "GET";
+        } else {
+            self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
+            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : "GET";
+        }
+        $root = dirname($_SERVER['SCRIPT_NAME']);
+        $request = self::$mUrl["path"];
+        if(stripos($request, $root) === 0)
+            $request = substr($request, strlen($root));
+        self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
+
+    }
 
     public static function getHeader($name) {
         static $headers = NULL;
         if($headers === null)
-            $headers = getallheaders();
+            $headers = function_exists('getallheaders') ? getallheaders() : array('Accept'=>'text/plain');
 
         return $headers[$name];
     }
 
-    public static function parseUrl($key=NULL) {
-        static $parseUrl = NULL;
-        if($parseUrl === null)
-            $parseUrl = parse_url($_SERVER["REQUEST_URI"]);
-
+    public static function getUrl($key=NULL) {
         if($key !== NULL)
-            return $parseUrl[$key];
-        return $parseUrl;
-    }
-
-    public static function getUrlRoute() {
-        static $route = NULL;
-        if($route === NULL) {
-            $root = dirname($_SERVER['SCRIPT_NAME']);
-            $request = self::parseUrl("path");
-            if(stripos($request, $root) === 0)
-                $request = substr($request, strlen($root));
-            $route = $_SERVER["REQUEST_METHOD"] . " " . $request;
-        }
-        return $route;
+            return self::$mUrl[$key];
+        return self::$mUrl;
     }
 
     public static function getAcceptedTypes() {
@@ -116,3 +117,4 @@ class Util {
         return $root;
     }
 }
+Util::init();

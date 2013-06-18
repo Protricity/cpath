@@ -24,7 +24,7 @@ class Route {
 
     public function tryRoute($requestPath=NULL) {
         if($requestPath === NULL)
-            $requestPath = Util::getUrlRoute();
+            $requestPath = Util::getUrl('route');
 
         if(strpos($requestPath, $this->mRoute) !== 0)
             return false;
@@ -54,6 +54,6 @@ class Route {
             if($Route->tryRoute())
                 return;
         }
-        throw new NoRoutesFoundException("No Routes Matched: " . Util::getUrlRoute());
+        throw new NoRoutesFoundException("No Routes Matched: " . Util::getUrl('route'));
     }
 }
