@@ -95,6 +95,10 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
                 case 'text/html':
                     $response->sendHeaders($mimeType);
                     echo "<pre>$response</pre>";
+                    if(Base::isDebug()) {
+                        foreach(Base::getLog() as $log)
+                            echo "<pre>$log</pre>";
+                    }
                     return;
             }
         }
