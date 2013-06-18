@@ -17,6 +17,7 @@ interface IResponse extends IJSON,IXML {
 }
 
 trait IResponseHelper {
+
     function toJSON(Array &$JSON) {
         $JSON['status'] = $this->getStatusCode() == IResponse::STATUS_SUCCESS;
         $JSON['msg'] = $this->getMessage();
@@ -27,7 +28,8 @@ trait IResponseHelper {
     function toXML(\SimpleXMLElement $xml) {
         $xml->addAttribute('status', $this->getStatusCode() == IResponse::STATUS_SUCCESS);
         $xml->addAttribute('msg', $this->getMessage());
-        Util::toXML($this->getData(), $xml);
+        Util::toXML($this->getData(), $xml->addChild('response'));
+        return $xml;
     }
 
     function sendHeaders($mimeType=NULL) {
@@ -37,5 +39,11 @@ trait IResponseHelper {
         header("HTTP/1.0 " . $this->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
+    }
+
+    function __toString() {
+        return
+            $this->getStatusCode() . " " . $this->getMessage() . "\n"
+            . print_r($this->getData(), true);
     }
 }

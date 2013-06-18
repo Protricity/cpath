@@ -152,7 +152,7 @@ class Procs extends PDOProc {
         foreach($DB->query(
             "SELECT r.routine_name, r.specific_name, p.parameter_name FROM information_schema.routines r"
             ."  LEFT JOIN information_schema.parameters p on r.specific_name = p.specific_name"
-            ."  WHERE routine_schema = 'public'"
+            ."  WHERE routine_schema = 'public' AND p.parameter_mode = 'IN'"
             ."  ORDER BY r.specific_name, p.ordinal_position") as $row) {
             $name = $row['routine_name'];
             $sname = $row['specific_name'];

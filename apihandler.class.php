@@ -26,7 +26,11 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
     public function __construct() {
     }
 
-    abstract function execute($request);
+    /**
+     * @param array $request associative array of request parameters, usually $_GET or $_POST
+     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     */
+    abstract function execute(Array $request);
 
     protected function addField($name, IApiField $Field) {
         $this->mFields[$name] = $Field;
@@ -38,34 +42,41 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
         return $this;
     }
 
-    public function render(Array $args) {
+    public function processRequest(Array $request) {
+        $values = array();
+        $FieldExceptions = new ValidationExceptions();
+        foreach($this->mFields as $name=>$Field)
+        {
+            try {
+                $value = isset($request[$name]) ? $request[$name] : NULL;
+                $values[$name] = $Field->validate($value);
+            } catch (ValidationException $ex) {
+                $FieldExceptions->addFieldException($name, $ex);
+            }
+        }
 
-        $req = strcasecmp(Util::getUrl('method'), 'get') === 0
+        if(count($FieldExceptions))
+            throw $FieldExceptions;
+        return $values;
+    }
+
+    public function render(Array $args) {
+        $request = strcasecmp(Util::getUrl('method'), 'get') === 0
             ? $_GET
             : $_POST;
 
-        $values = array();
-        $i = 0;
-
-        try {
-            $FieldExceptions = new ValidationExceptions();
-            foreach($this->mFields as $name=>$Field)
-            {
-                try {
-                    if($Field instanceof ApiParam && isset($args[$i]))
-                        $value = $args[$i++];
-                    else
-                        $value = isset($req[$name]) ? $req[$name] : NULL;
-                    $values[$name] = $Field->validate($value);
-                } catch (ValidationException $ex) {
-                    $FieldExceptions->addFieldException($name, $ex);
+        if($args) {
+            $i = 0;
+            foreach($this->mFields as $name=>$Field) {
+                if($Field instanceof ApiParam) {
+                    $request[$name] = $args[$i++];
+                    if(!isset($args[$i]))
+                        break;
                 }
             }
-
-            if(count($FieldExceptions))
-                throw $FieldExceptions;
-
-            $response = $this->execute($values);
+        }
+        try {
+            $response = $this->execute($request);
             if(!($response instanceof IResponse))
                 $response = new Response($response, "API executed successfully");
         } catch (ResponseException $ex) {
@@ -94,11 +105,13 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
                     return;
                 case 'text/html':
                     $response->sendHeaders($mimeType);
-                    echo "<pre>$response</pre>";
+                    echo "<pre>";
+                    echo $response."\n";
                     if(Base::isDebug()) {
                         foreach(Base::getLog() as $log)
-                            echo "<pre>$log</pre>";
+                            echo $log."\n";
                     }
+                    echo "</pre>";
                     return;
                 case 'text/plain':
                     $response->sendHeaders($mimeType);

@@ -35,10 +35,4 @@ class Response implements IResponse {
     function getData() {
         return $this->mData;
     }
-
-    function __toString() {
-        return
-            $this->getStatusCode() . " " . $this->getMessage() . "\n"
-            . print_r($this->getData(), true);
-    }
 }
