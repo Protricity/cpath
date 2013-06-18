@@ -23,7 +23,7 @@ class Util {
             else self::$mUrl = array('path'=>'');
             if($args) self::$mUrl['method'] = $args[0];
             self::$mUrl['args'] = $args;
-            if(self::$mUrl['query']) parse_str(self::$mUrl['query'], $_GET);
+            if(isset(self::$mUrl['query'])) parse_str(self::$mUrl['query'], $_GET);
             // TODO: $_POST
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);
@@ -51,7 +51,7 @@ class Util {
     public static function getAcceptedTypes() {
         static $types = NULL;
         if($types === NULL) {
-            $types = Util::getHeader('Accept');
+            $types = self::getHeader('Accept');
             $types = explode(',', strtolower($types));
             foreach($types as $i=>$type) {
                 list($type) = explode(';', $type);

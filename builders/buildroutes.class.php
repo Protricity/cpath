@@ -50,7 +50,7 @@ class BuildRoutes {
             $output .= "\n\tarray('" . $route['match'] . "', '" . $route['class'] . "'),";
         $output .= "\n);";
         file_put_contents(Base::getGenPath().'routes.php', $output);
-        Base::log(count(self::$mRoutes) . " Routes rebuilt.");
+        Base::log(count(self::$mRoutes) . " Route(s) rebuilt.");
 
         self::$mRoutes = array();
     }
