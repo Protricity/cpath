@@ -11,15 +11,20 @@ namespace CPath;
 class Util {
 
     private static $mHeaders = null;
-    private static $mUrl;
+    private static $mUrl = array();
 
     public static function init() {
-        if(empty($_SERVER["REQUEST_URI"])) {
-            self::$mUrl = parse_url($_SERVER['argv'][2]);
-            self::$mUrl['method'] = isset($_SERVER['argv'][1]) ? $_SERVER['argv'][1] : "GET";
-        } else {
+        if(!empty($_SERVER["REQUEST_URI"])) {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
-            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : "GET";
+            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : 'GET';
+        } elseif ($args = $_SERVER['argv']) {
+            array_shift($args);
+            if(sizeof($args) > 1) self::$mUrl = parse_url($args[1]);
+            else self::$mUrl = array('path'=>'');
+            if($args) self::$mUrl['method'] = $args[0];
+            self::$mUrl['args'] = $args;
+            if(self::$mUrl['query']) parse_str(self::$mUrl['query'], $_GET);
+            // TODO: $_POST
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);
         $request = self::$mUrl["path"];

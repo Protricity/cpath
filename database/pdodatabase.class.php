@@ -64,11 +64,13 @@ abstract class PDODatabase Extends DataBase {
         $version = static::VERSION;
         if($version === NULL)
             throw new \Exception("Version Constant is missing");
-        Base::log("Upgrading Database to $version");
         $version = (int)$version;
         $oldVersion = $this->getDBVersion();
-        if($version <= $oldVersion)
+        if($version <= $oldVersion){
+            Base::log("Skipping Database Upgrade");
             return $this;
+        }
+        Base::log("Upgrading Database to $version");
         BuildPGTables::upgrade($this);
     }
 }

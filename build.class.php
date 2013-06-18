@@ -86,7 +86,7 @@ class Build {
                 continue;
             }
             if($Class->isAbstract()) {
-                Base::log("Ignoring Abstract Class '{$class}' in '{$filePath}'");
+                //Base::log("Ignoring Abstract Class '{$class}' in '{$filePath}'");
                 continue;
             }
 
