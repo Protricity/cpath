@@ -40,14 +40,14 @@ class Procs extends PDOProc {
 "\tstatic function insert(\\PDO \$DB%s) {
 \t\tstatic \$stmd = NULL;
 \t\tif(!\$stmd) \$stmd = \$DB->prepare('INSERT INTO %s VALUES (%s)%s');
-\t\t\$stmd->execute(array_slice(func_get_args(), 1));
+\t\t\$stmd->execute(array(%s));
 %s\t}\n";
 
     const TMPL_PROC =
 "\n\tstatic function %s(\\PDO \$DB%s) {
 \t\tstatic \$stmd = NULL;
 \t\tif(!\$stmd) \$stmd = \$DB->prepare('SELECT %s(%s)');
-\t\t\$stmd->execute(array_slice(func_get_args(), 1));
+\t\t\$stmd->execute(array(%s));
 \t\treturn \$stmd;
 \t}\n";
 
@@ -202,12 +202,14 @@ class Procs extends PDOProc {
                 unset($columns[$name]);
             }
         }
-        return sprintf(self::TMPL_INSERT, !$columns ? '' : ', $'.implode(', $', array_keys($columns)), $table, $qs, $retSQL, $ret);
+        $p = '$'.implode(', $', array_keys($columns));
+        return sprintf(self::TMPL_INSERT, !$columns ? '' : ', '.$p, $table, $qs, $retSQL, $p, $ret);
     }
 
     private static function getProc($name, $params) {
         return sprintf(self::TMPL_PROC,
             $name, !$params ? '' : ', $'.implode(', $', $params),
-            $name, !$params ? '' : '?'.str_repeat(', ?', sizeof($params)-1));
+            $name, !$params ? '' : '?'.str_repeat(', ?', sizeof($params)-1),
+            '$'.implode(', $', $params));
     }
 }
