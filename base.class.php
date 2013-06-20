@@ -14,18 +14,23 @@ namespace CPath;
  * Provides required framework functionality such as class autoloader and directories
  */
 class Base {
-    private static $mLoaded, $mBasePath, $mDebug = false;
+    private static $mLoaded, $mBasePath, $mConfig;
 
     /** Initialize Static Class on include */
     public static function init() {
         self::$mBasePath = dirname(__DIR__) . "/";
+        $config = array();
+        if(!(include self::getGenPath().'config.php') || !$config) {
+            $config = Build::buildConfig();
+        }
+        self::$mConfig = $config;
     }
 
     /** Activate Autoloader for classes */
     public static function load() {
         if(!self::$mLoaded) {
             spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-            if(self::$mDebug) Build::classes();
+            if(self::$mConfig['build']) Build::buildClasses();
         }
     }
 
@@ -61,12 +66,17 @@ class Base {
         return $gen ?: $gen = self::getBasePath().'gen/';
     }
 
+    /** Returns the domain path */
+    public static function getDomainPath() {
+        return self::$mConfig['domain'];
+    }
+
     /**
      * Returns true if debug mode is set
      * @return bool true if debug mode is set
      */
     public static function isDebug() {
-        return self::$mDebug;
+        return self::$mConfig['debug'];
     }
 
     /**
@@ -74,7 +84,7 @@ class Base {
      * @param bool $debug set to true to enable debug mode
      */
     public static function setDebug($debug=true) {
-        self::$mDebug = $debug;
+        self::$mConfig['debug'] = $debug;
     }
 }
 

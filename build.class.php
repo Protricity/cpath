@@ -53,7 +53,19 @@ class Build {
 
     public static function force() { return false; }
 
-    public static function classes() {
+    public static function buildConfig() {
+        $config = array(
+            'debug' => false,
+            'build' => false,
+            'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
+        );
+        $php = "<?php\n\$config=".var_export($config, true).";";
+        $path = Base::getGenPath().'config.php';
+        file_put_contents($path, $php);
+        return $config;
+    }
+
+    public static function buildClasses() {
         Log::v("Starting Builds");
         self::$mBuildClasses = array();
         self::buildClass(dirname(__DIR__), '');
