@@ -11,6 +11,7 @@ use CPath\DataBase\PostGreSQL;
 use CPath\BuildException;
 use CPath\Base;
 use CPath\Build;
+use CPath\Log;
 
 
 class UpgradeException extends \Exception {}
@@ -32,8 +33,7 @@ class %s extends PDOTable {
 
     const TMPL_PROC_CLASS = "<?php
 namespace %s;
-use CPath\\Database\\PDOProc;
-class Procs extends PDOProc {
+class Procs {
 %s}";
 
     const TMPL_INSERT =
@@ -84,7 +84,7 @@ class Procs extends PDOProc {
             $DB->exec($sql);
             $DB->setDBVersion($v);
         }
-        Base::log("Upgraded Database from version $curVersion to $oldVersion");
+        Log::v("Upgraded Database from version $curVersion to $oldVersion");
     }
 
     /**
@@ -109,13 +109,15 @@ class Procs extends PDOProc {
         $hash = 0;
         $force = Build::force();
 
+        $oldFiles = array();
         if(!file_exists($tablePath)) { mkdir($tablePath, null, true); $force = true; }
+        else $oldFiles = scandir($tablePath);
         if(!file_exists($procPath))  { mkdir($procPath, null, true);  $force = true; }
 
         foreach(scandir($schemaFolder) as $file)
             $hash += filemtime($schemaFolder.$file);
         if(!$force && isset($Config['schemaHash']) && $Config['schemaHash'] == $hash) {
-            Base::log("Skipping Build for ".$Class->getName());
+            Log::v("Skipping Build for ".$Class->getName());
             return;
         }
         $Config['schemaHash'] = $hash;
@@ -137,14 +139,21 @@ class Procs extends PDOProc {
                     $cols[$name] = 'DEFAULT';
             }
 
-            $php = self::getConst('Name', $table);
+            $php = self::getConst('TableName', $table);
             foreach($cols as $name=>$type)
                 $php .= self::getConst(strtoupper($name), $name);
             $php .= self::getInsert($table, $cols);
             $php = sprintf(self::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
-            file_put_contents($tablePath.strtolower($table).'.class.php', $php);
+            $file = strtolower($table).'.class.php';
+            file_put_contents($tablePath.$file, $php);
+            $i = array_search($file, $oldFiles);
+            unset($oldFiles[$i]);
         }
-        Base::log("Built (".sizeof($tables).") table classes");
+        Log::v("Built (".sizeof($tables).") table classes");
+        if($c = $oldFiles) {
+            Log::v("Removing ({$c}) depreciated table classes");
+            foreach($oldFiles as $file) unlink($tablePath.$file);
+        }
 
         // Stored Procedures
 
@@ -171,7 +180,7 @@ class Procs extends PDOProc {
         }
         $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
         file_put_contents($procPath.'procs.class.php', $php);
-        Base::log("Built (".sizeof($tables).") routines");
+        Log::v("Built (".sizeof($tables).") routines");
     }
     /**
      * Checks to see if any routes were built, and builds them into [gen]/routes.php

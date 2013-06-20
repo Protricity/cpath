@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Database;
 use CPath\Base;
+use CPath\Log;
 use CPath\Builders\BuildPGTables;
 
 class SQLException extends \Exception {}
@@ -67,10 +68,10 @@ abstract class PDODatabase Extends DataBase {
         $version = (int)$version;
         $oldVersion = $this->getDBVersion();
         if($version <= $oldVersion){
-            Base::log("Skipping Database Upgrade");
+            Log::v("Skipping Database Upgrade");
             return $this;
         }
-        Base::log("Upgrading Database to $version");
+        Log::v("Upgrading Database to $version");
         BuildPGTables::upgrade($this);
     }
 }

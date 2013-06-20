@@ -14,7 +14,7 @@ namespace CPath;
  * Provides required framework functionality such as class autoloader and directories
  */
 class Base {
-    private static $mLoaded, $mBasePath, $mLog = array(), $mDebug = false;
+    private static $mLoaded, $mBasePath, $mDebug = false;
 
     /** Initialize Static Class on include */
     public static function init() {
@@ -59,22 +59,6 @@ class Base {
     public static function getGenPath() {
         static $gen = NULL;
         return $gen ?: $gen = self::getBasePath().'gen/';
-    }
-
-    /**
-     * Log a message
-     * @param $msg the message to log
-     */
-    public static function log($msg) {
-        self::$mLog[] = $msg;
-    }
-
-    /**
-     * Return the entire log
-     * @return array a list of log entries
-     */
-    public static function getLog() {
-        return self::$mLog;
     }
 
     /**

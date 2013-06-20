@@ -117,37 +117,34 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
             switch($mimeType) {
                 case 'application/json':
                     $response->sendHeaders($mimeType);
-                    $JSON = Util::toJSON($response);
-                    if(Base::isDebug()) $JSON['debug'] = array('log'=>Base::getLog());
+                    $JSON = array();
+                    Util::toJSON($response, $JSON);
+                    if(Base::isDebug())
+                        Util::toJSON(array('debug'=>array('log'=>Log::get())), $JSON);
                     echo json_encode($JSON, JSON_OBJECT_AS_ARRAY);
                     return;
                 case 'text/xml':
                     $response->sendHeaders($mimeType);
                     $XML = Util::toXML($response);
-                    if(Base::isDebug()) {
-                        $Debug = $XML->addChild('debug');
-                        foreach(Base::getLog() as $log)
-                            $Debug->addChild('log', $log);
-                    }
+                    if(Base::isDebug())
+                        Util::toXML(array('debug'=>array('log'=>Log::get())), $XML);
                     echo $XML->asXML();
                     return;
                 case 'text/html':
                     $response->sendHeaders($mimeType);
                     echo "<pre>";
                     echo $response."\n";
-                    if(Base::isDebug()) {
-                        foreach(Base::getLog() as $log)
-                            echo $log."\n";
-                    }
+                    /** @var $log ILog */
+                    foreach(Log::get() as $log)
+                        echo $log."\n";
                     echo "</pre>";
                     return;
                 case 'text/plain':
                     $response->sendHeaders($mimeType);
                     echo $response;
-                    if(Base::isDebug()) {
-                        foreach(Base::getLog() as $log)
-                            echo "$log\n";
-                    }
+                    /** @var $log ILog */
+                    foreach(Log::get() as $log)
+                        echo "$log\n";
             }
         }
     }
