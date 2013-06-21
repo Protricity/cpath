@@ -84,7 +84,7 @@ class Procs {
             $DB->exec($sql);
             $DB->setDBVersion($v);
         }
-        Log::v("Upgraded Database from version $curVersion to $oldVersion");
+        Log::v(__CLASS__, "Upgraded Database from version $curVersion to $oldVersion");
     }
 
     /**
@@ -111,13 +111,13 @@ class Procs {
 
         $oldFiles = array();
         if(!file_exists($tablePath)) { mkdir($tablePath, null, true); $force = true; }
-        else $oldFiles = scandir($tablePath);
+        else $oldFiles = array_diff(scandir($tablePath), array('..', '.'));
         if(!file_exists($procPath))  { mkdir($procPath, null, true);  $force = true; }
 
         foreach(scandir($schemaFolder) as $file)
             $hash += filemtime($schemaFolder.$file);
         if(!$force && isset($Config['schemaHash']) && $Config['schemaHash'] == $hash) {
-            Log::v("Skipping Build for ".$Class->getName());
+            Log::v(__CLASS__, "Skipping Build for ".$Class->getName());
             return;
         }
         $Config['schemaHash'] = $hash;
@@ -142,16 +142,16 @@ class Procs {
             $php = self::getConst('TableName', $table);
             foreach($cols as $name=>$type)
                 $php .= self::getConst(strtoupper($name), $name);
-            $php .= self::getInsert($table, $cols);
+            //$php .= self::getInsert($table, $cols);
             $php = sprintf(self::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
             $file = strtolower($table).'.class.php';
             file_put_contents($tablePath.$file, $php);
             $i = array_search($file, $oldFiles);
             unset($oldFiles[$i]);
         }
-        Log::v("Built (".sizeof($tables).") table classes");
-        if($c = $oldFiles) {
-            Log::v("Removing ({$c}) depreciated table classes");
+        Log::v(__CLASS__, "Built (".sizeof($tables).") table classes");
+        if($c = sizeof($oldFiles)) {
+            Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
             foreach($oldFiles as $file) unlink($tablePath.$file);
         }
 
@@ -180,7 +180,7 @@ class Procs {
         }
         $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
         file_put_contents($procPath.'procs.class.php', $php);
-        Log::v("Built (".sizeof($tables).") routines");
+        Log::v(__CLASS__, "Built (".sizeof($tables).") routines");
     }
     /**
      * Checks to see if any routes were built, and builds them into [gen]/routes.php

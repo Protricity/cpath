@@ -13,12 +13,12 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
     const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = "SELECT %s";
     protected $mConfig = array();
-    protected function __construct($prefix, $database, $host=NULL, $username=NULL, $password=NULL) {
+    public function __construct($prefix, $database, $host=NULL, $username=NULL, $password=NULL) {
         $this->mConfig = get_defined_vars();
 
         parent::__construct($prefix, "pgsql:dbname=$database;host=$host", $username, $password );
-        $this->getPDO()->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        $this->getPDO()->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+        $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $this->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
     }
 
     public function getDBVersion() {
@@ -26,7 +26,9 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
             return
                 $this->query("Select _getVersion();")
                     ->fetchColumn(0);
-        } catch (SQLException $ex) {
+        } catch (\PDOException $ex) {
+            if(strpos($ex->getMessage(), 'Undefined function') === false)
+                throw $ex;
             $this->setDBVersion(0);
             return 0;
         }
@@ -35,7 +37,7 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
     public function setDBVersion($version) {
         try{
             $this->exec('DROP FUNCTION _getVersion()');
-        } catch (SQLException $ex) {}
+        } catch (\PDOException $ex) {}
         $this->exec('CREATE FUNCTION _getVersion() RETURNS int AS \'Select '.((int)$version).';\' LANGUAGE SQL;');
     }
 

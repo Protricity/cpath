@@ -17,30 +17,26 @@ abstract class PDOTable {
         return "\n(".implode(', ', func_get_args()).")";
     }
 
-    static function select(\PDO $DB, $select, $where, $limit='1') {
-        return $DB->query("SELECT ".self::parseSelect($select)
-            ."\nFROM ".static::TableName
-            ."\nWHERE ".self::parseWhere($DB, $where)
-            .($limit ? "\nLIMIT ".$limit : ''));
+    static function select(\PDO $DB, $_selectArgs) {
+        $args = func_get_args();
+        return new PDOSelect(static::TableName, array_shift($args), $args);
     }
 
-    private static function parseSelect($select) {
-        if(!is_array($select))
-            return $select;
-        $sql = '';
-        foreach($select as $name=>$param) {
-            $sql .= ($sql ? ', ' : '') . $param . (is_int($name) ? '' : $name);
-        }
-        return $sql;
+    static function update(\PDO $DB, $_fieldArgs) {
+        $args = func_get_args();
+        return new PDOUpdate(static::TableName, array_shift($args), $args);
     }
 
-    private static function parseWhere(\PDO $DB, $where) {
-        if(!is_array($where))
-            return $where;
-        $sql = '';
-        foreach($where as $name=>$param) {
-            $sql .= ($sql ? "\n\tAND " : '') . (is_int($name) ? $param : $name."='".$DB->quote($param)."'");
-        }
-        return $sql;
+    static function insert(\PDO $DB, $_fieldArgs) {
+        $args = func_get_args();
+        return new PDOInsert(static::TableName, array_shift($args), $args);
     }
+//
+//    static function select(\PDO $DB, $select, $where, $limit='1') {
+//        return $DB->query("SELECT ".self::parseList($select)
+//            ."\nFROM ".static::TableName
+//            ."\nWHERE ".self::parseSet($DB, $where)
+//            .($limit ? "\nLIMIT ".$limit : ''));
+//    }
+
 }

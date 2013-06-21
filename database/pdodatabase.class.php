@@ -9,23 +9,18 @@ namespace CPath\Database;
 use CPath\Base;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
+use CPath\Interfaces\IDatabase;
+use CPath\Interfaces\IDataBaseHelper;
 
-class SQLException extends \Exception {}
-abstract class PDODatabase Extends DataBase {
+abstract class PDODatabase extends \PDO implements IDataBase {
+    use IDataBaseHelper;
+
     const FUNC_FORMAT = NULL;
 
-    private $mPDO;
-
-    protected function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {
-        $this->mPDO = new \PDO($dsn, $username, $passwd, $options);
-        parent::__construct($prefix);
+    public function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {
+        $this->setPrefix($prefix);
+        parent::__construct($dsn, $username, $passwd, $options);
     }
-
-    /**
-     * Returns the PDO database instance
-     * @return \PDO Database instance
-     */
-    public function getPDO() { return $this->mPDO; }
 
     abstract function getDBVersion();
     //abstract function insert($table, Array $pairs);
@@ -33,28 +28,13 @@ abstract class PDODatabase Extends DataBase {
 
     protected abstract function setDBVersion($version);
 
-    public function query($sql) {
-        try{
-            return $this->getPDO()->query($sql);
-        } catch (\PDOException $ex) {
-            throw new SQLException($ex->getMessage(), $ex->getCode(), $ex);
-        }
-    }
-
-    public function exec($sql) {
-        try{
-            return $this->getPDO()->exec($sql);
-        } catch (\PDOException $ex) {
-            throw new SQLException($ex->getMessage(), $ex->getCode(), $ex);
-        }
-    }
-
     public function quotef($format, $_args) {
-        return $this->quotef($format, array_slice(func_get_args(), 1));
+        return $this->vquotef($format, array_slice(func_get_args(), 1));
     }
 
     public function vquotef($format, Array $args) {
-        foreach($args as &$arg) $arg = $this->mPDO->quote($arg);
+        foreach($args as &$arg)
+            $arg = $this->quote($arg);
         $ret = vsprintf($format, $args);
         if(!is_string($ret))
             throw new \Exception("Invalid quotef() format ($format) or number of parameters (".sizeof($args).")");
@@ -68,10 +48,10 @@ abstract class PDODatabase Extends DataBase {
         $version = (int)$version;
         $oldVersion = $this->getDBVersion();
         if($version <= $oldVersion){
-            Log::v("Skipping Database Upgrade");
+            Log::v(__CLASS__, "Skipping Database Upgrade");
             return $this;
         }
-        Log::v("Upgrading Database to $version");
+        Log::v(__CLASS__, "Upgrading Database to $version");
         BuildPGTables::upgrade($this);
     }
 }

@@ -14,3 +14,17 @@ interface IDatabase {
     function upgrade();
     static function get();
 }
+
+trait IDataBaseHelper {
+    private $mPrefix;
+    protected function setPrefix($prefix) {
+        $this->mPrefix = $prefix;
+    }
+
+    public function getPrefix() { return $this->mPrefix; }
+
+    static function get()
+    {
+        throw new NotConfiguredException("Database helper ".get_called_class()."::get() is missing");
+    }
+}

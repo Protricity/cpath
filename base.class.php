@@ -21,6 +21,7 @@ class Base {
         self::$mBasePath = dirname(__DIR__) . "/";
         $config = array();
         if(!(include self::getGenPath().'config.php') || !$config) {
+            include 'build.class.php';
             $config = Build::buildConfig();
         }
         self::$mConfig = $config;

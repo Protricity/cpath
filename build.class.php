@@ -66,14 +66,14 @@ class Build {
     }
 
     public static function buildClasses() {
-        Log::v("Starting Builds");
+        Log::v(__CLASS__, "Starting Builds");
         self::$mBuildClasses = array();
         self::buildClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
         foreach(self::$mBuildClasses as $Class)
             call_user_func(array($Class->getName(), 'buildComplete'), $Class);
         self::commitConfig();
-        Log::v("All Builds Complete");
+        Log::v(__CLASS__, "All Builds Complete");
     }
 
     private static function buildClass($path, $dirClass) {
@@ -99,16 +99,16 @@ class Build {
                     throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
                 if($Class->getConstant('BUILD_IGNORE')) {
-                    Log::v("Ignoring Class '{$class}' in '{$filePath}'");
+                    Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
                     continue;
                 }
                 if($Class->isAbstract()) {
-                    Log::v("Ignoring Abstract Class '{$class}' in '{$filePath}'");
+                    Log::v(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
                     continue;
                 }
 
                 if($Class->implementsInterface(__NAMESPACE__."\Interfaces\IBuilder")) {
-                    Log::v("Building Class '{$class}' in '{$filePath}'");
+                    Log::v(__CLASS__, "Building Class '{$class}' in '{$filePath}'");
                     call_user_func(array($Class->getName(), 'build'), $Class);
                     static::$mBuildClasses[] = $Class;
                 }
