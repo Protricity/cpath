@@ -45,14 +45,12 @@ class PDOSelect implements \IteratorAggregate {
     }
 
     public function fetchColumn($i=0) {
-        return $this->DB
-            ->prepare($this->getSQL())
+        return $this->exec()
             ->fetchColumn($i);
     }
 
     public function fetch() {
-        return $this->DB
-            ->prepare($this->getSQL())
+        return $this->exec()
             ->fetch();
     }
 
