@@ -8,14 +8,14 @@
 namespace CPath\Models;
 
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\TResponseHelper;
 
 class ResponseException extends \Exception implements IResponse {
-    use IResponseHelper;
+    use TResponseHelper;
 
     function getStatusCode() { return IResponse::STATUS_ERROR; }
 
-    function getData()
+    function &getData()
     {
         $ex = $this->getPrevious() ?: $this;
         return array(

@@ -23,7 +23,7 @@ class MultiException extends ResponseException implements \Countable{
         return count($this->mEx);
     }
 
-    function getData()
+    function &getData()
     {
         $data = parent::getData();
         $data['errors'] = $this->mEx;

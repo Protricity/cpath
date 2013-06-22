@@ -9,7 +9,7 @@ namespace CPath\Database;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 class PDOInsert {
-    private $DB, $stmt=NULL, $table, $fields=array(), $returning=NULL, $batch=NULL;
+    private $DB, $stmt=NULL, $table, $fields=array(), $returning=NULL, $batch=NULL, $lastRow=NULL;
     public function __construct($table, \PDO $DB, Array $fields) {
         $this->DB = $DB;
         $this->table = $table;
@@ -35,10 +35,15 @@ class PDOInsert {
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
-        if($this->batch !== NULL)
+        if($this->batch !== NULL) {
             $this->batch[] = $_values;
-        else
+        } else {
             $this->stmt->execute($_values);
+            if($this->returning)
+                $this->lastRow = array($this->returning => $this->getInsertID()) + $_values;
+            else
+                $this->lastRow = $_values;
+        }
         return $this;
     }
 
@@ -60,14 +65,20 @@ class PDOInsert {
         return $this;
     }
 
+    public function getLastInsertRow() {
+        if(!$this->lastRow)
+            throw new \Exception("No row was inserted");
+        return $this->lastRow;
+    }
+
     public function getInsertID() {
         return $this->stmt->fetchColumn(0);
     }
 
-    public function getSQL() {
+    public function getSQL($token='?') {
         return "INSERT INTO ".$this->table
             ."\n (".implode(', ',$this->fields).')'
-            ."\nVALUES (?".str_repeat(', ?', sizeof($this->fields)-1).')'
+            ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')'
             .($this->returning ? "\nRETURNING ".$this->returning : '');
     }
 }

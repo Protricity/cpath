@@ -12,11 +12,11 @@ interface IResponse extends IJSON,IXML {
     const STATUS_ERROR = 400;
     function getStatusCode();
     function getMessage();
-    function getData();
+    function &getData();
     function sendHeaders();
 }
 
-trait IResponseHelper {
+trait TResponseHelper {
 
     function toJSON(Array &$JSON) {
         $JSON['status'] = $this->getStatusCode() == IResponse::STATUS_SUCCESS;

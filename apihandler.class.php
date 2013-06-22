@@ -106,7 +106,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
         try {
             $response = $this->execute($request);
             if(!($response instanceof IResponse))
-                $response = new Response($response, "API executed successfully");
+                $response = new Response(true, "API executed successfully", $response);
         } catch (ResponseException $ex) {
             $response = $ex;
         } catch (\Exception $ex) {
@@ -245,11 +245,15 @@ class ApiRequiredField extends ApiOptionalField {
     }
 }
 
+interface IApiParam {
+
+}
+
 /**
  * Class ApiParam
  * @package CPath
  * Represents a Parameter from the route path
  */
-class ApiParam extends ApiRequiredField {
-
+class ApiParam extends ApiRequiredField implements IApiParam {
+    TODO: IApiParam describes api param
 }

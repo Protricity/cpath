@@ -10,12 +10,6 @@ use CPath\Interfaces\IDatabase;
 use \PDO;
 abstract class PDOTable {
     const TableName = NULL;
-    static function getSQLInsertInto($_args) {
-        return "INSERT INTO ".static::TableName." (".implode(', ', func_get_args()).") VALUES ";
-    }
-    static function getSQLInsertValues($_args) {
-        return "\n(".implode(', ', func_get_args()).")";
-    }
 
     static function select(\PDO $DB, $_selectArgs) {
         $args = func_get_args();
