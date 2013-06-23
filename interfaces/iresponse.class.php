@@ -35,7 +35,7 @@ trait TResponseHelper {
     function sendHeaders($mimeType=NULL) {
         $msg = $this->getMessage();
         //list($msg) = explode("\n", $msg);
-        $msg = preg_replace('/[^a-zA-Z0-9 _-]/', ' ', $msg);
+        $msg = preg_replace('/[^\w\s-]/', ' ', $msg);
         header("HTTP/1.0 " . $this->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");

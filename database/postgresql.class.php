@@ -39,6 +39,7 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
             $this->exec('DROP FUNCTION _getVersion()');
         } catch (\PDOException $ex) {}
         $this->exec('CREATE FUNCTION _getVersion() RETURNS int AS \'Select '.((int)$version).';\' LANGUAGE SQL;');
+        return $this;
     }
 
 //    function prepareInsert($table, Array $keys) {

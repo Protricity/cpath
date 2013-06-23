@@ -60,7 +60,6 @@ trait TArrayAccessHelper {
     */
     public function offsetSet($offset, $value) {
         $data = &$this->getData();
-        $data[$offset] = $value;
         if (is_null($offset))
             $data[] = $value;
         else

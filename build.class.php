@@ -57,6 +57,7 @@ class Build {
         $config = array(
             'debug' => false,
             'build' => false,
+            'db-upgrade' => false,
             'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
         );
         $php = "<?php\n\$config=".var_export($config, true).";";

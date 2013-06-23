@@ -50,6 +50,7 @@ abstract class Log implements ILog {
      * @param $msg string verbose message to log
      */
     public static function v($tag, $msg) {
+        if(func_num_args()>2) $msg = vsprintf($msg, array_slice(func_get_args(), 2));
         self::add(new LogVerbose((string)$tag, $msg));
     }
 
@@ -59,6 +60,7 @@ abstract class Log implements ILog {
      * @param $msg string user message to log
      */
     public static function u($tag, $msg) {
+        if(func_num_args()>2) $msg = vsprintf($msg, array_slice(func_get_args(), 2));
         self::add(new LogUser((string)$tag, $msg));
     }
 
@@ -68,6 +70,7 @@ abstract class Log implements ILog {
      * @param $msg string error message to log
      */
     public static function e($tag, $msg) {
+        if(func_num_args()>2) $msg = vsprintf($msg, array_slice(func_get_args(), 2));
         error_log($tag."\t".$msg);
         self::add(new LogError((string)$tag, $msg));
     }
@@ -79,6 +82,7 @@ abstract class Log implements ILog {
      * @param $msg string exception message to log
      */
     public static function ex($tag, \Exception $ex, $msg=NULL) {
+        if(func_num_args()>3) $msg = vsprintf($msg, array_slice(func_get_args(), 3));
         self::add(new LogException((string)$tag, $ex, $msg));
     }
 

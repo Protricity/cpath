@@ -81,6 +81,16 @@ class Base {
     }
 
     /**
+     * Returns a config variable
+     * @param $key - The name of the config variable
+     * @param $default - the default value if the variable is not found
+     * @return mixed - the value of the config variable
+     */
+    public static function getConfig($key, $default) {
+        return isset(self::$mConfig[$key]) ? self::$mConfig[$key] : $default;
+    }
+
+    /**
      * Set debug mode on and off
      * @param bool $debug set to true to enable debug mode
      */

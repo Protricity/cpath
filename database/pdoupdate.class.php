@@ -55,6 +55,8 @@ class PDOUpdate {
         return $this;
     }
 
+    public function getLastAffectedRows() { return $this->stmt->rowCount(); }
+
     public function getSQL() {
         if(!$this->where)
             throw new \Exception("method addWhere() was not called");

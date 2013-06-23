@@ -53,5 +53,6 @@ abstract class PDODatabase extends \PDO implements IDataBase {
         }
         Log::v(__CLASS__, "Upgrading Database to $version");
         BuildPGTables::upgrade($this);
+        return $this;
     }
 }
