@@ -9,7 +9,14 @@ namespace CPath\Database;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 class PDOInsert {
-    private $DB, $stmt=NULL, $table, $fields=array(), $returning=NULL, $batch=NULL, $lastRow=NULL;
+    private $DB;
+    /** @var \PDOStatement */
+    private $stmt=NULL;
+    private $table;
+    private $fields=array();
+    private $returning=NULL;
+    private $batch=NULL;
+
     public function __construct($table, \PDO $DB, Array $fields) {
         $this->DB = $DB;
         $this->table = $table;
@@ -39,10 +46,6 @@ class PDOInsert {
             $this->batch[] = $_values;
         } else {
             $this->stmt->execute($_values);
-            if($this->returning)
-                $this->lastRow = array($this->returning => $this->getInsertID()) + $_values;
-            else
-                $this->lastRow = $_values;
         }
         return $this;
     }
@@ -63,12 +66,6 @@ class PDOInsert {
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
         return $this;
-    }
-
-    public function getLastInsertRow() {
-        if(!$this->lastRow)
-            throw new \Exception("No row was inserted");
-        return $this->lastRow;
     }
 
     public function getInsertID() {

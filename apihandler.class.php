@@ -96,7 +96,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
         if($args) {
             $i = 0;
             foreach($this->mFields as $name=>$Field) {
-                if($Field instanceof ApiParam) {
+                if($Field instanceof IApiParam) {
                     $request[$name] = $args[$i++];
                     if(!isset($args[$i]))
                         break;
@@ -156,7 +156,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
     public function getDisplayRoute() {
         $route = Build::getHandlerRoute($this);
         foreach($this->mFields as $name => $Field) {
-            if(!($Field instanceof ApiParam))
+            if(!($Field instanceof IApiParam))
                 continue;
             $route .= ':' . $name . '/';
         }
@@ -245,6 +245,11 @@ class ApiRequiredField extends ApiOptionalField {
     }
 }
 
+/**
+ * Class ApiParam
+ * @package CPath
+ * This interface tags an API Field as a route parameter.
+ */
 interface IApiParam {
 
 }
@@ -255,5 +260,4 @@ interface IApiParam {
  * Represents a Parameter from the route path
  */
 class ApiParam extends ApiRequiredField implements IApiParam {
-    TODO: IApiParam describes api param
 }

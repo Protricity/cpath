@@ -18,8 +18,9 @@ class ResponseException extends \Exception implements IResponse {
     function &getData()
     {
         $ex = $this->getPrevious() ?: $this;
-        return array(
+        $arr = array(
             '_debug_trace' => $ex->getTrace(),
         );
+        return $arr;
     }
 }
