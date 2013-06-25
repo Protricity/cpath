@@ -10,16 +10,27 @@ use CPath\Base;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IDatabase;
-use CPath\Interfaces\IDataBaseHelper;
 
+class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase {
-    use IDataBaseHelper;
 
     const FUNC_FORMAT = NULL;
+    private $mPrefix;
 
     public function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {
         $this->setPrefix($prefix);
         parent::__construct($dsn, $username, $passwd, $options);
+    }
+
+    protected function setPrefix($prefix) {
+        $this->mPrefix = $prefix;
+    }
+
+    public function getPrefix() { return $this->mPrefix; }
+
+    static function get()
+    {
+        throw new NotConfiguredException("Database helper ".get_called_class()."::get() is missing");
     }
 
     abstract function getDBVersion();

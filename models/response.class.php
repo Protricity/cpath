@@ -11,13 +11,10 @@ use CPath\Log;
 use CPath\LogUser;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
-use CPath\Interfaces\IArrayObject;
-use CPath\Interfaces\TArrayAccessHelper;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\ILogEntry;
 
-class Response implements IResponse, IArrayObject, ILogListener {
-    use TArrayAccessHelper;
+class Response extends ArrayObject implements IResponse, ILogListener {
     private $mCode, $mData=array(), $mMessage;
     /** @var ILogEntry[] */
     private $mLog=array();
