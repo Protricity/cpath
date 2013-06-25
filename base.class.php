@@ -45,7 +45,7 @@ class Base {
     /** Autoloader for classes. Path matches namespace heirarchy of Class */
     private static function loadClass($name) {
         if(strpos($name, '\\')===false) return;
-        //$name = str_replace('\\', '/', strtolower($name));
+        $name = str_replace('\\', '/', strtolower($name));
         $name = strtolower($name);
         $classPath = self::$mBasePath . $name . '.class.php';
         include_once($classPath);
