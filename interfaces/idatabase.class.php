@@ -15,6 +15,7 @@ interface IDatabase {
     static function get();
 }
 
+class NotConfiguredException extends \Exception{}
 trait IDataBaseHelper {
     private $mPrefix;
     protected function setPrefix($prefix) {

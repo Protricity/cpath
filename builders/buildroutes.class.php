@@ -64,9 +64,8 @@ class BuildRoutes {
         $method = $Class->getConstant('ROUTE_METHOD') ?: 'GET';
         $route = $Class->getConstant('ROUTE_PATH');
         if(!$route) {
-            $route = '/'.str_replace('\\', '/', $Class->getName());
+            $route = strtoupper($method) . ' ' . '/'.str_replace('\\', '/', strtolower($Class->getName()));
         }
-        $route = strtolower($route);
-        return strtoupper($method) . ' ' . $route;
+        return $route;
     }
 }

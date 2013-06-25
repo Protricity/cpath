@@ -7,9 +7,34 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IBuilder;
+use CPath\Models\Response;
+
 class BuildException extends \Exception {}
 
-class Build {
+class Build extends ApiHandler {
+
+    const ROUTE_PATH = 'build';
+
+
+    /**
+     * Execute this API Endpoint with the entire request.
+     * This method must call processRequest to validate and process the request object.
+     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     */
+    function execute(Array $request)
+    {
+        $Response = new Response(false, "Starting Build");
+        $Response->startLogging();
+        Build::buildClasses();
+        return $Response
+            ->update(true, "Build Complete")
+            ->stopLogging();
+    }
+
+    // Statics
 
     private static $mBuildClasses = array();
     private static $mBuildConfig = NULL;

@@ -84,7 +84,7 @@ class Procs {
             $DB->exec($sql);
             $DB->setDBVersion($v);
         }
-        Log::v(__CLASS__, "Upgraded Database from version $curVersion to $oldVersion");
+        Log::v(__CLASS__, "Upgraded Database from version $oldVersion to $curVersion");
     }
 
     /**

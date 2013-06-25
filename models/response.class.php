@@ -7,14 +7,21 @@
  * Date: 4/06/11 */
 namespace CPath\Models;
 use CPath\Util;
+use CPath\Log;
+use CPath\LogUser;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\TResponseHelper;
+use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\TArrayAccessHelper;
+use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\ILogEntry;
 
-class Response implements IResponse, IArrayObject {
-    use TResponseHelper, TArrayAccessHelper;
+class Response implements IResponse, IArrayObject, ILogListener {
+    use TArrayAccessHelper;
     private $mCode, $mData=array(), $mMessage;
+    /** @var ILogEntry[] */
+    private $mLog=array();
+    private $mIsLogging=false;
 
     function __construct($msg=NULL, $status=true, $data=array()) {
         $this->setStatusCode($status);
@@ -46,6 +53,10 @@ class Response implements IResponse, IArrayObject {
     function update($status, $msg) {
         $this->setMessage($msg);
         $this->setStatusCode($status);
+        if($this->mIsLogging)
+            $status
+            ? Log::u(__CLASS__, $msg)
+            : Log::e(__CLASS__, $msg);
         return $this;
     }
 
@@ -53,9 +64,49 @@ class Response implements IResponse, IArrayObject {
         return $this->mData;
     }
 
+    function startLogging() {
+        $this->mIsLogging = true;
+        Log::addCallback($this);
+        return $this;
+    }
+
+    function stopLogging() {
+        $this->mIsLogging = false;
+        Log::removeCallback($this);
+        return $this;
+    }
+
     // Statics
 
     static function getNew($msg=NULL, $status=true, $data=array()) {
         return new self($msg, $status, $data);
+    }
+
+    function onLog(ILogEntry $log)
+    {
+        $this->mLog[] = $log;
+    }
+
+    function sendHeaders() {
+        IResponseHelper::sendHeaders($this);
+    }
+
+    function toJSON(Array &$JSON)
+    {
+        IResponseHelper::toJSON($this, $JSON);
+        if($this->mLog)
+            $JSON['log'] = $this->mLog;
+    }
+
+    function toXML(\SimpleXMLElement $xml)
+    {
+        IResponseHelper::toXML($this, $xml);
+        foreach($this->mLog as $log)
+            $log->toXML($xml->addChild('log'));
+    }
+
+    function __toString() {
+        return IResponseHelper::toString($this)
+            .implode("\n", $this->mLog);
     }
 }

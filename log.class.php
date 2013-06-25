@@ -9,6 +9,8 @@ namespace CPath;
 
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IXML;
+use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\ILogEntry;
 
 /**
  * Class Log
@@ -16,32 +18,27 @@ use CPath\Interfaces\IXML;
  *
  * Provides logging functionality to all classes
  */
-interface ILog extends IXML, IJSON {
-    function getMessage();
-}
-abstract class Log implements ILog {
-    protected $mMsg, $mTag;
-    public function __construct($tag, $msg) { $this->mTag = $tag; $this->mMsg = $msg; }
-    public function __toString() { return $this->getMessage(); }
-    public function getMessage() { return $this->mMsg; }
-    public function getTag() { return $this->mTag; }
+abstract class Log {
 
-    function toJSON(Array &$JSON) {
-        $JSON['tag'] = $this->getTag();
-        $JSON['msg'] = $this->getMessage();
-    }
-
-    function toXML(\SimpleXMLElement $xml) {
-        $xml->addChild('msg', $this->getMessage())
-            ->addAttribute('tag', $this->getTag());
-    }
-
-    // Statics
-
+    /** @var ILogEntry[] */
     private static $mLog = array();
+    /** @var ILogListener[] */
+    private static $mCallbacks = array();
 
-    public static function add(ILog $Log) {
+    public static function add(ILogEntry $Log) {
         self::$mLog[] = $Log;
+        foreach(self::$mCallbacks as $i=>$call)
+            $call->onLog($Log);
+    }
+
+    public static function addCallback(ILogListener $callback) {
+        self::$mCallbacks[] = $callback;
+    }
+
+    public static function removeCallback(ILogListener $callback) {
+        foreach(self::$mCallbacks as $i=>$call)
+            if($call === $callback)
+                unset(self::$mCallbacks[$i]);
     }
 
     /**
@@ -88,16 +85,33 @@ abstract class Log implements ILog {
 
     /**
      * Return the entire log
-     * @return array a list of log entries
+     * @return ILogEntry[] a list of log entries
      */
     public static function get() {
         return self::$mLog;
     }
 }
 
-class LogVerbose extends Log {}
-class LogUser extends Log {}
-class LogError extends Log {}
+abstract class LogEntry implements ILogEntry {
+    protected $mMsg, $mTag;
+    public function __construct($tag, $msg) { $this->mTag = $tag; $this->mMsg = $msg; }
+    public function __toString() { return $this->getMessage(); }
+    public function getMessage() { return $this->mMsg; }
+    public function getTag() { return $this->mTag; }
+
+    function toJSON(Array &$JSON) {
+        $JSON['tag'] = $this->getTag();
+        $JSON['msg'] = $this->getMessage();
+    }
+
+    function toXML(\SimpleXMLElement $xml) {
+        $xml->addChild('msg', $this->getMessage())
+            ->addAttribute('tag', $this->getTag());
+    }
+}
+class LogVerbose extends LogEntry {}
+class LogUser extends LogEntry {}
+class LogError extends LogEntry {}
 class LogException extends LogError {
     protected $mEx, $mTag;
     public function __construct($tag, \Exception $ex, $msg=NULL) {

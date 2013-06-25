@@ -8,10 +8,9 @@
 namespace CPath\Models;
 
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\TResponseHelper;
+use CPath\Interfaces\IResponseHelper;
 
 class ResponseException extends \Exception implements IResponse {
-    use TResponseHelper;
 
     function getStatusCode() { return IResponse::STATUS_ERROR; }
 
@@ -22,5 +21,21 @@ class ResponseException extends \Exception implements IResponse {
             '_debug_trace' => $ex->getTrace(),
         );
         return $arr;
+    }
+    function sendHeaders() {
+        IResponseHelper::sendHeaders($this);
+    }
+
+    function toJSON(Array &$JSON) {
+        IResponseHelper::toJSON($this, $JSON);
+    }
+
+    function toXML(\SimpleXMLElement $xml)
+    {
+        IResponseHelper::toXML($this, $xml);
+    }
+
+    function __toString() {
+        return IResponseHelper::toString($this);
     }
 }

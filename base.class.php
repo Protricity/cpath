@@ -20,7 +20,8 @@ class Base {
     public static function init() {
         self::$mBasePath = dirname(__DIR__) . "/";
         $config = array();
-        if(!(include self::getGenPath().'config.php') || !$config) {
+        $path = self::getGenPath().'config.php';
+        if(!file_exists($path) || !(include $path) || !$config) {
             include 'build.class.php';
             $config = Build::buildConfig();
         }

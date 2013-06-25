@@ -16,34 +16,34 @@ interface IResponse extends IJSON,IXML {
     function sendHeaders();
 }
 
-trait TResponseHelper {
+final class IResponseHelper {
 
-    function toJSON(Array &$JSON) {
-        $JSON['status'] = $this->getStatusCode() == IResponse::STATUS_SUCCESS;
-        $JSON['msg'] = $this->getMessage();
+    static function toJSON(IResponse $Response, Array &$JSON) {
+        $JSON['status'] = $Response->getStatusCode() == IResponse::STATUS_SUCCESS;
+        $JSON['msg'] = $Response->getMessage();
         $JSON['response'] = array();
-        Util::toJSON($this->getData(), $JSON['response']);
+        Util::toJSON($Response->getData(), $JSON['response']);
     }
 
-    function toXML(\SimpleXMLElement $xml) {
-        $xml->addAttribute('status', $this->getStatusCode() == IResponse::STATUS_SUCCESS);
-        $xml->addAttribute('msg', $this->getMessage());
-        Util::toXML($this->getData(), $xml->addChild('response'));
+    static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
+        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS);
+        $xml->addAttribute('msg', $Response->getMessage());
+        Util::toXML($Response->getData(), $xml->addChild('response'));
         return $xml;
     }
 
-    function sendHeaders($mimeType=NULL) {
-        $msg = $this->getMessage();
+    static function sendHeaders(IResponse $Response, $mimeType=NULL) {
+        $msg = $Response->getMessage();
         //list($msg) = explode("\n", $msg);
-        $msg = preg_replace('/[^\w\s-]/', ' ', $msg);
-        header("HTTP/1.0 " . $this->getStatusCode() . " " . $msg);
+        $msg = preg_replace('/[^\w -]/', ' ', $msg);
+        header("HTTP/1.0 " . $Response->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
     }
 
-    function __toString() {
+    static function toString(IResponse $Response) {
         return
-            $this->getStatusCode() . " " . $this->getMessage() . "\n"
-            . print_r($this->getData(), true);
+            $Response->getStatusCode() . " " . $Response->getMessage() . "\n"
+            . print_r($Response->getData() ?: NULL, true);
     }
 }

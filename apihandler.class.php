@@ -9,6 +9,8 @@
 namespace CPath;
 
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\IApiParam;
+use CPath\Interfaces\IApiField;
 use CPath\Models\MultiException;
 use CPath\Models\Response;
 use CPath\Models\ResponseException;
@@ -27,6 +29,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
     const ROUTE_METHOD = 'GET';     // Default accepted method is GET
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
+    /** @var IApiField[] */
     private $mFields = array();     // API Fields
 
     /**
@@ -39,7 +42,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
 
     /**
      * Add an API Field.
-     * @param $name the name of the Field
+     * @param $name string name of the Field
      * @param IApiField $Field Describes the Field. Implement IApiField for custom validation
      * @return $this Return the class instance
      */
@@ -119,32 +122,30 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
                     $response->sendHeaders($mimeType);
                     $JSON = array();
                     Util::toJSON($response, $JSON);
-                    if(Base::isDebug())
-                        Util::toJSON(array('debug'=>array('log'=>Log::get())), $JSON);
+                    //if(Base::isDebug())
+                    //    Util::toJSON(array('debug'=>array('log'=>Log::get())), $JSON);
                     echo json_encode($JSON, JSON_OBJECT_AS_ARRAY);
                     return;
                 case 'text/xml':
                     $response->sendHeaders($mimeType);
                     $XML = Util::toXML($response);
-                    if(Base::isDebug())
-                        Util::toXML(array('debug'=>array('log'=>Log::get())), $XML);
+                    //if(Base::isDebug())
+                    //    Util::toXML(array('debug'=>array('log'=>Log::get())), $XML);
                     echo $XML->asXML();
                     return;
                 case 'text/html':
                     $response->sendHeaders($mimeType);
                     echo "<pre>";
                     echo $response."\n";
-                    /** @var $log ILog */
-                    foreach(Log::get() as $log)
-                        echo $log."\n";
+                    //foreach(Log::get() as $log)
+                    //    echo $log."\n";
                     echo "</pre>";
                     return;
                 case 'text/plain':
                     $response->sendHeaders($mimeType);
                     echo $response;
-                    /** @var $log ILog */
-                    foreach(Log::get() as $log)
-                        echo "$log\n";
+                    //foreach(Log::get() as $log)
+                    //    echo "$log\n";
             }
         }
     }
@@ -199,20 +200,11 @@ class ValidationExceptions extends MultiException {
 }
 
 /**
- * Class IApiField
- * @package CPath
- * Represents an API Field
- */
-interface IApiField {
-    public function validate($value);
-}
-
-/**
- * Class ApiOptionalField
+ * Class ApiField
  * @package CPath
  * Represents an 'optional' API Field
  */
-class ApiOptionalField implements IApiField {
+class ApiField implements IApiField {
     public $mDescription;
     public function __construct($description=NULL) {
         $this->mDescription = $description;
@@ -237,21 +229,12 @@ class RequiredFieldException extends ValidationException {
  * @package CPath
  * Represents a 'required' API Field
  */
-class ApiRequiredField extends ApiOptionalField {
+class ApiRequiredField extends ApiField {
     public function validate($value) {
         if(!$value && $value !== '0')
             throw new RequiredFieldException();
         return parent::validate($value);
     }
-}
-
-/**
- * Class ApiParam
- * @package CPath
- * This interface tags an API Field as a route parameter.
- */
-interface IApiParam {
-
 }
 
 /**
