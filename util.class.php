@@ -37,7 +37,9 @@ class Util {
     public static function getHeader($name) {
         static $headers = NULL;
         if($headers === null)
-            $headers = function_exists('getallheaders') ? getallheaders() : array('Accept'=>'text/plain');
+            $headers = function_exists('getallheaders') 
+		? getallheaders() 
+		: array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
 
         return $headers[$name];
     }

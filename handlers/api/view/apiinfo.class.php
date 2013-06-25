@@ -28,7 +28,7 @@ class ApiInfo {
         ?></div>
         <h3>JSON Response</h3>
         <div style='white-space: pre'><?php
-             echo htmlentities(json_encode(Util::toJSON($Response), JSON_OBJECT_AS_ARRAY | JSON_PRETTY_PRINT));
+             echo htmlentities(json_encode(Util::toJSON($Response)));
         ?></div>
         <h3>XML Response</h3>
         <div style='white-space: pre'><?php
