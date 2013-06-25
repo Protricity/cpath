@@ -76,12 +76,6 @@ class Response implements IResponse, IArrayObject, ILogListener {
         return $this;
     }
 
-    // Statics
-
-    static function getNew($msg=NULL, $status=true, $data=array()) {
-        return new self($msg, $status, $data);
-    }
-
     function onLog(ILogEntry $log)
     {
         $this->mLog[] = $log;
@@ -94,8 +88,10 @@ class Response implements IResponse, IArrayObject, ILogListener {
     function toJSON(Array &$JSON)
     {
         IResponseHelper::toJSON($this, $JSON);
-        if($this->mLog)
-            $JSON['log'] = $this->mLog;
+        if($this->mLog) {
+            $JSON['log'] = array();
+            Util::toJSON($this->mLog, $JSON['log']);
+        }
     }
 
     function toXML(\SimpleXMLElement $xml)
@@ -108,5 +104,11 @@ class Response implements IResponse, IArrayObject, ILogListener {
     function __toString() {
         return IResponseHelper::toString($this)
             .implode("\n", $this->mLog);
+    }
+
+    // Statics
+
+    static function getNew($msg=NULL, $status=true, $data=array()) {
+        return new self($msg, $status, $data);
     }
 }

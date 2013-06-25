@@ -83,20 +83,20 @@ class Util {
             $JSON = array();
         }
 
-        if($object instanceof Interfaces\IJSON) {
+        if(is_scalar($object)) {
+            $JSON = $object;
+        } elseif($object instanceof Interfaces\IJSON) {
             $object->toJSON($JSON);
-            return $JSON;
-        }
-
-        foreach($object as $key=>$val) {
-            if(is_array($val)) {
+        } elseif(is_array($object) || $object instanceof \Traversable) {
+            foreach($object as $key=>$val) {
                 if(!isset($JSON[$key])) $JSON[$key] = array();
                 self::toJSON($val, $JSON[$key]);
-            } else {
-                $JSON[$key] = $val;
             }
+        } else {
+            $JSON = $object;
         }
         return $JSON;
+
     }
 
     public static function toXML($object, $root='root') {

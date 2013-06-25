@@ -6,15 +6,18 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath;
-
+namespace CPath\Handlers;
+use CPath\Interfaces\IResponseHelper;
+use CPath\Util;
+use CPath\Build;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IApiParam;
-use CPath\Interfaces\IApiField;
+use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IBuilder;
 use CPath\Models\MultiException;
 use CPath\Models\Response;
 use CPath\Models\ResponseException;
 use CPath\Builders\BuildRoutes;
+use CPath\Handlers\Api\View\ApiInfo;
 
 /**
  * Class ApiHandler
@@ -22,7 +25,7 @@ use CPath\Builders\BuildRoutes;
  *
  * Provides a Handler template for API calls
  */
-abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
+abstract class Api implements IHandler, IBuilder {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
@@ -30,7 +33,7 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IApiField[] */
-    private $mFields = array();     // API Fields
+    private $mFields = array(), $mRoute=NULL;     // API Fields
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -107,61 +110,56 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
             }
         }
         try {
-            $response = $this->execute($request);
-            if(!($response instanceof IResponse))
-                $response = new Response(true, "API executed successfully", $response);
+            $Response = $this->execute($request);
+            if(!($Response instanceof IResponse))
+                $Response = new Response(true, "API executed successfully", $Response);
         } catch (ResponseException $ex) {
-            $response = $ex;
+            $Response = $ex;
         } catch (\Exception $ex) {
-            $response = new ResponseException($ex->getMessage(), null, $ex);
+            $Response = new ResponseException($ex->getMessage(), null, $ex);
         }
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $response->sendHeaders($mimeType);
-                    $JSON = array();
-                    Util::toJSON($response, $JSON);
-                    //if(Base::isDebug())
-                    //    Util::toJSON(array('debug'=>array('log'=>Log::get())), $JSON);
+                    Util::toJSON($Response, $JSON);
                     echo json_encode($JSON, JSON_OBJECT_AS_ARRAY);
                     return;
                 case 'text/xml':
-                    $response->sendHeaders($mimeType);
-                    $XML = Util::toXML($response);
-                    //if(Base::isDebug())
-                    //    Util::toXML(array('debug'=>array('log'=>Log::get())), $XML);
+                    $Response->sendHeaders($mimeType);
+                    $XML = Util::toXML($Response);
                     echo $XML->asXML();
                     return;
                 case 'text/html':
-                    $response->sendHeaders($mimeType);
-                    echo "<pre>";
-                    echo $response."\n";
-                    //foreach(Log::get() as $log)
-                    //    echo $log."\n";
-                    echo "</pre>";
+                    $Response->sendHeaders($mimeType);
+                    $Render = new ApiInfo();
+                    $Render->render($this, $Response);
                     return;
                 case 'text/plain':
-                    $response->sendHeaders($mimeType);
-                    echo $response;
-                    //foreach(Log::get() as $log)
-                    //    echo "$log\n";
+                    $Response->sendHeaders($mimeType);
+                    echo $Response;
+                    return;
             }
         }
     }
 
+    public function getFields() {
+        return $this->mFields;
+    }
     /**
      * Provides the formatted route for viewing purposes
      * @return string the formatted route
      */
     public function getDisplayRoute() {
-        $route = Build::getHandlerRoute($this);
-        foreach($this->mFields as $name => $Field) {
-            if(!($Field instanceof IApiParam))
-                continue;
-            $route .= ':' . $name . '/';
+        if(!$this->mRoute) {
+            $this->mRoute = BuildRoutes::getHandlerRoute(new \ReflectionClass($this));
+            foreach($this->mFields as $name => $Field) {
+                if(!($Field instanceof IApiParam))
+                    continue;
+                $this->mRoute .= '/:' . $name ;
+            }
         }
-        return $route;
+        return $this->mRoute;
     }
 
     // Statics
@@ -177,6 +175,24 @@ abstract class ApiHandler implements Interfaces\IHandler, Interfaces\IBuilder {
     }
 }
 
+/**
+ * Class IApiField
+ * @package CPath
+ * Represents an API Field
+ */
+interface IApiField {
+    public function validate($value);
+    public function getDescription();
+}
+
+/**
+ * Class ApiParam
+ * @package CPath
+ * This interface tags an API Field as a route parameter.
+ */
+interface IApiParam extends IApiField {
+
+}
 /**
  * Class ValidationException
  * @package CPath
@@ -208,6 +224,10 @@ class ApiField implements IApiField {
     public $mDescription;
     public function __construct($description=NULL) {
         $this->mDescription = $description;
+    }
+
+    public function getDescription() {
+        return $this->mDescription;
     }
 
     public function validate($value) {

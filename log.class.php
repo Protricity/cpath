@@ -105,8 +105,8 @@ abstract class LogEntry implements ILogEntry {
     }
 
     function toXML(\SimpleXMLElement $xml) {
-        $xml->addChild('msg', $this->getMessage())
-            ->addAttribute('tag', $this->getTag());
+        $xml->addAttribute('msg', $this->getMessage());
+        $xml->addAttribute('tag', $this->getTag());
     }
 }
 class LogVerbose extends LogEntry {}

@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Models;
 
+use CPath\Base;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
 
@@ -17,9 +18,9 @@ class ResponseException extends \Exception implements IResponse {
     function &getData()
     {
         $ex = $this->getPrevious() ?: $this;
-        $arr = array(
-            '_debug_trace' => $ex->getTrace(),
-        );
+        $arr = array();
+        if(Base::isDebug())
+            $arr['_debug_trace'] = $ex->getTraceAsString();
         return $arr;
     }
     function sendHeaders() {

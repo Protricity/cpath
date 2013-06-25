@@ -10,10 +10,11 @@ namespace CPath;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IBuilder;
 use CPath\Models\Response;
+use CPath\Handlers\Api;
 
 class BuildException extends \Exception {}
 
-class Build extends ApiHandler {
+class Build extends Api {
 
     const ROUTE_PATH = 'build';
 
