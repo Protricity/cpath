@@ -122,8 +122,9 @@ abstract class Api implements IHandler, IBuilder {
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
+                    header("Content-Type: $mimeType");
                     Util::toJSON($Response, $JSON);
-                    echo json_encode($JSON, JSON_OBJECT_AS_ARRAY);
+                    echo json_encode($JSON);
                     return;
                 case 'text/xml':
                     $Response->sendHeaders($mimeType);
