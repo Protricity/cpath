@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 
 interface IHandler {
-    //const ROUTE_METHOD = 'GET';
+    //const ROUTE_METHODS = 'GET|POST|...';
     //const ROUTE_PATH = NULL; //'/my/api/';
 
     function render(Array $args);

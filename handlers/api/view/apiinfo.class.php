@@ -10,12 +10,14 @@ class ApiInfo {
 
     function render(Api $Api, IResponse $Response)
     {
+        $routes = $Api->getDisplayRoutes();
 ?><html>
     <head>
-        <title><?php echo $Api->getDisplayRoute(); ?></title>
+        <title><?php echo $routes[0]; ?></title>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     </head>
     <body>
-        <h1><?php echo $Api->getDisplayRoute(); ?></h1>
+        <h1><?php foreach($routes as $route) echo $route."<br />"; ?></h1>
         <h3>Params:</h3>
         <table>
         <?php foreach($Api->getFields() as $name=>$Field) { ?>

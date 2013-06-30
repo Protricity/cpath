@@ -10,7 +10,7 @@ namespace CPath;
 class FileHandler implements Interfaces\IHandler{
     const BUILD_IGNORE = true;
 
-    const ROUTE_METHOD = 'GET';
+    const ROUTE_METHODS = 'GET';
     const ROUTE_PATH = NULL;
 
     private $mFilePath;

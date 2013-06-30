@@ -29,11 +29,11 @@ abstract class Api implements IHandler, IBuilder {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
-    const ROUTE_METHOD = 'GET';     // Default accepted method is GET
+    const ROUTE_METHODS = 'GET|POST';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IApiField[] */
-    private $mFields = array(), $mRoute=NULL;     // API Fields
+    private $mFields = array(), $mRoutes=NULL;     // API Fields
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -95,9 +95,17 @@ abstract class Api implements IHandler, IBuilder {
      * @param array $args an array of arguments parsed out of the route path
      */
     public function render(Array $args) {
-        $request = strcasecmp(Util::getUrl('method'), 'get') === 0
-            ? $_GET
-            : $_POST;
+
+        // Parse the request
+        if(!$_POST && strcasecmp(Util::getUrl('method'), 'get') === 0) {                // if GET
+            $request = $_GET;
+        } else {                                                                        // else POST
+            if(!$_POST && Util::getHeader('Content-Type') === 'application/json') {     // if JSON Object,
+                $request = json_decode( file_get_contents('php://input'), true);        // Parse out json
+            } else {
+                $request = $_POST;                                                      // else use POST
+            }
+        }
 
         if($args) {
             $i = 0;
@@ -122,8 +130,8 @@ abstract class Api implements IHandler, IBuilder {
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    header("Content-Type: $mimeType");
-                    Util::toJSON($Response, $JSON);
+                    $Response->sendHeaders($mimeType);
+                    $JSON = Util::toJSON($Response);
                     echo json_encode($JSON);
                     return;
                 case 'text/xml':
@@ -149,18 +157,21 @@ abstract class Api implements IHandler, IBuilder {
     }
     /**
      * Provides the formatted route for viewing purposes
-     * @return string the formatted route
+     * @return array the formatted route(s)
      */
-    public function getDisplayRoute() {
-        if(!$this->mRoute) {
-            $this->mRoute = BuildRoutes::getHandlerRoute(new \ReflectionClass($this));
-            foreach($this->mFields as $name => $Field) {
-                if(!($Field instanceof IApiParam))
-                    continue;
-                $this->mRoute .= '/:' . $name ;
+    public function getDisplayRoutes() {
+        if(!$this->mRoutes) {
+            $this->mRoutes = array();
+            foreach(BuildRoutes::getHandlerRoutes(new \ReflectionClass($this)) as $route) {
+                foreach($this->mFields as $name => $Field) {
+                    if(!($Field instanceof IApiParam))
+                        continue;
+                    $route .= '/:' . $name ;
+                }
+                $this->mRoutes [] = $route;
             }
         }
-        return $this->mRoute;
+        return $this->mRoutes;
     }
 
     // Statics
