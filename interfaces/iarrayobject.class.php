@@ -7,6 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-interface IArrayObject extends \ArrayAccess, \IteratorAggregate {
+interface IArrayObject extends \ArrayAccess, \IteratorAggregate, \Countable {
 
 }
