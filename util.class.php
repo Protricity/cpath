@@ -32,16 +32,13 @@ class Util {
             $request = substr($request, strlen($root));
         self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
 
+        self::$mHeaders = function_exists('getallheaders')
+            ? getallheaders()
+            : array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
     }
 
     public static function getHeader($name) {
-        static $headers = NULL;
-        if($headers === null)
-            $headers = function_exists('getallheaders') 
-		? getallheaders() 
-		: array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
-
-        return $headers[$name];
+        return isset(self::$mHeaders[$name]) ? self::$mHeaders[$name] : NULL;
     }
 
     public static function getUrl($key=NULL) {
@@ -72,6 +69,9 @@ class Util {
                     case 'text/html':
                     case 'application/xhtml+xml':
                         $types[$i] = 'text/html';
+                        break;
+                    case 'text/plain':
+                        $types[$i] = 'text/plain';
                         break;
                 }
             }

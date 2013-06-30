@@ -17,7 +17,7 @@ class BuildException extends \Exception {}
 class Build extends Api {
 
     const ROUTE_PATH = 'build';
-
+    const ROUTE_METHODS = 'CLI';
 
     /**
      * Execute this API Endpoint with the entire request.

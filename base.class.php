@@ -14,7 +14,7 @@ namespace CPath;
  * Provides required framework functionality such as class autoloader and directories
  */
 class Base {
-    private static $mLoaded, $mBasePath, $mConfig;
+    private static $mLoaded = false, $mBasePath, $mConfig;
 
     /** Initialize Static Class on include */
     public static function init() {
@@ -22,8 +22,11 @@ class Base {
         $config = array();
         $path = self::getGenPath().'config.php';
         if(!file_exists($path) || !(include $path) || !$config) {
+            $loaded = self::$mLoaded;
+            if(!$loaded) self::load();
             include 'build.class.php';
             $config = Build::buildConfig();
+            if(!$loaded) self::unload();
         }
         self::$mConfig = $config;
     }
@@ -38,8 +41,10 @@ class Base {
 
     /** Deactivate Autoloader for classes */
     public static function unload() {
-        spl_autoload_unregister(__NAMESPACE__.'\Base::loadClass');
-        self::$mLoaded = false;
+        if(self::$mLoaded) {
+            spl_autoload_unregister(__NAMESPACE__.'\Base::loadClass');
+            self::$mLoaded = false;
+        }
     }
 
     /** Autoloader for classes. Path matches namespace heirarchy of Class */
@@ -48,7 +53,7 @@ class Base {
         $name = str_replace('\\', '/', strtolower($name));
         $name = strtolower($name);
         $classPath = self::$mBasePath . $name . '.class.php';
-        include_once($classPath);
+        require_once($classPath);
     }
 
     /** Attempt to route a web request to it's destination */

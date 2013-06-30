@@ -88,7 +88,10 @@ class BuildRoutes {
         }
 
         foreach($methods as $m) {
-            $routes[] = $m . ' ' . $route;
+            if($m == 'CLI')
+                $routes[] = $route;
+            else
+                $routes[] = $m . ' ' . $route;
         }
 
         return $routes;
