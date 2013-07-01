@@ -8,11 +8,19 @@
 namespace CPath;
 
 
-class Util {
+// TODO split this class up into generic methods and request-oriented methods
+/**
+ * Class Util provides information about the current request
+ * @package CPath
+ */
+abstract class Util {
 
     private static $mHeaders = null;
     private static $mUrl = array();
 
+    /**
+     * Initialize the static class and parses request information
+     */
     public static function init() {
         if(!empty($_SERVER["REQUEST_URI"])) {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
@@ -37,16 +45,30 @@ class Util {
             : array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
     }
 
+    /**
+     * Get a request header
+     * @param $name string the header key
+     * @return string|null the header value or null if it was not found
+     */
     public static function getHeader($name) {
         return isset(self::$mHeaders[$name]) ? self::$mHeaders[$name] : NULL;
     }
 
+    /**
+     * Get path information for the request url
+     * @param string|null $key if set, return only the data that coorisponds to this vaue
+     * @return array|string the url data
+     */
     public static function getUrl($key=NULL) {
         if($key !== NULL)
             return self::$mUrl[$key];
         return self::$mUrl;
     }
 
+    /**
+     * Determines all accepted mimetypes from the request. Narrows different types into the most common mimetype
+     * @return array a list of accepted mimetypes
+     */
     public static function getAcceptedTypes() {
         static $types = NULL;
         if($types === NULL) {
@@ -80,6 +102,12 @@ class Util {
         return $types;
     }
 
+    /**
+     * Prepare an object for json serialization
+     * @param $object mixed the object to serialize
+     * @param array|null $JSON the existing json data to add to
+     * @return array|bool|float|int|null|string the json data to serialize
+     */
     public static function toJSON($object, &$JSON=NULL) {
         if($JSON == NULL) {
             $JSON = array();
@@ -101,6 +129,12 @@ class Util {
 
     }
 
+    /**
+     * Prepare an object for xml serialization
+     * @param $object mixed the object to serialize
+     * @param \SimpleXMLElement|string $root the existing xml instance or root tag to use for a new xml instance
+     * @return \SimpleXMLElement the xml instance with serialized data added in
+     */
     public static function toXML($object, $root='root') {
 
         if(!($root instanceof \SimpleXMLElement)) {
@@ -124,4 +158,5 @@ class Util {
         return $root;
     }
 }
+// Init this class on load
 Util::init();

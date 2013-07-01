@@ -25,16 +25,28 @@ abstract class Log {
     /** @var ILogListener[] */
     private static $mCallbacks = array();
 
+    /**
+     * Add a new log entry
+     * @param ILogEntry $Log the log entry to add
+     */
     public static function add(ILogEntry $Log) {
         self::$mLog[] = $Log;
         foreach(self::$mCallbacks as $i=>$call)
             $call->onLog($Log);
     }
 
+    /**
+     * Add a logging callback to be performed until removeCallback() removes it
+     * @param ILogListener $callback the callback to be performed
+     */
     public static function addCallback(ILogListener $callback) {
         self::$mCallbacks[] = $callback;
     }
 
+    /**
+     * Remove a callback
+     * @param ILogListener $callback
+     */
     public static function removeCallback(ILogListener $callback) {
         foreach(self::$mCallbacks as $i=>$call)
             if($call === $callback)
@@ -92,6 +104,10 @@ abstract class Log {
     }
 }
 
+/**
+ * Class LogEntry provides a basic implementation of ILogEntry
+ * @package CPath
+ */
 abstract class LogEntry implements ILogEntry {
     protected $mMsg, $mTag;
     public function __construct($tag, $msg) { $this->mTag = $tag; $this->mMsg = $msg; }
@@ -99,19 +115,31 @@ abstract class LogEntry implements ILogEntry {
     public function getMessage() { return $this->mMsg; }
     public function getTag() { return $this->mTag; }
 
+    /**
+     * Implements IJSON to convert the log entry to a jsonobject
+     * @param array $JSON the existing json object to modify
+     */
     function toJSON(Array &$JSON) {
         $JSON['tag'] = $this->getTag();
         $JSON['msg'] = $this->getMessage();
     }
 
+    /**
+     * Implements IXML to convert the log entry into an xml element
+     * @param \SimpleXMLElement $xml the existing xml object
+     */
     function toXML(\SimpleXMLElement $xml) {
         $xml->addAttribute('msg', $this->getMessage());
         $xml->addAttribute('tag', $this->getTag());
     }
 }
+/** Class LogVerbose - a debug log entry for developers to see */
 class LogVerbose extends LogEntry {}
+/** Class LogUser - a status log entry for users to see */
 class LogUser extends LogEntry {}
+/** Class LogError - an error log entry */
 class LogError extends LogEntry {}
+/** Class LogException - an exception log entry */
 class LogException extends LogError {
     protected $mEx, $mTag;
     public function __construct($tag, \Exception $ex, $msg=NULL) {

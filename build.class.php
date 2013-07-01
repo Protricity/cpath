@@ -16,8 +16,8 @@ class BuildException extends \Exception {}
 
 class Build extends Api {
 
-    const ROUTE_PATH = 'build';
-    const ROUTE_METHODS = 'CLI';
+    const ROUTE_PATH = 'build';     // Allow manual building from command line: 'php index.php build'
+    const ROUTE_METHODS = 'CLI';    // CLI only
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -40,11 +40,20 @@ class Build extends Api {
     private static $mBuildClasses = array();
     private static $mBuildConfig = NULL;
 
+    /**
+     * Return the build config full path
+     * @return string build config full path
+     */
     private static function getConfigPath() {
         static $path = NULL;
         return $path ?: $path = Base::getGenPath().'build.php';
     }
 
+    /**
+     * Load build config data for a class
+     * @param null $class optional class to load data for
+     * @return mixed build config data
+     */
     private static function &loadConfig($class=NULL) {
         if(self::$mBuildConfig === NULL) {
             $path = self::getConfigPath();
@@ -59,17 +68,32 @@ class Build extends Api {
         return self::$mBuildConfig[$class];
     }
 
+    /**
+     * Load build config data for a class
+     * @param $class string class to load data for
+     * @param null $key if provided, only return data for this key
+     * @return mixed build config data
+     */
     public static function &getConfig($class, $key=NULL) {
         $Config =& self::loadConfig($class);
         if($key) return $Config[$key];
         return $Config;
     }
 
+    /**
+     * Set build config data for a class
+     * @param $class string class to load data for
+     * @param $key string data key
+     * @param $val string data value
+     */
     public static function setConfig($class, $key, $val) {
         $Config = self::loadConfig($class);
         $Config[$key] = $val;
     }
 
+    /**
+     * Commit the build config to the file
+     */
     public static function commitConfig() {
         $config = self::loadConfig();
         $php = "<?php\n\$config=".var_export($config, true).";";
@@ -77,8 +101,16 @@ class Build extends Api {
         file_put_contents($path, $php);
     }
 
+    /**
+     * Returns true if the current build should be forced
+     * @return bool whether or not to force build
+     */
     public static function force() { return false; }
 
+    /**
+     * Return the build config data from the build file if it exists
+     * @return array the build config data
+     */
     public static function buildConfig() {
         $config = array(
             'debug' => false,
@@ -92,6 +124,9 @@ class Build extends Api {
         return $config;
     }
 
+    /**
+     * Build all classes
+     */
     public static function buildClasses() {
         Log::v(__CLASS__, "Starting Builds");
         self::$mBuildClasses = array();
@@ -103,6 +138,12 @@ class Build extends Api {
         Log::v(__CLASS__, "All Builds Complete");
     }
 
+    /**
+     * Build a specific class
+     * @param $path string the class path
+     * @param $dirClass string the class namespace
+     * @throws \Exception if a build fails
+     */
     private static function buildClass($path, $dirClass) {
         if(file_exists($path.'/.buildignore'))
             return;

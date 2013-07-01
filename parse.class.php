@@ -9,14 +9,30 @@ namespace CPath;
 
 
 class Parse {
+
+    /**
+     * Removes all non alpha characters from a string
+     * @param $value string the string to parse
+     * @return string the parsed string
+     */
     static function alpha($value) {
         return preg_replace('/[^a-z]/i', '', $value);
     }
 
+    /**
+     * Removes all non alphanumeric characters from a string
+     * @param $value string the string to parse
+     * @return string the parsed string
+     */
     static function alphaNumeric($value) {
         return preg_replace('/[^a-z0-9]/i', '', $value);
     }
 
+    /**
+     * Removes all non alphanumeric, space, underscore, or dash characters from a string
+     * @param $value string the string to parse
+     * @return string the parsed string
+     */
     static function title($value) {
         return preg_replace('/[^a-zA-Z0-9 _-]/', '', $value);
     }
