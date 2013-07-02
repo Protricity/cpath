@@ -88,12 +88,21 @@ class Base {
 
     /**
      * Returns a config variable
-     * @param $key - The name of the config variable
-     * @param $default - the default value if the variable is not found
-     * @return mixed - the value of the config variable
+     * @param $key string The name of the config variable
+     * @param $default mixed the default value if the variable is not found
+     * @return mixed mixed the value of the config variable
      */
     public static function getConfig($key, $default) {
         return isset(self::$mConfig[$key]) ? self::$mConfig[$key] : $default;
+    }
+
+    /**
+     * Sets config variable for the active session.
+     * @param $key string The name of the config variable
+     * @param $value mixed The value for the config variable
+     */
+    public static function setConfig($key, $value) {
+        self::$mConfig[$key] = $value;
     }
 
     /**
