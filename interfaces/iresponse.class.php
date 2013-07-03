@@ -13,7 +13,7 @@ interface IResponse extends IJSON,IXML {
     function getStatusCode();
     function getMessage();
     function &getData();
-    function sendHeaders();
+    function sendHeaders($mimeType=NULL);
 }
 
 final class IResponseHelper {

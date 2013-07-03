@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IBuilder;
 use CPath\Models\Response;
 use CPath\Handlers\Api;
@@ -37,7 +36,9 @@ class Build extends Api {
 
     // Statics
 
-    private static $mBuildClasses = array();
+    /** @var $mBuilders IBuilder[] */
+    private static $mBuilders = array();
+    private static $mClasses = array();
     private static $mBuildConfig = NULL;
     private static $mForce = false;
 
@@ -131,64 +132,69 @@ class Build extends Api {
     public static function buildClasses($force=false) {
         Log::v(__CLASS__, "Starting Builds");
         self::$mForce = $force;
-        self::$mBuildClasses = array();
-        self::buildClass(dirname(__DIR__), '');
+        self::$mBuilders = array();
+        self::findClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
-        foreach(self::$mBuildClasses as $Class)
-            call_user_func(array($Class->getName(), 'buildComplete'), $Class);
+        $exCount = 0;
+        foreach(self::$mClasses as $Class) {
+            /** @var $Builder IBuilder */
+            foreach(self::$mBuilders as $Builder) try {
+                $Builder->build($Class);
+            } catch (\Exception $ex) {
+                $exCount++;
+                Log::ex(get_class($Builder), $ex);
+            }
+        }
+        /** @var $Builder IBuilder */
+        foreach(self::$mBuilders as $Builder)
+            $Builder->buildComplete();
         self::commitConfig();
+        if($exCount)
+            throw new \Exception("Build Failed: {$exCount} Exception(s) Occurred");
         Log::v(__CLASS__, "All Builds Complete");
     }
 
     /**
-     * Build a specific class
+     * Find all classes by folder
      * @param $path string the class path
      * @param $dirClass string the class namespace
      * @throws \Exception if a build fails
      */
-    private static function buildClass($path, $dirClass) {
+    private static function findClass($path, $dirClass) {
         if(file_exists($path.'/.buildignore'))
             return;
-        $Exceptions = array();
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))
                 continue;
             $filePath = $path . '/' . $file;
             if(is_dir($filePath)) {
-                self::buildClass($filePath, $dirClass .'\\'. ucfirst($file));
+                self::findClass($filePath, $dirClass .'\\'. ucfirst($file));
                 continue;
             }
             if(strcasecmp(substr($file, -10), '.class.php') !== 0)
                 continue;
             $name = substr($file, 0, strlen($file) - 10);
             $class = $dirClass . '\\' . ucfirst($name);
-            try {
-                require_once($filePath);
-                $Class = new \ReflectionClass($class);
-                if($Class === NULL)
-                    throw new \Exception("Class '{$class}' not found in '{$filePath}'");
+            require_once($filePath);
+            $Class = new \ReflectionClass($class);
+            if($Class === NULL)
+                throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
-                if($Class->getConstant('BUILD_IGNORE')) {
-                    Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
-                    continue;
-                }
-                if($Class->isAbstract()) {
-                    Log::v(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
-                    continue;
-                }
-
-                if($Class->implementsInterface(__NAMESPACE__."\Interfaces\IBuilder")) {
-                    Log::v(__CLASS__, "Building Class '{$class}' in '{$filePath}'");
-                    call_user_func(array($Class->getName(), 'build'), $Class);
-                    static::$mBuildClasses[] = $Class;
-                }
+            if($Class->getConstant('BUILD_IGNORE')) {
+                Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
+                continue;
             }
-            catch (\Exception $ex) {
-                $Exceptions[] = $ex;
+            if($Class->isAbstract()) {
+                //Log::v(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
+                continue;
+            }
+            static::$mClasses[] = $Class;
+
+            if($Class->implementsInterface(__NAMESPACE__."\Interfaces\IBuilder")) {
+                Log::v(__CLASS__, "Found Builder Class '{$class}' in '{$filePath}'");
+                //call_user_func(array($Class->getName(), 'build'), $Class);
+                static::$mBuilders[] = $Class->newInstance();
             }
         }
-
-        foreach($Exceptions as $ex)
-            throw $ex;
     }
 }

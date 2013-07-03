@@ -12,7 +12,6 @@ use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IBuilder;
 use CPath\Models\MultiException;
 use CPath\Models\Response;
 use CPath\Models\ResponseException;
@@ -25,7 +24,7 @@ use CPath\Handlers\Api\View\ApiInfo;
  *
  * Provides a Handler template for API calls
  */
-abstract class Api implements IHandler, IBuilder {
+abstract class Api implements IHandler {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
@@ -172,18 +171,6 @@ abstract class Api implements IHandler, IBuilder {
             }
         }
         return $this->mRoutes;
-    }
-
-    // Statics
-
-    /** Builds the API Endpoint route */
-    public static function build(\ReflectionClass $Class) {
-        BuildRoutes::build($Class);
-    }
-
-    /** Processes the API Endpoint route into the routes file */
-    public static function buildComplete(\ReflectionClass $Class) {
-        BuildRoutes::buildComplete($Class);
     }
 }
 

@@ -3,7 +3,6 @@ namespace CPath\Handlers\Api\View;
 
 use CPath\Util;
 use CPath\Handlers\Api;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IResponse;
 
 class ApiInfo {

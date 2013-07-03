@@ -15,7 +15,7 @@ use CPath\Interfaces\IDatabase;
 use CPath\Builders\BuildRoutes;
 
 class NotConfiguredException extends \Exception{}
-abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder {
+abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     const FUNC_FORMAT = NULL;
     private $mPrefix;
@@ -71,9 +71,12 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder
         }
 
         Log::v(__CLASS__, "Upgrading Database from version {$oldVersion} to {$version}");
-        BuildPGTables::upgrade($this, $oldVersion);
+        $Build = new BuildPGTables();
+        $Build->upgrade($this, $oldVersion);
         return $this;
     }
+
+    // Implement IHandler
 
     const ROUTE_METHODS = 'CLI';
 
@@ -91,15 +94,4 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder
 
     }
 
-    // Statics
-
-    /** Builds the API Endpoint route */
-    public static function build(\ReflectionClass $Class) {
-        BuildRoutes::build($Class);
-    }
-
-    /** Processes the API Endpoint route into the routes file */
-    public static function buildComplete(\ReflectionClass $Class) {
-        BuildRoutes::buildComplete($Class);
-    }
 }

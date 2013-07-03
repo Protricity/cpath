@@ -11,6 +11,7 @@ use CPath\DataBase\PostGreSQL;
 use CPath\BuildException;
 use CPath\Base;
 use CPath\Build;
+use CPath\Interfaces\IBuilder;
 use CPath\Log;
 
 
@@ -22,7 +23,7 @@ class UpgradeException extends \Exception {}
  * Provides building methods for Handler Classes.
  * Builds [gen]/routes.php
  */
-class BuildPGTables {
+class BuildPGTables implements IBuilder{
     const PostGreSQL = "CPath\\DataBase\\PostGreSQL";
 
     const TMPL_TABLE_CLASS = "<?php
@@ -36,12 +37,13 @@ namespace %s;
 class Procs {
 %s}";
 
-    const TMPL_INSERT =
-"\tstatic function insert(\\PDO \$DB%s) {
-\t\tstatic \$stmd = NULL;
-\t\tif(!\$stmd) \$stmd = \$DB->prepare('INSERT INTO %s VALUES (%s)%s');
-\t\t\$stmd->execute(array(%s));
-%s\t}\n";
+    const TMPL_INSERT = <<<'PHP'
+    static function insert(\PDO $DB%s) {
+        static $stmd = NULL;
+        if(!$stmd) $stmd = $DB->prepare('INSERT INTO %s VALUES (%s)%s');
+        $stmd->execute(array(%s));
+%s  }
+PHP;
 
     const TMPL_PROC =
 "\n\tstatic function %s(\\PDO \$DB%s) {
@@ -51,12 +53,12 @@ class Procs {
 \t\treturn \$stmd;
 \t}\n";
 
-    public static function upgrade(PostGreSQL $DB, $oldVersion=NULL) {
+    public function upgrade(PostGreSQL $DB, $oldVersion=NULL) {
         if($oldVersion===NULL)
             $oldVersion = $DB->getDBVersion();
         $curVersion = $DB::VERSION;
         $Class = new \ReflectionClass($DB);
-        $schemaFolder = self::getFolder($Class, 'schema');
+        $schemaFolder = $this->getFolder($Class, 'schema');
         $files = scandir($schemaFolder);
         if(!$files)
             throw new UpgradeException("No Schemas found in ".$schemaFolder);
@@ -91,22 +93,24 @@ class Procs {
     /**
      * Builds class references for existing database tables
      * @param \ReflectionClass $Class
+     * @return boolean True if the class was built. False if it was ignored.
+     * @throws \CPath\BuildException when a build exception occurred
      */
-    public static function build(\ReflectionClass $Class) {
+    public function build(\ReflectionClass $Class) {
 
         if(!$Class->isSubclassOf(self::PostGreSQL))
-            throw new BuildException("Class ".$Class->getName()." does not implement ".self::PostGreSQL);
+            return false;
 
         /* @var $DB PostGreSQL */
         $DB = call_user_func(array($Class->getName(), 'get'));
 
-        $tablePath = self::getFolder($Class, 'tables');
+        $tablePath = $this->getFolder($Class, 'tables');
         $tableNS = $Class->getNamespaceName() . "\\Tables";
-        $procPath = self::getFolder($Class, 'procs');
+        $procPath = $this->getFolder($Class, 'procs');
         $procNS = $Class->getNamespaceName() . "\\Procs";
 
         $Config =& Build::getConfig($Class->getName());
-        $schemaFolder = self::getFolder($Class, 'schema');
+        $schemaFolder = $this->getFolder($Class, 'schema');
         $hash = 0;
         $force = Build::force();
 
@@ -119,7 +123,7 @@ class Procs {
             $hash += filemtime($schemaFolder.$file);
         if(!$force && isset($Config['schemaHash']) && $Config['schemaHash'] == $hash) {
             Log::v(__CLASS__, "Skipping Build for ".$Class->getName());
-            return;
+            return false;
         }
         $Config['schemaHash'] = $hash;
 
@@ -140,10 +144,10 @@ class Procs {
                     $cols[$name] = 'DEFAULT';
             }
 
-            $php = self::getConst('TableName', $table);
+            $php = $this->getConst('TableName', $table);
             foreach($cols as $name=>$type)
-                $php .= self::getConst(strtoupper($name), $name);
-            //$php .= self::getInsert($table, $cols);
+                $php .= $this->getConst(strtoupper($name), $name);
+            //$php .= $this->getInsert($table, $cols);
             $php = sprintf(self::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
             $file = strtolower($table).'.class.php';
             file_put_contents($tablePath.$file, $php);
@@ -182,30 +186,33 @@ class Procs {
                 $names[$name] = 1;
             }
             $method = $name.'('.(!$proc ? '' : ('%s'.str_repeat(', %s', sizeof($proc)-1))).')';
-            $phpC .= self::getConst(strtoupper($name), $method);
-            $phpP .= self::getProc($name, $proc);
+            $phpC .= $this->getConst(strtoupper($name), $method);
+            $phpP .= $this->getProc($name, $proc);
         }
         $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
         file_put_contents($procPath.'procs.class.php', $php);
         Log::v(__CLASS__, "Built (".sizeof($tables).") routines");
-    }
-    /**
-     * Checks to see if any routes were built, and builds them into [gen]/routes.php
-     * @param \ReflectionClass $Class
-     */
-    public static function buildComplete(\ReflectionClass $Class) {
+
+        return true;
     }
 
-    private static function getFolder(\ReflectionClass $Class, $subFolder=NULL) {
+    /**
+     * Unused
+     */
+    public function buildComplete() {
+
+    }
+
+    private function getFolder(\ReflectionClass $Class, $subFolder=NULL) {
         if($subFolder) $subFolder .= '/';
         return dirname($Class->getFileName()) . '/' . $subFolder;
     }
 
-    private static function getConst($name, $value) {
+    private function getConst($name, $value) {
         return "\tConst {$name} = '{$value}';\n";
     }
 
-    private static function getInsert($table, $columns) {
+    private function getInsert($table, $columns) {
         $qs = NULL;
         $retSQL = '';
         $ret = '';
@@ -222,7 +229,7 @@ class Procs {
         return sprintf(self::TMPL_INSERT, !$columns ? '' : ', '.$p, $table, $qs, $retSQL, $p, $ret);
     }
 
-    private static function getProc($name, $params) {
+    private function getProc($name, $params) {
         return sprintf(self::TMPL_PROC,
             $name, !$params ? '' : ', $'.implode(', $', $params),
             $name, !$params ? '' : '?'.str_repeat(', ?', sizeof($params)-1),

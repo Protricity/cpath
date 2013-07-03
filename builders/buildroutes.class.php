@@ -9,6 +9,7 @@
 namespace CPath\Builders;
 use CPath\BuildException;
 use CPath\Base;
+use CPath\Interfaces\IBuilder;
 use CPath\Log;
 
 
@@ -19,52 +20,55 @@ use CPath\Log;
  * Provides building methods for Handler Classes.
  * Builds [gen]/routes.php
  */
-class BuildRoutes {
+class BuildRoutes implements IBuilder {
     const IHandler = "CPath\\Interfaces\\IHandler";
     const METHODS = 'GET|POST|PUT|DELETE|CLI';
-    private static $mRoutes = array();
+    private $mRoutes = array();
 
     /**
-     * Builds a route for the specified IHandler class
+     * Performs a build on a class. If the class is not a type that should be built,
+     * this method should return false immediately
      * @param \ReflectionClass $Class
-     * @throws \CPath\BuildException
+     * @return boolean True if the class was built. False if it was ignored.
+     * @throws \CPath\BuildException when a build exception occured
      */
-    public static function build(\ReflectionClass $Class) {
+    public function build(\ReflectionClass $Class) {
         if(!$Class->implementsInterface(self::IHandler))
-            throw new BuildException("Class ".$Class->getName()." does not implement ".self::IHandler);
+            return false;
 
         foreach(static::getHandlerRoutes($Class) as $route) {
-            self::$mRoutes[] = array(
+            $this->mRoutes[] = array(
                 'match' => $route,
                 'class' => $Class->getName(),
             );
         }
+        return true;
     }
 
     /**
      * Checks to see if any routes were built, and builds them into [gen]/routes.php
-     * @param \ReflectionClass $Class
      */
-    public static function buildComplete(\ReflectionClass $Class) {
-        if(!self::$mRoutes)
+    public function buildComplete() {
+        if(!$this->mRoutes)
             return;
 
         $output = "<?php\n\$routes = array(";
-        foreach(self::$mRoutes as $route)
+        foreach($this->mRoutes as $route)
             $output .= "\n\tarray('" . $route['match'] . "', '" . $route['class'] . "'),";
         $output .= "\n);";
         file_put_contents(Base::getGenPath().'routes.php', $output);
-        Log::v(__CLASS__, count(self::$mRoutes) . " Route(s) rebuilt.");
+        Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
 
-        self::$mRoutes = array();
+        $this->mRoutes = array();
     }
 
     /**
      * Determines the Handler route(s) from constants or the class name
      * @param \ReflectionClass $Class
      * @return array a list of routes
+     * @throws \CPath\BuildException when a build exception occured
      */
-    public static function getHandlerRoutes(\ReflectionClass $Class) {
+    public function getHandlerRoutes(\ReflectionClass $Class) {
         $routes = array();
         $methods = $Class->getConstant('ROUTE_METHODS') ?: 'ALL';
         $route = $Class->getConstant('ROUTE_PATH');

@@ -7,9 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Database;
 use \PDO;
-use CPath\Interfaces\IBuilder;
 use CPath\Builders\BuildPGTables;
-abstract class PostGreSQL extends PDODatabase implements IBuilder {
+abstract class PostGreSQL extends PDODatabase {
     const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = "SELECT %s";
     protected $mConfig = array();
@@ -54,15 +53,4 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
 //            ->prepare("UPDATE {$table} SET ".implode(',', $keys)." WHERE $whereKey=:$whereKey");
 //    }
 
-    static function build(\ReflectionClass $Class)
-    {
-        BuildPGTables::build($Class);
-        parent::build($Class);
-    }
-
-    static function buildComplete(\ReflectionClass $Class)
-    {
-        BuildPGTables::buildComplete($Class);
-        parent::buildComplete($Class);
-    }
 }

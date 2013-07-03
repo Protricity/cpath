@@ -11,6 +11,17 @@ namespace CPath\Interfaces;
 interface IBuilder {
     //const BUILD_IGNORE = trueRoute;
 
-    static function build(\ReflectionClass $Class);
-    static function buildComplete(\ReflectionClass $Class);
+    /**
+     * Performs a build on a class. If the class is not a type that should be built,
+     * this method should return false immediately
+     * @param \ReflectionClass $Class
+     * @return boolean True if the class was built. False if it was ignored.
+     * @throws \CPath\BuildException
+     */
+    function build(\ReflectionClass $Class);
+
+    /**
+     * Executed when all classes have been built. Used to consolidate data.
+     */
+    function buildComplete();
 }
