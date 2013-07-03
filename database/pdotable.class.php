@@ -25,6 +25,14 @@ abstract class PDOTable {
         $args = func_get_args();
         return new PDOInsert(static::TableName, array_shift($args), $args);
     }
+
+    static function from($alias) {
+        return "\nFROM ".static::TableName." {$alias}";
+    }
+
+    static function join($alias, $on='') {
+        return "\nJOIN ".static::TableName." {$alias} ON {$on}";
+    }
 //
 //    static function select(\PDO $DB, $select, $where, $limit='1') {
 //        return $DB->query("SELECT ".self::parseList($select)

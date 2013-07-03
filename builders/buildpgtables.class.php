@@ -172,8 +172,14 @@ class Procs {
 
         $phpC = '';
         $phpP = '';
+        $names = array();
         foreach($procs as $proc) {
             $name = array_shift($proc);
+            if(isset($names[$name])) {
+                $name .= ++$names[$name];
+            } else {
+                $names[$name] = 1;
+            }
             $method = $name.'('.(!$proc ? '' : ('%s'.str_repeat(', %s', sizeof($proc)-1))).')';
             $phpC .= self::getConst(strtoupper($name), $method);
             $phpP .= self::getProc($name, $proc);

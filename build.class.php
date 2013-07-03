@@ -29,7 +29,7 @@ class Build extends Api {
     {
         $Response = new Response(false, "Starting Build");
         $Response->startLogging();
-        Build::buildClasses();
+        Build::buildClasses(true);
         return $Response
             ->update(true, "Build Complete")
             ->stopLogging();
@@ -39,6 +39,7 @@ class Build extends Api {
 
     private static $mBuildClasses = array();
     private static $mBuildConfig = NULL;
+    private static $mForce = false;
 
     /**
      * Return the build config full path
@@ -105,7 +106,7 @@ class Build extends Api {
      * Returns true if the current build should be forced
      * @return bool whether or not to force build
      */
-    public static function force() { return false; }
+    public static function force() { return self::$mForce; }
 
     /**
      * Return the build config data from the build file if it exists
@@ -127,8 +128,9 @@ class Build extends Api {
     /**
      * Build all classes
      */
-    public static function buildClasses() {
+    public static function buildClasses($force=false) {
         Log::v(__CLASS__, "Starting Builds");
+        self::$mForce = $force;
         self::$mBuildClasses = array();
         self::buildClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
