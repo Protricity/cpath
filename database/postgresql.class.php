@@ -57,10 +57,12 @@ abstract class PostGreSQL extends PDODatabase implements IBuilder {
     static function build(\ReflectionClass $Class)
     {
         BuildPGTables::build($Class);
+        parent::build($Class);
     }
 
     static function buildComplete(\ReflectionClass $Class)
     {
         BuildPGTables::buildComplete($Class);
+        parent::buildComplete($Class);
     }
 }

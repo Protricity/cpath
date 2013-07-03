@@ -27,11 +27,17 @@ abstract class Util {
             self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : 'GET';
         } elseif ($args = $_SERVER['argv']) {
             array_shift($args);
-            if(sizeof($args) > 1) self::$mUrl = parse_url($args[1]);
-            else self::$mUrl = array('path'=>'');
-            if($args) self::$mUrl['method'] = $args[0];
+            if(!$args[0] || !preg_match('/get|post|cli/i', $args[0]))
+                array_unshift($args, 'CLI');
+
+            if($args[1])
+                self::$mUrl = parse_url($args[1]);
+            else
+                self::$mUrl = array('path'=>'');
+            self::$mUrl['method'] = strtoupper($args[0]);
             self::$mUrl['args'] = $args;
-            if(isset(self::$mUrl['query'])) parse_str(self::$mUrl['query'], $_GET);
+            if(isset(self::$mUrl['query']))
+                parse_str(self::$mUrl['query'], $_GET);
             // TODO: $_POST
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);

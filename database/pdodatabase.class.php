@@ -7,12 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Database;
 use CPath\Base;
+use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IHandler;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IDatabase;
+use CPath\Builders\BuildRoutes;
 
 class NotConfiguredException extends \Exception{}
-abstract class PDODatabase extends \PDO implements IDataBase {
+abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder {
 
     const FUNC_FORMAT = NULL;
     private $mPrefix;
@@ -59,11 +62,39 @@ abstract class PDODatabase extends \PDO implements IDataBase {
         $version = (int)$version;
         $oldVersion = $this->getDBVersion();
         if($version <= $oldVersion){
-            Log::v(__CLASS__, "Skipping Database Upgrade");
+            Log::v(__CLASS__, "Skipping Database Upgrade ({$version} = {$oldVersion})");
             return $this;
         }
         Log::v(__CLASS__, "Upgrading Database to $version");
         BuildPGTables::upgrade($this);
         return $this;
+    }
+
+    const ROUTE_METHODS = 'CLI';
+
+    function render(Array $args) {
+        header('text/plain');
+        echo "DB Upgrader: ".get_class($this)."\n\n";
+        if($args[0] == 'upgrade') {
+            $this->upgrade();
+            foreach(Log::get() as $log)
+                echo $log."\n";
+        } else {
+            echo "use /upgrade to upgrade database";
+        }
+        echo "DB Upgrader Completed\n";
+
+    }
+
+    // Statics
+
+    /** Builds the API Endpoint route */
+    public static function build(\ReflectionClass $Class) {
+        BuildRoutes::build($Class);
+    }
+
+    /** Processes the API Endpoint route into the routes file */
+    public static function buildComplete(\ReflectionClass $Class) {
+        BuildRoutes::buildComplete($Class);
     }
 }
