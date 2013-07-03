@@ -78,8 +78,8 @@ class Response extends ArrayObject implements IResponse, ILogListener {
         $this->mLog[] = $log;
     }
 
-    function sendHeaders() {
-        IResponseHelper::sendHeaders($this);
+    function sendHeaders($mimeType=NULL) {
+        IResponseHelper::sendHeaders($this, $mimeType);
     }
 
     function toJSON(Array &$JSON)

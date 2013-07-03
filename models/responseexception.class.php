@@ -23,8 +23,8 @@ class ResponseException extends \Exception implements IResponse {
             $arr['_debug_trace'] = $ex->getTraceAsString();
         return $arr;
     }
-    function sendHeaders() {
-        IResponseHelper::sendHeaders($this);
+    function sendHeaders($mimeType=NULL) {
+        IResponseHelper::sendHeaders($this, $mimeType);
     }
 
     function toJSON(Array &$JSON) {
