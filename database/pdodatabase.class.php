@@ -55,18 +55,23 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder
         return $ret;
     }
 
-    public function upgrade() {
+    public function upgrade($rebuild=false) {
         $version = static::VERSION;
         if($version === NULL)
             throw new \Exception("Version Constant is missing");
         $version = (int)$version;
         $oldVersion = $this->getDBVersion();
-        if($version <= $oldVersion){
-            Log::v(__CLASS__, "Skipping Database Upgrade ({$version} = {$oldVersion})");
+        if(!$rebuild && $version <= $oldVersion){
+            Log::v(__CLASS__, "Skipping Database Upgrade (New={$version} Old={$oldVersion})");
             return $this;
         }
-        Log::v(__CLASS__, "Upgrading Database to $version");
-        BuildPGTables::upgrade($this);
+        if($rebuild) {
+            $oldVersion = 0;
+            Log::v(__CLASS__, "Rebuilding Database to {$version}");
+        }
+
+        Log::v(__CLASS__, "Upgrading Database from version {$oldVersion} to {$version}");
+        BuildPGTables::upgrade($this, $oldVersion);
         return $this;
     }
 
@@ -75,8 +80,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IBuilder
     function render(Array $args) {
         header('text/plain');
         echo "DB Upgrader: ".get_class($this)."\n\n";
-        if($args[0] == 'upgrade') {
-            $this->upgrade();
+        if($args[0] == 'upgrade' || $args[0] == 'rebuild') {
+            $this->upgrade($args[0] == 'rebuild');
             foreach(Log::get() as $log)
                 echo $log."\n";
         } else {

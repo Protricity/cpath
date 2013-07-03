@@ -51,8 +51,9 @@ class Procs {
 \t\treturn \$stmd;
 \t}\n";
 
-    public static function upgrade(PostGreSQL $DB) {
-        $oldVersion = $DB->getDBVersion();
+    public static function upgrade(PostGreSQL $DB, $oldVersion=NULL) {
+        if($oldVersion===NULL)
+            $oldVersion = $DB->getDBVersion();
         $curVersion = $DB::VERSION;
         $Class = new \ReflectionClass($DB);
         $schemaFolder = self::getFolder($Class, 'schema');
