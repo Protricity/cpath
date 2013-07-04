@@ -35,7 +35,7 @@ class Base {
     public static function load() {
         if(!self::$mLoaded) {
             spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-            if(self::getConfig('build-auto')) Build::buildClasses();
+            if(self::getConfig('build.auto')) Build::buildClasses();
         }
     }
 

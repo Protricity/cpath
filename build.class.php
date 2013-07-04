@@ -116,8 +116,8 @@ class Build extends Api {
     public static function buildConfig() {
         $config = array(
             'debug' => false,
-            'build-enabled' => true,
-            'build-auto' => false,
+            'build.enabled' => true,
+            'build.auto' => false,
             'db-upgrade' => false,
             'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
         );
@@ -132,8 +132,8 @@ class Build extends Api {
      */
     public static function buildClasses($force=false) {
         Log::v(__CLASS__, "Starting Builds");
-        if(Base::getConfig('build-enabled') === false) {
-            Log::e(__CLASS__, "Building is not allowed. build-enabled===false");
+        if(Base::getConfig('build.enabled') === false) {
+            Log::e(__CLASS__, "Building is not allowed. build.enabled===false");
             return;
         }
         self::$mForce = $force;
