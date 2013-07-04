@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+use CPath\Interfaces\IRoute;
 
 /** Thrown when a valid route could not find a corresponding handler */
 class DestinationNotFoundException extends \Exception {}
@@ -18,11 +19,13 @@ class NoRoutesFoundException extends \Exception {}
  * Class Route - a route entry
  * @package CPath
  */
-class Route {
+class Route implements IRoute {
 
     private
         $mRoute,
-        $mDestination;
+        $mDestination,
+        $mBaseUrl,
+        $mArgs;
 
     /**
      * Constructs a new Route Entry
@@ -37,23 +40,22 @@ class Route {
     /**
      * Try's a route against a request path
      * @param string|null $requestPath the request path to match
-     * @return bool whether or not the path mached
+     * @return bool whether or not the path matched
      * @throws DestinationNotFoundException if the destination handler was not found
      * @throws InvalidHandlerException if the destination handler was invalid
      */
-    public function tryRoute($requestPath=NULL) {
-        if($requestPath === NULL)
-            $requestPath = Util::getUrl('route');
-
+    public function tryRoute($requestPath) {
         if(strpos($requestPath, $this->mRoute) !== 0)
             return false;
 
-        $args = explode('/', substr($requestPath, strlen($this->mRoute) + 1));
+        $argString = substr($requestPath, strlen($this->mRoute) + 1);
+        if($argString)
+            $args = explode('/', $argString);
+        else
+            $args = array();
 
         $dest = $this->mDestination;
-        if(file_exists($dest)) {
-            $Handler = new FileHandler($dest);
-        } elseif(class_exists($dest)) {
+        if(class_exists($dest)) {
             $Handler = new $dest();
             if(!($Handler instanceof Interfaces\IHandler))
                 throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
@@ -74,9 +76,14 @@ class Route {
     public static function tryAllRoutes() {
         $routes = array();
         include Base::getGenPath().'routes.php';
+        $routePath = Util::getUrl('route');
+        if(preg_match('/\.\w+$/', $routePath)) {
+            header("HTTP/1.0 404 File request was passed to Script");
+            die();
+        }
         foreach($routes as $route) {
             $Route = new Route($route[0], $route[1]);
-            if($Route->tryRoute())
+            if($Route->tryRoute($routePath))
                 return;
         }
         throw new NoRoutesFoundException("No Routes Matched: " . Util::getUrl('route'));

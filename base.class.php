@@ -85,6 +85,13 @@ class Base {
         return self::$mConfig['domain'];
     }
 
+
+    /** Returns the domain path */
+    public static function getClassPublicPath($Class) {
+        return self::getDomainPath()
+            .dirname(str_replace('\\', '/', strtolower(get_class($Class)))).'/';
+    }
+
     /**
      * Returns true if debug mode is set
      * @return bool true if debug mode is set

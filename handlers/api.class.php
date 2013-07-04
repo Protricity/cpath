@@ -109,11 +109,14 @@ abstract class Api implements IHandler {
         if($args) {
             $i = 0;
             foreach($this->mFields as $name=>$Field) {
-                if($Field instanceof IApiParam) {
-                    $request[$name] = $args[$i++];
+                if(!isset($args[$i]))
+                    break;
+                if(!empty($args[$i]) && $Field instanceof IApiParam) {
+                    $request[$name] = $args[$i];
                     if(!isset($args[$i]))
                         break;
                 }
+                $i++;
             }
         }
         try {
@@ -161,7 +164,8 @@ abstract class Api implements IHandler {
     public function getDisplayRoutes() {
         if(!$this->mRoutes) {
             $this->mRoutes = array();
-            foreach(BuildRoutes::getHandlerRoutes(new \ReflectionClass($this)) as $route) {
+            $BuildRoutes = new BuildRoutes();
+            foreach($BuildRoutes->getHandlerRoutes(new \ReflectionClass($this)) as $route) {
                 foreach($this->mFields as $name => $Field) {
                     if(!($Field instanceof IApiParam))
                         continue;

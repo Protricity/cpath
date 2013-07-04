@@ -36,7 +36,7 @@ class BuildRoutes implements IBuilder {
         if(!$Class->implementsInterface(self::IHandler))
             return false;
 
-        foreach(static::getHandlerRoutes($Class) as $route) {
+        foreach($this->getHandlerRoutes($Class) as $route) {
             $this->mRoutes[] = array(
                 'match' => $route,
                 'class' => $Class->getName(),
