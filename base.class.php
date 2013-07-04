@@ -19,9 +19,8 @@ class Base {
     /** Initialize Static Class on include */
     public static function init() {
         self::$mBasePath = dirname(__DIR__) . "/";
-        $config = array();
-        $path = self::getGenPath().'config.php';
-        if(!file_exists($path) || !(include $path) || !$config) {
+        $config = self::loadConfig();
+        if(!$config) {
             $loaded = self::$mLoaded;
             if(!$loaded) self::load();
             include 'build.class.php';
@@ -29,6 +28,14 @@ class Base {
             if(!$loaded) self::unload();
         }
         self::$mConfig = $config;
+    }
+
+    public static function loadConfig() {
+        $config = array();
+        $path = self::getGenPath().'config.php';
+        if(file_exists($path))
+            include $path;
+        return $config;
     }
 
     /** Activate Autoloader for classes */
@@ -103,6 +110,13 @@ class Base {
      */
     public static function setConfig($key, $value) {
         self::$mConfig[$key] = $value;
+    }
+
+    public static function commitConfig($key, $value=NULL) {
+        if(!is_array($key)) $key = array($key=>$value);
+        foreach($key as $k => $v)
+            self::setConfig($k, $v);
+        Build::buildConfig($key);
     }
 
     /**

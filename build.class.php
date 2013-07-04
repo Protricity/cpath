@@ -113,17 +113,24 @@ class Build extends Api {
      * Return the build config data from the build file if it exists
      * @return array the build config data
      */
-    public static function buildConfig() {
-        $config = array(
-            'debug' => false,
-            'build.enabled' => true,
-            'build.auto' => false,
-            'db-upgrade' => false,
-            'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
-        );
+    public static function buildConfig(Array $newConfig=array()) {
+        $config = Base::loadConfig();
+        if(!$config)
+            $config = array(
+                'debug' => false,
+                'build.enabled' => true,
+                'build.auto' => false,
+                'db.upgrade.auto' => false,
+                'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
+            );
+
+        if($newConfig)
+            foreach($newConfig as $k=>$v)
+                $config[$k] = $v;
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = Base::getGenPath().'config.php';
         file_put_contents($path, $php);
+        Log::v(__CLASS__, "Config data committed to file (".count($config).")");
         return $config;
     }
 
