@@ -132,8 +132,10 @@ class Build extends Api {
      */
     public static function buildClasses($force=false) {
         Log::v(__CLASS__, "Starting Builds");
-        if(self::getConfig('build-enabled') === false)
-            throw new BuildException("Building is not allowed. build-enabled===false");
+        if(Base::getConfig('build-enabled') === false) {
+            Log::e(__CLASS__, "Building is not allowed. build-enabled===false");
+            return;
+        }
         self::$mForce = $force;
         self::$mBuilders = array();
         self::findClass(dirname(__DIR__), '');

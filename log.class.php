@@ -92,6 +92,7 @@ abstract class Log {
      */
     public static function ex($tag, \Exception $ex, $msg=NULL) {
         if(func_num_args()>3) $msg = vsprintf($msg, array_slice(func_get_args(), 3));
+        error_log($tag."\t".($msg ?: $ex->getMessage()));
         self::add(new LogException((string)$tag, $ex, $msg));
     }
 

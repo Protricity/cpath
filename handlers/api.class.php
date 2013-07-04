@@ -145,7 +145,7 @@ abstract class Api implements IHandler {
                     return;
                 case 'text/plain':
                     $Response->sendHeaders($mimeType);
-                    echo $Response;
+                    echo $Response."\n";
                     return;
             }
         }
