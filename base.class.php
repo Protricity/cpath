@@ -35,7 +35,7 @@ class Base {
     public static function load() {
         if(!self::$mLoaded) {
             spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-            if(self::$mConfig['build']) Build::buildClasses();
+            if(self::getConfig('build-auto')) Build::buildClasses();
         }
     }
 
@@ -92,7 +92,7 @@ class Base {
      * @param $default mixed the default value if the variable is not found
      * @return mixed mixed the value of the config variable
      */
-    public static function getConfig($key, $default) {
+    public static function getConfig($key, $default=NULL) {
         return isset(self::$mConfig[$key]) ? self::$mConfig[$key] : $default;
     }
 
