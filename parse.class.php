@@ -25,7 +25,7 @@ class Parse {
      * @return string the parsed string
      */
     static function alphaNumeric($value) {
-        return preg_replace('/[^a-z0-9]/i', '', $value);
+        return preg_replace('/\W|_/', '', $value);
     }
 
     /**
