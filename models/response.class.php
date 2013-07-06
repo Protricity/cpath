@@ -73,9 +73,12 @@ class Response extends ArrayObject implements IResponse, ILogListener {
         return $this;
     }
 
-    function onLog(ILogEntry $log)
-    {
+    function onLog(ILogEntry $log) {
         $this->mLog[] = $log;
+    }
+
+    function getLog() {
+        return $this->mLog;
     }
 
     function sendHeaders($mimeType=NULL) {
