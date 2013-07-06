@@ -154,7 +154,10 @@ abstract class Util {
 
         foreach($object as $key=>$val) {
             if(is_int($key)) $key = 'item'.$key;
-            if(is_array($val)) {
+            if($val instanceof Interfaces\IXML) {
+                $ch = $root->addChild($key);
+                $val->toXML($ch);
+            } elseif(is_array($val)) {
                 $ch = $root->addChild($key);
                 self::toXML($val, $ch);
             } else {
