@@ -8,7 +8,7 @@
 namespace CPath;
 
 use CPath\Interfaces\IBuilder;
-use CPath\Models\Response;
+use CPath\Model\Response;
 use CPath\Handlers\Api;
 
 class BuildException extends \Exception {}

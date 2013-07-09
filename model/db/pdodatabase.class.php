@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;

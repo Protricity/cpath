@@ -39,6 +39,7 @@ final class IResponseHelper {
         header("HTTP/1.0 " . $Response->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
+        header('Access-Control-Allow-Origin: *');
     }
 
     static function toString(IResponse $Response) {

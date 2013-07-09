@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use \PDO;
 use CPath\Builders\BuildPGTables;
 abstract class PostGreSQL extends PDODatabase {
@@ -40,17 +40,5 @@ abstract class PostGreSQL extends PDODatabase {
         $this->exec('CREATE FUNCTION _getVersion() RETURNS int AS \'Select '.((int)$version).';\' LANGUAGE SQL;');
         return $this;
     }
-
-//    function prepareInsert($table, Array $keys) {
-//        return $this->getPDO()
-//            ->prepare("INSERT INTO {$table} (".implode(',', $keys).") VALUES (:".implode(', :', $keys).")");
-//    }
-//
-//    function prepareUpdate($table, Array $keys, $whereKey) {
-//        foreach($keys as &$key)
-//            $key = $key.'=:'.$key;
-//        return $this->getPDO()
-//            ->prepare("UPDATE {$table} SET ".implode(',', $keys)." WHERE $whereKey=:$whereKey");
-//    }
 
 }

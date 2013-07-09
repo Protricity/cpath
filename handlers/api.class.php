@@ -12,9 +12,9 @@ use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandler;
-use CPath\Models\MultiException;
-use CPath\Models\Response;
-use CPath\Models\ResponseException;
+use CPath\Model\MultiException;
+use CPath\Model\Response;
+use CPath\Model\ResponseException;
 use CPath\Builders\BuildRoutes;
 use CPath\Handlers\Api\View\ApiInfo;
 

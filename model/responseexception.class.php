@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Models;
+namespace CPath\Model;
 
 use CPath\Base;
 use CPath\Interfaces\IResponse;
