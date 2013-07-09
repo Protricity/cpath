@@ -56,7 +56,9 @@ class BuildRoutes implements IBuilder {
         foreach($this->mRoutes as $route)
             $output .= "\n\tarray('" . $route['match'] . "', '" . $route['class'] . "'),";
         $output .= "\n);";
-        file_put_contents(Base::getGenPath().'routes.php', $output);
+        $path = Base::getGenPath().'routes.php';
+        mkdir(dirname($path), NULL, true);
+        file_put_contents($path, $output);
         Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
 
         $this->mRoutes = array();
