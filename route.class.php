@@ -75,7 +75,11 @@ class Route implements IRoute {
      */
     public static function tryAllRoutes() {
         $routes = array();
-        include Base::getGenPath().'routes.php';
+        $path = Base::getGenPath().'routes.php';
+        if(!file_exists($path) || !(include $path) || !$routes) {
+            Build::buildClasses();
+            require $path;
+        }
         $routePath = Util::getUrl('route');
         if(preg_match('/\.\w+$/', $routePath)) {
             header("HTTP/1.0 404 File request was passed to Script");

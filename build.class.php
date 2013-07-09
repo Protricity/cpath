@@ -100,7 +100,8 @@ class Build extends Api {
         $config = self::loadConfig();
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = self::getConfigPath();
-        mkdir(dirname($path), NULL, true);
+        if(!is_dir(dirname($path)))
+            mkdir(dirname($path), NULL, true);
         file_put_contents($path, $php);
     }
 
@@ -130,7 +131,8 @@ class Build extends Api {
                 $config[$k] = $v;
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = Base::getGenPath().'config.php';
-        mkdir(dirname($path), NULL, true);
+        if(!is_dir(dirname($path)))
+            mkdir(dirname($path), NULL, true);
         file_put_contents($path, $php);
         Log::v(__CLASS__, "Config data committed to file (".count($config).")");
         return $config;
