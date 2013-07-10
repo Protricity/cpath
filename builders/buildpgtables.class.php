@@ -24,34 +24,40 @@ class UpgradeException extends \Exception {}
  * Builds [gen]/routes.php
  */
 class BuildPGTables implements IBuilder{
-    const PostGreSQL = "CPath\\DataBase\\PostGreSQL";
+    const PostGreSQL = "CPath\\Model\\DB\\PostGreSQL";
 
-    const TMPL_TABLE_CLASS = "<?php
+    const TMPL_TABLE_CLASS = <<<PHP
+<?php
 namespace %s;
-use CPath\\Database\\PDOTable;
+use CPath\Model\DB\PDOTable;
 class %s extends PDOTable {
-%s}";
+%s}
+PHP;
 
-    const TMPL_PROC_CLASS = "<?php
+
+    const TMPL_PROC_CLASS = <<<PHP
+<?php
 namespace %s;
 class Procs {
-%s}";
+%s}
+PHP;
 
     const TMPL_INSERT = <<<'PHP'
-    static function insert(\PDO $DB%s) {
-        static $stmd = NULL;
-        if(!$stmd) $stmd = $DB->prepare('INSERT INTO %s VALUES (%s)%s');
-        $stmd->execute(array(%s));
+	static function insert(\PDO $DB%s) {
+		static $stmd = NULL;
+		if(!$stmd) $stmd = $DB->prepare('INSERT INTO %s VALUES (%s)%s');
+		$stmd->execute(array(%s));
 %s  }
 PHP;
 
-    const TMPL_PROC =
-"\n\tstatic function %s(\\PDO \$DB%s) {
-\t\tstatic \$stmd = NULL;
-\t\tif(!\$stmd) \$stmd = \$DB->prepare('SELECT %s(%s)');
-\t\t\$stmd->execute(array(%s));
-\t\treturn \$stmd;
-\t}\n";
+    const TMPL_PROC = <<<'PHP'
+	static function %s(\PDO $DB%s) {
+		static $stmd = NULL;
+		if(!$stmd) $stmd = $DB->prepare('SELECT %s(%s)');
+		$stmd->execute(array(%s));
+		return $stmd;
+	}
+PHP;
 
     public function upgrade(PostGreSQL $DB, $oldVersion=NULL) {
         if($oldVersion===NULL)

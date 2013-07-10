@@ -1,5 +1,5 @@
 <?php
-namespace CPath\Models;
+namespace CPath\Model;
 
 use CPath\Interfaces\IArrayObject;
 
