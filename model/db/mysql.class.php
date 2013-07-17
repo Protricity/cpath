@@ -26,7 +26,7 @@ abstract class MySQL extends PDODatabase {
                 $this->query("Select _getVersion();")
                     ->fetchColumn(0);
         } catch (\PDOException $ex) {
-            if(strpos($ex->getMessage(), 'Undefined function') === false)
+            if(strpos($ex->getMessage(), 'does not exist') === false)
                 throw $ex;
             $this->setDBVersion(0);
             return 0;
@@ -34,10 +34,9 @@ abstract class MySQL extends PDODatabase {
     }
 
     public function setDBVersion($version) {
-        try{
-            $this->exec('DROP FUNCTION _getVersion()');
-        } catch (\PDOException $ex) {}
-        $this->exec('CREATE FUNCTION _getVersion() RETURNS int AS \'Select '.((int)$version).';\' LANGUAGE SQL;');
+        $this->exec('DROP FUNCTION IF EXISTS _getVersion');
+        $this->exec('CREATE FUNCTION `_getVersion` () RETURNS INTEGER BEGIN RETURN '.((int)$version).'; END ;');
         return $this;
     }
 }
+

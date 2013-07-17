@@ -40,7 +40,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     //abstract function insert($table, Array $pairs);
     //abstract function insertOrUpdate($table, Array $pairs, Array $updatePairs);
 
-    protected abstract function setDBVersion($version);
+    abstract function setDBVersion($version);
 
     public function quotef($format, $_args) {
         return $this->vquotef($format, array_slice(func_get_args(), 1));
