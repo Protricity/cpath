@@ -9,7 +9,11 @@ namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 class PDOUpdate {
-    private $DB, $stmt=NULL, $table, $fields=array(), $where=array(), $limit='1';
+    /** @var \PDO */
+    private $DB;
+    /** @var \PDOStatement */
+    private $stmt=NULL;
+    private $table, $fields=array(), $where=array(), $limit='1';
     public function __construct($table, \PDO $DB, Array $fields) {
         $this->DB = $DB;
         $this->table = $table;

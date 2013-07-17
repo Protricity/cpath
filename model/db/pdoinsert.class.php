@@ -8,14 +8,23 @@
 namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDOInsert {
-    private $DB;
+abstract class PDOInsert {
+    protected $DB;
     /** @var \PDOStatement */
-    private $stmt=NULL;
+    protected $stmt=NULL;
     private $table;
     private $fields=array();
     private $returning=NULL;
     private $batch=NULL;
+
+    abstract protected function updateSQL(&$SQL);
+
+    /**
+     * @param $field String name of insert ID Field
+     * @return PDOInsert
+     */
+    abstract public function requestInsertID($field);
+    abstract public function getInsertID();
 
     public function __construct($table, \PDO $DB, Array $fields) {
         $this->DB = $DB;
@@ -61,15 +70,10 @@ class PDOInsert {
             $SQL .= ($i ? ',' : '')."\n\t(?".str_repeat(', ?', sizeof($batch)-1).')';
             $values = array_merge($values, $batch);
         }
-        if($this->returning)
-            $SQL .= "\nRETURNING ".$this->returning;
+        $this->updateSQL($SQL);
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
         return $this;
-    }
-
-    public function getInsertID() {
-        return $this->stmt->fetchColumn(0);
     }
 
     public function getSQL($token='?') {

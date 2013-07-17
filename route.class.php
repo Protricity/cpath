@@ -23,9 +23,7 @@ class Route implements IRoute {
 
     private
         $mRoute,
-        $mDestination,
-        $mBaseUrl,
-        $mArgs;
+        $mDestination;
 
     /**
      * Constructs a new Route Entry
@@ -55,15 +53,17 @@ class Route implements IRoute {
             $args = array();
 
         $dest = $this->mDestination;
-        if(class_exists($dest)) {
+        $Class = new \ReflectionClass($dest);
+        if($Class->implementsInterface("Cpath\\Interfaces\\IStaticHandler")) {
+            $Handler = call_user_func($dest."::getHandler");
+            $Handler->render($args);
+        } else if($Class->implementsInterface("Cpath\\Interfaces\\IHandler")) {
             $Handler = new $dest();
-            if(!($Handler instanceof Interfaces\IHandler))
-                throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+            $Handler->render($args);
         } else {
-            throw new DestinationNotFoundException("Destination {$dest} could not be found");
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler/IStaticHandler");
         }
 
-        $Handler->render($args);
         return true;
     }
 

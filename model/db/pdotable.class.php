@@ -21,11 +21,6 @@ abstract class PDOTable {
         return new PDOUpdate(static::TableName, array_shift($args), $args);
     }
 
-    static function insert(\PDO $DB, $_fieldArgs) {
-        $args = func_get_args();
-        return new PDOInsert(static::TableName, array_shift($args), $args);
-    }
-
     static function from($alias) {
         return "\nFROM ".static::TableName." {$alias}";
     }

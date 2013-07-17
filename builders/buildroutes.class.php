@@ -22,6 +22,7 @@ use CPath\Log;
  */
 class BuildRoutes implements IBuilder {
     const IHandler = "CPath\\Interfaces\\IHandler";
+    const IStaticHandler = "CPath\\Interfaces\\IStaticHandler";
     const METHODS = 'GET|POST|PUT|DELETE|CLI';
     private $mRoutes = array();
 
@@ -33,7 +34,7 @@ class BuildRoutes implements IBuilder {
      * @throws \CPath\BuildException when a build exception occured
      */
     public function build(\ReflectionClass $Class) {
-        if(!$Class->implementsInterface(self::IHandler))
+        if(!$Class->implementsInterface(self::IHandler) && !$Class->implementsInterface(self::IStaticHandler))
             return false;
 
         foreach($this->getHandlerRoutes($Class) as $route) {

@@ -7,6 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Util;
 use CPath\Build;
@@ -28,7 +29,7 @@ abstract class Api implements IHandler {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
-    const ROUTE_METHODS = 'GET|POST';     // Default accepted methods are GET and POST
+    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IApiField[] */
@@ -48,7 +49,7 @@ abstract class Api implements IHandler {
      * @param IApiField $Field Describes the Field. Implement IApiField for custom validation
      * @return $this Return the class instance
      */
-    protected function addField($name, IApiField $Field) {
+    public function addField($name, IApiField $Field) {
         $this->mFields[$name] = $Field;
         return $this;
     }
@@ -59,7 +60,7 @@ abstract class Api implements IHandler {
      * The array key represents the Field name.
      * @return $this return the class instance
      */
-    protected function addFields(Array $fields) {
+    public function addFields(Array $fields) {
         foreach($fields as $name => $Field)
             $this->mFields[$name] = $Field;
         return $this;
@@ -96,7 +97,7 @@ abstract class Api implements IHandler {
     public function render(Array $args) {
 
         // Parse the request
-        if(!$_POST && strcasecmp(Util::getUrl('method'), 'get') === 0) {                // if GET
+        if(!$_POST && in_array(Util::getUrl('method'), array('GET', 'CLI'))) {                // if GET
             $request = $_GET;
         } else {                                                                        // else POST
             if(!$_POST && Util::getHeader('Content-Type') === 'application/json') {     // if JSON Object,
@@ -121,6 +122,8 @@ abstract class Api implements IHandler {
         }
         try {
             $Response = $this->execute($request);
+            if($Response instanceof IResponseAggregate)
+                $Response = $Response->getResponse();
             if(!($Response instanceof IResponse))
                 $Response = new Response(true, "API executed successfully", $Response);
         } catch (ResponseException $ex) {
@@ -266,4 +269,35 @@ class ApiRequiredField extends ApiField {
  * Represents a Parameter from the route path
  */
 class ApiParam extends ApiRequiredField implements IApiParam {
+}
+
+class ApiFilterField extends ApiField {
+
+    protected $mFilter, $mOptions;
+    /**
+     * @param int $filter
+     * @param mixed $options
+     * @param String $description
+     */
+    public function __construct($filter, $options=0, $description=NULL) {
+        $this->mFilter = $filter;
+        $this->mOptions = $options;
+        parent::__construct($description);
+    }
+
+    public function validate($value) {
+        $value = parent::validate($value);
+        return filter_var($value, $this->mFilter, $this->mOptions) ?: NULL;
+    }
+}
+class ApiRequiredFilterField extends ApiFilterField {
+
+    public function validate($value) {
+        if(!$value && $value !== '0')
+            throw new RequiredFieldException();
+        $value = parent::validate($value);
+        if(!$value)
+            throw new ValidationException("Field '%s' has an invalid format");
+        return $value;
+    }
 }

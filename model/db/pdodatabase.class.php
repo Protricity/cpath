@@ -20,6 +20,17 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     const FUNC_FORMAT = NULL;
     private $mPrefix;
 
+    /**
+     * @param $tableName
+     * @param $_fieldArgs
+     * @return PDOInsert
+     */
+    abstract public function insert($tableName, $_fieldArgs);
+
+    public function delete($tableName) {
+        return new PDODelete($tableName, $this);
+    }
+
     public function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {
         $this->setPrefix($prefix);
         parent::__construct($dsn, $username, $passwd, $options);

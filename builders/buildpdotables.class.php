@@ -20,13 +20,7 @@ class UpgradeException extends \Exception {}
 abstract class BuildPDOTables implements IBuilder{
     const DB_CLASSNAME = "CPath\\Model\\DB\\PDODatabase";
 
-    const TMPL_TABLE_CLASS = <<<PHP
-<?php
-namespace %s;
-use CPath\Model\DB\PDOTable;
-class %s extends PDOTable {
-%s}
-PHP;
+    const TMPL_TABLE_CLASS = null;
 
 
     const TMPL_PROC_CLASS = <<<PHP
@@ -144,7 +138,7 @@ PHP;
             foreach($cols as $name=>$type)
                 $php .= $this->getConst(strtoupper($name), $name);
             //$php .= $this->getInsert($table, $cols);
-            $php = sprintf(self::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
+            $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
             $file = strtolower($table).'.class.php';
             file_put_contents($tablePath.$file, $php);
             $i = array_search($file, $oldFiles);

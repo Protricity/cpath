@@ -24,21 +24,40 @@ abstract class Util {
     public static function init() {
         if(!empty($_SERVER["REQUEST_URI"])) {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
-            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : 'GET';
+            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
         } elseif ($args = $_SERVER['argv']) {
-            array_shift($args);
-            if(!$args[0] || !preg_match('/get|post|cli/i', $args[0]))
-                array_unshift($args, 'CLI');
+            if(!$args[0]) {
+                $method = 'CLI';
+            } else {
+                $method = strtoupper(array_shift($args));
+                if(!preg_match('/get|post|cli/i', $method))
+                    $method = 'CLI';
+            }
 
-            if($args[1])
-                self::$mUrl = parse_url($args[1]);
+            $args2 = array();
+            for($i=0; $i<sizeof($args); $i++) {
+                if($args[$i][0] == '-') {
+                    $_GET[ltrim($args[$i], '- ')] = $args[++$i];
+                } else {
+                    $args2[] = $args[$i];
+                }
+            }
+            $args = $args2;
+            unset($args2);
+
+            if($args[0] && $args[0][0] == '/')
+                self::$mUrl = parse_url($args[0]);
             else
-                self::$mUrl = array('path'=>'');
-            self::$mUrl['method'] = strtoupper($args[0]);
-            self::$mUrl['args'] = $args;
-            if(isset(self::$mUrl['query']))
-                parse_str(self::$mUrl['query'], $_GET);
+                self::$mUrl = array('path'=>'/'.implode('/', $args).'/');
+            self::$mUrl['method'] = $method;
+            //self::$mUrl['args'] = $args;
+            if(isset(self::$mUrl['query'])) {
+                $query = array();
+                parse_str(self::$mUrl['query'], $query);
+                $_GET = $query + $_GET;
+            }
             // TODO: $_POST
+            //print_r($_GET);print_r($args); print_r(self::$mUrl); die();
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);
         $request = self::$mUrl["path"];

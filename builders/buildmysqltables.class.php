@@ -16,7 +16,16 @@ use CPath\Log;
 
 
 class BuildMySQLTables extends BuildPDOTables {
-    const DB_CLASSNAME = "CPath\\Model\\DB\\Mysql";
+    const DB_CLASSNAME = "CPath\\Model\\DB\\MysqlDatabase";
+
+    const TMPL_TABLE_CLASS = <<<PHP
+<?php
+namespace %s;
+use CPath\Model\DB\MySQLTable;
+class %s extends MySQLTable {
+%s}
+PHP;
+
 
     protected function getTables(\PDO $DB){
         $tables = array();

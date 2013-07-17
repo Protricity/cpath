@@ -16,7 +16,15 @@ use CPath\Log;
 
 
 class BuildPGTables extends BuildPDOTables {
-    const DB_CLASSNAME = "CPath\\Model\\DB\\PostGreSQL";
+    const DB_CLASSNAME = "CPath\\Model\\DB\\PGSQLDatabase";
+
+    const TMPL_TABLE_CLASS = <<<PHP
+<?php
+namespace %s;
+use CPath\Model\DB\PGSQLTable;
+class %s extends PGSQLTable {
+%s}
+PHP;
 
     protected function getTables(\PDO $DB){
         $tables = array();
