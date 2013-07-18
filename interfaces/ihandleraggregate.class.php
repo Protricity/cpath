@@ -8,7 +8,7 @@
 namespace CPath\Interfaces;
 
 
-interface IStaticHandler {
+interface IHandlerAggregate {
 
     /**
      * @return IHandler $Handler

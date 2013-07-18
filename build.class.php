@@ -15,7 +15,7 @@ class BuildException extends \Exception {}
 
 class Build extends Api {
 
-    const ROUTE_PATH = 'build';     // Allow manual building from command line: 'php index.php build'
+    const ROUTE_PATH = '/build';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
 
     /**

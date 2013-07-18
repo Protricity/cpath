@@ -10,6 +10,7 @@ use CPath\Interfaces\IDatabase;
 use \PDO;
 class PDOSelect implements \IteratorAggregate {
     private $DB, $table, $select=array(), $where=array(), $values=array(), $limit='1';
+    private $lastCond = true;
     public function __construct($table, \PDO $DB, Array $select=array()) {
         $this->DB = $DB;
         $this->table = $table;
@@ -28,7 +29,16 @@ class PDOSelect implements \IteratorAggregate {
             if(strpos($field, '?') === false)
                 $field .= '=?';
         }
+        if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
+            $this->lastCond = true;
+            $this->where[] = $field;
+            return $this;
+        }
+        if (!$this->lastCond) {
+            $this->where[] = 'AND';
+        }
         $this->where[] = $field;
+        $this->lastCond = false;
         return $this;
     }
 
@@ -57,7 +67,7 @@ class PDOSelect implements \IteratorAggregate {
     public function getSQL() {
         return "SELECT ".implode(', ', $this->select)
             ."\nFROM ".$this->table
-            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
+            ."\nWHERE ".($this->where ? implode(' ', $this->where) : '1')
             ."\nLIMIT ".$this->limit;
     }
 

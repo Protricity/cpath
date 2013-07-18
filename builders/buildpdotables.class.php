@@ -22,6 +22,16 @@ abstract class BuildPDOTables implements IBuilder{
 
     const TMPL_TABLE_CLASS = null;
 
+    const TMPL_MODEL_CLASS = <<<'PHP'
+<?php
+namespace %s;
+use %s as DB;
+use CPath\Model\DB\PDOModel;
+class %s extends PDOModel{
+%s
+    static function getDB() { DB::get(); }
+}
+PHP;
 
     const TMPL_PROC_CLASS = <<<PHP
 <?php
@@ -45,6 +55,27 @@ PHP;
 		$stmd->execute(array(%s));
 		return $stmd;
 	}
+PHP;
+
+    const TMPL_GETPROP = <<<'PHP'
+	function get%s() { return $this->mRow['%s']; }
+
+PHP;
+
+    const TMPL_SETPROP = <<<'PHP'
+	function set%s($value, $commit=true) { return $this->setField('%s', $value, $commit); }
+
+
+PHP;
+
+    const TMPL_CREATE = <<<'PHP'
+	static function create(%s) { return parent::createA(get_defined_vars()); }
+
+PHP;
+
+    const TMPL_DELETE = <<<'PHP'
+	static function delete(%s $%s) { return parent::deleteM($%s); }
+
 PHP;
 
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
@@ -104,6 +135,8 @@ PHP;
 
         $tablePath = $this->getFolder($Class, 'tables');
         $tableNS = $Class->getNamespaceName() . "\\Tables";
+        $modelPath = $this->getFolder($Class, 'model');
+        $modelNS = $Class->getNamespaceName() . "\\Model";
         $procPath = $this->getFolder($Class, 'procs');
         $procNS = $Class->getNamespaceName() . "\\Procs";
 
@@ -116,6 +149,7 @@ PHP;
         if(!file_exists($tablePath)) { mkdir($tablePath, null, true); $force = true; }
         else $oldFiles = array_diff(scandir($tablePath), array('..', '.'));
         if(!file_exists($procPath))  { mkdir($procPath, null, true);  $force = true; }
+        if(!file_exists($modelPath)) { mkdir($modelPath, null, true); $force = true; }
 
         foreach(scandir($schemaFolder) as $file)
             $hash += filemtime($schemaFolder.$file);
@@ -133,22 +167,36 @@ PHP;
         foreach($tables as $table) {
             $ucTable = str_replace(' ', '_', ucwords(str_replace('_', ' ', $table)));
             $cols = $this->getColumns($DB, $table);
+            $file = strtolower($table).'.class.php';
+
+            // Static Table
 
             $php = $this->getConst('TableName', $table);
             foreach($cols as $name=>$type)
                 $php .= $this->getConst(strtoupper($name), $name);
             //$php .= $this->getInsert($table, $cols);
             $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
-            $file = strtolower($table).'.class.php';
             file_put_contents($tablePath.$file, $php);
             $i = array_search($file, $oldFiles);
             unset($oldFiles[$i]);
+
+            // Model
+
+            $php = $this->getConst('TableName', $table);
+            foreach($cols as $name=>$type)
+                $php .= $this->propGetSet($name);
+            $php .= $this->getCreate(array_keys($cols));
+            $php .= $this->getDelete($ucTable);
+            $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $ucTable, $php);
+            file_put_contents($modelPath.$file, $php);
+
         }
         Log::v(__CLASS__, "Built (".sizeof($tables).") table classes");
         if($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
             foreach($oldFiles as $file) unlink($tablePath.$file);
         }
+
 
         // Stored Procedures
 
@@ -213,5 +261,22 @@ PHP;
             $name, !$params ? '' : ', $'.implode(', $', $params),
             $name, !$params ? '' : '?'.str_repeat(', ?', sizeof($params)-1),
             '$'.implode(', $', $params));
+    }
+
+    private function propGetSet($name) {
+        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
+        $php = sprintf(self::TMPL_GETPROP, $ucName, strtolower($name));
+        $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name));
+        return $php;
+    }
+
+    private function getCreate(Array $cols) {
+        return sprintf(self::TMPL_CREATE,
+            !$cols ? '' : '$'.implode(', $', $cols));
+    }
+
+    private function getDelete($name) {
+        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
+        return sprintf(self::TMPL_DELETE, $name, $ucName, $ucName);
     }
 }

@@ -16,115 +16,91 @@ use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleApi;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IStaticHandler;
+use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandler;
 use CPath\Model\DB\PDODatabase;
+use CPath\Model\DB\PDOModel;
 
 class UserNotFoundException extends \Exception {}
 class UserAlreadyExistsException extends \Exception {}
 class IncorrectUsernameOrPasswordException extends \Exception {}
 class PasswordsDoNotMatchException extends \Exception {}
 
-interface IUser {
-    /**
-     * @return PDODatabase
-     */
-    static function getDB();
-}
 
-abstract class User extends ArrayObject implements IUser, IStaticHandler, IResponseAggregate {
-    Const TableName = 'users';
-    Const ID = 'id';
-    Const NAME = 'name';
-    Const EMAIL = 'email';
-    Const PASSWORD = 'password';
-    Const FLAGS = 'flags';
-    Const SETTINGS = 'settings';
+abstract class User extends PDOModel implements IHandlerAggregate {
 
-    const FLAG_DEBUG = 0x01;
+    const TableName = 'user';
+    const ID = 'id';
+    const NAME = 'name';
+    const EMAIL = 'email';
+    const PASSWORD = 'password';
+    const FLAGS = 'flags';
+    const CONFIG = 'config';
+
     const FLAG_VALIDATED = 0x02;
     const FLAG_DISABLED = 0x04;
 
-    const FLAG_ADMIN = 0x10;
+    const FLAG_DEBUG = 0x10;
+    const FLAG_MANAGER = 0x20;
+    const FLAG_ADMIN = 0x40;
 
-    private $mData = NULL;
     private $mCommit = array();
 
     public function __construct($id) {
-        $DB = $this->getDB();
+        $DB = static::getDB();
         if(is_numeric($id)) {
-            $SQL = "SELECT * FROM ".static::TableName
-                ."\n WHERE ".static::ID." = ".intval($id);
+            $row = $DB->select(static::TableName, '*')
+                ->where(static::ID, $id)
+                ->fetch();
         } else {
-            $SQL = "SELECT * FROM ".static::TableName
-                ."\n WHERE ".static::NAME." = ".$DB->quote($id)
-                ."\n OR ".static::EMAIL." = ".$DB->quote($id);
+            $row = $DB->select(static::TableName, '*')
+                ->where(static::NAME, $id)
+                ->where('OR')
+                ->where(static::EMAIL, $id)
+                ->fetch();
         }
-        $this->mData = $DB->query($SQL)->fetch();
-        if(!$this->mData)
+        if(!$row)
             throw new UserNotFoundException("User '$id' not found");
         if(static::FLAGS)
-            $this->mData[static::FLAGS] = (int)$this->mData[static::FLAGS];
+            $row[static::FLAGS] = (int)$row[static::FLAGS];
+        parent::__construct($row);
     }
 
-
-    public function getID() { return $this->mData[static::ID]; }
-    public function getName() { return $this->mData[static::NAME]; }
-    public function getEmail() { return $this->mData[static::EMAIL]; }
+    public function getID() { return $this->mRow[static::ID]; }
+    public function getName() { return $this->mRow[static::NAME]; }
+    public function getEmail() { return $this->mRow[static::EMAIL]; }
     public function isAdmin() { return $this->isFlag(static::FLAG_ADMIN); }
     public function isDebug() { return $this->isFlag(static::FLAG_DEBUG); }
 
     public function isFlag($flags) {
         if(!static::FLAGS)
             throw new \Exception("Flags are not enableld for this user type: ".get_class($this));
-        return $this->mData[static::FLAGS] & $flags ? true : false;
+        return $this->mRow[static::FLAGS] & $flags ? true : false;
     }
 
     public function checkPassword($password) {
-        $hash = $this->mData[static::PASSWORD];
+        $hash = $this->mRow[static::PASSWORD];
         if(static::hash($password, $hash) != $hash)
             throw new IncorrectUsernameOrPasswordException("The username/email and or password was not found");
     }
 
     public function setFlags($flags, $commit=true, $remove=false) {
         if(!$remove)
-            $flags |= $this->mData[static::FLAGS];
+            $flags |= $this->mRow[static::FLAGS];
         else
-            $flags = $this->mData[static::FLAGS] & ~$flags;
-        $this->setData(static::FLAGS, $flags, $commit);
+            $flags = $this->mRow[static::FLAGS] & ~$flags;
+        $this->setField(static::FLAGS, $flags, $commit);
     }
 
     public function setPassword($newPassword, $commit=true) {
-        $this->setData(static::PASSWORD, static::hash($newPassword), $commit);
-    }
-
-    public function &getData() { return $this->mData; }
-
-    public function setData($field, $value, $commit=true) {
-        $this->mCommit[$field] = $value;
-        if($commit) {
-            $set = '';
-            $DB = static::getDB();
-            foreach($this->mCommit as $field=>$value)
-                $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
-            $SQL = "UPDATE ".static::TableName
-                ."\n SET {$set}"
-                ."\n WHERE ".static::ID." = ".$this->getID();
-            $DB->exec($SQL);
-            $this->mCommit = array();
-        }
-        $this->mData[$field] = $value;
-    }
-
-    /**
-     * @return IResponse
-     */
-    public function getResponse()
-    {
-        return new Response("Retrieved User '" . $this->getName() . "'", true, $this->getData());
+        $this->setField(static::PASSWORD, static::hash($newPassword), $commit);
     }
 
     // Statics
+
+    protected static function getPrimaryKeyField() {
+        return static::ID;
+    }
 
     protected static function hash($password, $oldPassword=NULL) {
         return crypt($password, $oldPassword);

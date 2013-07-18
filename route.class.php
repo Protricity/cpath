@@ -54,14 +54,14 @@ class Route implements IRoute {
 
         $dest = $this->mDestination;
         $Class = new \ReflectionClass($dest);
-        if($Class->implementsInterface("Cpath\\Interfaces\\IStaticHandler")) {
+        if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
             $Handler = call_user_func($dest."::getHandler");
             $Handler->render($args);
         } else if($Class->implementsInterface("Cpath\\Interfaces\\IHandler")) {
             $Handler = new $dest();
             $Handler->render($args);
         } else {
-            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler/IStaticHandler");
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler/IHandlerAggregate");
         }
 
         return true;

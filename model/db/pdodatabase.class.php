@@ -20,6 +20,17 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     const FUNC_FORMAT = NULL;
     private $mPrefix;
 
+
+    /**
+     * @param $tableName
+     * @param $_selectArgs
+     * @return PDOSelect
+     */
+    public function select($tableName, $_selectArgs) {
+        $args = func_get_args();
+        return new PDOSelect(array_shift($args), $this, $args);
+    }
+
     /**
      * @param $tableName
      * @param $_fieldArgs
