@@ -48,24 +48,30 @@ abstract class User extends PDOModel implements IHandlerAggregate {
 
     private $mCommit = array();
 
-    public function __construct($id) {
-        $DB = static::getDB();
-        if(is_numeric($id)) {
-            $row = $DB->select(static::TableName, '*')
-                ->where(static::ID, $id)
-                ->fetch();
-        } else {
-            $row = $DB->select(static::TableName, '*')
-                ->where(static::NAME, $id)
-                ->where('OR')
-                ->where(static::EMAIL, $id)
-                ->fetch();
+    public function __construct($id=NULL) {
+        if($id !== NULL) {
+            $DB = static::getDB();
+            if(is_numeric($id)) {
+                $row = $DB->select(static::TableName, '*')
+                    ->where(static::ID, $id)
+                    ->fetch();
+            } else {
+                $row = $DB->select(static::TableName, '*')
+                    ->where(static::NAME, $id)
+                    ->where('OR')
+                    ->where(static::EMAIL, $id)
+                    ->fetch();
+            }
+            if(!$row)
+                throw new UserNotFoundException("User '$id' not found");
+            parent::setData($row);
         }
-        if(!$row)
-            throw new UserNotFoundException("User '$id' not found");
+    }
+
+    protected function setData(Array $row) {
         if(static::FLAGS)
             $row[static::FLAGS] = (int)$row[static::FLAGS];
-        parent::__construct($row);
+        return parent::setData($row);
     }
 
     public function getID() { return $this->mRow[static::ID]; }
@@ -76,7 +82,7 @@ abstract class User extends PDOModel implements IHandlerAggregate {
 
     public function isFlag($flags) {
         if(!static::FLAGS)
-            throw new \Exception("Flags are not enableld for this user type: ".get_class($this));
+            throw new \Exception("Flags are not enabled for this user type: ".get_class($this));
         return $this->mRow[static::FLAGS] & $flags ? true : false;
     }
 
@@ -138,6 +144,13 @@ abstract class User extends PDOModel implements IHandlerAggregate {
         }
 
         return new static(intval($id));
+    }
+
+    static function search($name, $email=null) {
+        return parent::searchA(array(
+            static::NAME => $name,
+            static::EMAIL => $email,
+        ));
     }
 
     public static function delete(User $User) {

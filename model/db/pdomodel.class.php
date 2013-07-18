@@ -23,20 +23,31 @@ class ModelAlreadyExistsException extends \Exception {}
 abstract class PDOModel implements IGetDB, IResponseAggregate {
     const TableName = null;
     const Primary = null;
-    protected $mRow;
+    protected $mRow = null;
     private $mCommit = array();
 
-    public function __construct($id) {
-        if(is_array($id)) {
-            $row = $id;
-        } else {
-            $row = static::getDB()->select(static::TableName, '*')
-                ->where(static::Primary, $id)
-                ->fetch();
+    /**
+     * PDOModel Constructor parameters must be optional. An 'empty' model must be created if no parameters are passed.
+     * @param mixed|null $id if passed, the model is created with the specified id
+     * @throws ModelNotFoundException if no model was found
+     */
+    public function __construct($id=NULL) {
+        if($id !== NULL) {
+            if(is_array($id)) {
+                $this->setData($id);
+            } else {
+                $this->mRow = static::getDB()->select(static::TableName, '*')
+                    ->where(static::Primary, $id)
+                    ->fetch();
+                if(!$this->mRow)
+                    throw new ModelNotFoundException(get_class($this) . " '{$id}' not found");
+            }
         }
-        if(!$row)
-            throw new ModelNotFoundException(get_class($this) . " '{$id}' not found");
+    }
+
+    protected function setData(Array $row) {
         $this->mRow = $row;
+        return $this;
     }
 
     public function setField($field, $value, $commit=true) {
@@ -92,7 +103,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
                 ->values(array_values($row))
                 ->getInsertID();
         } catch (\PDOException $ex) {
-            if(strpos($ex->getMessage(), 'Duplicate')!==false)
+            if(stripos($ex->getMessage(), 'Duplicate')!==false)
                 throw new ModelAlreadyExistsException($ex->getMessage(), $ex->getCode(), $ex);
             throw $ex;
         }
@@ -112,7 +123,10 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
 
         $Class = get_called_class();
         $Select->setCallback(function(Array $row) use ($Class) {
-            return new $Class($row);
+            /** @var PDOModel $M */
+            $M = new $Class();
+            $M->setData($row);
+            return $M;
         });
 
         return $Select;

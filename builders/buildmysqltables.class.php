@@ -43,8 +43,8 @@ PHP;
             if(stripos($row['Key'], 'PRI') === 0) {
                 $primaryCol = $name;
                 $cols[$name] = 'DEFAULT';
-                $indexCols[] = $name;
-            } elseif ($row['Key']) {
+            }
+            if ($row['Key']) {
                 $indexCols[] = $name;
             }
         }

@@ -58,6 +58,7 @@ PHP;
 PHP;
 
     const TMPL_GETPROP = <<<'PHP'
+
 	function get%s() { return $this->mRow['%s']; }
 
 PHP;
@@ -65,24 +66,23 @@ PHP;
     const TMPL_SETPROP = <<<'PHP'
 	function set%s($value, $commit=true) { return $this->setField('%s', $value, $commit); }
 
-
 PHP;
 
     const TMPL_CREATE = <<<'PHP'
-	static function create(%s) { return parent::createA(get_defined_vars()); }
 
+	static function create(%s) { return parent::createA(get_defined_vars()); }
 
 PHP;
 
     const TMPL_SEARCH = <<<'PHP'
-	static function search(%s) { return parent::searchA(get_defined_vars()); }
 
+	static function search(%s) { return parent::searchA(get_defined_vars()); }
 
 PHP;
 
     const TMPL_DELETE = <<<'PHP'
-	static function delete(%s $%s) { parent::deleteM($%s); }
 
+	static function delete(%s $%s) { parent::deleteM($%s); }
 
 PHP;
 
@@ -201,7 +201,7 @@ PHP;
             foreach($cols as $name=>$type)
                 $php .= $this->getConst(strtoupper($name), $name);
             foreach($cols as $name=>$type)
-                $php .= $this->propGetSet($name);
+                $php .= $this->propGetSet($name, $name == $primaryCol);
             $php .= $this->getCreate(array_diff(array_keys($cols), (array)$primaryCol));
             if($indexCols)
                 $php .= $this->getSearch($indexCols);
@@ -210,7 +210,7 @@ PHP;
             file_put_contents($modelPath.$file, $php);
 
         }
-        Log::v(__CLASS__, "Built (".sizeof($tables).") table definition classe(s)");
+        Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
         Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
@@ -283,10 +283,11 @@ PHP;
             '$'.implode(', $', $params));
     }
 
-    private function propGetSet($name) {
+    private function propGetSet($name, $justGet=false) {
         $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
         $php = sprintf(self::TMPL_GETPROP, $ucName, strtolower($name));
-        $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name));
+        if(!$justGet)
+            $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name));
         return $php;
     }
 
