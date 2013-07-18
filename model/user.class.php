@@ -41,62 +41,78 @@ abstract class User extends ArrayObject implements IUser, IStaticHandler, IRespo
     Const FLAGS = 'flags';
     Const SETTINGS = 'settings';
 
-    private $mID;
+    const FLAG_DEBUG = 0x01;
+    const FLAG_VALIDATED = 0x02;
+    const FLAG_DISABLED = 0x04;
+
+    const FLAG_ADMIN = 0x10;
+
     private $mData = NULL;
+    private $mCommit = array();
 
     public function __construct($id) {
+        $DB = $this->getDB();
         if(is_numeric($id)) {
-            $this->mID = $id;
+            $SQL = "SELECT * FROM ".static::TableName
+                ."\n WHERE ".static::ID." = ".intval($id);
         } else {
-            $DB = $this->getDB();
             $SQL = "SELECT * FROM ".static::TableName
                 ."\n WHERE ".static::NAME." = ".$DB->quote($id)
                 ."\n OR ".static::EMAIL." = ".$DB->quote($id);
-            $this->mData = $DB->query($SQL)->fetch();
-            if(!$this->mData)
-                throw new UserNotFoundException("User '$id' not found");
-            $this->mID = intval($this->mData[static::ID]);
         }
+        $this->mData = $DB->query($SQL)->fetch();
+        if(!$this->mData)
+            throw new UserNotFoundException("User '$id' not found");
+        if(static::FLAGS)
+            $this->mData[static::FLAGS] = (int)$this->mData[static::FLAGS];
     }
 
 
-    public function getID() { return $this->mID; }
-    public function getName() { return $this->getField(static::NAME); }
-    public function getEmail() { return $this->getField(static::EMAIL); }
+    public function getID() { return $this->mData[static::ID]; }
+    public function getName() { return $this->mData[static::NAME]; }
+    public function getEmail() { return $this->mData[static::EMAIL]; }
+    public function isAdmin() { return $this->isFlag(static::FLAG_ADMIN); }
+    public function isDebug() { return $this->isFlag(static::FLAG_DEBUG); }
+
+    public function isFlag($flags) {
+        if(!static::FLAGS)
+            throw new \Exception("Flags are not enableld for this user type: ".get_class($this));
+        return $this->mData[static::FLAGS] & $flags ? true : false;
+    }
 
     public function checkPassword($password) {
-        $hash = $this->getField(static::PASSWORD);
+        $hash = $this->mData[static::PASSWORD];
         if(static::hash($password, $hash) != $hash)
             throw new IncorrectUsernameOrPasswordException("The username/email and or password was not found");
     }
 
-    public function setPassword($newPassword) {
-        $this->setData(static::PASSWORD, static::hash($newPassword));
+    public function setFlags($flags, $commit=true, $remove=false) {
+        if(!$remove)
+            $flags |= $this->mData[static::FLAGS];
+        else
+            $flags = $this->mData[static::FLAGS] & ~$flags;
+        $this->setData(static::FLAGS, $flags, $commit);
     }
 
-    public function &getData() {
-        if($this->mData)
-            return $this->mData;
-        $SQL = "SELECT * FROM ".static::TableName
-            ."\n WHERE ".static::ID." = ".$this->mID;
-
-        $this->mData = static::getDB()->query($SQL)->fetch();
-        if(!$this->mData)
-            throw new UserNotFoundException("User ID #{$this->mID} not found");
-        return $this->mData;
+    public function setPassword($newPassword, $commit=true) {
+        $this->setData(static::PASSWORD, static::hash($newPassword), $commit);
     }
 
-    protected function getField($key=null) {
-        $data = $this->getData();
-        return $data[$key];
-    }
+    public function &getData() { return $this->mData; }
 
-    public function setData($field, $value) {
-        $DB = static::getDB();
-        $SQL = "UPDATE ".static::TableName
-            ."\n SET {$field} = ".$DB->quote($value)
-            ."\n WHERE ".static::ID." = ".$this->mID;
-        $DB->exec($SQL);
+    public function setData($field, $value, $commit=true) {
+        $this->mCommit[$field] = $value;
+        if($commit) {
+            $set = '';
+            $DB = static::getDB();
+            foreach($this->mCommit as $field=>$value)
+                $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
+            $SQL = "UPDATE ".static::TableName
+                ."\n SET {$set}"
+                ."\n WHERE ".static::ID." = ".$this->getID();
+            $DB->exec($SQL);
+            $this->mCommit = array();
+        }
         $this->mData[$field] = $value;
     }
 
@@ -121,6 +137,8 @@ abstract class User extends ArrayObject implements IUser, IStaticHandler, IRespo
      * @param String|null $passwordConfirm
      * @return User
      * @throws PasswordsDoNotMatchException
+     * @throws UserAlreadyExistsException
+     * @throws \Exception|\PDOException
      */
     public static function create($name, $email, $password, $passwordConfirm=null) {
         if($passwordConfirm !== null && $password != $passwordConfirm)

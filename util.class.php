@@ -26,12 +26,15 @@ abstract class Util {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
             self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
         } elseif ($args = $_SERVER['argv']) {
+            array_shift($args);
             if(!$args[0]) {
                 $method = 'CLI';
             } else {
-                $method = strtoupper(array_shift($args));
-                if(!preg_match('/get|post|cli/i', $method))
+                if(preg_match('/^get|post|cli$/i', $args[0])) {
+                    $method = strtoupper(array_shift($args));
+                } else {
                     $method = 'CLI';
+                }
             }
 
             $args2 = array();
@@ -45,10 +48,10 @@ abstract class Util {
             $args = $args2;
             unset($args2);
 
-            if($args[0] && $args[0][0] == '/')
+            if(isset($args[0]) && $args[0][0] == '/')
                 self::$mUrl = parse_url($args[0]);
             else
-                self::$mUrl = array('path'=>'/'.implode('/', $args).'/');
+                self::$mUrl = array('path'=>'/'.implode('/', $args));
             self::$mUrl['method'] = $method;
             //self::$mUrl['args'] = $args;
             if(isset(self::$mUrl['query'])) {
@@ -56,8 +59,8 @@ abstract class Util {
                 parse_str(self::$mUrl['query'], $query);
                 $_GET = $query + $_GET;
             }
+            //print_r($_GET);print_r($args); print_r(self::$mUrl); die($method);
             // TODO: $_POST
-            //print_r($_GET);print_r($args); print_r(self::$mUrl); die();
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);
         $request = self::$mUrl["path"];

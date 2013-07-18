@@ -15,9 +15,14 @@ class UtilTest extends PHPUnit_Framework_TestCase {
 
     public function testCLI()
     {
-        $_SERVER['argv'] = array('', 'GET', '/my/path');
+        $_SERVER['argv'] = array('index.php', 'GET', '/my/path');
         Util::init();
         $this->assertEquals(Util::getUrl('method'), 'GET');
+        $this->assertEquals(Util::getUrl('path'), '/my/path');
+
+        $_SERVER['argv'] = array('index.php', 'my', 'path');
+        Util::init();
+        $this->assertEquals(Util::getUrl('method'), 'CLI');
         $this->assertEquals(Util::getUrl('path'), '/my/path');
     }
 
