@@ -273,7 +273,7 @@ PHP;
 
     private function getCreate(Array $cols) {
         return sprintf(self::TMPL_CREATE,
-            !$cols ? '' : '$'.implode(', $', $cols));
+            !$cols ? '' : '$'.implode('=null, $', $cols).'=null');
     }
 
     private function getDelete($name) {
