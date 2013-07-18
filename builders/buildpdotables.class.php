@@ -74,7 +74,7 @@ PHP;
 PHP;
 
     const TMPL_DELETE = <<<'PHP'
-	static function delete(%s $%s) { return parent::deleteM($%s); }
+	static function delete(%s $%s) { parent::deleteM($%s); }
 
 PHP;
 
@@ -191,7 +191,8 @@ PHP;
             file_put_contents($modelPath.$file, $php);
 
         }
-        Log::v(__CLASS__, "Built (".sizeof($tables).") table classes");
+        Log::v(__CLASS__, "Built (".sizeof($tables).") table definition classe(s)");
+        Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
             foreach($oldFiles as $file) unlink($tablePath.$file);
@@ -218,7 +219,7 @@ PHP;
         }
         $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
         file_put_contents($procPath.'procs.class.php', $php);
-        Log::v(__CLASS__, "Built (".sizeof($tables).") routines");
+        Log::v(__CLASS__, "Built (".sizeof($procs).") routine(s)");
 
         return true;
     }
