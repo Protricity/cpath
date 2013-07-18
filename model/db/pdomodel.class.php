@@ -26,7 +26,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
     protected $mRow;
     private $mCommit = array();
 
-    public function __construct(Array $row, $searchID=NULL) {
+    public function __construct($row, $searchID=NULL) {
         if(!$row)
             throw new ModelNotFoundException(get_class($this) . " not found"
                 . ($searchID !== null ? ": ".$searchID : ""));
