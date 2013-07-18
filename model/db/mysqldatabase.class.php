@@ -40,8 +40,8 @@ abstract class MySQLDatabase extends PDODatabase {
     }
 
     public function insert($tableName, $_fieldArgs) {
-        $args = func_get_args();
-        return new MySQLInsert($tableName, $this, array_slice($args, 1));
+        $args = is_array($_fieldArgs) ? $_fieldArgs : array_slice(func_get_args(), 1);
+        return new MySQLInsert($tableName, $this, $args);
     }
 }
 

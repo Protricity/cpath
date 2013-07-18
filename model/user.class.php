@@ -18,11 +18,13 @@ use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandler;
+use CPath\Model\DB\ModelAlreadyExistsException;
+use CPath\Model\DB\ModelNotFoundException;
 use CPath\Model\DB\PDODatabase;
 use CPath\Model\DB\PDOModel;
 
-class UserNotFoundException extends \Exception {}
-class UserAlreadyExistsException extends \Exception {}
+class UserNotFoundException extends ModelNotFoundException {}
+class UserAlreadyExistsException extends ModelAlreadyExistsException {}
 class IncorrectUsernameOrPasswordException extends \Exception {}
 class PasswordsDoNotMatchException extends \Exception {}
 

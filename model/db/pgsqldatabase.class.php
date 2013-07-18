@@ -42,7 +42,7 @@ abstract class PGSQLDatabase extends PDODatabase {
     }
 
     public function insert($tableName, $_fieldArgs) {
-        $args = func_get_args();
+        $args = is_array($_fieldArgs) ? $_fieldArgs : func_get_args();
         return new MySQLInsert($tableName, $this, array_slice($args, 1));
     }
 }

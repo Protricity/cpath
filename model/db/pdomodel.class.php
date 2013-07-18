@@ -22,14 +22,20 @@ class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IGetDB, IResponseAggregate {
     const TableName = null;
-    const PRIMARY = null;
+    const Primary = null;
     protected $mRow;
     private $mCommit = array();
 
-    public function __construct($row, $searchID=NULL) {
+    public function __construct($id) {
+        if(is_array($id)) {
+            $row = $id;
+        } else {
+            $row = static::getDB()->select(static::TableName, '*')
+                ->where(static::Primary, $id)
+                ->fetch();
+        }
         if(!$row)
-            throw new ModelNotFoundException(get_class($this) . " not found"
-                . ($searchID !== null ? ": ".$searchID : ""));
+            throw new ModelNotFoundException(get_class($this) . " '{$id}' not found");
         $this->mRow = $row;
     }
 
@@ -37,7 +43,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
         $this->mCommit[$field] = $value;
         if($commit) {
             if(!($primary = static::getPrimaryKeyField()))
-                throw new \Exception("Constant 'PRIMARY' is not set. Cannot Update table");
+                throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
             $set = '';
             $DB = static::getDB();
             foreach($this->mCommit as $field=>$value)
@@ -70,12 +76,12 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
     // Statics
 
     protected static function getPrimaryKeyField() {
-        return static::PRIMARY;
+        return static::Primary;
     }
 
     protected static function createA(Array $row) {
         if(!($primary = static::getPrimaryKeyField()))
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Create " . get_called_class() . " Model");
+            throw new \Exception("Constant 'Primary' is not set. Cannot Create " . get_called_class() . " Model");
         $DB = static::getDB();
         foreach($row as $k=>$v)
             if($v===null)
@@ -94,9 +100,27 @@ abstract class PDOModel implements IGetDB, IResponseAggregate {
         return new static($id);
     }
 
+    protected static function searchA(Array $row, $limit=100) {
+        if(!($primary = static::getPrimaryKeyField()))
+            throw new \Exception("Constant 'Primary' is not set. Cannot Create " . get_called_class() . " Model");
+        $DB = static::getDB();
+
+        $Select = $DB->select(static::TableName, '*');
+        foreach($row as $k=>$v)
+            if($v!==null)
+                $Select->where($k, $v);
+
+        $Class = get_called_class();
+        $Select->setCallback(function(Array $row) use ($Class) {
+            return new $Class($row);
+        });
+
+        return $Select;
+    }
+
     protected static function deleteM(PDOModel $Model) {
         if(!($primary = static::getPrimaryKeyField()))
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Delete " . get_called_class() . " Model");
+            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . get_called_class() . " Model");
         $DB = static::getDB();
         $c = $DB->delete(static::TableName)
             ->where($primary, $Model->mRow[$primary])

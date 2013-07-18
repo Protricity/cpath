@@ -29,7 +29,7 @@ use %s as DB;
 use CPath\Model\DB\PDOModel;
 class %s extends PDOModel{
 %s
-    static function getDB() { DB::get(); }
+    static function getDB() { return DB::get(); }
 }
 PHP;
 
@@ -71,10 +71,18 @@ PHP;
     const TMPL_CREATE = <<<'PHP'
 	static function create(%s) { return parent::createA(get_defined_vars()); }
 
+
+PHP;
+
+    const TMPL_SEARCH = <<<'PHP'
+	static function search(%s) { return parent::searchA(get_defined_vars()); }
+
+
 PHP;
 
     const TMPL_DELETE = <<<'PHP'
 	static function delete(%s $%s) { parent::deleteM($%s); }
+
 
 PHP;
 
@@ -116,7 +124,8 @@ PHP;
     }
 
     protected abstract function getTables(\PDO $DB);
-    protected abstract function getColumns(\PDO $DB, $table);
+    protected abstract function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols);
+
     protected abstract function getProcs(\PDO $DB);
 
     /**
@@ -166,12 +175,16 @@ PHP;
 
         foreach($tables as $table) {
             $ucTable = str_replace(' ', '_', ucwords(str_replace('_', ' ', $table)));
-            $cols = $this->getColumns($DB, $table);
+            $primaryCol = null;
+            $indexCols = array();
+            $cols = $this->getColumns($DB, $table, $primaryCol, $indexCols);
             $file = strtolower($table).'.class.php';
 
             // Static Table
 
             $php = $this->getConst('TableName', $table);
+            if($primaryCol)
+                $php .= $this->getConst('Primary', $primaryCol);
             foreach($cols as $name=>$type)
                 $php .= $this->getConst(strtoupper($name), $name);
             //$php .= $this->getInsert($table, $cols);
@@ -183,9 +196,15 @@ PHP;
             // Model
 
             $php = $this->getConst('TableName', $table);
+            if($primaryCol)
+                $php .= $this->getConst('Primary', $primaryCol);
+            foreach($cols as $name=>$type)
+                $php .= $this->getConst(strtoupper($name), $name);
             foreach($cols as $name=>$type)
                 $php .= $this->propGetSet($name);
-            $php .= $this->getCreate(array_keys($cols));
+            $php .= $this->getCreate(array_diff(array_keys($cols), (array)$primaryCol));
+            if($indexCols)
+                $php .= $this->getSearch($indexCols);
             $php .= $this->getDelete($ucTable);
             $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $ucTable, $php);
             file_put_contents($modelPath.$file, $php);
@@ -274,6 +293,11 @@ PHP;
     private function getCreate(Array $cols) {
         return sprintf(self::TMPL_CREATE,
             !$cols ? '' : '$'.implode('=null, $', $cols).'=null');
+    }
+
+    private function getSearch(Array $indexs) {
+        return sprintf(self::TMPL_SEARCH,
+            !$indexs ? '' : '$'.implode('=null, $', $indexs).'=null');
     }
 
     private function getDelete($name) {

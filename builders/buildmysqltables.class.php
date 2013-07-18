@@ -35,16 +35,22 @@ PHP;
         return $tables;
     }
 
-    protected function getColumns(\PDO $DB, $table) {
+    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols) {
         $cols = array();
         foreach($DB->query("SHOW COLUMNS FROM `$table`;") as $row) {
             $name = $row['Field'];
             $cols[$name] = '?';
-            if(stripos($row['Key'], 'PRI') === 0)
+            if(stripos($row['Key'], 'PRI') === 0) {
+                $primaryCol = $name;
                 $cols[$name] = 'DEFAULT';
+                $indexCols[] = $name;
+            } elseif ($row['Key']) {
+                $indexCols[] = $name;
+            }
         }
         return $cols;
     }
+
 
     protected function getProcs(\PDO $DB) {
         $procs = array();

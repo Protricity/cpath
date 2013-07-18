@@ -38,6 +38,16 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
      */
     abstract public function insert($tableName, $_fieldArgs);
 
+    /**
+     * @param $tableName
+     * @param $_selectArgs
+     * @return PDOUpdate
+     */
+    public function update($tableName, $_selectArgs) {
+        $args = func_get_args();
+        return new PDOUpdate(array_shift($args), $this, $args);
+    }
+
     public function delete($tableName) {
         return new PDODelete($tableName, $this);
     }

@@ -8,8 +8,13 @@
 namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDOSelect implements \IteratorAggregate {
+class PDOSelect implements \Iterator {
     private $DB, $table, $select=array(), $where=array(), $values=array(), $limit='1';
+    /** @var \PDOStatement */
+    private $stmt = null;
+    private $row = null;
+    private $count = 0;
+    private $customMethod = null;
     private $lastCond = true;
     public function __construct($table, \PDO $DB, Array $select=array()) {
         $this->DB = $DB;
@@ -47,21 +52,36 @@ class PDOSelect implements \IteratorAggregate {
         return $this;
     }
 
+    /**
+     * @param $callable
+     * @return $this
+     */
+    public function setCallback($callable) {
+        $this->customMethod = $callable;
+        return $this;
+    }
+
     public function exec() {
-        $stmt = $this->DB
+        $this->stmt = $this->DB
             ->prepare($this->getSQL());
-        $stmt->execute($this->values);
-        return $stmt;
+        $this->stmt->execute($this->values);
+        $this->count=-1;
+        return $this->stmt;
     }
 
     public function fetchColumn($i=0) {
-        return $this->exec()
-            ->fetchColumn($i);
+        if(!$this->stmt) $this->exec();
+        $this->count++;
+        return $this->stmt->fetchColumn($i);
     }
 
     public function fetch() {
-        return $this->exec()
-            ->fetch();
+        if(!$this->stmt) $this->exec();
+        $this->count++;
+        $this->row = $this->stmt->fetch();
+        if($call = $this->customMethod)
+            $this->row = $call instanceof \Closure ? $call($this->row) : call_user_func($call, $this->row);
+        return $this->row;
     }
 
     public function getSQL() {
@@ -72,14 +92,54 @@ class PDOSelect implements \IteratorAggregate {
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Retrieve an external iterator
-     * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
-     * <b>Traversable</b>
+     * Return the current element
+     * @link http://php.net/manual/en/iterator.current.php
+     * @return mixed Can return any type.
      */
-    public function getIterator()
+    public function current()
     {
-        return $this->exec();
+        return $this->row;
+    }
+
+    /**
+     * Move forward to next element
+     * @link http://php.net/manual/en/iterator.next.php
+     * @return void Any returned value is ignored.
+     */
+    public function next()
+    {
+        $this->fetch();
+    }
+
+    /**
+     * Return the key of the current element
+     * @link http://php.net/manual/en/iterator.key.php
+     * @return mixed scalar on success, or null on failure.
+     */
+    public function key()
+    {
+        return $this->count;
+    }
+
+    /**
+     * Checks if current position is valid
+     * @link http://php.net/manual/en/iterator.valid.php
+     * @return boolean The return value will be casted to boolean and then evaluated.
+     * Returns true on success or false on failure.
+     */
+    public function valid()
+    {
+        return $this->row ? true : false;
+    }
+
+    /**
+     * Rewind the Iterator to the first element
+     * @link http://php.net/manual/en/iterator.rewind.php
+     * @return void Any returned value is ignored.
+     */
+    public function rewind()
+    {
+        $this->stmt = null;
+        $this->exec();
     }
 }

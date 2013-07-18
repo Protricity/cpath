@@ -33,7 +33,7 @@ PHP;
         return $tables;
     }
 
-    protected function getColumns(\PDO $DB, $table) {
+    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols) {
         $cols = array();
         foreach($DB->query("SELECT * FROM information_schema.columns WHERE table_name = '$table';") as $row) {
             $name = $row['column_name'];
