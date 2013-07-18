@@ -14,7 +14,6 @@ abstract class PDOInsert {
     protected $stmt=NULL;
     private $table;
     private $fields=array();
-    private $returning=NULL;
     private $batch=NULL;
 
     abstract protected function updateSQL(&$SQL);
@@ -35,11 +34,6 @@ abstract class PDOInsert {
     public function addField($field) {
         $this->fields[] = $field;
         $this->stmt = NULL;
-        return $this;
-    }
-
-    public function returning($field) {
-        $this->returning = $field;
         return $this;
     }
 
@@ -77,9 +71,10 @@ abstract class PDOInsert {
     }
 
     public function getSQL($token='?') {
-        return "INSERT INTO ".$this->table
+        $SQL = "INSERT INTO ".$this->table
             ."\n (".implode(', ',$this->fields).')'
-            ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')'
-            .($this->returning ? "\nRETURNING ".$this->returning : '');
+            ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
+        $this->updateSQL($SQL);
+        return $SQL;
     }
 }
