@@ -16,8 +16,18 @@ use CPath\Model\DB\ModelAlreadyExistsException;
 use CPath\Model\DB\ModelNotFoundException;
 use CPath\Model\DB\PDOModel;
 
+class IncorrectUsernameOrPasswordException extends \Exception {
+    public function __construct($msg="The username/email and or password was not found") {
+        parent::__construct($msg);
+    }
+}
+class PasswordsDoNotMatchException extends \Exception {
+    public function __construct($msg="Please make sure the passwords match") {
+        parent::__construct($msg);
+    }
+}
 
-class SessionManager {
+class PasswordManager {
     const SESSION_KEY = '_session';
     const SESSION_KEY_LENGTH = 48;
 
