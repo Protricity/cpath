@@ -120,33 +120,89 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         return new static($id);
     }
 
-    public static function search($any, $limit=1) {
+    protected static function fetchCallback(Array $row) {
+        /** @var PDOModel $M */
+        $M = new static();
+        $M->setData($row);
+        return $M;
+    }
+
+    /**
+     * Loads a model based on a primary key column value
+     * @param $search String the value to search for
+     * @return PDOModel the found model instance
+     * @throws ModelNotFoundException if a model entry was not found
+     * @throws \Exception if the model does not contain primary keys
+     */
+    public static function loadByPrimaryKey($search) {
+        if(!static::Primary)
+            throw new \Exception("Constant 'Primary' is not set. Cannot load " . get_called_class() . " Model");
         $DB = static::getDB();
-        $Class = get_called_class();
+        $Model = $DB->select(static::TableName, '*')
+            ->where(static::Primary, $search)
+            ->setCallback(get_called_class().':fetchCallback')
+            ->fetch();
+        if(!$Model)
+            throw new ModelNotFoundException("Model '{$search}' was not found");
+        return $Model;
+    }
+
+    /**
+     * @param $fieldName String the database field to search for
+     * @param $value String the field value to search for
+     * @param int $limit the number of rows to return
+     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
+     */
+    public static function searchByField($fieldName, $value, $limit=1) {
+        return static::searchByFields(array($fieldName => $value), $limit);
+    }
+
+    /**
+     * Searches a Model based on specified fields and values.
+     * @param array $fields an array of key-value pairs to search for
+     * @param int $limit the number of rows to return
+     * @param string $logic 'OR' or 'AND' logic between fields
+     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
+     */
+    public static function searchByFields(Array $fields, $limit=1, $logic='OR') {
+        $DB = static::getDB();
         $Select = $DB->select(static::TableName, '*');
 
-        if(is_array($any)) {
-            if(!static::SearchKeys)
-                throw new \Exception("No Indexes defined in ".$Class);
-            foreach(explode(',', static::SearchKeys) as $key)
-                $Select->where($key, $any);
-        } else {
-            $i = 0;
-            foreach($any as $k=>$v)
-                if($v!==null) {
-                    if($i++) $Select->where('OR');
-                    $Select->where($k, $v);
-                }
+        $i = 0;
+        foreach($fields as $k=>$v)
+            if($v!==null) {
+                if($logic=='OR' && $i++) $Select->where('OR');
+                $Select->where($k, $v);
+            }
+
+        $Select->limit($limit);
+        $Select->setCallback(get_called_class().':fetchCallback');
+        return $Select;
+    }
+
+
+    /**
+     * Searches for a Model using all indexed fields.
+     * @param mixed $any a value to search for
+     * @param int $limit the number of rows to return
+     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
+     * @throws \Exception if the model does not contain index keys
+     */
+     public static function searchByAnyIndex($any, $limit=1) {
+        $DB = static::getDB();
+        $Class = get_called_class();
+        if(!static::SearchKeys)
+            throw new \Exception("No Indexes defined in ".$Class);
+        $Select = $DB->select(static::TableName, '*');
+
+        $i = 0;
+        foreach(explode(',', static::SearchKeys) as $key){
+            if($i++) $Select->where('OR');
+            $Select->where($key, $any);
         }
 
         $Select->limit($limit);
-        $Select->setCallback(function(Array $row) use ($Class) {
-            /** @var PDOModel $M */
-            $M = new $Class();
-            $M->setData($row);
-            return $M;
-        });
-
+        $Select->setCallback(get_called_class().':fetchCallback');
         return $Select;
     }
 

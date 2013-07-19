@@ -12,10 +12,20 @@ use CPath\Handlers\ApiParam;
 use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleApi;
 use CPath\Interfaces\IUserSession;
-use CPath\Model\DB\ModelAlreadyExistsException;
-use CPath\Model\DB\ModelNotFoundException;
 use CPath\Model\DB\PDOModel;
 
+
+class UserNotFoundException extends \Exception {}
+class IncorrectUsernameOrPasswordException extends \Exception {
+    public function __construct($msg="The username/email and or password was not found") {
+        parent::__construct($msg);
+    }
+}
+class PasswordsDoNotMatchException extends \Exception {
+    public function __construct($msg="Please make sure the passwords match") {
+        parent::__construct($msg);
+    }
+}
 
 class SessionManager {
     const SESSION_KEY = '_session';
@@ -29,24 +39,55 @@ class SessionManager {
     const FLAG_ADMIN = 0x40;
 
     /** @var IUserSession */
-    private static $mUserClass;
-    private static $mIsLoggedIn = false;
+    private static $mUserSession;
 
-    public static function login(IUserSession $User, $password) {
+    /**
+     * Get the current user session or return a guest account
+     * @param IUserSession $EmptyUser an empty user instance
+     * @return IUserSession|PDOModel the user instance
+     */
+    static function getUserSession(IUserSession $EmptyUser) {
+        if(self::$mUserSession)
+            return self::$mUserSession;
+        if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
+        {
+            $key = $_SESSION[self::SESSION_KEY];
+            return self::$mUserSession = $EmptyUser::loadFromSessionKey($key);
+        }
+        return self::$mUserSession = $EmptyUser::loadGuestAccount();
+    }
+
+    /**
+     * Log in to a user account
+     * @param IUserSession $EmptyUser an empty user instance
+     * @param $search String the user account to search for
+     * @param $password String the password to log in with
+     * @throws IncorrectUsernameOrPasswordException
+     * @return IUserSession|PDOModel The logged in user instance
+     */
+    public static function login(IUserSession $EmptyUser, $search, $password) {
+        $User = $EmptyUser::searchByAnyIndex($search)->fetch();
+        if(!$User)
+            throw new IncorrectUsernameOrPasswordException();
         self::checkPassword($User, $password);
         $key = openssl_random_pseudo_bytes(static::SESSION_KEY_LENGTH);
         $User->storeNewSessionKey($key, $User->getID());
         session_start();
         $_SESSION[self::SESSION_KEY] = $key;
-        self::$mIsLoggedIn = true;
+        self::$mUserSession = $User;
+        return $User;
     }
 
     public static function isLoggedIn() {
-        return self::$mIsLoggedIn;
+        return self::$mUserSession ? true : false;
     }
 
     public static function isFlag(IUserSession $User, $flags) {
         return (int)$User->getFlags() & $flags ? true : false;
+    }
+
+    public static function isAdmin(IUserSession $User) {
+        return self::isFlag($User, self::FLAG_ADMIN);
     }
 
     public static function checkPassword(IUserSession $User, $password) {
@@ -73,12 +114,6 @@ class SessionManager {
 
     protected static function hash($password, $oldPassword=NULL) {
         return crypt($password, $oldPassword);
-    }
-
-    public static function checkForSessionKey() {
-        if(!isset($_SESSION, $_SESSION[self::SESSION_KEY]))
-            return false;
-        return $_SESSION[self::SESSION_KEY];
     }
 
     /**
