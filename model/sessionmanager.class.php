@@ -8,26 +8,26 @@
 namespace CPath\Model;
 
 use CPath\Handlers\Api;
-use CPath\Handlers\ApiField;
 use CPath\Handlers\ApiParam;
-use CPath\Handlers\ApiRequiredField;
-use CPath\Handlers\ApiRequiredFilterField;
 use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleApi;
-use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IHandlerAggregate;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IUserSession;
 use CPath\Model\DB\ModelAlreadyExistsException;
 use CPath\Model\DB\ModelNotFoundException;
-use CPath\Model\DB\PDODatabase;
 use CPath\Model\DB\PDOModel;
 
 class UserNotFoundException extends ModelNotFoundException {}
 class UserAlreadyExistsException extends ModelAlreadyExistsException {}
-class IncorrectUsernameOrPasswordException extends \Exception {}
-class PasswordsDoNotMatchException extends \Exception {}
+class IncorrectUsernameOrPasswordException extends \Exception {
+    public function __construct($msg="The username/email and or password was not found") {
+        parent::__construct($msg);
+    }
+}
+class PasswordsDoNotMatchException extends \Exception {
+    public function __construct($msg="Please make sure the passwords match") {
+        parent::__construct($msg);
+    }
+}
 
 class SessionManager {
     const SESSION_KEY = '_session';
@@ -70,7 +70,7 @@ class SessionManager {
     public function checkPassword($password) {
         $hash = $this->mUser->getPassword();
         if($this->hash($password, $hash) != $hash)
-            throw new IncorrectUsernameOrPasswordException("The username/email and or password was not found");
+            throw new IncorrectUsernameOrPasswordException();
     }
 
     public function setFlags($flags, $commit=true, $remove=false) {
@@ -85,7 +85,12 @@ class SessionManager {
     public function changePassword($newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
             if($newPassword != $confirmPassword)
+                throw new PasswordsDoNotMatchException();
         $this->mUser->setPassword($this->hash($newPassword), true);
+    }
+
+    protected function hash($password, $oldPassword=NULL) {
+        return crypt($password, $oldPassword);
     }
 
     // Statics
@@ -96,22 +101,24 @@ class SessionManager {
         return $_SESSION[self::SESSION_KEY];
     }
 
-    protected function hash($password, $oldPassword=NULL) {
-        return crypt($password, $oldPassword);
-    }
-
     /**
      * @param HandlerSet $Handlers
+     * @param String|null $UserClass
+     * @throws UserNotFoundException when user is not found
      */
-    public function addHandlers(HandlerSet $Handlers)
+    public static function addHandlers(HandlerSet $Handlers, $UserClass)
     {
-        if(!$Handlers)
-            $Handlers = new HandlerSet();
-        $Handlers->addHandler('get', new SimpleApi(function(Api $API, Array $request) use ($Class) {
+        $Handlers->addHandler('login', new SimpleApi(function(Api $API, Array $request) use ($UserClass) {
             $request = $API->processRequest($request);
-            return new $Class(is_numeric($request['search']) ? intval($request['search']) : $request['search']);
+            /** @var IUserSession $UserClass */
+            $User = $UserClass::login($request['name'], $request['password']);
+            if(!$User)
+                throw new UserNotFoundException("User '".$request['name'].'" not found');
+            return $User;
         }, array(
-            'search' => new ApiParam(),
+            'name' => new ApiParam("Username or Email Address"),
+            'password' => new ApiParam("Password")
         )));
+
     }
 }

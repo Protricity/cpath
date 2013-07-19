@@ -197,7 +197,7 @@ class Build extends Api {
                 throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
             if($Class->getConstant('BUILD_IGNORE')) {
-                Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
+                //Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
                 continue;
             }
             if($Class->isAbstract()) {
@@ -207,7 +207,7 @@ class Build extends Api {
             static::$mClasses[] = $Class;
 
             if($Class->implementsInterface(__NAMESPACE__."\Interfaces\IBuilder")) {
-                Log::v(__CLASS__, "Found Builder Class '{$class}' in '{$filePath}'");
+                Log::v(__CLASS__, "Found Builder Class: {$class}");
                 //call_user_func(array($Class->getName(), 'build'), $Class);
                 static::$mBuilders[] = $Class->newInstance();
             }

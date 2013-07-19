@@ -35,22 +35,28 @@ PHP;
         return $tables;
     }
 
-    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols) {
+    protected function getIndexes(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
+        $indexCols = array();
+        foreach($DB->query("SHOW KEYS FROM `{$table}`;") as $row) {
+            $name = $row['Column_name'];
+            if(stripos($row['Key_name'], 'PRIMARY') === 0) {
+                $primaryCol = $name;
+            }
+            $indexCols[] = $name;
+        }
+        return $indexCols;
+    }
+
+    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
         $cols = array();
         foreach($DB->query("SHOW COLUMNS FROM `$table`;") as $row) {
             $name = $row['Field'];
-            $cols[$name] = '?';
-            if(stripos($row['Key'], 'PRI') === 0) {
-                $primaryCol = $name;
-                $cols[$name] = 'DEFAULT';
-            }
-            if ($row['Key']) {
-                $indexCols[] = $name;
-            }
+            $cols[] = $name;
+            if($name == $primaryCol && $row['Extra'] != 'auto_increment')
+                $primaryAutoInc = false;
         }
         return $cols;
     }
-
 
     protected function getProcs(\PDO $DB) {
         $procs = array();

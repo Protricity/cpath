@@ -7,6 +7,19 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-interface IXML {
-    function toXML(\SimpleXMLElement $xml);
+interface IUserSession {
+    function getID();
+
+    function getFlags();
+    function setFlags($value, $commit=true);
+
+    function getPassword();
+    function setPassword($value, $commit=true);
+
+    function storeNewSessionKey($key, $user_id);
+
+    // Statics
+
+    static function login($search, $password);
+    static function getUserSession();
 }

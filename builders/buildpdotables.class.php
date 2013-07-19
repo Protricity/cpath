@@ -118,13 +118,16 @@ PHP;
             if(!$sql)
                 throw new UpgradeException("Invalid SQL in ".$schema);
             $DB->exec($sql);
+
             $DB->setDBVersion($v);
         }
-        Log::v(__CLASS__, "Upgraded Database from version $oldVersion to $curVersion");
+        Log::v(__CLASS__, "Upgraded Database from version $oldVersion to $curVersion.");
     }
 
     protected abstract function getTables(\PDO $DB);
-    protected abstract function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols);
+    protected abstract function getColumns(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc);
+    protected abstract function getIndexes(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc);
+
 
     protected abstract function getProcs(\PDO $DB);
 
@@ -139,7 +142,13 @@ PHP;
         if(!$Class->isSubclassOf(static::DB_CLASSNAME))
             return false;
 
-        /* @var $DB PostGreSQL */
+        $BUILD = $Class->getConstant('BUILD');
+        if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
+            Log::v(__CLASS__, "(BUILD = {$BUILD}) Skipping Build for ".$Class->getName());
+            return false;
+        }
+
+        /* @var $DB PDODatabase */
         $DB = call_user_func(array($Class->getName(), 'get'));
 
         $tablePath = $this->getFolder($Class, 'tables');
@@ -171,21 +180,28 @@ PHP;
 
         // Tables
 
-        $tables = $this->getTables($DB);
+        $tables = array();
+        if(in_array($BUILD, array('ALL', 'MODEL')))
+            $tables = $this->getTables($DB);
 
         foreach($tables as $table) {
             $ucTable = str_replace(' ', '_', ucwords(str_replace('_', ' ', $table)));
             $primaryCol = null;
-            $indexCols = array();
-            $cols = $this->getColumns($DB, $table, $primaryCol, $indexCols);
+            $primaryAutoInc = false;
+            $indexCols = $this->getIndexes($DB, $table, $primaryCol, $primaryAutoInc);
+            $cols = $this->getColumns($DB, $table, $primaryCol, $primaryAutoInc);
+            $order = array();
+            foreach($cols as $name)
+                if(in_array($name, $indexCols))
+                    $order[] = $name;
+            $indexCols = $order;
             $file = strtolower($table).'.class.php';
 
             // Static Table
 
             $php = $this->getConst('TableName', $table);
-            if($primaryCol)
-                $php .= $this->getConst('Primary', $primaryCol);
-            foreach($cols as $name=>$type)
+            $php .= $this->getConst('Primary', $primaryCol);
+            foreach($cols as $name)
                 $php .= $this->getConst(strtoupper($name), $name);
             //$php .= $this->getInsert($table, $cols);
             $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
@@ -196,15 +212,16 @@ PHP;
             // Model
 
             $php = $this->getConst('TableName', $table);
-            if($primaryCol)
-                $php .= $this->getConst('Primary', $primaryCol);
-            foreach($cols as $name=>$type)
-                $php .= $this->getConst(strtoupper($name), $name);
-            foreach($cols as $name=>$type)
-                $php .= $this->propGetSet($name, $name == $primaryCol);
-            $php .= $this->getCreate(array_diff(array_keys($cols), (array)$primaryCol));
+            $php .= $this->getConst('Primary', $primaryCol);
             if($indexCols)
-                $php .= $this->getSearch($indexCols);
+                $php .= $this->getConst('SearchKeys', implode(',', $indexCols));
+            foreach($cols as $name)
+                $php .= $this->getConst(strtoupper($name), $name);
+            foreach($cols as $name)
+                $php .= $this->propGetSet($name, $name == $primaryCol);
+            //$php .= $this->getCreate($primaryAutoInc ? array_diff($cols, (array)$primaryCol) : $cols);
+            //if($indexCols)
+            //    $php .= $this->getSearch($primaryAutoInc ? array_diff($indexCols, (array)$primaryCol) : $indexCols);
             $php .= $this->getDelete($ucTable);
             $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $ucTable, $php);
             file_put_contents($modelPath.$file, $php);
@@ -217,10 +234,12 @@ PHP;
             foreach($oldFiles as $file) unlink($tablePath.$file);
         }
 
-
         // Stored Procedures
 
-        $procs = $this->getProcs($DB);
+        $procs = array();
+        if(in_array($BUILD, array('ALL', 'PROC')))
+            $procs = $this->getProcs($DB);
+
 
         $phpC = '';
         $phpP = '';
@@ -256,7 +275,7 @@ PHP;
     }
 
     private function getConst($name, $value) {
-        return "\tConst {$name} = '{$value}';\n";
+        return "\tConst {$name} = ".var_export($value, true).";\n";
     }
 
     private function getInsert($table, $columns) {

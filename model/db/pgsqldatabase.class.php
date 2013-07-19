@@ -9,11 +9,11 @@ namespace CPath\Model\DB;
 use \PDO;
 use CPath\Builders\BuildPGTables;
 abstract class PGSQLDatabase extends PDODatabase {
-    const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = "SELECT %s";
     protected $mConfig = array();
     public function __construct($prefix, $database, $host=NULL, $username=NULL, $password=NULL) {
         $this->mConfig = get_defined_vars();
+        unset($this->mConfig['this']);
 
         parent::__construct($prefix, "pgsql:dbname=$database;host=$host", $username, $password );
         $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);

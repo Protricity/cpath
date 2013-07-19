@@ -33,28 +33,27 @@ PHP;
         return $tables;
     }
 
-    private function getIndex(\PDO $DB, $table, &$indexCols) {
+    protected function getIndexes(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
+        $indexCols = array();
         foreach($DB->query("select a.attname as column_name
 from pg_class t, pg_class i, pg_index ix, pg_attribute a
 where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '{$table}'
 group by column_name;") as $row ) {
                 $indexCols[] = $row['column_name'];
         }
+        return $indexCols;
     }
 
-    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$indexCols) {
+    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
         $cols = array();
         foreach($DB->query("SELECT * FROM information_schema.columns AS c WHERE c.table_name = '$table';") as $row) {
             $name = $row['column_name'];
-
-            $cols[$name] = '?';
+            $cols[] = $name;
             if(stripos($row['column_default'], 'nextval(') ===0) {
-                $cols[$name] = 'DEFAULT';
                 if(!$primaryCol)
                     $primaryCol = $name;
             }
         }
-        $this->getIndex($DB, $table, $indexCols);
         //static $w=1;
         //unset($row); print_r(get_defined_vars());
         //if($w++ > 8)

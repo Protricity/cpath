@@ -16,7 +16,8 @@ use CPath\Builders\BuildRoutes;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
-
+    const BUILD = 'NONE'; // ALL|MODEL|PROC|NONE;
+    const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = NULL;
     private $mPrefix;
 
