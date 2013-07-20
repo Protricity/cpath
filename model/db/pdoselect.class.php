@@ -56,7 +56,7 @@ class PDOSelect implements \Iterator {
         if($value !== NULL) {
             $this->values[] = $value;
             if(strpos($field, '?') === false)
-                $field .= '=?';
+                $field = '`'.$field.'`=?';
         }
         if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
             $this->lastCond = true;
@@ -112,6 +112,9 @@ class PDOSelect implements \Iterator {
     public function fetchAll() {
         if(!$this->stmt) $this->exec();
         $fetch = $this->stmt->fetchAll();
+        if($fetch && $call = $this->customMethod)
+            foreach($fetch as &$row)
+                $row = $call instanceof \Closure ? $call($row) : call_user_func($call, $row);
         $this->count = sizeof($fetch);
         return $fetch;
     }

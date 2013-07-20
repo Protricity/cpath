@@ -9,6 +9,7 @@ namespace CPath;
 
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRoute;
 use CPath\Model\Response;
 use CPath\Handlers\Api;
 
@@ -17,7 +18,7 @@ class Console implements IHandler {
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
 
-    function render(Array $args)
+    function render(IRoute $Route)
     {
         while(true) {
             echo ">";

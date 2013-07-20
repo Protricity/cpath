@@ -8,6 +8,9 @@
 namespace CPath\Interfaces;
 
 
+use CPath\DestinationNotFoundException;
+use CPath\InvalidHandlerException;
+
 interface IRoute {
 
     /**
@@ -22,4 +25,10 @@ interface IRoute {
 
     function getRoute();
     function getDestination();
+
+    function getCurrentArg();
+    function hasNextArg();
+    function getNextArg();
+    function addToRoute($path);
+
 }

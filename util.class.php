@@ -175,8 +175,9 @@ abstract class Util {
         }
 
         foreach($object as $key=>$val) {
-            if(is_int($key)) $key = 'item'.$key;
+            if(is_int($key)) $key = 'item';
             if($val instanceof Interfaces\IXML) {
+                $key = strtolower(basename(get_class($val)));
                 $ch = $root->addChild($key);
                 $val->toXML($ch);
             } elseif(is_array($val)) {

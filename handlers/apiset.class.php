@@ -10,6 +10,7 @@ namespace CPath\Handlers;
 use CPath\Handlers\Api\View\ApiInfo;
 use CPath\Interfaces\IApi;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRoute;
 use CPath\NoRoutesFoundException;
 use CPath\Route;
 use CPath\Util;
@@ -35,7 +36,6 @@ class ApiSet extends Api {
     protected $mApis = array();
     private $mPath = NULL;
     private $mClassName = NULL;
-    private $mRoutes = array();
 
     /**
      * Creates a new ApiSet instance
@@ -57,12 +57,18 @@ class ApiSet extends Api {
     }
 
     /**
-     * @param String $path the api path to search
+     * @param String $path the api path to search. If null, the currently selected Api is used
      * @return IApi the api instance or null if not found
+     * @throws \CPath\NoRoutesFoundException
      */
-    public function getApi($path) {
+    public function getApi($path=NULL) {
+        if(!$path) $path = $this->mPath;
         $path = strtolower($path);
-        return isset($this->mApis[$path]) ? $this->mApis[$path] : NULL;
+        if(!$path)
+            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mApis)));
+        if(!isset($this->mApis[$path]))
+            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mApis)));
+        return $this->mApis[$path];
     }
 
     /**
@@ -75,7 +81,11 @@ class ApiSet extends Api {
      */
     function execute(Array $request, $path=NULL)
     {
-        return $this->getSelectedApi($path)->execute($request);
+        /** @var Api $Api */
+        $Api = $this->getApi($path);
+        $Api->mRoute = $this->mRoute;
+        $Api->parseRequestParams($request, $this->mRoute);
+        return $Api->execute($request);
     }
 
     function executeAsResponse(Array $request, $path=NULL) {
@@ -83,7 +93,6 @@ class ApiSet extends Api {
             $this->mPath = $path;
         return parent::executeAsResponse($request);
     }
-
 
     /**
      * Sends headers and renders an IResponse as HTML
@@ -93,61 +102,18 @@ class ApiSet extends Api {
     public function renderHTML(IResponse $Response) {
         $Api = $this;
         if($this->mPath)
-            $Api = $this->getSelectedApi();
+            $Api = $this->getApi();
         $Response->sendHeaders('text/html');
         $Render = new ApiInfo();
         $Render->render($Api, $Response);
     }
 
-    function render(Array $args)
+    function render(IRoute $Route)
     {
-        $this->mPath = strtolower(array_shift($args));
-        parent::render($args);
+        $this->mPath = $Route->getNextArg();
+        $this->getApi($this->mPath);
+        $Route->addToRoute($this->mPath);
+        parent::render($Route);
     }
 
-    /**
-     * Provides the formatted route for viewing purposes
-     * @return array the formatted route(s)
-     */
-    public function getDisplayRoutes() {
-        if(!$this->mRoutes) {
-            $this->mRoutes = array();
-            $BuildRoutes = new BuildRoutes();
-            foreach($BuildRoutes->getHandlerRoutes(new \ReflectionClass($this->mClassName)) as $route) {
-                if($this->mPath) {
-                    $Api = $this->getSelectedApi();
-                    foreach($Api->mFields as $name => $Field) {
-                        if(!($Field instanceof IApiParam))
-                            continue;
-                        $route .= '/:' . $name ;
-                    }
-                }
-                $this->mRoutes [] = $route;
-            }
-        }
-        return $this->mRoutes;
-    }
-
-
-    public function getDisplayRoute(&$methods, $route=NULL) {
-        if(!$route) $route = Route::getCurrentRoute()->getRoute();
-        $methods = array('GET', 'POST');
-        if($this->mPath) {
-            $route .= $this->mPath .'/';
-            $Api = $this->getSelectedApi();
-            $route = $Api->getDisplayRoute($methods, $route);
-        } else {
-            $route = Route::getCurrentRoute()->getRoute();
-        }
-        return $route;
-    }
-
-    protected function getSelectedApi($path=NULL) {
-        if(!$path) $path = $this->mPath;
-        if(!$path)
-            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        if(!isset($this->mApis[$path]))
-            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        return $this->mApis[$path];
-    }
 }

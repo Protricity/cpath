@@ -8,6 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\IRoute;
 use CPath\NoRoutesFoundException;
 use CPath\Util;
 use CPath\Build;
@@ -45,13 +46,14 @@ class HandlerSet implements IHandler {
         return isset($this->mHandlers[$path]) ? $this->mHandlers[$path] : NULL;
     }
 
-    function render(Array $args)
+    function render(IRoute $Route)
     {
-        $path = strtolower(array_shift($args));
+        $path = $Route->getNextArg();
         if(!$path)
             throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
         if(!isset($this->mHandlers[$path]))
             throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $this->mHandlers[$path]->render($args);
+        $Route->addToRoute($path);
+        $this->mHandlers[$path]->render($Route);
     }
 }

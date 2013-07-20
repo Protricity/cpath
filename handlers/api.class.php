@@ -10,6 +10,8 @@ namespace CPath\Handlers;
 use CPath\Interfaces\IApi;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\IRoute;
+use CPath\Model\ArrayObject;
 use CPath\Route;
 use CPath\Util;
 use CPath\Build;
@@ -35,9 +37,8 @@ abstract class Api implements IApi {
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IApiField[] */
-    private $mFields = array();
-    private $mRoutes=NULL;     // API Fields
-
+    protected $mFields = array();
+    protected $mRoute=NULL;
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -65,6 +66,18 @@ abstract class Api implements IApi {
             $Response = new ResponseException($ex->getMessage(), null, $ex);
         }
         return $Response;
+    }
+
+    protected function parseRequestParams(Array &$request, IRoute $Route) {
+        if($Route->hasNextArg()) {
+            foreach($this->mFields as $name=>$Field) {
+                if(!$Route->hasNextArg())
+                    break;
+                if($Field instanceof IApiParam) {
+                    $request[$name] = $Route->getNextArg();
+                }
+            }
+        }
     }
 
     /**
@@ -159,10 +172,10 @@ abstract class Api implements IApi {
 
     /**
      * Render this API Call. The output format is based on the requested mimeType from the browser
-     * @param array $args an array of arguments parsed out of the route path
+     * @param IRoute $Route the selected route including remaining arguments
      */
-    public function render(Array $args) {
-
+    public function render(IRoute $Route) {
+        $this->mRoute = $Route;
         // Parse the request
         if(!$_POST && in_array(Util::getUrl('method'), array('GET', 'CLI'))) {                // if GET
             $request = $_GET;
@@ -173,20 +186,7 @@ abstract class Api implements IApi {
                 $request = $_POST;                                                      // else use POST
             }
         }
-
-        if($args) {
-            $i = 0;
-            foreach($this->mFields as $name=>$Field) {
-                if(!isset($args[$i]))
-                    break;
-                if(!empty($args[$i]) && $Field instanceof IApiParam) {
-                    $request[$name] = $args[$i];
-                    if(!isset($args[$i]))
-                        break;
-                }
-                $i++;
-            }
-        }
+        $this->parseRequestParams($request, $Route);
         $Response = $this->executeAsResponse($request);
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
@@ -211,9 +211,9 @@ abstract class Api implements IApi {
         return $this->mFields;
     }
 
-    public function getDisplayRoute(&$methods, $route=NULL) {
+    public function getDisplayRoute(&$methods) {
         $methods = array('GET', 'POST');
-        if(!$route) $route = Route::getCurrentRoute()->getRoute();
+        $route = $this->mRoute->getRoute();
         foreach($this->mFields as $name => $Field) {
             if(!($Field instanceof IApiParam))
                 continue;
@@ -223,6 +223,25 @@ abstract class Api implements IApi {
     }
 
 }
+//
+//class ApiRequest extends ArrayObject {
+//
+//    private $mRequest;
+//    private $mRoute;
+//
+//    public function __construct(Array $request, IRoute $Route=NULL) {
+//        $this->mRequest = $request;
+//        $this->mRoute = $Route;
+//    }
+//
+//    public function getRoute() {
+//        return $this->mRoute;
+//    }
+//
+//    public function &getData() {
+//        return $this->mRequest;
+//    }
+//}
 
 /**
  * Class IApiField

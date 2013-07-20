@@ -72,7 +72,7 @@ class SessionManager {
         if(!$User)
             throw new IncorrectUsernameOrPasswordException();
         self::checkPassword($User, $password);
-        $key = openssl_random_pseudo_bytes(static::SESSION_KEY_LENGTH);
+        $key = self::rndstr(static::SESSION_KEY_LENGTH);
         $User->storeNewSessionKey($key, $User->getID());
         session_start();
         $_SESSION[self::SESSION_KEY] = $key;
@@ -167,5 +167,14 @@ class SessionManager {
             return new Response("Logged out successfuly", true);
         }));
 
+    }
+
+    private static function rndstr($length=64) {
+        $s = '';
+        for($i=0; $i<$length; $i++) {
+            $d = rand(1,30)%2;
+            $s .= $d ? chr(rand(65,90)) : chr(rand(48,57));
+        }
+        return $s;
     }
 }

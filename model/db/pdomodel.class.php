@@ -14,8 +14,10 @@ use CPath\Handlers\SimpleApi;
 use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
+use CPath\Interfaces\IXML;
 use CPath\Model\Response;
 
 interface IGetDB {
@@ -28,7 +30,7 @@ interface IGetDB {
 class ModelNotFoundException extends \Exception {}
 class ModelAlreadyExistsException extends \Exception {}
 
-abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate {
     const BUILD_IGNORE = true;
     const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
@@ -88,33 +90,61 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         return $this;
     }
 
+
+    function toXML(\SimpleXMLElement $xml){
+        foreach($this->getExportData() as $key=>$val)
+            $xml->addAttribute($key, $val);
+    }
+
+    function toJSON(Array &$JSON){
+        foreach($this->getExportData() as $key=>$val)
+            $JSON[$key] = $val;
+    }
+
+
     /**
-     * Returns an IResponse for this object. Defaults to just primary key, if exists.
-     * Overwrite this object and return $this->getResponseArray(...) to return more data.
      * @return IResponse
      */
-    public function getResponse()
-    {
-        if(static::Primary)
-            return $this->getResponseArray(static::Primary);
-        else
-            return new Response("Retrieved '" . $this . "'", true, array());
+    public function getResponse() {
+        return new Response("Retrieved '" . $this . "'", true, $this);
     }
 
     /**
-     * @param String $_keyArgs an array or varargs of all the fields to return in the response. Set to 'ALL' to return all fields.
+     * Returns an IResponse for this object. Defaults to just primary key, if exists.
+     * Overwrite this method and return $this->getDataInclude(...) or $this->getDataExclude(...) to return more data.
+     * @return Array
+     */
+    public function getExportData()
+    {
+        if(static::Primary)
+            return $this->getDataInclude(static::Primary);
+        return array();
+    }
+
+    /**
+     * @param String $_keyArgs an array or varargs of all the fields to exclude from the response.
+     * If no fields are passed, the entire array is used.
      * @return Response
      */
-    public function getResponseArray($_keyArgs) {
-        if($_keyArgs==='ALL') {
-            $row = $this->mRow;
-        } else {
-            $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
-            $row = array();
-            foreach($args as $name)
-                if($name) $row[$name] = $this->mRow[$name];
-        }
-        return new Response("Retrieved '" . $this . "'", true, $row);
+    public function getDataExclude($_keyArgs) {
+        $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
+        $row = array();
+        foreach($this->mRow as $key=>$value)
+            if(!in_array($key, $args))
+                $row[$key] = $value;
+        return $row;
+    }
+
+    /**
+     * @param String $_keyArgs an array or varargs of all the fields to return in the response.
+     * @return Array
+     */
+    public function getDataInclude($_keyArgs) {
+        $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
+        $row = array();
+        foreach($args as $name)
+            if($name) $row[$name] = $this->mRow[$name];
+        return $row;
     }
 
     public function __toString() {
@@ -126,24 +156,37 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
 
     // Statics
 
+    /**
+     * Creates a new Model based on the provided row of key value pairs
+     * @param array $row key value pairs to insert into new row
+     * @return PDOModel|null returns NULL if no primary key is available
+     * @throws ModelAlreadyExistsException
+     * @throws \Exception|\PDOException
+     */
     public static function create(Array $row) {
-        if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot Create " . get_called_class() . " Model");
-        foreach($row as $k=>$v)
+       foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);
         try {
-            $id = static::insert(array_keys($row))
-                ->requestInsertID(static::Primary)
-                ->values(array_values($row))
-                ->getInsertID();
+            if(!static::Primary) {
+                $id = static::insert(array_keys($row))
+                    ->values(array_values($row));
+                return NULL;
+            } else {
+                if(isset($row[static::Primary]))
+                    $id = $row[static::Primary];
+                $Insert = static::insert(array_keys($row))
+                    ->requestInsertID(static::Primary)
+                    ->values(array_values($row));
+                if(!$id)
+                    $id = $Insert->getInsertID();
+                return static::loadByPrimaryKey($id);
+            }
         } catch (\PDOException $ex) {
             if(stripos($ex->getMessage(), 'Duplicate')!==false)
                 throw new ModelAlreadyExistsException($ex->getMessage(), $ex->getCode(), $ex);
             throw $ex;
         }
-
-        return static::loadByPrimaryKey($id);
     }
 
     // Database methods
