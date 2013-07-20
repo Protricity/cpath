@@ -42,8 +42,8 @@ class PDOSelect implements \Iterator {
         if($destField != NULL) {
             if($alias) {
                 $sAlias = $this->alias ?: $this->table;
-                $sourceField = "`{$sAlias}`.`{$sourceField}`";
-                $destField = "`{$alias}`.`{$sourceField}`";
+                $sourceField = "{$sAlias}.{$sourceField}";
+                $destField = "{$alias}.{$sourceField}";
             }
             $sourceField = " ON {$sourceField} = {$destField}";
         }
@@ -56,7 +56,7 @@ class PDOSelect implements \Iterator {
         if($value !== NULL) {
             $this->values[] = $value;
             if(strpos($field, '?') === false)
-                $field = '`'.$field.'`=?';
+                $field = $field.'=?';
         }
         if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
             $this->lastCond = true;

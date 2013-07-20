@@ -65,7 +65,7 @@ class PDOUpdate {
         if(!$this->where)
             throw new \Exception("method addWhere() was not called");
         return "UPDATE ".$this->table
-            ."\nSET `".implode('`=?, `',$this->fields).'`=?'
+            ."\nSET ".implode('=?, ',$this->fields).'=?'
             ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
             .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
