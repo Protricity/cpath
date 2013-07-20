@@ -177,15 +177,7 @@ abstract class Api implements IApi {
     public function render(IRoute $Route) {
         $this->mRoute = $Route;
         // Parse the request
-        if(!$_POST && in_array(Util::getUrl('method'), array('GET', 'CLI'))) {                // if GET
-            $request = $_GET;
-        } else {                                                                        // else POST
-            if(!$_POST && Util::getHeader('Content-Type') === 'application/json') {     // if JSON Object,
-                $request = json_decode( file_get_contents('php://input'), true);        // Parse out json
-            } else {
-                $request = $_POST;                                                      // else use POST
-            }
-        }
+        $request = $Route->getRequest();
         $this->parseRequestParams($request, $Route);
         $Response = $this->executeAsResponse($request);
 

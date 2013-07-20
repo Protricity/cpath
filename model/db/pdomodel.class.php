@@ -163,7 +163,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @throws ModelAlreadyExistsException
      * @throws \Exception|\PDOException
      */
-    public static function create(Array $row) {
+    public static function createFromArray(Array $row) {
        foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);

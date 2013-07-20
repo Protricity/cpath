@@ -102,8 +102,8 @@ class Response extends ArrayObject implements IResponse, ILogListener {
     }
 
     function __toString() {
-        return IResponseHelper::toString($this)
-            .implode("\n", $this->mLog);
+        return IResponseHelper::toString($this);
+            //.implode("\n", $this->mLog);
     }
 
     // Statics

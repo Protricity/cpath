@@ -13,6 +13,7 @@ use CPath\Handlers\ApiSet;
 use CPath\Handlers\SimpleApi;
 use CPath\Interfaces\IUserSession;
 use CPath\Model\DB\PDOModel;
+use CPath\Util;
 
 
 class UserNotFoundException extends \Exception {}
@@ -74,7 +75,13 @@ class SessionManager {
         self::checkPassword($User, $password);
         $key = self::rndstr(static::SESSION_KEY_LENGTH);
         $User->storeNewSessionKey($key, $User->getID());
-        session_start();
+        if(Util::isCLI())
+            $_SESSION = array();
+        else{
+            if(headers_sent($file, $line))
+                throw new \Exception("Cannot Log in: Headers already sent by {$file}:{$line}");
+            session_start();
+        }
         $_SESSION[self::SESSION_KEY] = $key;
         self::$mUserSession = $User;
         return $User;

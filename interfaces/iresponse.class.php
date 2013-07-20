@@ -27,13 +27,15 @@ final class IResponseHelper {
     }
 
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
-        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS);
+        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addAttribute('msg', $Response->getMessage());
         Util::toXML($Response->getData(), $xml->addChild('response'));
         return $xml;
     }
 
     static function sendHeaders(IResponse $Response, $mimeType=NULL) {
+        if(Util::isCLI())
+            return;
         if(headers_sent($file, $line)) {
             Log::e("IResponseHelper", "Warning: Headers already sent by {$file}:{$line}");
             return;

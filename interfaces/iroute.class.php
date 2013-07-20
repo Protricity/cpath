@@ -20,8 +20,13 @@ interface IRoute {
      * @throws DestinationNotFoundException if the destination handler was not found
      * @throws InvalidHandlerException if the destination handler was invalid
      */
-    function tryRoute($requestPath);
+    function match($requestPath);
 
+    /**
+     * Renders the route destination
+     * @return void
+     */
+    function render();
 
     function getRoute();
     function getDestination();
@@ -30,5 +35,19 @@ interface IRoute {
     function hasNextArg();
     function getNextArg();
     function addToRoute($path);
+
+    /**
+     * Returns the request parameters.
+     * If none are set, return the web request parameters ie $_GET, $_POST
+     * @return Array the request parameters
+     */
+    function getRequest();
+
+    /**
+     * Set the request parameters
+     * @param array $request the request parameters
+     * @return void
+     */
+    function setRequest(Array $request);
 
 }

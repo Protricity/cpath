@@ -122,10 +122,10 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
         echo "DB Upgrader: ".get_class($this)."\n\n";
         if(in_array($Route->getNextArg(), array('upgrade', 'rebuild'))) {
             $this->upgrade($Route->getCurrentArg() == 'rebuild');
-            foreach(Log::get() as $log)
-                echo $log."\n";
+            //foreach(Log::get() as $log)
+            //    echo $log."\n";
         } else {
-            echo "use /upgrade to upgrade database";
+            echo "use /upgrade to upgrade database\n";
         }
         echo "DB Upgrader Completed\n";
 

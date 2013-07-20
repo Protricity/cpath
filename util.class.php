@@ -9,6 +9,8 @@ namespace CPath;
 
 
 // TODO split this class up into generic methods and request-oriented methods
+use CPath\Model\CLI;
+
 /**
  * Class Util provides information about the current request
  * @package CPath
@@ -17,6 +19,7 @@ abstract class Util {
 
     private static $mHeaders = null;
     private static $mUrl = array();
+    private static $mIsCLI = false;
 
     /**
      * Initialize the static class and parses request information
@@ -27,40 +30,12 @@ abstract class Util {
             self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
         } elseif ($args = $_SERVER['argv']) {
             array_shift($args);
-            if(!$args[0]) {
-                $method = 'CLI';
-            } else {
-                if(preg_match('/^get|post|cli$/i', $args[0])) {
-                    $method = strtoupper(array_shift($args));
-                } else {
-                    $method = 'CLI';
-                }
-            }
+            $CLI = new CLI($args);
+            self::$mUrl = $CLI->getParsedUrl();
+            $_GET = $CLI->getRequest(); // TODO: $_POST
 
-            $args2 = array();
-            for($i=0; $i<sizeof($args); $i++) {
-                if($args[$i][0] == '-') {
-                    $_GET[ltrim($args[$i], '- ')] = $args[++$i];
-                } else {
-                    $args2[] = $args[$i];
-                }
-            }
-            $args = $args2;
-            unset($args2);
-
-            if(isset($args[0]) && $args[0][0] == '/')
-                self::$mUrl = parse_url($args[0]);
-            else
-                self::$mUrl = array('path'=>'/'.implode('/', $args));
-            self::$mUrl['method'] = $method;
-            //self::$mUrl['args'] = $args;
-            if(isset(self::$mUrl['query'])) {
-                $query = array();
-                parse_str(self::$mUrl['query'], $query);
-                $_GET = $query + $_GET;
-            }
-            //print_r($_GET);print_r($args); print_r(self::$mUrl); die($method);
-            // TODO: $_POST
+            self::$mIsCLI = true;
+            Log::addCallback($CLI);
         }
         $root = dirname($_SERVER['SCRIPT_NAME']);
         $request = self::$mUrl["path"];
@@ -71,6 +46,10 @@ abstract class Util {
         self::$mHeaders = function_exists('getallheaders')
             ? getallheaders()
             : array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
+    }
+
+    public static function isCLI() {
+        return self::$mIsCLI;
     }
 
     /**

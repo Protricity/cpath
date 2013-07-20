@@ -25,7 +25,7 @@ use CPath\Builders\BuildRoutes;
  *
  * Provides an Api collection
  */
-class ApiSet extends Api {
+class ApiSet extends Api implements \ArrayAccess, \IteratorAggregate {
 
     const BUILD_IGNORE = true;     // This class should not be built. Classes that use it should set BUILD_IGNORE to false
 
@@ -116,4 +116,20 @@ class ApiSet extends Api {
         parent::render($Route);
     }
 
+    // Implement ArrayAccess
+
+    public function offsetExists($path) { return isset($this->mApis[$path]);}
+
+    /**
+     * Shortcut for getApi($path)
+     * @param mixed $path
+     * @return IApi
+     */
+    public function offsetGet($path) { return $this->getApi($path);}
+    public function offsetSet($path, $value) { $this->addApi($path, $value); }
+    public function offsetUnset($path) { unset($this->mApis[$path]); }
+
+    // Implement IteratorAggregate
+
+    public function getIterator() { return new \ArrayIterator($this->mApis); }
 }
