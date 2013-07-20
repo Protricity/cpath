@@ -28,8 +28,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
      * @return PDOSelect
      */
     public function select($tableName, $_selectArgs) {
-        $args = func_get_args();
-        return new PDOSelect(array_shift($args), $this, $args);
+        $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
+        return new PDOSelect($tableName, $this, $args);
     }
 
     /**
@@ -45,8 +45,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
      * @return PDOUpdate
      */
     public function update($tableName, $_selectArgs) {
-        $args = func_get_args();
-        return new PDOUpdate(array_shift($args), $this, $args);
+        $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
+        return new PDOUpdate($tableName, $this, $args);
     }
 
     public function delete($tableName) {

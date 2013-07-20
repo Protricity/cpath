@@ -37,7 +37,7 @@ class SimpleApi extends Api {
      * @param Callable $callback
      * @param ApiField[] $fields
      */
-    public function __construct($callback, Array $fields) {
+    public function __construct($callback, Array $fields=array()) {
         $this->mCallback = $callback;
         $this->addFields($fields);
     }

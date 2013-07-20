@@ -7,6 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Interfaces\IApi;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Util;
@@ -25,7 +26,7 @@ use CPath\Handlers\Api\View\ApiInfo;
  *
  * Provides a Handler template for API calls
  */
-abstract class Api implements IHandler {
+abstract class Api implements IApi {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
@@ -39,9 +40,29 @@ abstract class Api implements IHandler {
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
      * @param array $request associative array of request Fields, usually $_GET or $_POST
-     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      */
     abstract function execute(Array $request);
+
+    /**
+     * Execute this API Endpoint with the entire request returning an IResponse object
+     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @return IResponse the api call response with data, message, and status
+     */
+    public function executeAsResponse(Array $request) {
+        try {
+            $Response = $this->execute($request);
+            if($Response instanceof IResponseAggregate)
+                $Response = $Response->getResponse();
+            if(!($Response instanceof IResponse))
+                $Response = new Response(true, "API executed successfully", $Response);
+        } catch (ResponseException $ex) {
+            $Response = $ex;
+        } catch (\Exception $ex) {
+            $Response = new ResponseException($ex->getMessage(), null, $ex);
+        }
+        return $Response;
+    }
 
     /**
      * Add an API Field.
@@ -120,17 +141,7 @@ abstract class Api implements IHandler {
                 $i++;
             }
         }
-        try {
-            $Response = $this->execute($request);
-            if($Response instanceof IResponseAggregate)
-                $Response = $Response->getResponse();
-            if(!($Response instanceof IResponse))
-                $Response = new Response(true, "API executed successfully", $Response);
-        } catch (ResponseException $ex) {
-            $Response = $ex;
-        } catch (\Exception $ex) {
-            $Response = new ResponseException($ex->getMessage(), null, $ex);
-        }
+        $Response = $this->executeAsResponse($request);
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {

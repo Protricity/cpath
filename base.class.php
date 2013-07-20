@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+class ClassNotFoundException extends \Exception {}
 /**
  * Class Base
  * @package CPath
@@ -60,7 +61,8 @@ class Base {
         $name = str_replace('\\', '/', strtolower($name));
         $name = strtolower($name);
         $classPath = self::$mBasePath . $name . '.class.php';
-        require_once($classPath);
+        if(!file_exists($classPath) || !(include_once($classPath)))
+            throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");
     }
 
     /** Attempt to route a web request to it's destination */

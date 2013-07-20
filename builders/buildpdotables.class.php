@@ -82,7 +82,7 @@ PHP;
 
     const TMPL_DELETE = <<<'PHP'
 
-	static function delete(%s $%s) { parent::deleteM($%s); }
+	static function remove(%s $%s) { parent::removeModel($%s); }
 
 PHP;
 

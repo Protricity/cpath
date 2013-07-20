@@ -13,5 +13,5 @@ interface IHandlerAggregate {
     /**
      * @return IHandler $Handler
      */
-    static function getHandler();
+    static function getApiSet();
 }

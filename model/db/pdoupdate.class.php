@@ -13,11 +13,12 @@ class PDOUpdate {
     private $DB;
     /** @var \PDOStatement */
     private $stmt=NULL;
-    private $table, $fields=array(), $where=array(), $limit='1';
-    public function __construct($table, \PDO $DB, Array $fields) {
+    private $table, $fields=array(), $where=array(), $limit;
+    public function __construct($table, \PDO $DB, Array $fields, $limit=1) {
         $this->DB = $DB;
         $this->table = $table;
         $this->fields = $fields;
+        $this->limit = $limit;
     }
 
     public function addField($field) {
@@ -46,11 +47,10 @@ class PDOUpdate {
         return $this;
     }
 
-//    public function limit($limit) {
-//        $this->limit = $limit;
-//        $this->stmt = NULL;
-//        return $this;
-//    }
+    public function limit($limit) {
+        $this->limit = $limit;
+        return $this;
+    }
 
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
@@ -66,6 +66,7 @@ class PDOUpdate {
             throw new \Exception("method addWhere() was not called");
         return "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
-            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1');
+            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
+            ."\nLIMIT ".$this->limit;
     }
 }

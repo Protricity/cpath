@@ -27,13 +27,13 @@ use CPath\Handlers\Api\View\ApiInfo;
  */
 class HandlerSet implements IHandler {
 
-    const BUILD_IGNORE = false;     // API Calls are built to provide routes
+    const BUILD_IGNORE = true;     // This class should not be built. Classes that use it should set BUILD_IGNORE to false
 
     const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IHandler[] */
-    private $mHandlers = array();
+    protected $mHandlers = array();
 
     public function addHandler($path, IHandler $Handler) {
         $this->mHandlers[strtolower($path)] = $Handler;

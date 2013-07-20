@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
+use CPath\Log;
 use CPath\Util;
 interface IResponse extends IJSON,IXML {
     const STATUS_SUCCESS = 200;
@@ -33,6 +34,10 @@ final class IResponseHelper {
     }
 
     static function sendHeaders(IResponse $Response, $mimeType=NULL) {
+        if(headers_sent($file, $line)) {
+            Log::e("IResponseHelper", "Warning: Headers already sent by {$file}:{$line}");
+            return;
+        }
         $msg = $Response->getMessage();
         //list($msg) = explode("\n", $msg);
         $msg = preg_replace('/[^\w -]/', ' ', $msg);

@@ -16,6 +16,9 @@ class PDOSelect implements \Iterator {
     private $count = 0;
     private $customMethod = null;
     private $lastCond = true;
+    private $alias = NULL;
+    private $joins = array();
+
     public function __construct($table, \PDO $DB, Array $select=array()) {
         $this->DB = $DB;
         $this->table = $table;
@@ -25,6 +28,27 @@ class PDOSelect implements \Iterator {
 
     public function select($field, $name=NULL) {
         $this->select[$name ?: $field] = $field;
+        return $this;
+    }
+
+    /**
+     * @param String $table the table to join
+     * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
+     * @param String|null $destField The destination field to join on.
+     * @param String|null $alias The alias for the table
+     * @return $this
+     */
+    public function leftJoin($table, $sourceField, $destField=NULL, $alias=NULL) {
+        if($destField != NULL) {
+            if($alias) {
+                $sAlias = $this->alias ?: $this->table;
+                $sourceField = "`{$sAlias}`.`{$sourceField}`";
+                $destField = "`{$alias}`.`{$sourceField}`";
+            }
+            $sourceField = " ON {$sourceField} = {$destField}";
+        }
+
+        $this->joins[] = "\tLEFT JOIN {$table} {$alias} {$sourceField}";
         return $this;
     }
 
@@ -46,6 +70,7 @@ class PDOSelect implements \Iterator {
         $this->lastCond = false;
         return $this;
     }
+
 
     public function limit($limit) {
         $this->limit = $limit;
@@ -79,15 +104,23 @@ class PDOSelect implements \Iterator {
         if(!$this->stmt) $this->exec();
         $this->count++;
         $this->row = $this->stmt->fetch();
-        if($call = $this->customMethod)
+        if($this->row && $call = $this->customMethod)
             $this->row = $call instanceof \Closure ? $call($this->row) : call_user_func($call, $this->row);
         return $this->row;
+    }
+
+    public function fetchAll() {
+        if(!$this->stmt) $this->exec();
+        $fetch = $this->stmt->fetchAll();
+        $this->count = sizeof($fetch);
+        return $fetch;
     }
 
     public function getSQL() {
         return "SELECT ".implode(', ', $this->select)
             ."\nFROM ".$this->table
             ."\nWHERE ".($this->where ? implode(' ', $this->where) : '1')
+            .implode('', $this->joins)
             ."\nLIMIT ".$this->limit;
     }
 

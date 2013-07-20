@@ -14,11 +14,25 @@ use CPath\Model\DB\PDOSelect;
 interface IUserSession {
     function getID();
 
+    function getName();
+
     function getFlags();
     function setFlags($value, $commit=true);
 
     function getPassword();
     function setPassword($value, $commit=true);
+
+    /**
+     * Returns true if the user is an admin
+     * @return boolean true if user is an admin
+     */
+    function isAdmin();
+
+    /**
+     * Returns true if the user is viewing debug mode
+     * @return boolean true if user is viewing debug mode
+     */
+    function isDebug();
 
     // Statics
 
@@ -33,9 +47,16 @@ interface IUserSession {
     /**
      * Loads a user instance from a session key
      * @param $key String the session key to search for
-     * @return PDOModel the found user instance
+     * @return PDOModel|mixed the found user instance or primary key id of the user
      */
     static function loadFromSessionKey($key);
+
+    /**
+     * Deletes or disables a session key from the database
+     * @param $key String the session key to search for
+     * @return void
+     */
+    static function disableSessionKey($key);
 
     /**
      * Gets or creates an instance of a guest user
@@ -50,6 +71,12 @@ interface IUserSession {
      * @return IUserSession|PDOModel The logged in user instance
      */
     static function login($search, $password);
+
+    /**
+     * Log out of a user account
+     * @return IUserSession|PDOModel The guest user account
+     */
+    static function logout();
 
     /**
      * Get the current user session or return a guest account

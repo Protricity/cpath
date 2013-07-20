@@ -9,13 +9,14 @@ namespace CPath\Model\DB;
 use CPath\Handlers\Api;
 use CPath\Handlers\ApiField;
 use CPath\Handlers\ApiParam;
-use CPath\Handlers\HandlerSet;
+use CPath\Handlers\ApiSet;
 use CPath\Handlers\SimpleApi;
+use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Model\Response;
-use \PDO;
 
 interface IGetDB {
     /**
@@ -29,10 +30,15 @@ class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate {
     const BUILD_IGNORE = true;
+    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
     const Primary = null;
     const SearchKeys = null;
+
+    const SearchLimitMax = 100;
+    const SearchLimit = 25;
+
     protected $mRow = null;
     private $mCommit = array();
 
@@ -46,7 +52,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         if($id !== NULL) {
             if(!static::Primary)
                 throw new \Exception("Model '".get_class($this)."' has no primary key set");
-            $row = static::getDB()->select(static::TableName, '*')
+            $row = static::select('*')
                 ->where(static::Primary, $id)
                 ->fetch();
             if(!$row)
@@ -71,7 +77,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
                 $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
             $SQL = "UPDATE ".static::TableName
                 ."\n SET {$set}"
-                ."\n WHERE ".static::Primary." = ".$DB->quote($this->mRow[$primary]);
+                ."\n WHERE ".static::Primary." = ".$DB->quote($this->mRow[static::Primary]);
             $DB->exec($SQL);
             $this->mCommit = array();
         }
@@ -80,13 +86,31 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
     }
 
     /**
+     * Returns an IResponse for this object. Defaults to just primary key, if exists.
+     * Overwrite this object and return $this->getResponseArray(...) to return more data.
      * @return IResponse
      */
     public function getResponse()
     {
-        $row = array();
         if(static::Primary)
-            $row[static::Primary] = $this->mRow[static::Primary];
+            return $this->getResponseArray(static::Primary);
+        else
+            return new Response("Retrieved '" . $this . "'", true, array());
+    }
+
+    /**
+     * @param String $_keyArgs an array or varargs of all the fields to return in the response. Set to 'ALL' to return all fields.
+     * @return Response
+     */
+    public function getResponseArray($_keyArgs) {
+        if($_keyArgs==='ALL') {
+            $row = $this->mRow;
+        } else {
+            $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
+            $row = array();
+            foreach($args as $name)
+                if($name) $row[$name] = $this->mRow[$name];
+        }
         return new Response("Retrieved '" . $this . "'", true, $row);
     }
 
@@ -102,12 +126,11 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
     public static function create(Array $row) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot Create " . get_called_class() . " Model");
-        $DB = static::getDB();
         foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);
         try {
-            $id = $DB->insert(static::TableName, array_keys($row))
+            $id = static::insert(array_keys($row))
                 ->requestInsertID(static::Primary)
                 ->values(array_values($row))
                 ->getInsertID();
@@ -117,10 +140,56 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
             throw $ex;
         }
 
-        return new static($id);
+        return static::loadByPrimaryKey($id);
     }
 
-    protected static function fetchCallback(Array $row) {
+    // Database methods
+
+    /**
+     * Create a PDOSelect object for this table
+     * @param $_selectArgs array|mixed an array or series of varargs of fields to select
+     * @return PDOSelect
+     */
+    static function select($_selectArgs) {
+        $args = is_array($_selectArgs) ? $_selectArgs : func_get_args();
+        return new PDOSelect(static::TableName, static::getDB(), $args);
+    }
+
+    /**
+     * Create a PDOInsert object for this table
+     * @param $_insertArgs array|mixed an array or series of varargs of fields to insert
+     * @return PDOInsert
+     */
+    static function insert($_insertArgs) {
+        $DB = static::getDB();
+        $args = is_array($_insertArgs) ? $_insertArgs : func_get_args();
+        return $DB->insert(static::TableName, $args);
+    }
+
+    /**
+     * Create a PDOUpdate object for this table
+     * @param $_fieldArgs array|mixed an array or series of varargs of fields to be updated
+     * @return PDOUpdate
+     */
+    static function update($_fieldArgs) {
+        $args = is_array($_fieldArgs) ? $_fieldArgs : func_get_args();
+        return new PDOUpdate(static::TableName, static::getDB(), $args);
+    }
+
+    /**
+     * Create a PDODelete object for this table
+     * @return PDODelete
+     */
+    static function delete() {
+        return new PDODelete(static::TableName, static::getDB());
+    }
+
+    /**
+     * Creates a model instance from a fetched row
+     * @param array $row the database row
+     * @return PDOModel a new instance of the model
+     */
+    public static function fetchCallback(Array $row) {
         /** @var PDOModel $M */
         $M = new static();
         $M->setData($row);
@@ -129,7 +198,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
 
     /**
      * Loads a model based on a primary key column value
-     * @param $search String the value to search for
+     * @param $search String the primary key value to search for
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      * @throws \Exception if the model does not contain primary keys
@@ -137,10 +206,9 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
     public static function loadByPrimaryKey($search) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot load " . get_called_class() . " Model");
-        $DB = static::getDB();
-        $Model = $DB->select(static::TableName, '*')
+        $Model = static::select('*')
             ->where(static::Primary, $search)
-            ->setCallback(get_called_class().':fetchCallback')
+            ->setCallback(get_called_class().'::fetchCallback')
             ->fetch();
         if(!$Model)
             throw new ModelNotFoundException("Model '{$search}' was not found");
@@ -165,8 +233,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
     public static function searchByFields(Array $fields, $limit=1, $logic='OR') {
-        $DB = static::getDB();
-        $Select = $DB->select(static::TableName, '*');
+        $Select = static::select('*');
 
         $i = 0;
         foreach($fields as $k=>$v)
@@ -176,7 +243,7 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
             }
 
         $Select->limit($limit);
-        $Select->setCallback(get_called_class().':fetchCallback');
+        $Select->setCallback(get_called_class().'::fetchCallback');
         return $Select;
     }
 
@@ -189,11 +256,9 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
      * @throws \Exception if the model does not contain index keys
      */
      public static function searchByAnyIndex($any, $limit=1) {
-        $DB = static::getDB();
-        $Class = get_called_class();
         if(!static::SearchKeys)
-            throw new \Exception("No Indexes defined in ".$Class);
-        $Select = $DB->select(static::TableName, '*');
+            throw new \Exception("No Indexes defined in ".get_called_class());
+        $Select = static::select('*');
 
         $i = 0;
         foreach(explode(',', static::SearchKeys) as $key){
@@ -202,47 +267,68 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         }
 
         $Select->limit($limit);
-        $Select->setCallback(get_called_class().':fetchCallback');
+        $Select->setCallback(get_called_class().'::fetchCallback');
         return $Select;
     }
 
-    protected static function deleteM(PDOModel $Model) {
+    public static function removeByPrimary($id) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . get_called_class() . " Model");
-        $DB = static::getDB();
-        $c = $DB->delete(static::TableName)
-            ->where(static::Primary, $Model->mRow[static::Primary])
+        $c = static::delete()
+            ->where(static::Primary, $id)
             ->execute()
             ->getDeletedRows();
         if(!$c)
-            throw new \Exception("Unable to delete User '" . $Model->mRow[static::Primary] . "'");
+            throw new \Exception("Unable to delete User '{$id}'");
+    }
+
+
+    protected static function removeModel(PDOModel $Model) {
+        if(!static::Primary)
+            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . get_called_class() . " Model");
+        static::removeByPrimary($Model->mRow[static::Primary]);
     }
 
     /**
-     * @return IHandler $Handler
+     * @return ApiSet a set of general api handlers for this model.
+     * @throws ValidationException
      */
-    public static function getHandler()
+    public static function getApiSet()
     {
         /** @var PDOModel $Class */
         $Class = get_called_class();
-        $Handlers = new HandlerSet();
+        $ApiSet = new ApiSet();
         if(static::Primary) {
-            $Handlers->addHandler('get', new SimpleApi(function(Api $API, Array $request) use ($Class) {
+            $ApiSet->addApi('get', new SimpleApi(function(Api $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
-                return $Class::search(array($Class::Primary => $request['search']));
+                return $Class::loadByPrimaryKey($request['id']);
             }, array(
-                'id' => new ApiParam(),
+                'id' => new ApiParam($Class." ID"),
             )));
         }
 
         if(static::SearchKeys) {
-            $keys = explode(',', static::SearchKeys);
-            foreach($keys as $key)
-                $fields[$key] = new ApiField("Search by ".ucfirst($key));
-            $Handlers->addHandler('search', new SimpleApi(function(Api $API, Array $request) use ($Class) {
+            $ApiSet->addApi('search', new SimpleApi(function(Api $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
-                return $Class::search(array($Class::Primary => $request['search']));
-            }, $fields));
+                $limit = $request['limit'];
+                if($limit < 1 || $limit > static::SearchLimitMax)
+                    $limit = static::SearchLimit;
+                if($by = ($request['searchby'])) {
+                    $keys = explode(',', $Class::SearchKeys);
+                    if(!in_array($by, $keys))
+                        throw new ValidationException("Invalid 'searchby'. Allowed: [".$Class::SearchKeys."]");
+                    $Search = $Class::searchByField($by, $request['search'], $limit)->fetchAll();
+                }
+                else
+                    $Search = $Class::searchByAnyIndex($request['search'], $limit)->fetchAll();
+                return new Response("Found (".sizeof($Search).") ".$Class."(s)", true, $Search);
+            }, array(
+                'search' => new ApiParam("Search for {$Class}"),
+                'searchby' => new ApiField("Search by field. Allowed: [".static::SearchKeys."]"),
+                'limit' => new ApiField("The Number of fields to return. Max=".static::SearchLimitMax),
+            )));
         }
+
+        return $ApiSet;
     }
 }

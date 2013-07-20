@@ -9,7 +9,7 @@ namespace CPath\Model;
 
 use CPath\Handlers\Api;
 use CPath\Handlers\ApiParam;
-use CPath\Handlers\HandlerSet;
+use CPath\Handlers\ApiSet;
 use CPath\Handlers\SimpleApi;
 use CPath\Interfaces\IUserSession;
 use CPath\Model\DB\PDOModel;
@@ -52,7 +52,9 @@ class SessionManager {
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
-            return self::$mUserSession = $EmptyUser::loadFromSessionKey($key);
+            $User = $EmptyUser::loadFromSessionKey($key);
+            if(is_scalar($User)) $User = $EmptyUser::loadByPrimaryKey($User);
+            return self::$mUserSession = $User;
         }
         return self::$mUserSession = $EmptyUser::loadGuestAccount();
     }
@@ -78,6 +80,16 @@ class SessionManager {
         return $User;
     }
 
+    public static function logout(IUserSession $EmptyUser) {
+
+        if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
+        {
+            $key = $_SESSION[self::SESSION_KEY];
+            $EmptyUser->disableSessionKey($key);
+        }
+        session_unset();
+    }
+
     public static function isLoggedIn() {
         return self::$mUserSession ? true : false;
     }
@@ -86,8 +98,22 @@ class SessionManager {
         return (int)$User->getFlags() & $flags ? true : false;
     }
 
+    /**
+     * Returns true if the user is an admin
+     * @param IUserSession $User
+     * @return boolean true if user is an admin
+     */
     public static function isAdmin(IUserSession $User) {
         return self::isFlag($User, self::FLAG_ADMIN);
+    }
+
+    /**
+     * Returns true if the user is viewing debug mode
+     * @param IUserSession $User
+     * @return boolean true if user is viewing debug mode
+     */
+    public static function isDebug(IUserSession $User) {
+        return self::isFlag($User, self::FLAG_DEBUG);
     }
 
     public static function checkPassword(IUserSession $User, $password) {
@@ -117,23 +143,26 @@ class SessionManager {
     }
 
     /**
-     * @param HandlerSet $Handlers
-     * @param String|null $UserClass
-     * @throws UserNotFoundException when user is not found
+     * Adds Session Api calls to an ApiSet
+     * @param IUserSession $EmptyUser an empty user instance
+     * @param ApiSet $ApiSet an existing set of Apis to add to
+     * @throws UserNotFoundException
      */
-    public static function addHandlers(HandlerSet $Handlers, $UserClass)
+    public static function addApis(IUserSession $EmptyUser, ApiSet $ApiSet)
     {
-        $Handlers->addHandler('login', new SimpleApi(function(Api $API, Array $request) use ($UserClass) {
+        $ApiSet->addApi('login', new SimpleApi(function(Api $API, Array $request) use ($EmptyUser) {
             $request = $API->processRequest($request);
-            /** @var IUserSession $UserClass */
-            $User = $UserClass::login($request['name'], $request['password']);
-            if(!$User)
-                throw new UserNotFoundException("User '".$request['name'].'" not found');
-            return $User;
+            $User = $EmptyUser::login($request['name'], $request['password']);
+            return new Response("Logged in as user '".$User->getName()."' successfully", true);
         }, array(
             'name' => new ApiParam("Username or Email Address"),
             'password' => new ApiParam("Password")
         )));
+
+        $ApiSet->addApi('logout', new SimpleApi(function(Api $API, Array $request) use ($EmptyUser) {
+            $EmptyUser::logout();
+            return new Response("Logged out successfuly", true);
+        }));
 
     }
 }
