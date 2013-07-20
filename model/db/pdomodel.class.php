@@ -178,7 +178,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 $Insert = static::insert(array_keys($row))
                     ->requestInsertID(static::Primary)
                     ->values(array_values($row));
-                if(!$id)
+                if(!isset($id))
                     $id = $Insert->getInsertID();
                 return static::loadByPrimaryKey($id);
             }

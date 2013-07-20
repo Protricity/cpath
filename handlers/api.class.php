@@ -68,8 +68,8 @@ abstract class Api implements IApi {
         return $Response;
     }
 
-    protected function parseRequestParams(Array &$request, IRoute $Route) {
-        if($Route->hasNextArg()) {
+    protected function parseRequestParams(Array &$request, IRoute $Route=NULL) {
+        if($Route && $Route->hasNextArg()) {
             foreach($this->mFields as $name=>$Field) {
                 if(!$Route->hasNextArg())
                     break;
