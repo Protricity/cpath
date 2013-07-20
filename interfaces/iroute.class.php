@@ -18,4 +18,8 @@ interface IRoute {
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     function tryRoute($requestPath);
+
+
+    function getRoute();
+    function getDestination();
 }

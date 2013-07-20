@@ -16,4 +16,5 @@ interface IApi extends IHandler {
      */
     function execute(Array $request);
 
+    function getDisplayRoute(&$methods, $route=NULL);
 }

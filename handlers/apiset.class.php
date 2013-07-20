@@ -11,6 +11,7 @@ use CPath\Handlers\Api\View\ApiInfo;
 use CPath\Interfaces\IApi;
 use CPath\Interfaces\IHandler;
 use CPath\NoRoutesFoundException;
+use CPath\Route;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
@@ -125,6 +126,20 @@ class ApiSet extends Api {
             }
         }
         return $this->mRoutes;
+    }
+
+
+    public function getDisplayRoute(&$methods, $route=NULL) {
+        if(!$route) $route = Route::getCurrentRoute()->getRoute();
+        $methods = array('GET', 'POST');
+        if($this->mPath) {
+            $route .= $this->mPath .'/';
+            $Api = $this->getSelectedApi();
+            $route = $Api->getDisplayRoute($methods, $route);
+        } else {
+            $route = Route::getCurrentRoute()->getRoute();
+        }
+        return $route;
     }
 
     protected function getSelectedApi($path=NULL) {

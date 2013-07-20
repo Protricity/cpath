@@ -24,6 +24,8 @@ class Route implements IRoute {
     private
         $mRoute,
         $mDestination;
+    private static
+        $mCurrentRoute = NULL;
 
     /**
      * Constructs a new Route Entry
@@ -34,6 +36,9 @@ class Route implements IRoute {
         $this->mRoute = $route;
         $this->mDestination = $destination;
     }
+
+    public function getRoute() { return $this->mRoute; }
+    public function getDestination() { return $this->mDestination; }
 
     /**
      * Try's a route against a request path
@@ -52,6 +57,8 @@ class Route implements IRoute {
         else
             $args = array();
 
+        self::$mCurrentRoute = $this;
+
         $dest = $this->mDestination;
         $Class = new \ReflectionClass($dest);
         if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
@@ -61,7 +68,7 @@ class Route implements IRoute {
             $Handler = new $dest();
             $Handler->render($args);
         } else {
-            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler/IHandlerAggregate");
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler or IHandlerAggregate");
         }
 
         return true;
@@ -91,5 +98,13 @@ class Route implements IRoute {
                 return;
         }
         throw new NoRoutesFoundException("No Routes Matched: " . Util::getUrl('route'));
+    }
+
+    /**
+     * Get the currently used route.
+     * @return IRoute the current route
+     */
+    public static function getCurrentRoute() {
+        return self::$mCurrentRoute;
     }
 }

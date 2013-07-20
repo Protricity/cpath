@@ -10,6 +10,7 @@ namespace CPath\Handlers;
 use CPath\Interfaces\IApi;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Route;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
@@ -210,24 +211,15 @@ abstract class Api implements IApi {
         return $this->mFields;
     }
 
-    /**
-     * Provides the formatted route for viewing purposes
-     * @return array the formatted route(s)
-     */
-    public function getDisplayRoutes() {
-        if(!$this->mRoutes) {
-            $this->mRoutes = array();
-            $BuildRoutes = new BuildRoutes();
-            foreach($BuildRoutes->getHandlerRoutes(new \ReflectionClass($this)) as $route) {
-                foreach($this->mFields as $name => $Field) {
-                    if(!($Field instanceof IApiParam))
-                        continue;
-                    $route .= '/:' . $name ;
-                }
-                $this->mRoutes [] = $route;
-            }
+    public function getDisplayRoute(&$methods, $route=NULL) {
+        $methods = array('GET', 'POST');
+        if(!$route) $route = Route::getCurrentRoute()->getRoute();
+        foreach($this->mFields as $name => $Field) {
+            if(!($Field instanceof IApiParam))
+                continue;
+            $route .= '/:' . $name ;
         }
-        return $this->mRoutes;
+        return $route;
     }
 
 }
