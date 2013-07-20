@@ -48,7 +48,8 @@ group by column_name;") as $row ) {
         $cols = array();
         foreach($DB->query("SELECT * FROM information_schema.columns AS c WHERE c.table_name = '$table';") as $row) {
             $name = $row['column_name'];
-            $cols[] = $name;
+            $type = stripos($row['data_type'], 'int') !== false ? 'i' : 's';
+            $cols[$name] = $type;
             if(stripos($row['column_default'], 'nextval(') ===0) {
                 if(!$primaryCol)
                     $primaryCol = $name;

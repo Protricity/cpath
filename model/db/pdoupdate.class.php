@@ -14,7 +14,7 @@ class PDOUpdate {
     /** @var \PDOStatement */
     private $stmt=NULL;
     private $table, $fields=array(), $where=array(), $limit;
-    public function __construct($table, \PDO $DB, Array $fields, $limit=1) {
+    public function __construct($table, \PDO $DB, Array $fields, $limit=NULL) {
         $this->DB = $DB;
         $this->table = $table;
         $this->fields = $fields;
@@ -67,6 +67,6 @@ class PDOUpdate {
         return "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
             ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
-            ."\nLIMIT ".$this->limit;
+            .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
 }

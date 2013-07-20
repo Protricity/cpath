@@ -34,7 +34,10 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
 
     const TableName = null;
     const Primary = null;
+    Const Columns = null;
+    Const Types = null;
     const SearchKeys = null;
+    const SearchTypes = null;
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
@@ -261,7 +264,16 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         $Select = static::select('*');
 
         $i = 0;
-        foreach(explode(',', static::SearchKeys) as $key){
+        $keys = explode(',', static::SearchKeys);
+        if(!is_numeric($any)) {
+            $types = static::SearchTypes;
+            $keys2 = array();
+            foreach($keys as $j=>$key)
+                if($types[$j] != 'i')
+                    $keys2[] = $key;
+            $keys = $keys2;
+        }
+        foreach($keys as $key){
             if($i++) $Select->where('OR');
             $Select->where($key, $any);
         }

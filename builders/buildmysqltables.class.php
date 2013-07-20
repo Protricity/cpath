@@ -51,7 +51,8 @@ PHP;
         $cols = array();
         foreach($DB->query("SHOW COLUMNS FROM `$table`;") as $row) {
             $name = $row['Field'];
-            $cols[] = $name;
+            $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
+            $cols[$name] = $type;
             if($name == $primaryCol && $row['Extra'] != 'auto_increment')
                 $primaryAutoInc = false;
         }

@@ -190,10 +190,16 @@ PHP;
             $primaryAutoInc = false;
             $indexCols = $this->getIndexes($DB, $table, $primaryCol, $primaryAutoInc);
             $cols = $this->getColumns($DB, $table, $primaryCol, $primaryAutoInc);
+            $types = implode('', array_values($cols));
+            $searchTypes = '';
+            $cols = array_keys($cols);
             $order = array();
-            foreach($cols as $name)
-                if(in_array($name, $indexCols))
+            foreach($cols as $i=>$name) {
+                if(in_array($name, $indexCols)) {
                     $order[] = $name;
+                    $searchTypes .= $types[$i];
+                }
+            }
             $indexCols = $order;
             $file = strtolower($table).'.class.php';
 
@@ -213,8 +219,12 @@ PHP;
 
             $php = $this->getConst('TableName', $table);
             $php .= $this->getConst('Primary', $primaryCol);
-            if($indexCols)
+            $php .= $this->getConst('Columns', implode(',', $cols));
+            $php .= $this->getConst('Types', $types);
+            if($indexCols) {
                 $php .= $this->getConst('SearchKeys', implode(',', $indexCols));
+                $php .= $this->getConst('SearchTypes', $searchTypes);
+            }
             foreach($cols as $name)
                 $php .= $this->getConst(strtoupper($name), $name);
             foreach($cols as $name)

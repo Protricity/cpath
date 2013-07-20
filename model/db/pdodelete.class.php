@@ -13,10 +13,11 @@ class PDODelete {
     private $DB;
     /** @var \PDOStatement */
     private $stmt=NULL;
-    private $table, $where=array(), $limit=1;
-    public function __construct($table, \PDO $DB, $limit=1) {
+    private $table, $where=array(), $limit=NULL;
+    public function __construct($table, \PDO $DB, $limit=NULL) {
         $this->DB = $DB;
         $this->table = $table;
+        $this->limit = $limit;
     }
 
     public function where($field, $value=NULL) {
@@ -45,6 +46,6 @@ class PDODelete {
             throw new \Exception("method where() was not called");
         return "DELETE FROM ".$this->table
             ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
-            ."\nLIMIT ".$this->limit;
+            .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
 }
