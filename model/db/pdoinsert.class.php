@@ -57,7 +57,7 @@ abstract class PDOInsert {
         if(!$this->batch)
             throw new \Exception("No Batch Available");
         $SQL = "INSERT INTO ".$this->table
-            ."\n (`".implode('`, `',$this->fields).'`)'
+            ."\n (".implode(', ',$this->fields).')'
             ."\n VALUES ";
         $values = array();
         foreach($this->batch as $i => $batch) {
@@ -72,7 +72,7 @@ abstract class PDOInsert {
 
     public function getSQL($token='?') {
         $SQL = "INSERT INTO ".$this->table
-            ."\n (`".implode('`, `',$this->fields).'`)'
+            ."\n (".implode(', ',$this->fields).')'
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
         $this->updateSQL($SQL);
         return $SQL;

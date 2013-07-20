@@ -24,7 +24,7 @@ class PDODelete {
         if(!is_int($value))
             $value = $this->DB->quote($value);
         if(strpos($field, '?') === false)
-            $field = '`'.$field.'`=' . $value;
+            $field = $field.'=' . $value;
         else
             $field = str_replace('?', $value, $field);
         $this->where[] = $field;
