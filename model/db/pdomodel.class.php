@@ -309,7 +309,8 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
     {
         /** @var PDOModel $Class */
         $Class = get_called_class();
-        $ApiSet = new ApiSet();
+        $ApiSet = new ApiSet($Class);
+        TODO SimpleApi needs to store the class name of its creator
         if(static::Primary) {
             $ApiSet->addApi('get', new SimpleApi(function(Api $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
@@ -342,5 +343,12 @@ abstract class PDOModel implements IGetDB, IResponseAggregate, IHandlerAggregate
         }
 
         return $ApiSet;
+    }
+
+    /**
+     * @return IHandler $Handler
+     */
+    static function getHandler() {
+        return static::getApiSet();
     }
 }

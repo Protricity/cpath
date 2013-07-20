@@ -34,7 +34,9 @@ abstract class Api implements IApi {
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IApiField[] */
-    private $mFields = array(), $mRoutes=NULL;     // API Fields
+    private $mFields = array();
+    private $mRoutes=NULL;     // API Fields
+
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -62,6 +64,49 @@ abstract class Api implements IApi {
             $Response = new ResponseException($ex->getMessage(), null, $ex);
         }
         return $Response;
+    }
+
+    /**
+     * Sends headers and renders an IResponse as HTML
+     * @param IResponse $Response
+     * @return void
+     */
+    public function renderHTML(IResponse $Response) {
+        $Response->sendHeaders('text/html');
+        $Render = new ApiInfo();
+        $Render->render($this, $Response);
+    }
+
+    /**
+     * Sends headers and renders an IResponse as JSON
+     * @param IResponse $Response
+     * @return void
+     */
+    public function renderJSON(IResponse $Response) {
+        $Response->sendHeaders('application/json');
+        $JSON = Util::toJSON($Response);
+        echo json_encode($JSON);
+    }
+
+    /**
+     * Sends headers and renders an IResponse as XML
+     * @param IResponse $Response
+     * @return void
+     */
+    public function renderXML(IResponse $Response) {
+        $Response->sendHeaders('text/xml');
+        $XML = Util::toXML($Response);
+        echo $XML->asXML();
+    }
+
+    /**
+     * Sends headers and renders an IResponse as Plain Text
+     * @param IResponse $Response
+     * @return void
+     */
+    public function renderText(IResponse $Response) {
+        $Response->sendHeaders('text/plain');
+        echo $Response."\n";
     }
 
     /**
@@ -146,23 +191,16 @@ abstract class Api implements IApi {
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $Response->sendHeaders($mimeType);
-                    $JSON = Util::toJSON($Response);
-                    echo json_encode($JSON);
+                    $this->renderJSON($Response);
                     return;
                 case 'text/xml':
-                    $Response->sendHeaders($mimeType);
-                    $XML = Util::toXML($Response);
-                    echo $XML->asXML();
+                    $this->renderXML($Response);
                     return;
                 case 'text/html':
-                    $Response->sendHeaders($mimeType);
-                    $Render = new ApiInfo();
-                    $Render->render($this, $Response);
+                    $this->renderHTML($Response);
                     return;
                 case 'text/plain':
-                    $Response->sendHeaders($mimeType);
-                    echo $Response."\n";
+                    $this->renderText($Response);
                     return;
             }
         }
@@ -171,6 +209,7 @@ abstract class Api implements IApi {
     public function getFields() {
         return $this->mFields;
     }
+
     /**
      * Provides the formatted route for viewing purposes
      * @return array the formatted route(s)
@@ -190,6 +229,7 @@ abstract class Api implements IApi {
         }
         return $this->mRoutes;
     }
+
 }
 
 /**

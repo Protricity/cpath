@@ -7,7 +7,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Handlers\Api\View\ApiInfo;
 use CPath\Interfaces\IApi;
+use CPath\Interfaces\IHandler;
 use CPath\NoRoutesFoundException;
 use CPath\Util;
 use CPath\Build;
@@ -31,6 +33,17 @@ class ApiSet extends Api {
     /** @var IApi[] */
     protected $mApis = array();
     private $mPath = NULL;
+    private $mClassName = NULL;
+    private $mRoutes = array();
+
+    /**
+     * Creates a new ApiSet instance
+     * @param null $ContainerClass The class name of the class that created this ApiSet
+     */
+    public function __construct($ContainerClass=NULL) {
+        if($ContainerClass)
+            $this->mClassName = $ContainerClass;
+    }
 
     /**
      * @param String $path the alphanumeric path to the IAPI Instance
@@ -61,12 +74,7 @@ class ApiSet extends Api {
      */
     function execute(Array $request, $path=NULL)
     {
-        if(!$path) $path = $this->mPath;
-        if(!$path)
-            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        if(!isset($this->mApis[$path]))
-            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        return $this->mApis[$path]->execute($request);
+        return $this->getSelectedApi($path)->execute($request);
     }
 
     function executeAsResponse(Array $request, $path=NULL) {
@@ -76,9 +84,55 @@ class ApiSet extends Api {
     }
 
 
+    /**
+     * Sends headers and renders an IResponse as HTML
+     * @param IResponse $Response
+     * @return void
+     */
+    public function renderHTML(IResponse $Response) {
+        $Api = $this;
+        if($this->mPath)
+            $Api = $this->getSelectedApi();
+        $Response->sendHeaders('text/html');
+        $Render = new ApiInfo();
+        $Render->render($Api, $Response);
+    }
+
     function render(Array $args)
     {
         $this->mPath = strtolower(array_shift($args));
         parent::render($args);
+    }
+
+    /**
+     * Provides the formatted route for viewing purposes
+     * @return array the formatted route(s)
+     */
+    public function getDisplayRoutes() {
+        if(!$this->mRoutes) {
+            $this->mRoutes = array();
+            $BuildRoutes = new BuildRoutes();
+            foreach($BuildRoutes->getHandlerRoutes(new \ReflectionClass($this->mClassName)) as $route) {
+                if($this->mPath) {
+                    $Api = $this->getSelectedApi();
+                    foreach($Api->mFields as $name => $Field) {
+                        if(!($Field instanceof IApiParam))
+                            continue;
+                        $route .= '/:' . $name ;
+                    }
+                }
+                $this->mRoutes [] = $route;
+            }
+        }
+        return $this->mRoutes;
+    }
+
+    protected function getSelectedApi($path=NULL) {
+        if(!$path) $path = $this->mPath;
+        if(!$path)
+            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mApis)));
+        if(!isset($this->mApis[$path]))
+            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mApis)));
+        return $this->mApis[$path];
     }
 }

@@ -80,6 +80,9 @@ class SessionManager {
         return $User;
     }
 
+    /**
+     * @param IUserSession $EmptyUser an empty user instance
+     */
     public static function logout(IUserSession $EmptyUser) {
 
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
