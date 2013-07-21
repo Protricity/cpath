@@ -8,34 +8,21 @@
 namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDODelete {
+class PDODelete extends PDOWhere {
     /** @var \PDO */
     private $DB;
     /** @var \PDOStatement */
     private $stmt=NULL;
-    private $table, $where=array(), $limit=NULL;
+    private $limit=NULL;
     public function __construct($table, \PDO $DB, $limit=NULL) {
+        parent::__construct($table);
         $this->DB = $DB;
-        $this->table = $table;
         $this->limit = $limit;
     }
 
-    public function where($field, $value=NULL) {
-        if(!is_int($value))
-            $value = $this->DB->quote($value);
-        if(strpos($field, '?') === false)
-            $field = $field.'=' . $value;
-        else
-            $field = str_replace('?', $value, $field);
-        $this->where[] = $field;
-        $this->stmt = NULL;
-        return $this;
-    }
-
-
     public function execute() {
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
-        $this->stmt->execute();
+        $this->stmt->execute($this->values);
         return $this;
     }
 
@@ -45,7 +32,7 @@ class PDODelete {
         if(!$this->where)
             throw new \Exception("method where() was not called");
         return "DELETE FROM ".$this->table
-            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
+            .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
 }

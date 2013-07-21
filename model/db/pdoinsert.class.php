@@ -42,6 +42,11 @@ abstract class PDOInsert {
         return $this;
     }
 
+    /**
+     * Insert or batch a row of values
+     * @param $_values Array an indexed array of values to insert
+     * @return PDOInsert $this
+     */
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());

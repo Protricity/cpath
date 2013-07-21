@@ -8,15 +8,15 @@
 namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDOUpdate {
+class PDOUpdate extends PDOWhere {
     /** @var \PDO */
     private $DB;
     /** @var \PDOStatement */
     private $stmt=NULL;
-    private $table, $fields=array(), $where=array(), $limit;
+    private $fields=array(), $limit;
     public function __construct($table, \PDO $DB, Array $fields, $limit=NULL) {
+        parent::__construct($table);
         $this->DB = $DB;
-        $this->table = $table;
         $this->fields = $fields;
         $this->limit = $limit;
     }
@@ -30,18 +30,6 @@ class PDOUpdate {
     public function addWhere($field) {
         if(strpos($field, '?') === false)
             $field .= '=?';
-        $this->where[] = $field;
-        $this->stmt = NULL;
-        return $this;
-    }
-
-    public function where($field, $value=NULL) {
-        if(!is_int($value))
-            $value = $this->DB->quote($value);
-        if(strpos($field, '?') === false)
-            $field .= '=' . $value;
-        else
-            $field = str_replace('?', $value, $field);
         $this->where[] = $field;
         $this->stmt = NULL;
         return $this;
@@ -66,7 +54,7 @@ class PDOUpdate {
             throw new \Exception("method addWhere() was not called");
         return "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
-            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1')
+            .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
 }

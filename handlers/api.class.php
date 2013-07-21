@@ -322,7 +322,15 @@ class APIRequiredField extends APIField {
  * @package CPath
  * Represents a Parameter from the route path
  */
-class APIParam extends APIRequiredField implements IAPIParam {
+class APIParam extends APIField implements IAPIParam {
+}
+
+/**
+ * Class APIRquiredParam
+ * @package CPath
+ * Represents a Required Parameter from the route path
+ */
+class APIRequiredParam extends APIRequiredField implements IAPIParam {
 }
 
 class APIFilterField extends APIField {

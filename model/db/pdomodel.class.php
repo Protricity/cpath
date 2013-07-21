@@ -10,6 +10,7 @@ use CPath\Base;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
+use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\APISet;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
@@ -191,7 +192,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 unset($row[$k]);
         try {
             if(!static::Primary) {
-                $id = static::insert(array_keys($row))
+                static::insert(array_keys($row))
                     ->values(array_values($row));
                 return NULL;
             } else {
@@ -288,6 +289,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Creates a PDOSelect for searching models.
+     * @param bool $asRow if true, returns an array of data instead of an instance of the model
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
     public static function search($asRow=false) {
@@ -371,7 +373,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             ->execute()
             ->getDeletedRows();
         if(!$c)
-            throw new \Exception("Unable to delete User '{$id}'");
+            throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
     }
 
 
@@ -384,6 +386,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     /**
      * @return APISet a set of general api handlers for this model.
      * @throws ValidationException
+     * @throws ModelNotFoundException if no Model was found
      */
     public static function getAPISet()
     {
@@ -393,9 +396,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if(static::Primary) {
             $APISet->addAPI('get', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
-                return $Class::loadByPrimaryKey($request['id']);
+                $Search = $Class::search();
+                $Search->where($Class::Primary, $request['id']);
+                $Class::limitAPIGet($Search);
+                $data = $Search->fetch();
+                if(!$data)
+                    throw new ModelNotFoundException($Class::getModelName() . " '{$request['id']}' was not found");
+                return $data;
             }, array(
-                'id' => new APIParam($Class." ID"),
+                'id' => new APIRequiredParam($Class." ID"),
             )));
         }
 
@@ -417,22 +426,63 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     if(!in_array($by, $keys))
                         throw new ValidationException("Invalid 'searchby'. Allowed: [".$Class::SearchKeys."]");
 
-                    $Search = $Class::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit)
-                        ->fetchAll();
+                    $Search = $Class::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit);
                 }
                 else
-                    $Search = $Class::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '')
-                        ->fetchAll();
-                return new Response("Found (".sizeof($Search).") ".$Class."(s)", true, $Search);
+                    $Search = $Class::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '');
+                $Class::limitAPISearch($Search);
+                $data = $Search->fetchAll();
+                return new Response("Found (".sizeof($data).") ".$Class::getModelName()."(s)", true, $data);
             }, array(
-                'search' => new APIParam("Search for {$Class}"),
-                'searchby' => new APIField("Search by field. Allowed: [".static::SearchKeys."]"),
+                'search' => new APIRequiredParam("Search for ".$Class::getModelName()),
+                'searchby' => new APIParam("Search by field. Allowed: [".static::SearchKeys."]"),
                 'limit' => new APIField("The Number of fields to return. Max=".static::SearchLimitMax),
+            )));
+        }
+
+        if(static::Primary) {
+            $APISet->addAPI('remove', new SimpleAPI(function(API $API, Array $request) use ($Class) {
+                $request = $API->processRequest($request);
+                $Search = $Class::search();
+                $Search->where($Class::Primary, $request['id']);
+                $Class::limitAPIRemove($Search);
+                $Model = $Search->fetch();
+                if(!$Model)
+                    throw new ModelNotFoundException($Class::getModelName() . " '{$request['id']}' was not found");
+                $Class::removeModel($Model);
+                return new Response("Removed ".$Class::getModelName()."(s)", true, $Model);
+
+            }, array(
+                'id' => new APIRequiredParam($Class." ID"),
             )));
         }
 
         return $APISet;
     }
+
+    /**
+     * Override this to limit all default API 'search', 'get', and 'remove' calls
+     * @param PDOWhere $Select the statement to limit.
+     */
+    protected static function limitAPI(PDOWhere $Select) {}
+
+    /**
+     * Override this to limit all default API 'search' calls
+     * @param PDOWhere $Select the statement to limit.
+     */
+    protected static function limitAPISearch(PDOWhere $Select) { static::limitAPI($Select); }
+
+    /**
+     * Override this to limit all default API 'get' calls
+     * @param PDOWhere $Select the statement to limit.
+     */
+    protected static function limitAPIGet(PDOWhere $Select) { static::limitAPI($Select); }
+
+    /**
+     * Override this to limit all default API 'remove' calls
+     * @param PDOWhere $Select the statement to limit.
+     */
+    protected static function limitAPIRemove(PDOWhere $Select) { static::limitAPI($Select); }
 
     /**
      * @return APISet a set of common api routes for this model

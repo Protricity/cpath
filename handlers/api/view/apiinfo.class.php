@@ -1,6 +1,7 @@
 <?php
 namespace CPath\Handlers\API\View;
 
+use CPath\Base;
 use CPath\Util;
 use CPath\Handlers\API;
 use CPath\Interfaces\IResponse;
@@ -39,6 +40,14 @@ class APIInfo {
             echo htmlentities($dom->saveXML());
 
         ?></div>
+
+        <?php if(Base::isDebug()) { ?>
+        <h3>Debug</h3>
+        <div style='white-space: pre'><?php
+            //foreach(Log::get)
+
+        ?></div>
+        <?php } ?>
     </body>
 </html><?php
     }

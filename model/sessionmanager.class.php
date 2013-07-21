@@ -8,7 +8,7 @@
 namespace CPath\Model;
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIParam;
+use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\APISet;
 use CPath\Handlers\SimpleAPI;
 use CPath\Interfaces\IUserSession;
@@ -166,8 +166,8 @@ class SessionManager {
             $User = $EmptyUser::login($request['name'], $request['password']);
             return new Response("Logged in as user '".$User->getName()."' successfully", true, $User);
         }, array(
-            'name' => new APIParam("Username or Email Address"),
-            'password' => new APIParam("Password")
+            'name' => new APIRequiredParam("Username or Email Address"),
+            'password' => new APIRequiredParam("Password")
         )));
 
         $APISet->addAPI('logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {

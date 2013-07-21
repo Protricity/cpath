@@ -8,7 +8,6 @@
 namespace CPath\Model;
 use CPath\Util;
 use CPath\Log;
-use CPath\LogUser;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\ILogListener;
