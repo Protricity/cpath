@@ -26,10 +26,10 @@ use CPath\Handlers\API\View\APIInfo;
  */
 class SimpleAPI extends API {
 
-    const BUILD_IGNORE = true;     // API Calls are built to provide routes
+    const Build_Ignore = true;     // API Calls are built to provide routes
 
-    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
-    const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
+    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
 
     private $mCallback;
 

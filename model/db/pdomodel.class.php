@@ -31,8 +31,8 @@ class ModelNotFoundException extends \Exception {}
 class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate {
-    const BUILD_IGNORE = true; // TODO: Title case
-    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    const Build_Ignore = true; // TODO: Title case
+    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
     const Primary = null;

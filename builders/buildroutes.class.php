@@ -74,8 +74,8 @@ class BuildRoutes implements IBuilder {
      */
     public function getHandlerRoutes(\ReflectionClass $Class) {
         $routes = array();
-        $methods = $Class->getConstant('ROUTE_METHODS') ?: 'GET|POST|CLI';
-        $route = $Class->getConstant('ROUTE_PATH');
+        $methods = $Class->getConstant('Route_Methods') ?: 'GET|POST|CLI';
+        $route = $Class->getConstant('Route_Path');
         if(!$route) {
             $route = '/'.str_replace('\\', '/', strtolower($Class->getName()));
         }

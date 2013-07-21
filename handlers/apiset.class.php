@@ -27,10 +27,10 @@ use CPath\Builders\BuildRoutes;
  */
 class APISet extends API implements \ArrayAccess, \IteratorAggregate {
 
-    const BUILD_IGNORE = true;     // This class should not be built. Classes that use it should set BUILD_IGNORE to false
+    const Build_Ignore = true;     // This class should not be built. Classes that use it should set Build_Ignore to false
 
-    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
-    const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
+    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IAPI[] */
     protected $mAPIs = array();

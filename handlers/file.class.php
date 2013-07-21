@@ -11,10 +11,10 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
 
 class File implements IHandler{
-    const BUILD_IGNORE = true;
+    const Build_Ignore = true;
 
-    const ROUTE_METHODS = 'GET';
-    const ROUTE_PATH = NULL;
+    const Route_Methods = 'GET';
+    const Route_Path = NULL;
 
     private $mFilePath;
 

@@ -116,7 +116,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     // Implement IHandler
 
-    const ROUTE_METHODS = 'CLI';
+    const Route_Methods = 'CLI';
 
     function render(IRoute $Route) {
         if(!Util::isCLI() && !headers_sent())

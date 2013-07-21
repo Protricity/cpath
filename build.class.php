@@ -15,8 +15,8 @@ class BuildException extends \Exception {}
 
 class Build extends API {
 
-    const ROUTE_PATH = '/build';     // Allow manual building from command line: 'php index.php build'
-    const ROUTE_METHODS = 'CLI';    // CLI only
+    const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
+    const Route_Methods = 'CLI';    // CLI only
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -208,7 +208,7 @@ class Build extends API {
             if($Class === NULL) // TODO: can this be null?
                 throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
-            if($Class->getConstant('BUILD_IGNORE')) {
+            if($Class->getConstant('Build_Ignore')) {
                 //Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
                 continue;
             }
