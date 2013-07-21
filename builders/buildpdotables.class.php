@@ -86,6 +86,7 @@ PHP;
 
 PHP;
 
+    // TODO: move out of the build class
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
         if($oldVersion===NULL)
             $oldVersion = $DB->getDBVersion();

@@ -28,6 +28,12 @@ abstract class Util {
         if(!empty($_SERVER["REQUEST_URI"])) {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
             self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
+
+            $root = dirname($_SERVER['SCRIPT_NAME']);
+            $request = self::$mUrl["path"];
+            if(stripos($request, $root) === 0)
+                $request = substr($request, strlen($root));
+            self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
         } elseif ($args = $_SERVER['argv']) {
             array_shift($args);
             $CLI = new CLI($args);
@@ -37,11 +43,6 @@ abstract class Util {
             self::$mIsCLI = true;
             Log::addCallback($CLI);
         }
-        $root = dirname($_SERVER['SCRIPT_NAME']);
-        $request = self::$mUrl["path"];
-        if(stripos($request, $root) === 0)
-            $request = substr($request, strlen($root));
-        self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
 
         self::$mHeaders = function_exists('getallheaders')
             ? getallheaders()

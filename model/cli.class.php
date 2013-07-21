@@ -12,7 +12,6 @@ use CPath\Interfaces\ILogListener;
 
 class CLI implements ILogListener {
 
-    private $mMethod;
     private $mArgs;
     private $mRequest = array();
     private $mUrl;
@@ -22,29 +21,44 @@ class CLI implements ILogListener {
             $args = $_SERVER['argv'];
 
         if(!$args[0]) {
-            $this->mMethod = 'CLI';
+            $method = 'CLI';
         } else {
             if(preg_match('/^get|post|cli$/i', $args[0])) {
-                $this->mMethod = strtoupper(array_shift($args));
+                $method = strtoupper(array_shift($args));
             } else {
-                $this->mMethod = 'CLI';
+                $method = 'CLI';
             }
         }
 
         $args2 = array();
         for($i=0; $i<sizeof($args); $i++) {
-            if($args[$i][0] == '-') {
-                $this->mRequest[ltrim($args[$i], '- ')] = $args[++$i];
+            $arg = trim($args[$i]);
+            if($arg === '')
+                return;
+            if($arg[0] == '-') {
+                if($arg[$i+1]) {
+                    if($arg[$i+1][0] == '-')
+                        $val = true;
+                    else
+                        $val = $arg[++$i];
+                    $this->mRequest[ltrim($arg, '- ')] = $val;
+                }
             } else {
-                $args2[] = $args[$i];
+                $args2[] = $arg;
             }
         }
-        $this->mArgs = $args2;
+        $args = $args2;
 
-        if(isset($args2[0]) && $args2[0][0] == '/')
-            $this->mUrl = parse_url($args2[0]);
-        else
-            $this->mUrl = array('path'=>'/'.implode('/', $args2));
+        if($args) {
+            if($args[0])
+                foreach(array_reverse(explode('/', array_shift($args))) as $a)
+                    if($a) array_unshift($args, $a);
+            $this->mUrl = parse_url('/'.implode('/', $args));
+            $this->mArgs = $args;
+        } else {
+            $this->mUrl = array('path'=>'/');
+            $this->mArgs = array();
+        }
 
         if(isset($this->mUrl['query'])) {
             $query = array();
@@ -52,14 +66,15 @@ class CLI implements ILogListener {
             $this->mRequest = $query + $this->mRequest;
         }
 
-        $this->mUrl['method'] = $this->mMethod;
+        $this->mUrl['method'] = $method;
+        $this->mUrl['route'] = $method . " " . $this->mUrl['path'];
     }
 
     public function getArgs() { return $this->mArgs; }
     public function getRequest() { return $this->mRequest; }
     public function getParsedUrl() { return $this->mUrl; }
-    public function getMethod() { return $this->mMethod; }
     public function getPath() { return $this->mUrl['path']; }
+    public function getRoute() { return $this->mUrl['route']; }
 
     function onLog(ILogEntry $log)
     {

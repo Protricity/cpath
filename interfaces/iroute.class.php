@@ -24,9 +24,10 @@ interface IRoute {
 
     /**
      * Renders the route destination
+     * @param String $requestPath
      * @return void
      */
-    function render();
+    function render($requestPath);
 
     function getRoute();
     function getDestination();

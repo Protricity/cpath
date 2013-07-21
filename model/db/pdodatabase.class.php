@@ -14,6 +14,7 @@ use CPath\Log;
 use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IDatabase;
 use CPath\Builders\BuildRoutes;
+use CPath\Util;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
@@ -118,16 +119,17 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     const ROUTE_METHODS = 'CLI';
 
     function render(IRoute $Route) {
-        header('text/plain');
-        echo "DB Upgrader: ".get_class($this)."\n\n";
+        if(!Util::isCLI() && !headers_sent())
+            header('text/plain');
+        echo "DB Upgrader: ".get_class($this)."\n";
         if(in_array($Route->getNextArg(), array('upgrade', 'rebuild'))) {
             $this->upgrade($Route->getCurrentArg() == 'rebuild');
+            echo "DB Upgrader Completed\n";
             //foreach(Log::get() as $log)
             //    echo $log."\n";
         } else {
-            echo "use /upgrade to upgrade database\n";
+            echo "use .../upgrade to upgrade database\n";
         }
-        echo "DB Upgrader Completed\n";
 
     }
 

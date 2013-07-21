@@ -154,6 +154,7 @@ class Build extends Api {
         }
         self::$mForce = $force;
         self::$mBuilders = array();
+        self::$mClasses = array();
         $exCount = self::findClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
         foreach(self::$mClasses as $Class) {

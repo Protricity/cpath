@@ -98,11 +98,6 @@ class Route implements IRoute {
     public function match($requestPath) {
         if(strpos($requestPath, $this->mRoute) !== 0)
             return false;
-
-        $argString = substr($requestPath, strlen($this->mRoute) + 1);
-        if($argString)
-            $this->mArgs = explode('/', $argString);
-
         return true;
     }
 
@@ -112,7 +107,13 @@ class Route implements IRoute {
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */
-    public function render() {
+    public function render($requestPath) {
+        $argString = substr($requestPath, strlen($this->mRoute) + 1);
+        $this->mArgs = array();
+        if($argString)
+            foreach(explode('/', $argString) as $arg)
+                $this->mArgs[] = $arg;
+
         $dest = $this->mDestination;
         $Class = new \ReflectionClass($dest);
         if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
@@ -145,7 +146,7 @@ class Route implements IRoute {
                 continue;
             if($request)
                 $Route->setRequest($request);
-            $Route->render();
+            $Route->render($routePath);
             return;
         }
         throw new NoRoutesFoundException("No Routes Matched: " . $routePath);

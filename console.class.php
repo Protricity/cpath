@@ -30,10 +30,15 @@ class Console implements IHandler {
             $routes[$route][] = $method;
         }
 
+        $history = array();
         $ns = '/';
+        echo "CPath Console Mode (exit, ls, cd, history, !!)\n";
         while(true) {
             echo $ns, '>';
             $cmd=trim(fgets(STDIN));
+            if($history && strpos($cmd, '!!') !== false)
+                $cmd = str_replace('!!', $history[sizeof($history)-1], $cmd);
+            $history[] = $cmd;
             $args = explode(' ', $cmd);
             switch(trim(strtolower($args[0]))) {
                 case 'exit':
@@ -41,6 +46,10 @@ class Console implements IHandler {
                 case 'ls':
                     foreach($routes as $route=>$methods)
                         echo $route, ' (',implode(', ',$methods),')',"\n";
+                    break;
+                case 'history':
+                    foreach($history as $h)
+                        echo $h,"\n";
                     break;
                 case 'cd':
                     if(!isset($args[1])) {
@@ -67,15 +76,18 @@ class Console implements IHandler {
                     echo "Namespace '{$dir} was not found\n";
                     break;
                 default:
+                    if(!isset($args[0]) || !($arg = trim($args[0])))
+                        break;
+                    if($arg[0] != '/')
+                        $arg = $ns . $arg;
+                    $args[0] = $arg;
                     $Cli = new CLI($args);
-                    try{ TODO: add 'route'
-                        Route::tryAllRoutes($Cli->getPath(), $Cli->getRequest());
+                    try{
+                        Route::tryAllRoutes($Cli->getRoute(), $Cli->getRequest());
                     } catch (\Exception $ex) {
-                        echo "Exception: ",$ex->getMessage(),"\n";
+                        echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";
                     }
             }
-            if($cmd == 'exit')
-                break;
         }
     }
 }
