@@ -16,15 +16,15 @@ use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Model\ResponseException;
 use CPath\Builders\BuildRoutes;
-use CPath\Handlers\Api\View\ApiInfo;
+use CPath\Handlers\API\View\APIInfo;
 
 /**
- * Class SimpleApi
+ * Class SimpleAPI
  * @package CPath
  *
  * Provides a portable Handler template for API calls
  */
-class SimpleApi extends Api {
+class SimpleAPI extends API {
 
     const BUILD_IGNORE = true;     // API Calls are built to provide routes
 
@@ -35,7 +35,7 @@ class SimpleApi extends Api {
 
     /**
      * @param Callable $callback
-     * @param ApiField[] $fields
+     * @param APIField[] $fields
      */
     public function __construct($callback, Array $fields=array()) {
         $this->mCallback = $callback;

@@ -7,8 +7,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Handlers\Api\View\ApiInfo;
-use CPath\Interfaces\IApi;
+use CPath\Handlers\API\View\APIInfo;
+use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
 use CPath\NoRoutesFoundException;
@@ -20,26 +20,26 @@ use CPath\Model\Response;
 use CPath\Builders\BuildRoutes;
 
 /**
- * Class ApiSet
+ * Class APISet
  * @package CPath\Handlers
  *
- * Provides an Api collection
+ * Provides an API collection
  */
-class ApiSet extends Api implements \ArrayAccess, \IteratorAggregate {
+class APISet extends API implements \ArrayAccess, \IteratorAggregate {
 
     const BUILD_IGNORE = true;     // This class should not be built. Classes that use it should set BUILD_IGNORE to false
 
     const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
-    /** @var IApi[] */
-    protected $mApis = array();
+    /** @var IAPI[] */
+    protected $mAPIs = array();
     private $mPath = NULL;
     private $mClassName = NULL;
 
     /**
-     * Creates a new ApiSet instance
-     * @param null $ContainerClass The class name of the class that created this ApiSet
+     * Creates a new APISet instance
+     * @param null $ContainerClass The class name of the class that created this APISet
      */
     public function __construct($ContainerClass=NULL) {
         if($ContainerClass)
@@ -48,27 +48,27 @@ class ApiSet extends Api implements \ArrayAccess, \IteratorAggregate {
 
     /**
      * @param String $path the alphanumeric path to the IAPI Instance
-     * @param IApi $Api the API instance
+     * @param IAPI $API the API instance
      * @return $this
      */
-    public function addApi($path, IApi $Api) {
-        $this->mApis[strtolower($path)] = $Api;
+    public function addAPI($path, IAPI $API) {
+        $this->mAPIs[strtolower($path)] = $API;
         return $this;
     }
 
     /**
-     * @param String $path the api path to search. If null, the currently selected Api is used
-     * @return IApi the api instance or null if not found
+     * @param String $path the api path to search. If null, the currently selected API is used
+     * @return IAPI the api instance or null if not found
      * @throws \CPath\NoRoutesFoundException
      */
-    public function getApi($path=NULL) {
+    public function getAPI($path=NULL) {
         if(!$path) $path = $this->mPath;
         $path = strtolower($path);
         if(!$path)
-            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        if(!isset($this->mApis[$path]))
-            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mApis)));
-        return $this->mApis[$path];
+            throw new NoRoutesFoundException("Sub-route is missing. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
+        if(!isset($this->mAPIs[$path]))
+            throw new NoRoutesFoundException("Route '{$path}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
+        return $this->mAPIs[$path];
     }
 
     /**
@@ -81,11 +81,11 @@ class ApiSet extends Api implements \ArrayAccess, \IteratorAggregate {
      */
     function execute(Array $request, $path=NULL)
     {
-        /** @var Api $Api */
-        $Api = $this->getApi($path);
-        $Api->mRoute = $this->mRoute;
-        $Api->parseRequestParams($request, $this->mRoute);
-        return $Api->execute($request);
+        /** @var API $API */
+        $API = $this->getAPI($path);
+        $API->mRoute = $this->mRoute;
+        $API->parseRequestParams($request, $this->mRoute);
+        return $API->execute($request);
     }
 
     function executeAsResponse(Array $request, $path=NULL) {
@@ -100,36 +100,36 @@ class ApiSet extends Api implements \ArrayAccess, \IteratorAggregate {
      * @return void
      */
     public function renderHTML(IResponse $Response) {
-        $Api = $this;
+        $API = $this;
         if($this->mPath)
-            $Api = $this->getApi();
+            $API = $this->getAPI();
         $Response->sendHeaders('text/html');
-        $Render = new ApiInfo();
-        $Render->render($Api, $Response);
+        $Render = new APIInfo();
+        $Render->render($API, $Response);
     }
 
     function render(IRoute $Route)
     {
         $this->mPath = $Route->getNextArg();
-        $this->getApi($this->mPath);
+        $this->getAPI($this->mPath);
         $Route->addToRoute($this->mPath);
         parent::render($Route);
     }
 
     // Implement ArrayAccess
 
-    public function offsetExists($path) { return isset($this->mApis[$path]);}
+    public function offsetExists($path) { return isset($this->mAPIs[$path]);}
 
     /**
-     * Shortcut for getApi($path)
+     * Shortcut for getAPI($path)
      * @param mixed $path
-     * @return IApi
+     * @return IAPI
      */
-    public function offsetGet($path) { return $this->getApi($path);}
-    public function offsetSet($path, $value) { $this->addApi($path, $value); }
-    public function offsetUnset($path) { unset($this->mApis[$path]); }
+    public function offsetGet($path) { return $this->getAPI($path);}
+    public function offsetSet($path, $value) { $this->addAPI($path, $value); }
+    public function offsetUnset($path) { unset($this->mAPIs[$path]); }
 
     // Implement IteratorAggregate
 
-    public function getIterator() { return new \ArrayIterator($this->mApis); }
+    public function getIterator() { return new \ArrayIterator($this->mAPIs); }
 }

@@ -9,11 +9,11 @@ namespace CPath;
 
 use CPath\Interfaces\IBuilder;
 use CPath\Model\Response;
-use CPath\Handlers\Api;
+use CPath\Handlers\API;
 
 class BuildException extends \Exception {}
 
-class Build extends Api {
+class Build extends API {
 
     const ROUTE_PATH = '/build';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only

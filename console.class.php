@@ -12,7 +12,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
 use CPath\Model\CLI;
 use CPath\Model\Response;
-use CPath\Handlers\Api;
+use CPath\Handlers\API;
 
 class Console implements IHandler {
 

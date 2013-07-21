@@ -1,16 +1,16 @@
 <?php
-namespace CPath\Handlers\Api\View;
+namespace CPath\Handlers\API\View;
 
 use CPath\Util;
-use CPath\Handlers\Api;
+use CPath\Handlers\API;
 use CPath\Interfaces\IResponse;
 
-class ApiInfo {
+class APIInfo {
 
-    function render(Api $Api, IResponse $Response)
+    function render(API $API, IResponse $Response)
     {
 
-        $route = $Api->getDisplayRoute($methods);
+        $route = $API->getDisplayRoute($methods);
 ?><html>
     <head>
         <title><?php echo $route; ?></title>
@@ -20,7 +20,7 @@ class ApiInfo {
         <h1><?php echo $route."<br />"; ?></h1>
         <h3>Params:</h3>
         <table>
-        <?php foreach($Api->getFields() as $name=>$Field) { ?>
+        <?php foreach($API->getFields() as $name=>$Field) { ?>
             <tr><td><?php echo $name; ?></td><td><?php echo $Field->getDescription(); ?></td>
         <?php } ?>
         </table>

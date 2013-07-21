@@ -7,7 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Interfaces\IApi;
+use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
@@ -21,22 +21,22 @@ use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Model\ResponseException;
 use CPath\Builders\BuildRoutes;
-use CPath\Handlers\Api\View\ApiInfo;
+use CPath\Handlers\API\View\APIInfo;
 
 /**
- * Class ApiHandler
+ * Class APIHandler
  * @package CPath
  *
  * Provides a Handler template for API calls
  */
-abstract class Api implements IApi {
+abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;     // API Calls are built to provide routes
 
     const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
-    /** @var IApiField[] */
+    /** @var IAPIField[] */
     protected $mFields = array();
     protected $mRoute=NULL;
 
@@ -73,7 +73,7 @@ abstract class Api implements IApi {
             foreach($this->mFields as $name=>$Field) {
                 if(!$Route->hasNextArg())
                     break;
-                if($Field instanceof IApiParam) {
+                if($Field instanceof IAPIParam) {
                     $request[$name] = $Route->getNextArg();
                 }
             }
@@ -87,7 +87,7 @@ abstract class Api implements IApi {
      */
     public function renderHTML(IResponse $Response) {
         $Response->sendHeaders('text/html');
-        $Render = new ApiInfo();
+        $Render = new APIInfo();
         $Render->render($this, $Response);
     }
 
@@ -126,10 +126,10 @@ abstract class Api implements IApi {
     /**
      * Add an API Field.
      * @param $name string name of the Field
-     * @param IApiField $Field Describes the Field. Implement IApiField for custom validation
+     * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
      * @return $this Return the class instance
      */
-    public function addField($name, IApiField $Field) {
+    public function addField($name, IAPIField $Field) {
         $this->mFields[$name] = $Field;
         return $this;
     }
@@ -207,7 +207,7 @@ abstract class Api implements IApi {
         $methods = array('GET', 'POST');
         $route = $this->mRoute->getRoute();
         foreach($this->mFields as $name => $Field) {
-            if(!($Field instanceof IApiParam))
+            if(!($Field instanceof IAPIParam))
                 continue;
             $route .= '/:' . $name ;
         }
@@ -216,7 +216,7 @@ abstract class Api implements IApi {
 
 }
 //
-//class ApiRequest extends ArrayObject {
+//class APIRequest extends ArrayObject {
 //
 //    private $mRequest;
 //    private $mRoute;
@@ -236,21 +236,21 @@ abstract class Api implements IApi {
 //}
 
 /**
- * Class IApiField
+ * Class IAPIField
  * @package CPath
  * Represents an API Field
  */
-interface IApiField {
+interface IAPIField {
     public function validate($value);
     public function getDescription();
 }
 
 /**
- * Class ApiParam
+ * Class APIParam
  * @package CPath
  * This interface tags an API Field as a route parameter.
  */
-interface IApiParam extends IApiField {
+interface IAPIParam extends IAPIField {
 
 }
 /**
@@ -276,11 +276,11 @@ class ValidationExceptions extends MultiException {
 }
 
 /**
- * Class ApiField
+ * Class APIField
  * @package CPath
  * Represents an 'optional' API Field
  */
-class ApiField implements IApiField {
+class APIField implements IAPIField {
     public $mDescription;
     public function __construct($description=NULL) {
         $this->mDescription = $description;
@@ -305,11 +305,11 @@ class RequiredFieldException extends ValidationException {
 }
 
 /**
- * Class ApiRequiredField
+ * Class APIRequiredField
  * @package CPath
  * Represents a 'required' API Field
  */
-class ApiRequiredField extends ApiField {
+class APIRequiredField extends APIField {
     public function validate($value) {
         if(!$value && $value !== '0')
             throw new RequiredFieldException();
@@ -318,14 +318,14 @@ class ApiRequiredField extends ApiField {
 }
 
 /**
- * Class ApiParam
+ * Class APIParam
  * @package CPath
  * Represents a Parameter from the route path
  */
-class ApiParam extends ApiRequiredField implements IApiParam {
+class APIParam extends APIRequiredField implements IAPIParam {
 }
 
-class ApiFilterField extends ApiField {
+class APIFilterField extends APIField {
 
     protected $mFilter, $mOptions;
     /**
@@ -344,7 +344,7 @@ class ApiFilterField extends ApiField {
         return filter_var($value, $this->mFilter, $this->mOptions) ?: NULL;
     }
 }
-class ApiRequiredFilterField extends ApiFilterField {
+class APIRequiredFilterField extends APIFilterField {
 
     public function validate($value) {
         if(!$value && $value !== '0')

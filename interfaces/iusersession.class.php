@@ -22,6 +22,8 @@ interface IUserSession {
     function getPassword();
     function setPassword($value, $commit=true);
 
+    function isGuestAccount();
+
     /**
      * Returns true if the user is an admin
      * @return boolean true if user is an admin
@@ -34,15 +36,15 @@ interface IUserSession {
      */
     function isDebug();
 
-    // Statics
-
     /**
      * Stores a session key for a corresponding user id
      * @param $key String the session key to store
-     * @param $user_id int the user id to store with the session key
      * @return void
      */
-    static function storeNewSessionKey($key, $user_id);
+    function storeNewSessionKey($key);
+
+    // Statics
+
 
     /**
      * Loads a user instance from a session key
@@ -80,9 +82,10 @@ interface IUserSession {
 
     /**
      * Get the current user session or return a guest account
+     * @param bool $throwIfGuest throws an exception if the user is not logged in
      * @return IUserSession|PDOModel the user instance
      */
-    static function getUserSession();
+    static function getUserSession($throwIfGuest=true);
 
     /**
      * Loads a model based on a primary key column value

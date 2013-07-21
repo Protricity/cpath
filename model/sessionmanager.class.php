@@ -7,11 +7,12 @@
  */
 namespace CPath\Model;
 
-use CPath\Handlers\Api;
-use CPath\Handlers\ApiParam;
-use CPath\Handlers\ApiSet;
-use CPath\Handlers\SimpleApi;
+use CPath\Handlers\API;
+use CPath\Handlers\APIParam;
+use CPath\Handlers\APISet;
+use CPath\Handlers\SimpleAPI;
 use CPath\Interfaces\IUserSession;
+use CPath\Log;
 use CPath\Model\DB\PDOModel;
 use CPath\Util;
 
@@ -28,6 +29,13 @@ class PasswordsDoNotMatchException extends \Exception {
     }
 }
 
+class UserNotLoggedInException extends \Exception {
+    public function __construct($msg="User is not logged in") {
+        parent::__construct($msg);
+    }
+}
+class SessionDisabledException extends \Exception {}
+
 class SessionManager {
     const SESSION_KEY = '_session';
     const SESSION_KEY_LENGTH = 48;
@@ -42,22 +50,42 @@ class SessionManager {
     /** @var IUserSession */
     private static $mUserSession;
 
+    static function start() {
+        switch(session_status()) {
+            case PHP_SESSION_DISABLED:
+                throw new SessionDisabledException();
+                break;
+            case PHP_SESSION_NONE:
+                session_start();
+                break;
+        }
+    }
+
     /**
      * Get the current user session or return a guest account
      * @param IUserSession $EmptyUser an empty user instance
+     * @param bool $throwIfGuest throws an exception if the user is not logged in
      * @return IUserSession|PDOModel the user instance
+     * @throws UserNotLoggedInException if the user is not logged in and $throwIfGuest==true
      */
-    static function getUserSession(IUserSession $EmptyUser) {
-        if(self::$mUserSession)
-            return self::$mUserSession;
-        if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
-        {
-            $key = $_SESSION[self::SESSION_KEY];
-            $User = $EmptyUser::loadFromSessionKey($key);
-            if(is_scalar($User)) $User = $EmptyUser::loadByPrimaryKey($User);
-            return self::$mUserSession = $User;
+    static function getUserSession(IUserSession $EmptyUser, $throwIfGuest=true) {
+        if(!self::$mUserSession) {
+            self::start();
+            if(isset($_SESSION, $_SESSION[self::SESSION_KEY])) {
+                $key = $_SESSION[self::SESSION_KEY];
+                $User = $EmptyUser::loadFromSessionKey($key);
+                if(is_scalar($User) && $User) $User = $EmptyUser::loadByPrimaryKey($User);
+                if($User)
+                    self::$mUserSession = $User;
+                else
+                    Log::e("SessionManager", "User could not be found in session");
+            }
+            if(!self::$mUserSession)
+                self::$mUserSession = $EmptyUser::loadGuestAccount();
         }
-        return self::$mUserSession = $EmptyUser::loadGuestAccount();
+        if($throwIfGuest && self::$mUserSession->isGuestAccount())
+            throw new UserNotLoggedInException();
+        return self::$mUserSession;
     }
 
     /**
@@ -66,6 +94,7 @@ class SessionManager {
      * @param $search String the user account to search for
      * @param $password String the password to log in with
      * @throws IncorrectUsernameOrPasswordException
+     * @throws \Exception if the session fails to start
      * @return IUserSession|PDOModel The logged in user instance
      */
     public static function login(IUserSession $EmptyUser, $search, $password) {
@@ -79,8 +108,8 @@ class SessionManager {
             $_SESSION = array();
         else{
             if(headers_sent($file, $line))
-                throw new \Exception("Cannot Log in: Headers already sent by {$file}:{$line}");
-            session_start();
+                throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+            self::start();
         }
         $_SESSION[self::SESSION_KEY] = $key;
         self::$mUserSession = $User;
@@ -91,7 +120,7 @@ class SessionManager {
      * @param IUserSession $EmptyUser an empty user instance
      */
     public static function logout(IUserSession $EmptyUser) {
-
+        self::start();
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
@@ -153,23 +182,23 @@ class SessionManager {
     }
 
     /**
-     * Adds Session Api calls to an ApiSet
+     * Adds Session API calls to an APISet
      * @param IUserSession $EmptyUser an empty user instance
-     * @param ApiSet $ApiSet an existing set of Apis to add to
+     * @param APISet $APISet an existing set of APIs to add to
      * @throws UserNotFoundException
      */
-    public static function addApis(IUserSession $EmptyUser, ApiSet $ApiSet)
+    public static function addAPIs(IUserSession $EmptyUser, APISet $APISet)
     {
-        $ApiSet->addApi('login', new SimpleApi(function(Api $API, Array $request) use ($EmptyUser) {
+        $APISet->addAPI('login', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
             $request = $API->processRequest($request);
             $User = $EmptyUser::login($request['name'], $request['password']);
-            return new Response("Logged in as user '".$User->getName()."' successfully", true);
+            return new Response("Logged in as user '".$User->getName()."' successfully", true, $User);
         }, array(
-            'name' => new ApiParam("Username or Email Address"),
-            'password' => new ApiParam("Password")
+            'name' => new APIParam("Username or Email Address"),
+            'password' => new APIParam("Password")
         )));
 
-        $ApiSet->addApi('logout', new SimpleApi(function(Api $API, Array $request) use ($EmptyUser) {
+        $APISet->addAPI('logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
             $EmptyUser::logout();
             return new Response("Logged out successfuly", true);
         }));

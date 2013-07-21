@@ -40,23 +40,26 @@ class PDOSelect implements \Iterator {
      */
     public function leftJoin($table, $sourceField, $destField=NULL, $alias=NULL) {
         if($destField != NULL) {
-            if($alias) {
-                $sAlias = $this->alias ?: $this->table;
-                $sourceField = "{$sAlias}.{$sourceField}";
-                $destField = "{$alias}.{$sourceField}";
-            }
+            if($alias) $table .= ' '.$alias;
+            else $alias = $table;
+            $sAlias = $this->alias ?: $this->table;
+            $sourceField = "{$sAlias}.{$sourceField}";
+            $destField = "{$alias}.{$destField}";
             $sourceField = " ON {$sourceField} = {$destField}";
+        } else {
+            if($alias) $table .= ' '.$alias;
         }
 
-        $this->joins[] = "\tLEFT JOIN {$table} {$alias} {$sourceField}";
+        $this->joins[] = "\tLEFT JOIN {$table} {$sourceField}";
         return $this;
     }
 
-    public function where($field, $value=NULL) {
+    public function where($field, $value=NULL, $alias=NULL) {
         if($value !== NULL) {
+            if(!$alias) $alias = $this->table;
             $this->values[] = $value;
             if(strpos($field, '?') === false)
-                $field = $field.'=?';
+                $field = $alias . '.' . $field.'=?';
         }
         if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
             $this->lastCond = true;
@@ -87,8 +90,9 @@ class PDOSelect implements \Iterator {
     }
 
     public function exec() {
+        $sql = $this->getSQL();
         $this->stmt = $this->DB
-            ->prepare($this->getSQL());
+            ->prepare($sql);
         $this->stmt->execute($this->values);
         $this->count=-1;
         return $this->stmt;
@@ -122,8 +126,8 @@ class PDOSelect implements \Iterator {
     public function getSQL() {
         return "SELECT ".implode(', ', $this->select)
             ."\nFROM ".$this->table
-            ."\nWHERE ".($this->where ? implode(' ', $this->where) : '1')
             .implode('', $this->joins)
+            ."\nWHERE ".($this->where ? implode(' ', $this->where) : '1')
             ."\nLIMIT ".$this->limit;
     }
 

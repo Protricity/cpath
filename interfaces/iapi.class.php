@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-interface IApi extends IHandler {
+interface IAPI extends IHandler {
 
     /**
      * Execute this API Endpoint with the entire request.

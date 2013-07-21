@@ -6,11 +6,11 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use CPath\Handlers\Api;
-use CPath\Handlers\ApiField;
-use CPath\Handlers\ApiParam;
-use CPath\Handlers\ApiSet;
-use CPath\Handlers\SimpleApi;
+use CPath\Handlers\API;
+use CPath\Handlers\APIField;
+use CPath\Handlers\APIParam;
+use CPath\Handlers\APISet;
+use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
@@ -57,7 +57,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if($id !== NULL) {
             if(!static::Primary)
                 throw new \Exception("Model '".get_class($this)."' has no primary key set");
-            $row = static::select('*')
+            $row = static::search(true)
                 ->where(static::Primary, $id)
                 ->fetch();
             if(!$row)
@@ -251,14 +251,25 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      */
     public static function loadByPrimaryKey($search) {
         if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot load " . get_called_class() . " Model");
-        $Model = static::select('*')
+            throw new \Exception("Constant 'Primary' is not set. Cannot load " . static::getModelName() . " Model");
+        $Model = static::search()
             ->where(static::Primary, $search)
-            ->setCallback(get_called_class().'::fetchCallback')
             ->fetch();
         if(!$Model)
-            throw new ModelNotFoundException("Model '{$search}' was not found");
+            throw new ModelNotFoundException(static::getModelName() . " '{$search}' was not found");
         return $Model;
+    }
+
+    /**
+     * Creates a PDOSelect for searching models.
+     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
+     */
+    public static function search($asRow=false) {
+        $alias = static::TableName . '.';
+        $Select = static::select($alias . '*');
+        if(!$asRow)
+            $Select->setCallback(get_called_class().'::fetchCallback');
+        return $Select;
     }
 
     /**
@@ -272,14 +283,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Searches a Model based on specified fields and values.
+     * Searches for Models based on specified fields and values.
      * @param array $fields an array of key-value pairs to search for
      * @param int $limit the number of rows to return
      * @param string $logic 'OR' or 'AND' logic between fields
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
     public static function searchByFields(Array $fields, $limit=1, $logic='OR') {
-        $Select = static::select('*');
+        $Select = static::search();
 
         $i = 0;
         foreach($fields as $k=>$v)
@@ -289,13 +300,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             }
 
         $Select->limit($limit);
-        $Select->setCallback(get_called_class().'::fetchCallback');
         return $Select;
     }
 
 
     /**
-     * Searches for a Model using all indexed fields.
+     * Searches for Models using all indexed fields.
      * @param mixed $any a value to search for
      * @param int $limit the number of rows to return
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
@@ -303,8 +313,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      */
      public static function searchByAnyIndex($any, $limit=1) {
         if(!static::SearchKeys)
-            throw new \Exception("No Indexes defined in ".get_called_class());
-        $Select = static::select('*');
+            throw new \Exception("No Indexes defined in ".static::getModelName());
+         $Select = static::search();
 
         $i = 0;
         $keys = explode(',', static::SearchKeys);
@@ -322,13 +332,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         $Select->limit($limit);
-        $Select->setCallback(get_called_class().'::fetchCallback');
         return $Select;
     }
 
     public static function removeByPrimary($id) {
         if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . get_called_class() . " Model");
+            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
         $c = static::delete()
             ->where(static::Primary, $id)
             ->execute()
@@ -340,30 +349,30 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     protected static function removeModel(PDOModel $Model) {
         if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . get_called_class() . " Model");
+            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
         static::removeByPrimary($Model->mRow[static::Primary]);
     }
 
     /**
-     * @return ApiSet a set of general api handlers for this model.
+     * @return APISet a set of general api handlers for this model.
      * @throws ValidationException
      */
-    public static function getApiSet()
+    public static function getAPISet()
     {
         /** @var PDOModel $Class */
         $Class = get_called_class();
-        $ApiSet = new ApiSet($Class);
+        $APISet = new APISet($Class);
         if(static::Primary) {
-            $ApiSet->addApi('get', new SimpleApi(function(Api $API, Array $request) use ($Class) {
+            $APISet->addAPI('get', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 return $Class::loadByPrimaryKey($request['id']);
             }, array(
-                'id' => new ApiParam($Class." ID"),
+                'id' => new APIParam($Class." ID"),
             )));
         }
 
         if(static::SearchKeys) {
-            $ApiSet->addApi('search', new SimpleApi(function(Api $API, Array $request) use ($Class) {
+            $APISet->addAPI('search', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 $limit = $request['limit'];
                 if($limit < 1 || $limit > static::SearchLimitMax)
@@ -378,19 +387,23 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     $Search = $Class::searchByAnyIndex($request['search'], $limit)->fetchAll();
                 return new Response("Found (".sizeof($Search).") ".$Class."(s)", true, $Search);
             }, array(
-                'search' => new ApiParam("Search for {$Class}"),
-                'searchby' => new ApiField("Search by field. Allowed: [".static::SearchKeys."]"),
-                'limit' => new ApiField("The Number of fields to return. Max=".static::SearchLimitMax),
+                'search' => new APIParam("Search for {$Class}"),
+                'searchby' => new APIField("Search by field. Allowed: [".static::SearchKeys."]"),
+                'limit' => new APIField("The Number of fields to return. Max=".static::SearchLimitMax),
             )));
         }
 
-        return $ApiSet;
+        return $APISet;
     }
 
     /**
      * @return IHandler $Handler
      */
     static function getHandler() {
-        return static::getApiSet();
+        return static::getAPISet();
+    }
+
+    public static function getModelName() {
+        return basename(get_called_class());
     }
 }
