@@ -12,9 +12,16 @@ use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 
 interface IUserSession {
+
     const SESSION_EXPIRE_DAYS = 365;        // The amount of time before a session should expire in days. Overwrite to change. NULL for never.
     const SESSION_EXPIRE_SECONDS = NULL;    // The amount of time before a session should expire in seconds. Overwrite to enable.
 
+    const FLAG_VALIDATED = 0x02;
+    const FLAG_DISABLED = 0x04;
+
+    const FLAG_DEBUG = 0x10;
+    const FLAG_MANAGER = 0x20;
+    const FLAG_ADMIN = 0x40;
 
     function getID();
 

@@ -40,13 +40,6 @@ class SessionManager {
     const SESSION_KEY = '_session';
     const SESSION_KEY_LENGTH = 48;
 
-    const FLAG_VALIDATED = 0x02;
-    const FLAG_DISABLED = 0x04;
-
-    const FLAG_DEBUG = 0x10;
-    const FLAG_MANAGER = 0x20;
-    const FLAG_ADMIN = 0x40;
-
     /** @var IUserSession */
     private static $mUserSession;
 
@@ -143,41 +136,10 @@ class SessionManager {
         return self::$mUserSession ? true : false;
     }
 
-    public static function isFlag(IUserSession $User, $flags) {
-        return (int)$User->getFlags() & $flags ? true : false;
-    }
-
-    /**
-     * Returns true if the user is an admin
-     * @param IUserSession $User
-     * @return boolean true if user is an admin
-     */
-    public static function isAdmin(IUserSession $User) {
-        return self::isFlag($User, self::FLAG_ADMIN);
-    }
-
-    /**
-     * Returns true if the user is viewing debug mode
-     * @param IUserSession $User
-     * @return boolean true if user is viewing debug mode
-     */
-    public static function isDebug(IUserSession $User) {
-        return self::isFlag($User, self::FLAG_DEBUG);
-    }
-
     public static function checkPassword(IUserSession $User, $password) {
         $hash = $User->getPassword();
         if(self::hash($password, $hash) != $hash)
             throw new IncorrectUsernameOrPasswordException();
-    }
-
-    public static function setFlags(IUserSession $User, $flags, $commit=true, $remove=false) {
-        $oldFlags = (int)$User->getFlags();
-        if(!$remove)
-            $flags |= $oldFlags;
-        else
-            $flags = $oldFlags & ~$flags;
-        $User->setFlags($flags, $commit);
     }
 
     public static function changePassword(IUserSession $User, $newPassword, $confirmPassword=NULL) {
