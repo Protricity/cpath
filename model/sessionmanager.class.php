@@ -93,17 +93,27 @@ class SessionManager {
      * @param IUserSession $EmptyUser an empty user instance
      * @param $search String the user account to search for
      * @param $password String the password to log in with
+     * @param $expireInSeconds int the amount of time in seconds before an account should expire or 0 for never
      * @throws IncorrectUsernameOrPasswordException
      * @throws \Exception if the session fails to start
      * @return IUserSession|PDOModel The logged in user instance
      */
-    public static function login(IUserSession $EmptyUser, $search, $password) {
+    public static function login(IUserSession $EmptyUser, $search, $password, $expireInSeconds=NULL) {
+        /** @var IUserSession $User */
         $User = $EmptyUser::searchByAnyIndex($search)->fetch();
         if(!$User)
             throw new IncorrectUsernameOrPasswordException();
         self::checkPassword($User, $password);
         $key = self::rndstr(static::SESSION_KEY_LENGTH);
-        $User->storeNewSessionKey($key, $User->getID());
+
+        $expireMax = 0;
+        if($e = $User::SESSION_EXPIRE_DAYS)
+            $expireMax = $e * 60*60*24;
+        if($e = $User::SESSION_EXPIRE_SECONDS)
+            $expireMax = $e;
+        if(!$expireInSeconds || $expireInSeconds > $expireMax)
+            $expireInSeconds = $expireMax;
+        $User->storeNewSessionKey($key, $expireInSeconds ? time() + $expireInSeconds : 0);
         if(Util::isCLI())
             $_SESSION = array();
         else{

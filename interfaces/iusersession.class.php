@@ -12,6 +12,10 @@ use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 
 interface IUserSession {
+    const SESSION_EXPIRE_DAYS = 365;        // The amount of time before a session should expire in days. Overwrite to change. NULL for never.
+    const SESSION_EXPIRE_SECONDS = NULL;    // The amount of time before a session should expire in seconds. Overwrite to enable.
+
+
     function getID();
 
     function getName();
@@ -39,9 +43,10 @@ interface IUserSession {
     /**
      * Stores a session key for a corresponding user id
      * @param $key String the session key to store
+     * @param $expireDate int a unix timestamp representing when the session key should expire, or 0 for never.
      * @return void
      */
-    function storeNewSessionKey($key);
+    function storeNewSessionKey($key, $expireDate);
 
     // Statics
 

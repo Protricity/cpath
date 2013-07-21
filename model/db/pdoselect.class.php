@@ -45,12 +45,12 @@ class PDOSelect implements \Iterator {
             $sAlias = $this->alias ?: $this->table;
             $sourceField = "{$sAlias}.{$sourceField}";
             $destField = "{$alias}.{$destField}";
-            $sourceField = " ON {$sourceField} = {$destField}";
+            $sourceField = "ON {$sourceField} = {$destField}";
         } else {
             if($alias) $table .= ' '.$alias;
         }
 
-        $this->joins[] = "\tLEFT JOIN {$table} {$sourceField}";
+        $this->joins[] = "\nLEFT JOIN {$table} {$sourceField}";
         return $this;
     }
 
@@ -58,10 +58,16 @@ class PDOSelect implements \Iterator {
         if($value !== NULL) {
             if(!$alias) $alias = $this->table;
             $this->values[] = $value;
-            if(strpos($field, '?') === false)
-                $field = $alias . '.' . $field.'=?';
+            if(strpos($field, '?') === false) {
+                $e = '=';
+                if(preg_match('/([=<>!]+|like)\s*$/i', $field))
+                    $e = ' ';
+                $field = $alias . '.' . $field . $e . '?';
+            }
         }
         if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
+            if($field == '(' && !$this->lastCond)
+                $this->where[] = 'AND';
             $this->lastCond = true;
             $this->where[] = $field;
             return $this;

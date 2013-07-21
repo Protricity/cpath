@@ -6,13 +6,13 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
 use CPath\Handlers\APISet;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
@@ -31,7 +31,7 @@ class ModelNotFoundException extends \Exception {}
 class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate {
-    const BUILD_IGNORE = true;
+    const BUILD_IGNORE = true; // TODO: Title case
     const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
@@ -43,6 +43,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
+    const SearchAllowWildCard = false;   // true or false
+
+    const ExportFields = 'Primary'; // 'All|None|Index|Primary|Exclude:[field1,field2]|Include:[field1,field2]';
 
     protected $mRow = null;
     private $mCommit = array();
@@ -116,9 +119,28 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      */
     public function getExportData()
     {
-        if(static::Primary)
-            return $this->getDataInclude(static::Primary);
-        return array();
+        if(!$f = static::ExportFields)
+            return array();
+        $f = explode(':', $f);
+        switch(array_shift($f)) {
+            case 'All':
+                return $this->mRow;
+            default:
+            case 'None':
+                return array();
+            case 'Index':
+                if(!static::SearchKeys)
+                    return array();
+                return $this->getDataInclude(explode(',', static::SearchKeys));
+            case 'Primary':
+                if(!static::Primary)
+                    return array();
+                return $this->getDataInclude(static::Primary);
+            case 'Exclude':
+                return $this->getDataExclude($f);
+            case 'Include':
+                return $this->getDataInclude($f);
+        }
     }
 
     /**
@@ -183,8 +205,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 return static::loadByPrimaryKey($id);
             }
         } catch (\PDOException $ex) {
-            if(stripos($ex->getMessage(), 'Duplicate')!==false)
-                throw new ModelAlreadyExistsException($ex->getMessage(), $ex->getCode(), $ex);
+            if(stripos($ex->getMessage(), 'Duplicate')!==false) {
+                $err = "A Duplicate ".static::getModelName()." already exists";
+                if(Base::isDebug())
+                    $err .= ': ' . $ex->getMessage();
+                throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
+            }
             throw $ex;
         }
     }
@@ -308,10 +334,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * Searches for Models using all indexed fields.
      * @param mixed $any a value to search for
      * @param int $limit the number of rows to return
+     * @param String $compare custom comparison (ex. '<', 'LIKE', '=func(?)')
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if the model does not contain index keys
      */
-     public static function searchByAnyIndex($any, $limit=1) {
+    public static function searchByAnyIndex($any, $limit=1, $compare=NULL) {
         if(!static::SearchKeys)
             throw new \Exception("No Indexes defined in ".static::getModelName());
          $Select = static::search();
@@ -328,6 +355,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
         foreach($keys as $key){
             if($i++) $Select->where('OR');
+            if($compare) $key .= ' ' . $compare;
             $Select->where($key, $any);
         }
 
@@ -375,16 +403,26 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             $APISet->addAPI('search', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 $limit = $request['limit'];
-                if($limit < 1 || $limit > static::SearchLimitMax)
-                    $limit = static::SearchLimit;
+                if($limit < 1 || $limit > $Class::SearchLimitMax)
+                    $limit = $Class::SearchLimit;
+                $search = $request['search'];
+                $wildCard = false;
+                if(strpos($search, '*') !== false && $Class::SearchAllowWildCard) {
+                    $search = str_replace('*', '%', $search);
+                    $wildCard = true;
+                }
+
                 if($by = ($request['searchby'])) {
                     $keys = explode(',', $Class::SearchKeys);
                     if(!in_array($by, $keys))
                         throw new ValidationException("Invalid 'searchby'. Allowed: [".$Class::SearchKeys."]");
-                    $Search = $Class::searchByField($by, $request['search'], $limit)->fetchAll();
+
+                    $Search = $Class::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit)
+                        ->fetchAll();
                 }
                 else
-                    $Search = $Class::searchByAnyIndex($request['search'], $limit)->fetchAll();
+                    $Search = $Class::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '')
+                        ->fetchAll();
                 return new Response("Found (".sizeof($Search).") ".$Class."(s)", true, $Search);
             }, array(
                 'search' => new APIParam("Search for {$Class}"),
@@ -397,7 +435,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * @return IHandler $Handler
+     * @return APISet a set of common api routes for this model
      */
     static function getHandler() {
         return static::getAPISet();
