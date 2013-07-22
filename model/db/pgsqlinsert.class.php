@@ -11,18 +11,14 @@ use \PDO;
 class PGSQLInsert extends PDOInsert {
     private $returning=NULL;
 
-    public function returning($field) {
-        $this->returning = $field;
-        return $this;
-    }
-
     protected function updateSQL(&$SQL) {
         if($this->returning)
             $SQL .= "\nRETURNING ".$this->returning;
     }
 
     public function requestInsertID($field) {
-        return $this->returning($field);
+        $this->returning = $field;
+        return $this;
     }
 
     public function getInsertID() {
