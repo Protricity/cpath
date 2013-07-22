@@ -27,8 +27,8 @@ final class IResponseHelper {
     }
 
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
-        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
-        $xml->addAttribute('msg', $Response->getMessage());
+        $xml->addChild('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
+        $xml->addChild('msg', $Response->getMessage());
         Util::toXML($Response->getData(), $xml->addChild('response'));
         return $xml;
     }
