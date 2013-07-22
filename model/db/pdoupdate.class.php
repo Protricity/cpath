@@ -6,7 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Interfaces\IDatabase;
+use CPath\Log;
 use \PDO;
 class PDOUpdate extends PDOWhere {
     /** @var \PDO */
@@ -42,7 +44,12 @@ class PDOUpdate extends PDOWhere {
 
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
-        if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
+        if(!$this->stmt) {
+            $sql = $this->getSQL();
+            $this->stmt = $this->DB->prepare($sql);
+            if(Base::isDebug())
+                Log::v(__CLASS__, $sql);
+        }
         if($this->values) $_values = array_merge($_values, $this->values);
         $this->stmt->execute($_values);
         return $this;

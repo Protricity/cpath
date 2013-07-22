@@ -6,7 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Interfaces\IDatabase;
+use CPath\Log;
 use \PDO;
 abstract class PDOInsert {
     protected $DB;
@@ -49,10 +51,13 @@ abstract class PDOInsert {
      */
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
-        if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
         if($this->batch !== NULL) {
             $this->batch[] = $_values;
         } else {
+            $sql = $this->getSQL();
+            if(!$this->stmt) $this->stmt = $this->DB->prepare($sql);
+            if(Base::isDebug())
+                Log::v(__CLASS__, $sql);
             $this->stmt->execute($_values);
         }
         return $this;

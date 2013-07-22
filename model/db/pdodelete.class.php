@@ -6,7 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Interfaces\IDatabase;
+use CPath\Log;
 use \PDO;
 class PDODelete extends PDOWhere {
     /** @var \PDO */
@@ -21,7 +23,12 @@ class PDODelete extends PDOWhere {
     }
 
     public function execute() {
-        if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
+        if(!$this->stmt) {
+            $sql = $this->getSQL();
+            $this->stmt = $this->DB->prepare($sql);
+            if(Base::isDebug())
+                Log::v(__CLASS__, $sql);
+        }
         $this->stmt->execute($this->values);
         return $this;
     }
