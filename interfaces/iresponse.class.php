@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
+use CPath\Log;
 use CPath\Util;
 interface IResponse extends IJSON,IXML {
     const STATUS_SUCCESS = 200;
@@ -26,19 +27,26 @@ final class IResponseHelper {
     }
 
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
-        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS);
+        $xml->addAttribute('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addAttribute('msg', $Response->getMessage());
         Util::toXML($Response->getData(), $xml->addChild('response'));
         return $xml;
     }
 
     static function sendHeaders(IResponse $Response, $mimeType=NULL) {
+        if(Util::isCLI())
+            return;
+        if(headers_sent($file, $line)) {
+            Log::e("IResponseHelper", "Warning: Headers already sent by {$file}:{$line}");
+            return;
+        }
         $msg = $Response->getMessage();
         //list($msg) = explode("\n", $msg);
         $msg = preg_replace('/[^\w -]/', ' ', $msg);
         header("HTTP/1.0 " . $Response->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
+        header('Access-Control-Allow-Origin: *');
     }
 
     static function toString(IResponse $Response) {

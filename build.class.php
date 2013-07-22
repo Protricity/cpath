@@ -8,15 +8,15 @@
 namespace CPath;
 
 use CPath\Interfaces\IBuilder;
-use CPath\Models\Response;
-use CPath\Handlers\Api;
+use CPath\Model\Response;
+use CPath\Handlers\API;
 
 class BuildException extends \Exception {}
 
-class Build extends Api {
+class Build extends API {
 
-    const ROUTE_PATH = 'build';     // Allow manual building from command line: 'php index.php build'
-    const ROUTE_METHODS = 'CLI';    // CLI only
+    const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
+    const Route_Methods = 'CLI';    // CLI only
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -28,7 +28,11 @@ class Build extends Api {
     {
         $Response = new Response(false, "Starting Build");
         $Response->startLogging();
-        Build::buildClasses(true);
+        $exCount = Build::buildClasses(true);
+        if($exCount)
+            return $Response
+                ->update(false, "Build Failed: {$exCount} Exception(s) Occurred")
+                ->stopLogging();
         return $Response
             ->update(true, "Build Complete")
             ->stopLogging();
@@ -100,7 +104,8 @@ class Build extends Api {
         $config = self::loadConfig();
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = self::getConfigPath();
-        mkdir(dirname($path), NULL, true);
+        if(!is_dir(dirname($path)))
+            mkdir(dirname($path), NULL, true);
         file_put_contents($path, $php);
     }
 
@@ -112,6 +117,7 @@ class Build extends Api {
 
     /**
      * Return the build config data from the build file if it exists
+     * @param array $newConfig
      * @return array the build config data
      */
     public static function buildConfig(Array $newConfig=array()) {
@@ -130,7 +136,8 @@ class Build extends Api {
                 $config[$k] = $v;
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = Base::getGenPath().'config.php';
-        mkdir(dirname($path), NULL, true);
+        if(!is_dir(dirname($path)))
+            mkdir(dirname($path), NULL, true);
         file_put_contents($path, $php);
         Log::v(__CLASS__, "Config data committed to file (".count($config).")");
         return $config;
@@ -143,13 +150,13 @@ class Build extends Api {
         Log::v(__CLASS__, "Starting Builds");
         if(Base::getConfig('build.enabled') === false) {
             Log::e(__CLASS__, "Building is not allowed. build.enabled===false");
-            return;
+            return 0;
         }
         self::$mForce = $force;
         self::$mBuilders = array();
-        self::findClass(dirname(__DIR__), '');
+        self::$mClasses = array();
+        $exCount = self::findClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
-        $exCount = 0;
         foreach(self::$mClasses as $Class) {
             /** @var $Builder IBuilder */
             foreach(self::$mBuilders as $Builder) try {
@@ -163,9 +170,8 @@ class Build extends Api {
         foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
         self::commitConfig();
-        if($exCount)
-            throw new \Exception("Build Failed: {$exCount} Exception(s) Occurred");
         Log::v(__CLASS__, "All Builds Complete");
+        return $exCount;
     }
 
     /**
@@ -173,29 +179,37 @@ class Build extends Api {
      * @param $path string the class path
      * @param $dirClass string the class namespace
      * @throws \Exception if a build fails
+     * @return int The number of exceptions that occurred
      */
     private static function findClass($path, $dirClass) {
+        $exCount = 0;
         if(file_exists($path.'/.buildignore'))
-            return;
+            return $exCount;
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))
                 continue;
             $filePath = $path . '/' . $file;
             if(is_dir($filePath)) {
-                self::findClass($filePath, $dirClass .'\\'. ucfirst($file));
+                $exCount += self::findClass($filePath, $dirClass .'\\'. ucfirst($file));
                 continue;
             }
             if(strcasecmp(substr($file, -10), '.class.php') !== 0)
                 continue;
             $name = substr($file, 0, strlen($file) - 10);
             $class = $dirClass . '\\' . ucfirst($name);
-            require_once($filePath);
+            try{
+                require_once($filePath);
+            } catch (\Exception $ex) {
+                $exCount++;
+                Log::ex("Exception occured while loading {$class}", $ex);
+                continue;
+            }
             $Class = new \ReflectionClass($class);
-            if($Class === NULL)
+            if($Class === NULL) // TODO: can this be null?
                 throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
-            if($Class->getConstant('BUILD_IGNORE')) {
-                Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
+            if($Class->getConstant('Build_Ignore')) {
+                //Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
                 continue;
             }
             if($Class->isAbstract()) {
@@ -204,11 +218,12 @@ class Build extends Api {
             }
             static::$mClasses[] = $Class;
 
-            if($Class->implementsInterface(__NAMESPACE__."\Interfaces\IBuilder")) {
-                Log::v(__CLASS__, "Found Builder Class '{$class}' in '{$filePath}'");
+            if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuilder")) {
+                Log::v(__CLASS__, "Found Builder Class: {$class}");
                 //call_user_func(array($Class->getName(), 'build'), $Class);
                 static::$mBuilders[] = $Class->newInstance();
             }
         }
+        return $exCount;
     }
 }

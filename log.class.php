@@ -21,7 +21,7 @@ use CPath\Interfaces\ILogEntry;
 abstract class Log {
 
     /** @var ILogEntry[] */
-    private static $mLog = array();
+    //private static $mLog = array();
     /** @var ILogListener[] */
     private static $mCallbacks = array();
 
@@ -30,7 +30,7 @@ abstract class Log {
      * @param ILogEntry $Log the log entry to add
      */
     public static function add(ILogEntry $Log) {
-        self::$mLog[] = $Log;
+        //self::$mLog[] = $Log;
         foreach(self::$mCallbacks as $i=>$call)
             $call->onLog($Log);
     }
@@ -100,9 +100,9 @@ abstract class Log {
      * Return the entire log
      * @return ILogEntry[] a list of log entries
      */
-    public static function get() {
-        return self::$mLog;
-    }
+//    public static function get() {
+//        return self::$mLog;
+//    }
 }
 
 /**

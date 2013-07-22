@@ -5,17 +5,25 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDOInsert {
-    private $DB;
+abstract class PDOInsert {
+    protected $DB;
     /** @var \PDOStatement */
-    private $stmt=NULL;
+    protected $stmt=NULL;
     private $table;
     private $fields=array();
-    private $returning=NULL;
     private $batch=NULL;
+
+    abstract protected function updateSQL(&$SQL);
+
+    /**
+     * @param $field String name of insert ID Field
+     * @return PDOInsert
+     */
+    abstract public function requestInsertID($field);
+    abstract public function getInsertID();
 
     public function __construct($table, \PDO $DB, Array $fields) {
         $this->DB = $DB;
@@ -29,16 +37,16 @@ class PDOInsert {
         return $this;
     }
 
-    public function returning($field) {
-        $this->returning = $field;
-        return $this;
-    }
-
     public function batch() {
         $this->batch = array();
         return $this;
     }
 
+    /**
+     * Insert or batch a row of values
+     * @param $_values Array an indexed array of values to insert
+     * @return PDOInsert $this
+     */
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
@@ -61,21 +69,17 @@ class PDOInsert {
             $SQL .= ($i ? ',' : '')."\n\t(?".str_repeat(', ?', sizeof($batch)-1).')';
             $values = array_merge($values, $batch);
         }
-        if($this->returning)
-            $SQL .= "\nRETURNING ".$this->returning;
+        $this->updateSQL($SQL);
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
         return $this;
     }
 
-    public function getInsertID() {
-        return $this->stmt->fetchColumn(0);
-    }
-
     public function getSQL($token='?') {
-        return "INSERT INTO ".$this->table
+        $SQL = "INSERT INTO ".$this->table
             ."\n (".implode(', ',$this->fields).')'
-            ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')'
-            .($this->returning ? "\nRETURNING ".$this->returning : '');
+            ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
+        $this->updateSQL($SQL);
+        return $SQL;
     }
 }

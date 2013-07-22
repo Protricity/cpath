@@ -1,25 +1,41 @@
 <?php
-namespace CPath\Handlers\Api\View;
+namespace CPath\Handlers\API\View;
 
+use CPath\Base;
+use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\ILogListener;
+use CPath\Log;
 use CPath\Util;
-use CPath\Handlers\Api;
+use CPath\Handlers\API;
 use CPath\Interfaces\IResponse;
 
-class ApiInfo {
+class APIInfo implements ILogListener {
 
-    function render(Api $Api, IResponse $Response)
+    private $mLog = array();
+
+    public function __construct() {
+        if(Base::isDebug())
+            Log::addCallback($this);
+    }
+
+    function onLog(ILogEntry $log) {
+        $this->mLog[] = $log;
+    }
+
+    function render(API $API, IResponse $Response)
     {
-        $routes = $Api->getDisplayRoutes();
+
+        $route = $API->getDisplayRoute($methods);
 ?><html>
     <head>
-        <title><?php echo $routes[0]; ?></title>
+        <title><?php echo $route; ?></title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     </head>
     <body>
-        <h1><?php foreach($routes as $route) echo $route."<br />"; ?></h1>
+        <h1><?php echo $route."<br />"; ?></h1>
         <h3>Params:</h3>
         <table>
-        <?php foreach($Api->getFields() as $name=>$Field) { ?>
+        <?php foreach($API->getFields() as $name=>$Field) { ?>
             <tr><td><?php echo $name; ?></td><td><?php echo $Field->getDescription(); ?></td>
         <?php } ?>
         </table>
@@ -38,6 +54,16 @@ class ApiInfo {
             echo htmlentities($dom->saveXML());
 
         ?></div>
+
+        <?php if(Base::isDebug()) { ?>
+        <h3>Debug</h3>
+        <table><?php
+            /** @var ILogEntry $log */
+            foreach($this->mLog as $log)
+                echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
+
+        ?></table>
+        <?php } ?>
     </body>
 </html><?php
     }

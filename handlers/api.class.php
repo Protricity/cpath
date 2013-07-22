@@ -7,48 +7,140 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\IRoute;
+use CPath\Model\ArrayObject;
+use CPath\Route;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandler;
-use CPath\Models\MultiException;
-use CPath\Models\Response;
-use CPath\Models\ResponseException;
+use CPath\Model\MultiException;
+use CPath\Model\Response;
+use CPath\Model\ResponseException;
 use CPath\Builders\BuildRoutes;
-use CPath\Handlers\Api\View\ApiInfo;
+use CPath\Handlers\API\View\APIInfo;
 
 /**
- * Class ApiHandler
+ * Class APIHandler
  * @package CPath
  *
  * Provides a Handler template for API calls
  */
-abstract class Api implements IHandler {
+abstract class API implements IAPI {
 
-    const BUILD_IGNORE = false;     // API Calls are built to provide routes
+    const Build_Ignore = false;     // API Calls are built to provide routes
 
-    const ROUTE_METHODS = 'GET|POST';     // Default accepted methods are GET and POST
-    const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
+    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
 
-    /** @var IApiField[] */
-    private $mFields = array(), $mRoutes=NULL;     // API Fields
+    /** @var IAPIField[] */
+    protected $mFields = array();
+    protected $mRoute=NULL;
 
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
      * @param array $request associative array of request Fields, usually $_GET or $_POST
-     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      */
     abstract function execute(Array $request);
 
     /**
+     * Execute this API Endpoint with the entire request returning an IResponse object
+     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @return IResponse the api call response with data, message, and status
+     */
+    public function executeAsResponse(Array $request) {
+        $this->parseRequestParams($request, $this->mRoute);
+        try {
+            $Response = $this->execute($request);
+            if($Response instanceof IResponseAggregate)
+                $Response = $Response->getResponse();
+            if(!($Response instanceof IResponse))
+                $Response = new Response(true, "API executed successfully", $Response);
+        } catch (ResponseException $ex) {
+            $Response = $ex;
+        } catch (\Exception $ex) {
+            $Response = new ResponseException($ex->getMessage(), null, $ex);
+        }
+        return $Response;
+    }
+
+    protected function parseRequestParams(Array &$request, IRoute $Route=NULL) {
+        if($Route && $Route->hasNextArg()) {
+            foreach($this->mFields as $name=>$Field) {
+                if(!$Route->hasNextArg())
+                    break;
+                if($Field instanceof IAPIParam) {
+                    $request[$name] = $Route->getNextArg();
+                }
+            }
+        }
+    }
+
+    /**
+     * Sends headers, executes the request, and renders an IResponse as HTML
+     * @param array $request the request to execute
+     * @return void
+     */
+    public function renderHTML(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: text/html");
+        $Render = new APIInfo();
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
+        $Render->render($this, $Response);
+    }
+
+    /**
+     * Sends headers, executes the request, and renders an IResponse as JSON
+     * @param array $request the request to execute
+     * @return void
+     */
+    public function renderJSON(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: application/json");
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
+        $JSON = Util::toJSON($Response);
+        echo json_encode($JSON);
+    }
+
+    /**
+     * Sends headers, executes the request, and renders an IResponse as XML
+     * @param array $request the request to execute
+     * @return void
+     */
+    public function renderXML(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: text/xml");
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
+        $XML = Util::toXML($Response);
+        echo $XML->asXML();
+    }
+
+    /**
+     * Sends headers, executes the request, and renders an IResponse as Plain Text
+     * @param array $request the request to execute
+     * @return void
+     */
+    public function renderText(Array $request) {
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders('text/plain');
+        echo $Response."\n";
+    }
+
+    /**
      * Add an API Field.
      * @param $name string name of the Field
-     * @param IApiField $Field Describes the Field. Implement IApiField for custom validation
+     * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
      * @return $this Return the class instance
      */
-    protected function addField($name, IApiField $Field) {
+    public function addField($name, IAPIField $Field) {
         $this->mFields[$name] = $Field;
         return $this;
     }
@@ -59,7 +151,7 @@ abstract class Api implements IHandler {
      * The array key represents the Field name.
      * @return $this return the class instance
      */
-    protected function addFields(Array $fields) {
+    public function addFields(Array $fields) {
         foreach($fields as $name => $Field)
             $this->mFields[$name] = $Field;
         return $this;
@@ -91,64 +183,26 @@ abstract class Api implements IHandler {
 
     /**
      * Render this API Call. The output format is based on the requested mimeType from the browser
-     * @param array $args an array of arguments parsed out of the route path
+     * @param IRoute $Route the selected route including remaining arguments
      */
-    public function render(Array $args) {
-
+    public function render(IRoute $Route) {
+        $this->mRoute = $Route;
         // Parse the request
-        if(!$_POST && strcasecmp(Util::getUrl('method'), 'get') === 0) {                // if GET
-            $request = $_GET;
-        } else {                                                                        // else POST
-            if(!$_POST && Util::getHeader('Content-Type') === 'application/json') {     // if JSON Object,
-                $request = json_decode( file_get_contents('php://input'), true);        // Parse out json
-            } else {
-                $request = $_POST;                                                      // else use POST
-            }
-        }
-
-        if($args) {
-            $i = 0;
-            foreach($this->mFields as $name=>$Field) {
-                if(!isset($args[$i]))
-                    break;
-                if(!empty($args[$i]) && $Field instanceof IApiParam) {
-                    $request[$name] = $args[$i];
-                    if(!isset($args[$i]))
-                        break;
-                }
-                $i++;
-            }
-        }
-        try {
-            $Response = $this->execute($request);
-            if(!($Response instanceof IResponse))
-                $Response = new Response(true, "API executed successfully", $Response);
-        } catch (ResponseException $ex) {
-            $Response = $ex;
-        } catch (\Exception $ex) {
-            $Response = new ResponseException($ex->getMessage(), null, $ex);
-        }
+        $request = $Route->getRequest();
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $Response->sendHeaders($mimeType);
-                    $JSON = Util::toJSON($Response);
-                    echo json_encode($JSON);
+                    $this->renderJSON($request);
                     return;
                 case 'text/xml':
-                    $Response->sendHeaders($mimeType);
-                    $XML = Util::toXML($Response);
-                    echo $XML->asXML();
+                    $this->renderXML($request);
                     return;
                 case 'text/html':
-                    $Response->sendHeaders($mimeType);
-                    $Render = new ApiInfo();
-                    $Render->render($this, $Response);
+                    $this->renderHTML($request);
                     return;
                 case 'text/plain':
-                    $Response->sendHeaders($mimeType);
-                    echo $Response."\n";
+                    $this->renderText($request);
                     return;
             }
         }
@@ -157,43 +211,65 @@ abstract class Api implements IHandler {
     public function getFields() {
         return $this->mFields;
     }
-    /**
-     * Provides the formatted route for viewing purposes
-     * @return array the formatted route(s)
-     */
-    public function getDisplayRoutes() {
-        if(!$this->mRoutes) {
-            $this->mRoutes = array();
-            $BuildRoutes = new BuildRoutes();
-            foreach($BuildRoutes->getHandlerRoutes(new \ReflectionClass($this)) as $route) {
-                foreach($this->mFields as $name => $Field) {
-                    if(!($Field instanceof IApiParam))
-                        continue;
-                    $route .= '/:' . $name ;
-                }
-                $this->mRoutes [] = $route;
-            }
+
+    public function getDisplayRoute(&$methods) {
+        $methods = array('GET', 'POST');
+        $route = $this->mRoute->getRoute();
+        foreach($this->mFields as $name => $Field) {
+            if(!($Field instanceof IAPIParam))
+                continue;
+            $route .= '/:' . $name ;
         }
-        return $this->mRoutes;
+        return $route;
     }
+
 }
+//
+//class APIRequest extends ArrayObject {
+//
+//    private $mRequest;
+//    private $mRoute;
+//
+//    public function __construct(Array $request, IRoute $Route=NULL) {
+//        $this->mRequest = $request;
+//        $this->mRoute = $Route;
+//    }
+//
+//    public function getRoute() {
+//        return $this->mRoute;
+//    }
+//
+//    public function &getData() {
+//        return $this->mRequest;
+//    }
+//}
 
 /**
- * Class IApiField
+ * Class IAPIField
  * @package CPath
  * Represents an API Field
  */
-interface IApiField {
+interface IAPIField {
+    /**
+     * Validates an input field. Throws a ValidationException if it fails to validate
+     * @param mixed $value the input field to validate
+     * @return mixed the formatted input field that passed validation
+     * @throws ValidationException if validation fails
+     */
     public function validate($value);
+
+    /**
+     * @return String a description of the Api Field
+     */
     public function getDescription();
 }
 
 /**
- * Class ApiParam
+ * Class APIParam
  * @package CPath
  * This interface tags an API Field as a route parameter.
  */
-interface IApiParam extends IApiField {
+interface IAPIParam extends IAPIField {
 
 }
 /**
@@ -219,11 +295,11 @@ class ValidationExceptions extends MultiException {
 }
 
 /**
- * Class ApiField
+ * Class APIField
  * @package CPath
  * Represents an 'optional' API Field
  */
-class ApiField implements IApiField {
+class APIField implements IAPIField {
     public $mDescription;
     public function __construct($description=NULL) {
         $this->mDescription = $description;
@@ -232,6 +308,7 @@ class ApiField implements IApiField {
     public function getDescription() {
         return $this->mDescription;
     }
+
 
     public function validate($value) {
         return $value;
@@ -248,11 +325,11 @@ class RequiredFieldException extends ValidationException {
 }
 
 /**
- * Class ApiRequiredField
+ * Class APIRequiredField
  * @package CPath
  * Represents a 'required' API Field
  */
-class ApiRequiredField extends ApiField {
+class APIRequiredField extends APIField {
     public function validate($value) {
         if(!$value && $value !== '0')
             throw new RequiredFieldException();
@@ -261,9 +338,48 @@ class ApiRequiredField extends ApiField {
 }
 
 /**
- * Class ApiParam
+ * Class APIParam
  * @package CPath
  * Represents a Parameter from the route path
  */
-class ApiParam extends ApiRequiredField implements IApiParam {
+class APIParam extends APIField implements IAPIParam {
+}
+
+/**
+ * Class APIRquiredParam
+ * @package CPath
+ * Represents a Required Parameter from the route path
+ */
+class APIRequiredParam extends APIRequiredField implements IAPIParam {
+}
+
+class APIFilterField extends APIField {
+
+    protected $mFilter, $mOptions;
+    /**
+     * @param int $filter
+     * @param mixed $options
+     * @param String $description
+     */
+    public function __construct($filter, $options=0, $description=NULL) {
+        $this->mFilter = $filter;
+        $this->mOptions = $options;
+        parent::__construct($description);
+    }
+
+    public function validate($value) {
+        $value = parent::validate($value);
+        return filter_var($value, $this->mFilter, $this->mOptions) ?: NULL;
+    }
+}
+class APIRequiredFilterField extends APIFilterField {
+
+    public function validate($value) {
+        if(!$value && $value !== '0')
+            throw new RequiredFieldException();
+        $value = parent::validate($value);
+        if(!$value)
+            throw new ValidationException("Field '%s' has an invalid format");
+        return $value;
+    }
 }

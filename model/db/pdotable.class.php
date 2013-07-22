@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 abstract class PDOTable {
@@ -21,18 +21,6 @@ abstract class PDOTable {
         return new PDOUpdate(static::TableName, array_shift($args), $args);
     }
 
-    static function insert(\PDO $DB, $_fieldArgs) {
-        $args = func_get_args();
-        return new PDOInsert(static::TableName, array_shift($args), $args);
-    }
-
-    static function from($alias) {
-        return "\nFROM ".static::TableName." {$alias}";
-    }
-
-    static function join($alias, $on='') {
-        return "\nJOIN ".static::TableName." {$alias} ON {$on}";
-    }
 //
 //    static function select(\PDO $DB, $select, $where, $limit='1') {
 //        return $DB->query("SELECT ".self::parseList($select)

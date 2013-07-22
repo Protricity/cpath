@@ -5,15 +5,20 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
-class PDOUpdate {
-    private $DB, $stmt=NULL, $table, $fields=array(), $where=array(), $limit='1';
-    public function __construct($table, \PDO $DB, Array $fields) {
+class PDOUpdate extends PDOWhere {
+    /** @var \PDO */
+    private $DB;
+    /** @var \PDOStatement */
+    private $stmt=NULL;
+    private $fields=array(), $limit;
+    public function __construct($table, \PDO $DB, Array $fields, $limit=NULL) {
+        parent::__construct($table);
         $this->DB = $DB;
-        $this->table = $table;
         $this->fields = $fields;
+        $this->limit = $limit;
     }
 
     public function addField($field) {
@@ -30,27 +35,15 @@ class PDOUpdate {
         return $this;
     }
 
-    public function where($field, $value=NULL) {
-        if(!is_int($value))
-            $value = $this->DB->quote($value);
-        if(strpos($field, '?') === false)
-            $field .= '=' . $value;
-        else
-            $field = str_replace('?', $value, $field);
-        $this->where[] = $field;
-        $this->stmt = NULL;
+    public function limit($limit) {
+        $this->limit = $limit;
         return $this;
     }
-
-//    public function limit($limit) {
-//        $this->limit = $limit;
-//        $this->stmt = NULL;
-//        return $this;
-//    }
 
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
+        if($this->values) $_values = array_merge($_values, $this->values);
         $this->stmt->execute($_values);
         return $this;
     }
@@ -62,6 +55,7 @@ class PDOUpdate {
             throw new \Exception("method addWhere() was not called");
         return "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
-            ."\nWHERE ".($this->where ? implode(' AND ', $this->where) : '1');
+            .parent::getSQL()
+            .($this->limit ? "\nLIMIT ".$this->limit : "");
     }
 }

@@ -5,20 +5,55 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IDatabase;
 use CPath\Builders\BuildRoutes;
+use CPath\Util;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
-
+    const BUILD = 'NONE'; // ALL|MODEL|PROC|NONE;
+    const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = NULL;
     private $mPrefix;
+
+
+    /**
+     * @param $tableName
+     * @param $_selectArgs
+     * @return PDOSelect
+     */
+    public function select($tableName, $_selectArgs) {
+        $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
+        return new PDOSelect($tableName, $this, $args);
+    }
+
+    /**
+     * @param $tableName
+     * @param $_fieldArgs
+     * @return PDOInsert
+     */
+    abstract public function insert($tableName, $_fieldArgs);
+
+    /**
+     * @param $tableName
+     * @param $_selectArgs
+     * @return PDOUpdate
+     */
+    public function update($tableName, $_selectArgs) {
+        $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
+        return new PDOUpdate($tableName, $this, $args);
+    }
+
+    public function delete($tableName) {
+        return new PDODelete($tableName, $this);
+    }
 
     public function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {
         $this->setPrefix($prefix);
@@ -40,7 +75,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     //abstract function insert($table, Array $pairs);
     //abstract function insertOrUpdate($table, Array $pairs, Array $updatePairs);
 
-    protected abstract function setDBVersion($version);
+    abstract function setDBVersion($version);
 
     public function quotef($format, $_args) {
         return $this->vquotef($format, array_slice(func_get_args(), 1));
@@ -81,19 +116,20 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     // Implement IHandler
 
-    const ROUTE_METHODS = 'CLI';
+    const Route_Methods = 'CLI';
 
-    function render(Array $args) {
-        header('text/plain');
-        echo "DB Upgrader: ".get_class($this)."\n\n";
-        if($args[0] == 'upgrade' || $args[0] == 'rebuild') {
-            $this->upgrade($args[0] == 'rebuild');
-            foreach(Log::get() as $log)
-                echo $log."\n";
+    function render(IRoute $Route) {
+        if(!Util::isCLI() && !headers_sent())
+            header('text/plain');
+        echo "DB Upgrader: ".get_class($this)."\n";
+        if(in_array($Route->getNextArg(), array('upgrade', 'rebuild'))) {
+            $this->upgrade($Route->getCurrentArg() == 'rebuild');
+            echo "DB Upgrader Completed\n";
+            //foreach(Log::get() as $log)
+            //    echo $log."\n";
         } else {
-            echo "use /upgrade to upgrade database";
+            echo "use .../upgrade to upgrade database\n";
         }
-        echo "DB Upgrader Completed\n";
 
     }
 

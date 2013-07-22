@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Models;
+namespace CPath\Model;
 
 use CPath\Base;
 use CPath\Interfaces\IResponse;
@@ -19,8 +19,10 @@ class ResponseException extends \Exception implements IResponse {
     {
         $ex = $this->getPrevious() ?: $this;
         $arr = array();
-        if(Base::isDebug())
+        if(Base::isDebug()) {
             $arr['_debug_trace'] = $ex->getTraceAsString();
+            $arr['_debug_trace'] = current(explode("\n", $arr['_debug_trace']));
+        }
         return $arr;
     }
     function sendHeaders($mimeType=NULL) {

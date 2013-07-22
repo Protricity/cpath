@@ -8,4 +8,5 @@
 namespace CPath\Interfaces;
 interface ILogEntry extends IXML, IJSON {
     function getMessage();
+    function getTag();
 }

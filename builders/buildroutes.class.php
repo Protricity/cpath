@@ -22,6 +22,7 @@ use CPath\Log;
  */
 class BuildRoutes implements IBuilder {
     const IHandler = "CPath\\Interfaces\\IHandler";
+    const IHandlerAggregate = "CPath\\Interfaces\\IHandlerAggregate";
     const METHODS = 'GET|POST|PUT|DELETE|CLI';
     private $mRoutes = array();
 
@@ -33,7 +34,7 @@ class BuildRoutes implements IBuilder {
      * @throws \CPath\BuildException when a build exception occured
      */
     public function build(\ReflectionClass $Class) {
-        if(!$Class->implementsInterface(self::IHandler))
+        if(!$Class->implementsInterface(self::IHandler) && !$Class->implementsInterface(self::IHandlerAggregate))
             return false;
 
         foreach($this->getHandlerRoutes($Class) as $route) {
@@ -57,7 +58,8 @@ class BuildRoutes implements IBuilder {
             $output .= "\n\tarray('" . $route['match'] . "', '" . $route['class'] . "'),";
         $output .= "\n);";
         $path = Base::getGenPath().'routes.php';
-        mkdir(dirname($path), NULL, true);
+        if(!is_dir(dirname($path)))
+            mkdir(dirname($path), NULL, true);
         file_put_contents($path, $output);
         Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
 
@@ -72,8 +74,8 @@ class BuildRoutes implements IBuilder {
      */
     public function getHandlerRoutes(\ReflectionClass $Class) {
         $routes = array();
-        $methods = $Class->getConstant('ROUTE_METHODS') ?: 'ALL';
-        $route = $Class->getConstant('ROUTE_PATH');
+        $methods = $Class->getConstant('Route_Methods') ?: 'GET|POST|CLI';
+        $route = $Class->getConstant('Route_Path');
         if(!$route) {
             $route = '/'.str_replace('\\', '/', strtolower($Class->getName()));
         }

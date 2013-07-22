@@ -5,10 +5,9 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Models;
+namespace CPath\Model;
 use CPath\Util;
 use CPath\Log;
-use CPath\LogUser;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\ILogListener;
@@ -102,8 +101,8 @@ class Response extends ArrayObject implements IResponse, ILogListener {
     }
 
     function __toString() {
-        return IResponseHelper::toString($this)
-            .implode("\n", $this->mLog);
+        return IResponseHelper::toString($this);
+            //.implode("\n", $this->mLog);
     }
 
     // Statics

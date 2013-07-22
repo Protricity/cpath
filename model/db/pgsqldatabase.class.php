@@ -5,15 +5,15 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Database;
+namespace CPath\Model\DB;
 use \PDO;
 use CPath\Builders\BuildPGTables;
-abstract class PostGreSQL extends PDODatabase {
-    const BUILD_TABLE_PATH = 'tables';
+abstract class PGSQLDatabase extends PDODatabase {
     const FUNC_FORMAT = "SELECT %s";
     protected $mConfig = array();
     public function __construct($prefix, $database, $host=NULL, $username=NULL, $password=NULL) {
         $this->mConfig = get_defined_vars();
+        unset($this->mConfig['this']);
 
         parent::__construct($prefix, "pgsql:dbname=$database;host=$host", $username, $password );
         $this->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -41,16 +41,8 @@ abstract class PostGreSQL extends PDODatabase {
         return $this;
     }
 
-//    function prepareInsert($table, Array $keys) {
-//        return $this->getPDO()
-//            ->prepare("INSERT INTO {$table} (".implode(',', $keys).") VALUES (:".implode(', :', $keys).")");
-//    }
-//
-//    function prepareUpdate($table, Array $keys, $whereKey) {
-//        foreach($keys as &$key)
-//            $key = $key.'=:'.$key;
-//        return $this->getPDO()
-//            ->prepare("UPDATE {$table} SET ".implode(',', $keys)." WHERE $whereKey=:$whereKey");
-//    }
-
+    public function insert($tableName, $_fieldArgs) {
+        $args = is_array($_fieldArgs) ? $_fieldArgs : array_slice(func_get_args(), 1);
+        return new PGSQLInsert($tableName, $this, $args);
+    }
 }

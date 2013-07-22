@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 
 interface IBuilder {
-    //const BUILD_IGNORE = trueRoute;
+    //const Build_Ignore = trueRoute;
 
     /**
      * Performs a build on a class. If the class is not a type that should be built,

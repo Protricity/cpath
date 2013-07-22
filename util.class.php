@@ -9,6 +9,8 @@ namespace CPath;
 
 
 // TODO split this class up into generic methods and request-oriented methods
+use CPath\Model\CLI;
+
 /**
  * Class Util provides information about the current request
  * @package CPath
@@ -17,6 +19,7 @@ abstract class Util {
 
     private static $mHeaders = null;
     private static $mUrl = array();
+    private static $mIsCLI = false;
 
     /**
      * Initialize the static class and parses request information
@@ -24,31 +27,30 @@ abstract class Util {
     public static function init() {
         if(!empty($_SERVER["REQUEST_URI"])) {
             self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
-            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? $_SERVER["REQUEST_METHOD"] : 'GET';
+            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
+
+            $root = dirname($_SERVER['SCRIPT_NAME']);
+            $request = self::$mUrl["path"];
+            if(stripos($request, $root) === 0)
+                $request = substr($request, strlen($root));
+            self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
         } elseif ($args = $_SERVER['argv']) {
             array_shift($args);
-            if(!$args[0] || !preg_match('/get|post|cli/i', $args[0]))
-                array_unshift($args, 'CLI');
+            $CLI = new CLI($args);
+            self::$mUrl = $CLI->getParsedUrl();
+            $_GET = $CLI->getRequest(); // TODO: $_POST
 
-            if($args[1])
-                self::$mUrl = parse_url($args[1]);
-            else
-                self::$mUrl = array('path'=>'');
-            self::$mUrl['method'] = strtoupper($args[0]);
-            self::$mUrl['args'] = $args;
-            if(isset(self::$mUrl['query']))
-                parse_str(self::$mUrl['query'], $_GET);
-            // TODO: $_POST
+            self::$mIsCLI = true;
+            Log::addCallback($CLI);
         }
-        $root = dirname($_SERVER['SCRIPT_NAME']);
-        $request = self::$mUrl["path"];
-        if(stripos($request, $root) === 0)
-            $request = substr($request, strlen($root));
-        self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
 
         self::$mHeaders = function_exists('getallheaders')
             ? getallheaders()
             : array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
+    }
+
+    public static function isCLI() {
+        return self::$mIsCLI;
     }
 
     /**
@@ -153,8 +155,9 @@ abstract class Util {
         }
 
         foreach($object as $key=>$val) {
-            if(is_int($key)) $key = 'item'.$key;
+            if(is_int($key)) $key = 'item';
             if($val instanceof Interfaces\IXML) {
+                $key = strtolower(basename(get_class($val)));
                 $ch = $root->addChild($key);
                 $val->toXML($ch);
             } elseif(is_array($val)) {
