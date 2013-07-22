@@ -43,7 +43,8 @@ class PDOUpdate extends PDOWhere {
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
         if(!$this->stmt) $this->stmt = $this->DB->prepare($this->getSQL());
-        $this->stmt->execute($_values);
+        if($this->values) $_values = array_merge($_values, $this->values);
+B        $this->stmt->execute($_values);
         return $this;
     }
 

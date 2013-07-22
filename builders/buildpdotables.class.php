@@ -212,15 +212,15 @@ PHP;
 
             // Static Table
 
-            $php = $this->getConst('TableName', $table);
-            $php .= $this->getConst('Primary', $primaryCol);
-            foreach($cols as $name)
-                $php .= $this->getConst(strtoupper($name), $name);
-            //$php .= $this->getInsert($table, $cols);
-            $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
-            file_put_contents($tablePath.$file, $php);
-            $i = array_search($file, $oldFiles);
-            unset($oldFiles[$i]);
+//            $php = $this->getConst('TableName', $table);
+//            $php .= $this->getConst('Primary', $primaryCol);
+//            foreach($cols as $name)
+//                $php .= $this->getConst(strtoupper($name), $name);
+//            //$php .= $this->getInsert($table, $cols);
+//            $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
+//            file_put_contents($tablePath.$file, $php);
+//            $i = array_search($file, $oldFiles);
+//            unset($oldFiles[$i]);
 
             // Model
 
@@ -248,7 +248,7 @@ PHP;
             file_put_contents($modelPath.$file, $php);
 
         }
-        Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
+        //Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
         Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
