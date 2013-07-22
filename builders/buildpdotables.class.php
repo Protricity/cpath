@@ -57,9 +57,14 @@ PHP;
 	}
 PHP;
 
+    const TMPL_PROP = <<<'PHP'
+	protected $%s;
+
+PHP;
+
     const TMPL_GETPROP = <<<'PHP'
 
-	function get%s() { return $this->mRow['%s']; }
+	function get%s() { return $this->%s; }
 
 PHP;
 
@@ -192,13 +197,14 @@ PHP;
             $indexCols = $this->getIndexes($DB, $table, $primaryCol, $primaryAutoInc);
             $cols = $this->getColumns($DB, $table, $primaryCol, $primaryAutoInc);
             $types = implode('', array_values($cols));
-            $searchTypes = '';
+            $searchSKeys = array();
             $cols = array_keys($cols);
             $order = array();
             foreach($cols as $i=>$name) {
                 if(in_array($name, $indexCols)) {
                     $order[] = $name;
-                    $searchTypes .= $types[$i];
+                    if($types[$i] == 's')
+                        $searchSKeys[] = $name;
                 }
             }
             $indexCols = $order;
@@ -224,10 +230,14 @@ PHP;
             $php .= $this->getConst('Types', $types);
             if($indexCols) {
                 $php .= $this->getConst('SearchKeys', implode(',', $indexCols));
-                $php .= $this->getConst('SearchTypes', $searchTypes);
+                $php .= $this->getConst('SearchSKeys', implode(',', $searchSKeys));
             }
+            $php .= "\n";
             foreach($cols as $name)
                 $php .= $this->getConst(strtoupper($name), $name);
+            $php .= "\n";
+            foreach($cols as $name)
+                $php .= sprintf(self::TMPL_PROP, $name);
             foreach($cols as $name)
                 $php .= $this->propGetSet($name, $name == $primaryCol);
             //$php .= $this->getCreate($primaryAutoInc ? array_diff($cols, (array)$primaryCol) : $cols);

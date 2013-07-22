@@ -54,6 +54,7 @@ abstract class API implements IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     public function executeAsResponse(Array $request) {
+        $this->parseRequestParams($request, $this->mRoute);
         try {
             $Response = $this->execute($request);
             if($Response instanceof IResponseAggregate)
@@ -81,44 +82,54 @@ abstract class API implements IAPI {
     }
 
     /**
-     * Sends headers and renders an IResponse as HTML
-     * @param IResponse $Response
+     * Sends headers, executes the request, and renders an IResponse as HTML
+     * @param array $request the request to execute
      * @return void
      */
-    public function renderHTML(IResponse $Response) {
-        $Response->sendHeaders('text/html');
+    public function renderHTML(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: text/html");
         $Render = new APIInfo();
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
         $Render->render($this, $Response);
     }
 
     /**
-     * Sends headers and renders an IResponse as JSON
-     * @param IResponse $Response
+     * Sends headers, executes the request, and renders an IResponse as JSON
+     * @param array $request the request to execute
      * @return void
      */
-    public function renderJSON(IResponse $Response) {
-        $Response->sendHeaders('application/json');
+    public function renderJSON(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: application/json");
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
         $JSON = Util::toJSON($Response);
         echo json_encode($JSON);
     }
 
     /**
-     * Sends headers and renders an IResponse as XML
-     * @param IResponse $Response
+     * Sends headers, executes the request, and renders an IResponse as XML
+     * @param array $request the request to execute
      * @return void
      */
-    public function renderXML(IResponse $Response) {
-        $Response->sendHeaders('text/xml');
+    public function renderXML(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: text/xml");
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
         $XML = Util::toXML($Response);
         echo $XML->asXML();
     }
 
     /**
-     * Sends headers and renders an IResponse as Plain Text
-     * @param IResponse $Response
+     * Sends headers, executes the request, and renders an IResponse as Plain Text
+     * @param array $request the request to execute
      * @return void
      */
-    public function renderText(IResponse $Response) {
+    public function renderText(Array $request) {
+        $Response = $this->executeAsResponse($request);
         $Response->sendHeaders('text/plain');
         echo $Response."\n";
     }
@@ -178,22 +189,20 @@ abstract class API implements IAPI {
         $this->mRoute = $Route;
         // Parse the request
         $request = $Route->getRequest();
-        $this->parseRequestParams($request, $Route);
-        $Response = $this->executeAsResponse($request);
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $this->renderJSON($Response);
+                    $this->renderJSON($request);
                     return;
                 case 'text/xml':
-                    $this->renderXML($Response);
+                    $this->renderXML($request);
                     return;
                 case 'text/html':
-                    $this->renderHTML($Response);
+                    $this->renderHTML($request);
                     return;
                 case 'text/plain':
-                    $this->renderText($Response);
+                    $this->renderText($request);
                     return;
             }
         }
@@ -241,7 +250,17 @@ abstract class API implements IAPI {
  * Represents an API Field
  */
 interface IAPIField {
+    /**
+     * Validates an input field. Throws a ValidationException if it fails to validate
+     * @param mixed $value the input field to validate
+     * @return mixed the formatted input field that passed validation
+     * @throws ValidationException if validation fails
+     */
     public function validate($value);
+
+    /**
+     * @return String a description of the Api Field
+     */
     public function getDescription();
 }
 
@@ -289,6 +308,7 @@ class APIField implements IAPIField {
     public function getDescription() {
         return $this->mDescription;
     }
+
 
     public function validate($value) {
         return $value;

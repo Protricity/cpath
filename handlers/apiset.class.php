@@ -25,17 +25,20 @@ use CPath\Builders\BuildRoutes;
  *
  * Provides an API collection
  */
-class APISet extends API implements \ArrayAccess, \IteratorAggregate {
+class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate {
 
     const Build_Ignore = true;     // This class should not be built. Classes that use it should set Build_Ignore to false
 
     const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
 
+    const ROUTE_KEY = 'apiset_subroute';
+
     /** @var IAPI[] */
     protected $mAPIs = array();
     private $mPath = NULL;
     private $mClassName = NULL;
+    private $mExecutedAPI = NULL;
 
     /**
      * Creates a new APISet instance
@@ -44,6 +47,27 @@ class APISet extends API implements \ArrayAccess, \IteratorAggregate {
     public function __construct($ContainerClass=NULL) {
         if($ContainerClass)
             $this->mClassName = $ContainerClass;
+        $this->addField(self::ROUTE_KEY, $this);
+    }
+
+    /**
+     * Validates an input field. Throws a ValidationException if it fails to validate
+     * @param mixed $value the input field to validate
+     * @return mixed the formatted input field that passed validation
+     * @throws InvalidRouteException if validation fails
+     */
+    public function validate($value)
+    {
+        $this->getAPI($value);
+        return $value;
+    }
+
+    /**
+     * @return String a description of the Api Field
+     */
+    public function getDescription()
+    {
+        // TODO: Implement getDescription() method.
     }
 
     /**
@@ -59,15 +83,15 @@ class APISet extends API implements \ArrayAccess, \IteratorAggregate {
     /**
      * @param String $path the api path to search. If null, the currently selected API is used
      * @return IAPI the api instance or null if not found
-     * @throws \CPath\NoRoutesFoundException
+     * @throws InvalidRouteException
      */
     public function getAPI($path=NULL) {
         if(!$path) $path = $this->mPath;
         $path = strtolower($path);
         if(!$path)
-            throw new NoRoutesFoundException("Sub-route is missing. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
+            throw new InvalidRouteException("Sub-route is missing. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
         if(!isset($this->mAPIs[$path]))
-            throw new NoRoutesFoundException("Route '{$path}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
+            throw new InvalidRouteException("Route '{$path}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
         return $this->mAPIs[$path];
     }
 
@@ -81,40 +105,48 @@ class APISet extends API implements \ArrayAccess, \IteratorAggregate {
      */
     function execute(Array $request, $path=NULL)
     {
+        if($path) $request[self::ROUTE_KEY] = $path;
+        $request = $this->processRequest($request);
+        $path = $request[self::ROUTE_KEY];
+        unset($request[self::ROUTE_KEY]);
         /** @var API $API */
-        $API = $this->getAPI($path);
-        $API->mRoute = $this->mRoute;
-        $API->parseRequestParams($request, $this->mRoute);
-        return $API->execute($request);
+        $this->mExecutedAPI = $this->getAPI($path);
+        $this->mExecutedAPI->mRoute = $this->mRoute;
+        return $this->mExecutedAPI->executeAsResponse($request);
     }
 
-    function executeAsResponse(Array $request, $path=NULL) {
-        if($path != NULL)
-            $this->mPath = $path;
-        return parent::executeAsResponse($request);
-    }
+//    function executeAsResponse(Array $request, $path=NULL) {
+//        if($path != NULL)
+//            $this->mPath = $path;
+//        $API = $this;
+//        if($this->mPath) {
+//            $API = $this->getAPI();
+//            $API->mRoute = $this->mRoute;
+//        }
+//        return $API->executeAsResponse($request);
+//    }
 
     /**
-     * Sends headers and renders an IResponse as HTML
-     * @param IResponse $Response
+     * Sends headers, executes the request, and renders an IResponse as HTML
+     * @param array $request the request to execute
      * @return void
      */
-    public function renderHTML(IResponse $Response) {
-        $API = $this;
-        if($this->mPath)
-            $API = $this->getAPI();
-        $Response->sendHeaders('text/html');
+    public function renderHTML(Array $request) {
+        if(!headers_sent() && !Util::isCLI())
+            header("Content-Type: text/html");
         $Render = new APIInfo();
-        $Render->render($API, $Response);
+        $Response = $this->executeAsResponse($request);
+        $Response->sendHeaders();
+        $Render->render($this->mExecutedAPI ?: $this, $Response);
     }
 
-    function render(IRoute $Route)
-    {
-        $this->mPath = $Route->getNextArg();
-        $this->getAPI($this->mPath);
-        $Route->addToRoute($this->mPath);
-        parent::render($Route);
-    }
+//    function render(IRoute $Route)
+//    {
+//        $this->mPath = $Route->getNextArg();
+//        $this->getAPI($this->mPath);
+//        $Route->addToRoute($this->mPath);
+//        parent::render($Route);
+//    }
 
     // Implement ArrayAccess
 
@@ -133,3 +165,5 @@ class APISet extends API implements \ArrayAccess, \IteratorAggregate {
 
     public function getIterator() { return new \ArrayIterator($this->mAPIs); }
 }
+
+class InvalidRouteException extends ValidationException {}

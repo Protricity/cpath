@@ -13,7 +13,7 @@ use \PDO;
 class PDOSelect extends PDOWhere implements \Iterator {
     private $DB, $select=array(), $limit='1';
     /** @var \PDOStatement */
-    private $stmt = null;
+    protected $stmt = null;
     private $row = null;
     private $count = 0;
     private $customMethod = null;
@@ -71,12 +71,19 @@ class PDOSelect extends PDOWhere implements \Iterator {
         return $this->row;
     }
 
+    public function fetchObject($Class) {
+        if(!$this->stmt) $this->exec();
+        $this->count++;
+        $this->row = $this->stmt->fetchObject($Class);
+        return $this->row;
+    }
+
     public function fetchAll() {
         if(!$this->stmt) $this->exec();
-        $fetch = $this->stmt->fetchAll();
-        if($fetch && $call = $this->customMethod)
-            foreach($fetch as &$row)
-                $row = $call instanceof \Closure ? $call($row) : call_user_func($call, $row);
+        $fetch = array();
+        while($row = $this->fetch())
+            $fetch[] = $row;
+
         $this->count = sizeof($fetch);
         return $fetch;
     }

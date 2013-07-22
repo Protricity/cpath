@@ -2,11 +2,25 @@
 namespace CPath\Handlers\API\View;
 
 use CPath\Base;
+use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\ILogListener;
+use CPath\Log;
 use CPath\Util;
 use CPath\Handlers\API;
 use CPath\Interfaces\IResponse;
 
-class APIInfo {
+class APIInfo implements ILogListener {
+
+    private $mLog = array();
+
+    public function __construct() {
+        if(Base::isDebug())
+            Log::addCallback($this);
+    }
+
+    function onLog(ILogEntry $log) {
+        $this->mLog[] = $log;
+    }
 
     function render(API $API, IResponse $Response)
     {
@@ -43,10 +57,12 @@ class APIInfo {
 
         <?php if(Base::isDebug()) { ?>
         <h3>Debug</h3>
-        <div style='white-space: pre'><?php
-            //foreach(Log::get)
+        <table><?php
+            /** @var ILogEntry $log */
+            foreach($this->mLog as $log)
+                echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
 
-        ?></div>
+        ?></table>
         <?php } ?>
     </body>
 </html><?php

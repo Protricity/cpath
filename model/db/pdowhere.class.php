@@ -64,12 +64,11 @@ abstract class PDOWhere {
                 if(preg_match('/([=<>!]+|like)\s*$/i', $field))
                     $e = ' ';
                 $field .= $e . '?';
-            } else {
             }
         }
 
 
-        if(preg_match('/^AND|OR|\(|\)$/i', $field)) {
+        if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
             if($field == '(' && !$this->lastCond)
                 $this->where[] = 'AND';
             $this->lastCond = true;

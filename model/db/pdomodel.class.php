@@ -40,45 +40,31 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     Const Columns = null;
     Const Types = null;
     const SearchKeys = null;
-    const SearchTypes = null;
+    const SearchSKeys = null;
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
     const SearchAllowWildCard = false;   // true or false
 
-    const ExportFields = 'Primary'; // 'All|None|Index|Primary|Exclude:[field1,field2]|Include:[field1,field2]';
+    const ExportFields = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
 
-    protected $mRow = null;
-    private $mCommit = array();
+    //protected $mRow = null;
+    private $mCommit = NULL;
 
     /**
-     * PDOModel Constructor parameters must be optional. An 'empty' model must be created if no parameters are passed.
-     * @param mixed|null $id if passed, the model is created with the specified id by Primary key, if exists.
-     * @throws ModelNotFoundException if no model was found
-     * @throws \Exception if the primary key is not set when $id is passed
+     * PDOModel Constructor parameters must be optional.
+     * No queries should be attempted to load the model from the constructor.
+     * Parameters may formatted and additional parameters added in the constructor
      */
-    public function __construct($id=NULL) {
-        if($id !== NULL) {
-            if(!static::Primary)
-                throw new \Exception("Model '".get_class($this)."' has no primary key set");
-            $row = static::search(true)
-                ->where(static::Primary, $id)
-                ->fetch();
-            if(!$row)
-                throw new ModelNotFoundException(get_class($this) . " '{$id}' not found");
-            $this->setData($row);
-        }
-    }
+    public function __construct() {
 
-    protected function setData(Array $row) {
-        $this->mRow = $row;
-        return $this;
     }
 
     public function setField($field, $value, $commit=true) {
+        if(!$this->mCommit) $this->mCommit = array();
         $this->mCommit[$field] = $value;
         if($commit) {
-            if(!static::Primary)
+            if(!($primary = static::Primary))
                 throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
             $set = '';
             $DB = static::getDB();
@@ -86,11 +72,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
             $SQL = "UPDATE ".static::TableName
                 ."\n SET {$set}"
-                ."\n WHERE ".static::Primary." = ".$DB->quote($this->mRow[static::Primary]);
+                ."\n WHERE ".static::Primary." = ".$DB->quote($this->$primary);
             $DB->exec($SQL);
             $this->mCommit = array();
         }
-        $this->mRow[$field] = $value;
+        $this->$field = $value;
         return $this;
     }
 
@@ -98,19 +84,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     function toXML(\SimpleXMLElement $xml){
         foreach($this->getExportData() as $key=>$val)
             $xml->addAttribute($key, $val);
+
     }
 
     function toJSON(Array &$JSON){
         foreach($this->getExportData() as $key=>$val)
             $JSON[$key] = $val;
-    }
-
-
-    /**
-     * @return IResponse
-     */
-    public function getResponse() {
-        return new Response("Retrieved '" . $this . "'", true, $this);
     }
 
     /**
@@ -123,57 +102,74 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if(!$f = static::ExportFields)
             return array();
         $f = explode(':', $f);
-        switch(array_shift($f)) {
-            case 'All':
-                return $this->mRow;
-            default:
+        switch($f[0]) {
+            case 'Public':
+                $R = new \ReflectionObject($this);
+                $export = array();
+                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC) as $p)
+                    $export[$p->name] = $this->{$p->name};
+                return $export;
+            case 'Protected':
+                $R = new \ReflectionObject($this);
+                $export = array();
+                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED) as $p)
+                    $export[$p->name] = $this->{$p->name};
+                return $export;
             case 'None':
                 return array();
             case 'Index':
-                if(!static::SearchKeys)
-                    return array();
-                return $this->getDataInclude(explode(',', static::SearchKeys));
+                $export = array();
+                $keys = explode(',', static::SearchKeys);
+                foreach($keys as $k)
+                    $export[$k] = $this->$k;
+                return $export;
+            case 'SPIndex':
+                $export = array();
+                $keys = explode(',', (static::Primary ? static::Primary.',' : '') . static::SearchSKeys);
+                foreach($keys as $k)
+                    $export[$k] = $this->$k;
+                return $export;
             case 'Primary':
                 if(!static::Primary)
                     return array();
-                return $this->getDataInclude(static::Primary);
+                return array(static::Primary => $this->{static::Primary});
             case 'Exclude':
-                return $this->getDataExclude($f);
+                $export = array();
+                array_shift($f);
+                foreach($this as $k=>$v)
+                    if(!in_array($k, $f))
+                        $export[$k] = $v;
+                return $export;
             case 'Include':
-                return $this->getDataInclude($f);
+                if(!$f[1] || !($f = explode(',', $f[1])))
+                    return array();
+                $export = array();
+                foreach($this as $k=>$v)
+                    if(in_array($k, $f))
+                        $export[$k] = $v;
+                return $export;
+            default:
+                if(!$f[0] || !($f = explode(',', $f[0])))
+                    return array();
+                $export = array();
+                foreach($this as $k=>$v)
+                    if(in_array($k, $f))
+                        $export[$k] = $v;
+                return $export;
         }
     }
 
     /**
-     * @param String $_keyArgs an array or varargs of all the fields to exclude from the response.
-     * If no fields are passed, the entire array is used.
-     * @return Response
+     * @return IResponse
      */
-    public function getDataExclude($_keyArgs) {
-        $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
-        $row = array();
-        foreach($this->mRow as $key=>$value)
-            if(!in_array($key, $args))
-                $row[$key] = $value;
-        return $row;
-    }
-
-    /**
-     * @param String $_keyArgs an array or varargs of all the fields to return in the response.
-     * @return Array
-     */
-    public function getDataInclude($_keyArgs) {
-        $args = is_array($_keyArgs) ? $_keyArgs : func_get_args();
-        $row = array();
-        foreach($args as $name)
-            if($name) $row[$name] = $this->mRow[$name];
-        return $row;
+    public function getResponse() {
+        return new Response("Retrieved '" . $this . "'", true, $this);
     }
 
     public function __toString() {
         if(static::Primary)
-            return get_class($this) . " '" . $this->mRow[static::Primary] . "'";
-        return get_class($this);
+            return static::getModelName() . " '" . $this->{static::Primary} . "'";
+        return static::getModelName();
     }
 
 
@@ -258,18 +254,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Creates a model instance from a fetched row
-     * @param array $row the database row
-     * @return PDOModel a new instance of the model
-     */
-    public static function fetchCallback(Array $row) {
-        /** @var PDOModel $M */
-        $M = new static();
-        $M->setData($row);
-        return $M;
-    }
-
-    /**
      * Loads a model based on a primary key column value
      * @param $search String the primary key value to search for
      * @return PDOModel the found model instance
@@ -289,15 +273,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Creates a PDOSelect for searching models.
-     * @param bool $asRow if true, returns an array of data instead of an instance of the model
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    public static function search($asRow=false) {
-        $alias = static::TableName . '.';
-        $Select = static::select($alias . '*');
-        if(!$asRow)
-            $Select->setCallback(get_called_class().'::fetchCallback');
-        return $Select;
+    public static function search() {
+        return new PDOSelectObject(static::TableName, static::getDB(), get_called_class());
     }
 
     /**
@@ -346,15 +325,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
          $Select = static::search();
 
         $i = 0;
-        $keys = explode(',', static::SearchKeys);
-        if(!is_numeric($any)) {
-            $types = static::SearchTypes;
-            $keys2 = array();
-            foreach($keys as $j=>$key)
-                if($types[$j] != 'i')
-                    $keys2[] = $key;
-            $keys = $keys2;
-        }
+        if(is_numeric($any))
+            $keys = explode(',', static::SearchKeys);
+        else
+            $keys = explode(',', static::SearchSKeys);
+
         foreach($keys as $key){
             if($i++) $Select->where('OR');
             if($compare) $key .= ' ' . $compare;
@@ -380,7 +355,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     protected static function removeModel(PDOModel $Model) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
-        static::removeByPrimary($Model->mRow[static::Primary]);
+        static::removeByPrimary($Model->{static::Primary});
     }
 
     /**
@@ -493,5 +468,20 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     public static function getModelName() {
         return basename(get_called_class());
+    }
+}
+
+
+class PDOSelectObject extends PDOSelect {
+    private $mClass;
+    public function __construct($table, \PDO $DB, $Class) {
+        parent::__construct($table, $DB, array($table . '.*'));
+        $this->mClass = $Class;
+    }
+
+    public function exec() {
+        parent::exec();
+        $this->stmt->setFetchMode(\PDO::FETCH_CLASS, $this->mClass);
+        return $this;
     }
 }
