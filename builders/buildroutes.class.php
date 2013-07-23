@@ -7,10 +7,12 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Builders;
+use CPath\Build;
 use CPath\BuildException;
 use CPath\Base;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
+use CPath\Route;
 
 
 /**
@@ -46,12 +48,34 @@ class BuildRoutes implements IBuilder {
         return true;
     }
 
+    private function getCustomRoutes() {
+        $routes = array();
+        $path = Base::getGenPath().'routes.custom.php';
+        if(file_exists($path)) {
+            include $path;
+        } else {
+            file_put_contents($path, "<?php\n\$routes = array(\n//\tarray('GET /path/to', 'My\\Handler', array('my'=>'custom', 'request'=>'parameters')),\n);");
+        }
+
+        return $routes;
+    }
+
     /**
      * Checks to see if any routes were built, and builds them into [gen]/routes.php
      */
     public function buildComplete() {
         if(!$this->mRoutes)
             return;
+
+        foreach($this->getCustomRoutes() as $route)
+            $this->mRoutes[] = array('match' => $route[0], 'class' => $route[1]);
+
+//        foreach($this->mRoutes as &$route)
+//            if($route['match'][strlen($route['match'])-1] != '/')
+//                $route['match'] .= '/';
+        usort($this->mRoutes, function ($a, $b){
+            return strlen($b['match'])-strlen($a['match']);
+        });
 
         $output = "<?php\n\$routes = array(";
         foreach($this->mRoutes as $route)
@@ -62,6 +86,9 @@ class BuildRoutes implements IBuilder {
             mkdir(dirname($path), NULL, true);
         file_put_contents($path, $output);
         Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
+
+        if(Base::isApcEnabled())
+            self::clearAPCCache();
 
         $this->mRoutes = array();
     }
@@ -100,5 +127,22 @@ class BuildRoutes implements IBuilder {
         }
 
         return $routes;
+    }
+
+    // Statics
+
+    public static function clearAPCCache() {
+        $c = 0;
+        $cache = apc_cache_info('user');
+        if($cache)
+            foreach($cache['cache_list'] as $info) {
+                if(strpos($info['info'], Route::APC_PREFIX) === 0) {
+                    apc_delete($info['info']);
+                    $c++;
+                }
+            }
+        elseif($cache===false)
+            Log::e(__CLASS__, "APC Cache info could not be got. Make sure to set apc.enable_cli=1 in php.ini");
+        Log::v(__CLASS__, "Cleared {$c} APC Route Entries");
     }
 }

@@ -15,7 +15,9 @@ class ClassNotFoundException extends \Exception {}
  * Provides required framework functionality such as class autoloader and directories
  */
 class Base {
-    private static $mLoaded = false, $mBasePath, $mConfig;
+    private static $mLoaded = false;
+    private static $mBasePath;
+    private static $mConfig;
 
     /** Initialize Static Class on include */
     public static function init() {
@@ -43,7 +45,7 @@ class Base {
     public static function load() {
         if(!self::$mLoaded) {
             spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-            if(self::getConfig('build.auto')) Build::buildClasses();
+            //if(self::getConfig('build.auto')) Build::buildClasses(); // Depreciated. no reason to auto build
         }
     }
 
@@ -100,6 +102,14 @@ class Base {
      */
     public static function isDebug() {
         return self::$mConfig['debug'];
+    }
+
+    /**
+     * Returns true if debug mode is set
+     * @return bool true if debug mode is set
+     */
+    public static function isApcEnabled() {
+        return self::$mConfig['apc.enabled'];
     }
 
     /**

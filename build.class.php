@@ -126,7 +126,8 @@ class Build extends API {
             $config = array(
                 'debug' => false,
                 'build.enabled' => true,
-                'build.auto' => false,
+                'build.inc' => 0,
+                'db.upgrade.enabled' => true,
                 'db.upgrade.auto' => false,
                 'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
             );
@@ -170,7 +171,11 @@ class Build extends API {
         foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
         self::commitConfig();
-        Log::v(__CLASS__, "All Builds Complete");
+
+        $v = Base::getConfig('build.inc', 0);
+        Base::commitConfig('build.inc', ++$v);
+
+        Log::v(__CLASS__, "All Builds Complete (inc={$v})");
         return $exCount;
     }
 

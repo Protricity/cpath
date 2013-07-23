@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+use CPath\Builders\BuildRoutes;
 use CPath\Interfaces\IRoute;
 
 /** Thrown when a valid route could not find a corresponding handler */
@@ -20,6 +21,8 @@ class NoRoutesFoundException extends \Exception {}
  * @package CPath
  */
 class Route implements IRoute {
+
+    const APC_PREFIX = 'cpath.route.%s:';
 
     private
         $mRoute,
@@ -98,12 +101,15 @@ class Route implements IRoute {
     public function match($requestPath) {
         if(strpos($requestPath, $this->mRoute) !== 0)
             return false;
+        if(strlen($requestPath) > ($c = strlen($this->mRoute))
+            && substr($requestPath, $c, 1) != '/')
+            return false;
         return true;
     }
 
-
     /**
      * Renders the route destination
+     * @param String $requestPath the request path to render
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */
@@ -133,20 +139,52 @@ class Route implements IRoute {
      * Loads all routes and attempts to match them to the request path
      * @throws NoRoutesFoundException if no routes matched
      */
-    public static function tryAllRoutes($routePath=NULL, Array $request=NULL) {
-        $routes = self::getRoutes();
+    public static function tryAllRoutes($routePath=NULL, Array $request=array()) {
         if($routePath===NULL) $routePath = Util::getUrl('route');
         if(preg_match('/\.\w+$/', $routePath)) {
             header("HTTP/1.0 404 File request was passed to Script");
             die();
         }
+
+        if(Base::isApcEnabled()) {
+            $prefix = sprintf(self::APC_PREFIX, Base::getConfig('build.inc', 0));
+            $route = $routePath;
+            while(true) {
+                $dest = apc_fetch($prefix.$route, $found);
+                if(!$found) {
+                    $p = strrpos($route, '/');
+                    if(!$p) break;
+                    $route = substr($route, 0, $p);
+                    continue;
+                }
+                $Route = new Route($route, $dest[0]);
+                if(!$Route->match($routePath)) {
+                    Log::e(__CLASS__, "APC Cache did not match route: ". $route);
+                    apc_delete($prefix.$route);
+                    continue;
+                }
+                if(isset($dest[1]))
+                    $request += (array)$dest[1];
+                if($request)
+                    $Route->setRequest($request);
+                $Route->render($routePath);
+                return;
+            }
+        }
+
+        $routes = self::getRoutes();
         foreach($routes as $route) {
             $Route = new Route($route[0], $route[1]);
             if(!$Route->match($routePath))
                 continue;
+            if(isset($route[2]))
+                $request += (array)$route[2];
             if($request)
                 $Route->setRequest($request);
             $Route->render($routePath);
+
+            if(Base::isApcEnabled())
+                apc_store(sprintf(self::APC_PREFIX, Base::getConfig('build.inc', 0)).$route[0], array_slice($route, 1));
             return;
         }
         throw new NoRoutesFoundException("No Routes Matched: " . $routePath);

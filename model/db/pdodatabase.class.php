@@ -109,7 +109,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
         $Build = new BuildPGTables();
 
         if(Base::getConfig('db.upgrade.enabled', true) === false)
-            throw new \Exception("Database Upgrade is disabled db.upgrade.auto===false");
+            throw new \Exception("Database Upgrade is disabled db.upgrade.enabled===false");
         $Build->upgrade($this, $oldVersion);
         return $this;
     }
