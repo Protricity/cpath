@@ -17,12 +17,7 @@ class ResponseException extends \Exception implements IResponse {
 
     function &getData()
     {
-        $ex = $this->getPrevious() ?: $this;
         $arr = array();
-        if(Base::isDebug()) {
-            $arr['_debug_trace'] = $ex->getTraceAsString();
-            $arr['_debug_trace'] = current(explode("\n", $arr['_debug_trace']));
-        }
         return $arr;
     }
     function sendHeaders($mimeType=NULL) {
@@ -31,11 +26,21 @@ class ResponseException extends \Exception implements IResponse {
 
     function toJSON(Array &$JSON) {
         IResponseHelper::toJSON($this, $JSON);
+        if(Base::isDebug()) {
+            $ex = $this->getPrevious() ?: $this;
+            $trace = $ex->getTraceAsString();
+            $JSON['_debug_trace'] = current(explode("\n", $trace));
+        }
     }
 
     function toXML(\SimpleXMLElement $xml)
     {
         IResponseHelper::toXML($this, $xml);
+        if(Base::isDebug()) {
+            $ex = $this->getPrevious() ?: $this;
+            $trace = $ex->getTraceAsString();
+            $xml->addChild('_debug_trace', current(explode("\n", $trace)));
+        }
     }
 
     function __toString() {

@@ -75,7 +75,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 ."\n SET {$set}"
                 ."\n WHERE ".static::Primary." = ".$DB->quote($this->$primary);
             $DB->exec($SQL);
-            Log::u(static::getModelName(), "Updated ".static::getModelName()." '{$this->$primary}'");
+            Log::u(get_called_class(), "Updated ".static::getModelName()." '{$this->$primary}'");
             $this->mCommit = array();
         }
         $this->$field = $value;
@@ -201,7 +201,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     ->values(array_values($row));
                 if(!isset($id))
                     $id = $Insert->getInsertID();
-                Log::u(static::getModelName(), "Created ".static::getModelName()." '{$id}'");
+                Log::u(get_called_class(), "Created ".static::getModelName()." '{$id}'");
                 return static::loadByPrimaryKey($id);
             }
         } catch (\PDOException $ex) {
@@ -209,7 +209,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 $err = "A Duplicate ".static::getModelName()." already exists";
                 if(Base::isDebug())
                     $err .= ': ' . $ex->getMessage();
-                Log::u(static::getModelName(), "Duplicate ".static::getModelName()." already exists");
+                Log::u(get_called_class(), "Duplicate ".static::getModelName()." already exists");
                 throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
             }
             throw $ex;
@@ -353,7 +353,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             ->getDeletedRows();
         if(!$c)
             throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
-        Log::u(static::getModelName(), "Deleted ".static::getModelName()." '{$id}'");
+        Log::u(get_called_class(), "Deleted ".static::getModelName()." '{$id}'");
 
     }
 

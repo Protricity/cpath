@@ -106,8 +106,8 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
     function execute(Array $request, $path=NULL)
     {
         if($path) $request[self::ROUTE_KEY] = $path;
-        $request = $this->processRequest($request);
-        $path = $request[self::ROUTE_KEY];
+        $routeRequest = $this->processRequest($request);
+        $path = $routeRequest[self::ROUTE_KEY];
         unset($request[self::ROUTE_KEY]);
         /** @var API $API */
         $this->mExecutedAPI = $this->getAPI($path);
