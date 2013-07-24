@@ -121,19 +121,20 @@ class SessionManager {
 
     /**
      * @param IUserSession $EmptyUser an empty user instance
+     * @return bool true if user was logged in
      */
     public static function logout(IUserSession $EmptyUser) {
         self::start();
+        $loggedIn = false;
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
+            $loggedIn = true;
             $EmptyUser->disableSessionKey($key);
+            self::$mUserSession = NULL;
         }
         session_unset();
-    }
-
-    public static function isLoggedIn() {
-        return self::$mUserSession ? true : false;
+        return $loggedIn;
     }
 
     public static function checkPassword(IUserSession $User, $password) {
@@ -171,8 +172,10 @@ class SessionManager {
         )));
 
         $APISet->addAPI('logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
-            $EmptyUser::logout();
-            return new Response("Logged out successfuly", true);
+            $wasLoggedIn = $EmptyUser::logout();
+            if($wasLoggedIn)
+                return new Response("Logged out successfully", true);
+            return new Response("User was not logged in", false);
         }));
 
     }
@@ -180,8 +183,7 @@ class SessionManager {
     private static function rndstr($length=64) {
         $s = '';
         for($i=0; $i<$length; $i++) {
-            $d = rand(1,30)%2;
-            $s .= $d ? chr(rand(65,90)) : chr(rand(48,57));
+            $s .= rand(1,30)%2 ? chr(rand(97,122)) : chr(rand(48,57));
         }
         return $s;
     }

@@ -38,6 +38,7 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
     protected $mAPIs = array();
     private $mPath = NULL;
     private $mClassName = NULL;
+    /** @var API */
     private $mExecutedAPI = NULL;
 
     /**
@@ -67,7 +68,7 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
      */
     public function getDescription()
     {
-        // TODO: Implement getDescription() method.
+        return "ApiSet Sub-route. Possible routes are: ".implode(', ', array_keys($this->mAPIs));
     }
 
     /**
@@ -109,8 +110,8 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
         $routeRequest = $this->processRequest($request);
         $path = $routeRequest[self::ROUTE_KEY];
         unset($request[self::ROUTE_KEY]);
-        /** @var API $API */
         $this->mExecutedAPI = $this->getAPI($path);
+        $this->mRoute->addToRoute($path);
         $this->mExecutedAPI->mRoute = $this->mRoute;
         return $this->mExecutedAPI->executeAsResponse($request);
     }

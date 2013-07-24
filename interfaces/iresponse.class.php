@@ -22,14 +22,17 @@ final class IResponseHelper {
     static function toJSON(IResponse $Response, Array &$JSON) {
         $JSON['status'] = $Response->getStatusCode() == IResponse::STATUS_SUCCESS;
         $JSON['msg'] = $Response->getMessage();
-        $JSON['response'] = array();
-        Util::toJSON($Response->getData(), $JSON['response']);
+        if($data = $Response->getData()) {
+            $JSON['response'] = array();
+            Util::toJSON($data, $JSON['response']);
+        }
     }
 
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
         $xml->addChild('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addChild('msg', $Response->getMessage());
-        Util::toXML($Response->getData(), $xml->addChild('response'));
+        if($data = $Response->getData())
+            Util::toXML($data, $xml->addChild('response'));
         return $xml;
     }
 

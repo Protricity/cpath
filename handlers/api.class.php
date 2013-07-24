@@ -38,6 +38,7 @@ abstract class API implements IAPI {
 
     /** @var IAPIField[] */
     protected $mFields = array();
+    /** @var IRoute */
     protected $mRoute=NULL;
 
     /**
@@ -290,7 +291,7 @@ class ValidationException extends \Exception {
  */
 class ValidationExceptions extends MultiException {
     public function addFieldException($fieldName, ValidationException $ex) {
-        parent::add($ex->getFieldError($fieldName));
+        parent::add($ex->getFieldError($fieldName), $fieldName);
     }
 }
 
