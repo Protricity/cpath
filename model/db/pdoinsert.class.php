@@ -6,7 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Interfaces\IDatabase;
+use CPath\Log;
 use \PDO;
 abstract class PDOInsert {
     protected $DB;
@@ -72,6 +74,8 @@ abstract class PDOInsert {
         $this->updateSQL($SQL);
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
+        if(Base::isDebug())
+            Log::v(__CLASS__, $SQL);
         return $this;
     }
 
@@ -80,6 +84,8 @@ abstract class PDOInsert {
             ."\n (".implode(', ',$this->fields).')'
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
         $this->updateSQL($SQL);
+        if(Base::isDebug())
+            Log::v(__CLASS__, $SQL);
         return $SQL;
     }
 }

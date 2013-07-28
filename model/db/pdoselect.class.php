@@ -144,6 +144,6 @@ class PDOSelect extends PDOWhere implements \Iterator {
     public function rewind()
     {
         $this->stmt = null;
-        $this->exec();
+        $this->fetch();
     }
 }

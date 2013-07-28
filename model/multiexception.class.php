@@ -9,7 +9,7 @@ namespace CPath\Model;
 
 use CPath\Interfaces\IResponse;
 
-class MultiException extends ResponseException implements \Countable{
+class MultiException extends ResponseException implements \Countable {
     private $mEx = array();
     public function add($ex) {
         if($ex instanceof \Exception)

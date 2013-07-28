@@ -38,6 +38,7 @@ abstract class API implements IAPI {
 
     /** @var IAPIField[] */
     protected $mFields = array();
+    /** @var IRoute */
     protected $mRoute=NULL;
 
     /**
@@ -54,7 +55,6 @@ abstract class API implements IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     public function executeAsResponse(Array $request) {
-        $this->parseRequestParams($request, $this->mRoute);
         try {
             $Response = $this->execute($request);
             if($Response instanceof IResponseAggregate)
@@ -69,16 +69,8 @@ abstract class API implements IAPI {
         return $Response;
     }
 
-    protected function parseRequestParams(Array &$request, IRoute $Route=NULL) {
-        if($Route && $Route->hasNextArg()) {
-            foreach($this->mFields as $name=>$Field) {
-                if(!$Route->hasNextArg())
-                    break;
-                if($Field instanceof IAPIParam) {
-                    $request[$name] = $Route->getNextArg();
-                }
-            }
-        }
+    public function setRoute(IRoute $Route) {
+        $this->mRoute = $Route;
     }
 
     /**
@@ -134,6 +126,10 @@ abstract class API implements IAPI {
         echo $Response."\n";
     }
 
+    public function renderDefault(Array $request) {
+        $this->renderText($request);
+    }
+
     /**
      * Add an API Field.
      * @param $name string name of the Field
@@ -164,6 +160,15 @@ abstract class API implements IAPI {
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
     public function processRequest(Array $request) {
+        if($this->mRoute && $this->mRoute->hasNextArg()) {
+            foreach($this->mFields as $name=>$Field) {
+                if(!$this->mRoute->hasNextArg())
+                    break;
+                if($Field instanceof IAPIParam) {
+                    $request[$name] = $this->mRoute->getNextArg();
+                }
+            }
+        }
         $values = array();
         $FieldExceptions = new ValidationExceptions();
         foreach($this->mFields as $name=>$Field)
@@ -206,6 +211,7 @@ abstract class API implements IAPI {
                     return;
             }
         }
+        $this->renderDefault($request);
     }
 
     public function getFields() {
@@ -352,6 +358,27 @@ class APIParam extends APIField implements IAPIParam {
  */
 class APIRequiredParam extends APIRequiredField implements IAPIParam {
 }
+
+class APIEnumField extends APIField {
+    protected $mEnum;
+    public function __construct($description, $_enumValues) {
+        parent::__construct($description);
+        $this->mEnum = is_array($_enumValues) ? $_enumValues : array_slice(func_get_args(), 1);
+    }
+
+    public function validate($value) {
+        $value = parent::validate($value);
+        if(!in_array($value, $this->mEnum))
+            throw new ValidationException("Field '%s' must be one of the following: '" . implode("', '", $this->mEnum) . "'");
+        return $value;
+    }
+
+    public function getDescription() {
+        return $this->getDescription() . ": '" . implode("', '", $this->mEnum) . "'";
+    }
+}
+
+class APIEnumParam extends APIField implements IAPIParam {}
 
 class APIFilterField extends APIField {
 

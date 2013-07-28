@@ -103,16 +103,16 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
      * @return IResponse the api call response with data, message, and status
      * @throws NoRoutesFoundException if the api path was not found
      */
-    function execute(Array $request, $path=NULL)
+    function execute(Array $origRequest, $path=NULL)
     {
         if($path) $request[self::ROUTE_KEY] = $path;
-        $request = $this->processRequest($request);
+        $request = $this->processRequest($origRequest);
         $path = $request[self::ROUTE_KEY];
         unset($request[self::ROUTE_KEY]);
         /** @var API $API */
         $this->mExecutedAPI = $this->getAPI($path);
-        $this->mExecutedAPI->mRoute = $this->mRoute;
-        return $this->mExecutedAPI->executeAsResponse($request);
+        $this->mExecutedAPI->setRoute($this->mRoute); // TODO: Ugly
+        return $this->mExecutedAPI->execute($origRequest);
     }
 
 //    function executeAsResponse(Array $request, $path=NULL) {

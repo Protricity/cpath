@@ -23,6 +23,7 @@ interface IAPI extends IHandler {
      * @return IResponse the api call response with data, message, and status
      */
     public function executeAsResponse(Array $request);
+    public function setRoute(IRoute $Route);
 
     function getDisplayRoute(&$methods);
 }

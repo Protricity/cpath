@@ -57,6 +57,12 @@ PHP;
 	}
 PHP;
 
+    const TMPL_GETENUM = <<<'PHP'
+
+	static function get%sEnumValues() { return %s; }
+
+PHP;
+
     const TMPL_PROP = <<<'PHP'
 	protected $%s;
 
@@ -95,7 +101,7 @@ PHP;
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
         if($oldVersion===NULL)
             $oldVersion = $DB->getDBVersion();
-        $curVersion = $DB::VERSION;
+        $curVersion = $DB::Version;
         $Class = new \ReflectionClass($DB);
         $schemaFolder = $this->getFolder($Class, 'schema');
         $files = scandir($schemaFolder);
@@ -148,9 +154,9 @@ PHP;
         if(!$Class->isSubclassOf(static::DB_CLASSNAME))
             return false;
 
-        $BUILD = $Class->getConstant('BUILD');
+        $BUILD = $Class->getConstant('Build_DB');
         if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
-            Log::v(__CLASS__, "(BUILD = {$BUILD}) Skipping Build for ".$Class->getName());
+            Log::v(__CLASS__, "(Build_DB = {$BUILD}) Skipping Build for ".$Class->getName());
             return false;
         }
 
@@ -196,7 +202,16 @@ PHP;
             $primaryAutoInc = false;
             $indexCols = $this->getIndexes($DB, $table, $primaryCol, $primaryAutoInc);
             $cols = $this->getColumns($DB, $table, $primaryCol, $primaryAutoInc);
-            $types = implode('', array_values($cols));
+            $enums = array();
+            $types = '';
+            foreach($cols as $name=>$type) {
+                if(is_array($type)) {
+                    $types .= 'e';
+                    $enums[$name] = $type;
+                } else {
+                    $types .= $type;
+                }
+            }
             $searchSKeys = array();
             $cols = array_keys($cols);
             $order = array();
@@ -240,6 +255,10 @@ PHP;
                 $php .= sprintf(self::TMPL_PROP, $name);
             foreach($cols as $name)
                 $php .= $this->propGetSet($name, $name == $primaryCol);
+
+            foreach ($enums as $name=>$enum)
+                $php .= $this->enumGet($name, $enum);
+
             //$php .= $this->getCreate($primaryAutoInc ? array_diff($cols, (array)$primaryCol) : $cols);
             //if($indexCols)
             //    $php .= $this->getSearch($primaryAutoInc ? array_diff($indexCols, (array)$primaryCol) : $indexCols);
@@ -329,6 +348,14 @@ PHP;
         if(!$justGet)
             $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name));
         return $php;
+    }
+
+    private function enumGet($name, Array $enums) {
+        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
+        $a = '';
+        foreach($enums as $e)
+            $a .= ($a ? ',' : '') . var_export($e, true);
+        return sprintf(self::TMPL_GETENUM, $ucName, 'array('.$a.')');
     }
 
     private function getCreate(Array $cols) {

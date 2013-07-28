@@ -7,6 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Interfaces\IAutoLoader;
+
 class ClassNotFoundException extends \Exception {}
 /**
  * Class Base
@@ -16,6 +18,8 @@ class ClassNotFoundException extends \Exception {}
  */
 class Base {
     private static $mLoaded = false, $mBasePath, $mConfig;
+    /** @var IAutoLoader[] $mAutoloaders */
+    private static $mAutoloaders = array();
 
     /** Initialize Static Class on include */
     public static function init() {
@@ -47,6 +51,14 @@ class Base {
         }
     }
 
+    /**
+     * Register an autoloader.
+     * @param IAutoLoader $loader
+     */
+    public static function registerAutoloader(IAutoLoader $loader, $prefix) {
+        self::$mAutoloaders[strtolower($prefix)] = $loader;
+    }
+
     /** Deactivate Autoloader for classes */
     public static function unload() {
         if(self::$mLoaded) {
@@ -58,17 +70,24 @@ class Base {
     /** Autoloader for classes. Path matches namespace heirarchy of Class */
     private static function loadClass($name) {
         if(strpos($name, '\\')===false) return;
+        $prefix = strtolower(strstr($name, '\\', true));
+        if(isset(self::$mAutoloaders[$prefix])
+            && self::$mAutoloaders[$prefix]->loadClass($name) !== false)
+                return;
         $name = str_replace('\\', '/', strtolower($name));
         $name = strtolower($name);
         $classPath = self::$mBasePath . $name . '.class.php';
-        if(!file_exists($classPath) || !(include_once($classPath)))
-            throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");
+        if(file_exists($classPath))
+            include($classPath);
+            //throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");
     }
 
     /** Attempt to route a web request to it's destination */
     public static function routeRequest() {
         self::load();
-        Route::tryAllRoutes();
+        $route = Util::getUrl('route');
+        Route::findRoute($route)
+            ->render();
     }
 
     /** Returns the path to the project directory */

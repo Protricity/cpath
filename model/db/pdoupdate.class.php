@@ -6,7 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+use CPath\Base;
 use CPath\Interfaces\IDatabase;
+use CPath\Log;
 use \PDO;
 class PDOUpdate extends PDOWhere {
     /** @var \PDO */
@@ -53,9 +55,13 @@ class PDOUpdate extends PDOWhere {
     public function getSQL() {
         if(!$this->where)
             throw new \Exception("method addWhere() was not called");
-        return "UPDATE ".$this->table
+        $SQL = "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
+
+        if(Base::isDebug())
+            Log::v(__CLASS__, $SQL);
+        return $SQL;
     }
 }

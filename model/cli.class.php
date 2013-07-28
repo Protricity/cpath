@@ -16,9 +16,15 @@ class CLI implements ILogListener {
     private $mRequest = array();
     private $mUrl;
 
-    public function __construct(Array $args=NULL) {
-        if($args===NULL)
+    public function __construct($args=NULL) {
+        if($args===NULL) {
             $args = $_SERVER['argv'];
+        } else {
+            if(!is_array($args))
+                $args = func_get_args();
+            if(sizeof($args) == 1)
+                $args = explode(' ', $args[0]);
+        }
 
         if(!$args[0]) {
             $method = 'CLI';
@@ -40,7 +46,7 @@ class CLI implements ILogListener {
                     if($arg[$i+1][0] == '-')
                         $val = true;
                     else
-                        $val = $arg[++$i];
+                        $val = $args[++$i];
                     $this->mRequest[ltrim($arg, '- ')] = $val;
                 }
             } else {

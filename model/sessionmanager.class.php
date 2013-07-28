@@ -43,14 +43,26 @@ class SessionManager {
     /** @var IUserSession */
     private static $mUserSession;
 
-    static function start() {
+    static function start($throwOnFail=false) {
+        $active = false;
         switch(session_status()) {
+            case PHP_SESSION_ACTIVE:
+                $active = true;
+                break;
             case PHP_SESSION_DISABLED:
                 throw new SessionDisabledException();
                 break;
             case PHP_SESSION_NONE:
-                session_start();
+                if(!headers_sent($file, $line)) {
+                    session_start();
+                    $active = true;
+                }
                 break;
+        }
+        if(!$active) {
+            if($throwOnFail)
+                throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+            Log::e(__CLASS__, "Cannot Start Session: Headers already sent by {$file}:{$line}");
         }
     }
 
@@ -110,9 +122,7 @@ class SessionManager {
         if(Util::isCLI())
             $_SESSION = array();
         else{
-            if(headers_sent($file, $line))
-                throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
-            self::start();
+            self::start(true);
         }
         $_SESSION[self::SESSION_KEY] = $key;
         self::$mUserSession = $User;
@@ -121,15 +131,19 @@ class SessionManager {
 
     /**
      * @param IUserSession $EmptyUser an empty user instance
+     * @return boolean true if the user was logged in
      */
     public static function logout(IUserSession $EmptyUser) {
+        $wasLoggedIn = false;
         self::start();
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
             $EmptyUser->disableSessionKey($key);
+            $wasLoggedIn = true;
         }
         session_unset();
+        return $wasLoggedIn ;
     }
 
     public static function isLoggedIn() {

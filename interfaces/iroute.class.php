@@ -14,7 +14,8 @@ use CPath\InvalidHandlerException;
 interface IRoute {
 
     /**
-     * Try's a route against a request path
+     * Try's a route against a request path.
+     * If the match is successful, this method processes the requestPath as input
      * @param string|null $requestPath the request path to match
      * @return bool whether or not the path matched
      * @throws DestinationNotFoundException if the destination handler was not found
@@ -24,10 +25,10 @@ interface IRoute {
 
     /**
      * Renders the route destination
-     * @param String $requestPath
+     * @param array $request optional request parameters
      * @return void
      */
-    function render($requestPath);
+    function render(Array $request=NULL);
 
     function getRoute();
     function getDestination();
@@ -43,12 +44,5 @@ interface IRoute {
      * @return Array the request parameters
      */
     function getRequest();
-
-    /**
-     * Set the request parameters
-     * @param array $request the request parameters
-     * @return void
-     */
-    function setRequest(Array $request);
 
 }

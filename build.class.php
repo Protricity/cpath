@@ -183,7 +183,7 @@ class Build extends API {
      */
     private static function findClass($path, $dirClass) {
         $exCount = 0;
-        if(file_exists($path.'/.buildignore'))
+        if(file_exists($path.'/.c'))
             return $exCount;
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))

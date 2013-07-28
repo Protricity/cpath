@@ -51,7 +51,14 @@ PHP;
         $cols = array();
         foreach($DB->query("SHOW COLUMNS FROM `$table`;") as $row) {
             $name = $row['Field'];
-            $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
+            if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
+                $enum = array();
+                foreach( explode(',', $matches[1]) as $value )
+                    $enum[] = trim( $value, "'" );
+                $type = $enum;
+            } else {
+                $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
+            }
             $cols[$name] = $type;
             if($name == $primaryCol && $row['Extra'] != 'auto_increment')
                 $primaryAutoInc = false;

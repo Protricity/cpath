@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
 
 /** Thrown when a valid route could not find a corresponding handler */
@@ -85,10 +86,6 @@ class Route implements IRoute {
         return $request;
     }
 
-    public function setRequest(Array $request) {
-        $this->mRequest = $request;
-    }
-
     /**
      * Try's a route against a request path
      * @param string|null $requestPath the request path to match
@@ -98,33 +95,46 @@ class Route implements IRoute {
     public function match($requestPath) {
         if(strpos($requestPath, $this->mRoute) !== 0)
             return false;
+
+        $argString = substr($requestPath, strlen($this->mRoute) + 1);
+        $this->mArgs = array();
+        if($argString)
+            foreach(explode('/', $argString) as $arg)
+                $this->mArgs[] = $arg;
         return true;
     }
 
 
     /**
      * Renders the route destination
-     * @return void
+     * @return IHandler
      * @throws InvalidHandlerException if the destination handler was invalid
      */
-    public function render($requestPath) {
-        $argString = substr($requestPath, strlen($this->mRoute) + 1);
-        $this->mArgs = array();
-        if($argString)
-            foreach(explode('/', $argString) as $arg)
-                $this->mArgs[] = $arg;
+    public function getHandler() {
 
         $dest = $this->mDestination;
         $Class = new \ReflectionClass($dest);
         if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
             $Handler = call_user_func($dest."::getHandler");
-            $Handler->render($this);
         } else if($Class->implementsInterface("Cpath\\Interfaces\\IHandler")) {
             $Handler = new $dest();
-            $Handler->render($this);
         } else {
             throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler or IHandlerAggregate");
         }
+        return $Handler;
+    }
+
+    /**
+     * Renders the route destination
+     * @param array $request optional request parameters
+     * @return void
+     * @throws InvalidHandlerException if the destination handler was invalid
+     */
+    public function render(Array $request=NULL) {
+        if($request)
+            $this->mRequest = $request;
+        $this->getHandler()
+            ->render($this);
     }
 
     // Static methods
@@ -133,9 +143,8 @@ class Route implements IRoute {
      * Loads all routes and attempts to match them to the request path
      * @throws NoRoutesFoundException if no routes matched
      */
-    public static function tryAllRoutes($routePath=NULL, Array $request=NULL) {
+    public static function findRoute($routePath) {
         $routes = self::getRoutes();
-        if($routePath===NULL) $routePath = Util::getUrl('route');
         if(preg_match('/\.\w+$/', $routePath)) {
             header("HTTP/1.0 404 File request was passed to Script");
             die();
@@ -144,10 +153,7 @@ class Route implements IRoute {
             $Route = new Route($route[0], $route[1]);
             if(!$Route->match($routePath))
                 continue;
-            if($request)
-                $Route->setRequest($request);
-            $Route->render($routePath);
-            return;
+            return $Route;
         }
         throw new NoRoutesFoundException("No Routes Matched: " . $routePath);
     }

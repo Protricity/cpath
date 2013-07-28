@@ -272,6 +272,46 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
+     * Loads a model based on a search
+     * @param array $fields an array of key-value pairs to search for
+     * @param string $logic 'OR' or 'AND' logic between fields
+     * @return PDOModel the found model instance
+     * @throws ModelNotFoundException if a model entry was not found
+     */
+    public static function loadByFields(Array $fields, $logic='OR') {
+        $Model = static::searchByFields($fields, 1, $logic)
+            ->fetch();
+        if(!$Model)
+            throw new ModelNotFoundException(static::getModelName() . " was not found");
+        return $Model;
+    }
+
+    /**
+     * Loads a model based on a search field
+     * @param $fieldName String the database field to search for
+     * @param $value String the field value to search for
+     * @return PDOModel the found model instance
+     * @throws ModelNotFoundException if a model entry was not found
+     */
+    public static function loadByField($fieldName, $value) {
+        return static::loadByFields(array($fieldName => $value));
+    }
+
+    /**
+     * Loads a Model using all indexed fields.
+     * @param mixed $search a value to search for
+     * @return PDOModel the found model instance
+     * @throws ModelNotFoundException if a model entry was not found
+     */
+    public static function loadByAnyIndex($search) {
+        $Model = static::searchByAnyIndex($search)
+            ->fetch();
+        if(!$Model)
+            throw new ModelNotFoundException(static::getModelName() . " '{$search}' was not found");
+        return $Model;
+    }
+
+    /**
      * Creates a PDOSelect for searching models.
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
@@ -313,19 +353,19 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Searches for Models using all indexed fields.
-     * @param mixed $any a value to search for
+     * @param mixed $search a value to search for
      * @param int $limit the number of rows to return
      * @param String $compare custom comparison (ex. '<', 'LIKE', '=func(?)')
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if the model does not contain index keys
      */
-    public static function searchByAnyIndex($any, $limit=1, $compare=NULL) {
+    public static function searchByAnyIndex($search, $limit=1, $compare=NULL) {
         if(!static::SearchKeys)
             throw new \Exception("No Indexes defined in ".static::getModelName());
          $Select = static::search();
 
         $i = 0;
-        if(is_numeric($any))
+        if(is_numeric($search))
             $keys = explode(',', static::SearchKeys);
         else
             $keys = explode(',', static::SearchSKeys);
@@ -333,7 +373,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         foreach($keys as $key){
             if($i++) $Select->where('OR');
             if($compare) $key .= ' ' . $compare;
-            $Select->where($key, $any);
+            $Select->where($key, $search);
         }
 
         $Select->limit($limit);
