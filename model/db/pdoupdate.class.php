@@ -60,9 +60,13 @@ class PDOUpdate extends PDOWhere {
     public function getSQL() {
         if(!$this->where)
             throw new \Exception("method addWhere() was not called");
-        return "UPDATE ".$this->table
+        $SQL = "UPDATE ".$this->table
             ."\nSET ".implode('=?, ',$this->fields).'=?'
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
+
+        if(Base::isDebug())
+            Log::v(__CLASS__, $SQL);
+        return $SQL;
     }
 }

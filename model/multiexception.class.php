@@ -11,7 +11,7 @@ use CPath\Base;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
 
-class MultiException extends ResponseException implements \Countable{
+class MultiException extends ResponseException implements \Countable {
     private $mEx = array();
     public function add($ex, $key=NULL) {
         if($ex instanceof \Exception)

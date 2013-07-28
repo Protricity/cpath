@@ -38,8 +38,11 @@ class PDODelete extends PDOWhere {
     public function getSQL() {
         if(!$this->where)
             throw new \Exception("method where() was not called");
-        return "DELETE FROM ".$this->table
+        $SQL = "DELETE FROM ".$this->table
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
+        if(Base::isDebug())
+            Log::v(__CLASS__, $SQL);
+        return $SQL;
     }
 }

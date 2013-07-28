@@ -43,15 +43,27 @@ class SessionManager {
     /** @var IUserSession */
     private static $mUserSession;
 
-    static function start() {
+    static function start($throwOnFail=false) {
+        $active = false;
         switch(session_status()) {
+            case PHP_SESSION_ACTIVE:
+                $active = true;
+                break;
             case PHP_SESSION_DISABLED:
                 throw new SessionDisabledException();
                 break;
             case PHP_SESSION_NONE:
-                session_start();
+                if(headers_sent($file, $line)) {
+                    if($throwOnFail)
+                        throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+                    Log::e(__CLASS__, "Cannot Start Session: Headers already sent by {$file}:{$line}");
+                } else {
+                    session_start();
+                    $active = true;
+                }
                 break;
         }
+        return $active;
     }
 
     /**
@@ -110,9 +122,7 @@ class SessionManager {
         if(Util::isCLI())
             $_SESSION = array();
         else{
-            if(headers_sent($file, $line))
-                throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
-            self::start();
+            self::start(true);
         }
         $_SESSION[self::SESSION_KEY] = $key;
         self::$mUserSession = $User;
@@ -124,17 +134,22 @@ class SessionManager {
      * @return bool true if user was logged in
      */
     public static function logout(IUserSession $EmptyUser) {
+        $wasLoggedIn = false;
         self::start();
-        $loggedIn = false;
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
             $loggedIn = true;
             $EmptyUser->disableSessionKey($key);
             self::$mUserSession = NULL;
+            $wasLoggedIn = true;
         }
         session_unset();
-        return $loggedIn;
+        return $wasLoggedIn ;
+    }
+
+    public static function isLoggedIn() {
+        return self::$mUserSession ? true : false;
     }
 
     public static function checkPassword(IUserSession $User, $password) {
