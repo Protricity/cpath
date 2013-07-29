@@ -30,7 +30,7 @@ class Route implements IRoute {
         $mDestination,
         $mArgs = array(),
         $mCurArg = -1,
-        $mRequest = NULL;
+        $mRequest = array();
 
     /**
      * Constructs a new Route Entry
@@ -139,7 +139,7 @@ class Route implements IRoute {
      */
     public function render(Array $request=NULL) {
         if($request)
-            $this->mRequest = $request;
+            $this->mRequest = $request + $this->mRequest;
         $this->getHandler()
             ->render($this);
     }
@@ -174,6 +174,8 @@ class Route implements IRoute {
                     apc_delete($prefix.$route);
                     continue;
                 }
+                if(isset($dest[1]))
+                    $Route->mRequest = (array)$dest[1] + $Route->mRequest;
                 //if(isset($dest[1]))
                 //    $request += (array)$dest[1];
                 //if($request)
@@ -188,11 +190,8 @@ class Route implements IRoute {
             $Route = new Route($route[0], $route[1]);
             if(!$Route->match($routePath))
                 continue;
-            //if(isset($route[2]))
-            //    $request += (array)$route[2];
-            //if($request)
-            //    $Route->setRequest($request);
-            //$Route->render($routePath);
+            if(isset($route[2]))
+                $Route->mRequest = (array)$route[2] + $Route->mRequest;
 
             if(Base::isApcEnabled())
                 apc_store(sprintf(self::APC_PREFIX, Base::getConfig('build.inc', 0)).$route[0], array_slice($route, 1));
