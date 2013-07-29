@@ -96,9 +96,19 @@ class Route implements IRoute {
      * @throws DestinationNotFoundException if the destination handler was not found
      */
     public function match($requestPath) {
+        if(strpos($requestPath, $this->mRoute) !== 0)
+            return false;
+
         if(strlen($requestPath) > ($c = strlen($this->mRoute))
             && substr($requestPath, $c, 1) != '/')
             return false;
+
+        $argString = substr($requestPath, strlen($this->mRoute) + 1);
+        $this->mArgs = array();
+        if($argString)
+            foreach(explode('/', $argString) as $arg)
+                if($arg) $this->mArgs[] = $arg;
+
         return true;
     }
 
