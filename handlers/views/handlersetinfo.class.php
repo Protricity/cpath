@@ -3,17 +3,16 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
-use CPath\Handlers\IAPIParam;
-use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Util;
 
-class APIInfo implements IHandler, ILogListener {
+class HandlerSetInfo implements IHandler, ILogListener {
 
     const Build_Ignore = true;
     private $mLog = array();
@@ -31,35 +30,31 @@ class APIInfo implements IHandler, ILogListener {
     {
         if(!$apiClass = $Route->getNextArg())
             die("No API Class passed to ".__CLASS__);
-        $API = new $apiClass();
-        if($API instanceof IHandlerAggregate) {
-            $API = $API->getHandler();
-        }
-        if(!($API instanceof IAPI)) {
-            print($apiClass. " is not an instance of IAPI");
+        $R = new \ReflectionClass($apiClass);
+        $Source = new $apiClass;
+        if($Source instanceof IHandlerAggregate) {
+            $Handlers = $Source->getHandler();
+        } else {
+            print($apiClass. " does not implement IHandlerAggregate");
             return;
         }
-        $this->renderApi($API);
-    }
+        if(!($Handlers instanceof IHandlerSet)) {
+            print(get_class($Handlers). " is not an instance of IHandlerSet");
+            return;
+        }
 
-    function renderAPI(IAPI $API) {
-        $Builder = new RouteBuilder();
-        //$routes = $Builder->getHandlerRoutes(new \ReflectionClass($API));
-        $route = $API->getRoute()->getPrefix();
-        foreach($API->getFields() as $name=>$Field)
-            if($Field instanceof IAPIParam)
-                $route .= '/:'.$name;
+        $routes = $Handlers->getAllRoutes(new RouteBuilder());
 ?><html>
     <head>
-        <title><?php echo $route; ?></title>
+        <title><?php // echo $route; ?></title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
     </head>
     <body>
-        <h1><?php echo $route."<br />"; ?></h1>
+        <h1><?php // echo $route."<br />"; ?></h1>
         <h3>Params:</h3>
         <table>
-        <?php foreach($API->getFields() as $name=>$Field) { ?>
-            <tr><td><?php echo $name; ?></td><td><?php echo $Field->getDescription(); ?></td>
+        <?php foreach($routes as $Route) { ?>
+            <tr><td><?php echo $Route->getPrefix(); ?></td><td><?php echo $Route->getDestination(); ?></td>
         <?php } ?>
         </table>
         <h3>Response</h3>

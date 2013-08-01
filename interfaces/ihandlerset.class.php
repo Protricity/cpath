@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 class HandlerSetException extends \Exception {}
 
-interface IHandlerSet extends IHandler, \ArrayAccess {
+interface IHandlerSet extends IRoutable, IHandler, \ArrayAccess {
     /**
      * Adds an IHandler to the set by route
      * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
@@ -25,4 +25,12 @@ interface IHandlerSet extends IHandler, \ArrayAccess {
      * @return IHandler|NULL
      */
     function getHandler($route);
+
+    /**
+     * Returns an array of all routes for this class
+     * @param IRouteBuilder $Builder the IRouteBuilder instance
+     * @return IRoute[]
+     * @throws \CPath\BuildException when a route is not in a valid format
+     */
+    function getAllRoutes(IRouteBuilder $Builder);
 }

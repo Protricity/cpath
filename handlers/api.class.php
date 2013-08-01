@@ -223,6 +223,10 @@ abstract class API implements IAPI {
         $this->renderDefault($request);
     }
 
+    /**
+     * Get all API Fields
+     * @return IAPIField[]
+     */
     public function getFields() {
         return $this->mFields;
     }

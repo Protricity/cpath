@@ -7,9 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-
-use CPath\DestinationNotFoundException;
-use CPath\InvalidHandlerException;
+/** Thrown when a valid route could not find a corresponding handler */
+class DestinationNotFoundException extends \Exception {}
+/** Thrown when a valid route's handler is invalid */
+class InvalidHandlerException extends \Exception {}
+/** Thrown when no valid routes could be found */
+class NoRoutesFoundException extends \Exception {}
 
 interface IRoute {
 
@@ -48,8 +51,9 @@ interface IRoute {
     function getRequest();
 
     /**
-     * Append a path element to the route
-     * @param $path String the element to append
+     * Renders the route destination
+     * @return IHandler
+     * @throws InvalidHandlerException if the destination handler was invalid
      */
-    function addToRoute($path);
+    function getHandler();
 }

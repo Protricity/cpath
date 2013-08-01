@@ -185,9 +185,85 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @return IRoute[]
      */
     function getAllRoutes(IRouteBuilder $Builder) {
-        return $this->getHandler()->getAllRoutes($this, $Builder);
+        return $this->getHandler()->getAllRoutes($Builder);
     }
 
+    // Implement IHandlerAggregate
+
+    /**
+     * @return HandlerSet a set of common api routes for this model
+     * @throws ValidationException
+     * @throws ModelNotFoundException if no Model was found
+     */
+    function getHandler() {
+        $Handlers = new HandlerSet(get_called_class());
+        $Source = $this;
+        if(static::Primary) {
+            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, Array $request) use ($Source) {
+                $request = $API->processRequest($request);
+                $Search = $Source::search();
+                $Search->where($Source::Primary, $request['id']);
+                $Source::limitAPIGet($Search);
+                $data = $Search->fetch();
+                if(!$data)
+                    throw new ModelNotFoundException($Source::getModelName() . " '{$request['id']}' was not found");
+                return $data;
+            }, array(
+                'id' => new APIRequiredParam($this->getModelName()." ID"),
+            )));
+        }
+
+        if(static::SearchKeys) {
+            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, Array $request) use ($Source) {
+                $request = $API->processRequest($request);
+                $limit = $request['limit'];
+                if($limit < 1 || $limit > $Source::SearchLimitMax)
+                    $limit = $Source::SearchLimit;
+                $search = $request['search'];
+                $wildCard = false;
+                if(strpos($search, '*') !== false && $Source::SearchAllowWildCard) {
+                    $search = str_replace('*', '%', $search);
+                    $wildCard = true;
+                }
+
+                if($by = ($request['search_by'])) {
+                    $keys = explode(',', $Source::SearchKeys);
+                    if(!in_array($by, $keys))
+                        throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::SearchKeys."]");
+
+                    $Search = $Source::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit);
+                }
+                else
+                    $Search = $Source::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '');
+                $Source::limitAPISearch($Search);
+                $data = $Search->fetchAll();
+                return new Response("Found (".sizeof($data).") ".$Source::getModelName()."(s)", true, $data);
+            }, array(
+                'search' => new APIRequiredParam("Search for ".$Source::getModelName()),
+                'search_by' => new APIParam("Search by field. Allowed: [".static::SearchKeys."]"),
+                'limit' => new APIField("The Number of fields to return. Max=".static::SearchLimitMax),
+            )));
+        }
+
+        if(static::Primary) {
+            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, Array $request) use ($Source) {
+                $request = $API->processRequest($request);
+                $Search = $Source::search();
+                $Search->where($Source::Primary, $request['id']);
+                $Source::limitAPIRemove($Search);
+                $Model = $Search->fetch();
+                if(!$Model)
+                    throw new ModelNotFoundException($Source::getModelName() . " '{$request['id']}' was not found");
+                $Source::removeModel($Model);
+                return new Response("Removed ".$Source::getModelName()."(s)", true, $Model);
+
+            }, array(
+                'id' => new APIRequiredParam($Source->getModelName()." ID"),
+            )));
+        }
+
+        return $Handlers;
+    }
 
     // Statics
 
@@ -422,81 +498,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         static::removeByPrimary($Model->{static::Primary});
     }
 
-    /**
-     * @return HandlerSet a set of common api routes for this model
-     * @throws ValidationException
-     * @throws ModelNotFoundException if no Model was found
-     */
-    static function getHandler() {
-        /** @var PDOModel $Class */
-        $Class = get_called_class();
-        $Handlers = new HandlerSet($Class);
-        if(static::Primary) {
-            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, Array $request) use ($Class) {
-                $request = $API->processRequest($request);
-                $Search = $Class::search();
-                $Search->where($Class::Primary, $request['id']);
-                $Class::limitAPIGet($Search);
-                $data = $Search->fetch();
-                if(!$data)
-                    throw new ModelNotFoundException($Class::getModelName() . " '{$request['id']}' was not found");
-                return $data;
-            }, array(
-                'id' => new APIRequiredParam($Class." ID"),
-            )));
-        }
-
-        if(static::SearchKeys) {
-            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, Array $request) use ($Class) {
-                $request = $API->processRequest($request);
-                $limit = $request['limit'];
-                if($limit < 1 || $limit > $Class::SearchLimitMax)
-                    $limit = $Class::SearchLimit;
-                $search = $request['search'];
-                $wildCard = false;
-                if(strpos($search, '*') !== false && $Class::SearchAllowWildCard) {
-                    $search = str_replace('*', '%', $search);
-                    $wildCard = true;
-                }
-
-                if($by = ($request['searchby'])) {
-                    $keys = explode(',', $Class::SearchKeys);
-                    if(!in_array($by, $keys))
-                        throw new ValidationException("Invalid 'searchby'. Allowed: [".$Class::SearchKeys."]");
-
-                    $Search = $Class::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit);
-                }
-                else
-                    $Search = $Class::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '');
-                $Class::limitAPISearch($Search);
-                $data = $Search->fetchAll();
-                return new Response("Found (".sizeof($data).") ".$Class::getModelName()."(s)", true, $data);
-            }, array(
-                'search' => new APIRequiredParam("Search for ".$Class::getModelName()),
-                'searchby' => new APIParam("Search by field. Allowed: [".static::SearchKeys."]"),
-                'limit' => new APIField("The Number of fields to return. Max=".static::SearchLimitMax),
-            )));
-        }
-
-        if(static::Primary) {
-            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, Array $request) use ($Class) {
-                $request = $API->processRequest($request);
-                $Search = $Class::search();
-                $Search->where($Class::Primary, $request['id']);
-                $Class::limitAPIRemove($Search);
-                $Model = $Search->fetch();
-                if(!$Model)
-                    throw new ModelNotFoundException($Class::getModelName() . " '{$request['id']}' was not found");
-                $Class::removeModel($Model);
-                return new Response("Removed ".$Class::getModelName()."(s)", true, $Model);
-
-            }, array(
-                'id' => new APIRequiredParam($Class." ID"),
-            )));
-        }
-
-        return $Handlers;
-    }
 
     /**
      * Override this to limit all default API 'search', 'get', and 'remove' calls

@@ -7,13 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Model;
 use CPath\Builders\RouteBuilder;
+use CPath\Interfaces\IRoute;
+use CPath\Interfaces\NoRoutesFoundException;
 use CPath\Util;
 
 /**
- * Class Route - a route entry
+ * Class MissingRoute - a placeholder for missing routes
  * @package CPath
  */
-class MissingRoute extends Route{
+class MissingRoute implements IRoute{
     private $mRoutePath;
     public function __construct($routePath) {
         $this->mRoutePath = $routePath;
@@ -29,4 +31,11 @@ class MissingRoute extends Route{
         print("No Routes Matched: " . $this->mRoutePath);
     }
 
+    function getHandler() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function match($requestPath) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function getPrefix() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function getDestination() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function getNextArg() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function addRequest(Array $request) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function getRequest() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
 }

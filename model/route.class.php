@@ -8,15 +8,9 @@
 namespace CPath\Model;
 use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IRoute;
 use CPath\Util;
-
-/** Thrown when a valid route could not find a corresponding handler */
-class DestinationNotFoundException extends \Exception {}
-/** Thrown when a valid route's handler is invalid */
-class InvalidHandlerException extends \Exception {}
-/** Thrown when no valid routes could be found */
-class NoRoutesFoundException extends \Exception {}
 
 /**
  * Class Route - a route entry
@@ -54,11 +48,6 @@ class Route implements IRoute {
         return isset($this->mArgs[$this->mPos])
             ? $this->mArgs[$this->mPos++]
             : NULL;
-    }
-
-    public function addToRoute($path) {
-        $this->mRoute .= '/' . $path;
-        return $this;
     }
 
     /**
@@ -111,11 +100,10 @@ class Route implements IRoute {
      */
     public function getHandler() {
         $dest = $this->mDestination;
-        $Class = new \ReflectionClass($dest);
-        if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
-            $Handler = call_user_func($dest."::getHandler");
-        } else if($Class->implementsInterface("Cpath\\Interfaces\\IHandler")) {
-            $Handler = new $dest();
+        $Handler = new $dest;
+        if($Handler instanceof IHandlerAggregate) {
+            $Handler = $Handler->getHandler();
+        } else if($Handler instanceof IHandler) {
         } else {
             throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler or IHandlerAggregate");
         }

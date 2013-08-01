@@ -52,7 +52,7 @@ PHP;
      * this method should return false immediately
      * @param \ReflectionClass $Class
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\BuildException when a build exception occured
+     * @throws \CPath\BuildException when a build exception occurred
      */
     public function build(\ReflectionClass $Class) {
         if(!$Class->implementsInterface(self::IHandler) && !$Class->implementsInterface(self::IHandlerAggregate))
@@ -145,7 +145,7 @@ PHP;
         Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
 
         if(Base::isApcEnabled())
-            self::clearAPCCache();
+            self::rebuildAPCCache();
 
         Base::commitConfig('route.max', $max);
 
@@ -217,7 +217,7 @@ PHP;
         $cache = apc_cache_info('user');
         if($cache)
             foreach($cache['cache_list'] as $info) {
-                if(strpos($info['info'], RouterAPC::APC_PREFIX) === 0) {
+                if(strpos($info['info'], RouterAPC::PREFIX) === 0) {
                     apc_delete($info['info']);
                     $c++;
                 }

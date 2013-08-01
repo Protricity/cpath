@@ -11,7 +11,8 @@ namespace CPath\Interfaces;
 interface IHandlerAggregate {
 
     /**
-     * @return IHandler $Handler
+     * Return a handler to act in place of this handler
+     * @return IHandler $Handler an IHandler instance
      */
-    static function getHandler();
+    function getHandler();
 }

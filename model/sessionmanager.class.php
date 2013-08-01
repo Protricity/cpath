@@ -172,7 +172,7 @@ class SessionManager {
     /**
      * Adds Session API calls to an APISet
      * @param IUserSession $EmptyUser an empty user instance
-     * @param IHandlerSet $APISet an existing set of APIs to add to
+     * @param IHandlerSet $Handlers an existing set of APIs to add to
      * @throws UserNotFoundException
      */
     public static function addHandlers(IUserSession $EmptyUser, IHandlerSet $Handlers)

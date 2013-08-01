@@ -8,6 +8,7 @@
 namespace CPath;
 
 use CPath\Interfaces\IAutoLoader;
+use CPath\Interfaces\IRoute;
 use CPath\Model\FileRequestRoute;
 use CPath\Model\MissingRoute;
 
@@ -89,7 +90,11 @@ class Base {
 
     }
 
-    /** Attempt to find a route request */
+    /**
+     * Attempt to find a Route
+     * @param null $routePath the path to match
+     * @return IRoute the route instance found. MissingRoute is returned if no route was found
+     */
     public static function findRoute($routePath=NULL) {
         if(!$routePath) $routePath = Util::getUrl('route');
         if(preg_match('/\.\w+$/', $routePath)) {

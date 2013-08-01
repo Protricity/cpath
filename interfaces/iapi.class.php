@@ -7,6 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
+use CPath\Handlers\IAPIField;
+
 interface IAPI extends IHandler, IRoutable {
 
     /**
@@ -15,6 +17,12 @@ interface IAPI extends IHandler, IRoutable {
      * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
      */
     function execute(Array $request);
+
+    /**
+     * Get all API Fields
+     * @return IAPIField[]
+     */
+    function getFields();
 
     /**
      * Set the route for this IAPI

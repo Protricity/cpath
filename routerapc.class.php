@@ -16,7 +16,7 @@ use CPath\Model\FileRequestRoute;
  */
 final class RouterAPC{
 
-    const PREFIX_APC = 'cpath.route.';
+    const PREFIX = 'cpath.route';
     const PREFIX_ROUTE = 'cpath.route:';
 
     // Static methods
@@ -27,9 +27,9 @@ final class RouterAPC{
      * @return IRoute|NULL the found route or null if none found
      */
     public static function findRoute($routePath) {
-        if(Base::getConfig('build.inc') != apc_fetch(self::PREFIX_APC . 'inc')) {
+        if(Base::getConfig('build.inc') != apc_fetch(self::PREFIX . '.inc')) {
             RouteBuilder::rebuildAPCCache();
-            apc_store(self::PREFIX_APC . 'inc', Base::getConfig('build.inc'));
+            apc_store(self::PREFIX . '.inc', Base::getConfig('build.inc'));
         }
         $route = $routePath;
         if(($max = Base::getConfig('route.max', 0)) && ($max < strlen($route))) {
@@ -50,6 +50,10 @@ final class RouterAPC{
                 apc_delete($apcRoute);
                 continue;
             }
+            return $Route;
+        }
+        if($Route = Router::findRoute($routePath)) {
+            Log::e(__CLASS__, "Error: APC Route Cache Failed. Had to fall back to CPath\\Router");
             return $Route;
         }
         return NULL;
