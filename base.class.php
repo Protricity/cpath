@@ -8,6 +8,8 @@
 namespace CPath;
 
 use CPath\Interfaces\IAutoLoader;
+use CPath\Model\FileRequestRoute;
+use CPath\Model\MissingRoute;
 
 class ClassNotFoundException extends \Exception {}
 /**
@@ -81,14 +83,29 @@ class Base {
         $classPath = self::$mBasePath . $name . '.class.php';
         if(file_exists($classPath))
             include($classPath);
+        else
+            Log::e(__CLASS__, "Class not found: ".$classPath);
             //throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");
+
+    }
+
+    /** Attempt to find a route request */
+    public static function findRoute($routePath=NULL) {
+        if(!$routePath) $routePath = Util::getUrl('route');
+        if(preg_match('/\.\w+$/', $routePath)) {
+            $Route = new FileRequestRoute($routePath);
+        } elseif(Base::isApcEnabled()) {
+            $Route = RouterAPC::findRoute($routePath);
+        } else {
+            $Route = Router::findRoute($routePath);
+        }
+        return $Route ?: new MissingRoute($routePath);
     }
 
     /** Attempt to route a web request to it's destination */
-    public static function routeRequest() {
+    public static function render() {
         self::load();
-        $route = Util::getUrl('route');
-        Route::findRoute($route)
+        self::findRoute()
             ->render();
     }
 

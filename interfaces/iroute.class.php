@@ -25,18 +25,20 @@ interface IRoute {
 
     /**
      * Renders the route destination
-     * @param array $request optional request parameters
      * @return void
      */
-    function render(Array $request=NULL);
+    function render();
 
-    function getRoute();
+    function getPrefix();
     function getDestination();
 
-    function getCurrentArg();
-    function hasNextArg();
     function getNextArg();
-    function addToRoute($path);
+
+    /**
+     * Merge an associative array into the existing request array
+     * @param $request Array associative array to merge
+     */
+    function addRequest(Array $request);
 
     /**
      * Returns the request parameters.
@@ -45,4 +47,9 @@ interface IRoute {
      */
     function getRequest();
 
+    /**
+     * Append a path element to the route
+     * @param $path String the element to append
+     */
+    function addToRoute($path);
 }

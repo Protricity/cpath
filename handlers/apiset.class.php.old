@@ -7,12 +7,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Handlers\API\View\APIInfo;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
-use CPath\NoRoutesFoundException;
-use CPath\Route;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
@@ -25,6 +22,9 @@ use CPath\Builders\BuildRoutes;
  *
  * Provides an API collection
  */
+
+class InvalidRouteException extends \Exception {}
+
 class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate {
 
     const Build_Ignore = true;     // This class should not be built. Classes that use it should set Build_Ignore to false
@@ -36,7 +36,6 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
 
     /** @var IAPI[] */
     protected $mAPIs = array();
-    private $mPath = NULL;
     private $mClassName = NULL;
     /** @var API */
     private $mExecutedAPI = NULL;
@@ -66,18 +65,17 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
     /**
      * @return String a description of the Api Field
      */
-    public function getDescription()
-    {
+    public function getDescription() {
         return "ApiSet Sub-route. Possible routes are: ".implode(', ', array_keys($this->mAPIs));
     }
 
     /**
-     * @param String $path the alphanumeric path to the IAPI Instance
+     * @param String $route the route to the sub api i.e. POST, GET search (relative), GET /site/users/search (absolute)
      * @param IAPI $API the API instance
      * @return $this
      */
-    public function addAPI($path, IAPI $API) {
-        $this->mAPIs[strtolower($path)] = $API;
+    public function addAPI($route, IAPI $API) {
+        $this->mAPIs[$route] = $API;
         return $this;
     }
 
@@ -86,9 +84,7 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
      * @return IAPI the api instance or null if not found
      * @throws InvalidRouteException
      */
-    public function getAPI($path=NULL) {
-        if(!$path) $path = $this->mPath;
-        $path = strtolower($path);
+    public function getAPI($path) {
         if(!$path)
             throw new InvalidRouteException("Sub-route is missing. Possible routes are: ".implode(', ', array_keys($this->mAPIs)));
         if(!isset($this->mAPIs[$path]))
@@ -102,10 +98,9 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
      * @param array $request associative array of request Fields, usually $_GET or $_POST
      * @param String|null $path
      * @return IResponse the api call response with data, message, and status
-     * @throws NoRoutesFoundException if the api path was not found
+     * @throws InvalidRouteException if the api path was not found
      */
-    function execute(Array $request, $path=NULL)
-    {
+    function execute(Array $request, $path=NULL) {
         if($path) $request[self::ROUTE_KEY] = $path;
         $routeRequest = $this->processRequest($request);
         $path = $routeRequest[self::ROUTE_KEY];
@@ -128,19 +123,19 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
 //        return $API->executeAsResponse($request);
 //    }
 
-    /**
-     * Sends headers, executes the request, and renders an IResponse as HTML
-     * @param array $request the request to execute
-     * @return void
-     */
-    public function renderHTML(Array $request) {
-        if(!headers_sent() && !Util::isCLI())
-            header("Content-Type: text/html");
-        $Render = new APIInfo();
-        $Response = $this->executeAsResponse($request);
-        $Response->sendHeaders();
-        $Render->render($this->mExecutedAPI ?: $this, $Response);
-    }
+//    /**
+//     * Sends headers, executes the request, and renders an IResponse as HTML
+//     * @param array $request the request to execute
+//     * @return void
+//     */
+//    public function renderHTML(Array $request) {
+//        if(!headers_sent() && !Util::isCLI())
+//            header("Content-Type: text/html");
+//        $Render = new APIInfo();
+//        $Response = $this->executeAsResponse($request);
+//        $Response->sendHeaders();
+//        $Render->render($this->mExecutedAPI ?: $this, $Response);
+//    }
 
 //    function render(IRoute $Route)
 //    {
@@ -152,7 +147,14 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
 
     // Implement ArrayAccess
 
-    public function offsetExists($path) { return isset($this->mAPIs[$path]);}
+    public function offsetExists($path) {
+        try {
+            $this->getAPI($path);
+            return true;
+        } catch (InvalidRouteException $ex) {
+            return false;
+        }
+    }
 
     /**
      * Shortcut for getAPI($path)
@@ -167,5 +169,3 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
 
     public function getIterator() { return new \ArrayIterator($this->mAPIs); }
 }
-
-class InvalidRouteException extends ValidationException {}

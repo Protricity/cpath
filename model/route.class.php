@@ -5,10 +5,11 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath;
-use CPath\Builders\BuildRoutes;
+namespace CPath\Model;
+use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRoute;
+use CPath\Util;
 
 /** Thrown when a valid route could not find a corresponding handler */
 class DestinationNotFoundException extends \Exception {}
@@ -23,45 +24,36 @@ class NoRoutesFoundException extends \Exception {}
  */
 class Route implements IRoute {
 
-    const APC_PREFIX = 'cpath.route.%s:';
-
     private
         $mRoute,
         $mDestination,
         $mArgs = array(),
-        $mCurArg = -1,
+        $mPos = 0,
         $mRequest = array();
 
     /**
      * Constructs a new Route Entry
-     * @param $route string the route request path
+     * @param $routePrefix string the route prefix
      * @param $destination string the handler class for this route
+     * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
      */
-    public function __construct($route, $destination) {
-        $this->mRoute = $route;
+    public function __construct($routePrefix, $destination, $_args=NULL) {
+        $this->mRoute = $routePrefix;
         $this->mDestination = $destination;
+        if($_args && $c = func_num_args())
+            for($i=2; $i<$c; $i++)
+                if($arg = func_get_arg($i))
+                    if(is_array($arg)) $this->mRequest = $arg;
+                    else $this->mArgs[] = $arg;
     }
 
-    public function getRoute() { return $this->mRoute; }
+    public function getPrefix() { return $this->mRoute; }
     public function getDestination() { return $this->mDestination; }
 
-    public function getCurrentArg() {
-        $cur = $this->mCurArg <= 0 ? 0 : $this->mCurArg;
-        return $this->mArgs[$cur];
-    }
-
     public function getNextArg() {
-        if(!$this->hasNextArg())
-            return NULL;
-        $this->mCurArg++;
-        return $this->mArgs[$this->mCurArg];
-    }
-
-    public function hasNextArg() {
-        if($this->mCurArg >= sizeof($this->mArgs)-1) {
-            return false;
-        }
-        return true;
+        return isset($this->mArgs[$this->mPos])
+            ? $this->mArgs[$this->mPos++]
+            : NULL;
     }
 
     public function addToRoute($path) {
@@ -104,7 +96,7 @@ class Route implements IRoute {
             return false;
 
         $argString = substr($requestPath, strlen($this->mRoute) + 1);
-        $this->mArgs = array();
+        //$this->mArgs = array();
         if($argString)
             foreach(explode('/', $argString) as $arg)
                 if($arg) $this->mArgs[] = $arg;
@@ -118,7 +110,6 @@ class Route implements IRoute {
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     public function getHandler() {
-
         $dest = $this->mDestination;
         $Class = new \ReflectionClass($dest);
         if($Class->implementsInterface("Cpath\\Interfaces\\IHandlerAggregate")) {
@@ -133,86 +124,19 @@ class Route implements IRoute {
 
     /**
      * Renders the route destination
-     * @param array $request optional request parameters
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */
-    public function render(Array $request=NULL) {
-        if($request)
-            $this->mRequest = $request + $this->mRequest;
+    public function render() {
         $this->getHandler()
             ->render($this);
     }
 
-    // Static methods
-
     /**
-     * Loads all routes and attempts to match them to the request path
-     * @throws NoRoutesFoundException if no routes matched
+     * Merge an associative array into the existing request array
+     * @param $request Array associative array to merge
      */
-    public static function findRoute($routePath) {
-
-        if(preg_match('/\.\w+$/', $routePath)) {
-            header("HTTP/1.0 404 File request was passed to Script");
-            die();
-        }
-
-        if(Base::isApcEnabled()) {
-            $prefix = sprintf(self::APC_PREFIX, Base::getConfig('build.inc', 0));
-            $route = $routePath;
-            while(true) {
-                $dest = apc_fetch($prefix.$route, $found);
-                if(!$found) {
-                    $p = strrpos($route, '/');
-                    if(!$p) break;
-                    $route = substr($route, 0, $p);
-                    continue;
-                }
-                $Route = new Route($route, $dest[0]);
-                if(!$Route->match($routePath)) {
-                    Log::e(__CLASS__, "APC Cache did not match route: ". $route);
-                    apc_delete($prefix.$route);
-                    continue;
-                }
-                if(isset($dest[1]))
-                    $Route->mRequest = (array)$dest[1] + $Route->mRequest;
-                //if(isset($dest[1]))
-                //    $request += (array)$dest[1];
-                //if($request)
-                //    $Route->setRequest($request);
-                //$Route->render($routePath);
-                return $Route;
-            }
-        }
-
-        $routes = self::getRoutes();
-        foreach($routes as $route) {
-            $Route = new Route($route[0], $route[1]);
-            if(!$Route->match($routePath))
-                continue;
-            if(isset($route[2]))
-                $Route->mRequest = (array)$route[2] + $Route->mRequest;
-
-            if(Base::isApcEnabled())
-                apc_store(sprintf(self::APC_PREFIX, Base::getConfig('build.inc', 0)).$route[0], array_slice($route, 1));
-            return $Route;
-        }
-        throw new NoRoutesFoundException("No Routes Matched: " . $routePath);
-    }
-
-    public static function getRoutes($method=NULL) {
-        $routes = array();
-        $path = Base::getGenPath().'routes.php';
-        if(!file_exists($path) || !(include $path) || !$routes) {
-            Build::buildClasses();
-            require $path;
-        }
-        if(!$method)
-            return $routes;
-        $routes2 = array();
-        foreach($routes as $route)
-            if(stripos($route[0], $method) === 0)
-                $routes2[] = $route;
-        return $routes2;
+    function addRequest(Array $request) {
+        $this->mRequest = $request + $this->mRequest;
     }
 }

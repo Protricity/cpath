@@ -9,8 +9,8 @@ namespace CPath\Model;
 
 use CPath\Handlers\API;
 use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\APISet;
 use CPath\Handlers\SimpleAPI;
+use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IUserSession;
 use CPath\Log;
 use CPath\Model\DB\PDOModel;
@@ -172,12 +172,12 @@ class SessionManager {
     /**
      * Adds Session API calls to an APISet
      * @param IUserSession $EmptyUser an empty user instance
-     * @param APISet $APISet an existing set of APIs to add to
+     * @param IHandlerSet $APISet an existing set of APIs to add to
      * @throws UserNotFoundException
      */
-    public static function addAPIs(IUserSession $EmptyUser, APISet $APISet)
+    public static function addHandlers(IUserSession $EmptyUser, IHandlerSet $Handlers)
     {
-        $APISet->addAPI('login', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
+        $Handlers->addHandler('POST login', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
             $request = $API->processRequest($request);
             $User = $EmptyUser::login($request['name'], $request['password']);
             return new Response("Logged in as user '".$User->getName()."' successfully", true, $User);
@@ -186,7 +186,7 @@ class SessionManager {
             'password' => new APIRequiredParam("Password")
         )));
 
-        $APISet->addAPI('logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
+        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
             $wasLoggedIn = $EmptyUser::logout();
             if($wasLoggedIn)
                 return new Response("Logged out successfully", true);

@@ -7,12 +7,14 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Handlers\Views\APIInfo;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
+use CPath\Interfaces\IRouteBuilder;
 use CPath\Model\ArrayObject;
-use CPath\Route;
+use CPath\Model\Route;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
@@ -20,8 +22,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Model\ResponseException;
-use CPath\Builders\BuildRoutes;
-use CPath\Handlers\API\View\APIInfo;
+use CPath\Builders\RouteBuilder;
 
 /**
  * Class APIHandler
@@ -74,6 +75,14 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Get the route for this API
+     * @return IRoute
+     */
+    function getRoute() {
+        return $this->mRoute;
+    }
+
+    /**
      * Sends headers, executes the request, and renders an IResponse as HTML
      * @param array $request the request to execute
      * @return void
@@ -82,9 +91,9 @@ abstract class API implements IAPI {
         if(!headers_sent() && !Util::isCLI())
             header("Content-Type: text/html");
         $Render = new APIInfo();
-        $Response = $this->executeAsResponse($request);
-        $Response->sendHeaders();
-        $Render->render($this, $Response);
+        //$Response = $this->executeAsResponse($request);
+        //$Response->sendHeaders();
+        $Render->renderAPI($this);
     }
 
     /**
@@ -160,12 +169,12 @@ abstract class API implements IAPI {
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
     public function processRequest(Array $request) {
-        if($this->mRoute && $this->mRoute->hasNextArg()) {
+        if($this->mRoute && $arg = $this->mRoute->getNextArg()) {
             foreach($this->mFields as $name=>$Field) {
-                if(!$this->mRoute->hasNextArg())
-                    break;
                 if($Field instanceof IAPIParam) {
-                    $request[$name] = $this->mRoute->getNextArg();
+                    $request[$name] = $arg;
+                    if(!$arg = $this->mRoute->getNextArg())
+                        break;
                 }
             }
         }
@@ -218,17 +227,19 @@ abstract class API implements IAPI {
         return $this->mFields;
     }
 
-    public function getDisplayRoute(&$methods) {
-        $methods = array('GET', 'POST');
-        $route = $this->mRoute->getRoute();
-        foreach($this->mFields as $name => $Field) {
-            if(!($Field instanceof IAPIParam))
-                continue;
-            $route .= '/:' . $name ;
-        }
-        return $route;
+    /**
+     * Returns an array of all routes for this class
+     * @param IRouteBuilder $Builder the IRouteBuilder instance
+     * @return IRoute[]
+     */
+    public function getAllRoutes(IRouteBuilder $Builder) {
+        $path = $Builder->getHandlerDefaultPath();
+        foreach($Builder->getHandlerMethods() as $method)
+            $routes[$method] = new Route($method . ' ' . $path, get_called_class());
+        if(!isset($routes['GET']))
+            $routes['GET'] = new Route('GET ' . $path, 'CPath\Handlers\Views\APIInfo', get_called_class());
+        return $routes;
     }
-
 }
 //
 //class APIRequest extends ArrayObject {

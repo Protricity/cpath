@@ -21,9 +21,8 @@ class Console implements IHandler {
 
     function render(IRoute $Route)
     {
-
         $routes = array();
-        foreach(Route::getRoutes() as $route){
+        foreach(Router::getRoutes() as $route){
             list($method, $route) = explode(' ', $route[0], 2);
             if(!isset($routes[$route]))
                 $routes[$route] = array();
@@ -83,8 +82,9 @@ class Console implements IHandler {
                     $args[0] = $arg;
                     $Cli = new CLI($args);
                     try{
-                        Route::findRoute($Cli->getRoute())
-                            ->render($Cli->getRoute(), $Cli->getRequest());
+                        $Route = Base::findRoute($Cli->getRoute());
+                        $Route->addRequest($Cli->getRequest());
+                        $Route->render();
                     } catch (\Exception $ex) {
                         echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";
                     }

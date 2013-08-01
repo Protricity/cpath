@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-interface IAPI extends IHandler {
+interface IAPI extends IHandler, IRoutable {
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -16,7 +16,16 @@ interface IAPI extends IHandler {
      */
     function execute(Array $request);
 
+    /**
+     * Set the route for this IAPI
+     * @param IRoute $Route
+     * @return void
+     */
     function setRoute(IRoute $Route);
 
-    function getDisplayRoute(&$methods);
+    /**
+     * Get the route for this IAPI
+     * @return IRoute
+     */
+    function getRoute();
 }

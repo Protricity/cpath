@@ -11,13 +11,16 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\APISet;
+use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
+use CPath\Interfaces\IRoutable;
+use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Model\Response;
@@ -32,7 +35,7 @@ interface IGetDB {
 class ModelNotFoundException extends \Exception {}
 class ModelAlreadyExistsException extends \Exception {}
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate, IRoutable {
     const Build_Ignore = true; // TODO: Title case
     const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
@@ -172,6 +175,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if(static::Primary)
             return static::getModelName() . " '" . $this->{static::Primary} . "'";
         return static::getModelName();
+    }
+
+    // Implement IRoutable
+
+    /**
+     * Returns an array of all routes for this class
+     * @param IRouteBuilder $Builder the IRouteBuilder instance
+     * @return IRoute[]
+     */
+    function getAllRoutes(IRouteBuilder $Builder) {
+        return $this->getHandler()->getAllRoutes($this, $Builder);
     }
 
 
@@ -384,6 +398,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         return $Select;
     }
 
+    /**
+     * Delete a model entry by Primary Key Column
+     * @param $id mixed the Primary Key to search for
+     * @throws \Exception
+     */
     public static function removeByPrimary($id) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
@@ -394,7 +413,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if(!$c)
             throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
         Log::u(get_called_class(), "Deleted ".static::getModelName()." '{$id}'");
-
     }
 
 
@@ -405,17 +423,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * @return APISet a set of general api handlers for this model.
+     * @return HandlerSet a set of common api routes for this model
      * @throws ValidationException
      * @throws ModelNotFoundException if no Model was found
      */
-    public static function getAPISet()
-    {
+    static function getHandler() {
         /** @var PDOModel $Class */
         $Class = get_called_class();
-        $APISet = new APISet($Class);
+        $Handlers = new HandlerSet($Class);
         if(static::Primary) {
-            $APISet->addAPI('get', new SimpleAPI(function(API $API, Array $request) use ($Class) {
+            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 $Search = $Class::search();
                 $Search->where($Class::Primary, $request['id']);
@@ -430,7 +447,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::SearchKeys) {
-            $APISet->addAPI('search', new SimpleAPI(function(API $API, Array $request) use ($Class) {
+            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 $limit = $request['limit'];
                 if($limit < 1 || $limit > $Class::SearchLimitMax)
@@ -462,7 +479,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::Primary) {
-            $APISet->addAPI('remove', new SimpleAPI(function(API $API, Array $request) use ($Class) {
+            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, Array $request) use ($Class) {
                 $request = $API->processRequest($request);
                 $Search = $Class::search();
                 $Search->where($Class::Primary, $request['id']);
@@ -478,7 +495,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             )));
         }
 
-        return $APISet;
+        return $Handlers;
     }
 
     /**
@@ -505,12 +522,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      */
     protected static function limitAPIRemove(PDOWhere $Select) { static::limitAPI($Select); }
 
-    /**
-     * @return APISet a set of common api routes for this model
-     */
-    static function getHandler() {
-        return static::getAPISet();
-    }
 
     public static function getModelName() {
         return basename(get_called_class());

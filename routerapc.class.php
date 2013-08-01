@@ -1,0 +1,57 @@
+<?php
+/**
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
+namespace CPath;
+use CPath\Builders\RouteBuilder;
+use CPath\Interfaces\IRoute;
+use CPath\Model\FileRequestRoute;
+
+/**
+ * Class RouterAPC - finds routes in APC to match paths and renders them
+ * @package CPath
+ */
+final class RouterAPC{
+
+    const PREFIX_APC = 'cpath.route.';
+    const PREFIX_ROUTE = 'cpath.route:';
+
+    // Static methods
+
+    /**
+     * Loads all routes and attempts to match them to the request path
+     * @param String $routePath the path to find
+     * @return IRoute|NULL the found route or null if none found
+     */
+    public static function findRoute($routePath) {
+        if(Base::getConfig('build.inc') != apc_fetch(self::PREFIX_APC . 'inc')) {
+            RouteBuilder::rebuildAPCCache();
+            apc_store(self::PREFIX_APC . 'inc', Base::getConfig('build.inc'));
+        }
+        $route = $routePath;
+        if(($max = Base::getConfig('route.max', 0)) && ($max < strlen($route))) {
+            $p = strrpos($route, '/', $max);
+            $route = substr($route, 0, $p);
+        }
+        while(true) {
+            $apcRoute = self::PREFIX_ROUTE.$route;
+            $Route = apc_fetch($apcRoute, $found);
+            if(!$found) {
+                $p = strrpos($route, '/');
+                if(!$p) break;
+                $route = substr($route, 0, $p);
+                continue;
+            }
+            if(!$Route->match($routePath)) {
+                Log::e(__CLASS__, "APC Cache did not match route: ". $route);
+                apc_delete($apcRoute);
+                continue;
+            }
+            return $Route;
+        }
+        return NULL;
+    }
+}

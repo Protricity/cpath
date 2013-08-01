@@ -7,12 +7,11 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace CPath\Misc;
+use CPath\Base;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IResponse;
 use CPath\Model\CLI;
-use CPath\Route;
-use Symfony\Component\Config\Definition\Exception\Exception;
-use Symfony\Component\HttpFoundation\Response;
+use CPath\Model\Response;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -42,7 +41,7 @@ class ApiTester {
 
     static function fromCMD($_cmd) {
         $Cli = new CLI(is_array($_cmd) ? $_cmd : func_get_args());
-        $Route = Route::findRoute($Cli->getRoute());
+        $Route = Base::findRoute($Cli->getRoute());
         $Api = $Route->getHandler();
         if(!($Api instanceof IAPI))
             throw new NotAnApiException(get_class($Api) . " does not implement IAPI");

@@ -1,16 +1,18 @@
 <?php
-namespace CPath\Handlers\API\View;
+namespace CPath\Handlers\Views;
 
 use CPath\Base;
+use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Util;
-use CPath\Handlers\API;
-use CPath\Interfaces\IResponse;
 
-class APIInfo implements ILogListener {
+class APIInfo implements IHandler, ILogListener {
 
+    const Build_Ignore = true;
     private $mLog = array();
 
     public function __construct() {
@@ -22,10 +24,23 @@ class APIInfo implements ILogListener {
         $this->mLog[] = $log;
     }
 
-    function render(API $API, IResponse $Response)
+    function render(IRoute $Route)
     {
+        if(!$apiClass = $Route->getNextArg())
+            die("No API Class passed to ".__CLASS__);
+        $R = new \ReflectionClass($apiClass);
+        if($R->implementsInterface("CPath\\Interfaces\\IHandlerAggregate")) {
+            $API = $apiClass::getHandler();
+        } else {
+            $API = new $apiClass();
+        }
+        if(!($API instanceof IAPI))
+            die($apiClass. " is not an instance of IAPI");
+        $this->renderApi($API);
+    }
 
-        $route = $API->getDisplayRoute($methods);
+    function renderAPI(IAPI $API) {
+        $route = ';'; //$API->getDisplayRoute($methods);
 ?><html>
     <head>
         <title><?php echo $route; ?></title>
@@ -41,17 +56,17 @@ class APIInfo implements ILogListener {
         </table>
         <h3>Response</h3>
         <div style='white-space: pre'><?php
-            echo $Response;
+            //echo $Response;
         ?></div>
         <h3>JSON Response</h3>
         <div style='white-space: pre'><?php
-             echo htmlentities(json_encode(Util::toJSON($Response)));
+             //echo htmlentities(json_encode(Util::toJSON($Response)));
         ?></div>
         <h3>XML Response</h3>
         <div style='white-space: pre'><?php
-            $dom = dom_import_simplexml(Util::toXML($Response))->ownerDocument;
-            $dom->formatOutput = true;
-            echo htmlentities($dom->saveXML());
+            //$dom = dom_import_simplexml(Util::toXML($Response))->ownerDocument;
+            //$dom->formatOutput = true;
+            //echo htmlentities($dom->saveXML());
 
         ?></div>
 

@@ -7,18 +7,20 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Interfaces\IResponseHelper;
+use CPath\BuildException;
+use CPath\Interfaces\HandlerSetException;
+use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IHandlerSet;
+use CPath\Interfaces\IRoutable;
 use CPath\Interfaces\IRoute;
+use CPath\Interfaces\IRouteBuilder;
+use CPath\Model\Route;
 use CPath\NoRoutesFoundException;
 use CPath\Util;
 use CPath\Build;
-use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandler;
-use CPath\Model\MultiException;
 use CPath\Model\Response;
-use CPath\Model\ResponseException;
-use CPath\Builders\BuildRoutes;
-use CPath\Handlers\API\View\APIInfo;
+use CPath\Builders\RouteBuilder;
 
 /**
  * Class HandlerSet
@@ -26,9 +28,12 @@ use CPath\Handlers\API\View\APIInfo;
  *
  * Provides a Handler Set for Handler calls
  */
-class HandlerSet implements IHandler {
 
-    const Build_Ignore = true;     // This class should not be built. Classes that use it should set Build_Ignore to false
+class InvalidRouteException extends \Exception {}
+
+class HandlerSet implements IHandlerSet {
+
+    const Build_Ignore = true;     // This class should not be built. Classes that extend it should set Build_Ignore to true
 
     const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
     const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
@@ -36,24 +41,91 @@ class HandlerSet implements IHandler {
     /** @var IHandler[] */
     protected $mHandlers = array();
 
-    public function addHandler($path, IHandler $Handler) {
-        $this->mHandlers[strtolower($path)] = $Handler;
-        return $this;
+    public function __construct() {
+
     }
 
-    public function getHandler($path) {
-        $path = strtolower($path);
-        return isset($this->mHandlers[$path]) ? $this->mHandlers[$path] : NULL;
+    /**
+     * Adds an IHandler to the set by route
+     * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
+     * @param IHandler $Handler the IHandler instance to add to the set
+     * @param bool $replace if true, replace any existing handlers
+     * @throws HandlerSetException
+     */
+    public function addHandler($route, IHandler $Handler, $replace=false) {
+        if(!$replace && isset($this->mHandlers[$route])) {
+            throw new HandlerSetException("Route already exists: ".$route);
+        }
+        $this->mHandlers[$route] = $Handler;
+    }
+
+    /**
+     * Returns an IHandler instance by route
+     * @param $route String the route associated with this handler
+     * @return IHandler|NULL
+     */
+    public function getHandler($route) {
+        return isset($this->mHandlers[$route]) ? $this->mHandlers[$route] : NULL;
     }
 
     function render(IRoute $Route)
     {
-        $path = $Route->getNextArg();
-        if(!$path)
-            throw new NoRoutesFoundException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        if(!isset($this->mHandlers[$path]))
-            throw new NoRoutesFoundException("Route '{$path}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $Route->addToRoute($path);
-        $this->mHandlers[$path]->render($Route);
+        $route = $Route->getNextArg();
+        if(!$route)
+            throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        if(!isset($this->mHandlers[$route]))
+            throw new InvalidRouteException("Route '{$route}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        $Route->addToRoute($route);
+        $this->mHandlers[$route]->render($Route);
     }
+
+    /**
+     * Returns an array of all routes for this class
+     * @param IHandlerAggregate $Source the source class instance associated with the IHandlerSet
+     * @param IRouteBuilder $Builder the IRouteBuilder instance
+     * @return IRoute[]
+     * @throw BuildException when a route is not in a valid format
+     */
+    public function getAllRoutes(IHandlerAggregate $Source, IRouteBuilder $Builder) {
+        $defaultPath = $Builder->getHandlerDefaultPath();
+        $routes = array();
+        $regex = '/^('.IRouteBuilder::METHODS.')( (\/)?(.*))?$/';
+        foreach($this->mHandlers as $route => $Handler) {
+            //if($Handler instanceof IRoutable) {
+            //    $routes = array_merge($routes, $Handler->getAllRoutes($Builder));
+            //} else {
+            if(!preg_match($regex, $route, $matches))
+                throw new BuildException("Route '$route' is not a valid route");
+            if(empty($matches[4])) $path = $defaultPath;
+            else $path = !empty($matches[3]) ? $matches[4] : $defaultPath . '/' .$matches[4];
+            $routes[] = new Route($matches[1] . ' ' . $path, get_class($Source), $route);
+        }
+        //if(!isset($routes['GET']))
+        //    $routes['GET'] = new Route('GET ' . $defaultPath, 'CPath\Handlers\Views\APIInfo', get_called_class());
+        return $routes;
+    }
+
+    // Implement ArrayAccess
+
+    public function offsetExists($route) {
+        try {
+            $this->getHandler($route);
+            return true;
+        } catch (InvalidRouteException $ex) {
+            return false;
+        }
+    }
+
+    /**
+     * Shortcut for getAPI($path)
+     * @param mixed $route
+     * @return IHandler
+     */
+    public function offsetGet($route) { return $this->getHandler($route);}
+    public function offsetSet($route, $value) { $this->addHandler($route, $value); }
+    public function offsetUnset($route) { unset($this->mHandlers[$route]); }
+
+    // Implement IteratorAggregate
+
+    public function getIterator() { return new \ArrayIterator($this->mHandlers); }
 }

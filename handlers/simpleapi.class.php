@@ -15,7 +15,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Model\ResponseException;
-use CPath\Builders\BuildRoutes;
+use CPath\Builders\RouteBuilder;
 use CPath\Handlers\API\View\APIInfo;
 
 /**
