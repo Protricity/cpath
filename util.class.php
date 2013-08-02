@@ -83,11 +83,10 @@ abstract class Util {
     public static function getAcceptedTypes() {
         static $types = NULL;
         if($types === NULL) {
-            $types = self::getHeader('Accept');
-            $types = explode(',', strtolower($types));
-            foreach($types as $i=>$type) {
+            $types = array();
+            foreach(explode(',', strtolower(self::getHeader('Accept'))) as $i=>$type) {
                 list($type) = explode(';', $type);
-                switch ($type) {
+                switch (trim($type)) {
                     case 'application/json':
                     case 'application/x-javascript':
                     case 'text/javascript':

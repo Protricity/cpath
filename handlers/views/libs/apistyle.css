@@ -3,32 +3,46 @@ body {
     background-color: #eee;
 }
 
-.param-table {
+.field-table {
     list-style: none;
     margin: 0;
     padding: 0;
     font: 11px Arial, Helvetica, Geneva, sans-serif;
+    min-width: 600px;
 }
 
-.param-table li div {
-    background-color: #fff;
-    display: block;
+.field-table li {
+    overflow: hidden;
+}
+
+.field-table li div {
+    display: inline-block;
     float: left;
     border-bottom: 1px solid #ccc;
     border-right: 1px solid #ccc;
     padding: 3px 5px;
+    overflow-y: auto;
 }
 
-.param-table li.param-header div{
+.field-table li.field-item div {
+    background-color: #fff;
+    height: 45px;
+}
+
+.field-table li.field-header div, .field-table li.field-footer div{
     background-color: #ccc;
     font-weight: bold;
     cursor: default;
 }
 
-.param-table div.param-name { width: 12%; border-left: 1px solid #ccc; }
-.param-table div.param-description { width: 24%; }
+.field-table div.field-num { width: 10px; border-left: 1px solid #ccc; }
+.field-table div.field-name { width: 80px; }
+.field-table div.field-description { width: 50%; min-width: 280px;  }
+.field-table div.field-input { width: 25%; min-width: 160px; }
+.field-table div.field-input input { width: 90%; }
 
-.response-content {
+.response-content, .response-header {
+    font: 10px Courier New, Courier New, monospace;
     white-space: pre;
 }
 

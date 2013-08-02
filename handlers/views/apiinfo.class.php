@@ -48,44 +48,66 @@ class APIInfo implements IHandler, ILogListener {
 
         $basePath = Base::getClassPublicPath($this);
         $route = $Route->getPrefix();
+        list($method, $path) = explode(' ', $route, 2);
         foreach($API->getFields() as $name=>$Field)
             if($Field instanceof IAPIParam)
                 $route .= '/:'.$name;
-?><html>
+        $num = 1;
+
+
+
+        ?><html>
     <head>
         <base href="<?php echo $basePath; ?>" />
         <title><?php echo $route; ?></title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <script src="libs/apiinfo.js"></script>
+        <script src="libs/vkbeautify.min.js"></script>
         <link rel="stylesheet" href="libs/apistyle.css" />
     </head>
     <body>
-        <h1><?php echo $route."<br />"; ?></h1>
-        <h3>Params:</h3>
-        <ul class='param-table'>
-            <li class='param-header clearfix'>
-                <div class='param-name'>Name</div>
-                <div class='param-description'>Description</div>
+    <h1><?php echo $route."<br />"; ?></h1>
+    <h3>Params:</h3>
+    <form class="field-form" >
+        <ul class='field-table'>
+            <li class='field-header clearfix'>
+                <div class='field-num'>#</div>
+                <div class='field-name'>Name</div>
+                <div class='field-description'>Description</div>
+                <div class='field-input'>Test</div>
             </li>
-        <?php foreach($API->getFields() as $name=>$Field) { ?>
-            <li class='param-item clearfix'>
-                <div class='param-name'><?php echo $name; ?></div>
-                <div class='param-description'><?php echo $Field->getDescription(); ?></div>
+            <?php foreach($API->getFields() as $name=>$Field) { ?>
+                <li class='field-item clearfix'>
+                    <div class='field-num'><?php echo $num++; ?>.</div>
+                    <div class='field-name'><?php echo $name; ?></div>
+                    <div class='field-description'><?php echo $Field->getDescription(); ?></div>
+                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo preg_replace('/[^\w _-]/', '', $_GET[$name]); ?>' /></div>
+                </li>
+            <?php } ?>
+            <li class='field-footer clearfix'>
+                <div>
+                    <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>')" />
+                    <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>')" />
+                    <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>')" />
+                </div>
             </li>
-        <?php } ?>
         </ul>
-        <h3>Response</h3>
-        <div class='response-content'></div>
+    </form>
+    <h3>Response</h3>
+    <div class='response-content' style="display: none"></div>
+    <h3>Response Headers</h3>
+    <div class='response-header' style="display: none"></div>
 
-        <?php if(Base::isDebug()) { ?>
+    <?php if(false && Base::isDebug()) { ?>
         <h3>Debug</h3>
         <table><?php
             /** @var ILogEntry $log */
             //foreach($this->mLog as $log)
             //    echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
 
-        ?></table>
-        <?php } ?>
+            ?></table>
+    <?php } ?>
     </body>
-</html><?php
+        </html><?php
     }
 }

@@ -192,15 +192,12 @@ abstract class API implements IAPI {
      * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      */
     public function render(IRoute $Route) {
-        // Parse the request
-        $request = $Route->getRequest();
-
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
                     $this->renderJSON($Route);
                     return;
-                case 'text/xml':
+                case 'application/xml':
                     $this->renderXML($Route);
                     return;
                 case 'text/html':
@@ -211,7 +208,7 @@ abstract class API implements IAPI {
                     return;
             }
         }
-        $this->renderDefault($request);
+        $this->renderDefault($Route);
     }
 
     /**

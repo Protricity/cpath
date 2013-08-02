@@ -47,7 +47,7 @@ class MultiException extends ResponseException implements \Countable {
         IResponseHelper::toJSON($this, $JSON);
         $JSON['response'] = array();
         foreach($this->mEx as $field => $ex)
-            $JSON['response'] = array('msg' => $ex, 'field' => $field);
+            $JSON['response'][] = array('msg' => $ex, 'field' => $field);
         if(Base::isDebug()) {
             $ex = $this->getPrevious() ?: $this;
             $trace = $ex->getTraceAsString();
