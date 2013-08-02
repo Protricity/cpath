@@ -26,6 +26,11 @@ class ApiTester {
         $this->mRoute = $Route;
     }
 
+    /**
+     * @param array $request
+     * @return IResponse
+     * @throws APIFailedException
+     */
     public function test(Array $request=NULL) {
         if($request)
             $this->mRoute->addRequest($request);

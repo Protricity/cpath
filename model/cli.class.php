@@ -31,8 +31,11 @@ class CLI implements ILogListener {
         if(!$args[0]) {
             $method = 'CLI';
         } else {
-            if(preg_match('/^'.IRoute::METHODS.'$/i', $args[0])) {
-                $method = strtoupper(array_shift($args));
+            if(preg_match('/^('.IRoute::METHODS.')(?: (.*))?$/i', $args[0], $matches)) {
+                array_shift($args);
+                $method = strtoupper($matches[1]);
+                if(!empty($matches[2]))
+                    array_unshift($args, $matches[2]);
             } else {
                 $method = 'CLI';
             }
@@ -40,6 +43,10 @@ class CLI implements ILogListener {
 
         $args2 = array();
         for($i=0; $i<sizeof($args); $i++) {
+            if(is_array($args[$i])) {
+                $this->mRequest = $args[$i] + $this->mRequest;
+                continue;
+            }
             $arg = trim($args[$i]);
             if($arg === '')
                 return;

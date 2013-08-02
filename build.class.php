@@ -8,6 +8,8 @@
 namespace CPath;
 
 use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IResponse;
+use CPath\Interfaces\IRoute;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
@@ -21,11 +23,16 @@ class Build extends API {
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param array $request associative array of request Fields, usually $_GET or $_POST
-     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @return Response the api call response with data, message, and status
      */
-    function execute(Array $request)
+    function execute(IRoute $Route)
     {
+        static $built = false;
+        if($built)
+            return new Response(false, "Build can only occur once per execution. Skipping Build...");
+        $built = true;
+
         $Response = new Response(false, "Starting Build");
         $Response->startLogging();
         $exCount = Build::buildClasses(true);

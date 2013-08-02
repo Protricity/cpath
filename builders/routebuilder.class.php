@@ -229,7 +229,7 @@ PHP;
             Log::e(__CLASS__, "APC Cache info could not be got. Make sure to set apc.enable_cli=1 in php.ini");
             return;
         }
-        Log::v(__CLASS__, "Cleared {$c} APC Route Entries");
+        Log::v(__CLASS__, "Cleared {$c} APC Entries");
 
         $routes = Router::getRoutes();
         /** @var IRoute $Route */
