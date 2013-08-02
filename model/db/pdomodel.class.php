@@ -51,6 +51,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const SearchLimit = 25;
     const SearchAllowWildCard = false;   // true or false
 
+    const UpdateFields = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
     const ExportFields = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
 
     //protected $mRow = null;
@@ -67,23 +68,34 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     public function setField($field, $value, $commit=true) {
         if(!$this->mCommit) $this->mCommit = array();
+        if($this->$field == $value)
+            return $this;
         $this->mCommit[$field] = $value;
-        if($commit) {
-            if(!($primary = static::Primary))
-                throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
-            $set = '';
-            $DB = static::getDB();
-            foreach($this->mCommit as $field=>$value)
-                $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
-            $SQL = "UPDATE ".static::TableName
-                ."\n SET {$set}"
-                ."\n WHERE ".static::Primary." = ".$DB->quote($this->$primary);
-            $DB->exec($SQL);
-            Log::u(get_called_class(), "Updated ".static::getModelName()." '{$this->$primary}'");
-            $this->mCommit = array();
-        }
+        if($commit)
+            $this->commitFields();
         $this->$field = $value;
         return $this;
+    }
+
+    public function commitFields() {
+        if(!($primary = static::Primary))
+            throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
+        if(!$this->mCommit) {
+            Log::u(get_called_class(), "No Fields Updated for ".static::getModelName()." '{$this->$primary}'");
+            return 0;
+        }
+        $set = '';
+        $DB = static::getDB();
+        foreach($this->mCommit as $field=>$value)
+            $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
+        $SQL = "UPDATE ".static::TableName
+            ."\n SET {$set}"
+            ."\n WHERE ".static::Primary." = ".$DB->quote($this->$primary);
+        $DB->exec($SQL);
+        Log::u(get_called_class(), "Updated ".static::getModelName()." '{$this->$primary}'");
+        $c = sizeof($this->mCommit);
+        $this->mCommit = array();
+        return $c;
     }
 
 
@@ -99,70 +111,62 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Returns an IResponse for this object. Defaults to just primary key, if exists.
-     * Overwrite this method and return $this->getDataInclude(...) or $this->getDataExclude(...) to return more data.
+     * Returns an indexed array of field names for this object filtered by the tokens in constant ExportFields.
+     * @param $tokens String the filter to use
+     * @return Array
+     */
+    protected function getFieldList($tokens) {
+        $tokens = explode(':', $tokens);
+        switch($tokens[0]) {
+            case 'Public':
+                $R = new \ReflectionObject($this);
+                $list = array();
+                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC) as $p)
+                    $list[] = $p->name;
+                return $list;
+            case 'Protected':
+                $R = new \ReflectionObject($this);
+                $list = array();
+                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED) as $p)
+                    $list[] = $p->name;
+                return $list;
+            case 'None':
+                return array();
+            case 'Index':
+                return explode(',', static::SearchKeys);
+            case 'SPIndex':
+                return explode(',', (static::Primary ? static::Primary.',' : '') . static::SearchSKeys);
+            case 'Primary':
+                return (array)static::Primary;
+            case 'Exclude':
+                if(empty($tokens[1]) || !($tokens = explode(',', $tokens[1])))
+                    return array();
+                return array_diff(explode(',', static::Columns), $tokens);
+            case 'Include':
+                if(empty($tokens[1]) || !($tokens = explode(',', $tokens[1])))
+                    return array();
+                return array_intersect(explode(',', static::Columns), $tokens);
+            default:
+                if(!$tokens[0] || !($tokens = explode(',', $tokens[0])))
+                    return array();
+                return array_intersect(explode(',', static::Columns), $tokens);
+        }
+    }
+
+    /**
+     * Returns an associative array of fields and values for this object filtered by the tokens in constant ExportFields.
+     * Defaults to just primary key, if exists.
+     * Modify const ExportFields to change what data gets exported
      * @return Array
      */
     public function getExportData()
     {
-        if(!$f = static::ExportFields)
+        if(!static::ExportFields)
             return array();
-        $f = explode(':', $f);
-        switch($f[0]) {
-            case 'Public':
-                $R = new \ReflectionObject($this);
-                $export = array();
-                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC) as $p)
-                    $export[$p->name] = $this->{$p->name};
-                return $export;
-            case 'Protected':
-                $R = new \ReflectionObject($this);
-                $export = array();
-                foreach($R->getProperties(\ReflectionProperty::IS_PUBLIC | \ReflectionProperty::IS_PROTECTED) as $p)
-                    $export[$p->name] = $this->{$p->name};
-                return $export;
-            case 'None':
-                return array();
-            case 'Index':
-                $export = array();
-                $keys = explode(',', static::SearchKeys);
-                foreach($keys as $k)
-                    $export[$k] = $this->$k;
-                return $export;
-            case 'SPIndex':
-                $export = array();
-                $keys = explode(',', (static::Primary ? static::Primary.',' : '') . static::SearchSKeys);
-                foreach($keys as $k)
-                    $export[$k] = $this->$k;
-                return $export;
-            case 'Primary':
-                if(!static::Primary)
-                    return array();
-                return array(static::Primary => $this->{static::Primary});
-            case 'Exclude':
-                $export = array();
-                array_shift($f);
-                foreach($this as $k=>$v)
-                    if(!in_array($k, $f))
-                        $export[$k] = $v;
-                return $export;
-            case 'Include':
-                if(!$f[1] || !($f = explode(',', $f[1])))
-                    return array();
-                $export = array();
-                foreach($this as $k=>$v)
-                    if(in_array($k, $f))
-                        $export[$k] = $v;
-                return $export;
-            default:
-                if(!$f[0] || !($f = explode(',', $f[0])))
-                    return array();
-                $export = array();
-                foreach($this as $k=>$v)
-                    if(in_array($k, $f))
-                        $export[$k] = $v;
-                return $export;
-        }
+        $export = array();
+        foreach($this->getFieldList(static::ExportFields) as $f)
+            $export[$f] = $this->$f;
+        return $export;
     }
 
     /**
@@ -222,10 +226,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 if($limit < 1 || $limit > $Source::SearchLimitMax)
                     $limit = $Source::SearchLimit;
                 $search = $request['search'];
-                $wildCard = false;
-                if(strpos($search, '*') !== false && $Source::SearchAllowWildCard) {
-                    $search = str_replace('*', '%', $search);
-                    $wildCard = true;
+                if($Source::SearchAllowWildCard) {
+                    if(strpos($search, '*') !== false)
+                        $search = str_replace('*', '%', $search);
+                    else
+                        $search .= '%';
                 }
 
                 if($by = ($request['search_by'])) {
@@ -233,10 +238,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     if(!in_array($by, $keys))
                         throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::SearchKeys."]");
 
-                    $Search = $Source::searchByField($wildCard ? $by . ' LIKE ' : $by, $search, $limit);
+                    $Search = $Source::searchByField($Source::SearchAllowWildCard ? $by . ' LIKE ' : $by, $search, $limit);
                 }
                 else
-                    $Search = $Source::searchByAnyIndex($search, $limit, $wildCard ? 'LIKE' : '');
+                    $Search = $Source::searchByAnyIndex($search, $limit, $Source::SearchAllowWildCard ? 'LIKE' : '');
                 $Source::limitAPISearch($Search);
                 $data = $Search->fetchAll();
                 return new Response("Found (".sizeof($data).") ".$Source::getModelName()."(s)", true, $data);
@@ -248,6 +253,44 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::Primary) {
+            $fields = array();
+            $fields[static::Primary] = new APIRequiredParam("ID of the " . $Source->getModelName() . " to be updated");
+            foreach($this->getFieldList(static::UpdateFields) as $field)
+                if($field != static::Primary)
+                    $fields[$field] = new APIField("Update " . $Source->getModelName() . " " . $field);
+            if(sizeof($fields) > 1) {
+                $Handlers->addHandler('PATCH', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                    $request = $API->processRequest($Route);
+                    $id = $request[$Source::Primary];
+                    unset($request[$Source::Primary]);
+
+
+                    $Search = $Source::search();
+                    $Search->where($Source::Primary, $id);
+                    $Source::limitAPIGet($Search);
+                    /** @var PDOModel $Model */
+                    $Model = $Search->fetch();
+                    if(!$Model)
+                        throw new ModelNotFoundException($Source::getModelName() . " '{$id}' was not found");
+
+                    foreach($request as $field => $value)
+                        if($value !== NULL && $value !== "") {
+                            $call = 'set' . str_replace('_', '', $field);
+                            try {
+                                $Model->$call($value, false);
+                            } catch (ValidationException $ex) {
+                                throw $ex->updateMessage($field);
+                            }
+                        }
+                    $c = $Model->commitFields();
+                    if(!$c)
+                        return new Response("No fields were updated for " . $Source::getModelName()." '{$id}'.", true, $Model);
+                    return new Response("Updated {$c} Field(s) for " . $Source::getModelName()." '{$id}'.", true, $Model);
+
+                }, $fields));
+            }
+
+
             $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                 $request = $API->processRequest($Route);
                 $Search = $Source::search();
@@ -275,12 +318,24 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @return PDOModel|null returns NULL if no primary key is available
      * @throws ModelAlreadyExistsException
      * @throws \Exception|\PDOException
+     * @throws ValidationException if a field fails to validate
      */
     public static function createFromArray(Array $row) {
        foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);
         try {
+            $ValidModel = new static;
+            foreach($row as $field => $value)
+                if($value !== NULL && $value !== "") {
+                    $call = 'set' . str_replace('_', '', $field);
+                    try {
+                        $ValidModel->$call($value, false);
+                    } catch (ValidationException $ex) {
+                        throw $ex->updateMessage($field);
+                    }
+                }
+
             if(!static::Primary) {
                 static::insert(array_keys($row))
                     ->values(array_values($row));

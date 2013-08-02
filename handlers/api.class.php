@@ -290,6 +290,11 @@ class ValidationException extends \Exception {
     public function getFieldError($fieldName) {
         return sprintf($this->getMessage(), $fieldName);
     }
+
+    public function updateMessage($fieldName) {
+        $this->message = $this->getFieldError($fieldName);
+        return $this;
+    }
 }
 
 /**

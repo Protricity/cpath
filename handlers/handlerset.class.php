@@ -65,8 +65,16 @@ class HandlerSet implements IHandlerSet {
      */
     public function getHandler($route) {
         if(!isset($this->mHandlers[$route]))
-            throw new InvalidRouteException("Route '{$route}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+            throw new InvalidRouteException("Route '{$route}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
         return $this->mHandlers[$route];
+    }
+
+    /**
+     * Returns the source class that created this instance
+     * @return String the source class name
+     */
+    public function getSourceClass() {
+        return $this->mSource;
     }
 
     /**
@@ -101,10 +109,10 @@ class HandlerSet implements IHandlerSet {
                 throw new BuildException("Route '$route' is not a valid route");
             if(empty($matches[4])) $path = $defaultPath;
             else $path = !empty($matches[3]) ? $matches[4] : $defaultPath . '/' .$matches[4];
-            $routes[] = new Route($matches[1] . ' ' . $path, $this->mSource, $route);
+            $routes[$route] = new Route($matches[1] . ' ' . $path, $this->mSource, $route);
         }
         //if(!isset($routes['GET']))
-            $routes['GET api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $this->mSource);
+            $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $this->mSource);
         return $routes;
     }
 //

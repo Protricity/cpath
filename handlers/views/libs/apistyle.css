@@ -35,13 +35,21 @@ body {
     cursor: default;
 }
 
+/* APIInfo */
+
 .field-table div.field-num { width: 10px; border-left: 1px solid #ccc; }
 .field-table div.field-name { width: 80px; }
 .field-table div.field-description { width: 50%; min-width: 280px;  }
 .field-table div.field-input { width: 25%; min-width: 160px; }
 .field-table div.field-input input { width: 90%; }
 
-.response-content, .response-header {
+/* HandlerSetInfo */
+
+.field-table div.field-prefix { width: 10%; min-width: 120px; }
+.field-table div.field-destination { width: 30%; min-width: 180px;  }
+
+
+.response-content, .response-headers, .request-headers {
     font: 10px Courier New, Courier New, monospace;
     white-space: pre;
 }

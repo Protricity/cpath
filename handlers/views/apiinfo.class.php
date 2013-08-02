@@ -54,7 +54,7 @@ class APIInfo implements IHandler, ILogListener {
                 $route .= '/:'.$name;
         $num = 1;
 
-
+        $fields = $API->getFields();
 
         ?><html>
     <head>
@@ -68,7 +68,7 @@ class APIInfo implements IHandler, ILogListener {
     <body>
     <h1><?php echo $route."<br />"; ?></h1>
     <h3>Params:</h3>
-    <form class="field-form" >
+    <form class="field-form">
         <ul class='field-table'>
             <li class='field-header clearfix'>
                 <div class='field-num'>#</div>
@@ -76,7 +76,14 @@ class APIInfo implements IHandler, ILogListener {
                 <div class='field-description'>Description</div>
                 <div class='field-input'>Test</div>
             </li>
-            <?php foreach($API->getFields() as $name=>$Field) { ?>
+            <?php if(!$fields) { ?>
+                <li class='field-item clearfix'>
+                    <div class='field-num'></div>
+                    <div class='field-name'></div>
+                    <div class='field-description'>No Fields in this API</div>
+                    <div class='field-input'></div>
+                </li>
+            <?php } else foreach($fields as $name=>$Field) { ?>
                 <li class='field-item clearfix'>
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
@@ -85,18 +92,27 @@ class APIInfo implements IHandler, ILogListener {
                 </li>
             <?php } ?>
             <li class='field-footer clearfix'>
-                <div>
-                    <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>')" />
-                    <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>')" />
-                    <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>')" />
-                </div>
+                <div class='field-num'></div>
+                <div class='field-name'></div>
+                <div class='field-description'></div>
+                <div class='field-input'></div>
             </li>
         </ul>
+        <div>
+            <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>')" />
+            <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>')" />
+            <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>')" />
+        </div>
     </form>
-    <h3>Response</h3>
-    <div class='response-content' style="display: none"></div>
-    <h3>Response Headers</h3>
-    <div class='response-header' style="display: none"></div>
+
+    <div class="response-container" style="display: none">
+        <h3>Response</h3>
+        <div class='response-content'></div>
+        <h3>Response Headers</h3>
+        <div class='response-headers'></div>
+        <h3>Request Headers</h3>
+        <div class='request-headers'></div>
+    </div>
 
     <?php if(false && Base::isDebug()) { ?>
         <h3>Debug</h3>

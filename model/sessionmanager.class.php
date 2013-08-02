@@ -136,18 +136,16 @@ class SessionManager {
      * @return bool true if user was logged in
      */
     public static function logout(IUserSession $EmptyUser) {
-        $wasLoggedIn = false;
         self::start();
         if(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
         {
             $key = $_SESSION[self::SESSION_KEY];
-            $loggedIn = true;
-            $EmptyUser->disableSessionKey($key);
             self::$mUserSession = NULL;
-            $wasLoggedIn = true;
+            session_unset();
+            $EmptyUser->disableSessionKey($key);
+            return true;
         }
-        session_unset();
-        return $wasLoggedIn ;
+        return false ;
     }
 
     public static function isLoggedIn() {
@@ -160,10 +158,14 @@ class SessionManager {
             throw new IncorrectUsernameOrPasswordException();
     }
 
+    public static function confirmPassword($newPassword, $confirmPassword) {
+        if($newPassword != $confirmPassword)
+            throw new PasswordsDoNotMatchException();
+    }
+
     public static function changePassword(IUserSession $User, $newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
-            if($newPassword != $confirmPassword)
-                throw new PasswordsDoNotMatchException();
+            self::confirmPassword($newPassword, $confirmPassword);
         $User->setPassword(self::hash($newPassword), true);
     }
 

@@ -131,10 +131,17 @@ class Base {
     }
 
 
-    /** Returns the domain path */
-    public static function getClassPublicPath($Class) {
-        return self::getDomainPath()
-            .dirname(str_replace('\\', '/', strtolower(get_class($Class)))).'/';
+    /**
+     * Returns the public path for a Class
+     * @param $Class String|Object the class name or instance
+     * @param $withDomain boolean true if the full domain path should be returned
+     * @return string the public path
+     */
+    public static function getClassPublicPath($Class, $withDomain=true) {
+        if(is_object($Class))
+            $Class = get_class($Class);
+        return ($withDomain ? self::getDomainPath() : '')
+            .dirname(str_replace('\\', '/', strtolower($Class))).'/';
     }
 
     /**

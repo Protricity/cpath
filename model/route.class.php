@@ -11,6 +11,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\InvalidHandlerException;
+use CPath\Log;
 use CPath\Util;
 
 /**
@@ -59,16 +60,25 @@ class Route implements IRoute {
     public function getRequest() {
         if($this->mRequest)
             return $this->mRequest;
-        if(!$_POST && in_array(Util::getUrl('method'), array('GET', 'CLI'))) {                // if GET
-            $request = $_GET;
-        } else {                                                                        // else POST
-            if(!$_POST && Util::getHeader('Content-Type') === 'application/json') {     // if JSON Object,
-                $request = json_decode( file_get_contents('php://input'), true);        // Parse out json
-            } else {
-                $request = $_POST;                                                      // else use POST
-            }
+        if($_POST)
+            return $_POST;
+        switch(Util::getUrl('method')) {
+            case 'GET':
+            case 'CLI':
+                return $_GET;
+            case 'POST':
+            case 'PUT':
+            case 'PATCH':
+            case 'DELETE':
+                $input = file_get_contents('php://input');
+                if(Util::getHeader('Content-Type') === 'application/json')
+                    return json_decode($input , true);
+                parse_str($input, $request);
+                return $request;
+            default:
+                Log::e(__CLASS__, "Invalid Request Method: ".Util::getUrl('method'));
+                return array();
         }
-        return $request;
     }
 
     /**

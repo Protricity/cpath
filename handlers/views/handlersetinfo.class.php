@@ -3,6 +3,8 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
+use CPath\Handlers\InvalidRouteException;
+use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
@@ -28,9 +30,9 @@ class HandlerSetInfo implements IHandler, ILogListener {
 
     function render(IRoute $Route)
     {
+        $route = $Route->getPrefix();
         if(!$apiClass = $Route->getNextArg())
             die("No API Class passed to ".__CLASS__);
-        $R = new \ReflectionClass($apiClass);
         $Source = new $apiClass;
         if($Source instanceof IHandlerAggregate) {
             $Handlers = $Source->getAggregateHandler();
@@ -44,44 +46,59 @@ class HandlerSetInfo implements IHandler, ILogListener {
         }
 
         $routes = $Handlers->getAllRoutes(new RouteBuilder());
+        $ids = array_flip(array_keys($routes));
+
+        if($arg = $Route->getNextArg()) {
+            $routePath = array_search($arg, $ids);
+            $Route = $routes[$routePath];
+            $API = $Handlers->getHandler($routePath);
+            if(!$API instanceof IAPI)
+                throw new InvalidRouteException("Destination for '{$arg}' does not implement IAPI");
+            $APIInfo = new APIInfo();
+            $APIInfo->renderAPI($API, $Route);
+            return;
+        }
+
+        $basePath = Base::getClassPublicPath($this);
+        list(,$infoPath) = explode(' ', $Route->getPrefix(), 2);
+        $infoPath = substr(Base::getDomainPath(), 0, -1) . $infoPath .'/';
+
+        $num = 1;
 ?><html>
     <head>
-        <title><?php // echo $route; ?></title>
+        <base href="<?php echo $basePath; ?>" />
+        <title><?php echo $route; ?></title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <link rel="stylesheet" href="<?php echo $basePath; ?>libs/apistyle.css" />
     </head>
     <body>
-        <h1><?php // echo $route."<br />"; ?></h1>
-        <h3>Params:</h3>
-        <table>
-        <?php foreach($routes as $Route) { ?>
-            <tr><td><?php echo $Route->getPrefix(); ?></td><td><?php echo $Route->getDestination(); ?></td>
-        <?php } ?>
-        </table>
-        <h3>Response</h3>
-        <div style='white-space: pre'><?php
-            //echo $Response;
-        ?></div>
-        <h3>JSON Response</h3>
-        <div style='white-space: pre'><?php
-             //echo htmlentities(json_encode(Util::toJSON($Response)));
-        ?></div>
-        <h3>XML Response</h3>
-        <div style='white-space: pre'><?php
-            //$dom = dom_import_simplexml(Util::toXML($Response))->ownerDocument;
-            //$dom->formatOutput = true;
-            //echo htmlentities($dom->saveXML());
+        <h1><?php echo $route."<br />"; ?></h1>
 
-        ?></div>
-
-        <?php if(Base::isDebug()) { ?>
-        <h3>Debug</h3>
-        <table><?php
-            /** @var ILogEntry $log */
-            foreach($this->mLog as $log)
-                echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
-
-        ?></table>
-        <?php } ?>
+        <ul class='field-table'>
+            <li class='field-header clearfix'>
+                <div class='field-num'>#</div>
+                <div class='field-prefix'>Route</div>
+                <div class='field-destination'>Destination</div>
+            </li>
+            <?php if(!$routes) { ?>
+                <li class='field-item clearfix'>
+                    <div class='field-num'></div>
+                    <div class='field-prefix'></div>
+                    <div class='field-destination'>No Routes available in this IHandlerSet</div>
+                </li>
+            <?php } else foreach($routes as $route => $Route) { ?>
+                <li class='field-item clearfix'>
+                    <div class='field-num'><?php echo $num++; ?>.</div>
+                    <div class='field-prefix'><a href='<?php echo $infoPath . $ids[$route]. '#' . $route; ?>'><?php echo $Route->getPrefix(); ?></a></div>
+                    <div class='field-destination'><?php echo $Route->getDestination(); ?></div>
+                </li>
+            <?php } ?>
+            <li class='field-footer clearfix'>
+                <div class='field-num'></div>
+                <div class='field-prefix'></div>
+                <div class='field-destination'></div>
+            </li>
+        </ul>
     </body>
 </html><?php
     }

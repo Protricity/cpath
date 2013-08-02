@@ -68,8 +68,8 @@ final class IResponseHelper {
         }
         $msg = $Response->getMessage();
         //list($msg) = explode("\n", $msg);
-        $msg = preg_replace('/[^\w -]/', ' ', $msg);
-        header("HTTP/1.0 " . $Response->getStatusCode() . " " . $msg);
+        $msg = preg_replace('/[^\w -]/', '', $msg);
+        header("HTTP/1.1 " . $Response->getStatusCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
         header('Access-Control-Allow-Origin: *');

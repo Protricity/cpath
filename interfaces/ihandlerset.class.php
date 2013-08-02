@@ -27,6 +27,12 @@ interface IHandlerSet extends IHandler, IRoutable, \ArrayAccess {
     function getHandler($route);
 
     /**
+     * Returns the source class that created this instance
+     * @return String the source class name
+     */
+    function getSourceClass();
+
+    /**
      * Returns an array of all routes for this class
      * @param IRouteBuilder $Builder the IRouteBuilder instance
      * @return IRoute[]
