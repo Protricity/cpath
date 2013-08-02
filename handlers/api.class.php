@@ -79,7 +79,7 @@ abstract class API implements IAPI {
         $Render = new APIInfo();
         //$Response = $this->executeAsResponse($request);
         //$Response->sendHeaders();
-        $Render->renderAPI($this);
+        $Render->renderAPI($this, $Route);
     }
 
     /**
