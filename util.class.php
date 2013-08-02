@@ -41,7 +41,10 @@ abstract class Util {
             $_GET = $CLI->getRequest(); // TODO: $_POST
 
             self::$mIsCLI = true;
-            Log::addCallback($CLI);
+            static $logged = false;
+            if(!$logged)
+                Log::addCallback($CLI);
+            $logged = true;
         }
 
         self::$mHeaders = function_exists('getallheaders')

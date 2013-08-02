@@ -39,25 +39,23 @@ abstract class API implements IAPI {
 
     /** @var IAPIField[] */
     protected $mFields = array();
-    /** @var IRoute */
-    protected $mRoute=NULL;
 
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
-    abstract function execute(Array $request);
+    abstract function execute(IRoute $Route);
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
-     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
      */
-    public function executeAsResponse(Array $request) {
+    public function executeAsResponse(IRoute $Route) {
         try {
-            $Response = $this->execute($request);
+            $Response = $this->execute($Route);
             if($Response instanceof IResponseAggregate)
                 $Response = $Response->getResponse();
             if(!($Response instanceof IResponse))
@@ -70,24 +68,12 @@ abstract class API implements IAPI {
         return $Response;
     }
 
-    public function setRoute(IRoute $Route) {
-        $this->mRoute = $Route;
-    }
-
-    /**
-     * Get the route for this API
-     * @return IRoute
-     */
-    function getRoute() {
-        return $this->mRoute;
-    }
-
     /**
      * Sends headers, executes the request, and renders an IResponse as HTML
-     * @param array $request the request to execute
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderHTML(Array $request) {
+    public function renderHTML(IRoute $Route) {
         if(!headers_sent() && !Util::isCLI())
             header("Content-Type: text/html");
         $Render = new APIInfo();
@@ -98,13 +84,13 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as JSON
-     * @param array $request the request to execute
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderJSON(Array $request) {
+    public function renderJSON(IRoute $Route) {
         if(!headers_sent() && !Util::isCLI())
             header("Content-Type: application/json");
-        $Response = $this->executeAsResponse($request);
+        $Response = $this->executeAsResponse($Route);
         $Response->sendHeaders();
         $JSON = Util::toJSON($Response);
         echo json_encode($JSON);
@@ -112,13 +98,13 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as XML
-     * @param array $request the request to execute
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderXML(Array $request) {
+    public function renderXML(IRoute $Route) {
         if(!headers_sent() && !Util::isCLI())
             header("Content-Type: text/xml");
-        $Response = $this->executeAsResponse($request);
+        $Response = $this->executeAsResponse($Route);
         $Response->sendHeaders();
         $XML = Util::toXML($Response);
         echo $XML->asXML();
@@ -126,17 +112,22 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as Plain Text
-     * @param array $request the request to execute
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderText(Array $request) {
-        $Response = $this->executeAsResponse($request);
+    public function renderText(IRoute $Route) {
+        $Response = $this->executeAsResponse($Route);
         $Response->sendHeaders('text/plain');
         echo $Response."\n";
     }
 
-    public function renderDefault(Array $request) {
-        $this->renderText($request);
+    /**
+     * Renders via default method
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @return void
+     */
+    public function renderDefault(IRoute $Route) {
+        $this->renderText($Route);
     }
 
     /**
@@ -164,16 +155,17 @@ abstract class API implements IAPI {
 
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
-     * @param array $request the entire web request
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return array the processed and validated request data
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    public function processRequest(Array $request) {
-        if($this->mRoute && $arg = $this->mRoute->getNextArg()) {
+    public function processRequest(IRoute $Route) {
+        $request = $Route->getRequest();
+        if($Route && $arg = $Route->getNextArg()) {
             foreach($this->mFields as $name=>$Field) {
                 if($Field instanceof IAPIParam) {
                     $request[$name] = $arg;
-                    if(!$arg = $this->mRoute->getNextArg())
+                    if(!$arg = $Route->getNextArg())
                         break;
                 }
             }
@@ -197,26 +189,25 @@ abstract class API implements IAPI {
 
     /**
      * Render this API Call. The output format is based on the requested mimeType from the browser
-     * @param IRoute $Route the selected route including remaining arguments
+     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      */
     public function render(IRoute $Route) {
-        $this->mRoute = $Route;
         // Parse the request
         $request = $Route->getRequest();
 
         foreach(Util::getAcceptedTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $this->renderJSON($request);
+                    $this->renderJSON($Route);
                     return;
                 case 'text/xml':
-                    $this->renderXML($request);
+                    $this->renderXML($Route);
                     return;
                 case 'text/html':
-                    $this->renderHTML($request);
+                    $this->renderHTML($Route);
                     return;
                 case 'text/plain':
-                    $this->renderText($request);
+                    $this->renderText($Route);
                     return;
             }
         }

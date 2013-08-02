@@ -48,7 +48,7 @@ class PDOUpdate extends PDOWhere {
             $sql = $this->getSQL();
             $this->stmt = $this->DB->prepare($sql);
             if(Base::isDebug())
-                Log::v(__CLASS__, $sql);
+                Log::v2(__CLASS__, $sql);
         }
         if($this->values) $_values = array_merge($_values, $this->values);
         $this->stmt->execute($_values);
@@ -66,7 +66,7 @@ class PDOUpdate extends PDOWhere {
             .($this->limit ? "\nLIMIT ".$this->limit : "");
 
         if(Base::isDebug())
-            Log::v(__CLASS__, $SQL);
+            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }

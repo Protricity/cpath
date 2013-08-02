@@ -11,6 +11,8 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\SimpleAPI;
 use CPath\Interfaces\IHandlerSet;
+use CPath\Interfaces\IRoutable;
+use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IUserSession;
 use CPath\Log;
 use CPath\Model\DB\PDOModel;
@@ -177,8 +179,8 @@ class SessionManager {
      */
     public static function addHandlers(IUserSession $EmptyUser, IHandlerSet $Handlers)
     {
-        $Handlers->addHandler('POST login', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
-            $request = $API->processRequest($request);
+        $Handlers->addHandler('POST login', new SimpleAPI(function(API $API, IRoute $Route) use ($EmptyUser) {
+            $request = $API->processRequest($Route);
             $User = $EmptyUser::login($request['name'], $request['password']);
             return new Response("Logged in as user '".$User->getName()."' successfully", true, $User);
         }, array(
@@ -186,7 +188,7 @@ class SessionManager {
             'password' => new APIRequiredParam("Password")
         )));
 
-        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, Array $request) use ($EmptyUser) {
+        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, IRoute $Route) use ($EmptyUser) {
             $wasLoggedIn = $EmptyUser::logout();
             if($wasLoggedIn)
                 return new Response("Logged out successfully", true);

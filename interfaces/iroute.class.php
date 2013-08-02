@@ -16,6 +16,7 @@ class NoRoutesFoundException extends \Exception {}
 
 interface IRoute {
 
+    const METHODS = 'GET|POST|PUT|PATCH|DELETE|CLI';
     /**
      * Try's a route against a request path.
      * If the match is successful, this method processes the requestPath as input

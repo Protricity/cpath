@@ -12,5 +12,10 @@ interface IHandler {
     //const Route_Methods = 'GET|POST|...';
     //const Route_Path = NULL; //'/my/api/';
 
+    /**
+     * Render this handler
+     * @param IRoute $Route the IRoute instance for this render which contains the request and argss
+     * @return void
+     */
     function render(IRoute $Route);
 }

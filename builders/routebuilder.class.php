@@ -109,7 +109,9 @@ PHP;
 //            if($route['match'][strlen($route['match'])-1] != '/')
 //                $route['match'] .= '/';
         usort($this->mRoutes, function (IRoute $a, IRoute $b){
-            return substr_count($b->getPrefix(), '/')-substr_count($a->getPrefix(), '/');
+            $b = $b->getPrefix();
+            $a = $a->getPrefix();
+            return (substr_count($b, '/')-substr_count($a, '/')) * 100 + strcmp($a, $b);
         });
 
         $max = 0;
@@ -162,7 +164,7 @@ PHP;
         if(!$Class) $Class = $this->getCurrentClass();
         $methods = $Class->getConstant('Route_Methods') ?: 'GET|POST|CLI';
 
-        $allowed = explode('|', self::METHODS);
+        $allowed = explode('|', IRoute::METHODS);
         $methods = explode('|', $methods);
         foreach($methods as &$method) {
             $method = strtoupper($method);
@@ -213,6 +215,7 @@ PHP;
     // Statics
 
     public static function rebuildAPCCache() {
+        Log::e(__CLASS__, "Rebuilding APC Cache");
         $c = 0;
         $cache = apc_cache_info('user');
         if($cache)

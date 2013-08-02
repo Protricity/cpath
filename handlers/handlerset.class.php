@@ -61,18 +61,24 @@ class HandlerSet implements IHandlerSet {
      * Returns an IHandler instance by route
      * @param $route String the route associated with this handler
      * @return IHandler|NULL
+     * @throws InvalidRouteException if the route is not found
      */
     public function getHandler($route) {
-        return isset($this->mHandlers[$route]) ? $this->mHandlers[$route] : NULL;
+        if(!isset($this->mHandlers[$route]))
+            throw new InvalidRouteException("Route '{$route}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        return $this->mHandlers[$route];
     }
 
+    /**
+     * Render using the selected Handler in the set
+     * @param IRoute $Route
+     * @throws InvalidRouteException
+     */
     function render(IRoute $Route)
     {
         $route = $Route->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        if(!isset($this->mHandlers[$route]))
-            throw new InvalidRouteException("Route '{$route}' is missing invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
         $this->mHandlers[$route]->render($Route);
     }
 
@@ -86,7 +92,7 @@ class HandlerSet implements IHandlerSet {
         $Builder = new RouteBuilder();
         $defaultPath = $Builder->getHandlerDefaultPath(new \ReflectionClass($this->mSource));
         $routes = array();
-        $regex = '/^('.IRouteBuilder::METHODS.')( (\/)?(.*))?$/';
+        $regex = '/^('.IRoute::METHODS.')( (\/)?(.*))?$/';
         foreach($this->mHandlers as $route => $Handler) {
             //if($Handler instanceof IRoutable) {
             //    $routes = array_merge($routes, $Handler->getAllRoutes($Builder));
@@ -101,6 +107,18 @@ class HandlerSet implements IHandlerSet {
             $routes['GET api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $this->mSource);
         return $routes;
     }
+//
+//    // Implement IHandlerAggregate
+//
+//    /**
+//     * Returns an IHandler instance based on the currently selected Handler
+//     * @param String $route an optional route to retrieve the IHandler instance from the specified route
+//     * @return IHandler $Handler an IHandler instance
+//     */
+//    function getAggregateHandler($route=NULL)
+//    {
+//        return $this->getHandler($)
+//    }
 
     // Implement ArrayAccess
 
@@ -125,4 +143,5 @@ class HandlerSet implements IHandlerSet {
     // Implement IteratorAggregate
 
     public function getIterator() { return new \ArrayIterator($this->mHandlers); }
+
 }

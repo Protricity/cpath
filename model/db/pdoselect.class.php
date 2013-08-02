@@ -48,7 +48,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
     public function exec() {
         $sql = $this->getSQL();
         if(Base::isDebug())
-            Log::v(__CLASS__, $sql);
+            Log::v2(__CLASS__, $sql);
         $this->stmt = $this->DB
             ->prepare($sql);
         $this->stmt->execute($this->values);

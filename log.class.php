@@ -20,6 +20,8 @@ use CPath\Interfaces\ILogEntry;
  */
 abstract class Log {
 
+    const DEFAULT_LEVEL = LogVerbose::LEVEL;
+
     /** @var ILogEntry[] */
     //private static $mLog = array();
     /** @var ILogListener[] */
@@ -30,17 +32,23 @@ abstract class Log {
      * @param ILogEntry $Log the log entry to add
      */
     public static function add(ILogEntry $Log) {
-        //self::$mLog[] = $Log;
-        foreach(self::$mCallbacks as $i=>$call)
-            $call->onLog($Log);
+        $level = $Log::LEVEL;
+        /** @var ILogListener $call */
+        foreach(self::$mCallbacks as $l=>$calls)
+            if($l >= $level)
+                foreach($calls as $call)
+                    $call->onLog($Log);
     }
 
     /**
      * Add a logging callback to be performed until removeCallback() removes it
      * @param ILogListener $callback the callback to be performed
+     * @param int|NULL $level the level of log types this handler should receive.
      */
-    public static function addCallback(ILogListener $callback) {
-        self::$mCallbacks[] = $callback;
+    public static function addCallback(ILogListener $callback, $level=NULL) {
+        static $default = NULL;
+        if($level===NULL) $level = $default ?: Base::getConfig('log.level', self::DEFAULT_LEVEL);
+        self::$mCallbacks[$level][] = $callback;
     }
 
     /**
@@ -48,19 +56,30 @@ abstract class Log {
      * @param ILogListener $callback
      */
     public static function removeCallback(ILogListener $callback) {
-        foreach(self::$mCallbacks as $i=>$call)
-            if($call === $callback)
-                unset(self::$mCallbacks[$i]);
+        foreach(self::$mCallbacks as $l=>$calls)
+            foreach($calls as $i=>$call)
+                if($call === $callback)
+                    unset(self::$mCallbacks[$l][$i]);
     }
 
     /**
-     * Log a verbose message. These are messages meant for the developer to see.
+     * Log a verbose (level 1) message. These are messages meant for the developer to see.
      * @param $tag string tag associated with this log entry
      * @param $msg string verbose message to log
      */
     public static function v($tag, $msg) {
         if(func_num_args()>2) $msg = vsprintf($msg, array_slice(func_get_args(), 2));
         self::add(new LogVerbose((string)$tag, $msg));
+    }
+
+    /**
+     * Log a verbose (level 2) message. These are extra verbose messages meant for the developer to see.
+     * @param $tag string tag associated with this log entry
+     * @param $msg string verbose message to log
+     */
+    public static function v2($tag, $msg) {
+        if(func_num_args()>2) $msg = vsprintf($msg, array_slice(func_get_args(), 2));
+        self::add(new LogVerbose2((string)$tag, $msg));
     }
 
     /**
@@ -134,14 +153,17 @@ abstract class LogEntry implements ILogEntry {
         $xml->addAttribute('tag', $this->getTag());
     }
 }
-/** Class LogVerbose - a debug log entry for developers to see */
-class LogVerbose extends LogEntry {}
+/** Class LogVerbose - a verbose log entry for developers to see */
+class LogVerbose extends LogEntry { const LEVEL = 3; }
+/** Class LogVerbose2 - an extra verbose log entry for developers to see */
+class LogVerbose2 extends LogEntry { const LEVEL = 4; }
 /** Class LogUser - a status log entry for users to see */
-class LogUser extends LogEntry {}
+class LogUser extends LogEntry { const LEVEL = 2; }
 /** Class LogError - an error log entry */
-class LogError extends LogEntry {}
+class LogError extends LogEntry { const LEVEL = 1; }
 /** Class LogException - an exception log entry */
 class LogException extends LogError {
+    const LEVEL = 1;
     protected $mEx, $mTag;
     public function __construct($tag, \Exception $ex, $msg=NULL) {
         $this->mTag = $tag;

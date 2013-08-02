@@ -27,7 +27,7 @@ class PDODelete extends PDOWhere {
             $sql = $this->getSQL();
             $this->stmt = $this->DB->prepare($sql);
             if(Base::isDebug())
-                Log::v(__CLASS__, $sql);
+                Log::v2(__CLASS__, $sql);
         }
         $this->stmt->execute($this->values);
         return $this;
@@ -42,7 +42,7 @@ class PDODelete extends PDOWhere {
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
         if(Base::isDebug())
-            Log::v(__CLASS__, $SQL);
+            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }

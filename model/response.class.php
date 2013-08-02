@@ -56,8 +56,22 @@ class Response extends ArrayObject implements IResponse, ILogListener {
         return $this;
     }
 
-    function &getData() {
-        return $this->mData;
+    /**
+     * @param mixed|NULL $_args optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    function &getData($_args=NULL) {
+        if($_args===NULL)
+            return $this->mData;
+        $target = &$this->mData;
+        foreach(func_get_args() as $arg) {
+            if(!is_array($target) || !isset($target[$arg]))
+                throw new \InvalidArgumentException("Invalid data path at '{$arg}': " . implode('.', func_get_args()));
+            $target = &$target[$arg];
+        }
+        return $target;
     }
 
     function startLogging() {

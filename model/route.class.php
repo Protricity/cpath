@@ -10,6 +10,7 @@ use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IRoute;
+use CPath\Interfaces\InvalidHandlerException;
 use CPath\Util;
 
 /**
@@ -102,7 +103,7 @@ class Route implements IRoute {
         $dest = $this->mDestination;
         $Handler = new $dest;
         if($Handler instanceof IHandlerAggregate) {
-            $Handler = $Handler->getHandler();
+            $Handler = $Handler->getAggregateHandler();
         } else if($Handler instanceof IHandler) {
         } else {
             throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler or IHandlerAggregate");

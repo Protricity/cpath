@@ -10,7 +10,6 @@ namespace CPath\Interfaces;
 
 interface IRouteBuilder extends IBuilder {
 
-    const METHODS = 'GET|POST|PUT|DELETE|CLI';
     /**
      * Returns a list of allowed route methods associated with this class
      * @param \ReflectionClass $Class

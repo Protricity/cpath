@@ -11,9 +11,32 @@ use CPath\Util;
 interface IResponse extends IJSON,IXML {
     const STATUS_SUCCESS = 200;
     const STATUS_ERROR = 400;
+
+    /**
+     * Get the Response status code
+     * @return int
+     */
     function getStatusCode();
+
+    /**
+     * Get the IResponse Message
+     * @return String
+     */
     function getMessage();
-    function &getData();
+
+    /**
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException
+     */
+    function &getData($_path=NULL);
+
+    /**
+     * Send response headers for this request
+     * @param null $mimeType
+     * @return mixed
+     */
     function sendHeaders($mimeType=NULL);
 }
 

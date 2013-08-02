@@ -33,7 +33,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
         $R = new \ReflectionClass($apiClass);
         $Source = new $apiClass;
         if($Source instanceof IHandlerAggregate) {
-            $Handlers = $Source->getHandler();
+            $Handlers = $Source->getAggregateHandler();
         } else {
             print($apiClass. " does not implement IHandlerAggregate");
             return;

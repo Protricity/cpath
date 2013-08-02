@@ -15,11 +15,20 @@ class ResponseException extends \Exception implements IResponse {
 
     function getStatusCode() { return IResponse::STATUS_ERROR; }
 
-    function &getData()
+    /**
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    function &getData($_path=NULL)
     {
+        if($_path !== NULL)
+            throw new \InvalidArgumentException("Invalid data path: No data available");
         $arr = array();
         return $arr;
     }
+
     function sendHeaders($mimeType=NULL) {
         IResponseHelper::sendHeaders($this, $mimeType);
     }

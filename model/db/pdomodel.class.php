@@ -15,6 +15,7 @@ use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
@@ -185,22 +186,23 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @return IRoute[]
      */
     function getAllRoutes(IRouteBuilder $Builder) {
-        return $this->getHandler()->getAllRoutes($Builder);
+        return $this->getAggregateHandler()->getAllRoutes($Builder);
     }
 
     // Implement IHandlerAggregate
 
     /**
-     * @return HandlerSet a set of common api routes for this model
+     * Returns an IHandlerSet instance to represent this class
+     * @return IHandlerSet a set of common api routes for this model
      * @throws ValidationException
      * @throws ModelNotFoundException if no Model was found
      */
-    function getHandler() {
+    function getAggregateHandler() {
         $Handlers = new HandlerSet(get_called_class());
         $Source = $this;
         if(static::Primary) {
-            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, Array $request) use ($Source) {
-                $request = $API->processRequest($request);
+            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                $request = $API->processRequest($Route);
                 $Search = $Source::search();
                 $Search->where($Source::Primary, $request['id']);
                 $Source::limitAPIGet($Search);
@@ -214,8 +216,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::SearchKeys) {
-            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, Array $request) use ($Source) {
-                $request = $API->processRequest($request);
+            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                $request = $API->processRequest($Route);
                 $limit = $request['limit'];
                 if($limit < 1 || $limit > $Source::SearchLimitMax)
                     $limit = $Source::SearchLimit;
@@ -246,8 +248,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::Primary) {
-            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, Array $request) use ($Source) {
-                $request = $API->processRequest($request);
+            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                $request = $API->processRequest($Route);
                 $Search = $Source::search();
                 $Search->where($Source::Primary, $request['id']);
                 $Source::limitAPIRemove($Search);

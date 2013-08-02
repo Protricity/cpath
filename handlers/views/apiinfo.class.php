@@ -33,7 +33,7 @@ class APIInfo implements IHandler, ILogListener {
             die("No API Class passed to ".__CLASS__);
         $API = new $apiClass();
         if($API instanceof IHandlerAggregate) {
-            $API = $API->getHandler();
+            $API = $API->getAggregateHandler();
         }
         if(!($API instanceof IAPI)) {
             print($apiClass. " is not an instance of IAPI");

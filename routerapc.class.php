@@ -27,14 +27,14 @@ final class RouterAPC{
      * @return IRoute|NULL the found route or null if none found
      */
     public static function findRoute($routePath) {
-        if(Base::getConfig('build.inc') != apc_fetch(self::PREFIX . '.inc')) {
+        if(($inc = Base::getConfig('build.inc')) && ($inc != apc_fetch(self::PREFIX . '.inc'))) {
             RouteBuilder::rebuildAPCCache();
-            apc_store(self::PREFIX . '.inc', Base::getConfig('build.inc'));
+            apc_store(self::PREFIX . '.inc', $inc);
         }
         $route = $routePath;
         if(($max = Base::getConfig('route.max', 0)) && ($max < strlen($route))) {
-            $p = strrpos($route, '/', $max);
-            $route = substr($route, 0, $p);
+            if($p = strrpos($route, '/', $max))
+                $route = substr($route, 0, $p);
         }
         while(true) {
             $apcRoute = self::PREFIX_ROUTE.$route;
@@ -54,6 +54,7 @@ final class RouterAPC{
         }
         if($Route = Router::findRoute($routePath)) {
             Log::e(__CLASS__, "Error: APC Route Cache Failed. Had to fall back to CPath\\Router");
+            RouteBuilder::rebuildAPCCache();
             return $Route;
         }
         return NULL;

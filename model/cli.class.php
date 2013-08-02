@@ -9,6 +9,8 @@ namespace CPath\Model;
 
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\IRoute;
+use CPath\LogException;
 
 class CLI implements ILogListener {
 
@@ -29,7 +31,7 @@ class CLI implements ILogListener {
         if(!$args[0]) {
             $method = 'CLI';
         } else {
-            if(preg_match('/^get|post|cli$/i', $args[0])) {
+            if(preg_match('/^'.IRoute::METHODS.'$/i', $args[0])) {
                 $method = strtoupper(array_shift($args));
             } else {
                 $method = 'CLI';
@@ -85,5 +87,7 @@ class CLI implements ILogListener {
     function onLog(ILogEntry $log)
     {
         echo $log->getMessage(),"\n";
+        if($log instanceof LogException)
+            echo $log->getException();
     }
 }

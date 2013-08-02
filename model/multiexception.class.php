@@ -28,11 +28,18 @@ class MultiException extends ResponseException implements \Countable {
         return count($this->mEx);
     }
 
-    function &getData()
+    /**
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    function &getData($_path=NULL)
     {
-        $data = parent::getData();
-        //$data['errors'] = $this->mEx;
-        return $data;
+        if($_path !== NULL)
+            throw new \InvalidArgumentException("Invalid data path: No data available");
+        $arr = array();
+        return $arr;
     }
 
 

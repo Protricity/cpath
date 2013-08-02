@@ -12,7 +12,13 @@ use CPath\Interfaces\IArrayObject;
  */
 abstract class ArrayObject implements IArrayObject {
 
-    abstract public function &getData();
+    /**
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    abstract function &getData($_path=NULL);
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -83,7 +89,7 @@ abstract class ArrayObject implements IArrayObject {
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return \Traversable An instance of an object implementing <b>Iterator</b> or
      * <b>Traversable</b>
      */
     public function getIterator() {

@@ -57,7 +57,7 @@ abstract class PDOInsert {
             $sql = $this->getSQL();
             if(!$this->stmt) $this->stmt = $this->DB->prepare($sql);
             if(Base::isDebug())
-                Log::v(__CLASS__, $sql);
+                Log::v2(__CLASS__, $sql);
             $this->stmt->execute($_values);
         }
         return $this;
@@ -78,7 +78,7 @@ abstract class PDOInsert {
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
         if(Base::isDebug())
-            Log::v(__CLASS__, $SQL);
+            Log::v2(__CLASS__, $SQL);
         return $this;
     }
 
@@ -88,7 +88,7 @@ abstract class PDOInsert {
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
         $this->updateSQL($SQL);
         if(Base::isDebug())
-            Log::v(__CLASS__, $SQL);
+            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }

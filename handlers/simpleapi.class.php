@@ -8,6 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\IRoute;
 use CPath\Util;
 use CPath\Build;
 use CPath\Interfaces\IResponse;
@@ -28,9 +29,6 @@ class SimpleAPI extends API {
 
     const Build_Ignore = true;     // API Calls are built to provide routes
 
-    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
-    const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
-
     private $mCallback;
 
     /**
@@ -45,14 +43,14 @@ class SimpleAPI extends API {
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param array $request associative array of request Fields, usually $_GET or $_POST
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
      */
-    public function execute(Array $request){
+    public function execute(IRoute $Route){
         $call = $this->mCallback;
         if($call instanceof \Closure)
-            return $call($this, $request);
-        return call_user_func($call, $request);
+            return $call($this, $Route);
+        return call_user_func($call, $Route);
     }
 
 }
