@@ -8,7 +8,7 @@ body {
     margin: 0;
     padding: 0;
     font: 11px Arial, Helvetica, Geneva, sans-serif;
-    min-width: 600px;
+    min-width: 700px;
 }
 
 .field-table li {
@@ -26,7 +26,6 @@ body {
 
 .field-table li.field-item div {
     background-color: #fff;
-    height: 45px;
 }
 
 .field-table li.field-header div, .field-table li.field-footer div{
@@ -38,10 +37,11 @@ body {
 /* APIInfo */
 
 .field-table div.field-num { width: 10px; border-left: 1px solid #ccc; }
-.field-table div.field-name { width: 80px; }
+.field-table div.field-name { width: 120px; }
 .field-table div.field-description { width: 50%; min-width: 280px;  }
 .field-table div.field-input { width: 25%; min-width: 160px; }
-.field-table div.field-input input { width: 90%; }
+.field-table div.field-input input { width: 100%; margin: 0; padding: 0; border: 0; font: 11px Arial, Helvetica, Geneva, sans-serif; }
+.field-table li.field-item div.field-input { overflow-y: hidden;  }
 
 /* HandlerSetInfo */
 

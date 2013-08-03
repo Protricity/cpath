@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
+use CPath\Base;
 use CPath\Log;
 use CPath\Util;
 interface IResponse extends IJSON,IXML {
@@ -77,7 +78,7 @@ final class IResponseHelper {
 
     static function toString(IResponse $Response) {
         return
-            $Response->getStatusCode() . " " . $Response->getMessage() . "\n"
-            . print_r($Response->getData() ?: NULL, true);
+            $Response->getStatusCode() . " " . $Response->getMessage()
+            . (Base::isDebug() ? "\n" . print_r($Response->getData() ?: NULL, true) : ''); // TODO: IText
     }
 }

@@ -8,8 +8,10 @@
 namespace CPath\Interfaces;
 
 use CPath\Handlers\IAPIField;
+use CPath\Handlers\IAPIValidation;
+use CPath\Handlers\ValidationExceptions;
 
-interface IAPI extends IHandler, IRoutable {
+interface IAPI extends IHandler, IRoutable, IDescribable {
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -23,4 +25,27 @@ interface IAPI extends IHandler, IRoutable {
      * @return IAPIField[]
      */
     function getFields();
+
+    /**
+     * Add an API Field.
+     * @param string $name name of the Field
+     * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
+     * @return $this Return the class instance
+     */
+    function addField($name, IAPIField $Field);
+
+    /**
+     * Add a validation
+     * @param IAPIValidation $Validation the validation
+     * @return $this Return the class instance
+     */
+    function addValidation(IAPIValidation $Validation);
+
+    /**
+     * Process a request. Validates each Field. Provides optional Field formatting
+     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @return array the processed and validated request data
+     * @throws ValidationExceptions if one or more Fields fail to validate
+     */
+    public function processRequest(IRoute $Route);
 }

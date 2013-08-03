@@ -30,14 +30,17 @@ class SimpleAPI extends API {
     const Build_Ignore = true;     // API Calls are built to provide routes
 
     private $mCallback;
+    private $mDescription;
 
     /**
      * @param Callable $callback
      * @param APIField[] $fields
+     * @param String $description
      */
-    public function __construct($callback, Array $fields=array()) {
+    public function __construct($callback, Array $fields=array(), $description=NULL) {
         $this->mCallback = $callback;
         $this->addFields($fields);
+        $this->mDescription = $description;
     }
 
     /**
@@ -53,4 +56,12 @@ class SimpleAPI extends API {
         return call_user_func($call, $Route);
     }
 
+
+    /**
+     * Get the IAPI Description
+     * @return String description for this IAPI
+     */
+    function getDescription() {
+        return $this->mDescription ?: "No Description";
+    }
 }

@@ -39,6 +39,8 @@ abstract class API implements IAPI {
 
     /** @var IAPIField[] */
     protected $mFields = array();
+    /** @var IAPIValidation[] */
+    protected $mValidations = array();
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -154,6 +156,16 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Add a validation
+     * @param IAPIValidation $Validation the validation
+     * @return $this Return the class instance
+     */
+    function addValidation(IAPIValidation $Validation){
+        $this->mValidations[] = $Validation;
+        return $this;
+    }
+
+    /**
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return array the processed and validated request data
@@ -172,8 +184,7 @@ abstract class API implements IAPI {
         }
         $values = array();
         $FieldExceptions = new ValidationExceptions();
-        foreach($this->mFields as $name=>$Field)
-        {
+        foreach($this->mFields as $name=>$Field) {
             try {
                 $value = isset($request[$name]) ? $request[$name] : NULL;
                 $values[$name] = $Field->validate($value);
@@ -181,10 +192,20 @@ abstract class API implements IAPI {
                 $FieldExceptions->addFieldException($name, $ex);
             }
         }
+        $request = $values;
+
+        foreach($this->mValidations as $Validation) {
+            try {
+                $values = $Validation->validate($request);
+                if(is_array($values)) $request = $values;
+            } catch (ValidationException $ex) {
+                $FieldExceptions->addFieldException(null, $ex);  // TODO: null?
+            }
+        }
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
-        return $values;
+        return $request;
     }
 
     /**
@@ -233,26 +254,38 @@ abstract class API implements IAPI {
         return $routes;
     }
 }
-//
-//class APIRequest extends ArrayObject {
-//
-//    private $mRequest;
-//    private $mRoute;
-//
-//    public function __construct(Array $request, IRoute $Route=NULL) {
-//        $this->mRequest = $request;
-//        $this->mRoute = $Route;
-//    }
-//
-//    public function getRoute() {
-//        return $this->mRoute;
-//    }
-//
-//    public function &getData() {
-//        return $this->mRequest;
-//    }
-//}
 
+interface IAPIValidation {
+    /**
+     * Validate and return request
+     * @param $request array the pending request to validate
+     * @return array|null return the modified array or NULL if no changes were made
+     * @throws ValidationException if a validation exception occurred
+     */
+    function validate($request);
+}
+
+class APIValidation implements IAPIValidation {
+    protected $mCallback;
+    /**
+     * Create an APIValidation using a callback
+     * @param Callable $callback which accepts the $request for validation
+     */
+    function __construct($callback) {
+        $this->mCallback = $callback;
+    }
+
+    /**
+     * Validate and return request
+     * @param $request array the pending request to validate
+     * @return array|null return the modified array or NULL if no changes were made
+     * @throws ValidationException if a validation exception occurred
+     */
+    function validate($request) {
+        $call = $this->mCallback;
+        return $call($request);
+    }
+}
 /**
  * Class IAPIField
  * @package CPath

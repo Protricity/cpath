@@ -10,6 +10,7 @@ use CPath\Base;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
+use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\HandlerSet;
 use CPath\Handlers\SimpleAPI;
@@ -44,15 +45,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const Primary = null;
     Const Columns = null;
     Const Types = null;
-    const SearchKeys = null;
-    const SearchSKeys = null;
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
     const SearchAllowWildCard = false;   // true or false
 
-    const UpdateFields = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
-    const ExportFields = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Search = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Insert = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Update = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Export = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
 
     //protected $mRow = null;
     private $mCommit = NULL;
@@ -66,7 +67,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     }
 
-    public function setField($field, $value, $commit=true) {
+    public function setField($field, $value, $commit=true, $validate=NULL) {
+        if($validate !== NULL) {
+            $value = filter_var($value, $validate);
+            if (!$value)
+                throw new ValidationException("Field '%s' is not in the valid format");
+        }
         if(!$this->mCommit) $this->mCommit = array();
         if($this->$field == $value)
             return $this;
@@ -111,7 +117,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Returns an indexed array of field names for this object filtered by the tokens in constant ExportFields.
+     * Returns an indexed array of field names for this object filtered by the tokens in constant Export.
      * @param $tokens String the filter to use
      * @return Array
      */
@@ -133,9 +139,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             case 'None':
                 return array();
             case 'Index':
-                return explode(',', static::SearchKeys);
+                return explode(',', static::Search);
             case 'SPIndex':
-                return explode(',', (static::Primary ? static::Primary.',' : '') . static::SearchSKeys);
+                if(static::Primary)
+                    return array_merge((array)static::Primary, self::getStringSearchFields());
+                return self::getStringSearchFields();
             case 'Primary':
                 return (array)static::Primary;
             case 'Exclude':
@@ -154,17 +162,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Returns an associative array of fields and values for this object filtered by the tokens in constant ExportFields.
+     * Returns an associative array of fields and values for this object filtered by the tokens in constant Export.
      * Defaults to just primary key, if exists.
-     * Modify const ExportFields to change what data gets exported
+     * Modify const Export to change what data gets exported
      * @return Array
      */
     public function getExportData()
     {
-        if(!static::ExportFields)
+        if(!static::Export)
             return array();
         $export = array();
-        foreach($this->getFieldList(static::ExportFields) as $f)
+        foreach($this->getFieldList(static::Export) as $f)
             $export[$f] = $this->$f;
         return $export;
     }
@@ -197,15 +205,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Returns an IHandlerSet instance to represent this class
-     * @return IHandlerSet a set of common api routes for this model
+     * @return PDOAPIHandlerSet a set of common api routes for this model
      * @throws ValidationException
      * @throws ModelNotFoundException if no Model was found
      */
     function getAggregateHandler() {
-        $Handlers = new HandlerSet(get_called_class());
+        $Handlers = new PDOAPIHandlerSet(get_called_class());
         $Source = $this;
         if(static::Primary) {
-            $Handlers->addHandler('GET', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+            $Handlers->addAPI('GET', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                 $request = $API->processRequest($Route);
                 $Search = $Source::search();
                 $Search->where($Source::Primary, $request['id']);
@@ -216,11 +224,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 return $data;
             }, array(
                 'id' => new APIRequiredParam($this->getModelName()." ID"),
-            )));
+            ), "Get information about this ".$this->getModelName()));
         }
 
-        if(static::SearchKeys) {
-            $Handlers->addHandler('GET search', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+        if(static::Search) {
+            $Handlers->addAPI('GET search', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                 $request = $API->processRequest($Route);
                 $limit = $request['limit'];
                 if($limit < 1 || $limit > $Source::SearchLimitMax)
@@ -234,9 +242,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 }
 
                 if($by = ($request['search_by'])) {
-                    $keys = explode(',', $Source::SearchKeys);
+                    $keys = explode(',', $Source::Search);
                     if(!in_array($by, $keys))
-                        throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::SearchKeys."]");
+                        throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::Search."]");
 
                     $Search = $Source::searchByField($Source::SearchAllowWildCard ? $by . ' LIKE ' : $by, $search, $limit);
                 }
@@ -247,23 +255,38 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 return new Response("Found (".sizeof($data).") ".$Source::getModelName()."(s)", true, $data);
             }, array(
                 'search' => new APIRequiredParam("Search for ".$Source::getModelName()),
-                'search_by' => new APIParam("Search by field. Allowed: [".static::SearchKeys."]"),
+                'search_by' => new APIParam("Search by field. Allowed: [".static::Search."]"),
                 'limit' => new APIField("The Number of fields to return. Max=".static::SearchLimitMax),
-            )));
+            ), "Search for a ".$this->getModelName() ));
+        }
+
+        $fields = array();
+        foreach($this->getFieldList(static::Insert) as $field)
+            if($field != static::Primary)
+                $fields[$field] = new APIRequiredField($Source->getModelName() . " " . $field);
+
+        if($fields) {
+            $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                $request = $API->processRequest($Route);
+                $Model = $Source::createFromArray($request);
+                $id = '';
+                if($field = $Source::Primary)
+                    $id = " '" . $Model->$field . "'";
+                return new Response("Created " . $Source::getModelName() . "{$id} Sucessfully.", true, $Model);
+            }, $fields, "Create a new ".$this->getModelName()));
         }
 
         if(static::Primary) {
             $fields = array();
             $fields[static::Primary] = new APIRequiredParam("ID of the " . $Source->getModelName() . " to be updated");
-            foreach($this->getFieldList(static::UpdateFields) as $field)
+            foreach($this->getFieldList(static::Update) as $field)
                 if($field != static::Primary)
                     $fields[$field] = new APIField("Update " . $Source->getModelName() . " " . $field);
             if(sizeof($fields) > 1) {
-                $Handlers->addHandler('PATCH', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+                $Handlers->addAPI('PATCH', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                     $request = $API->processRequest($Route);
                     $id = $request[$Source::Primary];
                     unset($request[$Source::Primary]);
-
 
                     $Search = $Source::search();
                     $Search->where($Source::Primary, $id);
@@ -287,11 +310,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                         return new Response("No fields were updated for " . $Source::getModelName()." '{$id}'.", true, $Model);
                     return new Response("Updated {$c} Field(s) for " . $Source::getModelName()." '{$id}'.", true, $Model);
 
-                }, $fields));
+                }, $fields, "Update a ".$this->getModelName()));
             }
 
 
-            $Handlers->addHandler('DELETE', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+            $Handlers->addAPI('DELETE', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                 $request = $API->processRequest($Route);
                 $Search = $Source::search();
                 $Search->where($Source::Primary, $request['id']);
@@ -304,7 +327,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
             }, array(
                 'id' => new APIRequiredParam($Source->getModelName()." ID"),
-            )));
+            ), "Delete a ".$this->getModelName()));
         }
 
         return $Handlers;
@@ -330,7 +353,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 if($value !== NULL && $value !== "") {
                     $call = 'set' . str_replace('_', '', $field);
                     try {
-                        $ValidModel->$call($value, false);
+                        if(method_exists($ValidModel, $call))
+                            $ValidModel->$call($value, false);
                     } catch (ValidationException $ex) {
                         throw $ex->updateMessage($field);
                     }
@@ -511,15 +535,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @throws \Exception if the model does not contain index keys
      */
     public static function searchByAnyIndex($search, $limit=1, $compare=NULL) {
-        if(!static::SearchKeys)
+        if(!static::Search)
             throw new \Exception("No Indexes defined in ".static::getModelName());
          $Select = static::search();
 
         $i = 0;
         if(is_numeric($search))
-            $keys = explode(',', static::SearchKeys);
+            $keys = explode(',', static::Search);
         else
-            $keys = explode(',', static::SearchSKeys);
+            $keys = static::getStringSearchFields();
 
         foreach($keys as $key){
             if($i++) $Select->where('OR');
@@ -583,6 +607,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     public static function getModelName() {
         return basename(get_called_class());
+    }
+
+    private static function getStringSearchFields() {
+        $columns = explode(',', static::Columns);
+        $search = explode(',', static::Search);
+        $fields = array();
+        $types = static::Types;
+        foreach($columns as $i => $col)
+            if($types[$i] != 'i' && in_array($col, $search))
+                $fields[] = $col;
+        return $fields;
     }
 }
 

@@ -67,8 +67,9 @@ class APIInfo implements IHandler, ILogListener {
     </head>
     <body>
     <h1><?php echo $route."<br />"; ?></h1>
+    <h2><?php echo $API->getDescription(); ?></h2>
     <h3>Params:</h3>
-    <form class="field-form">
+    <form class="field-form" onsubmit="jQuery(this).find('input[type=button]:first').click(); return false;">
         <ul class='field-table'>
             <li class='field-header clearfix'>
                 <div class='field-num'>#</div>
@@ -88,7 +89,7 @@ class APIInfo implements IHandler, ILogListener {
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
                     <div class='field-description'><?php echo $Field->getDescription(); ?></div>
-                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo preg_replace('/[^\w _-]/', '', $_GET[$name]); ?>' /></div>
+                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo preg_replace('/[^\w _-]/', '', $_GET[$name]); ?>' placeholder='Enter value for <?php echo $name; ?>' /></div>
                 </li>
             <?php } ?>
             <li class='field-footer clearfix'>

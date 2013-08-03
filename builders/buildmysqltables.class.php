@@ -27,29 +27,41 @@ class %s extends MySQLTable {
 PHP;
 
 
+    /**
+     * @param \PDO $DB
+     * @return BuildPDOTable[]
+     */
     protected function getTables(\PDO $DB){
         $tables = array();
-        foreach($DB->query("SHOW TABLES") as $row) {
-            $tables[] = array_pop($row);
+        foreach($DB->query("SHOW TABLE STATUS") as $row) {
+            $tables[] = new BuildPDOTable($row['Name'], $row['Comment']);
         }
         return $tables;
     }
 
-    protected function getIndexes(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
-        $indexCols = array();
+    /**
+     * @param \PDO $DB
+     * @param $table
+     * @param BuildPDOColumn[] $cols
+     * @return void
+     */
+    protected function getIndexes(\PDO $DB, $table, Array &$cols) {
         foreach($DB->query("SHOW KEYS FROM `{$table}`;") as $row) {
             $name = $row['Column_name'];
-            if(stripos($row['Key_name'], 'PRIMARY') === 0) {
-                $primaryCol = $name;
-            }
-            $indexCols[] = $name;
+            $cols[$name]->Index = true;
+            if(stripos($row['Key_name'], 'PRIMARY') === 0)
+                $cols[$name]->Primary = true;
         }
-        return $indexCols;
     }
 
-    protected function getColumns(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc) {
+    /**
+     * @param \PDO $DB
+     * @param $table
+     * @return BuildPDOColumn[]
+     */
+    protected function getColumns(\PDO $DB, $table) { // , &$primaryCol, &$primaryAutoInc
         $cols = array();
-        foreach($DB->query("SHOW COLUMNS FROM `$table`;") as $row) {
+        foreach($DB->query("SHOW FULL COLUMNS FROM `$table`;") as $row) {
             $name = $row['Field'];
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
                 $enum = array();
@@ -59,9 +71,10 @@ PHP;
             } else {
                 $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
             }
-            $cols[$name] = $type;
-            if($name == $primaryCol && $row['Extra'] != 'auto_increment')
-                $primaryAutoInc = false;
+            $cols[$name] = new BuildPDOColumn($name, $type, $row['Comment'], $row['Extra'] == 'auto_increment');
+//            $cols[$name] = $type;
+//            if($name == $primaryCol && $row['Extra'] != 'auto_increment')
+//                $primaryAutoInc = false;
         }
         return $cols;
     }

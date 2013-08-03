@@ -75,7 +75,7 @@ PHP;
 PHP;
 
     const TMPL_SETPROP = <<<'PHP'
-	function set%s($value, $commit=true) { return $this->setField('%s', $value, $commit); }
+	function set%s($value, $commit=true) { return $this->setField('%s', $value, $commit%s); }
 
 PHP;
 
@@ -136,9 +136,26 @@ PHP;
         Log::v(__CLASS__, "Upgraded Database from version $oldVersion to $curVersion.");
     }
 
+    /**
+     * @param \PDO $DB
+     * @return BuildPDOTable[]
+     */
     protected abstract function getTables(\PDO $DB);
-    protected abstract function getColumns(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc);
-    protected abstract function getIndexes(\PDO $DB, $table, &$primaryCol, &$primaryAutoInc);
+
+    /**
+     * @param \PDO $DB
+     * @param $table
+     * @return BuildPDOColumn[]
+     */
+    protected abstract function getColumns(\PDO $DB, $table); // , &$primaryCol, &$primaryAutoInc
+
+    /**
+     * @param \PDO $DB
+     * @param $table
+     * @param BuildPDOColumn[] $cols
+     * @return void
+     */
+    protected abstract function getIndexes(\PDO $DB, $table, Array &$cols); //, &$primaryCol, &$primaryAutoInc);
 
 
     protected abstract function getProcs(\PDO $DB);
@@ -196,74 +213,86 @@ PHP;
         if(in_array($BUILD, array('ALL', 'MODEL')))
             $tables = $this->getTables($DB);
 
-        foreach($tables as $table) {
-            $ucTable = str_replace(' ', '_', ucwords(str_replace('_', ' ', $table)));
-            $primaryCol = null;
-            $primaryAutoInc = false;
-            $indexCols = $this->getIndexes($DB, $table, $primaryCol, $primaryAutoInc);
-            $cols = $this->getColumns($DB, $table, $primaryCol, $primaryAutoInc);
-            $enums = array();
-            $types = '';
-            foreach($cols as $name=>$type) {
-                if(is_array($type)) {
-                    $types .= 'e';
-                    $enums[$name] = $type;
-                } else {
-                    $types .= $type;
-                }
-            }
-            $searchSKeys = array();
-            $cols = array_keys($cols);
-            $order = array();
-            foreach($cols as $i=>$name) {
-                if(in_array($name, $indexCols)) {
-                    $order[] = $name;
-                    if($types[$i] == 's')
-                        $searchSKeys[] = $name;
-                }
-            }
-            $indexCols = $order;
-            $file = strtolower($table).'.class.php';
+        foreach($tables as $Table) {
+            $shortTable = str_replace(' ', '', ucwords(str_replace('_', ' ', $Table->Name)));
 
-            // Static Table
+            /** @var BuildPDOColumn[] $cols  */
+            $cols = $this->getColumns($DB, $Table->Name);
+            $this->getIndexes($DB, $Table->Name, $cols);
 
-//            $php = $this->getConst('TableName', $table);
-//            $php .= $this->getConst('Primary', $primaryCol);
-//            foreach($cols as $name)
-//                $php .= $this->getConst(strtoupper($name), $name);
-//            //$php .= $this->getInsert($table, $cols);
-//            $php = sprintf(static::TMPL_TABLE_CLASS, $tableNS, $ucTable, $php);
-//            file_put_contents($tablePath.$file, $php);
-//            $i = array_search($file, $oldFiles);
-//            unset($oldFiles[$i]);
+            $file = strtolower($shortTable).'.class.php';
 
             // Model
 
-            $php = $this->getConst('TableName', $table);
-            $php .= $this->getConst('Primary', $primaryCol);
-            $php .= $this->getConst('Columns', implode(',', $cols));
-            $php .= $this->getConst('Types', $types);
-            if($indexCols) {
-                $php .= $this->getConst('SearchKeys', implode(',', $indexCols));
-                $php .= $this->getConst('SearchSKeys', implode(',', $searchSKeys));
+            $php = $this->getConst('TableName', $Table->Name);
+            $primaryCol = NULL;
+            foreach($cols as $Column) {
+                if($Column->Primary) {
+                    $primaryCol = $Column->Name;
+                    break;
+                }
             }
-            $php .= "\n";
-            foreach($cols as $name)
-                $php .= $this->getConst(strtoupper($name), $name);
-            $php .= "\n";
-            foreach($cols as $name)
-                $php .= sprintf(self::TMPL_PROP, $name);
-            foreach($cols as $name)
-                $php .= $this->propGetSet($name, $name == $primaryCol);
+            $php .= $this->getConst('Primary', $primaryCol);
 
-            foreach ($enums as $name=>$enum)
-                $php .= $this->enumGet($name, $enum);
+            $colNames = array();
+            foreach($cols as $Column)
+                $colNames[] = $Column->Name;
+            $php .= $this->getConst('Columns', implode(',', $colNames));
 
-            //$php .= $this->getCreate($primaryAutoInc ? array_diff($cols, (array)$primaryCol) : $cols);
-            //if($indexCols)
-            //    $php .= $this->getSearch($primaryAutoInc ? array_diff($indexCols, (array)$primaryCol) : $indexCols);
-            $php .= $this->getDelete($ucTable);
-            $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $ucTable, $php);
+            $comments = array();
+            foreach($cols as $Column)
+                $comments[] = $Column->Comment;
+            $php .= $this->getConst('Comments', implode(';', $comments));
+
+            $types = '';
+            $InsertFields = array();
+            $UpdateFields = array();
+            $SearchFields = array();
+            $ExportFields = array();
+            //$FilterFields = array();
+            //$filterFound = false;
+            foreach($cols as $Column) {
+                if($Column->Insert) $InsertFields[] = $Column->Name;
+                if($Column->Update) $UpdateFields[] = $Column->Name;
+                if($Column->Search) $SearchFields[] = $Column->Name;
+                if($Column->Export) $ExportFields[] = $Column->Name;
+                //$FilterFields[] = $Column->Filter;
+                //if($Column->Filter) $filterFound = true;
+                $types .= $Column->Type;
+            }
+            if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
+            if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
+            if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
+            if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
+
+            if(!$SearchFields)
+                foreach($cols as $Column)
+                    if($Column->Index)
+                        $SearchFields[] = $Column->Name;
+
+            $php .= $this->getConst('Types', $types);
+
+            if($InsertFields) $php .= $this->getConst('Insert', implode(',', $InsertFields));
+            if($UpdateFields) $php .= $this->getConst('Update', implode(',', $UpdateFields));
+            if($SearchFields) $php .= $this->getConst('Search', implode(',', $SearchFields));
+            if($ExportFields) $php .= $this->getConst('Export', implode(',', $ExportFields));
+            //if($filterFound)  $php .= $this->getConst('Filter', implode(',', $FilterFields));
+
+            $php .= "\n";
+            foreach($cols as $Column)
+                $php .= $this->getConst(strtoupper($Column->Name), $Column->Name);
+            $php .= "\n";
+            foreach($cols as $Column)
+                $php .= sprintf(self::TMPL_PROP, $Column->Name);
+            foreach($cols as $Column)
+                $php .= $this->propGetSet($Column->Name, $Column->Primary, $Column->Filter);
+
+            foreach($cols as $Column)
+                if($Column->Enum)
+                    $php .= $this->enumGet($Column->Name, $Column->Enum);
+
+            $php .= $this->getDelete($shortTable);
+            $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $shortTable, $php);
             file_put_contents($modelPath.$file, $php);
 
         }
@@ -342,11 +371,11 @@ PHP;
             '$'.implode(', $', $params));
     }
 
-    private function propGetSet($name, $justGet=false) {
+    private function propGetSet($name, $justGet=false, $filter=NULL) {
         $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
         $php = sprintf(self::TMPL_GETPROP, $ucName, strtolower($name));
         if(!$justGet)
-            $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name));
+            $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name), ($filter ? ', '.$filter : ''));
         return $php;
     }
 
@@ -368,8 +397,103 @@ PHP;
             !$indexs ? '' : '$'.implode('=null, $', $indexs).'=null');
     }
 
-    private function getDelete($name) {
-        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
-        return sprintf(self::TMPL_DELETE, $name, $ucName, $ucName);
+    private function getDelete($shortTable) {
+        return sprintf(self::TMPL_DELETE, $shortTable, $shortTable, $shortTable);
+    }
+}
+
+class BuildPDOColumn {
+    public $Name, $Type, $Comment, $AutoInc, $Primary, $Enum, $Index, $Insert, $Update, $Search, $Export, $Filter=NULL;
+    public function __construct($name, $type, $comment, $autoInc=false) {
+        if(is_array($type)) {
+            $this->Enum = $type;
+            $type = 'e';
+        }
+        $this->Name = $name;
+        $this->Type = $type;
+        $Column = $this;
+        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', function(array $matches) use ($Column) {
+            foreach(explode('|', $matches[1]) as $field) {
+                $args = explode(':', $field, 2);
+                switch(strtolower($args[0])) {
+                    case 'i':
+                    case 'insert':
+                        $Column->Insert = true;
+                        break;
+                    case 'u':
+                    case 'update':
+                        $Column->Update = true;
+                        break;
+                    case 's':
+                    case 'search':
+                        $Column->Search = true;
+                        break;
+                    case 'e':
+                    case 'export':
+                        $Column->Export = true;
+                        break;
+                    case 'c':
+                    case 'comment':
+                        if(isset($args[1]))
+                            $Column->Comment = $args[1];
+                        break;
+                    case 'f':
+                    case 'filter':
+                        if(isset($args[1])) {
+                            $fArgs = explode(':', $args[1]);
+                            if(!is_numeric($fArgs[0])) $fArgs[0] = constant($fArgs[0]);
+                            $Column->Filter |= $fArgs[0];
+                        }
+                        break;
+                }
+            }
+            return '';
+        }, $comment);
+        if(!$this->Comment)
+            $this->Comment = $comment;
+        if($this->Comment)
+            $this->Comment = str_replace(';', ':', $this->Comment);
+        $this->AutoInc = $autoInc;
+    }
+}
+
+class BuildPDOTable {
+    public $Name, $Comment, $Insert, $Update, $Search, $Export;
+    public function __construct($name, $comment) {
+        $this->Name = $name;
+        $Table = $this;
+        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', function(array $matches) use ($Table) {
+            foreach(explode('|', $matches[1]) as $field) {
+                $args = explode(':', $field, 2);
+                switch(strtolower($args[0])) {
+                    case 'i':
+                    case 'insert':
+                        if(isset($args[1])) $Table->Insert = $args[1];
+                        break;
+                    case 'u':
+                    case 'update':
+                        if(isset($args[1])) $Table->Update = $args[1];
+                        break;
+                    case 's':
+                    case 'search':
+                        if(isset($args[1])) $Table->Search = $args[1];
+                        break;
+                    case 'e':
+                    case 'export':
+                        if(isset($args[1])) $Table->Export = $args[1];
+                        break;
+                    case 'c':
+                    case 'comment':
+                        if(isset($args[1]))
+                            $Table->Comment = $args[1];
+                        break;
+                }
+            }
+            return '';
+        }, $comment);
+        if(!$this->Comment)
+            $this->Comment = $comment;
+        if($this->Comment)
+            $this->Comment = str_replace(';', ':', $this->Comment);
     }
 }

@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 class HandlerSetException extends \Exception {}
 
-interface IHandlerSet extends IHandler, IRoutable, \ArrayAccess {
+interface IHandlerSet extends IHandler, IRoutable, \ArrayAccess, \IteratorAggregate {
     /**
      * Adds an IHandler to the set by route
      * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)

@@ -60,7 +60,7 @@ class HandlerSet implements IHandlerSet {
     /**
      * Returns an IHandler instance by route
      * @param $route String the route associated with this handler
-     * @return IHandler|NULL
+     * @return IHandler
      * @throws InvalidRouteException if the route is not found
      */
     public function getHandler($route) {
@@ -87,7 +87,7 @@ class HandlerSet implements IHandlerSet {
         $route = $Route->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $this->mHandlers[$route]->render($Route);
+        $this->getHandler($route)->render($Route);
     }
 
     /**
@@ -111,8 +111,7 @@ class HandlerSet implements IHandlerSet {
             else $path = !empty($matches[3]) ? $matches[4] : $defaultPath . '/' .$matches[4];
             $routes[$route] = new Route($matches[1] . ' ' . $path, $this->mSource, $route);
         }
-        //if(!isset($routes['GET']))
-            $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $this->mSource);
+        $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $this->mSource);
         return $routes;
     }
 //
