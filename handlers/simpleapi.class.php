@@ -7,17 +7,12 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Interfaces\IResponseHelper;
-use CPath\Interfaces\IRoute;
-use CPath\Util;
 use CPath\Build;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IHandler;
-use CPath\Model\MultiException;
-use CPath\Model\Response;
-use CPath\Model\ResponseException;
 use CPath\Builders\RouteBuilder;
-use CPath\Handlers\API\View\APIInfo;
+use CPath\Interfaces\IResponse;
+use CPath\Interfaces\IRoute;
+use CPath\Model\Response;
+use CPath\Util;
 
 /**
  * Class SimpleAPI

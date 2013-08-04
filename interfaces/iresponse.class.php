@@ -34,6 +34,12 @@ interface IResponse extends IJSON,IXML {
     function &getData($_path=NULL);
 
     /**
+     * Add a log entry to the response
+     * @param ILogEntry $Log
+     */
+    function addLogEntry(ILogEntry $Log);
+
+    /**
      * Send response headers for this request
      * @param null $mimeType
      * @return mixed

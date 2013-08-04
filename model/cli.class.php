@@ -51,13 +51,11 @@ class CLI implements ILogListener {
             if($arg === '')
                 return;
             if($arg[0] == '-') {
-                if($arg[$i+1]) {
-                    if($arg[$i+1][0] == '-')
-                        $val = true;
-                    else
-                        $val = $args[++$i];
-                    $this->mRequest[ltrim($arg, '- ')] = $val;
-                }
+                $val = true;
+                if(!empty($args[$i+1]) && $args[$i+1][0] !== '-')
+                    $val = $args[++$i];
+
+                $this->mRequest[ltrim($arg, '- ')] = $val;
             } else {
                 $args2[] = $arg;
             }

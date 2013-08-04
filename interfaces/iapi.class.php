@@ -42,6 +42,13 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
     function addValidation(IAPIValidation $Validation);
 
     /**
+     * Enable or disable logging for this IAPI
+     * @param bool $enable set true to enable and false to disable
+     * @return $this Return the class instance
+     */
+    function captureLog($enable=true);
+
+    /**
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return array the processed and validated request data

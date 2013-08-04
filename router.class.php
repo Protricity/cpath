@@ -58,7 +58,7 @@ final class Router{
     private static function processDefaults(IRoute $Route, Array $defaults) {
         foreach($defaults as $def) {
             if(is_array($def))
-                $Route->addRequest($def);
+                $Route->setRequest($def);
             else
                 $Route->addArg($def);
         }

@@ -36,6 +36,6 @@ class MissingRoute implements IRoute{
     function getPrefix() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getDestination() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getNextArg() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
-    function addRequest(Array $request) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function setRequest(Array $request) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getRequest() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
 }

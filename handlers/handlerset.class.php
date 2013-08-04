@@ -82,8 +82,7 @@ class HandlerSet implements IHandlerSet {
      * @param IRoute $Route
      * @throws InvalidRouteException
      */
-    function render(IRoute $Route)
-    {
+    function render(IRoute $Route) {
         $route = $Route->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));

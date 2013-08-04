@@ -43,6 +43,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     const FieldPassword = NULL;
     const FieldFlags = NULL;
 
+    const CacheEnabled = true;
 
     const SessionClass = NULL;
 
@@ -263,5 +264,4 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $class = static::SessionClass;
         return $class::destroySession();
     }
-
 }

@@ -83,7 +83,7 @@ class Console implements IHandler {
                     $Cli = new CLI($args);
                     try{
                         $Route = Base::findRoute($Cli->getRoute());
-                        $Route->addRequest($Cli->getRequest());
+                        $Route->setRequest($Cli->getRequest());
                         $Route->render();
                     } catch (\Exception $ex) {
                         echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";

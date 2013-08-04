@@ -33,7 +33,7 @@ class ApiTester {
      */
     public function test(Array $request=NULL) {
         if($request)
-            $this->mRoute->addRequest($request);
+            $this->mRoute->setRequest($request);
         $Response = $this->mAPI->execute($this->mRoute);
         if(!($Response instanceof IResponse))
             $Response = new Response(true, "API executed successfully", $Response);
@@ -45,7 +45,7 @@ class ApiTester {
     static function fromCMD($_cmd) {
         $Cli = new CLI(is_array($_cmd) ? $_cmd : func_get_args());
         $Route = Base::findRoute($Cli->getRoute());
-        $Route->addRequest($Cli->getRequest());
+        $Route->setRequest($Cli->getRequest());
         $Api = $Route->getHandler();
         if($Api instanceof IHandlerSet)
             $Api = $Api->getHandler($Route->getNextArg());

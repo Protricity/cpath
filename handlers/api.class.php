@@ -13,7 +13,10 @@ use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
+use CPath\Misc\SimpleLogger;
 use CPath\Model\ArrayObject;
+use CPath\Model\AutoLoader\SimpleLoader;
+use CPath\Model\ExceptionResponse;
 use CPath\Model\Route;
 use CPath\Util;
 use CPath\Build;
@@ -32,15 +35,18 @@ use CPath\Builders\RouteBuilder;
  */
 abstract class API implements IAPI {
 
-    const Build_Ignore = false;     // API Calls are built to provide routes
+    const Build_Ignore = false;             // API Calls are built to provide routes
+    const Enable_Logging = true;            // Enable API Logging
 
-    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
-    const Route_Path = NULL;        // No custom route path. Path is based on namespace + class name
+    const Route_Methods = 'GET|POST|CLI';   // Default accepted methods are GET and POST
+    const Route_Path = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IAPIField[] */
     protected $mFields = array();
     /** @var IAPIValidation[] */
     protected $mValidations = array();
+    /** @var SimpleLogger */
+    private $mLog = NULL;
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -56,18 +62,34 @@ abstract class API implements IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     public function executeAsResponse(IRoute $Route) {
+        if(static::Enable_Logging)
+            $this->mLog = new SimpleLogger(true);
         try {
             $Response = $this->execute($Route);
             if($Response instanceof IResponseAggregate)
                 $Response = $Response->getResponse();
             if(!($Response instanceof IResponse))
                 $Response = new Response(true, "API executed successfully", $Response);
-        } catch (ResponseException $ex) {
-            $Response = $ex;
         } catch (\Exception $ex) {
-            $Response = new ResponseException($ex->getMessage(), null, $ex);
+            $Response = new ExceptionResponse($ex);
+        }
+        if(static::Enable_Logging) {
+            foreach($this->mLog->getLogs() as $Log)
+                $Response->addLogEntry($Log);
+            unset($this->mLog);
         }
         return $Response;
+    }
+
+    /**
+     * Enable or disable logging for this IAPI
+     * @param bool $enable set true to enable and false to disable
+     * @param int|NULL $level the log level to capture
+     * @return $this Return the class instance
+     */
+    function captureLog($enable=true, $level=NULL) {
+        if($this->mLog)
+            $this->mLog->capture($enable, $level=NULL);
     }
 
     /**
@@ -324,6 +346,10 @@ class ValidationException extends \Exception {
         return sprintf($this->getMessage(), $fieldName);
     }
 
+    /**
+     * @param $fieldName
+     * @return ValidationException
+     */
     public function updateMessage($fieldName) {
         $this->message = $this->getFieldError($fieldName);
         return $this;

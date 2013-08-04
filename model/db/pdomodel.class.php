@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 use CPath\Base;
+use CPath\Cache;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
@@ -39,7 +40,7 @@ class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate, IRoutable {
     const Build_Ignore = true; // TODO: Title case
-    const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    //const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
     const ModelName = null;
@@ -51,6 +52,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const SearchLimitMax = 100;
     const SearchLimit = 25;
     const SearchWildCard = false;   // true or false
+
+    const CacheEnabled = false;
+    const CacheTTL = 300;
 
     const Search = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
     const Insert = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
@@ -88,8 +92,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     public function commitFields() {
         if(!($primary = static::Primary))
             throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
+        $id = $this->$primary;
         if(!$this->mCommit) {
-            Log::u(get_called_class(), "No Fields Updated for ".static::getModelName()." '{$this->$primary}'");
+            Log::u(get_called_class(), "No Fields Updated for ".static::getModelName()." '{$id}'");
             return 0;
         }
         $set = '';
@@ -98,11 +103,13 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             $set .= ($set ? ",\n\t" : '') . "{$field} = ".$DB->quote($value);
         $SQL = "UPDATE ".static::TableName
             ."\n SET {$set}"
-            ."\n WHERE ".static::Primary." = ".$DB->quote($this->$primary);
+            ."\n WHERE ".static::Primary." = ".$DB->quote($id);
         $DB->exec($SQL);
-        Log::u(get_called_class(), "Updated ".static::getModelName()." '{$this->$primary}'");
+        Log::u(get_called_class(), "Updated ".static::getModelName()." '{$id}'");
         $c = sizeof($this->mCommit);
         $this->mCommit = array();
+        if(static::CacheEnabled)
+            static::$mCache->store(get_called_class() . ':id:' . $id, $this, static::CacheTTL);
         return $c;
     }
 
@@ -339,6 +346,18 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     // Statics
 
     /**
+     * @var Cache
+     */
+    protected static $mCache = NULL;
+
+    /**
+     * Initialize this class
+     */
+    public static function init() {
+        self::$mCache = Cache::get();
+    }
+
+    /**
      * Creates a new Model based on the provided row of key value pairs
      * @param array $row key value pairs to insert into new row
      * @return PDOModel|null returns NULL if no primary key is available
@@ -433,19 +452,24 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Loads a model based on a primary key column value
-     * @param $search String the primary key value to search for
+     * @param $id String the primary key value to search for
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      * @throws \Exception if the model does not contain primary keys
      */
-    public static function loadByPrimaryKey($search) {
+    public static function loadByPrimaryKey($id) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot load " . static::getModelName() . " Model");
+        if(static::CacheEnabled
+            && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
+            return $Model;
         $Model = static::search()
-            ->where(static::Primary, $search)
+            ->where(static::Primary, $id)
             ->fetch();
         if(!$Model)
-            throw new ModelNotFoundException(static::getModelName() . " '{$search}' was not found");
+            throw new ModelNotFoundException(static::getModelName() . " '{$id}' was not found");
+        if(static::CacheEnabled)
+            static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
         return $Model;
     }
 
@@ -573,6 +597,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         if(!$c)
             throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
         Log::u(get_called_class(), "Deleted ".static::getModelName()." '{$id}'");
+        if(static::CacheEnabled)
+            static::$mCache->remove(get_called_class() . ':id:' . $id);
     }
 
 
@@ -581,7 +607,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
         static::removeByPrimary($Model->{static::Primary});
     }
-
 
     /**
      * Override this to limit all default API 'search', 'get', and 'remove' calls
@@ -635,6 +660,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         return $comments;
     }
 }
+PDOModel::init();
 
 
 class PDOSelectObject extends PDOSelect {

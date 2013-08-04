@@ -25,7 +25,8 @@ class Route implements IRoute {
         $mDestination,
         $mArgs = array(),
         $mPos = 0,
-        $mRequest = array();
+        $mRequest = array(),
+        $mBaseRequest = array();
 
     /**
      * Constructs a new Route Entry
@@ -39,7 +40,7 @@ class Route implements IRoute {
         if($_args && $c = func_num_args())
             for($i=2; $i<$c; $i++)
                 if($arg = func_get_arg($i))
-                    if(is_array($arg)) $this->mRequest = $arg;
+                    if(is_array($arg)) $this->mBaseRequest = $arg;
                     else $this->mArgs[] = $arg;
     }
 
@@ -60,12 +61,13 @@ class Route implements IRoute {
     public function getRequest() {
         if($this->mRequest)
             return $this->mRequest;
+        if(Util::isCLI())
+            return Util::getCLI()->getRequest() + $this->mBaseRequest;
         if($_POST)
-            return $_POST;
+            return $_POST + $this->mBaseRequest;
         switch(Util::getUrl('method')) {
             case 'GET':
-            case 'CLI':
-                return $_GET;
+                return $_GET + $this->mBaseRequest;
             case 'POST':
             case 'PUT':
             case 'PATCH':
@@ -74,7 +76,7 @@ class Route implements IRoute {
                 if(Util::getHeader('Content-Type') === 'application/json')
                     return json_decode($input , true);
                 parse_str($input, $request);
-                return $request;
+                return $request + $this->mBaseRequest;
             default:
                 Log::e(__CLASS__, "Invalid Request Method: ".Util::getUrl('method'));
                 return array();
@@ -85,7 +87,6 @@ class Route implements IRoute {
      * Try's a route against a request path
      * @param string|null $requestPath the request path to match
      * @return bool whether or not the path matched
-     * @throws DestinationNotFoundException if the destination handler was not found
      */
     public function match($requestPath) {
         if(strpos($requestPath, $this->mRoute) !== 0)
@@ -132,10 +133,10 @@ class Route implements IRoute {
     }
 
     /**
-     * Merge an associative array into the existing request array
-     * @param $request Array associative array to merge
+     * Set the Request for this route to be used
+     * @param $request Array the request for this route
      */
-    function addRequest(Array $request) {
-        $this->mRequest = $request + $this->mRequest;
+    function setRequest(Array $request) {
+        $this->mRequest = $request + $this->mBaseRequest;
     }
 }

@@ -20,7 +20,6 @@ class Build extends API {
     const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
     const Route_Methods = 'CLI';    // CLI only
 
-    // TODO: move the api outa hea
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
@@ -34,16 +33,17 @@ class Build extends API {
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
         $built = true;
 
+        $req = $Route->getRequest();
+        if(!empty($req['v']))
+            Log::setDefaultLevel(4);
+
         $Response = new Response(false, "Starting Build");
-        $Response->startLogging();
         $exCount = Build::buildClasses(true);
         if($exCount)
             return $Response
-                ->update(false, "Build Failed: {$exCount} Exception(s) Occurred")
-                ->stopLogging();
+                ->update(false, "Build Failed: {$exCount} Exception(s) Occurred");
         return $Response
-            ->update(true, "Build Complete")
-            ->stopLogging();
+            ->update(true, "Build Complete");
     }
 
     /**
@@ -204,8 +204,11 @@ class Build extends API {
      */
     private static function findClass($path, $dirClass) {
         $exCount = 0;
-        if(file_exists($path.'/.c'))
+        Log::v2(__CLASS__, "Scanning '{$path}'");
+        if(file_exists($path.'/.buildignore')) {
+            Log::v2(__CLASS__, "Ignoring Directory '{$path}'");
             return $exCount;
+        }
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))
                 continue;
@@ -230,11 +233,11 @@ class Build extends API {
                 throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 
             if($Class->getConstant('Build_Ignore')) {
-                //Log::v(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
+                Log::v2(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
                 continue;
             }
             if($Class->isAbstract()) {
-                //Log::v(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
+                Log::v2(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
                 continue;
             }
             static::$mClasses[] = $Class;

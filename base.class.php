@@ -20,6 +20,7 @@ class ClassNotFoundException extends \Exception {}
  * Provides required framework functionality such as class autoloader and directories
  */
 class Base {
+
     private static $mLoaded = false;
     private static $mBasePath;
     private static $mConfig;
@@ -100,7 +101,7 @@ class Base {
         if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp'))) {
             $Route = new FileRequestRoute($routePath);
-        } elseif(Base::isApcEnabled()) {
+        } elseif(Base::isApcEnabled() && !Util::isCLI()) {
             $Route = RouterAPC::findRoute($routePath);
         } else {
             $Route = Router::findRoute($routePath);

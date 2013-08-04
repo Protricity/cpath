@@ -18,6 +18,7 @@ use CPath\Log;
 use CPath\Model\Route;
 use CPath\Router;
 use CPath\RouterAPC;
+use CPath\Util;
 
 /**
  * Class BuildHandlers
@@ -215,6 +216,8 @@ PHP;
     // Statics
 
     public static function rebuildAPCCache() {
+        if(Util::isCLI())
+            return;
         Log::e(__CLASS__, "Rebuilding APC Cache");
         $c = 0;
         $cache = apc_cache_info('user');

@@ -19,7 +19,8 @@ abstract class Util {
 
     private static $mHeaders = null;
     private static $mUrl = array();
-    private static $mIsCLI = false;
+    /** @var CLI */
+    private static $mCLI = NULL;
 
     /**
      * Initialize the static class and parses request information
@@ -38,9 +39,9 @@ abstract class Util {
             array_shift($args);
             $CLI = new CLI($args);
             self::$mUrl = $CLI->getParsedUrl();
-            $_GET = $CLI->getRequest(); // TODO: $_POST
+            //$_GET = $CLI->getRequest(); // TODO: $_POST
 
-            self::$mIsCLI = true;
+            self::$mCLI = $CLI;
             static $logged = false;
             if(!$logged)
                 Log::addCallback($CLI);
@@ -53,7 +54,11 @@ abstract class Util {
     }
 
     public static function isCLI() {
-        return self::$mIsCLI;
+        return self::$mCLI ? true : false;
+    }
+
+    public static function getCLI() {
+        return self::$mCLI;
     }
 
     /**

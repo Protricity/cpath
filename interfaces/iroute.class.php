@@ -42,7 +42,7 @@ interface IRoute {
      * Merge an associative array into the existing request array
      * @param $request Array associative array to merge
      */
-    function addRequest(Array $request);
+    function setRequest(Array $request);
 
     /**
      * Returns the request parameters.

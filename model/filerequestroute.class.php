@@ -34,7 +34,7 @@ class FileRequestRoute implements IRoute{
     function getNextArg() { throw new InvalidRouteException("File request was passed to Script"); }
     function getPrefix() { throw new InvalidRouteException("File request was passed to Script"); }
     function getDestination() { throw new InvalidRouteException("File request was passed to Script"); }
-    function addRequest(Array $request) { throw new InvalidRouteException("File request was passed to Script"); }
+    function setRequest(Array $request) { throw new InvalidRouteException("File request was passed to Script"); }
     function getRequest() { throw new InvalidRouteException("File request was passed to Script"); }
     function getHandler() { throw new InvalidRouteException("File request was passed to Script"); }
 

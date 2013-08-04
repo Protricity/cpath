@@ -13,12 +13,17 @@ use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\ILogEntry;
 
-class Response extends ArrayObject implements IResponse, ILogListener {
+class Response extends ArrayObject implements IResponse {
     private $mCode, $mData=array(), $mMessage;
     /** @var ILogEntry[] */
     private $mLog=array();
-    private $mIsLogging=false;
 
+    /**
+     * Create a new response
+     * @param String $msg the response message
+     * @param bool $status the response status
+     * @param mixed $data additional response data
+     */
     function __construct($msg=NULL, $status=true, $data=array()) {
         $this->setStatusCode($status);
         $this->mData = $data;
@@ -46,16 +51,21 @@ class Response extends ArrayObject implements IResponse, ILogListener {
         return $this;
     }
 
-    function update($status, $msg) {
+    function update($status, $msg, $data=NULL) {
         $this->setMessage($msg);
         $this->setStatusCode($status);
-        if($this->mIsLogging)
-            $status
-            ? Log::u(__CLASS__, $msg)
-            : Log::e(__CLASS__, $msg);
+        if($data) $this->setData($data);
+//        if($this->mIsLogging)
+//            $status
+//            ? Log::u(__CLASS__, $msg)
+//            : Log::e(__CLASS__, $msg);
         return $this;
     }
 
+    function setData($data) {
+        $this->mData = $data;
+        return $this;
+    }
     /**
      * @param mixed|NULL $_args optional varargs specifying a path to data
      * Example: ->getData(0, 'key') gets $data[0]['key'];
@@ -74,24 +84,16 @@ class Response extends ArrayObject implements IResponse, ILogListener {
         return $target;
     }
 
-    function startLogging() {
-        $this->mIsLogging = true;
-        Log::addCallback($this);
-        return $this;
+    /**
+     * Add a log entry to the response
+     * @param ILogEntry $Log
+     */
+    function addLogEntry(ILogEntry $Log) {
+        $this->mLog[] = $Log;
     }
 
-    function stopLogging() {
-        $this->mIsLogging = false;
-        Log::removeCallback($this);
-        return $this;
-    }
-
-    function onLog(ILogEntry $log) {
-        $this->mLog[] = $log;
-    }
-
-    function getLog() {
-        return $this->mLog;
+    function getLogs() {
+        return $this->mLogs;
     }
 
     function sendHeaders($mimeType=NULL) {
@@ -110,8 +112,10 @@ class Response extends ArrayObject implements IResponse, ILogListener {
     function toXML(\SimpleXMLElement $xml)
     {
         IResponseHelper::toXML($this, $xml);
-        foreach($this->mLog as $log)
-            $log->toXML($xml->addChild('log'));
+        if($this->mLog) {
+            foreach($this->mLog as $log)
+                $log->toXML($xml->addChild('log'));
+        }
     }
 
     function __toString() {
@@ -121,6 +125,13 @@ class Response extends ArrayObject implements IResponse, ILogListener {
 
     // Statics
 
+    /**
+     * Return a new response
+     * @param String $msg the response message
+     * @param bool $status the response status
+     * @param mixed $data additional response data
+     * @return Response a new Response instance
+     */
     static function getNew($msg=NULL, $status=true, $data=array()) {
         return new self($msg, $status, $data);
     }

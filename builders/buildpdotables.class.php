@@ -379,7 +379,8 @@ class BuildPDOColumn {
 
 class BuildPDOTable {
 
-    public $Name, $Namespace, $ClassName, $ModelName, $Comment, $Insert, $Update, $Search, $Export, $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler, $Primary, $Template;
+    public $Name, $Namespace, $ClassName, $ModelName, $Comment, $Insert, $Update, $Search, $Export,
+        $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler = false, $Primary, $Template;
     protected $mColumns = array();
     protected $mUnfound = array();
 
@@ -594,6 +595,11 @@ class BuildPDOUserTable extends BuildPDOTable {
 class BuildPDOUserSessionTable extends BuildPDOTable {
     public $FieldKey, $FieldUserID, $FieldExpire;
     public $SessionExpireDays, $SessionExpireSeconds, $SessionKey, $SessionKeyLength;
+
+    public function __construct($name, $comment) {
+        parent::__construct($name, $comment);
+        BuildPDOUserTable::addUserSessionTable($this);
+    }
 
     function defaultCommentArg($field) {
         list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
