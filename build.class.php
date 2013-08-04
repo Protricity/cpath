@@ -20,6 +20,7 @@ class Build extends API {
     const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
     const Route_Methods = 'CLI';    // CLI only
 
+    // TODO: move the api outa hea
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
@@ -43,6 +44,14 @@ class Build extends API {
         return $Response
             ->update(true, "Build Complete")
             ->stopLogging();
+    }
+
+    /**
+     * Get the Object Description
+     * @return String description for this Object
+     */
+    function getDescription() {
+        return "Build All classes";
     }
 
     // Statics

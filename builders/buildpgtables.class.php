@@ -33,44 +33,43 @@ PHP;
     protected function getTables(\PDO $DB){
         $tables = array();
         foreach($DB->query("SELECT table_name, table_comment FROM information_schema.tables WHERE table_schema='public'") as $row)
-            $tables[] = new BuildPDOTable($row['table_name'], $row['table_comment']);
+            $tables[] = BuildPDOTable::create($row['table_name'], $row['table_comment']);
         return $tables;
     }
 
     /**
      * @param \PDO $DB
-     * @param $table
-     * @param BuildPDOColumn[] $cols
+     * @param BuildPDOTable $Table
      * @return void
      */
-    protected function getIndexes(\PDO $DB, $table, Array &$cols) {
+    protected function getIndexes(\PDO $DB, BuildPDOTable $Table) {
         foreach($DB->query("select a.attname as column_name
 from pg_class t, pg_class i, pg_index ix, pg_attribute a
-where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '{$table}'
+where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '{$Table->Name}'
 group by column_name;") as $row ) {
             $name = $row['column_name'];
-            $cols[$name]->Index = true;
+            $Column = $Table->getColumn($name);
+            $Column->Index = true;
         }
     }
 
     /**
      * @param \PDO $DB
-     * @param $table
-     * @return BuildPDOColumn[]
+     * @param BuildPDOTable $Table
+     * @return void
      */
-    protected function getColumns(\PDO $DB, $table) { //, &$primaryCol, &$primaryAutoInc) {
+    protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
         $primaryCol = NULL;
-        $cols = array();
-        foreach($DB->query("SELECT * FROM information_schema.columns AS c WHERE c.table_name = '$table';") as $row) {
+        foreach($DB->query("SELECT * FROM information_schema.columns AS c WHERE c.table_name = '{$Table->Name}';") as $row) {
             $name = $row['column_name'];
             $type = stripos($row['data_type'], 'int') !== false ? 'i' : 's';
-            $cols[$name] = new BuildPDOColumn($name, $type, $row['column_comment'], stripos($row['column_default'], 'nextval(') ===0);
-            if($cols[$name]->AutoInc && !$primaryCol) {
-                $cols[$name]->Primary = true;
+            $Column = new BuildPDOColumn($name, $type, $row['column_comment'], stripos($row['column_default'], 'nextval(') ===0);
+            if($Column->AutoInc && !$primaryCol) {
+                $Column->Primary = true;
                 $primaryCol = $name;
             }
+            $Table->addColumn($Column);
         }
-        return $cols;
     }
 
     protected function getProcs(\PDO $DB) {

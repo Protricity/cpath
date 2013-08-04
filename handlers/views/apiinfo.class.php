@@ -79,10 +79,10 @@ class APIInfo implements IHandler, ILogListener {
             </li>
             <?php if(!$fields) { ?>
                 <li class='field-item clearfix'>
-                    <div class='field-num'></div>
-                    <div class='field-name'></div>
+                    <div class='field-num'>&nbsp;</div>
+                    <div class='field-name'>&nbsp;</div>
                     <div class='field-description'>No Fields in this API</div>
-                    <div class='field-input'></div>
+                    <div class='field-input'>&nbsp;</div>
                 </li>
             <?php } else foreach($fields as $name=>$Field) { ?>
                 <li class='field-item clearfix'>

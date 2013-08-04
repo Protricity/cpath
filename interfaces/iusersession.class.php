@@ -7,123 +7,53 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-use CPath\Model\DB\ModelNotFoundException;
-use CPath\Model\DB\PDOModel;
-use CPath\Model\DB\PDOSelect;
+class InvalidUserSessionException extends \Exception {
+    public function __construct($msg="User is not logged in") {
+        parent::__construct($msg);
+    }
+}
+class SessionDisabledException extends InvalidUserSessionException {}
+class SessionNotActiveException extends InvalidUserSessionException {}
+class SessionExpiredException extends InvalidUserSessionException {}
 
 interface IUserSession {
 
-    const SESSION_EXPIRE_DAYS = 365;        // The amount of time before a session should expire in days. Overwrite to change. NULL for never.
-    const SESSION_EXPIRE_SECONDS = NULL;    // The amount of time before a session should expire in seconds. Overwrite to enable.
-
-    const FLAG_VALIDATED = 0x02;
-    const FLAG_DISABLED = 0x04;
-
-    const FLAG_DEBUG = 0x10;
-    const FLAG_MANAGER = 0x20;
-    const FLAG_ADMIN = 0x40;
-
-    function getID();
-
-    function getName();
-
-    function getFlags();
-    function setFlags($value, $commit=true);
-
-    function getPassword();
-    function setPassword($value, $commit=true);
-
-    function isGuestAccount();
-
     /**
-     * Returns true if the user is an admin
-     * @return boolean true if user is an admin
+     * Get the User Primary Key ID associated with this Session
+     * @return String User ID
      */
-    function isAdmin();
-
-    /**
-     * Returns true if the user is viewing debug mode
-     * @return boolean true if user is viewing debug mode
-     */
-    function isDebug();
-
-    /**
-     * Stores a session key for a corresponding user id
-     * @param $key String the session key to store
-     * @param $expireDate int a unix timestamp representing when the session key should expire, or 0 for never.
-     * @return void
-     */
-    function storeNewSessionKey($key, $expireDate);
+    function getUserID();
 
     // Statics
 
+    /**
+     * Create a new Session for an IUser Instance
+     * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
+     * @param IUser $User
+     */
+    static function createNewSession(IUser $User, $expireInSeconds=NULL);
 
     /**
-     * Loads a user instance from a session key
+     * Loads a session instance from a session key
      * @param $key String the session key to search for
-     * @return PDOModel|mixed the found user instance or primary key id of the user
+     * @return IUserSession the found user session
+     * @throws SessionExpiredException if the session was active but expired or not found
      */
-    static function loadFromSessionKey($key);
+    static function loadByKey($key);
 
     /**
-     * Deletes or disables a session key from the database
-     * @param $key String the session key to search for
-     * @return void
+     * Loads a session instance from the active
+     * @return IUserSession the found user session
+     * @throws SessionNotActiveException if the session was not active
+     * @throws SessionExpiredException if the session was active but expired or not found
      */
-    static function disableSessionKey($key);
-
-    /**
-     * Gets or creates an instance of a guest user
-     * @return IUserSession|PDOModel the guest user instance
-     */
-    static function loadGuestAccount();
-
-    /**
-     * Log in to a user account
-     * @param $search String the user account to search for
-     * @param $password String the password to log in with
-     * @return IUserSession|PDOModel The logged in user instance
-     */
-    static function login($search, $password);
+    static function loadBySession();
 
     /**
      * Log out of a user account
-     * @return IUserSession|PDOModel The guest user account
+     * @return boolean true if the session was destroyed
      */
-    static function logout();
+    static function destroySession();
 
-    /**
-     * Get the current user session or return a guest account
-     * @param bool $throwIfGuest throws an exception if the user is not logged in
-     * @return IUserSession|PDOModel the user instance
-     */
-    static function getUserSession($throwIfGuest=true);
-
-    /**
-     * Loads a model based on a primary key column value
-     * @param $search String the value to search for
-     * @return IUserSession|PDOModel the found model instance
-     * @throws ModelNotFoundException if a model entry was not found
-     * @throws \Exception if the model does not contain primary keys
-     */
-    static function loadByPrimaryKey($search);
-
-    /**
-     * Searches a Model based on specified fields and values.
-     * @param array $fields an array of key-value pairs to search for
-     * @param int $limit the number of rows to return
-     * @param string $logic 'OR' or 'AND' logic between fields
-     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
-     */
-    static function searchByFields(Array $fields, $limit=1, $logic='OR');
-
-    /**
-     * Searches for a Model using all indexed fields.
-     * @param mixed $any a value to search for
-     * @param int $limit the number of rows to return
-     * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
-     * @throws \Exception if the model does not contain index keys
-     */
-    static function searchByAnyIndex($any, $limit=1);
 
 }

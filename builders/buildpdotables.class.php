@@ -7,12 +7,14 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Builders;
+use CPath\Interfaces\IUserSession;
 use CPath\Model\DB\PDODatabase;
 use CPath\BuildException;
 use CPath\Base;
 use CPath\Build;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
+use CPath\Builders\Tools\BuildPHPClass;
 
 
 class UpgradeException extends \Exception {}
@@ -20,32 +22,11 @@ class UpgradeException extends \Exception {}
 abstract class BuildPDOTables implements IBuilder{
     const DB_CLASSNAME = "CPath\\Model\\DB\\PDODatabase";
 
-    const TMPL_TABLE_CLASS = null;
-
-    const TMPL_MODEL_CLASS = <<<'PHP'
-<?php
-namespace %s;
-use %s as DB;
-use CPath\Model\DB\PDOModel;
-class %s extends PDOModel{
-%s
-    static function getDB() { return DB::get(); }
-}
-PHP;
-
     const TMPL_PROC_CLASS = <<<PHP
 <?php
 namespace %s;
 class Procs {
 %s}
-PHP;
-
-    const TMPL_INSERT = <<<'PHP'
-	static function insert(\PDO $DB%s) {
-		static $stmd = NULL;
-		if(!$stmd) $stmd = $DB->prepare('INSERT INTO %s VALUES (%s)%s');
-		$stmd->execute(array(%s));
-%s  }
 PHP;
 
     const TMPL_PROC = <<<'PHP'
@@ -57,45 +38,6 @@ PHP;
 	}
 PHP;
 
-    const TMPL_GETENUM = <<<'PHP'
-
-	static function get%sEnumValues() { return %s; }
-
-PHP;
-
-    const TMPL_PROP = <<<'PHP'
-	protected $%s;
-
-PHP;
-
-    const TMPL_GETPROP = <<<'PHP'
-
-	function get%s() { return $this->%s; }
-
-PHP;
-
-    const TMPL_SETPROP = <<<'PHP'
-	function set%s($value, $commit=true) { return $this->setField('%s', $value, $commit%s); }
-
-PHP;
-
-    const TMPL_CREATE = <<<'PHP'
-
-	static function create(%s) { return parent::createA(get_defined_vars()); }
-
-PHP;
-
-    const TMPL_SEARCH = <<<'PHP'
-
-	static function search(%s) { return parent::searchA(get_defined_vars()); }
-
-PHP;
-
-    const TMPL_DELETE = <<<'PHP'
-
-	static function remove(%s $%s) { parent::removeModel($%s); }
-
-PHP;
 
     // TODO: move out of the build class
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
@@ -144,18 +86,17 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @param $table
-     * @return BuildPDOColumn[]
+     * @param BuildPDOTable $Table
+     * @return void
      */
-    protected abstract function getColumns(\PDO $DB, $table); // , &$primaryCol, &$primaryAutoInc
+    protected abstract function getColumns(\PDO $DB, BuildPDOTable $Table);
 
     /**
      * @param \PDO $DB
-     * @param $table
-     * @param BuildPDOColumn[] $cols
+     * @param BuildPDOTable $Table
      * @return void
      */
-    protected abstract function getIndexes(\PDO $DB, $table, Array &$cols); //, &$primaryCol, &$primaryAutoInc);
+    protected abstract function getIndexes(\PDO $DB, BuildPDOTable $Table);
 
 
     protected abstract function getProcs(\PDO $DB);
@@ -180,8 +121,6 @@ PHP;
         /* @var $DB PDODatabase */
         $DB = call_user_func(array($Class->getName(), 'get'));
 
-        $tablePath = $this->getFolder($Class, 'tables');
-        $tableNS = $Class->getNamespaceName() . "\\Tables";
         $modelPath = $this->getFolder($Class, 'model');
         $modelNS = $Class->getNamespaceName() . "\\Model";
         $procPath = $this->getFolder($Class, 'procs');
@@ -193,10 +132,9 @@ PHP;
         $force = Build::force();
 
         $oldFiles = array();
-        if(!file_exists($tablePath)) { mkdir($tablePath, null, true); $force = true; }
-        else $oldFiles = array_diff(scandir($tablePath), array('..', '.'));
         if(!file_exists($procPath))  { mkdir($procPath, null, true);  $force = true; }
         if(!file_exists($modelPath)) { mkdir($modelPath, null, true); $force = true; }
+        else $oldFiles = array_diff(scandir($modelPath), array('..', '.'));
 
         foreach(scandir($schemaFolder) as $file)
             $hash += filemtime($schemaFolder.$file);
@@ -214,93 +152,112 @@ PHP;
             $tables = $this->getTables($DB);
 
         foreach($tables as $Table) {
-            $shortTable = str_replace(' ', '', ucwords(str_replace('_', ' ', $Table->Name)));
+            $PHP = new BuildPHPClass($Table->ClassName);
+            $PHP->Namespace = $modelNS;
+            $Table->Namespace = $modelNS;
 
-            /** @var BuildPDOColumn[] $cols  */
-            $cols = $this->getColumns($DB, $Table->Name);
-            $this->getIndexes($DB, $Table->Name, $cols);
+            $this->getColumns($DB, $Table);
+            $this->getIndexes($DB, $Table);
 
-            $file = strtolower($shortTable).'.class.php';
+            $file = $modelPath.strtolower($Table->ClassName).'.class.php';
 
             // Model
+            $Table->processModelPHP($PHP);
 
-            $php = $this->getConst('TableName', $Table->Name);
-            $primaryCol = NULL;
-            foreach($cols as $Column) {
-                if($Column->Primary) {
-                    $primaryCol = $Column->Name;
-                    break;
-                }
-            }
-            $php .= $this->getConst('Primary', $primaryCol);
+            $PHP->addUse(get_class($DB), 'DB');
+
+            $PHP->addConst('TableName', $Table->Name);
+            if($Table->ModelName)
+                $PHP->addConst('ModelName', $Table->ModelName);
+
+            $PHP->addConst('Primary', $Table->Primary);
 
             $colNames = array();
-            foreach($cols as $Column)
+            foreach($Table->getColumns() as $Column)
                 $colNames[] = $Column->Name;
-            $php .= $this->getConst('Columns', implode(',', $colNames));
+            $PHP->addConst('Columns', implode(',', $colNames));
 
             $comments = array();
-            foreach($cols as $Column)
+            foreach($Table->getColumns() as $Column)
                 $comments[] = $Column->Comment;
-            $php .= $this->getConst('Comments', implode(';', $comments));
+            $PHP->addConst('Comments', implode(';', $comments));
 
             $types = '';
             $InsertFields = array();
             $UpdateFields = array();
             $SearchFields = array();
             $ExportFields = array();
-            //$FilterFields = array();
-            //$filterFound = false;
-            foreach($cols as $Column) {
+
+            foreach($Table->getColumns() as $Column) {
                 if($Column->Insert) $InsertFields[] = $Column->Name;
                 if($Column->Update) $UpdateFields[] = $Column->Name;
                 if($Column->Search) $SearchFields[] = $Column->Name;
                 if($Column->Export) $ExportFields[] = $Column->Name;
-                //$FilterFields[] = $Column->Filter;
-                //if($Column->Filter) $filterFound = true;
                 $types .= $Column->Type;
             }
+
             if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
             if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
             if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
             if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
 
             if(!$SearchFields)
-                foreach($cols as $Column)
+                foreach($Table->getColumns() as $Column)
                     if($Column->Index)
                         $SearchFields[] = $Column->Name;
 
-            $php .= $this->getConst('Types', $types);
+            $PHP->addConst('Types', $types);
 
-            if($InsertFields) $php .= $this->getConst('Insert', implode(',', $InsertFields));
-            if($UpdateFields) $php .= $this->getConst('Update', implode(',', $UpdateFields));
-            if($SearchFields) $php .= $this->getConst('Search', implode(',', $SearchFields));
-            if($ExportFields) $php .= $this->getConst('Export', implode(',', $ExportFields));
-            //if($filterFound)  $php .= $this->getConst('Filter', implode(',', $FilterFields));
+            if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
+            if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
+            if($SearchFields) $PHP->addConst('Search', implode(',', $SearchFields));
+            if($ExportFields) $PHP->addConst('Export', implode(',', $ExportFields));
+            if($Table->SearchWildCard)
+                $PHP->addConst('SearchWildCard', true);
+            if($Table->SearchLimit)
+                $PHP->addConst('SearchLimit', $Table->SearchLimit);
+            if($Table->SearchLimitMax)
+                $PHP->addConst('SearchLimitMax', $Table->SearchLimitMax);
+            if($Table->AllowHandler)
+                $PHP->addConst('Build_Ignore', false);
 
-            $php .= "\n";
-            foreach($cols as $Column)
-                $php .= $this->getConst(strtoupper($Column->Name), $Column->Name);
-            $php .= "\n";
-            foreach($cols as $Column)
-                $php .= sprintf(self::TMPL_PROP, $Column->Name);
-            foreach($cols as $Column)
-                $php .= $this->propGetSet($Column->Name, $Column->Primary, $Column->Filter);
+            $PHP->addConstCode();
+            $PHP->addConstCode("// Field Constants ");
+            foreach($Table->getColumns() as $Column)
+                $PHP->addConst(strtoupper($Column->Name), $Column->Name);
 
-            foreach($cols as $Column)
-                if($Column->Enum)
-                    $php .= $this->enumGet($Column->Name, $Column->Enum);
+            foreach($Table->getColumns() as $Column)
+                $PHP->addProperty($Column->Name);
 
-            $php .= $this->getDelete($shortTable);
-            $php = sprintf(static::TMPL_MODEL_CLASS, $modelNS, $Class->getName(), $shortTable, $php);
-            file_put_contents($modelPath.$file, $php);
+            foreach($Table->getColumns() as $Column) {
+                $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
+                $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
+                if(!$Column->Primary)
+                    $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->setField(\'%s\', $value, $commit%s); ', strtolower($Column->Name), ($Column->Filter ? ', '.$Column->Filter : '')));
+                if($Column->Enum) {
+                    $a = '';
+                    foreach($Column->Enum as $e)
+                        $a .= ($a ? ',' : '') . var_export($e, true);
+                    $PHP->addStaticMethod("get{$ucName}EnumValues", '', ' return array('.$a.'); ');
+                }
+                $PHP->addMethodCode();
+            }
 
+            $PHP->addStaticMethod('remove', $Table->ClassName . ' $' . $Table->ClassName, " parent::removeModel(\${$Table->ClassName}); ");
+            $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
+
+            file_put_contents($file, $PHP->build());
+            foreach($oldFiles as $i => $f)
+                if($modelPath.$f == $file) {
+                    unset($oldFiles[$i]);
+                    break;
+                }
         }
         //Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
         Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
-            Log::v(__CLASS__, "Removing ({$c}) depreciated table classes");
-            foreach($oldFiles as $file) unlink($tablePath.$file);
+            Log::v(__CLASS__, "Removing ({$c}) depreciated model classes");
+            foreach($oldFiles as $file) unlink($modelPath.$file);
         }
 
         // Stored Procedures
@@ -321,7 +278,7 @@ PHP;
                 $names[$name] = 1;
             }
             $method = $name.'('.(!$proc ? '' : ('%s'.str_repeat(', %s', sizeof($proc)-1))).')';
-            $phpC .= $this->getConst(strtoupper($name), $method);
+            $phpC .= self::getConst(strtoupper($name), $method);
             $phpP .= $this->getProc($name, $proc);
         }
         $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
@@ -343,25 +300,8 @@ PHP;
         return dirname($Class->getFileName()) . '/' . $subFolder;
     }
 
-    private function getConst($name, $value) {
-        return "\tConst {$name} = ".var_export($value, true).";\n";
-    }
-
-    private function getInsert($table, $columns) {
-        $qs = NULL;
-        $retSQL = '';
-        $ret = '';
-        foreach($columns as $name => $type) {
-            if($qs) $qs .= ', ';
-            $qs .= $type;
-            if(strpos($type, '?') === false) {
-                $retSQL = " RETURNING ".$name;
-                $ret = "\t\treturn \$stmd->fetchColumn(0);\n";
-                unset($columns[$name]);
-            }
-        }
-        $p = '$'.implode(', $', array_keys($columns));
-        return sprintf(self::TMPL_INSERT, !$columns ? '' : ', '.$p, $table, $qs, $retSQL, $p, $ret);
+    static function getConst($name, $value) {
+        return "\tconst {$name} = ".var_export($value, true).";\n";
     }
 
     private function getProc($name, $params) {
@@ -371,39 +311,11 @@ PHP;
             '$'.implode(', $', $params));
     }
 
-    private function propGetSet($name, $justGet=false, $filter=NULL) {
-        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
-        $php = sprintf(self::TMPL_GETPROP, $ucName, strtolower($name));
-        if(!$justGet)
-            $php .= sprintf(self::TMPL_SETPROP, $ucName, strtolower($name), ($filter ? ', '.$filter : ''));
-        return $php;
-    }
-
-    private function enumGet($name, Array $enums) {
-        $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
-        $a = '';
-        foreach($enums as $e)
-            $a .= ($a ? ',' : '') . var_export($e, true);
-        return sprintf(self::TMPL_GETENUM, $ucName, 'array('.$a.')');
-    }
-
-    private function getCreate(Array $cols) {
-        return sprintf(self::TMPL_CREATE,
-            !$cols ? '' : '$'.implode('=null, $', $cols).'=null');
-    }
-
-    private function getSearch(Array $indexs) {
-        return sprintf(self::TMPL_SEARCH,
-            !$indexs ? '' : '$'.implode('=null, $', $indexs).'=null');
-    }
-
-    private function getDelete($shortTable) {
-        return sprintf(self::TMPL_DELETE, $shortTable, $shortTable, $shortTable);
-    }
 }
 
 class BuildPDOColumn {
     public $Name, $Type, $Comment, $AutoInc, $Primary, $Enum, $Index, $Insert, $Update, $Search, $Export, $Filter=NULL;
+
     public function __construct($name, $type, $comment, $autoInc=false) {
         if(is_array($type)) {
             $this->Enum = $type;
@@ -411,89 +323,328 @@ class BuildPDOColumn {
         }
         $this->Name = $name;
         $this->Type = $type;
-        $Column = $this;
-        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', function(array $matches) use ($Column) {
-            foreach(explode('|', $matches[1]) as $field) {
-                $args = explode(':', $field, 2);
-                switch(strtolower($args[0])) {
-                    case 'i':
-                    case 'insert':
-                        $Column->Insert = true;
-                        break;
-                    case 'u':
-                    case 'update':
-                        $Column->Update = true;
-                        break;
-                    case 's':
-                    case 'search':
-                        $Column->Search = true;
-                        break;
-                    case 'e':
-                    case 'export':
-                        $Column->Export = true;
-                        break;
-                    case 'c':
-                    case 'comment':
-                        if(isset($args[1]))
-                            $Column->Comment = $args[1];
-                        break;
-                    case 'f':
-                    case 'filter':
-                        if(isset($args[1])) {
-                            $fArgs = explode(':', $args[1]);
-                            if(!is_numeric($fArgs[0])) $fArgs[0] = constant($fArgs[0]);
-                            $Column->Filter |= $fArgs[0];
-                        }
-                        break;
-                }
-            }
-            return '';
-        }, $comment);
+        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace') , $comment);
         if(!$this->Comment)
             $this->Comment = $comment;
         if($this->Comment)
             $this->Comment = str_replace(';', ':', $this->Comment);
         $this->AutoInc = $autoInc;
     }
+
+    function replace(array $matches) {
+        foreach(explode('|', $matches[1]) as $field) {
+            $args = explode(':', $field, 2);
+            switch(strtolower($args[0])) {
+                case 'i':
+                case 'insert':
+                    $this->Insert = true;
+                    break;
+                case 'u':
+                case 'update':
+                    $this->Update = true;
+                    break;
+                case 's':
+                case 'search':
+                    $this->Search = true;
+                    break;
+                case 'e':
+                case 'export':
+                    $this->Export = true;
+                    break;
+                case 'c':
+                case 'comment':
+                    $this->Comment = $this->req($args);
+                    break;
+                case 'f':
+                case 'filter':
+                    $filter = $this->req($args);
+                    if(!is_numeric($filter))
+                        $filter = constant($filter);
+                    $this->Filter |= (int)$filter;
+                    break;
+            }
+        }
+        return '';
+    }
+
+    private function req($args, $preg=NULL, $desc=NULL) {
+        if(!isset($args[1]) || ($preg && !preg_match($preg, $args[1], $matches)))
+            throw new BuildException("Column Comment Token {$args[0]} must be in the format {{$args[0]}:" . ($desc ?: $preg ?: 'value') . '}');
+        if(!$preg)
+            return $args[1];
+        array_shift($matches);
+        return $matches;
+    }
 }
 
 class BuildPDOTable {
-    public $Name, $Comment, $Insert, $Update, $Search, $Export;
-    public function __construct($name, $comment) {
+
+    public $Name, $Namespace, $ClassName, $ModelName, $Comment, $Insert, $Update, $Search, $Export, $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler, $Primary, $Template;
+    protected $mColumns = array();
+    protected $mUnfound = array();
+
+    protected function __construct($name, $comment) {
         $this->Name = $name;
-        $Table = $this;
-        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', function(array $matches) use ($Table) {
-            foreach(explode('|', $matches[1]) as $field) {
-                $args = explode(':', $field, 2);
-                switch(strtolower($args[0])) {
-                    case 'i':
-                    case 'insert':
-                        if(isset($args[1])) $Table->Insert = $args[1];
-                        break;
-                    case 'u':
-                    case 'update':
-                        if(isset($args[1])) $Table->Update = $args[1];
-                        break;
-                    case 's':
-                    case 'search':
-                        if(isset($args[1])) $Table->Search = $args[1];
-                        break;
-                    case 'e':
-                    case 'export':
-                        if(isset($args[1])) $Table->Export = $args[1];
-                        break;
-                    case 'c':
-                    case 'comment':
-                        if(isset($args[1]))
-                            $Table->Comment = $args[1];
-                        break;
-                }
-            }
-            return '';
-        }, $comment);
+        $this->ClassName = str_replace(' ', '', ucwords(str_replace('_', ' ', $this->Name)));
+        $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace'), $comment);
         if(!$this->Comment)
             $this->Comment = $comment;
         if($this->Comment)
             $this->Comment = str_replace(';', ':', $this->Comment);
+    }
+
+    function processDefault($field) {
+        $this->mUnfound[] = $field;
+    }
+
+    function replace(array $matches) {
+        foreach(explode('|', $matches[1]) as $field) {
+            list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
+            switch(strtolower($name)) {
+                case 't':
+                case 'template':
+                    $this->Template = $this->req($name, $arg);
+                    break;
+                case 'i':
+                case 'insert':
+                    $this->Insert = $this->req($name, $arg);
+                    break;
+                case 'u':
+                case 'update':
+                    $this->Update = $this->req($name, $arg);
+                    break;
+                case 's':
+                case 'search':
+                    $this->Search = $this->req($name, $arg);
+                    break;
+                case 'sw':
+                case 'searchwildcard':
+                    $this->SearchWildCard = true;
+                    break;
+                case 'sl':
+                case 'searchlimit':
+                    list($this->SearchLimit, $this->SearchLimitMax) =
+                        $this->req($name, $arg, '/^(\d+):(\d+)$/', '{default limit}:{max limit}');
+                    break;
+                case 'e':
+                case 'export':
+                    $this->Export = $this->req($name, $arg);
+                    break;
+                case 'c':
+                case 'comment':
+                    $this->Comment = $this->req($name, $arg);
+                    break;
+                case 'n':
+                case 'name':
+                    $this->ModelName = $this->req($name, $arg);
+                    break;
+                case 'ah':
+                case 'api':
+                case 'allowhandler':
+                    $this->AllowHandler = true;
+                    break;
+                default:
+                    $this->processDefault($field);
+            }
+        }
+        return '';
+    }
+
+    /**
+     * @return BuildPDOColumn[]
+     */
+    public function getColumns() {
+        return $this->mColumns;
+    }
+
+    /**
+     * @param $name
+     * @return BuildPDOColumn
+     */
+    public function getColumn($name) {
+        return $this->mColumns[$name];
+    }
+
+    public function addColumn(BuildPDOColumn $Column) {
+        $this->mColumns[$Column->Name] = $Column;
+    }
+
+    function processModelPHP(BuildPHPClass $PHP) {
+        $PHP->setExtend("CPath\\Model\\DB\\PDOModel");
+
+        if($this->mUnfound)
+            throw new BuildException("Invalid Table Comment Token '" . implode('|', $this->mUnfound) . "' in Table '{$this->Name}'");
+
+        if(!$this->Primary)
+            foreach($this->getColumns() as $Column) {
+                if($Column->Primary) {
+                    $this->Primary = $Column->Name;
+                    break;
+                }
+            }
+        if(!$this->Primary)
+            Log::e(__CLASS__, "Warning: No Primary key found for Table '{$this->Name}'");
+    }
+    
+    protected function req($name, $arg, $preg=NULL, $desc=NULL) {
+        if(!$arg || ($preg && !preg_match($preg, $arg, $matches)))
+            throw new BuildException("Table Comment Token {$name} must be in the format {{$name}:" . ($desc ?: $preg ?: 'value') . '}');
+        if(!$preg)
+            return $arg;
+        array_shift($matches);
+        return $matches;
+    }
+
+    static function create($name, $comment) {
+        $Table = new BuildPDOTable($name, $comment);
+        if($Table->Template) switch(strtolower($Table->Template)) {
+            case 'u':
+            case 'user':
+                $Table = new BuildPDOUserTable($name, $comment);
+                break;
+            case 'us':
+            case 'usersession':
+                $Table = new BuildPDOUserSessionTable($name, $comment);
+                break;
+        }
+        return $Table;
+    }
+}
+
+class BuildPDOUserTable extends BuildPDOTable {
+    public $FieldID, $FieldUsername, $FieldEmail, $FieldPassword, $FieldFlags, $SessionClass;
+    /** @var BuildPDOUserSessionTable[] */
+    protected static $mSessionTables = array();
+
+    function defaultCommentArg($field) {
+        list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
+        switch(strtolower($name)) {
+            case 'fi':
+            case 'fieldid':
+                $this->FieldID = $this->req($name, $arg);
+                break;
+            case 'fu':
+            case 'fieldusername':
+                $this->FieldUsername = $this->req($name, $arg);
+                break;
+            case 'fe':
+            case 'fieldemail':
+                $this->FieldEmail = $this->req($name, $arg);
+                break;
+            case 'fp':
+            case 'fieldpassword':
+                $this->FieldPassword = $this->req($name, $arg);
+                break;
+            case 'ff':
+            case 'fieldflags':
+                $this->FieldFlags = $this->req($name, $arg);
+                break;
+            case 'sc':
+            case 'sessionclass':
+                $this->SessionClass = $this->req($name, $arg);
+                break;
+            default:
+                parent::processDefault($field);
+        }
+    }
+
+    function processModelPHP(BuildPHPClass $PHP) {
+        parent::processModelPHP($PHP);
+        $PHP->setExtend("CPath\\Model\\DB\\PDOUserModel");
+
+        if(!$this->SessionClass) {
+            foreach(self::$mSessionTables as $STable)
+                if($STable->Namespace == $this->Namespace) {
+                    $this->SessionClass = get_class($STable);
+                    break;
+                }
+            if(!$this->SessionClass)
+                $this->SessionClass = "CPath\\Model\\SimpleUserSession";
+        }
+        $class = $this->SessionClass;
+        $Session = new $class;
+        if(!($Session instanceof IUserSession))
+            throw new BuildException($class . " is not an instance of IUserSession");
+        $PHP->addConst('SessionClass', $class);
+
+        if(!$this->FieldID && $this->Primary) $this->FieldID = $this->Primary;
+        foreach($this->getColumns() as $Column) {
+            if(!$this->FieldUsername && stripos($Column->Name, 'name') !== false)
+                $this->FieldUsername = $Column->Name;
+            if(!$this->FieldEmail && stripos($Column->Name, 'mail') !== false)
+                $this->FieldEmail = $Column->Name;
+            if(!$this->FieldPassword && stripos($Column->Name, 'pass') !== false)
+                $this->FieldPassword = $Column->Name;
+            if(!$this->FieldFlags && stripos($Column->Name, 'flag') !== false)
+                $this->FieldFlags = $Column->Name;
+        }
+
+        foreach(array('FieldID', 'FieldUsername', 'FieldEmail', 'FieldPassword', 'FieldFlags') as $field) {
+            if(!$this->$field)
+                throw new BuildException("The field name for {$field} could not be determined");
+            $PHP->addConst($field, $this->$field);
+        }
+    }
+
+    public static function addUserSessionTable(BuildPDOUserSessionTable $Table) {
+        self::$mSessionTables[] = $Table;
+    }
+}
+
+class BuildPDOUserSessionTable extends BuildPDOTable {
+    public $FieldKey, $FieldUserID, $FieldExpire;
+    public $SessionExpireDays, $SessionExpireSeconds, $SessionKey, $SessionKeyLength;
+
+    function defaultCommentArg($field) {
+        list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
+        switch(strtolower($name)) {
+            case 'fk':
+            case 'fieldkey':
+                $this->FieldKey = $this->req($name, $arg);
+                break;
+            case 'fui':
+            case 'fielduserid':
+                $this->FieldUserID = $this->req($name, $arg);
+                break;
+            case 'fe':
+            case 'fieldexpire':
+                $this->FieldExpire = $this->req($name, $arg);
+                break;
+            case 'sk':
+            case 'sessionkey':
+                $this->SessionKey = $this->req($name, $arg);
+                break;
+            case 'sed':
+            case 'sessionexpiredays':
+                $this->SessionExpireDays = $this->req($name, $arg);
+                break;
+            case 'ses':
+            case 'sessionexpireseconds':
+                $this->SessionExpireSeconds = $this->req($name, $arg);
+                break;
+            case 'skl':
+            case 'sessionkeylength':
+                $this->SessionExpireDays = $this->req($name, $arg);
+                break;
+        }
+    }
+
+    function processModelPHP(BuildPHPClass $PHP) {
+        parent::processModelPHP($PHP);
+        $PHP->setExtend("CPath\\Model\\DB\\PDOUserSessionModel");
+
+        if(!$this->FieldKey && $this->Primary) $this->FieldKey = $this->Primary;
+        foreach($this->getColumns() as $Column) {
+            if(!$this->FieldUserID && preg_match('/user.*id/i', $Column->Name))
+                $this->FieldUserID = $Column->Name;
+            if(!$this->FieldExpire && stripos($Column->Name, 'expire') !== false)
+                $this->FieldExpire = $Column->Name;
+        }
+
+        foreach(array('FieldKey', 'FieldUserID', 'FieldExpire') as $field) {
+            if(!$this->$field)
+                throw new BuildException("The field name for {$field} could not be determined");
+            $PHP->addConst($field, $this->$field);
+        }
     }
 }

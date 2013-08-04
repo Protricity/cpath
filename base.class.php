@@ -97,7 +97,8 @@ class Base {
      */
     public static function findRoute($routePath=NULL) {
         if(!$routePath) $routePath = Util::getUrl('route');
-        if(preg_match('/\.\w+$/', $routePath)) {
+        if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
+            && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp'))) {
             $Route = new FileRequestRoute($routePath);
         } elseif(Base::isApcEnabled()) {
             $Route = RouterAPC::findRoute($routePath);

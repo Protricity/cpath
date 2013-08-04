@@ -42,13 +42,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
+    const ModelName = null;
     const Primary = null;
-    Const Columns = null;
-    Const Types = null;
+    const Columns = null;
+    const Comments = null;
+    const Types = null;
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
-    const SearchAllowWildCard = false;   // true or false
+    const SearchWildCard = false;   // true or false
 
     const Search = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
     const Insert = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
@@ -212,6 +214,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     function getAggregateHandler() {
         $Handlers = new PDOAPIHandlerSet(get_called_class());
         $Source = $this;
+        $comments = $this->getFieldComments();
         if(static::Primary) {
             $Handlers->addAPI('GET', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                 $request = $API->processRequest($Route);
@@ -223,7 +226,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     throw new ModelNotFoundException($Source::getModelName() . " '{$request['id']}' was not found");
                 return $data;
             }, array(
-                'id' => new APIRequiredParam($this->getModelName()." ID"),
+                'id' => new APIRequiredParam($this->getModelName() . ' ' . $comments[static::Primary]),
             ), "Get information about this ".$this->getModelName()));
         }
 
@@ -234,7 +237,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 if($limit < 1 || $limit > $Source::SearchLimitMax)
                     $limit = $Source::SearchLimit;
                 $search = $request['search'];
-                if($Source::SearchAllowWildCard) {
+                if($Source::SearchWildCard) {
                     if(strpos($search, '*') !== false)
                         $search = str_replace('*', '%', $search);
                     else
@@ -246,10 +249,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     if(!in_array($by, $keys))
                         throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::Search."]");
 
-                    $Search = $Source::searchByField($Source::SearchAllowWildCard ? $by . ' LIKE ' : $by, $search, $limit);
+                    $Search = $Source::searchByField($Source::SearchWildCard ? $by . ' LIKE ' : $by, $search, $limit);
                 }
                 else
-                    $Search = $Source::searchByAnyIndex($search, $limit, $Source::SearchAllowWildCard ? 'LIKE' : '');
+                    $Search = $Source::searchByAnyIndex($search, $limit, $Source::SearchWildCard ? 'LIKE' : '');
                 $Source::limitAPISearch($Search);
                 $data = $Search->fetchAll();
                 return new Response("Found (".sizeof($data).") ".$Source::getModelName()."(s)", true, $data);
@@ -263,7 +266,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         $fields = array();
         foreach($this->getFieldList(static::Insert) as $field)
             if($field != static::Primary)
-                $fields[$field] = new APIRequiredField($Source->getModelName() . " " . $field);
+                $fields[$field] = new APIRequiredField($Source->getModelName() . " " .  $comments[$field]);
 
         if($fields) {
             $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
@@ -281,7 +284,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             $fields[static::Primary] = new APIRequiredParam("ID of the " . $Source->getModelName() . " to be updated");
             foreach($this->getFieldList(static::Update) as $field)
                 if($field != static::Primary)
-                    $fields[$field] = new APIField("Update " . $Source->getModelName() . " " . $field);
+                    $fields[$field] = new APIField("Update " . $Source->getModelName() . " " .  $comments[$field]);
             if(sizeof($fields) > 1) {
                 $Handlers->addAPI('PATCH', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
                     $request = $API->processRequest($Route);
@@ -326,7 +329,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 return new Response("Removed ".$Source::getModelName()."(s)", true, $Model);
 
             }, array(
-                'id' => new APIRequiredParam($Source->getModelName()." ID"),
+                'id' => new APIRequiredParam($Source->getModelName() . " " .  $comments[static::Primary]),
             ), "Delete a ".$this->getModelName()));
         }
 
@@ -606,7 +609,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
 
     public static function getModelName() {
-        return basename(get_called_class());
+        return static::ModelName ?: basename(get_called_class());
     }
 
     private static function getStringSearchFields() {
@@ -618,6 +621,18 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             if($types[$i] != 'i' && in_array($col, $search))
                 $fields[] = $col;
         return $fields;
+    }
+
+    private static function getFieldComments() {
+        $columns = explode(',', static::Columns);
+        if(static::Comments) {
+            $comments = explode(';', static::Comments);
+            return array_combine($columns, $comments);
+        }
+        $comments = array();
+        foreach($columns as $column)
+            $comments[$column] = ucwords(str_replace('_', ' ', $column));
+        return $comments;
     }
 }
 
