@@ -386,7 +386,7 @@ class BuildPDOTable {
 
     protected function __construct($name, $comment) {
         $this->Name = $name;
-        $this->ClassName = str_replace(' ', '', ucwords(str_replace('_', ' ', $this->Name)));
+        $this->ClassName = str_replace(' ', '', ucwords(str_replace('_', ' ', $this->Name))) . "Model";
         $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace'), $comment);
         if(!$this->Comment)
             $this->Comment = $comment;
@@ -483,6 +483,7 @@ class BuildPDOTable {
                     break;
                 }
             }
+
         if(!$this->Primary)
             Log::e(__CLASS__, "Warning: No Primary key found for Table '{$this->Name}'");
     }

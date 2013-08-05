@@ -32,7 +32,10 @@ PHP;
      */
     protected function getTables(\PDO $DB){
         $tables = array();
-        foreach($DB->query("SELECT table_name, table_comment FROM information_schema.tables WHERE table_schema='public'") as $row)
+        foreach($DB->query("SELECT table_name, obj_description(table_name::regclass) as table_comment
+        FROM information_schema.tables t
+        LEFT JOIN pg_class c on c.relname = t.table_name
+        WHERE table_schema='public'") as $row)
             $tables[] = BuildPDOTable::create($row['table_name'], $row['table_comment']);
         return $tables;
     }
@@ -60,10 +63,20 @@ group by column_name;") as $row ) {
      */
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
         $primaryCol = NULL;
-        foreach($DB->query("SELECT * FROM information_schema.columns AS c WHERE c.table_name = '{$Table->Name}';") as $row) {
+        foreach($DB->query("SELECT c.column_name, c.data_type, c.column_default, d.description as column_comment
+        FROM information_schema.columns AS c
+        LEFT JOIN (
+        SELECT c.table_schema,c.table_name,c.column_name,pgd.description
+            FROM pg_catalog.pg_statio_all_tables as st
+            inner join pg_catalog.pg_description pgd on (pgd.objoid=st.relid)
+            inner join information_schema.columns c on (pgd.objsubid=c.ordinal_position
+            and  c.table_schema=st.schemaname and c.table_name=st.relname)
+        ) d on d.column_name = c.column_name
+        WHERE c.table_name = '{$Table->Name}';") as $row) {
             $name = $row['column_name'];
             $type = stripos($row['data_type'], 'int') !== false ? 'i' : 's';
-            $Column = new BuildPDOColumn($name, $type, $row['column_comment'], stripos($row['column_default'], 'nextval(') ===0);
+            $Column = new BuildPDOColumn($name, $type, $row['column_comment']);
+            $Column->AutoInc = stripos($row['column_default'], 'nextval(') ===0;
             if($Column->AutoInc && !$primaryCol) {
                 $Column->Primary = true;
                 $primaryCol = $name;

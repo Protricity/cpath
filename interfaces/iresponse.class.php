@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 use CPath\Base;
 use CPath\Log;
 use CPath\Util;
-interface IResponse extends IJSON,IXML {
+interface IResponse extends IJSON, IXML, IText, IHTML {
     const STATUS_SUCCESS = 200;
     const STATUS_ERROR = 400;
 
@@ -40,6 +40,12 @@ interface IResponse extends IJSON,IXML {
     function addLogEntry(ILogEntry $Log);
 
     /**
+     * Get all log entries
+     * @return ILogEntry[]
+     */
+    function getLogs();
+
+    /**
      * Send response headers for this request
      * @param null $mimeType
      * @return mixed
@@ -56,6 +62,10 @@ final class IResponseHelper {
             $JSON['response'] = array();
             Util::toJSON($data, $JSON['response']);
         }
+        if($logs = $Response->getLogs()) {
+            $JSON['log'] = array();
+            Util::toJSON($logs, $JSON['log']);
+        }
     }
 
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
@@ -63,7 +73,25 @@ final class IResponseHelper {
         $xml->addChild('msg', $Response->getMessage());
         if($data = $Response->getData())
             Util::toXML($data, $xml->addChild('response'));
+        if($logs = $Response->getLogs()) {
+            foreach($logs as $log)
+                $log->toXML($xml->addChild('log'));
+        }
         return $xml;
+    }
+
+    static function renderText(IResponse $Response) {
+        echo "Status:  ", $Response->getStatusCode(), "\n";
+        echo "Message: ", $Response->getMessage(), "\n";
+        print_r($Response->getData()); // TODO: make pretty and safe
+    }
+
+    static function renderHtml(IResponse $Response) {
+        echo "<pre>";
+        echo "Status:  ", $Response->getStatusCode(), "\n";
+        echo "Message: ", htmlentities($Response->getMessage()), "\n";
+        htmlentities(print_r($Response->getData(), true)); // TODO: make pretty and safe
+        echo "</pre>";
     }
 
     static function sendHeaders(IResponse $Response, $mimeType=NULL) {

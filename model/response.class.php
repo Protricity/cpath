@@ -16,7 +16,7 @@ use CPath\Interfaces\ILogEntry;
 class Response extends ArrayObject implements IResponse {
     private $mCode, $mData=array(), $mMessage;
     /** @var ILogEntry[] */
-    private $mLog=array();
+    private $mLogs=array();
 
     /**
      * Create a new response
@@ -89,9 +89,13 @@ class Response extends ArrayObject implements IResponse {
      * @param ILogEntry $Log
      */
     function addLogEntry(ILogEntry $Log) {
-        $this->mLog[] = $Log;
+        $this->mLogs[] = $Log;
     }
 
+    /**
+     * Get all log entries
+     * @return ILogEntry[]
+     */
     function getLogs() {
         return $this->mLogs;
     }
@@ -100,27 +104,28 @@ class Response extends ArrayObject implements IResponse {
         IResponseHelper::sendHeaders($this, $mimeType);
     }
 
-    function toJSON(Array &$JSON)
-    {
+    function toJSON(Array &$JSON) {
         IResponseHelper::toJSON($this, $JSON);
-        if($this->mLog) {
-            $JSON['log'] = array();
-            Util::toJSON($this->mLog, $JSON['log']);
-        }
     }
 
-    function toXML(\SimpleXMLElement $xml)
-    {
+    function toXML(\SimpleXMLElement $xml) {
         IResponseHelper::toXML($this, $xml);
-        if($this->mLog) {
-            foreach($this->mLog as $log)
-                $log->toXML($xml->addChild('log'));
-        }
     }
 
-    function __toString() {
-        return IResponseHelper::toString($this);
-            //.implode("\n", $this->mLog);
+    /**
+     * Render Object as HTML
+     * @return void
+     */
+    function renderHtml() {
+        IResponseHelper::renderHtml($this);
+    }
+
+    /**
+     * Render Object as Plain Text
+     * @return void
+     */
+    function renderText() {
+        IResponseHelper::renderText($this);
     }
 
     // Statics

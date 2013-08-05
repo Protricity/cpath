@@ -8,12 +8,14 @@
 namespace CPath\Model;
 
 use CPath\Base;
+use CPath\Interfaces\IHTML;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
+use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
 
-class MultiException extends \Exception implements \Countable, IJSON, IXML {
+class MultiException extends \Exception implements \Countable, IJSON, IXML, IText, IHTML {
     private $mEx = array();
     public function add($ex, $key=NULL) {
         if($ex instanceof \Exception)
@@ -25,32 +27,36 @@ class MultiException extends \Exception implements \Countable, IJSON, IXML {
             $this->mEx[$key] = $ex;
     }
 
-    public function count()
-    {
+    public function count() {
         return count($this->mEx);
     }
 
     function toJSON(Array &$JSON) {
-        $JSON['response'] = array();
+        $JSON['errors'] = array();
         foreach($this->mEx as $field => $ex)
-            $JSON['response'][] = array('msg' => $ex, 'field' => $field);
-        if(Base::isDebug()) {
-            $ex = $this->getPrevious() ?: $this;
-            $trace = $ex->getTraceAsString();
-            $JSON['_debug_trace'] = current(explode("\n", $trace));
-        }
+            $JSON['errors'][] = array('msg' => $ex, 'field' => $field);
     }
 
-    function toXML(\SimpleXMLElement $xml)
-    {
-        $rxml = $xml->addChild('response');
+    function toXML(\SimpleXMLElement $xml) {
+        $rxml = $xml->addChild('errors');
         foreach($this->mEx as $field => $ex)
             $rxml->addChild('error', $ex)
                 ->addAttribute('field', $field);
-        if(Base::isDebug()) {
-            $ex = $this->getPrevious() ?: $this;
-            $trace = $ex->getTraceAsString();
-            $xml->addChild('_debug_trace', current(explode("\n", $trace)));
-        }
+    }
+
+    function renderText() {
+        $max = 0;
+        foreach($this->mEx as $field => $ex)
+            if(strlen($field) > $max) $max = strlen($field);
+        foreach($this->mEx as $field => $ex)
+            echo "(", str_pad($field, $max, ' '), ") ", $ex, "\n";
+    }
+
+    function renderHtml() {
+        $max = 0;
+        foreach($this->mEx as $field => $ex)
+            if(strlen($field) > $max) $max = strlen($field);
+        foreach($this->mEx as $field => $ex)
+            echo "(", str_pad($field, $max, ' '), ") ", $ex, "<br />";
     }
 }

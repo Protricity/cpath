@@ -453,11 +453,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     /**
      * Loads a model based on a primary key column value
      * @param $id String the primary key value to search for
+     * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      * @throws \Exception if the model does not contain primary keys
      */
-    public static function loadByPrimaryKey($id) {
+    public static function loadByPrimaryKey($id, $throwIfNotFound=true) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot load " . static::getModelName() . " Model");
         if(static::CacheEnabled
@@ -466,8 +467,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         $Model = static::search()
             ->where(static::Primary, $id)
             ->fetch();
-        if(!$Model)
-            throw new ModelNotFoundException(static::getModelName() . " '{$id}' was not found");
+        if(!$Model) {
+            if($throwIfNotFound)
+                throw new ModelNotFoundException(static::getModelName() . " '{$id}' was not found");
+            return NULL;
+        }
         if(static::CacheEnabled)
             static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
         return $Model;
@@ -477,13 +481,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * Loads a model based on a search
      * @param array $fields an array of key-value pairs to search for
      * @param string $logic 'OR' or 'AND' logic between fields
+     * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByFields(Array $fields, $logic='OR') {
+    public static function loadByFields(Array $fields, $logic='OR', $throwIfNotFound=true) {
         $Model = static::searchByFields($fields, 1, $logic)
             ->fetch();
-        if(!$Model)
+        if(!$Model && $throwIfNotFound)
             throw new ModelNotFoundException(static::getModelName() . " was not found");
         return $Model;
     }
@@ -492,23 +497,25 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * Loads a model based on a search field
      * @param $fieldName String the database field to search for
      * @param $value String the field value to search for
+     * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByField($fieldName, $value) {
-        return static::loadByFields(array($fieldName => $value));
+    public static function loadByField($fieldName, $value, $throwIfNotFound=true) {
+        return static::loadByFields(array($fieldName => $value), NULL, $throwIfNotFound);
     }
 
     /**
      * Loads a Model using all indexed fields.
      * @param mixed $search a value to search for
+     * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByAnyIndex($search) {
+    public static function loadByAnyIndex($search, $throwIfNotFound=true) {
         $Model = static::searchByAnyIndex($search)
             ->fetch();
-        if(!$Model)
+        if(!$Model && $throwIfNotFound)
             throw new ModelNotFoundException(static::getModelName() . " '{$search}' was not found");
         return $Model;
     }

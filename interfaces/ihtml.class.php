@@ -7,11 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-interface IXML {
+interface IHTML {
     /**
-     * Export Object to XML
-     * @param \SimpleXMLElement $xml the XML instance to modify
+     * Render Object as HTML
      * @return void
      */
-    function toXML(\SimpleXMLElement $xml);
+    function renderHtml();
 }

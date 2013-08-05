@@ -9,6 +9,7 @@
 namespace CPath\Handlers;
 use CPath\Handlers\Views\APIInfo;
 use CPath\Interfaces\IAPI;
+use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
@@ -93,6 +94,16 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Get captured logs
+     * @return ILogEntry[]
+     */
+    function getLogs() {
+        if($this->mLog)
+            return $this->mLog->getLogs();
+        return array();
+    }
+
+    /**
      * Sends headers, executes the request, and renders an IResponse as HTML
      * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
      * @return void
@@ -101,9 +112,10 @@ abstract class API implements IAPI {
         if(!headers_sent() && !Util::isCLI())
             header("Content-Type: text/html");
         $Render = new APIInfo();
-        //$Response = $this->executeAsResponse($request);
-        //$Response->sendHeaders();
         $Render->renderAPI($this, $Route);
+        //$Response = $this->executeAsResponse($Route);
+        //$Response->sendHeaders();
+        //$Response->renderHtml();
     }
 
     /**
@@ -142,7 +154,7 @@ abstract class API implements IAPI {
     public function renderText(IRoute $Route) {
         $Response = $this->executeAsResponse($Route);
         $Response->sendHeaders('text/plain');
-        echo $Response."\n";
+        $Response->renderText();
     }
 
     /**

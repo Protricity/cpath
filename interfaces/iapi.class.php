@@ -49,6 +49,12 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
     function captureLog($enable=true);
 
     /**
+     * Get captured logs
+     * @return ILogEntry[]
+     */
+    function getLogs();
+
+    /**
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRoute $Route the IRoute instance for this render which contains the request and args
      * @return array the processed and validated request data

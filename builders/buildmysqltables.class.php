@@ -60,7 +60,6 @@ PHP;
      * @return void
      */
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
-        $cols = array();
         foreach($DB->query("SHOW FULL COLUMNS FROM `{$Table->Name}`;") as $row) {
             $name = $row['Field'];
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
@@ -71,7 +70,8 @@ PHP;
             } else {
                 $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
             }
-            $Column = new BuildPDOColumn($name, $type, $row['Comment'], $row['Extra'] == 'auto_increment');
+            $Column = new BuildPDOColumn($name, $type, $row['Comment']);
+            $Column->AutoInc = $row['Extra'] == 'auto_increment';
             $Table->addColumn($Column);
         }
     }

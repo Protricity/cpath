@@ -29,9 +29,13 @@ abstract class PDOWhere {
         if($destField != NULL) {
             if($alias) $table .= ' '.$alias;
             else $alias = $table;
-            $sAlias = $this->alias ?: $this->table;
-            $sourceField = "{$sAlias}.{$sourceField}";
-            $destField = "{$alias}.{$destField}";
+            if(strpos($sourceField, '.') === false) {
+                $sAlias = $this->alias ?: $this->table;
+                $sourceField = "{$sAlias}.{$sourceField}";
+            }
+            if(strpos($destField, '.') === false) {
+                $destField = "{$alias}.{$destField}";
+            }
             $sourceField = "ON {$sourceField} = {$destField}";
         } else {
             if($alias) $table .= ' '.$alias;
@@ -58,12 +62,19 @@ abstract class PDOWhere {
         if(!$alias) $alias = $this->table;
 
         if($value !== NULL) {
-            $this->values[] = $value;
-            if(strpos($field, '?') === false) {
-                $e = '=';
-                if(preg_match('/([=<>!]+|like)\s*$/i', $field))
-                    $e = ' ';
-                $field .= $e . '?';
+            if(is_array($value)) {
+                if(!$value)
+                    throw new \Exception("An empty array was passed to Column '{$field}'");
+                $this->values = array_merge($this->values, $value);
+                $field .= ' in (?' . str_repeat(', ?', sizeof($this->values) - 1) . ')';
+            } else {
+                $this->values[] = $value;
+                if(strpos($field, '?') === false) {
+                    $e = '=';
+                    if(preg_match('/([=<>!]+|like)\s*$/i', $field))
+                        $e = ' ';
+                    $field .= $e . '?';
+                }
             }
         }
 
@@ -76,7 +87,8 @@ abstract class PDOWhere {
             return $this;
         } else {
             $field = str_replace('{}', $alias, $field, $c);
-            if($c==0) $field = $alias . '.' . $field;
+            if($c==0 && strpos($field, '.') === false)
+                $field = $alias . '.' . $field;
         }
         if (!$this->lastCond) {
             $this->where[] = 'AND';
