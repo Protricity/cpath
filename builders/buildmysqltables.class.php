@@ -7,13 +7,12 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Builders;
-use CPath\DataBase\PostGreSQL;
-use CPath\BuildException;
+
+
 use CPath\Base;
 use CPath\Build;
-use CPath\Interfaces\IBuilder;
 use CPath\Log;
-
+use CPath\Model\DB\PDOModel;
 
 class BuildMySQLTables extends BuildPDOTables {
     const DB_CLASSNAME = "CPath\\Model\\DB\\MysqlDatabase";
@@ -48,9 +47,9 @@ PHP;
         foreach($DB->query("SHOW KEYS FROM `{$Table->Name}`;") as $row) {
             $name = $row['Column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Index = true;
+            $Column->Flags |= PDOModel::ColumnIsIndex;
             if(stripos($row['Key_name'], 'PRIMARY') === 0)
-                $Column->Primary = true;
+                $Column->Flags |= PDOModel::ColumnIsPrimary;
         }
     }
 
@@ -62,16 +61,20 @@ PHP;
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
         foreach($DB->query("SHOW FULL COLUMNS FROM `{$Table->Name}`;") as $row) {
             $name = $row['Field'];
+            $Column = new BuildPDOColumn($name, $row['Comment']);
+            if($row['Null'] == 'YES')
+                $Column->Flags |= PDOModel::ColumnIsNull;
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
-                $enum = array();
+                $Column->EnumValues = array();
                 foreach( explode(',', $matches[1]) as $value )
-                    $enum[] = trim( $value, "'" );
-                $type = $enum;
+                    $Column->EnumValues[] = trim( $value, "'" );
+                $Column->Flags |= PDOModel::ColumnIsEnum;
             } else {
-                $type = stripos($row['Type'], 'int') !== false ? 'i' : 's';
+                if(stripos($row['Type'], 'int') !== false)
+                    $Column->Flags |= PDOModel::ColumnIsNumeric;
             }
-            $Column = new BuildPDOColumn($name, $type, $row['Comment']);
-            $Column->AutoInc = $row['Extra'] == 'auto_increment';
+            if($row['Extra'] == 'auto_increment')
+                $Column->Flags |= PDOModel::ColumnIsAutoInc;
             $Table->addColumn($Column);
         }
     }

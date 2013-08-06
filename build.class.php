@@ -178,6 +178,7 @@ class Build extends API {
         /** @var $Class \ReflectionClass */
         foreach(self::$mClasses as $Class) {
             /** @var $Builder IBuilder */
+            Log::v2(__CLASS__, "Building '{$Class->getName()}'");
             foreach(self::$mBuilders as $Builder) try {
                 $Builder->build($Class);
             } catch (\Exception $ex) {

@@ -16,6 +16,7 @@ class BuildPHPClass  {
         $mImplements = array(),
         $mConsts = array(),
         $mProps = array(),
+        $mStaticProps = array(),
         $mMethods = array(),
         $mStaticMethods = array();
 
@@ -33,15 +34,39 @@ class BuildPHPClass  {
         return $this;
     }
 
-    public function addProperty($name, $value=NULL, $visibility='protected') {
+    public function addProperty($name, $value=NULL, $visibility='protected', $static=false, $export=true) {
         if($visibility) $visibility .= ' ';
-        $this->mProps[$name] = "\t{$visibility}\${$name}" . ($value !== NULL ? var_export($value, true) : '') . ";\n";
+        if($export && ($value !== NULL)) {
+            if(is_array($value)) {
+                $i = 0;
+                $php = 'array(';
+                foreach($value as $k=>$v) {
+                    if($i) $php .= ',';
+                    if($i++ !== $k)
+                        $php .= var_export($k, true) . '=>';
+                    $php .= var_export($v, true);
+                }
+                $php .= ')';
+                $value = $php;
+            } else {
+                $value = var_export($value, true);
+            }
+            $value = str_replace("\n", '', $value);
+        }
+        if($static) $visibility .= 'static ';
+        $prop = "\t{$visibility}\${$name}" . ($value !== NULL ? ' = ' . $value : '') . ";\n";
+        $static ? $this->mStaticProps[$name] = $prop : $this->mProps[$name] = $prop;
         return $this;
     }
 
-    public function addPropertyCode($code = "") {
-        $this->mProps[] = "\t" . $code . "\n";
+    public function addPropertyCode($code = "", $static=false) {
+        $code = "\t" . $code . "\n";
+        $static ? $this->mStaticProps[] = $code : $this->mProps[] = $code;
         return $this;
+    }
+
+    public function addStaticProperty($name, $value=NULL, $visibility='protected', $export=true) {
+        return $this->addProperty($name, $value, $visibility, true, $export);
     }
 
     public function addMethod($name, $params, $content, $visibility='', $static=false) {
@@ -61,8 +86,9 @@ class BuildPHPClass  {
         return $this;
     }
 
-    public function addMethodCode($code = "") {
-        $this->mMethods[] = "\t" . $code . "\n";
+    public function addMethodCode($code = "", $static=false) {
+        $code = "\t" . $code . "\n";
+        $static ? $this->mStaticMethods[] = $code : $this->mMethods[] = $code;
         return $this;
     }
 
@@ -110,8 +136,8 @@ class BuildPHPClass  {
             $extends = ' extends ' . $extends;
         }
 
-        foreach($use as $as => $use)
-            $php .= "use {$use}" . (!is_int($as) ? ' as '.$as : '') . ";\n";
+        foreach($use as $as => $u)
+            $php .= "use {$u}" . (!is_int($as) ? ' as '.$as : '') . ";\n";
 
         $php .= "class " . $this->Name;
         $php .= $extends;
@@ -120,25 +146,35 @@ class BuildPHPClass  {
             $php .= (!$i ? ' implements ' : ', ') . $implement;
         $php .= " {\n";
 
-        $php .= "\n\t// Constants\n";
+        if($this->mConsts) {
+            $php .= "\n\t// Constants\n";
+            foreach($this->mConsts as $const)
+                $php .= $const;
+        }
 
-        foreach($this->mConsts as $const)
-            $php .= $const;
+        if($this->mProps) {
+            $php .= "\n\t// Properties\n";
+            foreach($this->mProps as $prop)
+                $php .= $prop;
+        }
 
-        $php .= "\n\t// Properties\n";
+        if($this->mStaticProps) {
+            $php .= "\n\t// Static Properties\n";
+            foreach($this->mStaticProps as $prop)
+                $php .= $prop;
+        }
 
-        foreach($this->mProps as $prop)
-            $php .= $prop;
+        if($this->mMethods) {
+            $php .= "\n\t// Methods\n";
+            foreach($this->mMethods as $method)
+                $php .= $method;
+        }
 
-        $php .= "\n\t// Methods\n";
-
-        foreach($this->mMethods as $method)
-            $php .= $method;
-
-        $php .= "\n\t// Static Methods\n";
-
-        foreach($this->mStaticMethods as $method)
-            $php .= $method;
+        if($this->mStaticMethods) {
+            $php .= "\n\t// Static Methods\n";
+            foreach($this->mStaticMethods as $method)
+                $php .= $method;
+        }
 
         $php .= "}";
         return $php;

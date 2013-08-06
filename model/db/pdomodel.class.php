@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+
 use CPath\Base;
 use CPath\Cache;
 use CPath\Handlers\API;
@@ -13,18 +14,15 @@ use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\HandlerSet;
-use CPath\Handlers\IAPIValidation;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IHandlerAggregate;
-use CPath\Interfaces\IHandlerSet;
-use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IRoutable;
+use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IXML;
 use CPath\Log;
@@ -47,9 +45,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const TableName = null;
     const ModelName = null;
     const Primary = null;
-    const Columns = null;
-    const Comments = null;
-    const Types = null;
+    const Validations = null;
 
     const SearchLimitMax = 100;
     const SearchLimit = 25;
@@ -58,13 +54,26 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     const CacheEnabled = false;
     const CacheTTL = 300;
 
-    const Search = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
-    const Insert = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
-    const Update = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
-    const Export = 'SPIndex'; // 'Public|Protected|None|Index|SPIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Search = 'SIndex'; // 'Public|Protected|None|Index|SIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Insert = 'SIndex'; // 'Public|Protected|None|Index|SIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Update = 'SIndex'; // 'Public|Protected|None|Index|SIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+    const Export = 'SIndex'; // 'Public|Protected|None|Index|SIndex|Primary|Exclude:[field1,field2]|[Include:][field1,field2]';
+
+    const ColumnIsNumeric = 0x01;
+    const ColumnIsEnum =    0x02;
+    const ColumnIsNull =    0x04;
+    const ColumnIsIndex =   0x10; // TODO: Default NotNullable Indexes to Required
+    const ColumnIsUnique =  0x20;
+    const ColumnIsPrimary = 0x40;
+    const ColumnIsAutoInc = 0x80;
+
+    const DefaultFilter =   FILTER_SANITIZE_SPECIAL_CHARS;
 
     //protected $mRow = null;
     private $mCommit = NULL;
+
+    // Static Properties (Overwritten by Model)
+    protected static $_columns;
 
     /**
      * PDOModel Constructor parameters must be optional.
@@ -75,15 +84,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     }
 
-    public function setField($field, $value, $commit=true, $validate=NULL) {
-        if($validate !== NULL) {
-            $value = filter_var($value, $validate);
-            if (!$value)
-                throw new ValidationException("Field '%s' is not in the valid format");
-        }
-        if(!$this->mCommit) $this->mCommit = array();
+    protected function updateField($field, $value, $commit=true) {
         if($this->$field == $value)
             return $this;
+        if(!$this->mCommit)
+            $this->mCommit = array();
         $this->mCommit[$field] = $value;
         if($commit)
             $this->commitFields();
@@ -91,7 +96,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         return $this;
     }
 
-    public function commitFields() {
+    protected function commitFields() {
         if(!($primary = static::Primary))
             throw new \Exception("Constant 'Primary' is not set. Cannot Update table");
         $id = $this->$primary;
@@ -150,25 +155,31 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             case 'None':
                 return array();
             case 'Index':
-                return explode(',', static::Search);
-            case 'SPIndex':
-                if(static::Primary)
-                    return array_merge((array)static::Primary, self::getStringSearchFields());
-                return self::getStringSearchFields();
+                $list = array();
+                foreach(static::$_columns as $col => $data)
+                    if($data[0] & self::ColumnIsIndex)
+                        $list[] = $col;
+                return $list;
+            case 'SIndex':
+                $list = array();
+                foreach(static::$_columns as $col => $data)
+                    if(($data[0] & self::ColumnIsIndex) && !($data[0] & self::ColumnIsNumeric))
+                        $list[] = $col;
+                return $list;
             case 'Primary':
                 return (array)static::Primary;
             case 'Exclude':
                 if(empty($tokens[1]) || !($tokens = explode(',', $tokens[1])))
                     return array();
-                return array_diff(explode(',', static::Columns), $tokens);
+                return array_diff(array_keys(static::$_columns), $tokens);
             case 'Include':
                 if(empty($tokens[1]) || !($tokens = explode(',', $tokens[1])))
                     return array();
-                return array_intersect(explode(',', static::Columns), $tokens);
+                return array_intersect(array_keys(static::$_columns), $tokens);
             default:
                 if(!$tokens[0] || !($tokens = explode(',', $tokens[0])))
                     return array();
-                return array_intersect(explode(',', static::Columns), $tokens);
+                return array_intersect(array_keys(static::$_columns), $tokens);
         }
     }
 
@@ -223,7 +234,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     function getAggregateHandler() {
         $Handlers = new PDOAPIHandlerSet(get_called_class());
         $Source = $this;
-        $comments = $this->getFieldComments();
         if(static::Primary) {
             $Handlers->addAPI('GET', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
                 $API->processRequest($Request);
@@ -235,7 +245,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                     throw new ModelNotFoundException($Source::getModelName() . " '{$Request['id']}' was not found");
                 return $data;
             }, array(
-                'id' => new APIRequiredParam($this->getModelName() . ' ' . $comments[static::Primary]),
+                'id' => new APIRequiredParam($this->getModelName() . ' ' . static::$_columns[static::Primary][1]),
             ), "Get information about this ".$this->getModelName()));
         }
 
@@ -275,7 +285,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         $fields = array();
         foreach($this->getFieldList(static::Insert) as $field)
             if($field != static::Primary)
-                $fields[$field] = new APIRequiredField($Source->getModelName() . " " .  $comments[$field]);
+                $fields[$field] = new APIField($Source->getModelName() . " " . static::$_columns[$field][1]);
 
         if($fields) {
             $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
@@ -294,7 +304,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             $fields[static::Primary] = new APIRequiredParam("ID of the " . $Source->getModelName() . " to be updated");
             foreach($this->getFieldList(static::Update) as $field)
                 if($field != static::Primary)
-                    $fields[$field] = new APIField("Update " . $Source->getModelName() . " " .  $comments[$field]);
+                    $fields[$field] = new APIField("Update " . $Source->getModelName() . " " . static::$_columns[$field][1]);
             if(sizeof($fields) > 1) {
                 $Handlers->addAPI('PATCH', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
                     $API->processRequest($Request);
@@ -309,14 +319,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                         throw new ModelNotFoundException($Source::getModelName() . " '{$id}' was not found");
 
                     foreach($Request as $field => $value)
-                        if($value !== NULL && $value !== "") {
-                            $call = 'set' . self::toTitleCase($field, true);
-                            try {
-                                $Model->$call($value, false);
-                            } catch (ValidationException $ex) {
-                                throw $ex->updateMessage($field);
-                            }
-                        }
+                        $Model->updateField($field, $value, false);
+
                     $c = $Model->commitFields();
                     if(!$c)
                         return new Response("No fields were updated for " . $Source::getModelName()." '{$id}'.", true, $Model);
@@ -338,7 +342,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 return new Response("Removed ".$Source::getModelName()."(s)", true, $Model);
 
             }, array(
-                'id' => new APIRequiredParam($Source->getModelName() . " " .  $comments[static::Primary]),
+                'id' => new APIRequiredParam($Source->getModelName() . " " . static::$_columns[static::Primary][1]),
             ), "Delete a ".$this->getModelName()));
         }
 
@@ -359,6 +363,18 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         self::$mCache = Cache::get();
     }
 
+    protected static function validateField($field, &$value, $validation=NULL) {
+        if($validation === NULL) {
+            if(isset(static::$_columns[$field][2]))
+                $validation = static::$_columns[$field][2];
+            else
+                $validation = static::DefaultFilter;
+        }
+        $value = filter_var($value, $validation);
+        if ($value === false)
+            throw new ValidationException("Field '{$field}' is not in the valid format");
+    }
+
     /**
      * Creates a new Model based on the provided row of key value pairs
      * @param array|mixed $row key value pairs to insert into new row
@@ -374,17 +390,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             if($v===null)
                 unset($row[$k]);
         try {
-            $ValidModel = new static;
             foreach($row as $field => $value)
-                if($value !== NULL && $value !== "") {
-                    $call = 'set' . self::toTitleCase($field, true);
-                    try {
-                        if(method_exists($ValidModel, $call))
-                            $ValidModel->$call($value, false);
-                    } catch (ValidationException $ex) {
-                        throw $ex->updateMessage($field);
-                    }
-                }
+                static::validateField($field, $value);
 
             if(!static::Primary) {
                 static::insert(array_keys($row))
@@ -552,7 +559,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     public static function searchByFields($fields, $limit=1, $logic='OR') {
         if($fields instanceof IArrayObject)
             $fields =$fields->getDataPath();
-        
+
         $Select = static::search();
 
         $i = 0;
@@ -580,12 +587,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             throw new \Exception("No Indexes defined in ".static::getModelName());
          $Select = static::search();
 
-        $i = 0;
-        if(is_numeric($search))
-            $keys = explode(',', static::Search);
-        else
-            $keys = static::getStringSearchFields();
+        $keys = static::getFieldList(static::Search);
 
+        $i = 0;
         foreach($keys as $key){
             if($i++) $Select->where('OR');
             if($compare) $key .= ' ' . $compare;
@@ -675,33 +679,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         return static::ModelName ?: basename(get_called_class());
     }
 
-    private static function getStringSearchFields() {
-        $columns = explode(',', static::Columns);
-        $search = explode(',', static::Search);
-        $fields = array();
-        $types = static::Types;
-        foreach($columns as $i => $col)
-            if($types[$i] != 'i' && in_array($col, $search))
-                $fields[] = $col;
-        return $fields;
-    }
-
-    private static function getFieldComments() {
-        $columns = explode(',', static::Columns);
-        $comments = array();
-        if(static::Comments) {
-            foreach(explode(';', static::Comments) as $i=>$comment)
-                $comments[$columns[$i]] = $comment ?: self::toTitleCase($columns[$i]);
-            return $comments;
-        }
-        foreach($columns as $column)
-            $comments[$column] = self::toTitleCase($column);
-        return $comments;
-    }
-
     protected static function toTitleCase($field, $noSpace=false) {
         $field = ucwords(str_replace('_', ' ', $field));
-        if(!$noSpace) return $field;
+        if(!$noSpace)
+            return $field;
         return str_replace(' ', '', $field);
     }
 }

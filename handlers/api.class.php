@@ -236,11 +236,11 @@ abstract class API implements IAPI {
             }
         }
         $request = $values;
+        $Route->setRequest($request);
 
         foreach($this->mValidations as $Validation) {
             try {
-                $values = $Validation->validate($request);
-                if(is_array($values)) $request = $values;
+                $Validation->validate($Route);
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException(null, $ex);  // TODO: null?
             }
@@ -248,7 +248,6 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
-        $Route->setRequest($request);
         return $request;
     }
 
@@ -302,18 +301,17 @@ abstract class API implements IAPI {
 interface IAPIValidation {
     /**
      * Validate and return request
-     * @param $request array the pending request to validate
-     * @return array|null return the modified array or NULL if no changes were made
+     * @param IRoute $Request the pending request to validate
      * @throws ValidationException if a validation exception occurred
      */
-    function validate($request);
+    function validate(IRoute $Request);
 }
 
 class APIValidation implements IAPIValidation {
     protected $mCallback;
     /**
      * Create an APIValidation using a callback
-     * @param Callable $callback which accepts the $request for validation
+     * @param Callable $callback which accepts the IRoute $Request for validation
      */
     function __construct($callback) {
         $this->mCallback = $callback;
@@ -321,13 +319,12 @@ class APIValidation implements IAPIValidation {
 
     /**
      * Validate and return request
-     * @param $request array the pending request to validate
-     * @return array|null return the modified array or NULL if no changes were made
+     * @param IRoute $Request the pending request to validate
      * @throws ValidationException if a validation exception occurred
      */
-    function validate($request) {
+    function validate(IRoute $Request) {
         $call = $this->mCallback;
-        return $call($request);
+        $call($Request);
     }
 }
 /**
@@ -404,9 +401,8 @@ class APIField implements IAPIField {
         return $this->mDescription;
     }
 
-
     public function validate($value) {
-        return $value;
+        return $value === "" ? NULL : $value;
     }
 }
 

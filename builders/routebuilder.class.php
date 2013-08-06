@@ -187,7 +187,8 @@ PHP;
     public function getHandlerDefaultPath(\ReflectionClass $Class=NULL) {
         if(!$Class) $Class = $this->getCurrentClass();
         $path = $Class->getConstant('Route_Path');
-        if(!$path) $path = '/'.str_replace('\\', '/', strtolower($Class->getName()));
+        if(!$path) $path = str_replace('\\', '/', strtolower($Class->getName()));
+        if($path[0] !== '/') $path = '/' . $path;
         return $path;
     }
 

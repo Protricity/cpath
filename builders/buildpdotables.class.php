@@ -15,6 +15,7 @@ use CPath\Build;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
 use CPath\Builders\Tools\BuildPHPClass;
+use CPath\Model\DB\PDOModel;
 
 
 class UpgradeException extends \Exception {}
@@ -172,20 +173,21 @@ PHP;
 
             $PHP->addConst('Primary', $Table->Primary);
 
-            $colNames = array();
-            foreach($Table->getColumns() as $Column)
-                $colNames[] = $Column->Name;
-            $PHP->addConst('Columns', implode(',', $colNames));
+            $columns = "array(";
+            $i=0;
+            foreach($Table->getColumns() as $Column) {
+                if($i++) $columns .= ',';
+                $columns .= "\n\t\t" . var_export($Column->Name, true) . ' => array(';
+                $columns .= $Column->Flags;
+                $columns .= ',' . var_export($Column->Comment ?: self::toTitleCase($Column->Name), true);
+                if($Column->Filter)
+                    $columns .= ',' . var_export($Column->Filter, true);
+                $columns .= ")";
+            }
+            $columns .= "\n\t)";
 
-            $comments = array();
-            $hasComment = false;
-            foreach($Table->getColumns() as $Column)
-                if($comments[] = $Column->Comment)
-                    $hasComment = true;
-            if($hasComment)
-                $PHP->addConst('Comments', implode(';', $comments));
+            $PHP->addStaticProperty('_columns', $columns, 'protected', false);
 
-            $types = '';
             $InsertFields = array();
             $UpdateFields = array();
             $SearchFields = array();
@@ -196,7 +198,6 @@ PHP;
                 if($Column->Update) $UpdateFields[] = $Column->Name;
                 if($Column->Search) $SearchFields[] = $Column->Name;
                 if($Column->Export) $ExportFields[] = $Column->Name;
-                $types .= $Column->Type;
             }
 
             if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
@@ -204,12 +205,10 @@ PHP;
             if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
             if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
 
-            if(!$SearchFields)
-                foreach($Table->getColumns() as $Column)
-                    if($Column->Index)
-                        $SearchFields[] = $Column->Name;
-
-            $PHP->addConst('Types', $types);
+//            if(!$SearchFields)
+//                foreach($Table->getColumns() as $Column)
+//                    if($Column->Index)
+//                        $SearchFields[] = $Column->Name;
 
             if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
             if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
@@ -225,7 +224,7 @@ PHP;
                 $PHP->addConst('Build_Ignore', false);
 
             $PHP->addConstCode();
-            $PHP->addConstCode("// Field Constants ");
+            $PHP->addConstCode("// Table Fields ");
             foreach($Table->getColumns() as $Column)
                 $PHP->addConst(strtoupper($Column->Name), $Column->Name);
 
@@ -235,11 +234,11 @@ PHP;
             foreach($Table->getColumns() as $Column) {
                 $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if(!$Column->Primary)
-                    $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->setField(\'%s\', $value, $commit%s); ', strtolower($Column->Name), ($Column->Filter ? ', '.$Column->Filter : '')));
-                if($Column->Enum) {
+                if($Column->Flags & PDOModel::ColumnIsPrimary ? false : true)
+                    $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateField(\'%s\', $value, $commit); ', strtolower($Column->Name)));
+                if($Column->EnumValues) {
                     $a = '';
-                    foreach($Column->Enum as $e)
+                    foreach($Column->EnumValues as $e)
                         $a .= ($a ? ',' : '') . var_export($e, true);
                     $PHP->addStaticMethod("get{$ucName}EnumValues", '', ' return array('.$a.'); ');
                 }
@@ -314,24 +313,23 @@ PHP;
             '$'.implode(', $', $params));
     }
 
+    static function toTitleCase($field, $noSpace=false) {
+        $field = ucwords(str_replace('_', ' ', $field));
+        if(!$noSpace) return $field;
+        return str_replace(' ', '', $field);
+    }
 }
 
 class BuildPDOColumn {
-    public $Name, $Type, $Comment, $AutoInc, $Primary, $Enum, $Index, $Insert, $Update, $Search, $Export, $Filter=NULL;
+    public $Name, $Comment, $Flags=0, $EnumValues, $Insert, $Update, $Search, $Export, $Filter=NULL;
 
-    public function __construct($name, $type, $comment, $autoInc=false) {
-        if(is_array($type)) {
-            $this->Enum = $type;
-            $type = 'e';
-        }
+    public function __construct($name, $comment) {
         $this->Name = $name;
-        $this->Type = $type;
         $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace') , $comment);
         if(!$this->Comment)
             $this->Comment = $comment;
         if($this->Comment)
             $this->Comment = str_replace(';', ':', $this->Comment);
-        $this->AutoInc = $autoInc;
     }
 
     function replace(array $matches) {
@@ -481,7 +479,7 @@ class BuildPDOTable {
 
         if(!$this->Primary)
             foreach($this->getColumns() as $Column) {
-                if($Column->Primary) {
+                if($Column->Flags & PDOModel::ColumnIsPrimary) {
                     $this->Primary = $Column->Name;
                     break;
                 }

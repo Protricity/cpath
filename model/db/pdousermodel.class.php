@@ -55,6 +55,12 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $this->mFlags = (int)$this->{static::FieldFlags};
     }
 
+    public function getUsername() { return $this->{static::FieldUsername}; }
+    public function setUsername($value, $commit=true) { return $this->updateField(static::FieldUsername, $value, $commit); }
+
+    public function getEmail() { return $this->{static::FieldEmail}; }
+    public function setEmail($value, $commit=true) { return $this->updateField(static::FieldEmail, $value, $commit, FILTER_VALIDATE_EMAIL); }
+
     function setFlag($flags, $commit=true, $remove=false) {
         if(!is_int($flags))
             throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
@@ -63,7 +69,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
             $this->mFlags |= $oldFlags;
         else
             $this->mFlags = $oldFlags & ~$flags;
-        parent::setField(static::FieldFlags, $this->mFlags, $commit);
+        $this->updateField(static::FieldFlags, $this->mFlags, $commit);
     }
 
     function checkPassword($password) {
@@ -75,7 +81,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     function changePassword($newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
             static::confirmPassword($newPassword, $confirmPassword);
-        $this->setField(static::FieldPassword, static::hashPassword($newPassword), true);
+        $this->updateField(static::FieldPassword, static::hashPassword($newPassword), true);
     }
 
     /**
@@ -111,32 +117,39 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $Handlers = parent::getAggregateHandler();
 
         $Source = $this;
-        $Handlers->addHandler('POST', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-            $request = $API->processRequest($Route);
-            $login = $request['login'];
-            $confirm = $request[static::FieldPassword.'_confirm'];
-            $pass = $request[static::FieldPassword];
-            unset($request['login']);
-            unset($request[static::FieldPassword.'_confirm']);
-            if($confirm !== NULL)
-                $Source::confirmPassword($pass, $confirm);
-            $request[static::FieldPassword] = $Source::hashPassword($pass);
-            /** @var PDOUserModel */
-            $User = parent::createFromArray($request);
-            if($login) {
-                $Source::login($request[static::FieldUsername], $pass);
-                return new Response("Created and logged in user '".$request[static::FieldUsername]."' successfully", true, $User);
-            }
-            return new Response("Created user '".$request[static::FieldUsername]."' successfully", true, $User);
-        }, array(
+
+        $fields = array(
             static::FieldUsername => new APIRequiredField("Username"),
             static::FieldEmail => new APIRequiredField("Email Address"),
-            static::FieldPassword => new APIRequiredField("Password"),
-            static::FieldPassword.'_confirm' => new APIField("Confirm Password"),
-            'login' => new APIField("Log in after"),
-        ), "Create a new ".$this->getModelName()), true);
+        );
 
-        $Handlers->addHandler('POST login', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+        foreach($this->getFieldList(static::Insert) as $field)
+            if($field != static::Primary && !isset($field[$field]))
+                $fields[$field] = new APIField($Source->getModelName() . " " .  static::$_columns[$field][1]);
+
+        $fields[static::FieldPassword] = new APIRequiredField("Password");
+        $fields[static::FieldPassword.'_confirm'] = new APIRequiredField("Confirm Password");
+        $fields['login'] = new APIField("Log in after");
+
+        $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+            $API->processRequest($Request);
+            $login = $Request->pluck('login');
+            $confirm = $Request->pluck(static::FieldPassword.'_confirm');
+            $pass = $Request[static::FieldPassword];
+            if($confirm !== NULL)
+                $Source::confirmPassword($pass, $confirm);
+            $Request[static::FieldPassword] = $Source::hashPassword($pass);
+            /** @var PDOUserModel $User */
+            $User = parent::createFromArray($Request);
+            if($login) {
+                $Source::login($User->getUsername(), $pass);
+                return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
+            }
+            return new Response("Created user '".$User->getUsername()."' successfully", true, $User);
+        }, $fields, "Create a new ".$this->getModelName()), true);
+
+
+        $Handlers->addAPI('POST login', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
             $request = $API->processRequest($Route);
             /** @var PDOUserModel $User  */
             $User = $Source::login($request['name'], $request['password']);

@@ -13,6 +13,7 @@ use CPath\Base;
 use CPath\Build;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
+use CPath\Model\DB\PDOModel;
 
 
 class BuildPGTables extends BuildPDOTables {
@@ -52,7 +53,7 @@ where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a
 group by column_name;") as $row ) {
             $name = $row['column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Index = true;
+            $Column->Flags |= PDOModel::ColumnIsIndex;
         }
     }
 
@@ -73,12 +74,14 @@ group by column_name;") as $row ) {
             and  c.table_schema=st.schemaname and c.table_name=st.relname)
         ) d on d.column_name = c.column_name
         WHERE c.table_name = '{$Table->Name}';") as $row) {
-            $name = $row['column_name'];
-            $type = stripos($row['data_type'], 'int') !== false ? 'i' : 's';
-            $Column = new BuildPDOColumn($name, $type, $row['column_comment']);
-            $Column->AutoInc = stripos($row['column_default'], 'nextval(') ===0;
-            if($Column->AutoInc && !$primaryCol) {
-                $Column->Primary = true;
+            $name = $row['column_name']; // TODO: get NULL $Column->Flags |= PDOModel::ColumnIsNull;
+            $Column = new BuildPDOColumn($name, $row['column_comment']);
+            if(stripos($row['data_type'], 'int') !== false)
+                $Column->Flags |= PDOModel::ColumnIsNumeric;
+            if(stripos($row['column_default'], 'nextval(') ===0)
+                $Column->Flags |= PDOModel::ColumnIsAutoInc;
+            if(($Column->Flags & PDOModel::ColumnIsAutoInc) && !$primaryCol) {
+                $Column->Flags |= PDOModel::ColumnIsPrimary;
                 $primaryCol = $name;
             }
             $Table->addColumn($Column);
