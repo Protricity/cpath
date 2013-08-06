@@ -14,8 +14,10 @@ use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\HandlerSet;
+use CPath\Handlers\IAPIValidation;
 use CPath\Handlers\SimpleAPI;
 use CPath\Handlers\ValidationException;
+use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRoute;
@@ -366,7 +368,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @throws ValidationException if a field fails to validate
      */
     public static function createFromArray($row) {
-       foreach($row as $k=>$v)
+        if($row instanceof IArrayObject)
+            $row = $row->getDataPath();
+        foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);
         try {
@@ -479,13 +483,13 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Loads a model based on a search
-     * @param array $fields an array of key-value pairs to search for
+     * @param array|mixed $fields an array of key-value pairs to search for
      * @param string $logic 'OR' or 'AND' logic between fields
      * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByFields(Array $fields, $logic='OR', $throwIfNotFound=true) {
+    public static function loadByFields($fields, $logic='OR', $throwIfNotFound=true) {
         $Model = static::searchByFields($fields, 1, $logic)
             ->fetch();
         if(!$Model && $throwIfNotFound)
@@ -545,7 +549,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
      * @param string $logic 'OR' or 'AND' logic between fields
      * @return PDOSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    public static function searchByFields(Array $fields, $limit=1, $logic='OR') {
+    public static function searchByFields($fields, $limit=1, $logic='OR') {
+        if($fields instanceof IArrayObject)
+            $fields =$fields->getDataPath();
+        
         $Select = static::search();
 
         $i = 0;

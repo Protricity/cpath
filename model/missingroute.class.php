@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Model;
 use CPath\Builders\RouteBuilder;
+use CPath\Handlers\InvalidRouteException;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\NoRoutesFoundException;
 use CPath\Util;
@@ -15,7 +16,7 @@ use CPath\Util;
  * Class MissingRoute - a placeholder for missing routes
  * @package CPath
  */
-class MissingRoute implements IRoute{
+class MissingRoute extends ArrayObject implements IRoute{
     private $mRoutePath;
     public function __construct($routePath) {
         $this->mRoutePath = $routePath;
@@ -38,4 +39,5 @@ class MissingRoute implements IRoute{
     function getNextArg() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function setRequest(Array $request) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getRequest() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    protected function &getArray() { throw new InvalidRouteException("File request was passed to Script"); }
 }

@@ -15,7 +15,7 @@ use CPath\Util;
  * Class Route - a route entry
  * @package CPath
  */
-class FileRequestRoute implements IRoute{
+class FileRequestRoute extends MissingRoute implements IRoute{
     private $mRoutePath;
     public function __construct($routePrefixPath) {
         $this->mRoutePath = $routePrefixPath;
@@ -29,13 +29,5 @@ class FileRequestRoute implements IRoute{
     public function render(Array $request=NULL) {
         header("HTTP/1.0 404 File request was passed to Script");
     }
-
-    function match($requestPath) { throw new InvalidRouteException("File request was passed to Script"); }
-    function getNextArg() { throw new InvalidRouteException("File request was passed to Script"); }
-    function getPrefix() { throw new InvalidRouteException("File request was passed to Script"); }
-    function getDestination() { throw new InvalidRouteException("File request was passed to Script"); }
-    function setRequest(Array $request) { throw new InvalidRouteException("File request was passed to Script"); }
-    function getRequest() { throw new InvalidRouteException("File request was passed to Script"); }
-    function getHandler() { throw new InvalidRouteException("File request was passed to Script"); }
 
 }
