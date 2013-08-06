@@ -22,44 +22,63 @@ use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Log;
 use CPath\Model\Response;
 use CPath\Util;
-
+/** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}
+
+/** Throw when the username or password does not match */
 class IncorrectUsernameOrPasswordException extends \Exception {
     public function __construct($msg="The username, email or password was not found") {
         parent::__construct($msg);
     }
 }
+/** Throw when the password and confirmation password do not match */
 class PasswordsDoNotMatchException extends \Exception {
     public function __construct($msg="Please make sure the passwords match") {
         parent::__construct($msg);
     }
 }
 
+/**
+ * Class PDOUserModel
+ * A PDOModel for User Account Tables
+ * Provides additional user-specific functionality and API endpoints
+ * @package CPath\Model\DB
+ */
 abstract class PDOUserModel extends PDOModel implements IUser {
 
-    const FieldID = NULL;
-    const FieldUsername = NULL;
-    const FieldEmail = NULL;
-    const FieldPassword = NULL;
-    const FieldFlags = NULL;
+    // User-specific column
+    /** (primary int) The User Account integer identifier */
+    const ColumnID = NULL;
+    /** (string) The username column */
+    const ColumnUsername = NULL;
+    /** (string) The email address column */
+    const ColumnEmail = NULL;
+    /** (string) The password column*/
+    const ColumnPassword = NULL;
+    /** (int) The account flags column */
+    const ColumnFlags = NULL;
 
+    /** Enable cache for user accounts by default */
     const CacheEnabled = true;
 
+    /** Specify the IUserSession class or model */
     const SessionClass = NULL;
 
+    /** @var int User Account flags */
     private $mFlags = 0;
+
     /** @var PDOUserModel[] */
     private static $mSession = array();
 
     public function __construct() {
-        $this->mFlags = (int)$this->{static::FieldFlags};
+        $this->mFlags = (int)$this->{static::ColumnFlags};
     }
 
-    public function getUsername() { return $this->{static::FieldUsername}; }
-    public function setUsername($value, $commit=true) { return $this->updateField(static::FieldUsername, $value, $commit); }
+    public function getUsername() { return $this->{static::ColumnUsername}; }
+    public function setUsername($value, $commit=true) { return $this->updateField(static::ColumnUsername, $value, $commit); }
 
-    public function getEmail() { return $this->{static::FieldEmail}; }
-    public function setEmail($value, $commit=true) { return $this->updateField(static::FieldEmail, $value, $commit, FILTER_VALIDATE_EMAIL); }
+    public function getEmail() { return $this->{static::ColumnEmail}; }
+    public function setEmail($value, $commit=true) { return $this->updateField(static::ColumnEmail, $value, $commit, FILTER_VALIDATE_EMAIL); }
 
     function setFlag($flags, $commit=true, $remove=false) {
         if(!is_int($flags))
@@ -69,11 +88,11 @@ abstract class PDOUserModel extends PDOModel implements IUser {
             $this->mFlags |= $oldFlags;
         else
             $this->mFlags = $oldFlags & ~$flags;
-        $this->updateField(static::FieldFlags, $this->mFlags, $commit);
+        $this->updateField(static::ColumnFlags, $this->mFlags, $commit);
     }
 
     function checkPassword($password) {
-        $hash = $this->{static::FieldPassword};
+        $hash = $this->{static::ColumnPassword};
         if(static::hashPassword($password, $hash) != $hash)
             throw new IncorrectUsernameOrPasswordException();
     }
@@ -81,7 +100,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     function changePassword($newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
             static::confirmPassword($newPassword, $confirmPassword);
-        $this->updateField(static::FieldPassword, static::hashPassword($newPassword), true);
+        $this->updateField(static::ColumnPassword, static::hashPassword($newPassword), true);
     }
 
     /**
@@ -119,26 +138,26 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $Source = $this;
 
         $fields = array(
-            static::FieldUsername => new APIRequiredField("Username"),
-            static::FieldEmail => new APIRequiredField("Email Address"),
+            static::ColumnUsername => new APIRequiredField("Username"),
+            static::ColumnEmail => new APIRequiredField("Email Address"),
         );
 
         foreach($this->getFieldList(static::Insert) as $field)
             if($field != static::Primary && !isset($field[$field]))
                 $fields[$field] = new APIField($Source->getModelName() . " " .  static::$_columns[$field][1]);
 
-        $fields[static::FieldPassword] = new APIRequiredField("Password");
-        $fields[static::FieldPassword.'_confirm'] = new APIRequiredField("Confirm Password");
+        $fields[static::ColumnPassword] = new APIRequiredField("Password");
+        $fields[static::ColumnPassword.'_confirm'] = new APIRequiredField("Confirm Password");
         $fields['login'] = new APIField("Log in after");
 
         $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
             $API->processRequest($Request);
             $login = $Request->pluck('login');
-            $confirm = $Request->pluck(static::FieldPassword.'_confirm');
-            $pass = $Request[static::FieldPassword];
+            $confirm = $Request->pluck(static::ColumnPassword.'_confirm');
+            $pass = $Request[static::ColumnPassword];
             if($confirm !== NULL)
                 $Source::confirmPassword($pass, $confirm);
-            $Request[static::FieldPassword] = $Source::hashPassword($pass);
+            $Request[static::ColumnPassword] = $Source::hashPassword($pass);
             /** @var PDOUserModel $User */
             $User = parent::createFromArray($Request);
             if($login) {
@@ -153,7 +172,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
             $request = $API->processRequest($Route);
             /** @var PDOUserModel $User  */
             $User = $Source::login($request['name'], $request['password']);
-            return new Response("Logged in as user '".$request[static::FieldUsername]."' successfully", true, $User);
+            return new Response("Logged in as user '".$request[static::ColumnUsername]."' successfully", true, $User);
         }, array(
             'name' => new APIRequiredParam("Username or Email Address"),
             'password' => new APIRequiredParam("Password")
@@ -228,14 +247,14 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      */
     static function loadGuestAccount(Array $insertFields=array()) {
         /** @var PDOUserModel $User  */
-        $User = static::searchByField(static::FieldUsername, 'guest')->fetch();
+        $User = static::searchByField(static::ColumnUsername, 'guest')->fetch();
         if(!$User) {
-            if(!isset($insertFields[static::FieldFlags]))
-                $insertFields[static::FieldFlags] = 0;
-            $insertFields[static::FieldFlags] |= static::FlagGuest;
+            if(!isset($insertFields[static::ColumnFlags]))
+                $insertFields[static::ColumnFlags] = 0;
+            $insertFields[static::ColumnFlags] |= static::FlagGuest;
             $User = static::createFromArray($insertFields + array(
-                static::FieldUsername => 'guest',
-                static::FieldEmail => 'guest@noemail.com',
+                static::ColumnUsername => 'guest',
+                static::ColumnEmail => 'guest@noemail.com',
             ));
         }
         $User->setFlag(static::FlagGuest);
@@ -254,8 +273,8 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     public static function login($search, $password, $expireInSeconds=NULL) {
         /** @var PDOUserModel $User */
         $User = static::searchByFields(array(
-            static::FieldUsername => $search,
-            static::FieldEmail => $search,
+            static::ColumnUsername => $search,
+            static::ColumnEmail => $search,
         ))->fetch();
 
         if(!$User)

@@ -363,6 +363,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         self::$mCache = Cache::get();
     }
 
+
+    /**
+     * Validate a field value using compiled configuration
+     * @param String $field the name of the field to validate
+     * @param String $value
+     * @param mixed|null $validation the validation to check, or null for default validation
+     * @throws \CPath\Handlers\ValidationException
+     */
     protected static function validateField($field, &$value, $validation=NULL) {
         if($validation === NULL) {
             if(isset(static::$_columns[$field][2]))
@@ -619,7 +627,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             static::$mCache->remove(get_called_class() . ':id:' . $id);
     }
 
-
+    /**
+     * Remove the row associated with a model from the database
+     * @param PDOModel $Model the model to remove
+     * @throws \Exception if no primary key is identified for this model
+     */
     protected static function removeModel(PDOModel $Model) {
         if(!static::Primary)
             throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
@@ -675,10 +687,20 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     protected static function processAPIDelete(PDOWhere $Select, IRoute $Request) { static::processAPI($Select, $Request); }
 
 
+    /**
+     * Returns the model name from comment or the class name
+     * @return string the model name
+     */
     public static function getModelName() {
         return static::ModelName ?: basename(get_called_class());
     }
 
+    /**
+     * Formats an underscored_field into TitleCase
+     * @param String $field the field to format
+     * @param bool $noSpace if true, all spaces are removed
+     * @return mixed|string
+     */
     protected static function toTitleCase($field, $noSpace=false) {
         $field = ucwords(str_replace('_', ' ', $field));
         if(!$noSpace)
@@ -688,14 +710,29 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 }
 PDOModel::init();
 
-
+/**
+ * Custom select object returns PDOModel instances instead of arrays
+ * Class PDOSelectObject the class to instantiate
+ * @package CPath\Model\DB
+ */
 class PDOSelectObject extends PDOSelect {
     private $mClass;
+
+    /**
+     * Create a new PDOSelectObject
+     * @param String $table the table to perform the query on
+     * @param \PDO $DB the database instance
+     * @param String $Class The class to instantiate
+     */
     public function __construct($table, \PDO $DB, $Class) {
         parent::__construct($table, $DB, array($table . '.*'));
         $this->mClass = $Class;
     }
 
+    /**
+     * Execute this query
+     * @return $this|\PDOStatement
+     */
     public function exec() {
         parent::exec();
         $this->stmt->setFetchMode(\PDO::FETCH_CLASS, $this->mClass);
