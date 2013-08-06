@@ -9,4 +9,11 @@ namespace CPath\Interfaces;
 
 interface IArrayObject extends \ArrayAccess, \IteratorAggregate, \Countable {
 
+    /**
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getData(0, 'key') gets $data[0]['key'];
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException
+     */
+    function &getDataPath($_path=NULL);
 }

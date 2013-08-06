@@ -13,12 +13,49 @@ use CPath\Interfaces\IArrayObject;
 abstract class ArrayObject implements IArrayObject {
 
     /**
+     * Return a reference to this object's associative array
+     * @return array the associative array
+     */
+    abstract protected function &getArray();
+
+    /**
      * @param mixed|NULL $_path optional varargs specifying a path to data
      * Example: ->getData(0, 'key') gets $data[0]['key'];
      * @return mixed the data array or targeted data specified by path
      * @throws \InvalidArgumentException if the data path doesn't exist
      */
-    abstract function &getData($_path=NULL);
+    function &getDataPath($_path=NULL) {
+        if($_path === NULL)
+            return $this->getArray();
+        $data =& $this->getArray();
+        foreach(func_get_args() as $arg) {
+            if(!is_array($data) || !isset($data[$arg]))
+                throw new \InvalidArgumentException("Invalid data path at '{$arg}': " . implode('.', func_get_args()));
+            $data = &$data[$arg];
+        }
+        return $data;
+    }
+
+    /**
+     * Remove an element from an array and return its value
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->pluck(0, 'key') removes $data[0]['key'] and returns it's value;
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    public function pluck($_path) {
+        $data =& $this->getArray();
+        $args = func_get_args();
+        $last = array_pop($args);
+        foreach($args as $arg) {
+            if(!is_array($data) || !isset($data[$arg]))
+                throw new \InvalidArgumentException("Invalid data path at '{$arg}': " . implode('.', func_get_args()));
+            $data = &$data[$arg];
+        }
+        $value = $data[$last];
+        unset($data[$last]);
+        return $value;
+    }
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -33,7 +70,7 @@ abstract class ArrayObject implements IArrayObject {
      * The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset) {
-        $data = &$this->getData();
+        $data = &$this->getArray();
         return isset($data[$offset]);
     }
 
@@ -47,7 +84,7 @@ abstract class ArrayObject implements IArrayObject {
      * @return mixed Can return all value types.
      */
     public function offsetGet($offset) {
-        $data = &$this->getData();
+        $data = &$this->getArray();
         return $data[$offset];
     }
 
@@ -64,7 +101,7 @@ abstract class ArrayObject implements IArrayObject {
      * @return void
      */
     public function offsetSet($offset, $value) {
-        $data = &$this->getData();
+        $data = &$this->getArray();
         if (is_null($offset))
             $data[] = $value;
         else
@@ -81,7 +118,7 @@ abstract class ArrayObject implements IArrayObject {
      * @return void
      */
     public function offsetUnset($offset) {
-        $data = &$this->getData();
+        $data = &$this->getArray();
         unset($data[$offset]);
     }
 
@@ -93,7 +130,7 @@ abstract class ArrayObject implements IArrayObject {
      * <b>Traversable</b>
      */
     public function getIterator() {
-        return new \ArrayIterator($this->getData());
+        return new \ArrayIterator($this->getArray());
     }
 
     /**
@@ -106,6 +143,9 @@ abstract class ArrayObject implements IArrayObject {
      * The return value is cast to an integer.
      */
     public function count() {
-        return count($this->getData());
+        return count($this->getArray());
     }
+
+    // Statics
+
 }

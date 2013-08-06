@@ -39,7 +39,7 @@ class ModelNotFoundException extends \Exception {}
 class ModelAlreadyExistsException extends \Exception {}
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHandlerAggregate, IRoutable {
-    const Build_Ignore = true; // TODO: Title case
+    const Build_Ignore = true;
     //const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
     const TableName = null;
@@ -223,14 +223,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         $Source = $this;
         $comments = $this->getFieldComments();
         if(static::Primary) {
-            $Handlers->addAPI('GET', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-                $request = $API->processRequest($Route);
+            $Handlers->addAPI('GET', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+                $API->processRequest($Request);
                 $Search = $Source::search();
-                $Search->where($Source::Primary, $request['id']);
-                $Source::limitAPIGet($Search);
+                $Search->where($Source::Primary, $Request['id']);
+                $Source::processAPIGet($Search, $Request);
                 $data = $Search->fetch();
                 if(!$data)
-                    throw new ModelNotFoundException($Source::getModelName() . " '{$request['id']}' was not found");
+                    throw new ModelNotFoundException($Source::getModelName() . " '{$Request['id']}' was not found");
                 return $data;
             }, array(
                 'id' => new APIRequiredParam($this->getModelName() . ' ' . $comments[static::Primary]),
@@ -238,12 +238,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
         }
 
         if(static::Search) {
-            $Handlers->addAPI('GET search', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-                $request = $API->processRequest($Route);
-                $limit = $request['limit'];
+            $Handlers->addAPI('GET search', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+                $API->processRequest($Request);
+                $limit = $Request['limit'];
                 if($limit < 1 || $limit > $Source::SearchLimitMax)
                     $limit = $Source::SearchLimit;
-                $search = $request['search'];
+                $search = $Request['search'];
                 if($Source::SearchWildCard) {
                     if(strpos($search, '*') !== false)
                         $search = str_replace('*', '%', $search);
@@ -251,7 +251,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                         $search .= '%';
                 }
 
-                if($by = ($request['search_by'])) {
+                if($by = ($Request['search_by'])) {
                     $keys = explode(',', $Source::Search);
                     if(!in_array($by, $keys))
                         throw new ValidationException("Invalid 'search_by'. Allowed: [".$Source::Search."]");
@@ -260,7 +260,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 }
                 else
                     $Search = $Source::searchByAnyIndex($search, $limit, $Source::SearchWildCard ? 'LIKE' : '');
-                $Source::limitAPISearch($Search);
+                $Source::processAPISearch($Search, $Request);
                 $data = $Search->fetchAll();
                 return new Response("Found (".sizeof($data).") ".$Source::getModelName()."(s)", true, $data);
             }, array(
@@ -276,13 +276,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 $fields[$field] = new APIRequiredField($Source->getModelName() . " " .  $comments[$field]);
 
         if($fields) {
-            $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-                $request = $API->processRequest($Route);
-                $Model = $Source::createFromArray($request);
+            $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+                $API->processRequest($Request);
+                $Source::processAPIPost($Request);
+                $Model = $Source::createFromArray($Request);
                 $id = '';
                 if($field = $Source::Primary)
                     $id = " '" . $Model->$field . "'";
-                return new Response("Created " . $Source::getModelName() . "{$id} Sucessfully.", true, $Model);
+                return new Response("Created " . $Source::getModelName() . "{$id} Successfully.", true, $Model);
             }, $fields, "Create a new ".$this->getModelName()));
         }
 
@@ -293,22 +294,21 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
                 if($field != static::Primary)
                     $fields[$field] = new APIField("Update " . $Source->getModelName() . " " .  $comments[$field]);
             if(sizeof($fields) > 1) {
-                $Handlers->addAPI('PATCH', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-                    $request = $API->processRequest($Route);
-                    $id = $request[$Source::Primary];
-                    unset($request[$Source::Primary]);
+                $Handlers->addAPI('PATCH', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+                    $API->processRequest($Request);
+                    $id = $Request->pluck($Source::Primary);
 
                     $Search = $Source::search();
                     $Search->where($Source::Primary, $id);
-                    $Source::limitAPIGet($Search);
+                    $Source::processAPIPatch($Search, $Request);
                     /** @var PDOModel $Model */
                     $Model = $Search->fetch();
                     if(!$Model)
                         throw new ModelNotFoundException($Source::getModelName() . " '{$id}' was not found");
 
-                    foreach($request as $field => $value)
+                    foreach($Request as $field => $value)
                         if($value !== NULL && $value !== "") {
-                            $call = 'set' . str_replace('_', '', $field);
+                            $call = 'set' . self::toTitleCase($field, true);
                             try {
                                 $Model->$call($value, false);
                             } catch (ValidationException $ex) {
@@ -324,14 +324,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             }
 
 
-            $Handlers->addAPI('DELETE', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-                $request = $API->processRequest($Route);
+            $Handlers->addAPI('DELETE', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+                $API->processRequest($Request);
                 $Search = $Source::search();
-                $Search->where($Source::Primary, $request['id']);
-                $Source::limitAPIRemove($Search);
+                $Search->where($Source::Primary, $Request['id']);
+                $Source::processAPIDelete($Search, $Request);
                 $Model = $Search->fetch();
                 if(!$Model)
-                    throw new ModelNotFoundException($Source::getModelName() . " '{$request['id']}' was not found");
+                    throw new ModelNotFoundException($Source::getModelName() . " '{$Request['id']}' was not found");
                 $Source::removeModel($Model);
                 return new Response("Removed ".$Source::getModelName()."(s)", true, $Model);
 
@@ -359,13 +359,13 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     /**
      * Creates a new Model based on the provided row of key value pairs
-     * @param array $row key value pairs to insert into new row
+     * @param array|mixed $row key value pairs to insert into new row
      * @return PDOModel|null returns NULL if no primary key is available
      * @throws ModelAlreadyExistsException
      * @throws \Exception|\PDOException
      * @throws ValidationException if a field fails to validate
      */
-    public static function createFromArray(Array $row) {
+    public static function createFromArray($row) {
        foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);
@@ -373,7 +373,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
             $ValidModel = new static;
             foreach($row as $field => $value)
                 if($value !== NULL && $value !== "") {
-                    $call = 'set' . str_replace('_', '', $field);
+                    $call = 'set' . self::toTitleCase($field, true);
                     try {
                         if(method_exists($ValidModel, $call))
                             $ValidModel->$call($value, false);
@@ -616,28 +616,52 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
     }
 
     /**
-     * Override this to limit all default API 'search', 'get', and 'remove' calls
+     * Override this to limit all default API 'GET', 'GET search', 'PATCH', and 'DELETE' calls by limiting the queries
      * @param PDOWhere $Select the statement to limit.
+     * @param IRoute $Request The api request
+     * @return void
      */
-    protected static function limitAPI(PDOWhere $Select) {}
+    protected static function processAPI(PDOWhere $Select, IRoute $Request) { }
 
     /**
-     * Override this to limit all default API 'search' calls
+     * Override this to limit all default API 'GET' calls
+     * Modify $Request to update the request (i.e. unset($Request['id']); $Request['field'] = 'value';)
      * @param PDOWhere $Select the statement to limit.
+     * @param IRoute $Request The api request to process and validate
+     * @return void
      */
-    protected static function limitAPISearch(PDOWhere $Select) { static::limitAPI($Select); }
+    protected static function processAPIGet(PDOWhere $Select, IRoute $Request) { static::processAPI($Select, $Request); }
 
     /**
-     * Override this to limit all default API 'get' calls
+     * Override this to limit all default API 'GET search' calls
      * @param PDOWhere $Select the statement to limit.
+     * @param IRoute $Request The api request to process and validate
+     * @return void
      */
-    protected static function limitAPIGet(PDOWhere $Select) { static::limitAPI($Select); }
+    protected static function processAPISearch(PDOWhere $Select, IRoute $Request) { static::processAPIGet($Select, $Request); }
 
     /**
-     * Override this to limit all default API 'remove' calls
-     * @param PDOWhere $Select the statement to limit.
+     * Override this to change or validate the request all default API 'POST' calls
+     * @param IRoute $Request The api request to process and validate
+     * @return void
      */
-    protected static function limitAPIRemove(PDOWhere $Select) { static::limitAPI($Select); }
+    protected static function processAPIPost(IRoute $Request) { }
+
+    /**
+     * Override this to limit all default API 'PATCH' calls
+     * @param PDOWhere $Select the statement to limit.
+     * @param IRoute $Request The api request to process and validate
+     * @return void
+     */
+    protected static function processAPIPatch(PDOWhere $Select, IRoute $Request) { static::processAPIGet($Select, $Request); }
+
+    /**
+     * Override this to limit all default API 'DELETE' calls
+     * @param PDOWhere $Select the statement to limit.
+     * @param IRoute $Request The api request to process and validate
+     * @return void
+     */
+    protected static function processAPIDelete(PDOWhere $Select, IRoute $Request) { static::processAPI($Select, $Request); }
 
 
     public static function getModelName() {
@@ -657,14 +681,21 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IHan
 
     private static function getFieldComments() {
         $columns = explode(',', static::Columns);
-        if(static::Comments) {
-            $comments = explode(';', static::Comments);
-            return array_combine($columns, $comments);
-        }
         $comments = array();
+        if(static::Comments) {
+            foreach(explode(';', static::Comments) as $i=>$comment)
+                $comments[$columns[$i]] = $comment ?: self::toTitleCase($columns[$i]);
+            return $comments;
+        }
         foreach($columns as $column)
-            $comments[$column] = ucwords(str_replace('_', ' ', $column));
+            $comments[$column] = self::toTitleCase($column);
         return $comments;
+    }
+
+    protected static function toTitleCase($field, $noSpace=false) {
+        $field = ucwords(str_replace('_', ' ', $field));
+        if(!$noSpace) return $field;
+        return str_replace(' ', '', $field);
     }
 }
 PDOModel::init();

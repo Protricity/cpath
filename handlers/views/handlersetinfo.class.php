@@ -33,7 +33,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
 
     function render(IRoute $HandlerRoute)
     {
-        $route = $HandlerRoute->getPrefix();
+        $handlerRoute = $HandlerRoute->getPrefix();
         if(!$apiClass = $HandlerRoute->getNextArg())
             die("No API Class passed to ".__CLASS__);
         $Source = new $apiClass;
@@ -76,12 +76,12 @@ class HandlerSetInfo implements IHandler, ILogListener {
 ?><html>
     <head>
         <base href="<?php echo $basePath; ?>" />
-        <title><?php echo $route; ?></title>
+        <title><?php echo $handlerRoute; ?></title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
         <link rel="stylesheet" href="<?php echo $basePath; ?>libs/apistyle.css" />
     </head>
     <body>
-        <h1><?php echo $route."<br />"; ?></h1>
+        <h1><?php echo $handlerRoute."<br />"; ?></h1>
 
         <ul class='field-table'>
             <li class='field-header clearfix'>

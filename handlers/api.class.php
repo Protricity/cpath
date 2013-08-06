@@ -170,10 +170,19 @@ abstract class API implements IAPI {
      * Add an API Field.
      * @param $name string name of the Field
      * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
+     * @param boolean|int $prepend Set true to prepend
      * @return $this Return the class instance
      */
-    public function addField($name, IAPIField $Field) {
-        $this->mFields[$name] = $Field;
+    public function addField($name, IAPIField $Field, $prepend=false) {
+        if($prepend) {
+            $old = $this->mFields;
+            $this->mFields = array();
+            $this->mFields[$name] = $Field;
+            foreach($old as $k=>$v)
+                $this->mFields[$k] = $v;
+        } else {
+            $this->mFields[$name] = $Field;
+        }
         return $this;
     }
 
@@ -239,6 +248,7 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
+        $Route->setRequest($request);
         return $request;
     }
 

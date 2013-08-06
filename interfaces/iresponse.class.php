@@ -31,7 +31,7 @@ interface IResponse extends IJSON, IXML, IText, IHTML {
      * @return mixed the data array or targeted data specified by path
      * @throws \InvalidArgumentException
      */
-    function &getData($_path=NULL);
+    function &getDataPath($_path=NULL);
 
     /**
      * Add a log entry to the response
@@ -58,7 +58,7 @@ final class IResponseHelper {
     static function toJSON(IResponse $Response, Array &$JSON) {
         $JSON['status'] = $Response->getStatusCode() == IResponse::STATUS_SUCCESS;
         $JSON['msg'] = $Response->getMessage();
-        if($data = $Response->getData()) {
+        if($data = $Response->getDataPath()) {
             $JSON['response'] = array();
             Util::toJSON($data, $JSON['response']);
         }
@@ -71,7 +71,7 @@ final class IResponseHelper {
     static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
         $xml->addChild('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addChild('msg', $Response->getMessage());
-        if($data = $Response->getData())
+        if($data = $Response->getDataPath())
             Util::toXML($data, $xml->addChild('response'));
         if($logs = $Response->getLogs()) {
             foreach($logs as $log)
@@ -83,14 +83,14 @@ final class IResponseHelper {
     static function renderText(IResponse $Response) {
         echo "Status:  ", $Response->getStatusCode(), "\n";
         echo "Message: ", $Response->getMessage(), "\n";
-        print_r($Response->getData()); // TODO: make pretty and safe
+        print_r($Response->getDataPath()); // TODO: make pretty and safe
     }
 
     static function renderHtml(IResponse $Response) {
         echo "<pre>";
         echo "Status:  ", $Response->getStatusCode(), "\n";
         echo "Message: ", htmlentities($Response->getMessage()), "\n";
-        htmlentities(print_r($Response->getData(), true)); // TODO: make pretty and safe
+        htmlentities(print_r($Response->getDataPath(), true)); // TODO: make pretty and safe
         echo "</pre>";
     }
 
@@ -113,6 +113,6 @@ final class IResponseHelper {
     static function toString(IResponse $Response) {
         return
             $Response->getStatusCode() . " " . $Response->getMessage()
-            . (Base::isDebug() ? "\n" . print_r($Response->getData() ?: NULL, true) : ''); // TODO: IText
+            . (Base::isDebug() ? "\n" . print_r($Response->getDataPath() ?: NULL, true) : ''); // TODO: IText
     }
 }

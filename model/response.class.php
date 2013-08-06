@@ -66,22 +66,13 @@ class Response extends ArrayObject implements IResponse {
         $this->mData = $data;
         return $this;
     }
+
     /**
-     * @param mixed|NULL $_args optional varargs specifying a path to data
-     * Example: ->getData(0, 'key') gets $data[0]['key'];
-     * @return mixed the data array or targeted data specified by path
-     * @throws \InvalidArgumentException if the data path doesn't exist
+     * Return a reference to this object's associative array
+     * @return array the associative array
      */
-    function &getData($_args=NULL) {
-        if($_args===NULL)
-            return $this->mData;
-        $target = &$this->mData;
-        foreach(func_get_args() as $arg) {
-            if(!is_array($target) || !isset($target[$arg]))
-                throw new \InvalidArgumentException("Invalid data path at '{$arg}': " . implode('.', func_get_args()));
-            $target = &$target[$arg];
-        }
-        return $target;
+    protected function &getArray() {
+        return $this->mData;
     }
 
     /**

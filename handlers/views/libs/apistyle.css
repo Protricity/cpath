@@ -45,7 +45,7 @@ body {
 
 /* HandlerSetInfo */
 
-.field-table div.field-prefix { width: 10%; min-width: 120px; }
+.field-table div.field-prefix { width: 10%; min-width: 200px; }
 .field-table div.field-destination { width: 30%; min-width: 180px;  }
 
 

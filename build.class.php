@@ -17,6 +17,8 @@ class BuildException extends \Exception {}
 
 class Build extends API {
 
+    const Route_Ignore_Files = '.buildignore';
+    const Route_Ignore_Dir = '.git|.idea';
     const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
     const Route_Methods = 'CLI';    // CLI only
 
@@ -205,10 +207,17 @@ class Build extends API {
     private static function findClass($path, $dirClass) {
         $exCount = 0;
         Log::v2(__CLASS__, "Scanning '{$path}'");
-        if(file_exists($path.'/.buildignore')) {
-            Log::v2(__CLASS__, "Ignoring Directory '{$path}'");
-            return $exCount;
-        }
+        $pathName = basename($path);
+        foreach(explode('|', self::Route_Ignore_Dir) as $dir)
+            if($dir == $pathName) {
+                Log::v2(__CLASS__, "Found '{$dir}'. Ignoring Directory '{$path}'");
+                return $exCount;
+            }
+        foreach(explode('|', self::Route_Ignore_Files) as $file)
+            if(file_exists($path . '/' . $file)) {
+                Log::v2(__CLASS__, "Found File '{$file}'. Ignoring Directory '{$path}'");
+                return $exCount;
+            }
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))
                 continue;

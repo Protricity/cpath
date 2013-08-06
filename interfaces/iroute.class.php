@@ -14,7 +14,7 @@ class InvalidHandlerException extends \Exception {}
 /** Thrown when no valid routes could be found */
 class NoRoutesFoundException extends \Exception {}
 
-interface IRoute {
+interface IRoute extends IArrayObject {
 
     const METHODS = 'GET|POST|PUT|PATCH|DELETE|CLI';
     /**
@@ -57,4 +57,13 @@ interface IRoute {
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     function getHandler();
+
+    /**
+     * Remove an element from the request array and return its value
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->pluck(0, 'key') removes $data[0]['key'] and returns it's value;
+     * @return mixed the data array or targeted data specified by path
+     * @throws \InvalidArgumentException if the data path doesn't exist
+     */
+    function pluck($_path);
 }

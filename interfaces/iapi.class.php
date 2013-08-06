@@ -30,9 +30,10 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
      * Add an API Field.
      * @param string $name name of the Field
      * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
+     * @param boolean|int $prepend Set true to prepend
      * @return $this Return the class instance
      */
-    function addField($name, IAPIField $Field);
+    function addField($name, IAPIField $Field, $prepend=false);
 
     /**
      * Add a validation

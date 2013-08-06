@@ -178,9 +178,12 @@ PHP;
             $PHP->addConst('Columns', implode(',', $colNames));
 
             $comments = array();
+            $hasComment = false;
             foreach($Table->getColumns() as $Column)
-                $comments[] = $Column->Comment;
-            $PHP->addConst('Comments', implode(';', $comments));
+                if($comments[] = $Column->Comment)
+                    $hasComment = true;
+            if($hasComment)
+                $PHP->addConst('Comments', implode(';', $comments));
 
             $types = '';
             $InsertFields = array();

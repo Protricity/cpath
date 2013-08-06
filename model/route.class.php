@@ -18,7 +18,7 @@ use CPath\Util;
  * Class Route - a route entry
  * @package CPath
  */
-class Route implements IRoute {
+class Route extends ArrayObject implements IRoute {
 
     private
         $mRoute,
@@ -138,5 +138,13 @@ class Route implements IRoute {
      */
     function setRequest(Array $request) {
         $this->mRequest = $request + $this->mBaseRequest;
+    }
+
+    /**
+     * Return a reference to this object's associative array
+     * @return array the associative array
+     */
+    protected function &getArray() {
+        return $this->mRequest;
     }
 }

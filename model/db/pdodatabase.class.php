@@ -21,7 +21,6 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     const Version = NULL;
     const Build_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const Build_Table_Path = 'tables';
-    const Route_Path = '/spdb';
     const FUNC_FORMAT = NULL;
     private $mPrefix;
 
