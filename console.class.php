@@ -9,8 +9,9 @@ namespace CPath;
 
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
-use CPath\Model\CLI;
+use CPath\Request\CLI;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
@@ -19,7 +20,7 @@ class Console implements IHandler {
     const Route_Path = '/console';     // Allow manual building from command line: 'php index.php build'
     const Route_Methods = 'CLI';    // CLI only
 
-    function render(IRoute $Route)
+    function render(IRequest $Request)
     {
         $routes = array();
         foreach(Router::getRoutes() as $route){
@@ -80,11 +81,10 @@ class Console implements IHandler {
                     if($arg[0] != '/')
                         $arg = $ns . $arg;
                     $args[0] = $arg;
-                    $Cli = new CLI($args);
+                    $Cli = CLI::fromArgs($args);
                     try{
-                        $Route = Base::findRoute($Cli->getRoute());
-                        $Route->setRequest($Cli->getRequest());
-                        $Route->render();
+                        $Cli->findRoute()
+                            ->render($Cli);
                     } catch (\Exception $ex) {
                         echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";
                     }

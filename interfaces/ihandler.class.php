@@ -14,8 +14,8 @@ interface IHandler {
 
     /**
      * Render this handler
-     * @param IRoute $Route the IRoute instance for this render which contains the request and argss
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function render(IRoute $Route);
+    function render(IRequest $Request);
 }

@@ -11,6 +11,7 @@ use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\InvalidHandlerException;
 use CPath\Log;
@@ -31,10 +32,11 @@ class HandlerSetInfo implements IHandler, ILogListener {
         $this->mLog[] = $log;
     }
 
-    function render(IRoute $HandlerRoute)
+    function render(IRequest $Request)
     {
+        $HandlerRoute = $Request->getRoute();
         $handlerRoute = $HandlerRoute->getPrefix();
-        if(!$apiClass = $HandlerRoute->getNextArg())
+        if(!$apiClass = $Request->getNextArg())
             die("No API Class passed to ".__CLASS__);
         $Source = new $apiClass;
         if($Source instanceof IHandlerAggregate) {
@@ -57,7 +59,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
             $ids[$route] = $num++;
         }
 
-        if($arg = $HandlerRoute->getNextArg()) {
+        if($arg = $Request->getNextArg()) {
             $route = array_search($arg, $ids);
             $API = $Handlers->getHandler($route);
             if(!$API instanceof IAPI)

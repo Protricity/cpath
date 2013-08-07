@@ -9,6 +9,7 @@
 namespace CPath\Handlers;
 use CPath\Build;
 use CPath\Builders\RouteBuilder;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
 use CPath\Model\Response;
@@ -41,14 +42,14 @@ class SimpleAPI extends API {
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
      */
-    public function execute(IRoute $Route){
+    public function execute(IRequest $Request){
         $call = $this->mCallback;
         if($call instanceof \Closure)
-            return $call($this, $Route);
-        return call_user_func($call, $Route);
+            return $call($this, $Request);
+        return call_user_func($call, $Request);
     }
 
 

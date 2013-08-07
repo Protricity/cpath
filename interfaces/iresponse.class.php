@@ -95,7 +95,7 @@ final class IResponseHelper {
     }
 
     static function sendHeaders(IResponse $Response, $mimeType=NULL) {
-        if(Util::isCLI())
+        if(Base::isCLI())
             return;
         if(headers_sent($file, $line)) {
             Log::e("IResponseHelper", "Warning: Headers already sent by {$file}:{$line}");

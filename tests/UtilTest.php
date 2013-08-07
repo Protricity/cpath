@@ -10,19 +10,22 @@ include_once __DIR__.'/../base.class.php';
 CPath\Base::load();
 
 use CPath\Util;
+use CPath\Request\CLI;
 class UtilTest extends PHPUnit_Framework_TestCase {
 
     public function testCLI()
     {
         $_SERVER['argv'] = array('index.php', 'GET', '/my/path');
-        Util::init();
-        $this->assertEquals(Util::getUrl('method'), 'GET');
-        $this->assertEquals(Util::getUrl('path'), '/my/path');
+        $CLI = CLI::fromRequest(true);
+
+        $this->assertEquals('GET', $CLI->getMethod());
+        $this->assertEquals('/my/path', $CLI->getPath());
 
         $_SERVER['argv'] = array('index.php', 'my', 'path');
-        Util::init();
-        $this->assertEquals(Util::getUrl('method'), 'CLI');
-        $this->assertEquals(Util::getUrl('path'), '/my/path');
+        $CLI = CLI::fromRequest(true);
+
+        $this->assertEquals('CLI', $CLI->getMethod());
+        $this->assertEquals('/my/path', $CLI->getPath());
     }
 
     public function testJSON() {

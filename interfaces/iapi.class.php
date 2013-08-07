@@ -15,10 +15,10 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
      */
-    function execute(IRoute $Route);
+    function execute(IRequest $Request);
 
     /**
      * Get all API Fields
@@ -57,9 +57,9 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
 
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
-     * @return array the processed and validated request data
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return void
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    public function processRequest(IRoute $Route);
+    public function processRequest(IRequest $Request);
 }

@@ -132,13 +132,10 @@ PHP;
         $phpRoute = '';
         foreach($this->mRoutes as $Route) {
             $args = '';
-            while($arg = $Route->getNextArg())
-                $args .= ', ' . var_export($arg, true);
-            $phpRoute .= "\n\tnew " . $useClass[get_class($Route)]
-                . "(" . var_export($Route->getPrefix(), true)
-                . ", " . var_export($Route->getDestination(), true)
-                . $args
-                ."),";
+            $i=0;
+            foreach($Route->getExportArgs() as $arg)
+                $args .= ($i++ ? ', ' : '') . var_export($arg, true);
+            $phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';
         }
         $output = sprintf(self::TMPL_ROUTES, $phpUse, $phpRoute);
         $path = Base::getGenPath().'routes.php';
@@ -217,7 +214,7 @@ PHP;
     // Statics
 
     public static function rebuildAPCCache() {
-        if(Util::isCLI())
+        if(Base::isCLI())
             return;
         Log::e(__CLASS__, "Rebuilding APC Cache");
         $c = 0;

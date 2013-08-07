@@ -10,9 +10,10 @@ namespace CPath\Misc;
 use CPath\Base;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandlerSet;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
-use CPath\Model\CLI;
+use CPath\Request\CLI;
 use CPath\Model\Response;
 
 class NotAnApiException extends \Exception {}
@@ -20,10 +21,10 @@ class APIFailedException extends \Exception {}
 
 class ApiTester {
     private $mAPI;
-    private $mRoute;
-    public function __construct(IAPI $API, IRoute $Route) {
+    private $mRequest;
+    public function __construct(IAPI $API, IRequest $Request) {
         $this->mAPI = $API;
-        $this->mRoute = $Route;
+        $this->mRequest = $Request;
     }
 
     /**
@@ -33,8 +34,8 @@ class ApiTester {
      */
     public function test(Array $request=NULL) {
         if($request)
-            $this->mRoute->setRequest($request);
-        $Response = $this->mAPI->execute($this->mRoute);
+            $this->mRequest->merge($request);
+        $Response = $this->mAPI->execute($this->mRequest);
         if(!($Response instanceof IResponse))
             $Response = new Response(true, "API executed successfully", $Response);
         if($Response->getStatusCode() != IResponse::STATUS_SUCCESS)
@@ -43,15 +44,14 @@ class ApiTester {
     }
 
     static function fromCMD($_cmd) {
-        $Cli = new CLI(is_array($_cmd) ? $_cmd : func_get_args());
-        $Route = Base::findRoute($Cli->getRoute());
-        $Route->setRequest($Cli->getRequest());
+        $Cli = CLI::fromArgs(is_array($_cmd) ? $_cmd : func_get_args());
+        $Route = $Cli->findRoute();
         $Api = $Route->getHandler();
         if($Api instanceof IHandlerSet)
-            $Api = $Api->getHandler($Route->getNextArg());
+            $Api = $Api->getHandler($Cli->getNextArg());
         if(!($Api instanceof IAPI))
             throw new NotAnApiException(get_class($Api) . " does not implement IAPI");
-        return new static($Api, $Route);
+        return new static($Api, $Cli);
     }
 
     /**

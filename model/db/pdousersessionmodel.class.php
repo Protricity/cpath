@@ -67,7 +67,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * @throws SessionExpiredException if the session was active but expired or not found
      */
     static function loadByKey($key) {
-        $Session = static::loadByFields(static::FieldKey, $key);
+        $Session = static::loadByColumns(static::FieldKey, $key);
         $expire = $Session->{static::FieldExpire};
         if($expire && $expire <= time())
             throw new SessionExpiredException("User Session has expired");
@@ -123,7 +123,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
             static::FieldExpire => $expireInSeconds ? time() + $expireInSeconds : 0,
         ));
 
-        if(Util::isCLI())
+        if(Base::isCLI())
             $_SESSION = array();
         else{
             static::startSession(true);

@@ -8,9 +8,12 @@
 namespace CPath;
 
 use CPath\Interfaces\IAutoLoader;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Model\FileRequestRoute;
 use CPath\Model\MissingRoute;
+use CPath\Request\CLI;
+use CPath\Request\Web;
 
 class ClassNotFoundException extends \Exception {}
 /**
@@ -24,6 +27,7 @@ class Base {
     private static $mLoaded = false;
     private static $mBasePath;
     private static $mConfig;
+    private static $isCLI = false;
     /** @var IAutoLoader[] $mAutoloaders */
     private static $mAutoloaders = array();
 
@@ -91,29 +95,12 @@ class Base {
 
     }
 
-    /**
-     * Attempt to find a Route
-     * @param null $routePath the path to match
-     * @return IRoute the route instance found. MissingRoute is returned if no route was found
-     */
-    public static function findRoute($routePath=NULL) {
-        if(!$routePath) $routePath = Util::getUrl('route');
-        if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
-            && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp'))) {
-            $Route = new FileRequestRoute($routePath);
-        } elseif(Base::isApcEnabled() && !Util::isCLI()) {
-            $Route = RouterAPC::findRoute($routePath);
-        } else {
-            $Route = Router::findRoute($routePath);
-        }
-        return $Route ?: new MissingRoute($routePath);
-    }
-
     /** Attempt to route a web request to it's destination */
     public static function render() {
         self::load();
-        self::findRoute()
-            ->render();
+        $Request = self::getRequest();
+        $Request->findRoute()
+            ->render($Request);
     }
 
     /** Returns the path to the project directory */
@@ -161,6 +148,30 @@ class Base {
     public static function isApcEnabled() {
         return self::$mConfig['apc.enabled'];
     }
+
+    /**
+     * Get the IRequest instance for this render
+     * @return IRequest
+     */
+    public static function getRequest() {
+        static $Request = NULL;
+        if($Request) return $Request;
+
+        if(!empty($_SERVER['argv'])) {
+            $Request = CLI::fromRequest();
+        } else {
+            $Request = Web::fromRequest();
+        }
+        return $Request;
+    }
+
+    public static function isCLI() {
+        static $cli = NULL;
+        return $cli !== NULL
+            ? $cli
+            : $cli = self::getRequest() instanceof CLI;
+    }
+
 
     /**
      * Returns a config variable

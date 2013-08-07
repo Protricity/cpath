@@ -23,17 +23,17 @@ final class Router{
     /**
      * Loads all routes and attempts to match them to the request path
      * @param String $routePath the path to find
+     * @param Array $args the arguments parsed out of the route if found
      * @return IRoute|NULL the found route or null if none found
      */
-    public static function findRoute($routePath) {
+    public static function findRoute($routePath, &$args) {
 
         $routes = self::getRoutes();
         /** @var IRoute $Route */
         foreach($routes as $Route) {
-            if(!$Route->match($routePath))
+            $args = $Route->match($routePath);
+            if($args === false)
                 continue;
-            if(isset($route[2]))
-                self::processDefaults($Route, array_slice($route, 2));
             return $Route;
         }
         return NULL;
@@ -55,12 +55,12 @@ final class Router{
         return $routes2;
     }
 
-    private static function processDefaults(IRoute $Route, Array $defaults) {
-        foreach($defaults as $def) {
-            if(is_array($def))
-                $Route->setRequest($def);
-            else
-                $Route->addArg($def);
-        }
-    }
+//    private static function processDefaults(IRoute $Route, Array $defaults) {
+//        foreach($defaults as $def) {
+//            if(is_array($def))
+//                $Route->setRequest($def);
+//            else
+//                $Route->addArg($def);
+//        }
+//    }
 }

@@ -13,6 +13,7 @@ use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\HandlerSetException;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerSet;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
 use CPath\Model\Response;
@@ -79,14 +80,14 @@ class HandlerSet implements IHandlerSet {
 
     /**
      * Render using the selected Handler in the set
-     * @param IRoute $Route
+     * @param IRequest $Request
      * @throws InvalidRouteException
      */
-    function render(IRoute $Route) {
-        $route = $Route->getNextArg();
+    function render(IRequest $Request) {
+        $route = $Request->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $this->getHandler($route)->render($Route);
+        $this->getHandler($route)->render($Request);
     }
 
     /**

@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
@@ -119,11 +120,11 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     const Route_Methods = 'CLI';
 
-    function render(IRoute $Route) {
-        if(!Util::isCLI() && !headers_sent())
+    function render(IRequest $Request) {
+        if(!Base::isCLI() && !headers_sent())
             header('text/plain');
         echo "DB Upgrader: ".get_class($this)."\n";
-        switch(strtolower($Route->getNextArg())) {
+        switch(strtolower($Request->getNextArg())) {
             case 'upgrade':
                 $this->upgrade(false);
                 break;

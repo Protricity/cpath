@@ -8,6 +8,7 @@
 namespace CPath\Model;
 use CPath\Builders\RouteBuilder;
 use CPath\Handlers\InvalidRouteException;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Util;
 
@@ -23,10 +24,10 @@ class FileRequestRoute extends MissingRoute implements IRoute{
 
     /**
      * Renders the route destination
-     * @param array $request optional request parameters
+     * @param IRequest $Request
      * @return void
      */
-    public function render(Array $request=NULL) {
+    public function render(IRequest $Request) {
         header("HTTP/1.0 404 File request was passed to Script");
     }
 

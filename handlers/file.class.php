@@ -8,6 +8,7 @@
 namespace CPath\Handlers;
 
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 
 class File implements IHandler{
@@ -22,7 +23,7 @@ class File implements IHandler{
         $this->mFilePath = $filePath;
     }
 
-    public function render(IRoute $Route)
+    public function render(IRequest $Request)
     {
         include($this->mFilePath);
         return true;

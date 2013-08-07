@@ -224,7 +224,7 @@ PHP;
                 $PHP->addConst('Build_Ignore', false);
 
             $PHP->addConstCode();
-            $PHP->addConstCode("// Table Fields ");
+            $PHP->addConstCode("// Table Columns ");
             foreach($Table->getColumns() as $Column)
                 $PHP->addConst(strtoupper($Column->Name), $Column->Name);
 
@@ -235,7 +235,7 @@ PHP;
                 $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
                 if($Column->Flags & PDOModel::ColumnIsPrimary ? false : true)
-                    $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateField(\'%s\', $value, $commit); ', strtolower($Column->Name)));
+                    $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
                 if($Column->EnumValues) {
                     $a = '';
                     foreach($Column->EnumValues as $e)
@@ -515,34 +515,34 @@ class BuildPDOTable {
 }
 
 class BuildPDOUserTable extends BuildPDOTable {
-    public $FieldID, $FieldUsername, $FieldEmail, $FieldPassword, $FieldFlags, $SessionClass;
+    public $ColumnID, $ColumnUsername, $ColumnEmail, $ColumnPassword, $ColumnFlags, $SessionClass;
     /** @var BuildPDOUserSessionTable[] */
     protected static $mSessionTables = array();
 
     function defaultCommentArg($field) {
         list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
         switch(strtolower($name)) {
-            case 'fi':
-            case 'fieldid':
-                $this->FieldID = $this->req($name, $arg);
+            case 'ci':
+            case 'columnid':
+                $this->ColumnID = $this->req($name, $arg);
                 break;
-            case 'fu':
-            case 'fieldusername':
-                $this->FieldUsername = $this->req($name, $arg);
+            case 'cu':
+            case 'columnusername':
+                $this->ColumnUsername = $this->req($name, $arg);
                 break;
-            case 'fe':
-            case 'fieldemail':
-                $this->FieldEmail = $this->req($name, $arg);
+            case 'ce':
+            case 'columnemail':
+                $this->ColumnEmail = $this->req($name, $arg);
                 break;
-            case 'fp':
-            case 'fieldpassword':
-                $this->FieldPassword = $this->req($name, $arg);
+            case 'cp':
+            case 'columnpassword':
+                $this->ColumnPassword = $this->req($name, $arg);
                 break;
-            case 'ff':
-            case 'fieldflags':
-                $this->FieldFlags = $this->req($name, $arg);
+            case 'cf':
+            case 'columnflags':
+                $this->ColumnFlags = $this->req($name, $arg);
                 break;
-            case 'sc':
+            case 'cc':
             case 'sessionclass':
                 $this->SessionClass = $this->req($name, $arg);
                 break;
@@ -570,23 +570,27 @@ class BuildPDOUserTable extends BuildPDOTable {
             throw new BuildException($class . " is not an instance of IUserSession");
         $PHP->addConst('SessionClass', $class);
 
-        if(!$this->FieldID && $this->Primary) $this->FieldID = $this->Primary;
+        if(!$this->ColumnID && $this->Primary) $this->ColumnID = $this->Primary;
         foreach($this->getColumns() as $Column) {
-            if(!$this->FieldUsername && stripos($Column->Name, 'name') !== false)
-                $this->FieldUsername = $Column->Name;
-            if(!$this->FieldEmail && stripos($Column->Name, 'mail') !== false)
-                $this->FieldEmail = $Column->Name;
-            if(!$this->FieldPassword && stripos($Column->Name, 'pass') !== false)
-                $this->FieldPassword = $Column->Name;
-            if(!$this->FieldFlags && stripos($Column->Name, 'flag') !== false)
-                $this->FieldFlags = $Column->Name;
+            if(!$this->ColumnUsername && stripos($Column->Name, 'name') !== false)
+                $this->ColumnUsername = $Column->Name;
+            if(!$this->ColumnEmail && stripos($Column->Name, 'mail') !== false)
+                $this->ColumnEmail = $Column->Name;
+            if(!$this->ColumnPassword && stripos($Column->Name, 'pass') !== false)
+                $this->ColumnPassword = $Column->Name;
+            if(!$this->ColumnFlags && stripos($Column->Name, 'flag') !== false)
+                $this->ColumnFlags = $Column->Name;
         }
 
-        foreach(array('FieldID', 'FieldUsername', 'FieldEmail', 'FieldPassword', 'FieldFlags') as $field) {
+        foreach(array('ColumnID', 'ColumnUsername', 'ColumnEmail', 'ColumnPassword', 'ColumnFlags') as $field) {
             if(!$this->$field)
-                throw new BuildException("The field name for {$field} could not be determined");
+                throw new BuildException("The column name for {$field} could not be determined");
             $PHP->addConst($field, $this->$field);
         }
+
+        $Column = $this->getColumn($this->ColumnEmail);
+        if(!$Column->Filter)
+            $Column->Filter = FILTER_VALIDATE_EMAIL;
     }
 
     public static function addUserSessionTable(BuildPDOUserSessionTable $Table) {

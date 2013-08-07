@@ -8,6 +8,7 @@
 namespace CPath;
 
 use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
 use CPath\Model\Response;
@@ -22,22 +23,24 @@ class Build extends API {
     const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
     const Route_Methods = 'CLI';    // CLI only
 
+
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRoute instance for this render which contains the request and args
      * @return Response the api call response with data, message, and status
      */
-    function execute(IRoute $Route)
+    function execute(IRequest $Request)
     {
         static $built = false;
         if($built)
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
         $built = true;
 
-        $req = $Route->getRequest();
-        if(!empty($req['v']))
+        if(!empty($Request['v']))
             Log::setDefaultLevel(4);
+        if(!empty($Request['s']))
+            self::$mSkipBroken = true;
 
         $Response = new Response(false, "Starting Build");
         $exCount = Build::buildClasses(true);
@@ -63,6 +66,8 @@ class Build extends API {
     private static $mClasses = array();
     private static $mBuildConfig = NULL;
     private static $mForce = false;
+    private static $mSkipBroken = false;
+    private static $mBrokenClasses = array();
 
     /**
      * Return the build config full path
@@ -106,20 +111,23 @@ class Build extends API {
 
     /**
      * Set build config data for a class
-     * @param $class string class to load data for
-     * @param $key string data key
-     * @param $val string data value
+     * @param string $class class to load data for
+     * @param string $key data key
+     * @param string $val data value
+     * @param boolean $commit data value
      */
-    public static function setConfig($class, $key, $val) {
-        $Config = self::loadConfig($class);
+    public static function setConfig($class, $key, $val, $commit=false) {
+        $Config =& self::loadConfig($class);
         $Config[$key] = $val;
+        if($commit)
+            self::commitConfig();
     }
 
     /**
      * Commit the build config to the file
      */
     public static function commitConfig() {
-        $config = self::loadConfig();
+        $config =& self::loadConfig();
         $php = "<?php\n\$config=".var_export($config, true).";";
         $path = self::getConfigPath();
         if(!is_dir(dirname($path)))
@@ -171,14 +179,43 @@ class Build extends API {
             Log::e(__CLASS__, "Building is not allowed. build.enabled===false");
             return 0;
         }
+
+        self::$mBrokenClasses = self::getConfig(__CLASS__, 'brokenClasses') ?: array();
+        if(self::$mSkipBroken) {
+            if($lastClass = self::getConfig(__CLASS__, 'lastClass')) {
+                if(!in_array($lastClass, self::$mBrokenClasses)) {
+                    self::$mBrokenClasses[] = $lastClass;
+                    self::setConfig(__CLASS__, 'brokenClasses', self::$mBrokenClasses);
+                    Log::v(__CLASS__, "Adding broken class to skip list: {$lastClass}");
+                }
+            }
+            if(self::$mBrokenClasses) {
+                Log::v(__CLASS__, "Skipping (%s) broken class(es)", sizeof(self::$mBrokenClasses));
+                foreach(self::$mBrokenClasses as $class)
+                    Log::v2(__CLASS__, "Skipping broken class: {$class}");
+            }
+        } else {
+            if(self::$mBrokenClasses) {
+                self::$mBrokenClasses = array();
+                self::setConfig(__CLASS__, 'brokenClasses', self::$mBrokenClasses);
+                Log::v(__CLASS__, "Clearing (%d) broken class(es)", sizeof(self::$mBrokenClasses));
+            }
+        }
+        self::commitConfig();
+
         self::$mForce = $force;
         self::$mBuilders = array();
         self::$mClasses = array();
         $exCount = self::findClass(dirname(__DIR__), '');
         /** @var $Class \ReflectionClass */
         foreach(self::$mClasses as $Class) {
+            if(self::$mBrokenClasses && in_array($Class->getName(), self::$mBrokenClasses)) {
+                Log::v2(__CLASS__, "Skipping broken class '{$Class->getName()}'");
+                continue;
+            }
             /** @var $Builder IBuilder */
             Log::v2(__CLASS__, "Building '{$Class->getName()}'");
+            self::setConfig(__CLASS__, 'lastClass', $Class->getName(), true);
             foreach(self::$mBuilders as $Builder) try {
                 $Builder->build($Class);
             } catch (\Exception $ex) {
@@ -186,14 +223,15 @@ class Build extends API {
                 Log::ex(get_class($Builder), $ex);
             }
         }
+        self::setConfig(__CLASS__, 'lastClass', NULL, true);
         /** @var $Builder IBuilder */
         foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
-        self::commitConfig();
 
         $v = Base::getConfig('build.inc', 0);
         Base::commitConfig('build.inc', ++$v);
 
+        self::setConfig(__CLASS__, 'lastClass', NULL, true);
         Log::v(__CLASS__, "All Builds Complete (inc={$v})");
         return $exCount;
     }
@@ -231,13 +269,22 @@ class Build extends API {
                 continue;
             $name = substr($file, 0, strlen($file) - 10);
             $class = $dirClass . '\\' . ucfirst($name);
+
+            if(self::$mBrokenClasses && in_array($class, self::$mBrokenClasses)) {
+                Log::v(__CLASS__, "Skipping broken class '{$class}'");
+                continue;
+            }
+
+            self::setConfig(__CLASS__, 'lastClass', $class, true);
             try{
                 require_once($filePath);
             } catch (\Exception $ex) {
+                self::setConfig(__CLASS__, 'lastClass', NULL, true);
                 $exCount++;
                 Log::ex("Exception occured while loading {$class}", $ex);
                 continue;
             }
+            self::setConfig(__CLASS__, 'lastClass', NULL);
             $Class = new \ReflectionClass($class);
             if($Class === NULL) // TODO: can this be null?
                 throw new \Exception("Class '{$class}' not found in '{$filePath}'");

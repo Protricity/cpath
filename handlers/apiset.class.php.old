@@ -129,7 +129,7 @@ class APISet extends API implements IAPIParam, \ArrayAccess, \IteratorAggregate 
 //     * @return void
 //     */
 //    public function renderHTML(Array $request) {
-//        if(!headers_sent() && !Util::isCLI())
+//        if(!headers_sent() && !Base::isCLI())
 //            header("Content-Type: text/html");
 //        $Render = new APIInfo();
 //        $Response = $this->executeAsResponse($request);

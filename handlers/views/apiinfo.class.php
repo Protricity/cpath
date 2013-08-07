@@ -9,6 +9,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Util;
@@ -27,9 +28,9 @@ class APIInfo implements IHandler, ILogListener {
         $this->mLog[] = $log;
     }
 
-    function render(IRoute $Route)
+    function render(IRequest $Request)
     {
-        if(!$apiClass = $Route->getNextArg()) {
+        if(!$apiClass = $Request->getNextArg()) {
             print("No API Class passed to ".__CLASS__);
             return;
         }
@@ -41,7 +42,7 @@ class APIInfo implements IHandler, ILogListener {
             print($apiClass. " is not an instance of IAPI");
             return;
         }
-        $this->renderApi($API, $Route);
+        $this->renderApi($API, $Request->getRoute());
     }
 
     function renderAPI(IAPI $API, IRoute $Route) {

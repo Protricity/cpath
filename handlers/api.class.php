@@ -7,13 +7,16 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+use CPath\Base;
 use CPath\Handlers\Views\APIInfo;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
+use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Model\ArrayObject;
 use CPath\Model\AutoLoader\SimpleLoader;
@@ -25,7 +28,6 @@ use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IHandler;
 use CPath\Model\MultiException;
 use CPath\Model\Response;
-use CPath\Model\ResponseException;
 use CPath\Builders\RouteBuilder;
 
 /**
@@ -52,21 +54,21 @@ abstract class API implements IAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
-    abstract function execute(IRoute $Route);
+    abstract function execute(IRequest $Request);
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
      */
-    public function executeAsResponse(IRoute $Route) {
+    public function executeAsResponse(IRequest $Request) {
         if(static::Enable_Logging)
             $this->mLog = new SimpleLogger(true);
         try {
-            $Response = $this->execute($Route);
+            $Response = $this->execute($Request);
             if($Response instanceof IResponseAggregate)
                 $Response = $Response->getResponse();
             if(!($Response instanceof IResponse))
@@ -105,14 +107,14 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as HTML
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderHTML(IRoute $Route) {
-        if(!headers_sent() && !Util::isCLI())
+    public function renderHTML(IRequest $Request) {
+        if(!headers_sent() && !Base::isCLI())
             header("Content-Type: text/html");
         $Render = new APIInfo();
-        $Render->renderAPI($this, $Route);
+        $Render->renderAPI($this, $Request);
         //$Response = $this->executeAsResponse($Route);
         //$Response->sendHeaders();
         //$Response->renderHtml();
@@ -120,13 +122,13 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as JSON
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderJSON(IRoute $Route) {
-        if(!headers_sent() && !Util::isCLI())
+    public function renderJSON(IRequest $Request) {
+        if(!headers_sent()) // && !Base::isCLI())
             header("Content-Type: application/json");
-        $Response = $this->executeAsResponse($Route);
+        $Response = $this->executeAsResponse($Request);
         $Response->sendHeaders();
         $JSON = Util::toJSON($Response);
         echo json_encode($JSON);
@@ -134,13 +136,13 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as XML
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderXML(IRoute $Route) {
-        if(!headers_sent() && !Util::isCLI())
+    public function renderXML(IRequest $Request) {
+        if(!headers_sent()) // && !Base::isCLI())
             header("Content-Type: text/xml");
-        $Response = $this->executeAsResponse($Route);
+        $Response = $this->executeAsResponse($Request);
         $Response->sendHeaders();
         $XML = Util::toXML($Response);
         echo $XML->asXML();
@@ -148,22 +150,22 @@ abstract class API implements IAPI {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as Plain Text
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderText(IRoute $Route) {
-        $Response = $this->executeAsResponse($Route);
+    public function renderText(IRequest $Request) {
+        $Response = $this->executeAsResponse($Request);
         $Response->sendHeaders('text/plain');
         $Response->renderText();
     }
 
     /**
      * Renders via default method
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
-    public function renderDefault(IRoute $Route) {
-        $this->renderText($Route);
+    public function renderDefault(IRequest $Request) {
+        $this->renderText($Request);
     }
 
     /**
@@ -210,37 +212,36 @@ abstract class API implements IAPI {
 
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
-     * @param IRoute $Route the IRoute instance for this render which contains the request and args
-     * @return array the processed and validated request data
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return void
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    public function processRequest(IRoute $Route) {
-        $request = $Route->getRequest();
-        if($Route && $arg = $Route->getNextArg()) {
+    public function processRequest(IRequest $Request) {
+        if($Request instanceof IShortOptions)
+            $Request->processShortOptions(array_keys($this->mFields));
+        if($arg = $Request->getNextArg()) {
             foreach($this->mFields as $name=>$Field) {
                 if($Field instanceof IAPIParam) {
-                    $request[$name] = $arg;
-                    if(!$arg = $Route->getNextArg())
+                    $Request[$name] = $arg;
+                    if(!$arg = $Request->getNextArg())
                         break;
                 }
             }
         }
-        $values = array();
         $FieldExceptions = new ValidationExceptions();
+        $data = array();
         foreach($this->mFields as $name=>$Field) {
             try {
-                $value = isset($request[$name]) ? $request[$name] : NULL;
-                $values[$name] = $Field->validate($value);
+                $data[$name] = $Field->validate($Request[$name]);
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException($name, $ex);
             }
         }
-        $request = $values;
-        $Route->setRequest($request);
+        $Request->merge($data, true);
 
         foreach($this->mValidations as $Validation) {
             try {
-                $Validation->validate($Route);
+                $Validation->validate($Request);
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException(null, $ex);  // TODO: null?
             }
@@ -248,31 +249,30 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
-        return $request;
     }
 
     /**
      * Render this API Call. The output format is based on the requested mimeType from the browser
-     * @param IRoute $Route the IRoute instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      */
-    public function render(IRoute $Route) {
-        foreach(Util::getAcceptedTypes() as $mimeType) {
+    public function render(IRequest $Request) {
+        foreach($Request->getMimeTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    $this->renderJSON($Route);
+                    $this->renderJSON($Request);
                     return;
                 case 'application/xml':
-                    $this->renderXML($Route);
+                    $this->renderXML($Request);
                     return;
                 case 'text/html':
-                    $this->renderHTML($Route);
+                    $this->renderHTML($Request);
                     return;
                 case 'text/plain':
-                    $this->renderText($Route);
+                    $this->renderText($Request);
                     return;
             }
         }
-        $this->renderDefault($Route);
+        $this->renderDefault($Request);
     }
 
     /**
@@ -301,17 +301,17 @@ abstract class API implements IAPI {
 interface IAPIValidation {
     /**
      * Validate and return request
-     * @param IRoute $Request the pending request to validate
+     * @param IRequest $Request the pending request to validate
      * @throws ValidationException if a validation exception occurred
      */
-    function validate(IRoute $Request);
+    function validate(IRequest $Request);
 }
 
 class APIValidation implements IAPIValidation {
     protected $mCallback;
     /**
      * Create an APIValidation using a callback
-     * @param Callable $callback which accepts the IRoute $Request for validation
+     * @param Callable $callback which accepts the IRequest $Request for validation
      */
     function __construct($callback) {
         $this->mCallback = $callback;
@@ -319,10 +319,10 @@ class APIValidation implements IAPIValidation {
 
     /**
      * Validate and return request
-     * @param IRoute $Request the pending request to validate
+     * @param IRequest $Request the pending request to validate
      * @throws ValidationException if a validation exception occurred
      */
-    function validate(IRoute $Request) {
+    function validate(IRequest $Request) {
         $call = $this->mCallback;
         $call($Request);
     }
@@ -392,9 +392,10 @@ class ValidationExceptions extends MultiException {
  * Represents an 'optional' API Field
  */
 class APIField implements IAPIField {
-    public $mDescription;
-    public function __construct($description=NULL) {
+    public $mDescription, $mValidation;
+    public function __construct($description=NULL, $validation=0) {
         $this->mDescription = $description;
+        $this->mValidation = $validation;
     }
 
     public function getDescription() {
@@ -402,7 +403,12 @@ class APIField implements IAPIField {
     }
 
     public function validate($value) {
-        return $value === "" ? NULL : $value;
+        if($value === "")
+            $value = NULL;
+        if($this->mValidation
+            && ($value = filter_var($value, $this->mValidation)) === false)
+            throw new ValidationException("Field '%s' is not in the valid format");
+        return $value;
     }
 }
 
@@ -422,9 +428,10 @@ class RequiredFieldException extends ValidationException {
  */
 class APIRequiredField extends APIField {
     public function validate($value) {
+        $value = parent::validate($value);
         if(!$value && $value !== '0')
             throw new RequiredFieldException();
-        return parent::validate($value);
+        return $value;
     }
 }
 
@@ -464,34 +471,3 @@ class APIEnumField extends APIField {
 }
 
 class APIEnumParam extends APIField implements IAPIParam {}
-
-class APIFilterField extends APIField {
-
-    protected $mFilter, $mOptions;
-    /**
-     * @param int $filter
-     * @param mixed $options
-     * @param String $description
-     */
-    public function __construct($filter, $options=0, $description=NULL) {
-        $this->mFilter = $filter;
-        $this->mOptions = $options;
-        parent::__construct($description);
-    }
-
-    public function validate($value) {
-        $value = parent::validate($value);
-        return filter_var($value, $this->mFilter, $this->mOptions) ?: NULL;
-    }
-}
-class APIRequiredFilterField extends APIFilterField {
-
-    public function validate($value) {
-        if(!$value && $value !== '0')
-            throw new RequiredFieldException();
-        $value = parent::validate($value);
-        if(!$value)
-            throw new ValidationException("Field '%s' has an invalid format");
-        return $value;
-    }
-}

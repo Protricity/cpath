@@ -15,6 +15,7 @@ use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Handlers\SimpleAPI;
 use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
@@ -75,10 +76,10 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     }
 
     public function getUsername() { return $this->{static::ColumnUsername}; }
-    public function setUsername($value, $commit=true) { return $this->updateField(static::ColumnUsername, $value, $commit); }
+    public function setUsername($value, $commit=true) { return $this->updateColumn(static::ColumnUsername, $value, $commit); }
 
     public function getEmail() { return $this->{static::ColumnEmail}; }
-    public function setEmail($value, $commit=true) { return $this->updateField(static::ColumnEmail, $value, $commit, FILTER_VALIDATE_EMAIL); }
+    public function setEmail($value, $commit=true) { return $this->updateColumn(static::ColumnEmail, $value, $commit, FILTER_VALIDATE_EMAIL); }
 
     function setFlag($flags, $commit=true, $remove=false) {
         if(!is_int($flags))
@@ -88,7 +89,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
             $this->mFlags |= $oldFlags;
         else
             $this->mFlags = $oldFlags & ~$flags;
-        $this->updateField(static::ColumnFlags, $this->mFlags, $commit);
+        $this->updateColumn(static::ColumnFlags, $this->mFlags, $commit);
     }
 
     function checkPassword($password) {
@@ -100,7 +101,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     function changePassword($newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
             static::confirmPassword($newPassword, $confirmPassword);
-        $this->updateField(static::ColumnPassword, static::hashPassword($newPassword), true);
+        $this->updateColumn(static::ColumnPassword, static::hashPassword($newPassword), true);
     }
 
     /**
@@ -137,20 +138,18 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
         $Source = $this;
 
-        $fields = array(
+        $columns = array(
             static::ColumnUsername => new APIRequiredField("Username"),
-            static::ColumnEmail => new APIRequiredField("Email Address"),
+            static::ColumnEmail => new APIRequiredField("Email Address", FILTER_VALIDATE_EMAIL),
         );
+        foreach($Handlers->getAPI('POST')->getFields() as $field=>$Field)
+            $columns[$field] = $Field;
 
-        foreach($this->getFieldList(static::Insert) as $field)
-            if($field != static::Primary && !isset($field[$field]))
-                $fields[$field] = new APIField($Source->getModelName() . " " .  static::$_columns[$field][1]);
+        $columns[static::ColumnPassword] = new APIRequiredField("Password");
+        $columns[static::ColumnPassword.'_confirm'] = new APIRequiredField("Confirm Password");
+        $columns['login'] = new APIField("Log in after");
 
-        $fields[static::ColumnPassword] = new APIRequiredField("Password");
-        $fields[static::ColumnPassword.'_confirm'] = new APIRequiredField("Confirm Password");
-        $fields['login'] = new APIField("Log in after");
-
-        $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRoute $Request) use ($Source) {
+        $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
             $API->processRequest($Request);
             $login = $Request->pluck('login');
             $confirm = $Request->pluck(static::ColumnPassword.'_confirm');
@@ -165,20 +164,20 @@ abstract class PDOUserModel extends PDOModel implements IUser {
                 return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
             }
             return new Response("Created user '".$User->getUsername()."' successfully", true, $User);
-        }, $fields, "Create a new ".$this->getModelName()), true);
+        }, $columns, "Create a new ".$this->getModelName()), true);
 
 
-        $Handlers->addAPI('POST login', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
-            $request = $API->processRequest($Route);
+        $Handlers->addAPI('POST login', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
+            $API->processRequest($Request);
             /** @var PDOUserModel $User  */
-            $User = $Source::login($request['name'], $request['password']);
-            return new Response("Logged in as user '".$request[static::ColumnUsername]."' successfully", true, $User);
+            $User = $Source::login($Request['name'], $Request['password']);
+            return new Response("Logged in as user '".$Request[static::ColumnUsername]."' successfully", true, $User);
         }, array(
             'name' => new APIRequiredParam("Username or Email Address"),
             'password' => new APIRequiredParam("Password")
         ), "Log in"));
 
-        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, IRoute $Route) use ($Source) {
+        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
             if($Source::logout())
                 return new Response("Logged out successfully", true);
             return new Response("User was not logged in", false);
@@ -242,12 +241,12 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
     /**
      * Gets or creates an instance of a guest user
-     * @param $insertFields Array|NULL optional associative array of fields and values used when inserting guest
+     * @param $insertFields Array|NULL optional associative array of columns and values used when inserting guest
      * @return PDOUserModel the guest user instance
      */
     static function loadGuestAccount(Array $insertFields=array()) {
         /** @var PDOUserModel $User  */
-        $User = static::searchByField(static::ColumnUsername, 'guest')->fetch();
+        $User = static::searchByColumn(static::ColumnUsername, 'guest')->fetch();
         if(!$User) {
             if(!isset($insertFields[static::ColumnFlags]))
                 $insertFields[static::ColumnFlags] = 0;
@@ -272,7 +271,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      */
     public static function login($search, $password, $expireInSeconds=NULL) {
         /** @var PDOUserModel $User */
-        $User = static::searchByFields(array(
+        $User = static::searchByColumns(array(
             static::ColumnUsername => $search,
             static::ColumnEmail => $search,
         ))->fetch();

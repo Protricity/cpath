@@ -121,7 +121,7 @@ class SessionManager {
         if(!$expireInSeconds || $expireInSeconds > $expireMax)
             $expireInSeconds = $expireMax;
         $User->storeNewSessionKey($key, $expireInSeconds ? time() + $expireInSeconds : 0);
-        if(Util::isCLI())
+        if(Base::isCLI())
             $_SESSION = array();
         else{
             self::start(true);

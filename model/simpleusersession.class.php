@@ -7,6 +7,7 @@
  */
 namespace CPath\Model;
 
+use CPath\Base;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 use CPath\Interfaces\SessionDisabledException;
@@ -69,7 +70,7 @@ class SimpleUserSession implements IUserSession {
      */
     static function createNewSession(IUser $User, $expireInSeconds=NULL) {
 
-        if(Util::isCLI())
+        if(Base::isCLI())
             $_SESSION = array();
         else{
             static::startSession(true);

@@ -9,113 +9,15 @@ namespace CPath;
 
 
 // TODO split this class up into generic methods and request-oriented methods
-use CPath\Model\CLI;
+use CPath\Interfaces\IRequest;
+use CPath\Request\CLI;
+use CPath\Request\Web;
 
 /**
  * Class Util provides information about the current request
  * @package CPath
  */
 abstract class Util {
-
-    private static $mHeaders = null;
-    private static $mUrl = array();
-    /** @var CLI */
-    private static $mCLI = NULL;
-
-    /**
-     * Initialize the static class and parses request information
-     */
-    public static function init() {
-        if(!empty($_SERVER["REQUEST_URI"])) {
-            self::$mUrl = parse_url($_SERVER['REQUEST_URI']);
-            self::$mUrl['method'] = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
-
-            $root = dirname($_SERVER['SCRIPT_NAME']);
-            $request = self::$mUrl["path"];
-            if(stripos($request, $root) === 0)
-                $request = substr($request, strlen($root));
-            self::$mUrl['route'] = self::$mUrl['method'] . " " . $request;
-        } elseif ($args = $_SERVER['argv']) {
-            array_shift($args);
-            $CLI = new CLI($args);
-            self::$mUrl = $CLI->getParsedUrl();
-            //$_GET = $CLI->getRequest(); // TODO: $_POST
-
-            self::$mCLI = $CLI;
-            static $logged = false;
-            if(!$logged)
-                Log::addCallback($CLI);
-            $logged = true;
-        }
-
-        self::$mHeaders = function_exists('getallheaders')
-            ? getallheaders()
-            : array('Accept'=> isset($_SERVER['HTTP_ACCEPT']) ? $_SERVER['HTTP_ACCEPT'] : 'text/plain');
-    }
-
-    public static function isCLI() {
-        return self::$mCLI ? true : false;
-    }
-
-    public static function getCLI() {
-        return self::$mCLI;
-    }
-
-    /**
-     * Get a request header
-     * @param $name string the header key
-     * @return string|null the header value or null if it was not found
-     */
-    public static function getHeader($name) {
-        return isset(self::$mHeaders[$name]) ? self::$mHeaders[$name] : NULL;
-    }
-
-    /**
-     * Get path information for the request url
-     * @param string|null $key if set, return only the data that coorisponds to this vaue
-     * @return array|string the url data
-     */
-    public static function getUrl($key=NULL) {
-        if($key !== NULL)
-            return self::$mUrl[$key];
-        return self::$mUrl;
-    }
-
-    /**
-     * Determines all accepted mimetypes from the request. Narrows different types into the most common mimetype
-     * @return array a list of accepted mimetypes
-     */
-    public static function getAcceptedTypes() {
-        static $types = NULL;
-        if($types === NULL) {
-            $types = array();
-            foreach(explode(',', strtolower(self::getHeader('Accept'))) as $i=>$type) {
-                list($type) = explode(';', $type);
-                switch (trim($type)) {
-                    case 'application/json':
-                    case 'application/x-javascript':
-                    case 'text/javascript':
-                    case 'text/x-javascript':
-                    case 'text/x-json':
-                        $types[$i] = 'application/json';
-                        break;
-                    case 'application/xml':
-                    case 'text/xml':
-                        $types[$i] = 'application/xml';
-                        break;
-                    case 'text/html':
-                    case 'application/xhtml+xml':
-                        $types[$i] = 'text/html';
-                        break;
-                    case 'text/plain':
-                        $types[$i] = 'text/plain';
-                        break;
-                }
-            }
-            $types = array_unique($types);
-        }
-        return $types;
-    }
 
     /**
      * Prepare an object for json serialization
@@ -177,5 +79,3 @@ abstract class Util {
         return $root;
     }
 }
-// Init this class on load
-Util::init();

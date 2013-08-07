@@ -14,42 +14,32 @@ class InvalidHandlerException extends \Exception {}
 /** Thrown when no valid routes could be found */
 class NoRoutesFoundException extends \Exception {}
 
-interface IRoute extends IArrayObject {
+interface IRoute {
 
     const METHODS = 'GET|POST|PUT|PATCH|DELETE|CLI';
+
     /**
-     * Try's a route against a request path.
-     * If the match is successful, this method processes the requestPath as input
+     * Try's a route against a request path and parse out any request args
      * @param string|null $requestPath the request path to match
-     * @return bool whether or not the path matched
-     * @throws DestinationNotFoundException if the destination handler was not found
-     * @throws InvalidHandlerException if the destination handler was invalid
+     * @return array|boolean return all parsed request args or false if no match is found
      */
     function match($requestPath);
 
     /**
-     * Renders the route destination
+     * Renders the route destination using an IRequest instance
+     * @param IRequest $Request the request to render
      * @return void
      */
-    function render();
+    function render(IRequest $Request);
 
     function getPrefix();
     function getDestination();
 
-    function getNextArg();
-
     /**
-     * Merge an associative array into the existing request array
-     * @param $request Array associative array to merge
+     * Get a list of arguments that the constructor calls to instantiate this instance
+     * @return Array
      */
-    function setRequest(Array $request);
-
-    /**
-     * Returns the request parameters.
-     * If none are set, return the web request parameters ie $_GET, $_POST
-     * @return Array the request parameters
-     */
-    function getRequest();
+    function getExportArgs();
 
     /**
      * Renders the route destination
@@ -58,12 +48,4 @@ interface IRoute extends IArrayObject {
      */
     function getHandler();
 
-    /**
-     * Remove an element from the request array and return its value
-     * @param mixed|NULL $_path optional varargs specifying a path to data
-     * Example: ->pluck(0, 'key') removes $data[0]['key'] and returns it's value;
-     * @return mixed the data array or targeted data specified by path
-     * @throws \InvalidArgumentException if the data path doesn't exist
-     */
-    function pluck($_path);
 }
