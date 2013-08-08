@@ -7,10 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 use CPath\Base;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IRoutable;
 use CPath\Interfaces\IRoute;
+use CPath\Interfaces\IRouteBuilder;
 use CPath\Log;
 use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IDatabase;
@@ -18,11 +21,15 @@ use CPath\Builders\RouteBuilder;
 use CPath\Util;
 
 class NotConfiguredException extends \Exception{}
-abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
+abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {
     const Version = NULL;
     const Build_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const Build_Table_Path = 'tables';
     const FUNC_FORMAT = NULL;
+
+    const Route_Methods = 'CLI';   // Default accepted methods are GET and POST
+    const Route_Path = NULL;       // No custom route path. Path is based on namespace + class name
+
     private $mPrefix;
 
 
@@ -68,6 +75,10 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     public function getPrefix() { return $this->mPrefix; }
 
+    /**
+     * @return PDODatabase
+     * @throws NotConfiguredException
+     */
     static function get()
     {
         throw new NotConfiguredException("Database helper ".get_called_class()."::get() is missing");
@@ -118,8 +129,6 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
     // Implement IHandler
 
-    const Route_Methods = 'CLI';
-
     function render(IRequest $Request) {
         if(!Base::isCLI() && !headers_sent())
             header('text/plain');
@@ -138,4 +147,26 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
         echo "DB Upgrader Completed\n";
     }
 
+    // Statics
+
+    // Implement IBuildable (sub class still needs to have "implements IBuildable")
+
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function getBuildableInstance() {
+        return static::get();
+    }
+
+    // Implement IRoutable
+
+    /**
+     * Returns an array of all routes for this class
+     * @param IRouteBuilder $Builder the IRouteBuilder instance
+     * @return IRoute[]
+     */
+    function getAllRoutes(IRouteBuilder $Builder) {
+        return $Builder->getHandlerDefaultRoutes(static::Route_Methods, static::Route_Path);
+    }
 }

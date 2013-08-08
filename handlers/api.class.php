@@ -8,8 +8,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 use CPath\Base;
+use CPath\Exceptions\ValidationException;
 use CPath\Handlers\Views\APIInfo;
 use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponseAggregate;
@@ -29,6 +31,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Builders\RouteBuilder;
+use CPath\Validate;
 
 /**
  * Class APIHandler
@@ -50,6 +53,10 @@ abstract class API implements IAPI {
     protected $mValidations = array();
     /** @var SimpleLogger */
     private $mLog = NULL;
+
+    public function __construct() {
+
+    }
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -114,7 +121,7 @@ abstract class API implements IAPI {
         if(!headers_sent() && !Base::isCLI())
             header("Content-Type: text/html");
         $Render = new APIInfo();
-        $Render->renderAPI($this, $Request);
+        $Render->renderAPI($this, $Request->getRoute());
         //$Response = $this->executeAsResponse($Route);
         //$Response->sendHeaders();
         //$Response->renderHtml();
@@ -289,12 +296,21 @@ abstract class API implements IAPI {
      * @return IRoute[]
      */
     public function getAllRoutes(IRouteBuilder $Builder) {
-        $path = $Builder->getHandlerDefaultPath();
-        foreach($Builder->getHandlerMethods() as $method)
-            $routes[$method] = new Route($method . ' ' . $path, get_called_class());
+        $path = static::Route_Path ?: $Builder->getHandlerDefaultPath();
+        $routes = $Builder->getHandlerDefaultRoutes(static::Route_Methods, $path);
         if(!isset($routes['GET']))
             $routes['GET'] = new Route('GET ' . $path, 'CPath\Handlers\Views\APIInfo', get_called_class());
         return $routes;
+    }
+
+    // Statics
+
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function getBuildableInstance() {
+        return new static;
     }
 }
 
@@ -355,25 +371,6 @@ interface IAPIField {
 interface IAPIParam extends IAPIField {
 
 }
-/**
- * Class ValidationException
- * @package CPath
- * Thrown when a Field fails to validate
- */
-class ValidationException extends \Exception {
-    public function getFieldError($fieldName) {
-        return sprintf($this->getMessage(), $fieldName);
-    }
-
-    /**
-     * @param $fieldName
-     * @return ValidationException
-     */
-    public function updateMessage($fieldName) {
-        $this->message = $this->getFieldError($fieldName);
-        return $this;
-    }
-}
 
 /**
  * Class ValidationExceptions
@@ -405,9 +402,8 @@ class APIField implements IAPIField {
     public function validate($value) {
         if($value === "")
             $value = NULL;
-        if($this->mValidation
-            && ($value = filter_var($value, $this->mValidation)) === false)
-            throw new ValidationException("Field '%s' is not in the valid format");
+        if($this->mValidation)
+            Validate::input($value, $this->mValidation);
         return $value;
     }
 }
@@ -418,7 +414,9 @@ class APIField implements IAPIField {
  * Throw when a required field is missing
  */
 class RequiredFieldException extends ValidationException {
-    public function getFieldError($fieldName) { return "Field '{$fieldName}' is required."; }
+    function __construct($msg = "Field '%s' is required") {
+        parent::__construct($msg);
+    }
 }
 
 /**

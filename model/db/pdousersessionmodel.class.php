@@ -6,35 +6,17 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
+
+
 use CPath\Base;
-use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIParam;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\HandlerSet;
-use CPath\Handlers\SimpleAPI;
-use CPath\Handlers\ValidationException;
-use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IHandlerAggregate;
-use CPath\Interfaces\IHandlerSet;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\IRoutable;
-use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
-use CPath\Interfaces\IXML;
 use CPath\Interfaces\SessionDisabledException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
 use CPath\Log;
 use CPath\Model\Response;
 use CPath\Util;
-
-
 
 abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
 

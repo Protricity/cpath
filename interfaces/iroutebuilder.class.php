@@ -11,17 +11,18 @@ namespace CPath\Interfaces;
 interface IRouteBuilder extends IBuilder {
 
     /**
-     * Returns a list of allowed route methods associated with this class
-     * @param \ReflectionClass $Class
-     * @return array a list of methods
-     * @throws \CPath\BuildException if no class was specified and no default class exists
+     * Get all default routes for this Handler
+     * @param String|Array|null $methods the allowed methods
+     * @param String|null $path the route path or null for default
+     * @param Object|null $Handler the handler class instance
+     * @return array
      */
-    function getHandlerMethods(\ReflectionClass $Class=NULL);
+    function getHandlerDefaultRoutes($methods='GET|POST|CLI', $path=NULL, $Handler=NULL);
 
     /**
      * Gets the default public route path for this handler
-     * @param \ReflectionClass $Class|NULL The class instance or NULL for the current class
+     * @param String $className|NULL The class instance or NULL for the current class
      * @return string The public route path
      */
-    function getHandlerDefaultPath(\ReflectionClass $Class=NULL);
+    function getHandlerDefaultPath($className=NULL);
 }

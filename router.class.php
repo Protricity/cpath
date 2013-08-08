@@ -43,7 +43,7 @@ final class Router{
         $routes = array();
         $path = Base::getGenPath().'routes.php';
         if(!file_exists($path) || !(include $path) || !$routes) {
-            Build::buildClasses();
+            Build::build();
             require $path;
         }
         if(!$method)

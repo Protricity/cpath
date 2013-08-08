@@ -37,7 +37,7 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
         if(!$args[0]) {
             $this->mMethod = 'CLI';
         } else {
-            if(preg_match('/^('.IRoute::METHODS.')(?: (.*))?$/i', $args[0], $matches)) {
+            if(preg_match('/^('.IRoute::Methods.')(?: (.*))?$/i', $args[0], $matches)) {
                 array_shift($args);
                 $this->mMethod = strtoupper($matches[1]);
                 if(!empty($matches[2]))
@@ -214,6 +214,11 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
      */
     function processShortOptions(Array $fields) {
         $opts = array();
+
+        foreach($fields as $short => $field)
+            if(!is_int($short))
+                $opts[$short] = $field;
+
         foreach($fields as $field) {
             $short = '';
             foreach(explode('_', $field) as $f2)

@@ -28,9 +28,9 @@ interface IHandlerSet extends IHandler, IRoutable, \ArrayAccess, \IteratorAggreg
 
     /**
      * Returns the source class that created this instance
-     * @return String the source class name
+     * @return IHandlerAggregate the source class name
      */
-    function getSourceClass();
+    function getSource();
 
     /**
      * Returns an array of all routes for this class

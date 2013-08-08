@@ -7,7 +7,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Builders;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IUserSession;
+use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDODatabase;
 use CPath\BuildException;
 use CPath\Base;
@@ -16,12 +18,12 @@ use CPath\Interfaces\IBuilder;
 use CPath\Log;
 use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Model\DB\PDOModel;
+use CPath\Validate;
 
 
 class UpgradeException extends \Exception {}
 
 abstract class BuildPDOTables implements IBuilder{
-    const DB_CLASSNAME = "CPath\\Model\\DB\\PDODatabase";
 
     const TMPL_PROC_CLASS = <<<PHP
 <?php
@@ -104,23 +106,23 @@ PHP;
 
     /**
      * Builds class references for existing database tables
-     * @param \ReflectionClass $Class
+     * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\BuildException when a build exception occurred
      */
-    public function build(\ReflectionClass $Class) {
+    public function build(IBuildable $Buildable) {
 
-        if(!$Class->isSubclassOf(static::DB_CLASSNAME))
+        if(!$Buildable instanceof PDODatabase)
             return false;
+        $DB = $Buildable;
 
-        $BUILD = $Class->getConstant('Build_DB');
+        $BUILD = $Buildable::Build_DB;
         if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
-            Log::v(__CLASS__, "(Build_DB = {$BUILD}) Skipping Build for ".$Class->getName());
+            Log::v(__CLASS__, "(Build_DB = {$BUILD}) Skipping Build for ".get_class($Buildable));
             return false;
         }
 
-        /* @var $DB PDODatabase */
-        $DB = call_user_func(array($Class->getName(), 'get'));
+        $Class = new \ReflectionClass($DB);
 
         $modelPath = $this->getFolder($Class, 'model');
         $modelNS = $Class->getNamespaceName() . "\\Model";
@@ -173,47 +175,60 @@ PHP;
 
             $PHP->addConst('Primary', $Table->Primary);
 
-            $columns = "array(";
+            $columns = "\n\t\tstatic \$columns = NULL;";
+            $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
             $i=0;
             foreach($Table->getColumns() as $Column) {
                 if($i++) $columns .= ',';
-                $columns .= "\n\t\t" . var_export($Column->Name, true) . ' => array(';
-                $columns .= $Column->Flags;
-                $columns .= ',' . var_export($Column->Comment ?: self::toTitleCase($Column->Name), true);
-                if($Column->Filter)
-                    $columns .= ',' . var_export($Column->Filter, true);
+                $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
+                $columns .= var_export($Column->Name, true);
+                $columns .= ',' . ($Column->Flags ?: 0);
+                if($Column->Comment || $Column->Filter || $Column->EnumValues)
+                    $columns .= ',' . ($Column->Filter ?: 0);
+                if($Column->Comment || $Column->EnumValues)
+                    $columns .= ',' . var_export($Column->Comment ?: '', true);
+                if($Column->EnumValues) {
+                    $a = '';
+                    foreach($Column->EnumValues as $e)
+                        $a .= ($a ? ',' : '') . var_export($e, true);
+                    $columns .= ',array('.$a.')';
+                }
                 $columns .= ")";
             }
-            $columns .= "\n\t)";
+            $columns .= "\n\t\t);\n";
 
-            $PHP->addStaticProperty('_columns', $columns, 'protected', false);
+            //$PHP->addStaticMethod('init', NULL, $columns, 'public', false);
+            //$PHP->addStaticMethod('getColumns', NULL, ' return self::$_columns; ', 'protected', false);
+            $PHP->addStaticMethod('getAllColumns', NULL, $columns, '', false);
+            //$PHP->addStaticProperty('_columns', NULL, 'private');
+            $PHP->addUse('CPath\Model\DB\PDOColumn');
 
-            $InsertFields = array();
-            $UpdateFields = array();
-            $SearchFields = array();
-            $ExportFields = array();
+//            $InsertFields = array();
+//            $UpdateFields = array();
+//            $SearchFields = array();
+//            $ExportFields = array();
+//
+//            foreach($Table->getColumns() as $Column) {
+//                if($Column->Flags & PDOColumn::FlagInsert) $InsertFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FlagUpdate) $UpdateFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FlagSearch) $SearchFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FlagExport) $ExportFields[] = $Column->Name;
+//            }
+//
+//            if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
+//            if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
+//            if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
+//            if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
 
-            foreach($Table->getColumns() as $Column) {
-                if($Column->Insert) $InsertFields[] = $Column->Name;
-                if($Column->Update) $UpdateFields[] = $Column->Name;
-                if($Column->Search) $SearchFields[] = $Column->Name;
-                if($Column->Export) $ExportFields[] = $Column->Name;
-            }
+            foreach($Table->getColumns() as $Column)
+                if($Column->Flags & PDOColumn::FlagIndex)
+                    $Column->Flags |= PDOColumn::FlagSearch;
 
-            if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
-            if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
-            if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
-            if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
+//            if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
+//            if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
+//            if($SearchFields) $PHP->addConst('Search', implode(',', $SearchFields));
+//            if($ExportFields) $PHP->addConst('Export', implode(',', $ExportFields));
 
-//            if(!$SearchFields)
-//                foreach($Table->getColumns() as $Column)
-//                    if($Column->Index)
-//                        $SearchFields[] = $Column->Name;
-
-            if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
-            if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
-            if($SearchFields) $PHP->addConst('Search', implode(',', $SearchFields));
-            if($ExportFields) $PHP->addConst('Export', implode(',', $ExportFields));
             if($Table->SearchWildCard)
                 $PHP->addConst('SearchWildCard', true);
             if($Table->SearchLimit)
@@ -221,7 +236,8 @@ PHP;
             if($Table->SearchLimitMax)
                 $PHP->addConst('SearchLimitMax', $Table->SearchLimitMax);
             if($Table->AllowHandler)
-                $PHP->addConst('Build_Ignore', false);
+                $PHP->addImplements('CPath\Interfaces\IBuildable');
+                //$PHP->addConst('Build_Ignore', false);
 
             $PHP->addConstCode();
             $PHP->addConstCode("// Table Columns ");
@@ -234,14 +250,8 @@ PHP;
             foreach($Table->getColumns() as $Column) {
                 $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if($Column->Flags & PDOModel::ColumnIsPrimary ? false : true)
+                if($Column->Flags & PDOColumn::FlagPrimary ? false : true)
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
-                if($Column->EnumValues) {
-                    $a = '';
-                    foreach($Column->EnumValues as $e)
-                        $a .= ($a ? ',' : '') . var_export($e, true);
-                    $PHP->addStaticMethod("get{$ucName}EnumValues", '', ' return array('.$a.'); ');
-                }
                 $PHP->addMethodCode();
             }
 
@@ -318,10 +328,14 @@ PHP;
         if(!$noSpace) return $field;
         return str_replace(' ', '', $field);
     }
+
+    static function getBuildableInstance() {
+        return new static;
+    }
 }
 
 class BuildPDOColumn {
-    public $Name, $Comment, $Flags=0, $EnumValues, $Insert, $Update, $Search, $Export, $Filter=NULL;
+    public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL;
 
     public function __construct($name, $comment) {
         $this->Name = $name;
@@ -338,19 +352,19 @@ class BuildPDOColumn {
             switch(strtolower($args[0])) {
                 case 'i':
                 case 'insert':
-                    $this->Insert = true;
+                    $this->Flags |= PDOColumn::FlagInsert;
                     break;
                 case 'u':
                 case 'update':
-                    $this->Update = true;
+                    $this->Flags |= PDOColumn::FlagUpdate;
                     break;
                 case 's':
                 case 'search':
-                    $this->Search = true;
+                    $this->Flags |= PDOColumn::FlagSearch;
                     break;
                 case 'e':
                 case 'export':
-                    $this->Export = true;
+                    $this->Flags |= PDOColumn::FlagExport;
                     break;
                 case 'c':
                 case 'comment':
@@ -380,7 +394,7 @@ class BuildPDOColumn {
 
 class BuildPDOTable {
 
-    public $Name, $Namespace, $ClassName, $ModelName, $Comment, $Insert, $Update, $Search, $Export,
+    public $Name, $Namespace, $ClassName, $ModelName, $Comment,
         $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler = false, $Primary, $Template;
     protected $mColumns = array();
     protected $mUnfound = array();
@@ -409,15 +423,27 @@ class BuildPDOTable {
                     break;
                 case 'i':
                 case 'insert':
-                    $this->Insert = $this->req($name, $arg);
+                    foreach(explode(',', $this->req($name, $arg)) as $column)
+                        $this->getColumn(trim($column))
+                            ->Flags |= PDOColumn::FlagInsert;
                     break;
                 case 'u':
                 case 'update':
-                    $this->Update = $this->req($name, $arg);
+                    foreach(explode(',', $this->req($name, $arg)) as $column)
+                        $this->getColumn(trim($column))
+                            ->Flags |= PDOColumn::FlagUpdate;
                     break;
                 case 's':
                 case 'search':
-                    $this->Search = $this->req($name, $arg);
+                    foreach(explode(',', $this->req($name, $arg)) as $column)
+                        $this->getColumn(trim($column))
+                            ->Flags |= PDOColumn::FlagSearch;
+                    break;
+                case 'e':
+                case 'export':
+                    foreach(explode(',', $this->req($name, $arg)) as $column)
+                        $this->getColumn(trim($column))
+                            ->Flags |= PDOColumn::FlagExport;
                     break;
                 case 'sw':
                 case 'searchwildcard':
@@ -427,10 +453,6 @@ class BuildPDOTable {
                 case 'searchlimit':
                     list($this->SearchLimit, $this->SearchLimitMax) =
                         $this->req($name, $arg, '/^(\d+):(\d+)$/', '{default limit}:{max limit}');
-                    break;
-                case 'e':
-                case 'export':
-                    $this->Export = $this->req($name, $arg);
                     break;
                 case 'c':
                 case 'comment':
@@ -462,8 +484,11 @@ class BuildPDOTable {
     /**
      * @param $name
      * @return BuildPDOColumn
+     * @throws BuildException if the column is not found
      */
     public function getColumn($name) {
+        if(!isset($this->mColumns[$name]))
+            throw new BuildException("Column {$name} not found");
         return $this->mColumns[$name];
     }
 
@@ -479,7 +504,7 @@ class BuildPDOTable {
 
         if(!$this->Primary)
             foreach($this->getColumns() as $Column) {
-                if($Column->Flags & PDOModel::ColumnIsPrimary) {
+                if($Column->Flags & PDOColumn::FlagPrimary) {
                     $this->Primary = $Column->Name;
                     break;
                 }
@@ -589,8 +614,19 @@ class BuildPDOUserTable extends BuildPDOTable {
         }
 
         $Column = $this->getColumn($this->ColumnEmail);
+        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
         if(!$Column->Filter)
             $Column->Filter = FILTER_VALIDATE_EMAIL;
+
+        $Column = $this->getColumn($this->ColumnUsername);
+        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
+        if(!$Column->Filter)
+            $Column->Filter = Validate::FILTER_VALIDATE_USERNAME;
+
+        $Column = $this->getColumn($this->ColumnPassword);
+        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
+        if(!$Column->Filter)
+            $Column->Filter = Validate::FILTER_VALIDATE_PASSWORD;
     }
 
     public static function addUserSessionTable(BuildPDOUserSessionTable $Table) {

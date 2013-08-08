@@ -22,6 +22,7 @@ class ClassNotFoundException extends \Exception {}
  *
  * Provides required framework functionality such as class autoloader and directories
  */
+
 class Base {
 
     private static $mLoaded = false;
@@ -55,44 +56,59 @@ class Base {
 
     /** Activate Autoloader for classes */
     public static function load() {
-        if(!self::$mLoaded) {
-            spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-            //if(self::getConfig('build.auto')) Build::buildClasses(); // Depreciated. no reason to auto build
+        if(self::$mLoaded)
+            return;
+        if(self::getConfig('profile.enable', false)) {
+            include 'profile.class.php';
+            Profile::load();
         }
+        spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
+        spl_autoload_register(__NAMESPACE__.'\Base::errClass', true);
+        //if(self::getConfig('build.auto')) Build::buildClasses(); // Depreciated. no reason to auto build
     }
 
-    /**
-     * Register an autoloader.
-     * @param IAutoLoader $loader
-     */
-    public static function registerAutoloader(IAutoLoader $loader, $prefix) {
-        self::$mAutoloaders[strtolower($prefix)] = $loader;
-    }
+//    /**
+//     * Register an autoloader.
+//     * @param IAutoLoader $loader
+//     */
+//    public static function registerAutoloader(IAutoLoader $loader, $prefix) {
+//        self::$mAutoloaders[strtolower($prefix)] = $loader;
+//    }
 
     /** Deactivate Autoloader for classes */
     public static function unload() {
         if(self::$mLoaded) {
+            spl_autoload_unregister(__NAMESPACE__.'\Base::errClass');
             spl_autoload_unregister(__NAMESPACE__.'\Base::loadClass');
             self::$mLoaded = false;
+
         }
     }
 
     /** Autoloader for classes. Path matches namespace heirarchy of Class */
     private static function loadClass($name) {
-        if(strpos($name, '\\')===false) return;
-        $prefix = strtolower(strstr($name, '\\', true));
-        if(isset(self::$mAutoloaders[$prefix])
-            && self::$mAutoloaders[$prefix]->loadClass($name) !== false)
-                return;
-        $name = str_replace('\\', '/', strtolower($name));
-        $name = strtolower($name);
+//        if(strpos($name, '\\')===false) return;
+//      $prefix = strtolower(strstr($name, '\\', true));
+//        if(isset(self::$mAutoloaders[$prefix])
+//            && self::$mAutoloaders[$prefix]->loadClass($name) !== false)
+//                return;
+        $name = strtr(strtolower($name), '_\\', '//');
         $classPath = self::$mBasePath . $name . '.class.php';
-        if(file_exists($classPath))
-            include($classPath);
-        else
-            Log::e(__CLASS__, "Class not found: ".$classPath);
+        //if(file_exists($classPath))
+            include_once($classPath);
+        //else
+        //    Log::e(__CLASS__, "Class not found: ".$classPath);
             //throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");
 
+    }
+
+    /** Loaded after main autoloader to throw an exception for missing classes
+     * @param String $name the Class name
+     * @throws ClassNotFoundException when a class is not found */
+    private static function errClass($name) {
+        $name = strtr('_\\', '//', strtolower($name));
+        $classPath = self::$mBasePath . $name . '.class.php';
+        throw new ClassNotFoundException("Class '{$name}' could not be found: ".$classPath);
     }
 
     /** Attempt to route a web request to it's destination */
@@ -181,6 +197,19 @@ class Base {
      */
     public static function getConfig($key, $default=NULL) {
         return isset(self::$mConfig[$key]) ? self::$mConfig[$key] : $default;
+    }
+
+    /**
+     * Returns an array of config variable based on a prefix
+     * @param $prefix string The name of the config variable
+     * @return array an array of config variables
+     */
+    public static function getConfigByPrefix($prefix) {
+        $arr = array();
+        foreach(self::$mConfig as $key => $data)
+            if(strpos($key, $prefix) === 0)
+                $arr[substr($key, strlen($prefix))] = $data;
+        return $arr;
     }
 
     /**

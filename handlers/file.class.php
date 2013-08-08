@@ -14,9 +14,6 @@ use CPath\Interfaces\IRoute;
 class File implements IHandler{
     const Build_Ignore = true;
 
-    const Route_Methods = 'GET';
-    const Route_Path = NULL;
-
     private $mFilePath;
 
     public function __construct($filePath) {

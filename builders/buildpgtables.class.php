@@ -11,13 +11,15 @@ use CPath\DataBase\PostGreSQL;
 use CPath\BuildException;
 use CPath\Base;
 use CPath\Build;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
+use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDOModel;
+use CPath\Model\DB\PGSQLDatabase;
 
 
-class BuildPGTables extends BuildPDOTables {
-    const DB_CLASSNAME = "CPath\\Model\\DB\\PGSQLDatabase";
+class BuildPGTables extends BuildPDOTables implements IBuildable {
 
     const TMPL_TABLE_CLASS = <<<PHP
 <?php
@@ -26,6 +28,18 @@ use CPath\Model\DB\PGSQLTable;
 class %s extends PGSQLTable {
 %s}
 PHP;
+
+    /**
+     * Builds class references for existing database tables
+     * @param IBuildable $Buildable
+     * @return boolean True if the class was built. False if it was ignored.
+     * @throws \CPath\BuildException when a build exception occurred
+     */
+    public function build(IBuildable $Buildable) {
+        if(!$Buildable instanceof PGSQLDatabase)
+            return false;
+        return parent::build($Buildable);
+    }
 
     /**
      * @param \PDO $DB
@@ -53,7 +67,7 @@ where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a
 group by column_name;") as $row ) {
             $name = $row['column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOModel::ColumnIsIndex;
+            $Column->Flags |= PDOColumn::FlagIndex;
         }
     }
 
@@ -74,14 +88,14 @@ group by column_name;") as $row ) {
             and  c.table_schema=st.schemaname and c.table_name=st.relname)
         ) d on d.column_name = c.column_name
         WHERE c.table_name = '{$Table->Name}';") as $row) {
-            $name = $row['column_name']; // TODO: get NULL $Column->Flags |= PDOModel::ColumnIsNull;
+            $name = $row['column_name']; // TODO: get NULL $Column->Flags |= PDOColumn::FlagNull;
             $Column = new BuildPDOColumn($name, $row['column_comment']);
             if(stripos($row['data_type'], 'int') !== false)
-                $Column->Flags |= PDOModel::ColumnIsNumeric;
+                $Column->Flags |= PDOColumn::FlagNumeric;
             if(stripos($row['column_default'], 'nextval(') ===0)
-                $Column->Flags |= PDOModel::ColumnIsAutoInc;
-            if(($Column->Flags & PDOModel::ColumnIsAutoInc) && !$primaryCol) {
-                $Column->Flags |= PDOModel::ColumnIsPrimary;
+                $Column->Flags |= PDOColumn::FlagAutoInc;
+            if(($Column->Flags & PDOColumn::FlagAutoInc) && !$primaryCol) {
+                $Column->Flags |= PDOColumn::FlagPrimary;
                 $primaryCol = $name;
             }
             $Table->addColumn($Column);

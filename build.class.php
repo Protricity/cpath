@@ -7,22 +7,22 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IRoute;
+use CPath\Interfaces\IShortOptions;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
 class BuildException extends \Exception {}
 
-class Build extends API {
+class Build extends API implements IBuildable {
+
+    const Route_Path = '/build';    // Allow manual building from command line: 'php index.php build'
+    const Route_Methods = 'CLI';    // CLI only
 
     const Route_Ignore_Files = '.buildignore';
     const Route_Ignore_Dir = '.git|.idea';
-    const Route_Path = '/build';     // Allow manual building from command line: 'php index.php build'
-    const Route_Methods = 'CLI';    // CLI only
-
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -36,14 +36,16 @@ class Build extends API {
         if($built)
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
         $built = true;
+        if($Request instanceof IShortOptions)
+            $Request->processShortOptions(array('v' => 'verbose', 's' => 'skip-broken'));
 
-        if(!empty($Request['v']))
+        if(!empty($Request['verbose']))
             Log::setDefaultLevel(4);
-        if(!empty($Request['s']))
+        if(!empty($Request['skip-broken']))
             self::$mSkipBroken = true;
 
         $Response = new Response(false, "Starting Build");
-        $exCount = Build::buildClasses(true);
+        $exCount = Build::build(true);
         if($exCount)
             return $Response
                 ->update(false, "Build Failed: {$exCount} Exception(s) Occurred");
@@ -61,13 +63,15 @@ class Build extends API {
 
     // Statics
 
-    /** @var $mBuilders IBuilder[] */
+    /** @var IBuilder[] $mBuilders */
     private static $mBuilders = array();
+    private static $mClassFiles = array();
+    /** @var \ReflectionClass[] $mBuilders */
     private static $mClasses = array();
     private static $mBuildConfig = NULL;
     private static $mForce = false;
     private static $mSkipBroken = false;
-    private static $mBrokenClasses = array();
+    private static $mBrokenFiles = array();
 
     /**
      * Return the build config full path
@@ -173,57 +177,43 @@ class Build extends API {
     /**
      * Build all classes
      */
-    public static function buildClasses($force=false) {
+    public static function build($force=false) {
         Log::v(__CLASS__, "Starting Builds");
         if(Base::getConfig('build.enabled') === false) {
             Log::e(__CLASS__, "Building is not allowed. build.enabled===false");
             return 0;
         }
 
-        self::$mBrokenClasses = self::getConfig(__CLASS__, 'brokenClasses') ?: array();
+        self::$mBrokenFiles = self::getConfig(__CLASS__, 'brokenFiles') ?: array();
         if(self::$mSkipBroken) {
-            if($lastClass = self::getConfig(__CLASS__, 'lastClass')) {
-                if(!in_array($lastClass, self::$mBrokenClasses)) {
-                    self::$mBrokenClasses[] = $lastClass;
-                    self::setConfig(__CLASS__, 'brokenClasses', self::$mBrokenClasses);
-                    Log::v(__CLASS__, "Adding broken class to skip list: {$lastClass}");
+            if($lastFile = self::getConfig(__CLASS__, 'lastFile')) {
+                if(!in_array($lastFile, self::$mBrokenFiles)) {
+                    self::$mBrokenFiles[] = $lastFile;
+                    self::setConfig(__CLASS__, 'brokenFiles', self::$mBrokenFiles);
+                    Log::v(__CLASS__, "Adding broken file to skip list: {$lastFile}");
                 }
             }
-            if(self::$mBrokenClasses) {
-                Log::v(__CLASS__, "Skipping (%s) broken class(es)", sizeof(self::$mBrokenClasses));
-                foreach(self::$mBrokenClasses as $class)
-                    Log::v2(__CLASS__, "Skipping broken class: {$class}");
+            if(self::$mBrokenFiles) {
+                Log::v(__CLASS__, "Skipping (%s) broken files(es)", sizeof(self::$mBrokenFiles));
+                foreach(self::$mBrokenFiles as $classFile)
+                    Log::v2(__CLASS__, "Skipping broken file: {$classFile}");
             }
         } else {
-            if(self::$mBrokenClasses) {
-                self::$mBrokenClasses = array();
-                self::setConfig(__CLASS__, 'brokenClasses', self::$mBrokenClasses);
-                Log::v(__CLASS__, "Clearing (%d) broken class(es)", sizeof(self::$mBrokenClasses));
+            if(self::$mBrokenFiles) {
+                self::$mBrokenFiles = array();
+                self::setConfig(__CLASS__, 'brokenFiles', self::$mBrokenFiles);
+                Log::v(__CLASS__, "Clearing (%d) broken files(es)", sizeof(self::$mBrokenFiles));
             }
         }
         self::commitConfig();
 
         self::$mForce = $force;
         self::$mBuilders = array();
-        self::$mClasses = array();
-        $exCount = self::findClass(dirname(__DIR__), '');
+        $exCount = self::findClassFiles(dirname(__DIR__), '');
+        self::findClasses();
+        $exCount += self::buildClasses();
         /** @var $Class \ReflectionClass */
-        foreach(self::$mClasses as $Class) {
-            if(self::$mBrokenClasses && in_array($Class->getName(), self::$mBrokenClasses)) {
-                Log::v2(__CLASS__, "Skipping broken class '{$Class->getName()}'");
-                continue;
-            }
-            /** @var $Builder IBuilder */
-            Log::v2(__CLASS__, "Building '{$Class->getName()}'");
-            self::setConfig(__CLASS__, 'lastClass', $Class->getName(), true);
-            foreach(self::$mBuilders as $Builder) try {
-                $Builder->build($Class);
-            } catch (\Exception $ex) {
-                $exCount++;
-                Log::ex(get_class($Builder), $ex);
-            }
-        }
-        self::setConfig(__CLASS__, 'lastClass', NULL, true);
+        self::setConfig(__CLASS__, 'lastFile', NULL, true);
         /** @var $Builder IBuilder */
         foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
@@ -231,11 +221,87 @@ class Build extends API {
         $v = Base::getConfig('build.inc', 0);
         Base::commitConfig('build.inc', ++$v);
 
-        self::setConfig(__CLASS__, 'lastClass', NULL, true);
         Log::v(__CLASS__, "All Builds Complete (inc={$v})");
         return $exCount;
     }
 
+    private static function findClasses() {
+        foreach(get_declared_classes() as $className) {
+            $Class = new \ReflectionClass($className);
+            $classFile = $Class->getFileName();
+            if(!isset(self::$mClassFiles[$classFile])){
+                Log::v2(__CLASS__, "Skipping non-framework class '{$Class->getName()}' at {$classFile}");
+                continue;
+            }
+            if(self::$mBrokenFiles && in_array($classFile, self::$mBrokenFiles)) {
+                Log::v2(__CLASS__, "Skipping broken class '{$Class->getName()}'");
+                continue;
+            }
+
+            $name = strtr(strtolower($className), '_\\', '//');
+            $classFile2 = realpath(Base::getBasePath() . $name . '.class.php');
+            if($classFile !== $classFile2) {
+                Log::v2(__CLASS__, "Skipping secondary class '{$Class->getName()}' in $classFile");
+                continue;
+            }
+
+            if($Class->getConstant('Build_Ignore')) {
+            }
+//            if($Class->isAbstract()) {
+//                Log::v2(__CLASS__, "Ignoring Abstract Class '{$className}' in '{$classFile}'");
+//                continue;
+//            }
+
+
+            if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuildable")) {
+
+                if($Class->getConstant('Build_Ignore')===true) {
+                    Log::v2(__CLASS__, "Ignoring Class '{$className}' marked with Build_Ignore===true");
+                    continue;
+                } else {
+                    if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuilder")) {
+                        Log::v(__CLASS__, "Found Builder Class: {$className}");
+                        //call_user_func(array($Class->getName(), 'build'), $Class);
+                        static::$mBuilders[] = $Class->getMethod('getBuildableInstance')->invoke(null);
+                    }
+                    Log::v2(__CLASS__, "Found Class '{$Class->getName()}'");
+                    self::$mClasses[] = $Class;
+                    continue;
+                }
+            }
+
+            Log::v2(__CLASS__, "Ignoring Class '{$className}' in '{$classFile}'");
+            continue;
+        }
+    }
+
+    private static function buildClasses() {
+        $exCount = 0;
+        foreach(self::$mClasses as $Class) {
+            $Buildable = $Class->getMethod('getBuildableInstance')->invoke(null);
+
+            if(!$Buildable) {
+                Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
+                self::$mClasses[] = $Class;
+                continue;
+            }
+
+            if(!$Buildable instanceof IBuildable){
+                Log::e(__CLASS__, "Buildable instance returned does not implement IBuildable for '{$Class->getName()}'");
+                $exCount++;
+                continue;
+            }
+
+            Log::v2(__CLASS__, "Building '{$Class->getName()}'");
+            foreach(self::$mBuilders as $Builder) try {
+                $Builder->build($Buildable);
+            } catch (\Exception $ex) {
+                $exCount++;
+                Log::ex(get_class($Builder), $ex);
+            }
+        }
+        return $exCount;
+    }
     /**
      * Find all classes by folder
      * @param $path string the class path
@@ -243,67 +309,71 @@ class Build extends API {
      * @throws \Exception if a build fails
      * @return int The number of exceptions that occurred
      */
-    private static function findClass($path, $dirClass) {
+    private static function findClassFiles($path, $dirClass) {
         $exCount = 0;
         Log::v2(__CLASS__, "Scanning '{$path}'");
         $pathName = basename($path);
+
         foreach(explode('|', self::Route_Ignore_Dir) as $dir)
             if($dir == $pathName) {
                 Log::v2(__CLASS__, "Found '{$dir}'. Ignoring Directory '{$path}'");
                 return $exCount;
             }
+
         foreach(explode('|', self::Route_Ignore_Files) as $file)
             if(file_exists($path . '/' . $file)) {
                 Log::v2(__CLASS__, "Found File '{$file}'. Ignoring Directory '{$path}'");
                 return $exCount;
             }
+
         foreach(scandir($path) as $file) {
             if(in_array($file, array('.', '..')))
                 continue;
-            $filePath = $path . '/' . $file;
+            $filePath = realpath($path . '/' . $file);
             if(is_dir($filePath)) {
-                $exCount += self::findClass($filePath, $dirClass .'\\'. ucfirst($file));
+                $exCount += self::findClassFiles($filePath, $dirClass .'\\'. ucfirst($file));
                 continue;
             }
             if(strcasecmp(substr($file, -10), '.class.php') !== 0)
                 continue;
-            $name = substr($file, 0, strlen($file) - 10);
-            $class = $dirClass . '\\' . ucfirst($name);
+            //$name = substr($file, 0, strlen($file) - 10);
+            //$class = $dirClass . '\\' . ucfirst($name);
 
-            if(self::$mBrokenClasses && in_array($class, self::$mBrokenClasses)) {
-                Log::v(__CLASS__, "Skipping broken class '{$class}'");
+            if(self::$mBrokenFiles && in_array($filePath, self::$mBrokenFiles)) {
+                Log::v(__CLASS__, "Skipping broken file: {$filePath}");
                 continue;
             }
 
-            self::setConfig(__CLASS__, 'lastClass', $class, true);
+            self::setConfig(__CLASS__, 'lastFile', $filePath, true);
             try{
                 require_once($filePath);
             } catch (\Exception $ex) {
-                self::setConfig(__CLASS__, 'lastClass', NULL, true);
+                self::setConfig(__CLASS__, 'lastFile', NULL, true);
                 $exCount++;
-                Log::ex("Exception occured while loading {$class}", $ex);
+                Log::ex("Exception occured while loading {$filePath}", $ex);
                 continue;
             }
-            self::setConfig(__CLASS__, 'lastClass', NULL);
-            $Class = new \ReflectionClass($class);
-            if($Class === NULL) // TODO: can this be null?
-                throw new \Exception("Class '{$class}' not found in '{$filePath}'");
-
-            if($Class->getConstant('Build_Ignore')) {
-                Log::v2(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
-                continue;
-            }
-            if($Class->isAbstract()) {
-                Log::v2(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
-                continue;
-            }
-            static::$mClasses[] = $Class;
-
-            if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuilder")) {
-                Log::v(__CLASS__, "Found Builder Class: {$class}");
-                //call_user_func(array($Class->getName(), 'build'), $Class);
-                static::$mBuilders[] = $Class->newInstance();
-            }
+            self::setConfig(__CLASS__, 'lastFile', NULL);
+            self::$mClassFiles[$filePath] = true;
+            Log::v2(__CLASS__, "Found Class file: {$filePath}");
+//            $Class = new \ReflectionClass($class);
+//            if($Class === NULL) // TODO: can this be null?
+//                throw new \Exception("Class '{$class}' not found in '{$filePath}'");
+//
+//            if($Class->getConstant('Build_Ignore')) {
+//                Log::v2(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
+//                continue;
+//            }
+//            if($Class->isAbstract()) {
+//                Log::v2(__CLASS__, "Ignoring Abstract Class '{$class}' in '{$filePath}'");
+//                continue;
+//            }
+//
+//            if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuilder")) {
+//                Log::v(__CLASS__, "Found Builder Class: {$class}");
+//                //call_user_func(array($Class->getName(), 'build'), $Class);
+//                static::$mBuilders[] = $Class->newInstance();
+//            }
         }
         return $exCount;
     }

@@ -9,20 +9,15 @@ namespace CPath\Model\DB;
 
 
 use CPath\Base;
-use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\SimpleAPI;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Log;
 use CPath\Model\Response;
 use CPath\Util;
+use CPath\Validate;
+
 /** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}
 
@@ -61,6 +56,9 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
     /** Enable cache for user accounts by default */
     const CacheEnabled = true;
+
+    /** Confirm Password by default */
+    const ConfirmPassword = true;
 
     /** Specify the IUserSession class or model */
     const SessionClass = NULL;
@@ -136,52 +134,9 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     {
         $Handlers = parent::getAggregateHandler();
 
-        $Source = $this;
-
-        $columns = array(
-            static::ColumnUsername => new APIRequiredField("Username"),
-            static::ColumnEmail => new APIRequiredField("Email Address", FILTER_VALIDATE_EMAIL),
-        );
-        foreach($Handlers->getAPI('POST')->getFields() as $field=>$Field)
-            $columns[$field] = $Field;
-
-        $columns[static::ColumnPassword] = new APIRequiredField("Password");
-        $columns[static::ColumnPassword.'_confirm'] = new APIRequiredField("Confirm Password");
-        $columns['login'] = new APIField("Log in after");
-
-        $Handlers->addAPI('POST', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
-            $API->processRequest($Request);
-            $login = $Request->pluck('login');
-            $confirm = $Request->pluck(static::ColumnPassword.'_confirm');
-            $pass = $Request[static::ColumnPassword];
-            if($confirm !== NULL)
-                $Source::confirmPassword($pass, $confirm);
-            $Request[static::ColumnPassword] = $Source::hashPassword($pass);
-            /** @var PDOUserModel $User */
-            $User = parent::createFromArray($Request);
-            if($login) {
-                $Source::login($User->getUsername(), $pass);
-                return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
-            }
-            return new Response("Created user '".$User->getUsername()."' successfully", true, $User);
-        }, $columns, "Create a new ".$this->getModelName()), true);
-
-
-        $Handlers->addAPI('POST login', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
-            $API->processRequest($Request);
-            /** @var PDOUserModel $User  */
-            $User = $Source::login($Request['name'], $Request['password']);
-            return new Response("Logged in as user '".$Request[static::ColumnUsername]."' successfully", true, $User);
-        }, array(
-            'name' => new APIRequiredParam("Username or Email Address"),
-            'password' => new APIRequiredParam("Password")
-        ), "Log in"));
-
-        $Handlers->addHandler('POST logout', new SimpleAPI(function(API $API, IRequest $Request) use ($Source) {
-            if($Source::logout())
-                return new Response("Logged out successfully", true);
-            return new Response("User was not logged in", false);
-        }, array(), "Log out"));
+        $Handlers->addHandlerByClass('POST', 'CPath\Model\DB\API_PostUser', true);
+        $Handlers->addHandlerByClass('POST login', 'CPath\Model\DB\API_PostUserLogin');
+        $Handlers->addHandlerByClass('POST logout', 'CPath\Model\DB\API_PostUserLogout');
 
         return $Handlers;
     }

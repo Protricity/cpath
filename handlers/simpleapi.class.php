@@ -23,8 +23,6 @@ use CPath\Util;
  */
 class SimpleAPI extends API {
 
-    const Build_Ignore = true;     // API Calls are built to provide routes
-
     private $mCallback;
     private $mDescription;
 

@@ -14,11 +14,11 @@ interface IBuilder {
     /**
      * Performs a build on a class. If the class is not a type that should be built,
      * this method should return false immediately
-     * @param \ReflectionClass $Class
+     * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\BuildException
      */
-    function build(\ReflectionClass $Class);
+    function build(IBuildable $Buildable);
 
     /**
      * Executed when all classes have been built. Used to consolidate data.

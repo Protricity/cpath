@@ -11,11 +11,13 @@ namespace CPath\Builders;
 
 use CPath\Base;
 use CPath\Build;
+use CPath\Interfaces\IBuildable;
 use CPath\Log;
+use CPath\Model\DB\MySQLDatabase;
+use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDOModel;
 
-class BuildMySQLTables extends BuildPDOTables {
-    const DB_CLASSNAME = "CPath\\Model\\DB\\MysqlDatabase";
+class BuildMySQLTables extends BuildPDOTables implements IBuildable {
 
     const TMPL_TABLE_CLASS = <<<PHP
 <?php
@@ -25,6 +27,17 @@ class %s extends MySQLTable {
 %s}
 PHP;
 
+    /**
+     * Builds class references for existing database tables
+     * @param IBuildable $Buildable
+     * @return boolean True if the class was built. False if it was ignored.
+     * @throws \CPath\BuildException when a build exception occurred
+     */
+    public function build(IBuildable $Buildable) {
+        if(!$Buildable instanceof MySQLDatabase)
+            return false;
+        return parent::build($Buildable);
+    }
 
     /**
      * @param \PDO $DB
@@ -47,9 +60,9 @@ PHP;
         foreach($DB->query("SHOW KEYS FROM `{$Table->Name}`;") as $row) {
             $name = $row['Column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOModel::ColumnIsIndex;
+            $Column->Flags |= PDOColumn::FlagIndex;
             if(stripos($row['Key_name'], 'PRIMARY') === 0)
-                $Column->Flags |= PDOModel::ColumnIsPrimary;
+                $Column->Flags |= PDOColumn::FlagPrimary;
         }
     }
 
@@ -63,18 +76,18 @@ PHP;
             $name = $row['Field'];
             $Column = new BuildPDOColumn($name, $row['Comment']);
             if($row['Null'] == 'YES')
-                $Column->Flags |= PDOModel::ColumnIsNull;
+                $Column->Flags |= PDOColumn::FlagNull;
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
                 $Column->EnumValues = array();
                 foreach( explode(',', $matches[1]) as $value )
                     $Column->EnumValues[] = trim( $value, "'" );
-                $Column->Flags |= PDOModel::ColumnIsEnum;
+                $Column->Flags |= PDOColumn::FlagEnum;
             } else {
                 if(stripos($row['Type'], 'int') !== false)
-                    $Column->Flags |= PDOModel::ColumnIsNumeric;
+                    $Column->Flags |= PDOColumn::FlagNumeric;
             }
             if($row['Extra'] == 'auto_increment')
-                $Column->Flags |= PDOModel::ColumnIsAutoInc;
+                $Column->Flags |= PDOColumn::FlagAutoInc;
             $Table->addColumn($Column);
         }
     }
