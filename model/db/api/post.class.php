@@ -13,42 +13,28 @@ use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
-class API_Post extends API {
-    private $mModel;
+class API_Post extends API_Base {
 
     /**
      * Construct an instance of this API
      * @param PDOModel $Model the user source object for this API
      */
     function __construct(PDOModel $Model) {
-        parent::__construct();
-        $this->mModel = $Model;
+        parent::__construct($Model);
 
         foreach($Model::findColumns($Model::Insert ?: PDOColumn::FlagInsert) as $Column)
             $Column->addToAPI($this);
     }
 
     /**
-     * Overwrite to modify IRequest before insert
-     * @param IRequest $Request the request to modify
-     */
-    function beforeInsert(IRequest $Request) {}
-
-    /**
-     * Overwrite to manage IRequest or PDOModel after insert
-     * @param PDOModel $NewModel the newly inserted model
-     * @param IRequest $Request the request that was used
-     */
-    function afterInsert(PDOModel $NewModel, IRequest $Request) {}
-
-    /**
      * Get the API Description
      * @return String description for this API
      */
     function getDescription() {
-        return "Create a new ".$this->mModel->getModelName();
+        return "Create a new ".$this->getModel()->getModelName();
     }
 
     /**
@@ -58,19 +44,14 @@ class API_Post extends API {
      * @return IResponse|mixed the api call response with data, message, and status
      */
     function execute(IRequest $Request) {
-        $Model = $this->mModel;
+        $Model = $this->getModel();
         $this->processRequest($Request);
-        $Model::validateRequest($Request);
 
-        $this->beforeInsert($Request);
+        if($Model instanceof IWriteAccess)
+            $Model->assertWriteAccess($Request, IWriteAccess::INTENT_POST);
 
         $Model = $Model::createFromArray($Request);
 
-        $this->afterInsert($Model, $Request);
-
-        $id = '';
-        if($column = $Model::Primary)
-            $id = " '" . $Model->$column . "'";
-        return new Response("Created " . $Model::getModelName() . "{$id} Successfully.", true, $Model);
+        return new Response("Created " . $Model . " Successfully.", true, $Model);
     }
 }

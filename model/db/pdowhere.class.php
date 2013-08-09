@@ -9,10 +9,13 @@ namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 abstract class PDOWhere {
+    const DefaultLogicOR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
+
     protected $table, $where=array(), $values=array();
     private $lastCond = true;
     private $alias = NULL;
     private $joins = array();
+    protected $mFlags = 0;
 
     public function __construct($table) {
         $this->table = $table;
@@ -57,6 +60,7 @@ abstract class PDOWhere {
      * @param String|null $value The value to compare against. If null, the entire comparison must be in $field
      * @param String|null $alias The alias to set for the $field. If $value is not set or $field contains '?', then the alias will not be appended to the field.
      * @return $this returns the query instance
+     * @throws \InvalidArgumentException
      */
     public function where($field, $value=NULL, $alias=NULL) {
         if(!$alias) $alias = $this->table;
@@ -64,7 +68,7 @@ abstract class PDOWhere {
         if($value !== NULL) {
             if(is_array($value)) {
                 if(!$value)
-                    throw new \Exception("An empty array was passed to Column '{$field}'");
+                    throw new \InvalidArgumentException("An empty array was passed to Column '{$field}'");
                 $this->values = array_merge($this->values, $value);
                 $field .= ' in (?' . str_repeat(', ?', sizeof($this->values) - 1) . ')';
             } else {
@@ -91,13 +95,39 @@ abstract class PDOWhere {
                 $field = $alias . '.' . $field;
         }
         if (!$this->lastCond) {
-            $this->where[] = 'AND';
+            $this->where[] = $this->mFlags & self::DefaultLogicOR ? 'OR' : 'AND';
         }
         $this->where[] = $field;
         $this->lastCond = false;
         return $this;
     }
 
+    /**
+     * Set flags for this query instance
+     * @param int $flags the flag or flags to set
+     * @return $this the query instance
+     * @throws \InvalidArgumentException
+     */
+    function setFlag($flags) {
+        if(!is_int($flags))
+            throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
+        $oldFlags = $this->mFlags;
+        $this->mFlags |= $oldFlags;
+        return $this;
+    }
+    /**
+     * Unset flags for this query instance
+     * @param int $flags the flag or flags to unset
+     * @return $this the query instance
+     * @throws \InvalidArgumentException
+     */
+    function unsetFlag($flags) {
+        if(!is_int($flags))
+            throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
+        $oldFlags = $this->mFlags;
+        $this->mFlags = $oldFlags & ~$flags;
+        return $this;
+    }
 
     public function getSQL() {
         return implode('', $this->joins)

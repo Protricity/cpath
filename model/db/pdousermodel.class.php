@@ -9,11 +9,15 @@ namespace CPath\Model\DB;
 
 
 use CPath\Base;
+use CPath\Exceptions\ValidationException;
+use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Log;
+use CPath\Model\DB\Interfaces\IReadAccess;
+use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 use CPath\Util;
 use CPath\Validate;
@@ -127,28 +131,63 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     }
 
     /**
-     * Return a handler to act in place of this handler
-     * @return IHandler $Handler an IHandler instance
+     * Returns the default IHandlerSet collection for this PDOModel type
+     * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
+     * @return HandlerSet a set of common handler routes for this PDOModel type
      */
-    function getAggregateHandler()
-    {
-        $Handlers = parent::getAggregateHandler();
+    function getDefaultHandlers(HandlerSet $Handlers=NULL) {
+        if($Handlers === NULL)
+            $Handlers = new HandlerSet($this);
 
-        $Handlers->addHandlerByClass('POST', 'CPath\Model\DB\API_PostUser', true);
-        $Handlers->addHandlerByClass('POST login', 'CPath\Model\DB\API_PostUserLogin');
-        $Handlers->addHandlerByClass('POST logout', 'CPath\Model\DB\API_PostUserLogout');
+        if(!($this instanceof IReadAccess) || !($this instanceof IWriteAccess))
+            Log::e(get_class($this), get_class($this) . " does not implement IReadAccess or IWriteAccess. Users may potentially edit other user's profiles");
+
+        $Handlers->add('GET', new API_Get($this, static::ColumnUsername));
+        $Handlers->add('GET search', new API_GetSearch($this));
+        $Handlers->add('POST', new API_PostUser($this));
+        $Handlers->add('POST login', new API_PostUserLogin($this));
+        $Handlers->add('POST logout', new API_PostUserLogout($this));
+        $Handlers->add('PATCH', new API_Patch($this, static::ColumnUsername));
+        //$Handlers->addHandler('DELETE', new API_Delete($this, static::ColumnUsername));
 
         return $Handlers;
     }
 
     // Statics
 
+    /**
+     * Creates a new Model based on the provided row of column value pairs
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return PDOUserModel|null returns NULL if no primary key column is available
+     * @throws ModelAlreadyExistsException
+     * @throws \Exception|\PDOException
+     * @throws ValidationException if a column fails to validate
+     */
+    static function createFromArray($row) {
+        $row[static::ColumnPassword] = static::hashPassword($row[static::ColumnPassword]);
+        return parent::createFromArray($row);
+    }
+
+
+    /**
+     * Update a column value for this Model
+     * @param String $column the column name to update
+     * @param String $value the value to set
+     * @param bool $commit set true to commit now, otherwise use ->commitColumns
+     * @return $this
+     */
+    function updateColumn($column, $value, $commit=true) {
+        if($column == static::ColumnPassword)
+            $value = static::hashPassword($value);
+        return parent::updateColumn($column, $value, $commit);
+    }
+
     static function confirmPassword($newPassword, $confirmPassword) {
         if(strcmp($newPassword, $confirmPassword) !== 0)
             throw new PasswordsDoNotMatchException();
     }
 
-    static function hashPassword($password, $oldPassword=NULL) {
+    private static function hashPassword($password, $oldPassword=NULL) {
         return crypt($password, $oldPassword);
     }
 
@@ -201,7 +240,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      */
     static function loadGuestAccount(Array $insertFields=array()) {
         /** @var PDOUserModel $User  */
-        $User = static::searchByColumn(static::ColumnUsername, 'guest')->fetch();
+        $User = static::searchByColumns('guest', static::ColumnUsername)->fetch();
         if(!$User) {
             if(!isset($insertFields[static::ColumnFlags]))
                 $insertFields[static::ColumnFlags] = 0;
@@ -226,9 +265,9 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      */
     public static function login($search, $password, $expireInSeconds=NULL) {
         /** @var PDOUserModel $User */
-        $User = static::searchByColumns(array(
-            static::ColumnUsername => $search,
-            static::ColumnEmail => $search,
+        $User = static::searchByColumns($search, array(
+            static::ColumnUsername,
+            static::ColumnEmail,
         ))->fetch();
 
         if(!$User)
@@ -237,7 +276,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $User->checkPassword($password);
         /** @var IUserSession $class  */
         $class = static::SessionClass;
-        $class::createNewSession($User);
+        $class::createNewSession($User, $expireInSeconds);
         return $User;
     }
 

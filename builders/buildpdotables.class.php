@@ -164,7 +164,15 @@ PHP;
 
             $file = $modelPath.strtolower($Table->ClassName).'.class.php';
 
+            foreach($Table->getColumns() as $Column) {
+                if($Column->Flags & PDOColumn::FlagIndex)
+                    $Column->Flags |= PDOColumn::FlagSearch;
+                if(!($Column->Flags & PDOColumn::FlagNull) && !($Column->Flags & PDOColumn::FlagAutoInc) && !($Column->Flags & PDOColumn::FlagDefault))
+                    $Column->Flags |= PDOColumn::FlagRequired;
+            }
+
             // Model
+
             $Table->processModelPHP($PHP);
 
             $PHP->addUse(get_class($DB), 'DB');
@@ -182,7 +190,7 @@ PHP;
                 if($i++) $columns .= ',';
                 $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
                 $columns .= var_export($Column->Name, true);
-                $columns .= ',' . ($Column->Flags ?: 0);
+                $columns .= ',0x' . dechex($Column->Flags ?: 0);
                 if($Column->Comment || $Column->Filter || $Column->EnumValues)
                     $columns .= ',' . ($Column->Filter ?: 0);
                 if($Column->Comment || $Column->EnumValues)
@@ -219,10 +227,6 @@ PHP;
 //            if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
 //            if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
 //            if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
-
-            foreach($Table->getColumns() as $Column)
-                if($Column->Flags & PDOColumn::FlagIndex)
-                    $Column->Flags |= PDOColumn::FlagSearch;
 
 //            if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
 //            if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
@@ -366,6 +370,10 @@ class BuildPDOColumn {
                 case 'export':
                     $this->Flags |= PDOColumn::FlagExport;
                     break;
+                case 'r':
+                case 'required':
+                    $this->Flags |= PDOColumn::FlagRequired;
+                    break;
                 case 'c':
                 case 'comment':
                     $this->Comment = $this->req($args);
@@ -444,6 +452,12 @@ class BuildPDOTable {
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
                             ->Flags |= PDOColumn::FlagExport;
+                    break;
+                case 'r':
+                case 'required':
+                    foreach(explode(',', $this->req($name, $arg)) as $column)
+                        $this->getColumn(trim($column))
+                            ->Flags |= PDOColumn::FlagRequired;
                     break;
                 case 'sw':
                 case 'searchwildcard':

@@ -9,7 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\APIField;
+use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredField;
+use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IAPI;
 use CPath\Validate;
 
@@ -19,6 +21,7 @@ class PDOColumn {
     const FlagNumeric =  0x0001;
     const FlagEnum =     0x0002;
     const FlagNull =     0x0004;
+    const FlagDefault =  0x0008;
 
     const FlagIndex =    0x0010;
     const FlagUnique =   0x0020;
@@ -53,6 +56,14 @@ class PDOColumn {
         $this->mFilter = $filter;
         $this->mComment = $comment;
         $this->mEnum = $enum;
+    }
+
+    /**
+     * Returns the column name
+     * @return String the column name
+     */
+    function getName() {
+        return $this->mName;
     }
 
     /**
@@ -92,15 +103,30 @@ class PDOColumn {
 
     /**
      * Add this column to an IAPI as a field
-     * @param boolean|NULL $required if null, the column flag FlagRequired determines the value
      * @param IAPI $API
+     * @param boolean|NULL $required if null, the column flag FlagRequired determines the value
+     * @param boolean|NULL $param
+     * @param boolean|NULL $comment
+     * @param mixed $defaultValidation
+     * @return APIField
      */
-    function addToAPI(IAPI $API, $required=NULL) {
+    function addToAPI(IAPI $API, $required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
             $required = $this->mFlags & PDOColumn::FlagRequired;
-        if($required)
-            $API->addField($this->mName, new APIRequiredField($this->getComment(), $this->mFilter));
-        else
-            $API->addField($this->mName, new APIField($this->getComment(),  $this->mFilter));
+        if($this->mFilter)
+            $defaultValidation = $this->mFilter;
+        if($param) {
+            if($required)
+                $Field = new APIRequiredParam($comment ?: $this->getComment(), $defaultValidation);
+            else
+                $Field = new APIParam($comment ?: $this->getComment(),  $defaultValidation);
+        } else {
+            if($required)
+                $Field = new APIRequiredField($comment ?: $this->getComment(), $defaultValidation);
+            else
+                $Field = new APIField($comment ?: $this->getComment(),  $defaultValidation);
+        }
+        $API->addField($this->mName, $Field);
+        return $Field;
     }
 }

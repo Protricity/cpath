@@ -63,8 +63,9 @@ class Base {
             Profile::load();
         }
         spl_autoload_register(__NAMESPACE__.'\Base::loadClass', true);
-        spl_autoload_register(__NAMESPACE__.'\Base::errClass', true);
+        //spl_autoload_register(__NAMESPACE__.'\Base::errClass', true);
         //if(self::getConfig('build.auto')) Build::buildClasses(); // Depreciated. no reason to auto build
+        self::$mLoaded = true;
     }
 
 //    /**
@@ -95,7 +96,7 @@ class Base {
         $name = strtr(strtolower($name), '_\\', '//');
         $classPath = self::$mBasePath . $name . '.class.php';
         //if(file_exists($classPath))
-            include_once($classPath);
+            include($classPath);
         //else
         //    Log::e(__CLASS__, "Class not found: ".$classPath);
             //throw new ClassNotFoundException(__CLASS__."::loadClass: {$name} not found in {$classPath}");

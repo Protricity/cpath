@@ -83,6 +83,8 @@ abstract class PDOInsert {
     }
 
     public function getSQL($token='?') {
+        if(!$this->fields)
+            throw new \Exception("No field provided for insert");
         $SQL = "INSERT INTO ".$this->table
             ."\n (".implode(', ',$this->fields).')'
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';

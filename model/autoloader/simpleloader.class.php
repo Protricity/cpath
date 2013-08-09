@@ -7,12 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Model\AutoLoader;
 
-use CPath\Interfaces\IAutoLoader;
-
-class SimpleLoader implements IAutoLoader {
-    private $mPrefix;
-    public function __construct($prefix) {
+class SimpleLoader extends BaseLoader {
+    private $mPrefix, $mSearch, $mReplace;
+    function __construct($prefix, $search='\\', $replace='/') {
         $this->mPrefix = $prefix;
+        $this->mSearch = $search;
+        $this->mReplace = $replace;
     }
 
     /**
@@ -20,14 +20,15 @@ class SimpleLoader implements IAutoLoader {
      * @param $class String the full class name
      * @return boolean false if the class was not found
      */
-    function loadClass($class)
-    {
-        $class = str_replace('\\', '/', $class);
+    function autoLoad($class) {
+        $class = strtr($class, $this->mSearch, $this->mReplace);
         $classPath = $this->mPrefix . $class . '.php';
-        if(file_exists($classPath)) {
-            include $classPath;
-            return true;
-        }
-        return false;
+        include $classPath;
+    }
+
+    // Static
+
+    static function register($namespace, $prefix, $search='\\', $replace='/') {
+        parent::registerLoader($namespace, new self($prefix, $search, $replace));
     }
 }

@@ -16,7 +16,7 @@ use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\Response;
 
-class API_PostUserLogin extends API {
+class API_PostUserLogin extends API_Base {
     private $mUser;
 
     /**
@@ -24,7 +24,7 @@ class API_PostUserLogin extends API {
      * @param PDOUserModel $Model the user source object for this API
      */
     function __construct(PDOUserModel $Model) {
-        parent::__construct();
+        parent::__construct($Model);
         $this->mUser = $Model;
 
         $this->addField('name', new APIRequiredParam("Username or Email Address"));

@@ -10,6 +10,7 @@ namespace CPath\Handlers;
 use CPath\Base;
 use CPath\Exceptions\ValidationException;
 use CPath\Handlers\Views\APIInfo;
+use CPath\Interfaces\APIFieldNotFound;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\ILogEntry;
@@ -208,6 +209,26 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Get all API Fields
+     * @return IAPIField[]
+     */
+    public function getFields() {
+        return $this->mFields;
+    }
+
+    /**
+     * Get an API field by name
+     * @param String $fieldName the field name
+     * @return IAPIField
+     * @throws APIFieldNotFound if the field was not found
+     */
+    public function getField($fieldName) {
+        if(!isset($this->mFields[$fieldName]))
+            throw new APIFieldNotFound("Field '{$fieldName}' is not in this API");
+        return $this->mFields;
+    }
+
+    /**
      * Add a validation
      * @param IAPIValidation $Validation the validation
      * @return $this Return the class instance
@@ -280,14 +301,6 @@ abstract class API implements IAPI {
             }
         }
         $this->renderDefault($Request);
-    }
-
-    /**
-     * Get all API Fields
-     * @return IAPIField[]
-     */
-    public function getFields() {
-        return $this->mFields;
     }
 
     /**
@@ -397,6 +410,11 @@ class APIField implements IAPIField {
 
     public function getDescription() {
         return $this->mDescription;
+    }
+
+    public function setValidation($filter) {
+        $this->mValidation = $filter;
+        return $this;
     }
 
     public function validate($value) {

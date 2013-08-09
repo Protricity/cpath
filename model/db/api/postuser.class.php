@@ -11,8 +11,10 @@ namespace CPath\Model\DB;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
+use CPath\Handlers\APIValidation;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\InvalidAPIException;
 use CPath\Model\Response;
 
 class API_PostUser extends API_Post {
@@ -25,13 +27,19 @@ class API_PostUser extends API_Post {
     function __construct(PDOUserModel $Model) {
         $this->mUser = $Model;
 
-        $this->addField($Model::ColumnUsername, new APIRequiredField("Username"));
-        $this->addField($Model::ColumnEmail, new APIRequiredField("Email Address", FILTER_VALIDATE_EMAIL));
-
         parent::__construct($Model);
 
-        if($Model::ConfirmPassword)
+        if($Model::ConfirmPassword) {
+            if(!$Model::ColumnPassword)
+                throw new InvalidAPIException("::ConfirmPassword requires ::ColumnPassword set");
+            $this->getField($Model::ColumnPassword); // Ensure the password field is in the insert
             $this->addField($Model::ColumnPassword.'_confirm', new APIRequiredField("Confirm Password"));
+            $this->addValidation(new APIValidation(function(IRequest $Request) use ($Model) {
+                $confirm = $Request->pluck($Model::ColumnPassword.'_confirm');
+                $pass = $Request[$Model::ColumnPassword];
+                $Model::confirmPassword($pass, $confirm);
+            }));
+        }
         $this->addField('login', new APIField("Log in after"));
     }
 
@@ -44,25 +52,11 @@ class API_PostUser extends API_Post {
      */
     function execute(IRequest $Request) {
         $User = $this->mUser;
-        $this->processRequest($Request);
-        $User::validateRequest($Request);
         $login = $Request->pluck('login');
-        $pass = $Request[$User::ColumnPassword];
 
-        if($User::ConfirmPassword) {
-            $confirm = $Request->pluck($User::ColumnPassword.'_confirm');
-            $User::confirmPassword($pass, $confirm);
-        }
-        $Request[$User::ColumnPassword] = $User::hashPassword($pass);
-        /** @var PDOUserModel $User */
+        parent::execute($Request);
 
-        $this->beforeInsert($Request);
-
-        $User = $User::createFromArray($Request);
-
-        $this->beforeInsert($User, $Request);
-
-        if($login) {
+        if($login && $pass = $Request[$User::ColumnPassword]) {
             $User::login($User->getUsername(), $pass);
             return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
         }

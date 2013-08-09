@@ -61,7 +61,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
 
         if($arg = $Request->getNextArg()) {
             $route = array_search($arg, $ids);
-            $API = $Handlers->getHandler($route);
+            $API = $Handlers->get($route);
             if(!$API instanceof IAPI)
                 throw new InvalidRouteException("Destination for '{$arg}' does not implement IAPI");
             $APIInfo = new APIInfo();

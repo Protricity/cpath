@@ -11,6 +11,9 @@ use CPath\Handlers\IAPIField;
 use CPath\Handlers\IAPIValidation;
 use CPath\Handlers\ValidationExceptions;
 
+class InvalidAPIException extends \Exception {}
+class APIFieldNotFound extends InvalidAPIException {};
+
 interface IAPI extends IHandler, IRoutable, IDescribable {
 
     /**
@@ -25,6 +28,14 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
      * @return IAPIField[]
      */
     function getFields();
+
+    /**
+     * Get an API field by name
+     * @param String $fieldName the field name
+     * @return IAPIField
+     * @throws APIFieldNotFound if the field was not found
+     */
+    public function getField($fieldName);
 
     /**
      * Add an API Field.

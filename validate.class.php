@@ -85,7 +85,7 @@ class Validate implements IValidate {
         }
         $variable = filter_var($variable, $filter, $options);
         if($variable === false)
-            throw new ValidationException("Field '%s' is not in the correct format");
+            throw new ValidationException("Field '%s' is not in the correct format ({$filter})");
         return $variable;
     }
 

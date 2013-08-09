@@ -88,6 +88,8 @@ PHP;
             }
             if($row['Extra'] == 'auto_increment')
                 $Column->Flags |= PDOColumn::FlagAutoInc;
+            if($row['Default'] !== NULL)
+                $Column->Flags |= PDOColumn::FlagDefault;
             $Table->addColumn($Column);
         }
     }

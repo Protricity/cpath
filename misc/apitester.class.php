@@ -48,7 +48,7 @@ class ApiTester {
         $Route = $Cli->findRoute();
         $Api = $Route->getHandler();
         if($Api instanceof IHandlerSet)
-            $Api = $Api->getHandler($Cli->getNextArg());
+            $Api = $Api->get($Cli->getNextArg());
         if(!($Api instanceof IAPI))
             throw new NotAnApiException(get_class($Api) . " does not implement IAPI");
         return new static($Api, $Cli);

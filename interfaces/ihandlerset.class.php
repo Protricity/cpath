@@ -17,14 +17,14 @@ interface IHandlerSet extends IHandler, IRoutable, \ArrayAccess, \IteratorAggreg
      * @param bool $replace if true, replace any existing handlers
      * @throws HandlerSetException
      */
-    function addHandler($route, IHandler $Handler, $replace=false);
+    function add($route, IHandler $Handler, $replace=false);
 
     /**
      * Returns an IHandler instance by route
      * @param $route String the route associated with this handler
      * @return IHandler|NULL
      */
-    function getHandler($route);
+    function get($route);
 
     /**
      * Returns the source class that created this instance

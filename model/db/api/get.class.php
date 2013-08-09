@@ -14,63 +14,77 @@ use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\InvalidAPIException;
+use CPath\Model\DB\Interfaces\ILimitApiQuery;
+use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\Response;
 
-class API_Get extends API {
-    private $mModel;
+class API_Get extends API_Base {
+    private $mColumns;
 
     /**
-     * Construct an instance of this API
-     * @param PDOModel $Model the user source object for this API
+     * Construct an instance of the GET API
+     * @param PDOModel|IReadAccess $Model the user source object for this API
+     * @param string|array $alternateColumns a column or array of columns that may be used to search for Models.
+     * Primary key is already included
+     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    function __construct(PDOModel $Model) {
-        parent::__construct();
-        $this->mModel = $Model;
+    function __construct(PDOModel $Model, $alternateColumns=NULL) {
+        parent::__construct($Model);
+        $this->mColumns = (array)$alternateColumns;
 
-        //$this->addField('id', new APIRequiredParam($Model->getModelName() . ' ' . static::$_columns[static::Primary][1]),
+        if($Model::Primary)
+            array_unshift($this->mColumns, $Model::Primary);
+
+        if(!$this->mColumns)
+            throw new InvalidAPIException("Model for PATCH API must have a PRIMARY key column or provide at least one alternative column");
+
+        $this->addField('id', new APIRequiredParam($Model->getModelName() . ' ID'));
     }
-
-    /**
-     * Overwrite to modify IRequest before insert
-     * @param IRequest $Request the request to modify
-     */
-    function beforeInsert(IRequest $Request) {}
-
-    /**
-     * Overwrite to manage IRequest or PDOModel after insert
-     * @param PDOModel $NewModel the newly inserted model
-     * @param IRequest $Request the request that was used
-     */
-    function afterInsert(PDOModel $NewModel, IRequest $Request) {}
 
     /**
      * Get the API Description
      * @return String description for this API
      */
     function getDescription() {
-        return "Create a new ".$this->mModel->getModelName();
+        return "Get information about this " . $this->getModel()->getModelName();
     }
+
+
 
     /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return PDOModel|IResponse the found model which implements IResponseAggregate
+     * @throws ModelNotFoundException if the Model was not found
      */
     function execute(IRequest $Request) {
-        $Model = $this->mModel;
+
+        $Model = $this->getModel();
         $this->processRequest($Request);
-        $Model::validateRequest($Request);
+        $id = $Request->pluck('id');
 
-        $this->beforeInsert($Request);
+        /** @var PDOModelSelect $Search  */
+        $Search = $Model::search();
+        $Search->limit(1);
+        $Search->where('(');
+        $Search->setFlag(PDOWhere::DefaultLogicOR);
+        foreach($this->mColumns as $column)
+            $Search->where($column, $id);
+        $Search->unsetFlag(PDOWhere::DefaultLogicOR);
+        $Search->where(')');
 
-        $Model = $Model::createFromArray($Request);
+        if($Model instanceof IReadAccess)
+            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
 
-        $this->afterInsert($Model, $Request);
+        $GetModel = $Search->fetch();
+        if(!$GetModel)
+            throw new ModelNotFoundException($Model::getModelName() . " '{$id}' was not found");
 
-        $id = '';
-        if($column = $Model::Primary)
-            $id = " '" . $Model->$column . "'";
-        return new Response("Created " . $Model::getModelName() . "{$id} Successfully.", true, $Model);
+        if($GetModel instanceof IReadAccess)
+            $GetModel->assertReadAccess($Request, IReadAccess::INTENT_GET);
+
+        return $GetModel;
     }
 }

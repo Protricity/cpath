@@ -52,7 +52,7 @@ class HandlerSet implements IHandlerSet {
      * @return HandlerSet self
      * @throws HandlerSetException
      */
-    public function addHandler($route, IHandler $Handler, $replace=false) {
+    public function add($route, IHandler $Handler, $replace=false) {
         if(!$replace && isset($this->mHandlers[$route])) {
             throw new HandlerSetException("Route already exists: ".$route);
         } elseif($replace && !isset($this->mHandlers[$route])) {
@@ -62,37 +62,50 @@ class HandlerSet implements IHandlerSet {
         return $this;
     }
 
+//    /**
+//     * Adds an IHandler to the set by route
+//     * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
+//     * @param String $className the IHandler instance to add to the set
+//     * @param bool $replace if true, replace any existing handlers
+//     * @return HandlerSet self
+//     * @throws HandlerSetException
+//     */
+//    public function addHandlerByClass($route, $className, $replace=false) {
+//        if(!$replace && isset($this->mHandlers[$route])) {
+//            throw new HandlerSetException("Route already exists: ".$route);
+//        } elseif($replace && !isset($this->mHandlers[$route])) {
+//            throw new HandlerSetException("Failed to replace Route: Does not exists: ".$route);
+//        }
+//        $this->mHandlers[$route] = $className;
+//        return $this;
+//    }
+
     /**
-     * Adds an IHandler to the set by route
-     * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
-     * @param String $className the IHandler instance to add to the set
-     * @param bool $replace if true, replace any existing handlers
-     * @return HandlerSet self
-     * @throws HandlerSetException
+     * Returns an IHandler instance by route
+     * @param String $route the route associated with this handler
+     * @return IHandler
+     * @throws InvalidRouteException if the route is not found
      */
-    public function addHandlerByClass($route, $className, $replace=false) {
-        if(!$replace && isset($this->mHandlers[$route])) {
-            throw new HandlerSetException("Route already exists: ".$route);
-        } elseif($replace && !isset($this->mHandlers[$route])) {
-            throw new HandlerSetException("Failed to replace Route: Does not exists: ".$route);
-        }
-        $this->mHandlers[$route] = $className;
-        return $this;
+    public function get($route) {
+        if(!isset($this->mHandlers[$route]))
+            throw new InvalidRouteException("Route '{$route}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        $Handler = $this->mHandlers[$route];
+        //if(is_string($Handler))
+        //    return $this->mHandlers[$route] = new $Handler($this->mSource);
+        return $Handler;
     }
 
     /**
      * Returns an IHandler instance by route
-     * @param $route String the route associated with this handler
-     * @return IHandler
+     * @param String $route the route associated with this handler
+     * @return HandlerSet self
      * @throws InvalidRouteException if the route is not found
      */
-    public function getHandler($route) {
+    public function remove($route) {
         if(!isset($this->mHandlers[$route]))
             throw new InvalidRouteException("Route '{$route}' is invalid. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $Handler = $this->mHandlers[$route];
-        if(is_string($Handler))
-            $Handler = new $Handler($this->mSource);
-        return $Handler;
+        unset($this->mHandlers[$route]);
+        return $this;
     }
 
     /**
@@ -112,7 +125,7 @@ class HandlerSet implements IHandlerSet {
         $route = $Request->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
-        $this->getHandler($route)->render($Request);
+        $this->get($route)->render($Request);
     }
 
     /**
@@ -157,7 +170,7 @@ class HandlerSet implements IHandlerSet {
 
     public function offsetExists($route) {
         try {
-            $this->getHandler($route);
+            $this->get($route);
             return true;
         } catch (InvalidRouteException $ex) {
             return false;
@@ -169,9 +182,9 @@ class HandlerSet implements IHandlerSet {
      * @param mixed $route
      * @return IHandler
      */
-    public function offsetGet($route) { return $this->getHandler($route);}
-    public function offsetSet($route, $value) { $this->addHandler($route, $value); }
-    public function offsetUnset($route) { unset($this->mHandlers[$route]); }
+    public function offsetGet($route) { return $this->get($route);}
+    public function offsetSet($route, $value) { $this->add($route, $value); }
+    public function offsetUnset($route) { $this->remove($route); }
 
     // Implement IteratorAggregate
 
