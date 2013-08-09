@@ -42,6 +42,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     const TableName = null;
     const ModelName = null;
     const Primary = null;
+    const HandlerIDColumn = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
     const Validations = null;
 
     const SearchLimitMax = 100;
@@ -52,25 +53,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     const CacheTTL = 300;
 
     const Search = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const Insert = NULL;    // 'None|Index|SIndex|Primary|Exclude:[column1,column2]|[Include:][column1,column2]';
-    const Update = NULL;    // 'None|Index|SIndex|Primary|Exclude:[column1,column2]|[Include:][column1,column2]';
-    const Export = NULL;    // 'None|Index|SIndex|Primary|Exclude:[column1,column2]|[Include:][column1,column2]';
-
-//    const ColumnIsNumeric =  0x0001;
-//    const ColumnIsEnum =     0x0002;
-//    const ColumnIsNull =     0x0004;
-//
-//    const ColumnIsIndex =    0x0010;
-//    const ColumnIsUnique =   0x0020;
-//    const ColumnIsPrimary =  0x0040;
-//    const ColumnIsAutoInc =  0x0080;
-//
-//    const ColumnIsRequired = 0x0100;
-//
-//    const ColumnIsInsert =   0x1000;
-//    const ColumnIsUpdate =   0x2000;
-//    const ColumnIsSearch =   0x4000;
-//    const ColumnIsExport =   0x8000;
+    const Insert = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const Update = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const Export = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
     const DefaultFilter =   FILTER_SANITIZE_SPECIAL_CHARS;
 

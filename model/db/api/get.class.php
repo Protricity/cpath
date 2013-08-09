@@ -25,21 +25,25 @@ class API_Get extends API_Base {
     /**
      * Construct an instance of the GET API
      * @param PDOModel|IReadAccess $Model the user source object for this API
-     * @param string|array $alternateColumns a column or array of columns that may be used to search for Models.
+     * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
      * Primary key is already included
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    function __construct(PDOModel $Model, $alternateColumns=NULL) {
+    function __construct(PDOModel $Model, $searchColumns=NULL) {
         parent::__construct($Model);
-        $this->mColumns = (array)$alternateColumns;
 
-        if($Model::Primary)
-            array_unshift($this->mColumns, $Model::Primary);
+        $searchColumns = $searchColumns ?: $Model::HandlerIDColumn ?: $Model::Primary;
+        $this->mColumns = $Model->findColumns($searchColumns);
 
         if(!$this->mColumns)
-            throw new InvalidAPIException("Model for PATCH API must have a PRIMARY key column or provide at least one alternative column");
+            throw new InvalidAPIException($Model->getModelName()
+                . " GET/PATCH/DELETE APIs must have a ::Primary or ::HandlerIDColumn column or provide at least one alternative column");
 
-        $this->addField('id', new APIRequiredParam($Model->getModelName() . ' ID'));
+        $keys = array_keys($this->mColumns);
+        foreach( $keys as $i => &$key)
+            if($i)
+                $key = ($i == sizeof($keys) - 1 ? ' or ' : ', ') . $key;
+        $this->addField('id', new APIRequiredParam($Model->getModelName() . implode('', $keys)));
     }
 
     /**

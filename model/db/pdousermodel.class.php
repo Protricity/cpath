@@ -130,6 +130,20 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         return $this->mFlags & static::FlagDebug ? true : false;
     }
 
+
+    /**
+     * Update a column value for this Model
+     * @param String $column the column name to update
+     * @param String $value the value to set
+     * @param bool $commit set true to commit now, otherwise use ->commitColumns
+     * @return $this
+     */
+    function updateColumn($column, $value, $commit=true) {
+        if($column == static::ColumnPassword)
+            $value = static::hashPassword($value);
+        return parent::updateColumn($column, $value, $commit);
+    }
+
     /**
      * Returns the default IHandlerSet collection for this PDOModel type
      * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
@@ -164,29 +178,28 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      * @throws ValidationException if a column fails to validate
      */
     static function createFromArray($row) {
-        $row[static::ColumnPassword] = static::hashPassword($row[static::ColumnPassword]);
+        if(isset($row[static::ColumnPassword]))
+            $row[static::ColumnPassword] = static::hashPassword($row[static::ColumnPassword]);
         return parent::createFromArray($row);
     }
 
-
     /**
-     * Update a column value for this Model
-     * @param String $column the column name to update
-     * @param String $value the value to set
-     * @param bool $commit set true to commit now, otherwise use ->commitColumns
-     * @return $this
+     * Confirm two passwords match
+     * @param $newPassword
+     * @param $confirmPassword
+     * @throws PasswordsDoNotMatchException if passwords do not match
      */
-    function updateColumn($column, $value, $commit=true) {
-        if($column == static::ColumnPassword)
-            $value = static::hashPassword($value);
-        return parent::updateColumn($column, $value, $commit);
-    }
-
     static function confirmPassword($newPassword, $confirmPassword) {
         if(strcmp($newPassword, $confirmPassword) !== 0)
             throw new PasswordsDoNotMatchException();
     }
 
+    /**
+     * Hash passwords
+     * @param $password
+     * @param null $oldPassword
+     * @return string
+     */
     private static function hashPassword($password, $oldPassword=NULL) {
         return crypt($password, $oldPassword);
     }
