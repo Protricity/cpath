@@ -42,11 +42,11 @@ use CPath\Validate;
  */
 abstract class API implements IAPI {
 
-    const Build_Ignore = false;             // API Calls are built to provide routes
+    const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const Enable_Logging = true;            // Enable API Logging
 
-    const Route_Methods = 'GET|POST|CLI';   // Default accepted methods are GET and POST
-    const Route_Path = NULL;                // No custom route path. Path is based on namespace + class name
+    const ROUTE_METHODS = 'GET|POST|CLI';   // Default accepted methods are GET and POST
+    const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IAPIField[] */
     protected $mFields = array();
@@ -54,6 +54,8 @@ abstract class API implements IAPI {
     protected $mValidations = array();
     /** @var SimpleLogger */
     private $mLog = NULL;
+
+    private $mRequestProcessed = false;
 
     public function __construct() {
 
@@ -78,7 +80,7 @@ abstract class API implements IAPI {
         try {
             $Response = $this->execute($Request);
             if($Response instanceof IResponseAggregate)
-                $Response = $Response->getResponse();
+                $Response = $Response->createResponse();
             if(!($Response instanceof IResponse))
                 $Response = new Response(true, "API executed successfully", $Response);
         } catch (\Exception $ex) {
@@ -245,6 +247,8 @@ abstract class API implements IAPI {
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
     public function processRequest(IRequest $Request) {
+        if($this->mRequestProcessed)                        // Ugly. need a better system. Probably should just force processRequest every time
+            return;
         if($Request instanceof IShortOptions)
             $Request->processShortOptions(array_keys($this->mFields));
         if($arg = $Request->getNextArg()) {
@@ -263,9 +267,13 @@ abstract class API implements IAPI {
                 $data[$name] = $Field->validate($Request[$name]);
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException($name, $ex);
+                $data[$name] = NULL;
             }
         }
         $Request->merge($data, true);
+
+        if(count($FieldExceptions))
+            throw $FieldExceptions;
 
         foreach($this->mValidations as $Validation) {
             try {
@@ -277,6 +285,8 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
+
+        $this->mRequestProcessed = true;
     }
 
     /**
@@ -309,8 +319,8 @@ abstract class API implements IAPI {
      * @return IRoute[]
      */
     public function getAllRoutes(IRouteBuilder $Builder) {
-        $path = static::Route_Path ?: $Builder->getHandlerDefaultPath();
-        $routes = $Builder->getHandlerDefaultRoutes(static::Route_Methods, $path);
+        $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath();
+        $routes = $Builder->getHandlerDefaultRoutes(static::ROUTE_METHODS, $path);
         if(!isset($routes['GET']))
             $routes['GET'] = new Route('GET ' . $path, 'CPath\Handlers\Views\APIInfo', get_called_class());
         return $routes;
@@ -322,7 +332,7 @@ abstract class API implements IAPI {
      * Return an instance of the class for building purposes
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
-    static function getBuildableInstance() {
+    static function createBuildableInstance() {
         return new static;
     }
 }

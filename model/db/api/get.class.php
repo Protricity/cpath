@@ -26,24 +26,24 @@ class API_Get extends API_Base {
      * Construct an instance of the GET API
      * @param PDOModel|IReadAccess $Model the user source object for this API
      * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
-     * Primary key is already included
+     * PRIMARY key is already included
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
     function __construct(PDOModel $Model, $searchColumns=NULL) {
         parent::__construct($Model);
 
-        $searchColumns = $searchColumns ?: $Model::HandlerIDColumn ?: $Model::Primary;
+        $searchColumns = $searchColumns ?: $Model::HANDLER_ID ?: $Model::PRIMARY;
         $this->mColumns = $Model->findColumns($searchColumns);
 
         if(!$this->mColumns)
-            throw new InvalidAPIException($Model->getModelName()
-                . " GET/PATCH/DELETE APIs must have a ::Primary or ::HandlerIDColumn column or provide at least one alternative column");
+            throw new InvalidAPIException($Model->modelName()
+                . " GET/PATCH/DELETE APIs must have a ::PRIMARY or ::HANDLER_ID column or provide at least one alternative column");
 
         $keys = array_keys($this->mColumns);
         foreach( $keys as $i => &$key)
             if($i)
                 $key = ($i == sizeof($keys) - 1 ? ' or ' : ', ') . $key;
-        $this->addField('id', new APIRequiredParam($Model->getModelName() . implode('', $keys)));
+        $this->addField('id', new APIRequiredParam($Model->modelName() . ' ' . implode('', $keys)));
     }
 
     /**
@@ -51,7 +51,7 @@ class API_Get extends API_Base {
      * @return String description for this API
      */
     function getDescription() {
-        return "Get information about this " . $this->getModel()->getModelName();
+        return "Get information about this " . $this->getModel()->modelName();
     }
 
 
@@ -74,20 +74,20 @@ class API_Get extends API_Base {
         $Search->limit(1);
         $Search->where('(');
         $Search->setFlag(PDOWhere::DefaultLogicOR);
-        foreach($this->mColumns as $column)
-            $Search->where($column, $id);
+        foreach($this->mColumns as $name => $Column)
+            $Search->where($name, $id);
         $Search->unsetFlag(PDOWhere::DefaultLogicOR);
         $Search->where(')');
 
-        if($Model instanceof IReadAccess)
-            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
+        $Policy = $this->getSecurityPolicy();
+
+        $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
 
         $GetModel = $Search->fetch();
         if(!$GetModel)
-            throw new ModelNotFoundException($Model::getModelName() . " '{$id}' was not found");
+            throw new ModelNotFoundException($Model::modelName() . " '{$id}' was not found");
 
-        if($GetModel instanceof IReadAccess)
-            $GetModel->assertReadAccess($Request, IReadAccess::INTENT_GET);
+        $Policy->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
 
         return $GetModel;
     }

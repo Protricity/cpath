@@ -17,8 +17,8 @@ use CPath\Handlers\API;
 
 class Console implements IHandler {
 
-    const Route_Path = '/console';     // Allow manual building from command line: 'php index.php build'
-    const Route_Methods = 'CLI';    // CLI only
+    const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
+    const ROUTE_METHODS = 'CLI';    // CLI only
 
     function render(IRequest $Request)
     {

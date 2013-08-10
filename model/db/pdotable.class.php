@@ -24,7 +24,7 @@ abstract class PDOTable {
 //
 //    static function select(\PDO $DB, $select, $where, $limit='1') {
 //        return $DB->query("SELECT ".self::parseList($select)
-//            ."\nFROM ".static::TableName
+//            ."\nFROM ".static::TABLE
 //            ."\nWHERE ".self::parseSet($DB, $where)
 //            .($limit ? "\nLIMIT ".$limit : ''));
 //    }

@@ -45,7 +45,7 @@ abstract class PDOInsert {
     }
 
     /**
-     * Insert or batch a row of values
+     * INSERT or batch a row of values
      * @param $_values Array an indexed array of values to insert
      * @return PDOInsert $this
      */

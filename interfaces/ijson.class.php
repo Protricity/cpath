@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 interface IJSON {
     /**
-     * Export Object to an associative array to be formatted into JSON
+     * EXPORT Object to an associative array to be formatted into JSON
      * @param Array $JSON the JSON array to modify
      * @return void
      */

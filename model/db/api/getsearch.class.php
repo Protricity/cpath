@@ -27,39 +27,20 @@ class API_GetSearch extends API_Base {
     function __construct(PDOModel $Model) {
         parent::__construct($Model);
 
-        $this->mSearchColumns = $Model->findColumns($Model::Search ?: PDOColumn::FlagSearch);
+        $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FlagSearch);
 
-        $this->addField('search', new APIRequiredParam("Search for ".$Model::getModelName()));
-        $this->addField('search_by', new APIParam("Search by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
-        $this->addField('limit', new APIField("The Number of rows to return. Max=".$Model::SearchLimitMax));
+        $this->addField('search', new APIRequiredParam("SEARCH for ".$Model::modelName()));
+        $this->addField('search_by', new APIParam("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
+        $this->addField('limit', new APIField("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
         $this->addField('logic', new APIField("The search logic to use [AND, OR]. Default=OR"));
     }
-
-//    /**
-//     * Searches for Models based on specified columns and values.
-//     * @param IRequest $Request the request that was used
-//     * @param String $search the column value to search for
-//     * @param mixed|NULL $search_by a string list (comma delimited) or array of columns to search for.
-//     * Default is static::Search or columns with PDOColumn::FlagSearch set
-//     * @param int $limit the number of rows to return. Default is 1
-//     * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
-//     * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
-//     * @return PDOModelSelect - the select query.
-//     * @throws \Exception if no columns were found
-//     */
-//    function buildQuery(IRequest $Request, $search, $search_by, $limit, $logic, $compare) {
-//        if($search[0] == ':')
-//            throw new \Exception("Tokens not allowed: " . $search);
-//        $Model = $this->mModel;
-//        return $Model::searchByColumns($search, $search_by, $limit, $logic, $compare);
-//    }
 
     /**
      * Get the API Description
      * @return String description for this API
      */
     function getDescription() {
-        return "Search for a " . $this->getModel()->getModelName();
+        return "SEARCH for a " . $this->getModel()->modelName();
     }
 
     /**
@@ -79,10 +60,10 @@ class API_GetSearch extends API_Base {
         $search_by = $Request->pluck('search_by');
         $logic = $Request->pluck('logic') ?: 'OR';
 
-        if($limit < 1 || $limit > $Model::SearchLimitMax)
-            $limit = $Model::SearchLimit;
+        if($limit < 1 || $limit > $Model::SEARCH_LIMIT_MAX)
+            $limit = $Model::SEARCH_LIMIT;
 
-        if($Model::SearchWildCard) {
+        if($Model::SEARCH_WILDCARD) {
             if(strpos($search, '*') !== false)
                 $search = str_replace('*', '%', $search);
             else
@@ -94,17 +75,17 @@ class API_GetSearch extends API_Base {
 
         $Model = $this->getModel();
         /** @var PDOModelSelect $Search */
-        $Search = $Model::searchByColumns($search, $search_by, $limit, $logic, $Model::SearchWildCard ? 'LIKE' : '');
+        $Search = $Model::searchByColumns($search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
 
-        if($Model instanceof IReadAccess)
-            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
+        $Policy = $this->getSecurityPolicy();
+
+        $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
 
         $results = $Search->fetchAll();
         if($Model instanceof IReadAccess)
-            foreach($results as $result)
-                /** @var IReadAccess $result */
-                $result->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
+            foreach($results as $ResultModel)
+                $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
 
-        return new Response("Found (".sizeof($results).") ".$Model::getModelName()."(s)", true, $results);
+        return new Response("Found (".sizeof($results).") ".$Model::modelName()."(s)", true, $results);
     }
 }

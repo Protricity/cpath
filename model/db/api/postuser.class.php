@@ -29,14 +29,14 @@ class API_PostUser extends API_Post {
 
         parent::__construct($Model);
 
-        if($Model::ConfirmPassword) {
-            if(!$Model::ColumnPassword)
-                throw new InvalidAPIException("::ConfirmPassword requires ::ColumnPassword set");
-            $this->getField($Model::ColumnPassword); // Ensure the password field is in the insert
-            $this->addField($Model::ColumnPassword.'_confirm', new APIRequiredField("Confirm Password"));
+        if($Model::PASSWORD_CONFIRM) {
+            if(!$Model::COLUMN_PASSWORD)
+                throw new InvalidAPIException("::PASSWORD_CONFIRM requires ::COLUMN_PASSWORD set");
+            $this->getField($Model::COLUMN_PASSWORD); // Ensure the password field is in the insert
+            $this->addField($Model::COLUMN_PASSWORD.'_confirm', new APIRequiredField("Confirm Password"));
             $this->addValidation(new APIValidation(function(IRequest $Request) use ($Model) {
-                $confirm = $Request->pluck($Model::ColumnPassword.'_confirm');
-                $pass = $Request[$Model::ColumnPassword];
+                $confirm = $Request->pluck($Model::COLUMN_PASSWORD.'_confirm');
+                $pass = $Request[$Model::COLUMN_PASSWORD];
                 $Model::confirmPassword($pass, $confirm);
             }));
         }
@@ -51,12 +51,12 @@ class API_PostUser extends API_Post {
      * @return IResponse|mixed the api call response with data, message, and status
      */
     function execute(IRequest $Request) {
-        $User = $this->mUser;
+        $this->processRequest($Request);
         $login = $Request->pluck('login');
 
-        parent::execute($Request);
+        $User = parent::execute($Request)->getDataPath();
 
-        if($login && $pass = $Request[$User::ColumnPassword]) {
+        if($login && $pass = $Request[$User::COLUMN_PASSWORD]) {
             $User::login($User->getUsername(), $pass);
             return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
         }

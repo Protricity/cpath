@@ -35,29 +35,31 @@ class ModelAlreadyExistsException extends \Exception {}
 class ColumnNotFoundException extends \Exception {}
 class InvalidPermissionException extends \Exception {}
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
-    //const Build_Ignore = true;
-    //const Route_Methods = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable {
+    //const BUILD_IGNORE = true;
+    //const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
 
-    const TableName = null;
-    const ModelName = null;
-    const Primary = null;
-    const HandlerIDColumn = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
-    const Validations = null;
+    const TABLE = null;
+    const MODEL_NAME = null;
+    const PRIMARY = null;
+    const VALIDATIONS = null;
 
-    const SearchLimitMax = 100;
-    const SearchLimit = 25;
-    const SearchWildCard = false;   // true or false
+    const SEARCH_LIMIT_MAX = 100;
+    const SEARCH_LIMIT = 25;
+    const SEARCH_WILDCARD = false;   // true or false
 
-    const CacheEnabled = false;
-    const CacheTTL = 300;
+    const CACHE_ENABLED = false;
+    const CACHE_TTL = 300;
 
-    const Search = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const Insert = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const Update = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const Export = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const HANDLER_ID = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
+    const SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const INSERT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const UPDATE = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const EXPORT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
-    const DefaultFilter =   FILTER_SANITIZE_SPECIAL_CHARS;
+    const DEFAULT_FILTER =   FILTER_SANITIZE_SPECIAL_CHARS;
+
+    const SECURITY_DISABLED = false;
 
     //protected $mRow = null;
     private $mCommit = NULL;
@@ -72,7 +74,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     }
 
     /**
-     * Update a column value for this Model
+     * Get model value by column
+     * @param String $column column name
+     * @return mixed
+     */
+    function columnValue($column) {
+        $this->loadColumn($column);
+        return $this->$column;
+    }
+
+    /**
+     * UPDATE a column value for this Model
      * @param String $column the column name to update
      * @param String $value the value to set
      * @param bool $commit set true to commit now, otherwise use ->commitColumns
@@ -91,56 +103,56 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     }
 
     /**
-     * Update column values for this Model
+     * UPDATE column values for this Model
      * @return int the number of columns updated
      * @throws \Exception if no primary key exists
      */
     function commitColumns() {
-        if(!($primary = static::Primary))
-            throw new \Exception("Constant 'Primary' is not set. Cannot Update table without it");
+        if(!($primary = static::PRIMARY))
+            throw new \Exception("Constant 'PRIMARY' is not set. Cannot UPDATE table without it");
         $id = $this->$primary;
         if(!$this->mCommit) {
-            Log::u(get_called_class(), "No Fields Updated for ".static::getModelName()." '{$id}'");
+            Log::u(get_called_class(), "No Fields Updated for ".static::modelName()." '{$id}'");
             return 0;
         }
         $set = '';
         $DB = static::getDB();
         foreach($this->mCommit as $column=>$value)
             $set .= ($set ? ",\n\t" : '') . "{$column} = ".$DB->quote($value);
-        $SQL = "UPDATE ".static::TableName
+        $SQL = "UPDATE ".static::TABLE
             ."\n SET {$set}"
-            ."\n WHERE ".static::Primary." = ".$DB->quote($id);
+            ."\n WHERE ".static::PRIMARY." = ".$DB->quote($id);
         $DB->exec($SQL);
-        Log::u(get_called_class(), "Updated ".static::getModelName()." '{$id}'");
+        Log::u(get_called_class(), "Updated " . $this);
         $c = sizeof($this->mCommit);
         $this->mCommit = array();
-        if(static::CacheEnabled)
-            static::$mCache->store(get_called_class() . ':id:' . $id, $this, static::CacheTTL);
+        if(static::CACHE_ENABLED)
+            static::$mCache->store(get_called_class() . ':id:' . $id, $this, static::CACHE_TTL);
         return $c;
     }
 
 
     function toXML(\SimpleXMLElement $xml){
-        foreach($this->getExportData() as $key=>$val)
+        foreach($this->exportData() as $key=>$val)
             $xml->addAttribute($key, $val);
 
     }
 
     function toJSON(Array &$JSON){
-        foreach($this->getExportData() as $key=>$val)
+        foreach($this->exportData() as $key=>$val)
             $JSON[$key] = $val;
     }
 
     /**
-     * Returns an associative array of columns and values for this object filtered by the tokens in constant Export.
+     * Returns an associative array of columns and values for this object filtered by the tokens in constant EXPORT.
      * Defaults to just primary key, if exists.
-     * Modify const Export to change what data gets exported
+     * Modify const EXPORT to change what data gets exported
      * @return Array
      */
-    public function getExportData()
+    public function exportData()
     {
         $export = array();
-        foreach(static::findColumns(static::Export ?: PDOColumn::FlagExport) as $column => $data)
+        foreach(static::findColumns(static::EXPORT ?: PDOColumn::FlagExport) as $column => $data)
             $export[$column] = $this->$column;
         return $export;
     }
@@ -148,14 +160,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     /**
      * @return IResponseAggregate
      */
-    public function getResponse() {
+    public function createResponse() {
         return new Response("Retrieved " . $this, true, $this);
     }
 
     public function __toString() {
-        if(static::Primary)
-            return static::getModelName() . " '" . $this->{static::Primary} . "'";
-        return static::getModelName();
+        if($id = static::HANDLER_ID ?: static::PRIMARY)
+            return static::modelName() . " '" . $this->$id . "'";
+        return static::modelName();
     }
 
     /**
@@ -163,12 +175,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
      * @return HandlerSet a set of common handler routes for this PDOModel type
      */
-    function getDefaultHandlers(HandlerSet $Handlers=NULL) {
+    function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
         if($Handlers === NULL)
             $Handlers = new HandlerSet($this);
-
-        if(!($this instanceof IReadAccess) || !($this instanceof IWriteAccess))
-            Log::e(get_class($this), get_class($this) . " does not implement IReadAccess or IWriteAccess. Security may be wide open");
 
         $Handlers->add('GET', new API_Get($this));
         $Handlers->add('GET search', new API_GetSearch($this));
@@ -197,7 +206,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * Return all columns for this Model
      * @return PDOColumn[]
      */
-    static function getAllColumns() { return array(); }
+    static function loadAllColumns() { return array(); }
 
     /**
      * Return information for a column
@@ -205,15 +214,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * @return PDOColumn
      * @throws ColumnNotFoundException if the column was not found
      */
-    static function getColumn($name) {
-        $cols = static::getAllColumns();
+    static function loadColumn($name) {
+        $cols = static::loadAllColumns();
         if(!isset($cols[$name]))
-            throw new ColumnNotFoundException("Column '{$name}' could not be found in " . static::getModelName());
+            throw new ColumnNotFoundException("Column '{$name}' could not be found in " . static::modelName());
         return $cols[$name];
     }
 
     /**
-     * Returns an indexed array of column names for this object filtered by the tokens in constant Export.
+     * Returns an indexed array of column names for this object filtered by the tokens in constant EXPORT.
      * @param $tokens String|Array|int the column list (comma delimited), array, token or filter to use, or NULL for all columns
      * @return PDOColumn[] associative array of $columns and config data
      * @throws \Exception if an invalid token was used
@@ -221,7 +230,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     static function findColumns($tokens) {
         if(is_int($tokens)) {
             $list = array();
-            foreach(static::getAllColumns() as $col => $data)
+            foreach(static::loadAllColumns() as $col => $data)
                 if($data->isFlag($tokens))
                     $list[$col] = $data;
             return $list;
@@ -236,7 +245,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
                         return static::findColumns(PDOColumn::FlagIndex);
                     case ':sindex':
                         $list = array();
-                        foreach(static::getAllColumns() as $col => $data)
+                        foreach(static::loadAllColumns() as $col => $data)
                             if($data->isFlag(PDOColumn::FlagIndex) && !$data->isFlag(PDOColumn::FlagNumeric))
                                 $list[$col] = $data;
                         return $list;
@@ -245,20 +254,20 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
                     case ':exclude':
                         if(empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
                             return array();
-                        return array_diff_key(static::getAllColumns(), array_flip($tokens));
+                        return array_diff_key(static::loadAllColumns(), array_flip($tokens));
                     case ':include':
                         if(empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
                             return array();
-                        return array_intersect_key(static::getAllColumns(), array_flip($tokens));
+                        return array_intersect_key(static::loadAllColumns(), array_flip($tokens));
                     default:
                         throw new \Exception("Invalid Identifier: " . $tokens[1]);
                 }
             }
 
-            if(!($tokens = explode(',', $tokens[1])))
+            if(!($tokens = explode(',', $tokens)))
                 return array();
         }
-        return array_intersect_key(static::getAllColumns(), array_flip($tokens));
+        return array_intersect_key(static::loadAllColumns(), array_flip($tokens));
     }
 //
 //    /**
@@ -290,27 +299,28 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
 //            foreach($row as $column => $value) // No re-validation
 //                static::validateColumn($column, $value);
 
-            if(!static::Primary) {
+            if(!static::PRIMARY) {
                 static::insert(array_keys($row))
                     ->values(array_values($row));
                 return NULL;
             } else {
-                if(isset($row[static::Primary]))
-                    $id = $row[static::Primary];
+                if(isset($row[static::PRIMARY]))
+                    $id = $row[static::PRIMARY];
                 $Insert = static::insert(array_keys($row))
-                    ->requestInsertID(static::Primary)
+                    ->requestInsertID(static::PRIMARY)
                     ->values(array_values($row));
                 if(!isset($id))
                     $id = $Insert->getInsertID();
-                Log::u(get_called_class(), "Created ".static::getModelName()." '{$id}'");
-                return static::loadByPrimaryKey($id);
+                $Model = static::loadByPrimaryKey($id);
+                Log::u(get_called_class(), "Created " . $Model);
+                return $Model;
             }
         } catch (\PDOException $ex) {
             if(stripos($ex->getMessage(), 'Duplicate')!==false) {
-                $err = "A Duplicate ".static::getModelName()." already exists";
+                $err = "A Duplicate ".static::modelName()." already exists";
                 if(Base::isDebug())
                     $err .= ': ' . $ex->getMessage();
-                Log::u(get_called_class(), "Duplicate ".static::getModelName()." already exists");
+                Log::u(get_called_class(), "Duplicate ".static::modelName()." already exists");
                 throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
             }
             throw $ex;
@@ -326,7 +336,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      */
     static function select($_selectArgs) {
         $args = is_array($_selectArgs) ? $_selectArgs : func_get_args();
-        return new PDOSelect(static::TableName, static::getDB(), $args);
+        return new PDOSelect(static::TABLE, static::getDB(), $args);
     }
 
     /**
@@ -337,7 +347,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     static function insert($_insertArgs) {
         $DB = static::getDB();
         $args = is_array($_insertArgs) ? $_insertArgs : func_get_args();
-        return $DB->insert(static::TableName, $args);
+        return $DB->insert(static::TABLE, $args);
     }
 
     /**
@@ -347,7 +357,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      */
     static function update($_columnArgs) {
         $args = is_array($_columnArgs) ? $_columnArgs : func_get_args();
-        return new PDOUpdate(static::TableName, static::getDB(), $args);
+        return new PDOUpdate(static::TABLE, static::getDB(), $args);
     }
 
     /**
@@ -355,7 +365,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * @return PDODelete
      */
     static function delete() {
-        return new PDODelete(static::TableName, static::getDB());
+        return new PDODelete(static::TABLE, static::getDB());
     }
 
     /**
@@ -367,20 +377,20 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * @throws \Exception if the model does not contain primary keys
      */
     public static function loadByPrimaryKey($id, $throwIfNotFound=true) {
-        if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot load " . static::getModelName() . " Model");
-        if(static::CacheEnabled
+        if(!static::PRIMARY)
+            throw new \Exception("Constant 'PRIMARY' is not set. Cannot load " . static::modelName() . " Model");
+        if(static::CACHE_ENABLED
             && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
             return $Model;
         $Model = static::search()
-            ->where(static::Primary, $id)
+            ->where(static::PRIMARY, $id)
             ->fetch();
         if(!$Model) {
             if($throwIfNotFound)
-                throw new ModelNotFoundException(static::getModelName() . " '{$id}' was not found");
+                throw new ModelNotFoundException(static::modelName() . " '{$id}' was not found");
             return NULL;
         }
-        if(static::CacheEnabled)
+        if(static::CACHE_ENABLED)
             static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
         return $Model;
     }
@@ -389,17 +399,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * Loads a model based on a search
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
-     * Default is static::Search or columns with PDOColumn::FlagSearch set
+     * Default is static::SEARCH or columns with PDOColumn::FlagSearch set
      * @param string $logic 'OR' or 'AND' logic between columns
      * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
     public static function loadByColumns($search, $columns=NULL, $logic='OR', $throwIfNotFound=true) {
-        $Model = static::searchByColumns($search, $columns, $logic)
+        $Model = static::searchByColumns($search, $columns, 1, $logic)
             ->fetch();
         if(!$Model && $throwIfNotFound)
-            throw new ModelNotFoundException(static::getModelName() . " was not found");
+            throw new ModelNotFoundException(static::modelName() . " was not found");
         return $Model;
     }
 
@@ -415,7 +425,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * Searches for Models based on specified columns and values.
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
-     * Default is static::Search or columns with PDOColumn::FlagSearch set
+     * Default is static::SEARCH or columns with PDOColumn::FlagSearch set
      * @param int $limit the number of rows to return. Default is 1
      * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
      * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
@@ -425,9 +435,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
     public static function searchByColumns($search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
         if($columns instanceof IArrayObject)
             $columns =$columns->getDataPath();
-        $columns = static::findColumns($columns ?: static::Search ?: PDOColumn::FlagSearch);
+        $columns = static::findColumns($columns ?: static::SEARCH ?: PDOColumn::FlagSearch);
         if(!$columns)
-            throw new \Exception("No Search fields defined in ".static::getModelName());
+            throw new \Exception("No SEARCH fields defined in ".static::modelName());
 
         $Select = static::search();
 
@@ -444,21 +454,22 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
 
 
     /**
-     * Delete a model entry by Primary Key Column
-     * @param $id mixed the Primary Key to search for
+     * Delete a model entry by PRIMARY Key Column
+     * @param $id mixed the PRIMARY Key to search for
      * @throws \Exception
      */
     public static function removeByPrimary($id) {
-        if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
+        if(!static::PRIMARY)
+            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Delete " . static::modelName());
+        if($id === NULL)
+            throw new \InvalidArgumentException("Remove ID can not be NULL. Cannot Delete " . static::modelName());
         $c = static::delete()
-            ->where(static::Primary, $id)
+            ->where(static::PRIMARY, $id)
             ->execute()
             ->getDeletedRows();
         if(!$c)
-            throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
-        Log::u(get_called_class(), "Deleted ".static::getModelName()." '{$id}'");
-        if(static::CacheEnabled)
+            throw new \Exception("Unable to delete ".static::modelName()." '{$id}'");
+        if(static::CACHE_ENABLED)
             static::$mCache->remove(get_called_class() . ':id:' . $id);
     }
 
@@ -468,9 +479,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * @throws \Exception if no primary key is identified for this model
      */
     static function removeModel(PDOModel $Model) {
-        if(!static::Primary)
-            throw new \Exception("Constant 'Primary' is not set. Cannot Delete " . static::getModelName());
-        static::removeByPrimary($Model->{static::Primary});
+        if(!static::PRIMARY)
+            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Delete " . static::modelName());
+        static::removeByPrimary($Model->{static::PRIMARY});
+        Log::u(get_called_class(), "Deleted " . $Model);
     }
 //
 //    /**
@@ -533,8 +545,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * Returns the model name from comment or the class name
      * @return string the model name
      */
-    public static function getModelName() {
-        return static::ModelName ?: basename(get_called_class());
+    public static function modelName() {
+        return static::MODEL_NAME ?: basename(get_called_class());
     }
 
     /**
@@ -554,8 +566,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML {
      * Return an instance of the class for building purposes
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
-    static function getBuildableInstance() {
-        return new static;
+    static function createBuildableInstance() {
+        $R = new \ReflectionClass(get_called_class());
+        if(!$R->isAbstract())
+            return new static;
+        return null;
     }
 }
 PDOModel::init();
@@ -574,7 +589,7 @@ class PDOModelSelect extends PDOSelect {
      * @param String|PDOModel $class The class name or instance
      */
     public function __construct(\PDO $DB, $class) {
-        $table = $class::TableName;
+        $table = $class::TABLE;
         parent::__construct($table, $DB, array($table . '.*'));
         $this->mClass = is_string($class) ? $class : get_class($class);
     }

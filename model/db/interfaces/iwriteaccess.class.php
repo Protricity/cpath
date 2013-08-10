@@ -10,21 +10,21 @@ namespace CPath\Model\DB\Interfaces;
 
 use CPath\Interfaces\IRequest;
 use CPath\Model\DB\InvalidPermissionException;
+use CPath\Model\DB\PDOModel;
 
 
 interface IWriteAccess {
 
-    const INTENT_POST = 1;
-    const INTENT_PATCH = 2;
-    const INTENT_DELETE = 3;
+    const INTENT_PATCH = 4;
+    const INTENT_DELETE = 5;
 
     /**
-     * Assert permission in default API calls 'POST, PATCH, and DELETE'
+     * Assert permission in default API calls PATCH, and DELETE
+     * @param PDOModel $Model the Model to assert access upon
      * @param IRequest $Request
      * @param int $intent the read intent.
-     * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
-     * Note: during IWriteAccess::INTENT_POST, the instance $this contains no data.
+     * Typically IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      */
-    function assertWriteAccess(IRequest $Request, $intent);
+    function assertWriteAccess(PDOModel $Model, IRequest $Request, $intent);
 }

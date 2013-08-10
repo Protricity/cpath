@@ -33,7 +33,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
     private static $mSession = array();
 
     /**
-     * Get the User Primary Key ID associated with this Session
+     * Get the User PRIMARY Key ID associated with this Session
      * @return String User ID
      */
     function getUserID() {
@@ -141,24 +141,16 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
 
 
     protected static function startSession($throwOnFail=false) {
-        $active = false;
-        switch(session_status()) {
-            case PHP_SESSION_ACTIVE:
+        $active = isset($_SESSION);
+        if(!$active) {
+            if(headers_sent($file, $line)) {
+                if($throwOnFail)
+                    throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+                Log::e(__CLASS__, "Cannot Start Session: Headers already sent by {$file}:{$line}");
+            } else {
+                session_start();
                 $active = true;
-                break;
-            case PHP_SESSION_DISABLED:
-                throw new SessionDisabledException();
-                break;
-            case PHP_SESSION_NONE:
-                if(headers_sent($file, $line)) {
-                    if($throwOnFail)
-                        throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
-                    Log::e(__CLASS__, "Cannot Start Session: Headers already sent by {$file}:{$line}");
-                } else {
-                    session_start();
-                    $active = true;
-                }
-                break;
+            }
         }
         return $active;
     }

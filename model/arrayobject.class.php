@@ -52,6 +52,8 @@ abstract class ArrayObject implements IArrayObject {
                 throw new \InvalidArgumentException("Invalid data path at '{$arg}': " . implode('.', func_get_args()));
             $data = &$data[$arg];
         }
+        if(!isset($data[$last]) && $data[$last] !== NULL)
+            throw new \InvalidArgumentException("Path '" . implode('.', func_get_args()) . "' is not set");
         $value = $data[$last];
         unset($data[$last]);
         return $value;

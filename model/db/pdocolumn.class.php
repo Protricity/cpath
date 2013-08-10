@@ -16,7 +16,7 @@ use CPath\Interfaces\IAPI;
 use CPath\Validate;
 
 class PDOColumn {
-    const Build_Ignore = true;
+    const BUILD_IGNORE = true;
     
     const FlagNumeric =  0x0001;
     const FlagEnum =     0x0002;

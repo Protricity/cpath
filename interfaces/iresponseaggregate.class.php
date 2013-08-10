@@ -11,5 +11,5 @@ interface IResponseAggregate {
     /**
      * @return IResponse
      */
-    function getResponse();
+    function createResponse();
 }

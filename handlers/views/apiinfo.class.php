@@ -16,7 +16,7 @@ use CPath\Util;
 
 class APIInfo implements IHandler, ILogListener {
 
-    const Build_Ignore = true;
+    const BUILD_IGNORE = true;
     private $mLog = array();
 
     public function __construct() {

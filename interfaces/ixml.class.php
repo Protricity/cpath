@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 interface IXML {
     /**
-     * Export Object to XML
+     * EXPORT Object to XML
      * @param \SimpleXMLElement $xml the XML instance to modify
      * @return void
      */

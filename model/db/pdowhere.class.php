@@ -86,7 +86,8 @@ abstract class PDOWhere {
         if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
             if($field == '(' && !$this->lastCond)
                 $this->where[] = 'AND';
-            $this->lastCond = true;
+            if($field != ')')
+                $this->lastCond = true;
             $this->where[] = $field;
             return $this;
         } else {

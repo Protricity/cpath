@@ -177,11 +177,11 @@ PHP;
 
             $PHP->addUse(get_class($DB), 'DB');
 
-            $PHP->addConst('TableName', $Table->Name);
+            $PHP->addConst('TABLE', $Table->Name);
             if($Table->ModelName)
-                $PHP->addConst('ModelName', $Table->ModelName);
+                $PHP->addConst('MODEL_NAME', $Table->ModelName);
 
-            $PHP->addConst('Primary', $Table->Primary);
+            $PHP->addConst('PRIMARY', $Table->Primary);
 
             $columns = "\n\t\tstatic \$columns = NULL;";
             $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
@@ -207,7 +207,7 @@ PHP;
 
             //$PHP->addStaticMethod('init', NULL, $columns, 'public', false);
             //$PHP->addStaticMethod('getColumns', NULL, ' return self::$_columns; ', 'protected', false);
-            $PHP->addStaticMethod('getAllColumns', NULL, $columns, '', false);
+            $PHP->addStaticMethod('loadAllColumns', NULL, $columns, '', false);
             //$PHP->addStaticProperty('_columns', NULL, 'private');
             $PHP->addUse('CPath\Model\DB\PDOColumn');
 
@@ -223,30 +223,30 @@ PHP;
 //                if($Column->Flags & PDOColumn::FlagExport) $ExportFields[] = $Column->Name;
 //            }
 //
-//            if(!$InsertFields && $Table->Insert) $InsertFields[] = $Table->Insert;
-//            if(!$UpdateFields && $Table->Update) $UpdateFields[] = $Table->Update;
-//            if(!$SearchFields && $Table->Search) $SearchFields[] = $Table->Search;
-//            if(!$ExportFields && $Table->Export) $ExportFields[] = $Table->Export;
+//            if(!$InsertFields && $Table->INSERT) $InsertFields[] = $Table->INSERT;
+//            if(!$UpdateFields && $Table->UPDATE) $UpdateFields[] = $Table->UPDATE;
+//            if(!$SearchFields && $Table->SEARCH) $SearchFields[] = $Table->SEARCH;
+//            if(!$ExportFields && $Table->EXPORT) $ExportFields[] = $Table->EXPORT;
 
-//            if($InsertFields) $PHP->addConst('Insert', implode(',', $InsertFields));
-//            if($UpdateFields) $PHP->addConst('Update', implode(',', $UpdateFields));
-//            if($SearchFields) $PHP->addConst('Search', implode(',', $SearchFields));
-//            if($ExportFields) $PHP->addConst('Export', implode(',', $ExportFields));
+//            if($InsertFields) $PHP->addConst('INSERT', implode(',', $InsertFields));
+//            if($UpdateFields) $PHP->addConst('UPDATE', implode(',', $UpdateFields));
+//            if($SearchFields) $PHP->addConst('SEARCH', implode(',', $SearchFields));
+//            if($ExportFields) $PHP->addConst('EXPORT', implode(',', $ExportFields));
 
             if($Table->SearchWildCard)
-                $PHP->addConst('SearchWildCard', true);
+                $PHP->addConst('SEARCH_WILDCARD', true);
             if($Table->SearchLimit)
-                $PHP->addConst('SearchLimit', $Table->SearchLimit);
+                $PHP->addConst('SEARCH_LIMIT', $Table->SearchLimit);
             if($Table->SearchLimitMax)
-                $PHP->addConst('SearchLimitMax', $Table->SearchLimitMax);
+                $PHP->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
             if($Table->AllowHandler)
                 $PHP->addImplements('CPath\Interfaces\IBuildable');
-                //$PHP->addConst('Build_Ignore', false);
+                //$PHP->addConst('BUILD_IGNORE', false);
 
             $PHP->addConstCode();
             $PHP->addConstCode("// Table Columns ");
             foreach($Table->getColumns() as $Column)
-                $PHP->addConst(strtoupper($Column->Name), $Column->Name);
+                $PHP->addConst($this->toTitleCase($Column->Name, true), $Column->Name);
 
             foreach($Table->getColumns() as $Column)
                 $PHP->addProperty($Column->Name);
@@ -333,7 +333,7 @@ PHP;
         return str_replace(' ', '', $field);
     }
 
-    static function getBuildableInstance() {
+    static function createBuildableInstance() {
         return new static;
     }
 }
@@ -525,7 +525,7 @@ class BuildPDOTable {
             }
 
         if(!$this->Primary)
-            Log::e(__CLASS__, "Warning: No Primary key found for Table '{$this->Name}'");
+            Log::e(__CLASS__, "Warning: No PRIMARY key found for Table '{$this->Name}'");
     }
     
     protected function req($name, $arg, $preg=NULL, $desc=NULL) {
@@ -554,7 +554,7 @@ class BuildPDOTable {
 }
 
 class BuildPDOUserTable extends BuildPDOTable {
-    public $ColumnID, $ColumnUsername, $ColumnEmail, $ColumnPassword, $ColumnFlags, $SessionClass;
+    public $Column_ID, $Column_Username, $Column_Email, $Column_Password, $Column_Flags, $Session_Class;
     /** @var BuildPDOUserSessionTable[] */
     protected static $mSessionTables = array();
 
@@ -563,27 +563,27 @@ class BuildPDOUserTable extends BuildPDOTable {
         switch(strtolower($name)) {
             case 'ci':
             case 'columnid':
-                $this->ColumnID = $this->req($name, $arg);
+                $this->Column_ID = $this->req($name, $arg);
                 break;
             case 'cu':
             case 'columnusername':
-                $this->ColumnUsername = $this->req($name, $arg);
+                $this->Column_Username = $this->req($name, $arg);
                 break;
             case 'ce':
             case 'columnemail':
-                $this->ColumnEmail = $this->req($name, $arg);
+                $this->Column_Email = $this->req($name, $arg);
                 break;
             case 'cp':
             case 'columnpassword':
-                $this->ColumnPassword = $this->req($name, $arg);
+                $this->Column_Password = $this->req($name, $arg);
                 break;
             case 'cf':
             case 'columnflags':
-                $this->ColumnFlags = $this->req($name, $arg);
+                $this->Column_Flags = $this->req($name, $arg);
                 break;
             case 'cc':
             case 'sessionclass':
-                $this->SessionClass = $this->req($name, $arg);
+                $this->Session_Class = $this->req($name, $arg);
                 break;
             default:
                 parent::processDefault($field);
@@ -594,53 +594,54 @@ class BuildPDOUserTable extends BuildPDOTable {
         parent::processModelPHP($PHP);
         $PHP->setExtend("CPath\\Model\\DB\\PDOUserModel");
 
-        if(!$this->SessionClass) {
+        if(!$this->Session_Class) {
             foreach(self::$mSessionTables as $STable)
                 if($STable->Namespace == $this->Namespace) {
-                    $this->SessionClass = get_class($STable);
+                    $this->Session_Class = get_class($STable);
                     break;
                 }
-            if(!$this->SessionClass)
-                $this->SessionClass = "CPath\\Model\\SimpleUserSession";
+            if(!$this->Session_Class)
+                $this->Session_Class = "CPath\\Model\\SimpleUserSession";
         }
-        $class = $this->SessionClass;
+        $class = $this->Session_Class;
         $Session = new $class;
         if(!($Session instanceof IUserSession))
             throw new BuildException($class . " is not an instance of IUserSession");
-        $PHP->addConst('SessionClass', $class);
+        $PHP->addConst('SESSION_CLASS', $class);
 
-        if(!$this->ColumnID && $this->Primary) $this->ColumnID = $this->Primary;
+        if(!$this->Column_ID && $this->Primary) $this->Column_ID = $this->Primary;
         foreach($this->getColumns() as $Column) {
-            if(!$this->ColumnUsername && stripos($Column->Name, 'name') !== false)
-                $this->ColumnUsername = $Column->Name;
-            if(!$this->ColumnEmail && stripos($Column->Name, 'mail') !== false)
-                $this->ColumnEmail = $Column->Name;
-            if(!$this->ColumnPassword && stripos($Column->Name, 'pass') !== false)
-                $this->ColumnPassword = $Column->Name;
-            if(!$this->ColumnFlags && stripos($Column->Name, 'flag') !== false)
-                $this->ColumnFlags = $Column->Name;
+            if(!$this->Column_Username && stripos($Column->Name, 'name') !== false)
+                $this->Column_Username = $Column->Name;
+            if(!$this->Column_Email && stripos($Column->Name, 'mail') !== false)
+                $this->Column_Email = $Column->Name;
+            if(!$this->Column_Password && stripos($Column->Name, 'pass') !== false)
+                $this->Column_Password = $Column->Name;
+            if(!$this->Column_Flags && stripos($Column->Name, 'flag') !== false)
+                $this->Column_Flags = $Column->Name;
         }
 
-        foreach(array('ColumnID', 'ColumnUsername', 'ColumnEmail', 'ColumnPassword', 'ColumnFlags') as $field) {
+        foreach(array('Column_ID', 'Column_Username', 'Column_Email', 'Column_Password', 'Column_Flags') as $field) {
             if(!$this->$field)
                 throw new BuildException("The column name for {$field} could not be determined");
-            $PHP->addConst($field, $this->$field);
+            $PHP->addConst(strtoupper($field), $this->$field);
         }
 
-        $Column = $this->getColumn($this->ColumnEmail);
+        $Column = $this->getColumn($this->Column_Email);
         $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
         if(!$Column->Filter)
             $Column->Filter = FILTER_VALIDATE_EMAIL;
 
-        $Column = $this->getColumn($this->ColumnUsername);
+        $Column = $this->getColumn($this->Column_Username);
         $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_USERNAME;
 
-        $Column = $this->getColumn($this->ColumnPassword);
+        $Column = $this->getColumn($this->Column_Password);
         $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_PASSWORD;
+        print_r($this);die();
     }
 
     public static function addUserSessionTable(BuildPDOUserSessionTable $Table) {
@@ -649,7 +650,7 @@ class BuildPDOUserTable extends BuildPDOTable {
 }
 
 class BuildPDOUserSessionTable extends BuildPDOTable {
-    public $FieldKey, $FieldUserID, $FieldExpire;
+    public $Column_Key, $Column_User_ID, $Column_Expire;
     public $SessionExpireDays, $SessionExpireSeconds, $SessionKey, $SessionKeyLength;
 
     public function __construct($name, $comment) {
@@ -660,17 +661,17 @@ class BuildPDOUserSessionTable extends BuildPDOTable {
     function defaultCommentArg($field) {
         list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
         switch(strtolower($name)) {
-            case 'fk':
-            case 'fieldkey':
-                $this->FieldKey = $this->req($name, $arg);
+            case 'ck':
+            case 'columnkey':
+                $this->Column_Key = $this->req($name, $arg);
                 break;
-            case 'fui':
-            case 'fielduserid':
-                $this->FieldUserID = $this->req($name, $arg);
+            case 'cui':
+            case 'columnuserid':
+                $this->Column_User_ID = $this->req($name, $arg);
                 break;
-            case 'fe':
-            case 'fieldexpire':
-                $this->FieldExpire = $this->req($name, $arg);
+            case 'ce':
+            case 'columnexpire':
+                $this->Column_Expire = $this->req($name, $arg);
                 break;
             case 'sk':
             case 'sessionkey':
@@ -695,18 +696,18 @@ class BuildPDOUserSessionTable extends BuildPDOTable {
         parent::processModelPHP($PHP);
         $PHP->setExtend("CPath\\Model\\DB\\PDOUserSessionModel");
 
-        if(!$this->FieldKey && $this->Primary) $this->FieldKey = $this->Primary;
+        if(!$this->Column_Key && $this->Primary) $this->Column_Key = $this->Primary;
         foreach($this->getColumns() as $Column) {
-            if(!$this->FieldUserID && preg_match('/user.*id/i', $Column->Name))
-                $this->FieldUserID = $Column->Name;
-            if(!$this->FieldExpire && stripos($Column->Name, 'expire') !== false)
-                $this->FieldExpire = $Column->Name;
+            if(!$this->Column_User_ID && preg_match('/user.*id/i', $Column->Name))
+                $this->Column_User_ID = $Column->Name;
+            if(!$this->Column_Expire && stripos($Column->Name, 'expire') !== false)
+                $this->Column_Expire = $Column->Name;
         }
 
-        foreach(array('FieldKey', 'FieldUserID', 'FieldExpire') as $field) {
+        foreach(array('Column_Key', 'Column_User_ID', 'Column_Expire') as $field) {
             if(!$this->$field)
                 throw new BuildException("The field name for {$field} could not be determined");
-            $PHP->addConst($field, $this->$field);
+            $PHP->addConst(strtoupper($field), $this->$field);
         }
     }
 }

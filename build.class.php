@@ -18,11 +18,11 @@ class BuildException extends \Exception {}
 
 class Build extends API implements IBuildable {
 
-    const Route_Path = '/build';    // Allow manual building from command line: 'php index.php build'
-    const Route_Methods = 'CLI';    // CLI only
+    const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
+    const ROUTE_METHODS = 'CLI';    // CLI only
 
-    const Route_Ignore_Files = '.buildignore';
-    const Route_Ignore_Dir = '.git|.idea';
+    const ROUTE_IGNORE_FILES = '.buildignore';
+    const ROUTE_IGNORE_DIR = '.git|.idea';
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -245,7 +245,7 @@ class Build extends API implements IBuildable {
                 continue;
             }
 
-            if($Class->getConstant('Build_Ignore')) {
+            if($Class->getConstant('BUILD_IGNORE')) {
             }
 //            if($Class->isAbstract()) {
 //                Log::v2(__CLASS__, "Ignoring Abstract Class '{$className}' in '{$classFile}'");
@@ -255,14 +255,14 @@ class Build extends API implements IBuildable {
 
             if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuildable")) {
 
-                if($Class->getConstant('Build_Ignore')===true) {
-                    Log::v2(__CLASS__, "Ignoring Class '{$className}' marked with Build_Ignore===true");
+                if($Class->getConstant('BUILD_IGNORE')===true) {
+                    Log::v2(__CLASS__, "Ignoring Class '{$className}' marked with BUILD_IGNORE===true");
                     continue;
                 } else {
                     if($Class->implementsInterface(__NAMESPACE__."\\Interfaces\\IBuilder")) {
                         Log::v(__CLASS__, "Found Builder Class: {$className}");
                         //call_user_func(array($Class->getName(), 'build'), $Class);
-                        static::$mBuilders[] = $Class->getMethod('getBuildableInstance')->invoke(null);
+                        static::$mBuilders[] = $Class->getMethod('createBuildableInstance')->invoke(null);
                     }
                     Log::v2(__CLASS__, "Found Class '{$Class->getName()}'");
                     self::$mClasses[] = $Class;
@@ -278,7 +278,7 @@ class Build extends API implements IBuildable {
     private static function buildClasses() {
         $exCount = 0;
         foreach(self::$mClasses as $Class) {
-            $Buildable = $Class->getMethod('getBuildableInstance')->invoke(null);
+            $Buildable = $Class->getMethod('createBuildableInstance')->invoke(null);
 
             if(!$Buildable) {
                 Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
@@ -314,13 +314,13 @@ class Build extends API implements IBuildable {
         Log::v2(__CLASS__, "Scanning '{$path}'");
         $pathName = basename($path);
 
-        foreach(explode('|', self::Route_Ignore_Dir) as $dir)
+        foreach(explode('|', self::ROUTE_IGNORE_DIR) as $dir)
             if($dir == $pathName) {
                 Log::v2(__CLASS__, "Found '{$dir}'. Ignoring Directory '{$path}'");
                 return $exCount;
             }
 
-        foreach(explode('|', self::Route_Ignore_Files) as $file)
+        foreach(explode('|', self::ROUTE_IGNORE_FILES) as $file)
             if(file_exists($path . '/' . $file)) {
                 Log::v2(__CLASS__, "Found File '{$file}'. Ignoring Directory '{$path}'");
                 return $exCount;
@@ -360,7 +360,7 @@ class Build extends API implements IBuildable {
 //            if($Class === NULL) // TODO: can this be null?
 //                throw new \Exception("Class '{$class}' not found in '{$filePath}'");
 //
-//            if($Class->getConstant('Build_Ignore')) {
+//            if($Class->getConstant('BUILD_IGNORE')) {
 //                Log::v2(__CLASS__, "Ignoring Class '{$class}' in '{$filePath}'");
 //                continue;
 //            }

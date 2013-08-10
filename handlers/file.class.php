@@ -12,7 +12,7 @@ use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 
 class File implements IHandler{
-    const Build_Ignore = true;
+    const BUILD_IGNORE = true;
 
     private $mFilePath;
 

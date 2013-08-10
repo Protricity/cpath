@@ -8,13 +8,13 @@
 namespace CPath\Interfaces;
 
 interface IUser {
-    const FlagDisabled = 0x01;
-    const FlagValidated = 0x02;
-    const FlagGuest = 0x04;
+    const FLAG_DISABLED = 0x01;
+    const FLAG_VALIDATED = 0x02;
+    const FLAG_GUEST = 0x04;
 
-    const FlagDebug = 0x10;
-    const FlagManager = 0x20;
-    const FlagAdmin = 0x40;
+    const FLAG_DEBUG = 0x10;
+    const FLAG_MANAGER = 0x20;
+    const FLAG_ADMIN = 0x40;
 
     function getID();
 

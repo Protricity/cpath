@@ -27,8 +27,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
     const Build_Table_Path = 'tables';
     const FUNC_FORMAT = NULL;
 
-    const Route_Methods = 'CLI';   // Default accepted methods are GET and POST
-    const Route_Path = NULL;       // No custom route path. Path is based on namespace + class name
+    const ROUTE_METHODS = 'CLI';   // Default accepted methods are GET and POST
+    const ROUTE_PATH = NULL;       // No custom route path. Path is based on namespace + class name
 
     private $mPrefix;
 
@@ -155,7 +155,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
      * Return an instance of the class for building purposes
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
-    static function getBuildableInstance() {
+    static function createBuildableInstance() {
         return static::get();
     }
 
@@ -167,6 +167,6 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
      * @return IRoute[]
      */
     function getAllRoutes(IRouteBuilder $Builder) {
-        return $Builder->getHandlerDefaultRoutes(static::Route_Methods, static::Route_Path);
+        return $Builder->getHandlerDefaultRoutes(static::ROUTE_METHODS, static::ROUTE_PATH);
     }
 }

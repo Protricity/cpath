@@ -37,7 +37,7 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
         if(!$args[0]) {
             $this->mMethod = 'CLI';
         } else {
-            if(preg_match('/^('.IRoute::Methods.')(?: (.*))?$/i', $args[0], $matches)) {
+            if(preg_match('/^('.IRoute::METHODS.')(?: (.*))?$/i', $args[0], $matches)) {
                 array_shift($args);
                 $this->mMethod = strtoupper($matches[1]);
                 if(!empty($matches[2]))

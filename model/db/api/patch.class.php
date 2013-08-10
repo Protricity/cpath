@@ -21,7 +21,7 @@ class API_Patch extends API_Get {
     /**
      * Construct an instance of this API
      * @param string|array $alternateColumns a column or array of columns that may be used to search for Models.
-     * Note: Primary key is already included
+     * Note: PRIMARY key is already included
      * Warning: Only the first result will be used if multiple Models are found
      * @param PDOModel|IWriteAccess $Model the user source object for this API
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
@@ -29,8 +29,8 @@ class API_Patch extends API_Get {
     function __construct(PDOModel $Model, $alternateColumns=NULL) {
         parent::__construct($Model, $alternateColumns);
 
-        $defFilter = $Model::DefaultFilter;
-        foreach($Model::findColumns($Model::Update ?: PDOColumn::FlagUpdate) as $Column)
+        $defFilter = $Model::DEFAULT_FILTER;
+        foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FlagUpdate) as $Column)
             /** @var PDOColumn $Column */
             $Column->addToAPI($this, NULL, NULL, NULL, $defFilter);
     }
@@ -40,7 +40,7 @@ class API_Patch extends API_Get {
      * @return String description for this API
      */
     function getDescription() {
-        return "Update a ".$this->getModel()->getModelName();
+        return "UPDATE a ".$this->getModel()->modelName();
     }
 
     /**
@@ -54,15 +54,16 @@ class API_Patch extends API_Get {
 
         $UpdateModel = parent::execute($Request);
 
-        if($UpdateModel instanceof IWriteAccess)
-            $UpdateModel->assertWriteAccess($Request, IWriteAccess::INTENT_PATCH);
+        $Policy = $this->getSecurityPolicy();
+
+        $Policy->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
 
         foreach($Request as $column => $value)
             $UpdateModel->updateColumn($column, $value, false);
 
         $c = $UpdateModel->commitColumns();
         if(!$c)
-            return new Response("No columns were updated for {$UpdateModel}.", true, $Model);
-        return new Response("Updated {$c} Field(s) for {$UpdateModel}.", true, $Model);
+            return new Response("No columns were updated for {$UpdateModel}.", true, $UpdateModel);
+        return new Response("Updated {$c} Field(s) for {$UpdateModel}.", true, $UpdateModel);
     }
 }

@@ -162,9 +162,9 @@ PHP;
      * @throws \CPath\BuildException if no class was specified and no default class exists
      */
     public function parseMethods($methods) {
-        //$methods = $Handler::Route_Methods ?: 'GET|POST|CLI';
+        //$methods = $Handler::ROUTE_METHODS ?: 'GET|POST|CLI';
 
-        $allowed = explode('|', IRoute::Methods);
+        $allowed = explode('|', IRoute::METHODS);
         if(!is_array($methods))
             $methods = explode('|', $methods);
         foreach($methods as &$method) {
@@ -263,7 +263,7 @@ PHP;
         Log::v(__CLASS__, "Stored (%s) into APC Cache", sizeof($routes));
     }
 
-    public static function getBuildableInstance() {
+    public static function createBuildableInstance() {
         return new static;
     }
 }

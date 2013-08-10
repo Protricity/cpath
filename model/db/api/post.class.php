@@ -13,6 +13,7 @@ use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAssignAccess;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
@@ -25,7 +26,7 @@ class API_Post extends API_Base {
     function __construct(PDOModel $Model) {
         parent::__construct($Model);
 
-        foreach($Model::findColumns($Model::Insert ?: PDOColumn::FlagInsert) as $Column)
+        foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FlagInsert) as $Column)
             $Column->addToAPI($this);
     }
 
@@ -34,7 +35,7 @@ class API_Post extends API_Base {
      * @return String description for this API
      */
     function getDescription() {
-        return "Create a new ".$this->getModel()->getModelName();
+        return "Create a new ".$this->getModel()->modelName();
     }
 
     /**
@@ -47,8 +48,9 @@ class API_Post extends API_Base {
         $Model = $this->getModel();
         $this->processRequest($Request);
 
-        if($Model instanceof IWriteAccess)
-            $Model->assertWriteAccess($Request, IWriteAccess::INTENT_POST);
+        $Policy = $this->getSecurityPolicy();
+
+        $Policy->assignAccessID($Request, IAssignAccess::INTENT_POST);
 
         $Model = $Model::createFromArray($Request);
 

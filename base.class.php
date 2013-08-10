@@ -155,7 +155,7 @@ class Base {
      * @return bool true if debug mode is set
      */
     public static function isDebug() {
-        return self::$mConfig['debug'];
+        return self::getConfig('debug');
     }
 
     /**
@@ -163,7 +163,7 @@ class Base {
      * @return bool true if debug mode is set
      */
     public static function isApcEnabled() {
-        return self::$mConfig['apc.enabled'];
+        return self::getConfig('apc.enabled');
     }
 
     /**

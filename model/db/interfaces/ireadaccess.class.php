@@ -10,6 +10,7 @@ namespace CPath\Model\DB\Interfaces;
 
 use CPath\Interfaces\IRequest;
 use CPath\Model\DB\InvalidPermissionException;
+use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOWhere;
 
 
@@ -21,12 +22,13 @@ interface IReadAccess {
     /**
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
+     * @param PDOModel $Model the Model to assert access upon
      * @param IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      * @return void
      */
-    function assertReadAccess(IRequest $Request, $intent);
+    function assertReadAccess(PDOModel $Model, IRequest $Request, $intent);
 
     /**
      * Assert read permissions by Limiting API search queries endpoints such as GET, GET search, PATCH, and DELETE

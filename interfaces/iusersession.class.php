@@ -19,7 +19,7 @@ class SessionExpiredException extends InvalidUserSessionException {}
 interface IUserSession {
 
     /**
-     * Get the User Primary Key ID associated with this Session
+     * Get the User PRIMARY Key ID associated with this Session
      * @return String User ID
      */
     function getUserID();

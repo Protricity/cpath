@@ -36,7 +36,7 @@ class API_PostUserLogin extends API_Base {
      * @return String description for this API
      */
     function getDescription() {
-        return "Log in as ".$this->mUser->getModelName();
+        return "Log in as ".$this->mUser->modelName();
     }
 
     /**

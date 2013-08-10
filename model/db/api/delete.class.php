@@ -24,7 +24,7 @@ class API_Delete extends API_Get {
      * @return String description for this API
      */
     function getDescription() {
-        return "Delete a ".$this->getModel()->getModelName();
+        return "Delete a ".$this->getModel()->modelName();
     }
 
     /**
@@ -38,8 +38,7 @@ class API_Delete extends API_Get {
 
         $DeleteModel = parent::execute($Request);
 
-        if($DeleteModel instanceof IWriteAccess)
-            $DeleteModel->assertWriteAccess($Request, IWriteAccess::INTENT_DELETE);
+        $this->getSecurityPolicy()->assertWriteAccess($DeleteModel, $Request, IWriteAccess::INTENT_DELETE);
 
         $DeleteModel::removeModel($DeleteModel);
 

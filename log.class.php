@@ -20,7 +20,7 @@ use CPath\Interfaces\ILogEntry;
  */
 abstract class Log {
 
-    const DefaultLevel = LogVerbose::Level;
+    const DEFAULT_LEVEL = LogVerbose::LEVEL;
 
     /** @var ILogEntry[] */
     //private static $mLog = array();
@@ -32,7 +32,7 @@ abstract class Log {
     public static function getDefaultLevel() {
         if(self::$mLevel !== NULL)
             return self::$mLevel;
-        return self::$mLevel = Base::getConfig('log.level', self::DefaultLevel);
+        return self::$mLevel = Base::getConfig('log.level', self::DEFAULT_LEVEL);
     }
 
     public static function setDefaultLevel($level) {
@@ -44,7 +44,7 @@ abstract class Log {
      * @param ILogEntry $Log the log entry to add
      */
     public static function add(ILogEntry $Log) {
-        $level = $Log::Level;
+        $level = $Log::LEVEL;
         /** @var ILogListener $call */
         foreach(self::$mCallbacks as $l=>$calls) {
             if($l == -1)
@@ -169,16 +169,16 @@ abstract class LogEntry implements ILogEntry {
     }
 }
 /** Class LogVerbose - a verbose log entry for developers to see */
-class LogVerbose extends LogEntry { const Level = 3; }
+class LogVerbose extends LogEntry { const LEVEL = 3; }
 /** Class LogVerbose2 - an extra verbose log entry for developers to see */
-class LogVerbose2 extends LogEntry { const Level = 4; }
+class LogVerbose2 extends LogEntry { const LEVEL = 4; }
 /** Class LogUser - a status log entry for users to see */
-class LogUser extends LogEntry { const Level = 2; }
+class LogUser extends LogEntry { const LEVEL = 2; }
 /** Class LogError - an error log entry */
-class LogError extends LogEntry { const Level = 1; }
+class LogError extends LogEntry { const LEVEL = 1; }
 /** Class LogException - an exception log entry */
 class LogException extends LogError {
-    const Level = 1;
+    const LEVEL = 1;
     protected $mEx, $mTag;
     public function __construct($tag, \Exception $ex, $msg=NULL) {
         $this->mTag = $tag;
