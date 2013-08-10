@@ -33,7 +33,7 @@ class InvalidRouteException extends \Exception {}
 
 class HandlerSet implements IHandlerSet {
 
-    const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
     /** @var IHandler[] */
@@ -139,7 +139,7 @@ class HandlerSet implements IHandlerSet {
         $Class = new \ReflectionClass($this->mSource);
         $defaultPath = $Builder->getHandlerDefaultPath($this->mSource);
         $routes = array();
-        $regex = '/^('.IRoute::METHODS.')( (\/)?(.*))?$/';
+        $regex = '/^('.str_replace(',', '|', IRoute::METHODS).')( (\/)?(.*))?$/';
         foreach($this->mHandlers as $route => $Handler) {
             //if($Handler instanceof IRoutable) {
             //    $routes = array_merge($routes, $Handler->getAllRoutes($Builder));

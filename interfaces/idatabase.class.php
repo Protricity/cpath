@@ -8,7 +8,7 @@
 namespace CPath\Interfaces;
 
 interface IDatabase {
-    const VERSION = NULL;
+    //const VERSION = NULL;
 
     function getPrefix();
     function upgrade();

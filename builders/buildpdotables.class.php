@@ -46,7 +46,7 @@ PHP;
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
         if($oldVersion===NULL)
             $oldVersion = $DB->getDBVersion();
-        $curVersion = $DB::Version;
+        $curVersion = $DB::VERSION;
         $Class = new \ReflectionClass($DB);
         $schemaFolder = $this->getFolder($Class, 'schema');
         $files = scandir($schemaFolder);
@@ -116,9 +116,9 @@ PHP;
             return false;
         $DB = $Buildable;
 
-        $BUILD = $Buildable::Build_DB;
+        $BUILD = $Buildable::BUILD_DB;
         if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
-            Log::v(__CLASS__, "(Build_DB = {$BUILD}) Skipping Build for ".get_class($Buildable));
+            Log::v(__CLASS__, "(BUILD_DB = {$BUILD}) Skipping Build for ".get_class($Buildable));
             return false;
         }
 
@@ -329,8 +329,13 @@ PHP;
 
     static function toTitleCase($field, $noSpace=false) {
         $field = ucwords(str_replace('_', ' ', $field));
-        if(!$noSpace) return $field;
-        return str_replace(' ', '', $field);
+        $words = explode(' ', $field);
+        foreach($words as &$word) {
+            if(strlen($word) === 2)
+                $word = strtoupper($word);
+        }
+        if(!$noSpace) return implode(' ', $words);;
+        return implode('', $words);
     }
 
     static function createBuildableInstance() {

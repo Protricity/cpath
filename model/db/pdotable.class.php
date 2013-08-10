@@ -13,12 +13,12 @@ abstract class PDOTable {
 
     static function select(\PDO $DB, $_selectArgs) {
         $args = func_get_args();
-        return new PDOSelect(static::TableName, array_shift($args), $args);
+        return new PDOSelect(static::TABLE, array_shift($args), $args);
     }
 
     static function update(\PDO $DB, $_fieldArgs) {
         $args = func_get_args();
-        return new PDOUpdate(static::TableName, array_shift($args), $args);
+        return new PDOUpdate(static::TABLE, array_shift($args), $args);
     }
 
 //

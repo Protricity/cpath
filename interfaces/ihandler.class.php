@@ -9,7 +9,7 @@ namespace CPath\Interfaces;
 
 
 interface IHandler {
-    //const ROUTE_METHODS = 'GET|POST|CLI';   // Default accepted methods are GET and POST
+    //const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     //const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /**

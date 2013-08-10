@@ -12,7 +12,7 @@ abstract class MySQLTable extends PDOTable {
 
     static function insert(\PDO $DB, $_fieldArgs) {
         $args = func_get_args();
-        return new MySQLInsert(static::TableName, array_shift($args), $args);
+        return new MySQLInsert(static::TABLE, array_shift($args), $args);
     }
 
 }

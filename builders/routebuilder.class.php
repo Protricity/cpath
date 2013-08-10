@@ -162,11 +162,11 @@ PHP;
      * @throws \CPath\BuildException if no class was specified and no default class exists
      */
     public function parseMethods($methods) {
-        //$methods = $Handler::ROUTE_METHODS ?: 'GET|POST|CLI';
+        //$methods = $Handler::ROUTE_METHODS ?: 'GET,POST,CLI';
 
-        $allowed = explode('|', IRoute::METHODS);
+        $allowed = explode(',', IRoute::METHODS);
         if(!is_array($methods))
-            $methods = explode('|', $methods);
+            $methods = explode(',', $methods);
         foreach($methods as &$method) {
             $method = strtoupper($method);
             if($method == 'ANY') {
@@ -184,13 +184,13 @@ PHP;
      * Get all default routes for this Handler
      * @param String|Array|null $methods the allowed methods
      * @param String|null $path the route path or null for default
-     * @param Object|null $Handler the handler class instance
-     * @return array
+     * @param IHandler|null $Handler the handler class instance
+     * @return IRoute[]
      */
-    function getHandlerDefaultRoutes($methods='GET|POST|CLI', $path=NULL, $Handler=NULL) {
+    function getHandlerDefaultRoutes($methods='GET,POST,CLI', $path=NULL, IHandler $Handler=NULL) {
         if(!$Handler)
             $Handler = $this->getCurrentClass();
-        $methods = $this->parseMethods($methods ?: 'GET|POST|CLI');
+        $methods = $this->parseMethods($methods ?: 'GET,POST,CLI');
         if(!$path)
             $path = $this->getHandlerDefaultPath($Handler);
         $routes = array();
@@ -201,10 +201,10 @@ PHP;
 
     /**
      * Gets the default public route path for this handler
-     * @param Object $Handler|NULL The class instance or NULL for the current class
+     * @param String|IHandler|NULL $Handler The class instance, class name, or NULL for the current class
      * @return string The public route path
      */
-    public function getHandlerDefaultPath($Handler=NULL) {
+    function getHandlerDefaultPath($Handler=NULL) {
         if(!$Handler)
             $Handler = $this->getCurrentClass();
         $path = str_replace('\\', '/', strtolower(get_class($Handler)));
@@ -219,7 +219,7 @@ PHP;
      * @return IRoute[] a list of IRoute instances
      * @throws \CPath\BuildException when a build exception occurred
      */
-    public function getHandlerRoutes(IHandler $Handler=NULL) {
+    private function getHandlerRoutes(IHandler $Handler=NULL) {
         if(!$Handler)
             $Handler = $this->getCurrentClass();
 
@@ -227,9 +227,10 @@ PHP;
         if($Handler instanceof IRoutable) {
             $routes = $Handler->getAllRoutes($this);
         } else {
-            $path = $this->getHandlerDefaultPath($Handler);
-            foreach($this->getHandlerMethods($Handler) as $method)
-                $routes[] = new Route($method . ' ' . $path, get_class($Handler));
+            $R = new \ReflectionClass($Handler);
+            $path = $R->getConstant('ROUTE_PATH');
+            $method = $R->getConstant('ROUTE_METHODS');
+            $routes = $this->getHandlerDefaultRoutes($method, $path, $Handler);
         }
         return $routes;
     }

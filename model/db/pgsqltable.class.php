@@ -12,7 +12,7 @@ abstract class PGSQLTable extends PDOTable {
 
     static function insert(\PDO $DB, $_fieldArgs) {
         $args = func_get_args();
-        return new PGSQLInsert(static::TableName, array_shift($args), $args);
+        return new PGSQLInsert(static::TABLE, array_shift($args), $args);
     }
 
 }

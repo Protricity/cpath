@@ -22,9 +22,9 @@ use CPath\Util;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {
-    const Version = NULL;
-    const Build_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
-    const Build_Table_Path = 'tables';
+    const VERSION = NULL;
+    const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
+    const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = NULL;
 
     const ROUTE_METHODS = 'CLI';   // Default accepted methods are GET and POST
@@ -104,7 +104,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
     }
 
     public function upgrade($rebuild=false) {
-        $version = static::Version;
+        $version = static::VERSION;
         if($version === NULL)
             throw new \Exception("Version Constant is missing");
         $version = (int)$version;

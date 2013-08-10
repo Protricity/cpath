@@ -37,7 +37,7 @@ class InvalidPermissionException extends \Exception {}
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable {
     //const BUILD_IGNORE = true;
-    //const ROUTE_METHODS = 'GET|POST|CLI';     // Default accepted methods are GET and POST
+    //const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
 
     const TABLE = null;
     const MODEL_NAME = null;
@@ -93,8 +93,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     function updateColumn($column, $value, $commit=true) {
         if($this->$column == $value)
             return $this;
-        if(!$this->mCommit)
-            $this->mCommit = array();
         $this->mCommit[$column] = $value;
         if($commit)
             $this->commitColumns();
@@ -125,7 +123,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         $DB->exec($SQL);
         Log::u(get_called_class(), "Updated " . $this);
         $c = sizeof($this->mCommit);
-        $this->mCommit = array();
+        $this->mCommit = NULL;
         if(static::CACHE_ENABLED)
             static::$mCache->store(get_called_class() . ':id:' . $id, $this, static::CACHE_TTL);
         return $c;
@@ -400,12 +398,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is static::SEARCH or columns with PDOColumn::FlagSearch set
-     * @param string $logic 'OR' or 'AND' logic between columns
      * @param boolean $throwIfNotFound if true, throws an exception if not found
+     * @param string $logic 'OR' or 'AND' logic between columns
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByColumns($search, $columns=NULL, $logic='OR', $throwIfNotFound=true) {
+    public static function loadByColumns($search, $columns=NULL, $throwIfNotFound=true, $logic='OR') {
         $Model = static::searchByColumns($search, $columns, 1, $logic)
             ->fetch();
         if(!$Model && $throwIfNotFound)
@@ -549,18 +547,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return static::MODEL_NAME ?: basename(get_called_class());
     }
 
-    /**
-     * Formats an underscored_column into TitleCase
-     * @param String $column the column to format
-     * @param bool $noSpace if true, all spaces are removed
-     * @return mixed|string
-     */
-    protected static function toTitleCase($column, $noSpace=false) {
-        $column = ucwords(str_replace('_', ' ', $column));
-        if(!$noSpace)
-            return $column;
-        return str_replace(' ', '', $column);
-    }
 
     /**
      * Return an instance of the class for building purposes
