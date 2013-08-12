@@ -121,8 +121,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
         Log::v(__CLASS__, "Upgrading Database from version {$oldVersion} to {$version}");
         $Build = new BuildPGTables();
 
-        if(Base::getConfig('db.upgrade.enabled', true) === false)
-            throw new \Exception("Database Upgrade is disabled db.upgrade.enabled===false");
+        if(!DBConfig::$UpgradeEnable)
+            throw new \Exception("Database Upgrade is disabled Config::\$UpgradeEnable==false");
         $Build->upgrade($this, $oldVersion);
         return $this;
     }
@@ -167,6 +167,6 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
      * @return IRoute[]
      */
     function getAllRoutes(IRouteBuilder $Builder) {
-        return $Builder->getHandlerDefaultRoutes(static::ROUTE_METHODS, static::ROUTE_PATH);
+        return $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, static::ROUTE_PATH);
     }
 }

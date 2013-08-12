@@ -43,7 +43,8 @@ use CPath\Validate;
 abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
-    const Enable_Logging = true;            // Enable API Logging
+    const LOG_ENABLE = true;                // Enable API Logging
+    const ROUTE_API_INFO = true;            // Add an APIInfo route entry for this API
 
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
@@ -75,7 +76,7 @@ abstract class API implements IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     public function executeAsResponse(IRequest $Request) {
-        if(static::Enable_Logging)
+        if(static::LOG_ENABLE)
             $this->mLog = new SimpleLogger(true);
         try {
             $Response = $this->execute($Request);
@@ -86,7 +87,7 @@ abstract class API implements IAPI {
         } catch (\Exception $ex) {
             $Response = new ExceptionResponse($ex);
         }
-        if(static::Enable_Logging) {
+        if(static::LOG_ENABLE) {
             foreach($this->mLog->getLogs() as $Log)
                 $Response->addLogEntry($Log);
             unset($this->mLog);
@@ -319,9 +320,9 @@ abstract class API implements IAPI {
      * @return IRoute[]
      */
     public function getAllRoutes(IRouteBuilder $Builder) {
-        $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath();
-        $routes = $Builder->getHandlerDefaultRoutes(static::ROUTE_METHODS, $path);
-        if(!isset($routes['GET']))
+        $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
+        $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
+        if(static::ROUTE_API_INFO && !isset($routes['GET']))
             $routes['GET'] = new Route('GET ' . $path, 'CPath\Handlers\Views\APIInfo', get_called_class());
         return $routes;
     }

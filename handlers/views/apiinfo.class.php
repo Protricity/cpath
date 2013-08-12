@@ -3,6 +3,7 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
+use CPath\Config;
 use CPath\Handlers\IAPIParam;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
@@ -20,7 +21,7 @@ class APIInfo implements IHandler, ILogListener {
     private $mLog = array();
 
     public function __construct() {
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::addCallback($this);
     }
 
@@ -42,7 +43,8 @@ class APIInfo implements IHandler, ILogListener {
             print($apiClass. " is not an instance of IAPI");
             return;
         }
-        $this->renderApi($API, $Request->getRoute());
+        $routes = $API->getAllRoutes(new RouteBuilder());
+        $this->renderApi($API, current($routes));
     }
 
     function renderAPI(IAPI $API, IRoute $Route) {
@@ -116,7 +118,7 @@ class APIInfo implements IHandler, ILogListener {
         <div class='request-headers'></div>
     </div>
 
-    <?php if(false && Base::isDebug()) { ?>
+    <?php if(false && Config::$Debug) { ?>
         <h3>Debug</h3>
         <table><?php
             /** @var ILogEntry $log */

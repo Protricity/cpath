@@ -21,7 +21,7 @@ abstract class Cache{
     public static function get() {
         if(self::$Cache)
             return self::$Cache;
-        if(Base::isApcEnabled())
+        if(Config::$APCEnabled)
             return self::$Cache = new APC();
         else
             return self::$Cache = new None();

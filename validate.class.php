@@ -60,7 +60,7 @@ class Validate implements IValidate {
 
             case self::FILTER_VALIDATE_USERNAME:
                 $options = (array)$options
-                    + Base::getConfigByPrefix('validation.username.')
+                    + Config::$ValidationUsername
                     + array(
                         'min' => self::DEFAULT_USERNAME_MIN_LENGTH,
                         'max' => self::DEFAULT_USERNAME_MAX_LENGTH,
@@ -70,7 +70,7 @@ class Validate implements IValidate {
 
             case self::FILTER_VALIDATE_PASSWORD:
                 $options = (array)$options
-                    + Base::getConfigByPrefix('validation.password.')
+                    + Config::$ValidationPassword
                     + array(
                         'min' => self::DEFAULT_PASSWORD_MIN_LENGTH,
                         'max' => self::DEFAULT_PASSWORD_MAX_LENGTH,

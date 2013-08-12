@@ -30,7 +30,7 @@ class ResponseException extends \Exception implements IJSON, IXML, IResponseAggr
 
 
     function toJSON(Array &$JSON) {
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             $ex = $this->getPrevious() ?: $this;
             $trace = $ex->getTraceAsString();
             $JSON['_debug_trace'] = current(explode("\n", $trace));
@@ -39,7 +39,7 @@ class ResponseException extends \Exception implements IJSON, IXML, IResponseAggr
 
     function toXML(\SimpleXMLElement $xml)
     {
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             $ex = $this->getPrevious() ?: $this;
             $trace = $ex->getTraceAsString();
             $xml->addChild('_debug_trace', current(explode("\n", $trace)));

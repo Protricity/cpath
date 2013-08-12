@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
+use CPath\Config;
 use \PDO;
 class PDOSelect extends PDOWhere implements \Iterator {
     private $DB, $select=array(), $limit='1';
@@ -47,7 +48,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
 
     public function exec() {
         $sql = $this->getSQL();
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::v2(__CLASS__, $sql);
         $this->stmt = $this->DB
             ->prepare($sql);

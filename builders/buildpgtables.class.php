@@ -8,7 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Builders;
 use CPath\DataBase\PostGreSQL;
-use CPath\BuildException;
+use CPath\Exceptions\BuildException;
 use CPath\Base;
 use CPath\Build;
 use CPath\Interfaces\IBuildable;
@@ -33,7 +33,7 @@ PHP;
      * Builds class references for existing database tables
      * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\BuildException when a build exception occurred
+     * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
     public function build(IBuildable $Buildable) {
         if(!$Buildable instanceof PGSQLDatabase)

@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 use CPath\Base;
+use CPath\Config;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 use \PDO;
@@ -26,7 +27,7 @@ class PDODelete extends PDOWhere {
         if(!$this->stmt) {
             $sql = $this->getSQL();
             $this->stmt = $this->DB->prepare($sql);
-            if(Base::isDebug())
+            if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
         }
         $this->stmt->execute($this->values);
@@ -41,7 +42,7 @@ class PDODelete extends PDOWhere {
         $SQL = "DELETE FROM ".$this->table
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::v2(__CLASS__, $SQL);
         return $SQL;
     }

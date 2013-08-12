@@ -16,7 +16,7 @@ interface IBuilder {
      * this method should return false immediately
      * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\BuildException
+     * @throws \CPath\Exceptions\BuildException
      */
     function build(IBuildable $Buildable);
 

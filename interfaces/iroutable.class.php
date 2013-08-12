@@ -16,7 +16,7 @@ interface IRoutable {
      * Returns an array of all routes for this class
      * @param IRouteBuilder $Builder the IRouteBuilder instance
      * @return IRoute[]
-     * @throws \CPath\BuildException when a route is not in a valid format
+     * @throws \CPath\Exceptions\BuildException when a route is not in a valid format
      */
     function getAllRoutes(IRouteBuilder $Builder);
 }

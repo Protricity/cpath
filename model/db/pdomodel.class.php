@@ -18,6 +18,7 @@ use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IXML;
 use CPath\Log;
+use CPath\Config;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
@@ -316,7 +317,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         } catch (\PDOException $ex) {
             if(stripos($ex->getMessage(), 'Duplicate')!==false) {
                 $err = "A Duplicate ".static::modelName()." already exists";
-                if(Base::isDebug())
+                if(Config::$Debug)
                     $err .= ': ' . $ex->getMessage();
                 Log::u(get_called_class(), "Duplicate ".static::modelName()." already exists");
                 throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
@@ -407,7 +408,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         $Model = static::searchByColumns($search, $columns, 1, $logic)
             ->fetch();
         if(!$Model && $throwIfNotFound)
-            throw new ModelNotFoundException(static::modelName() . " was not found");
+            throw new ModelNotFoundException(static::modelName() . " '{$search}' was not found");
         return $Model;
     }
 

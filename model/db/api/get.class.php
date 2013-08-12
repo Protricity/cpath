@@ -82,12 +82,16 @@ class API_Get extends API_Base {
         $Policy = $this->getSecurityPolicy();
 
         $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
+        if($Model instanceof IReadAccess)
+            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
 
         $GetModel = $Search->fetch();
         if(!$GetModel)
             throw new ModelNotFoundException($Model::modelName() . " '{$id}' was not found");
 
         $Policy->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
+        if($Model instanceof IReadAccess)
+            $Model->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
 
         return $GetModel;
     }

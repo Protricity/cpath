@@ -43,8 +43,8 @@ class ApiTester {
         return $Response;
     }
 
-    static function fromCMD($_cmd) {
-        $Cli = CLI::fromArgs(is_array($_cmd) ? $_cmd : func_get_args());
+    static function fromCMD($args, Array $request=NULL) {
+        $Cli = CLI::fromArgs($args, $request);
         $Route = $Cli->findRoute();
         $Api = $Route->getHandler();
         if($Api instanceof IHandlerSet)
@@ -58,7 +58,7 @@ class ApiTester {
      * @param $_cmd
      * @return IResponse
      */
-    static function cmd($_cmd) {
-        return self::fromCMD(is_array($_cmd) ? $_cmd : func_get_args())->test();
+    static function cmd($args, Array $request=NULL) {
+        return self::fromCMD($args, $request)->test();
     }
 }

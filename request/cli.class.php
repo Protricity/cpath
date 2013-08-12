@@ -258,17 +258,19 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
 
     // Statics
 
-    static function fromArgs($_args) {
-        if(!is_array($_args))
-            $_args = func_get_args();
-        if(sizeof($_args) == 1)
-            $_args = explode(' ', $_args[0]);
-        return new CLI($_args);
+    static function fromArgs($args, Array $request=NULL) {
+        if(is_string($args))
+            $args = explode(' ', $args);
+        $CLI = new CLI($args);
+        if($request)
+            $CLI->merge($request);
+        return $CLI;
     }
 
     static function fromRequest($force=false) {
         static $CLI = NULL;
-        if($CLI && !$force) return $CLI;
+        if($CLI && !$force)
+            return $CLI;
         $args = $_SERVER['argv'];
         array_shift($args);
         $CLI = new CLI($args);

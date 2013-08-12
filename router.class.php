@@ -41,7 +41,7 @@ final class Router{
 
     public static function getRoutes($method=NULL) {
         $routes = array();
-        $path = Base::getGenPath().'routes.php';
+        $path = Config::getGenPath().'routes.gen.php';
         if(!file_exists($path) || !(include $path) || !$routes) {
             Build::build();
             require $path;

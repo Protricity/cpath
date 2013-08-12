@@ -28,12 +28,12 @@ final class RouterAPC{
      * @return IRoute|NULL the found route or null if none found
      */
     public static function findRoute($routePath, &$args) {
-        if(($inc = Base::getConfig('build.inc')) && ($inc != apc_fetch(self::PREFIX . '.inc'))) {
+        if(($inc = Compile::$BuildInc) && (Compile::$BuildInc != apc_fetch(self::PREFIX . '.inc'))) {
             RouteBuilder::rebuildAPCCache();
             apc_store(self::PREFIX . '.inc', $inc);
         }
         $route = $routePath;
-        if(($max = Base::getConfig('route.max', 0)) && ($max < strlen($route))) {
+        if(($max = Compile::$RouteMax ?: 0) && ($max < strlen($route))) {
             if($p = strrpos($route, '/', $max))
                 $route = substr($route, 0, $p);
         }

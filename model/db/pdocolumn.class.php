@@ -81,7 +81,7 @@ class PDOColumn {
      */
     function getComment() {
         return $this->mComment
-            ?: $this->mComment = ucwords(str_replace('_', ' ', $this->mComment));
+            ?: $this->mComment = ucwords(str_replace('_', ' ', $this->mName));
     }
 
     /**

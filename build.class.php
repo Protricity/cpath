@@ -14,12 +14,12 @@ use CPath\Interfaces\IShortOptions;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
-class BuildException extends \Exception {}
-
 class Build extends API implements IBuildable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
+    const ROUTE_API_INFO = false;   // Add an APIInfo route entry for this API
+
 
     const ROUTE_IGNORE_FILES = '.buildignore';
     const ROUTE_IGNORE_DIR = '.git|.idea';
@@ -79,7 +79,7 @@ class Build extends API implements IBuildable {
      */
     private static function getConfigPath() {
         static $path = NULL;
-        return $path ?: $path = Base::getGenPath().'build.php';
+        return $path ?: $path = Config::getGenPath().'build.php';
     }
 
     /**
@@ -145,33 +145,8 @@ class Build extends API implements IBuildable {
      */
     public static function force() { return self::$mForce; }
 
-    /**
-     * Return the build config data from the build file if it exists
-     * @param array $newConfig
-     * @return array the build config data
-     */
-    public static function buildConfig(Array $newConfig=array()) {
-        $config = Base::loadConfig();
-        if(!$config)
-            $config = array(
-                'debug' => false,
-                'build.enabled' => true,
-                'build.inc' => 0,
-                'db.upgrade.enabled' => true,
-                'db.upgrade.auto' => false,
-                'domain' => 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/',
-            );
-
-        if($newConfig)
-            foreach($newConfig as $k=>$v)
-                $config[$k] = $v;
-        $php = "<?php\n\$config=".var_export($config, true).";";
-        $path = Base::getGenPath().'config.php';
-        if(!is_dir(dirname($path)))
-            mkdir(dirname($path), NULL, true);
-        file_put_contents($path, $php);
-        Log::v(__CLASS__, "Config data committed to file (".count($config).")");
-        return $config;
+    public static function buildDomainPath() {
+        return 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/';
     }
 
     /**
@@ -179,8 +154,8 @@ class Build extends API implements IBuildable {
      */
     public static function build($force=false) {
         Log::v(__CLASS__, "Starting Builds");
-        if(Base::getConfig('build.enabled') === false) {
-            Log::e(__CLASS__, "Building is not allowed. build.enabled===false");
+        if(!Config::$BuildEnabled) {
+            Log::e(__CLASS__, "Building is not allowed. Config::\$BuildEnabled==false");
             return 0;
         }
 
@@ -218,8 +193,10 @@ class Build extends API implements IBuildable {
         foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
 
-        $v = Base::getConfig('build.inc', 0);
-        Base::commitConfig('build.inc', ++$v);
+        $v = ++ Compile::$BuildInc;
+        Compile::commit();
+//        $v = Base::getConfig('build.inc', 0);
+//        Base::commitConfig('build.inc', ++$v);
 
         Log::v(__CLASS__, "All Builds Complete (inc={$v})");
         return $exCount;
@@ -239,7 +216,7 @@ class Build extends API implements IBuildable {
             }
 
             $name = strtr(strtolower($className), '_\\', '//');
-            $classFile2 = realpath(Base::getBasePath() . $name . '.class.php');
+            $classFile2 = realpath(Config::$BasePath . $name . '.class.php');
             if($classFile !== $classFile2) {
                 Log::v2(__CLASS__, "Skipping secondary class '{$Class->getName()}' in $classFile");
                 continue;

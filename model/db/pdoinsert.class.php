@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
+use CPath\Config;
 use \PDO;
 abstract class PDOInsert {
     protected $DB;
@@ -56,7 +57,7 @@ abstract class PDOInsert {
         } else {
             $sql = $this->getSQL();
             if(!$this->stmt) $this->stmt = $this->DB->prepare($sql);
-            if(Base::isDebug())
+            if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
             $this->stmt->execute($_values);
         }
@@ -77,7 +78,7 @@ abstract class PDOInsert {
         $this->updateSQL($SQL);
         $this->stmt = $this->DB->prepare($SQL);
         $this->stmt->execute($values);
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::v2(__CLASS__, $SQL);
         return $this;
     }
@@ -89,7 +90,7 @@ abstract class PDOInsert {
             ."\n (".implode(', ',$this->fields).')'
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
         $this->updateSQL($SQL);
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::v2(__CLASS__, $SQL);
         return $SQL;
     }

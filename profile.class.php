@@ -75,7 +75,7 @@ PHP;
      */
     private static function getConfigPath() {
         static $path = NULL;
-        return $path ?: $path = Base::getGenPath().'profile.php';
+        return $path ?: $path = Config::getGenPath().'profile.php';
     }
 
     static function profileClass($name) {

@@ -31,7 +31,7 @@ PHP;
      * Builds class references for existing database tables
      * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\BuildException when a build exception occurred
+     * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
     public function build(IBuildable $Buildable) {
         if(!$Buildable instanceof MySQLDatabase)

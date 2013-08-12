@@ -3,6 +3,7 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
+use CPath\Config;
 use CPath\Handlers\InvalidRouteException;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IDescribable;
@@ -24,7 +25,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
     private $mLog = array();
 
     public function __construct() {
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::addCallback($this);
     }
 
@@ -72,7 +73,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
 
         $basePath = Base::getClassPublicPath($this);
         list(,$infoPath) = explode(' ', $HandlerRoute->getPrefix(), 2);
-        $infoPath = substr(Base::getDomainPath(), 0, -1) . $infoPath .'/';
+        $infoPath = substr(Config::$Domain, 0, -1) . $infoPath .'/';
 
         $num = 1;
 ?><html>

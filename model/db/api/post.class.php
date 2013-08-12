@@ -8,13 +8,9 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAssignAccess;
-use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
 class API_Post extends API_Base {
@@ -51,6 +47,8 @@ class API_Post extends API_Base {
         $Policy = $this->getSecurityPolicy();
 
         $Policy->assignAccessID($Request, IAssignAccess::INTENT_POST);
+        if($Model instanceof IAssignAccess)
+            $Model->assignAccessID($Request, IAssignAccess::INTENT_POST);
 
         $Model = $Model::createFromArray($Request);
 

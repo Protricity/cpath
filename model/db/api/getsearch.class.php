@@ -40,7 +40,7 @@ class API_GetSearch extends API_Base {
      * @return String description for this API
      */
     function getDescription() {
-        return "SEARCH for a " . $this->getModel()->modelName();
+        return "Search for a " . $this->getModel()->modelName();
     }
 
     /**
@@ -80,11 +80,16 @@ class API_GetSearch extends API_Base {
         $Policy = $this->getSecurityPolicy();
 
         $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
+        if($Model instanceof IReadAccess)
+            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
 
         $results = $Search->fetchAll();
+
+        foreach($results as $ResultModel)
+            $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
         if($Model instanceof IReadAccess)
             foreach($results as $ResultModel)
-                $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
+                $Model->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
 
         return new Response("Found (".sizeof($results).") ".$Model::modelName()."(s)", true, $results);
     }

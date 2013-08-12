@@ -12,17 +12,17 @@ interface IRouteBuilder extends IBuilder {
 
     /**
      * Get all default routes for this Handler
+     * @param String|IHandler $Handler The class instance or class name
      * @param String|Array|null $methods the allowed methods
      * @param String|null $path the route path or null for default
-     * @param IHandler|null $Handler the handler class instance
      * @return array
      */
-    function getHandlerDefaultRoutes($methods='GET,POST,CLI', $path=NULL, IHandler $Handler=NULL);
+    function getHandlerDefaultRoutes($Handler, $methods='GET,POST,CLI', $path=NULL);
 
     /**
      * Gets the default public route path for this handler
-     * @param String|IHandler|NULL $Handler The class instance, class name, or NULL for the current class
+     * @param String|IHandler $Handler The class instance or class name
      * @return string The public route path
      */
-    function getHandlerDefaultPath($Handler=NULL);
+    function getHandlerDefaultPath($Handler);
 }

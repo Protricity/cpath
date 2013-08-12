@@ -32,7 +32,7 @@ abstract class Log {
     public static function getDefaultLevel() {
         if(self::$mLevel !== NULL)
             return self::$mLevel;
-        return self::$mLevel = Base::getConfig('log.level', self::DEFAULT_LEVEL);
+        return self::$mLevel = Config::$LogLevel ? Config::$LogLevel : self::DEFAULT_LEVEL;
     }
 
     public static function setDefaultLevel($level) {

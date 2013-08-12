@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
+use CPath\Config;
 use \PDO;
 class PDOUpdate extends PDOWhere {
     /** @var \PDO */
@@ -47,7 +48,7 @@ class PDOUpdate extends PDOWhere {
         if(!$this->stmt) {
             $sql = $this->getSQL();
             $this->stmt = $this->DB->prepare($sql);
-            if(Base::isDebug())
+            if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
         }
         if($this->values) $_values = array_merge($_values, $this->values);
@@ -65,7 +66,7 @@ class PDOUpdate extends PDOWhere {
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
 
-        if(Base::isDebug())
+        if(Config::$Debug)
             Log::v2(__CLASS__, $SQL);
         return $SQL;
     }

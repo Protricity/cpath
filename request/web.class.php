@@ -8,6 +8,7 @@
 namespace CPath\Request;
 
 use CPath\Base;
+use CPath\Config;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
@@ -118,7 +119,7 @@ class Web extends ArrayObject implements IRequest {
         if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico'))) {
             $Route = new FileRequestRoute($routePath);
-        } elseif(Base::isApcEnabled()) {
+        } elseif(Config::$APCEnabled) {
             $Route = RouterAPC::findRoute($routePath, $args);
         } else {
             $Route = Router::findRoute($routePath, $args);
@@ -162,6 +163,8 @@ class Web extends ArrayObject implements IRequest {
 
         $parse = parse_url($_SERVER['REQUEST_URI']);
         $Web->mMethod = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
+        if($Web->mMethod == 'CLI' && !Config::$AllowCLIRequest)
+            throw new \Exception("Web requests for CLI are disabled");
 
         $root = dirname($_SERVER['SCRIPT_NAME']);
         $path = $parse["path"];

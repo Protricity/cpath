@@ -8,6 +8,7 @@
 namespace CPath\Model;
 
 use CPath\Base;
+use CPath\Config;
 use CPath\Interfaces\IHTML;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IResponse;
@@ -30,7 +31,7 @@ class ExceptionResponse extends Response {
         parent::toJSON($JSON);
         if($this->mEx instanceof IJSON)
             Util::toJSON($this->mEx, $JSON);
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             $ex = $this->mEx->getPrevious() ?: $this->mEx;
             $trace = $ex->getTraceAsString();
             $JSON['_debug_trace'] = current(explode("\n", $trace));
@@ -42,7 +43,7 @@ class ExceptionResponse extends Response {
         parent::toXML($xml);
         if($this->mEx instanceof IXML)
             Util::toXML($this->mEx, $xml);
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             $ex = $this->mEx->getPrevious() ?: $this->mEx;
             $trace = $ex->getTraceAsString();
             $xml->addChild('_debug_trace', current(explode("\n", $trace)));
@@ -53,7 +54,7 @@ class ExceptionResponse extends Response {
         parent::renderText();
         if($this->mEx instanceof IText)
             $this->mEx->renderText();
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             $ex = $this->mEx->getPrevious() ?: $this->mEx;
             $trace = $ex->getTraceAsString();
             echo "Trace: ", current(explode("\n", $trace));
@@ -64,7 +65,7 @@ class ExceptionResponse extends Response {
         parent::renderHtml();
         if($this->mEx instanceof IHTML)
             $this->mEx->renderHtml();
-        if(Base::isDebug()) {
+        if(Config::$Debug) {
             throw $this->mEx->getPrevious() ?: $this->mEx;
         }
     }

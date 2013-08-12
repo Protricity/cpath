@@ -9,7 +9,9 @@
 namespace CPath\Builders;
 use CPath\Base;
 use CPath\Build;
-use CPath\BuildException;
+use CPath\Compile;
+use CPath\Config;
+use CPath\Exceptions\BuildException;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
@@ -54,7 +56,7 @@ PHP;
      * this method should return false immediately
      * @param IBuildable $Buildable
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\BuildException when a build exception occurred
+     * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
     public function build(IBuildable $Buildable) {
         if($Buildable instanceof IHandlerAggregate)
@@ -76,7 +78,7 @@ PHP;
 
     private function getCustomRoutes() {
         $routes = array();
-        $path = Base::getGenPath().'routes.custom.php';
+        $path = Config::getGenPath().'routes.custom.php';
         if(file_exists($path)) {
             include $path;
         } else {
@@ -90,7 +92,7 @@ PHP;
      * Add a route to the builder
      * @param IRoute $Route the route instance to add
      * @param bool $replace if true, replace any existing routes
-     * @throws \CPath\BuildException if a route already exists and $replace==false
+     * @throws \CPath\Exceptions\BuildException if a route already exists and $replace==false
      */
     private function addRoute(IRoute $Route, $replace=false) {
         if(!$replace && isset($this->mRoutes[$Route->getPrefix()])) {
@@ -115,7 +117,7 @@ PHP;
         usort($this->mRoutes, function (IRoute $a, IRoute $b){
             $b = $b->getPrefix();
             $a = $a->getPrefix();
-            return (substr_count($b, '/')-substr_count($a, '/')) * 100 + strcmp($a, $b);
+            return (substr_count($b, '/')-substr_count($a, '/'));
         });
 
         $max = 0;
@@ -141,16 +143,17 @@ PHP;
             $phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';
         }
         $output = sprintf(self::TMPL_ROUTES, $phpUse, $phpRoute);
-        $path = Base::getGenPath().'routes.php';
+        $path = Config::getGenPath().'routes.gen.php';
         if(!is_dir(dirname($path)))
             mkdir(dirname($path), NULL, true);
         file_put_contents($path, $output);
         Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
 
-        if(Base::isApcEnabled())
+        if(Config::$APCEnabled)
             self::rebuildAPCCache();
 
-        Base::commitConfig('route.max', $max);
+        Compile::$RouteMax = $max;
+        Compile::commit();
 
         $this->mRoutes = array();
     }
@@ -159,7 +162,7 @@ PHP;
      * Returns a list of allowed route methods associated with this class
      * @param String|Array $methods an array of methods or a string list delimited by '|'
      * @return array a validated list of methods
-     * @throws \CPath\BuildException if no class was specified and no default class exists
+     * @throws \CPath\Exceptions\BuildException if no class was specified and no default class exists
      */
     public function parseMethods($methods) {
         //$methods = $Handler::ROUTE_METHODS ?: 'GET,POST,CLI';
@@ -179,17 +182,14 @@ PHP;
         return $methods;
     }
 
-
     /**
      * Get all default routes for this Handler
+     * @param String|IHandler $Handler The class instance or class name
      * @param String|Array|null $methods the allowed methods
      * @param String|null $path the route path or null for default
-     * @param IHandler|null $Handler the handler class instance
-     * @return IRoute[]
+     * @return array
      */
-    function getHandlerDefaultRoutes($methods='GET,POST,CLI', $path=NULL, IHandler $Handler=NULL) {
-        if(!$Handler)
-            $Handler = $this->getCurrentClass();
+    function getHandlerDefaultRoutes($Handler, $methods='GET,POST,CLI', $path=NULL) {
         $methods = $this->parseMethods($methods ?: 'GET,POST,CLI');
         if(!$path)
             $path = $this->getHandlerDefaultPath($Handler);
@@ -201,12 +201,10 @@ PHP;
 
     /**
      * Gets the default public route path for this handler
-     * @param String|IHandler|NULL $Handler The class instance, class name, or NULL for the current class
+     * @param String|IHandler $Handler The class instance or class name
      * @return string The public route path
      */
-    function getHandlerDefaultPath($Handler=NULL) {
-        if(!$Handler)
-            $Handler = $this->getCurrentClass();
+    function getHandlerDefaultPath($Handler) {
         $path = str_replace('\\', '/', strtolower(get_class($Handler)));
         if($path[0] !== '/')
             $path = '/' . $path;
@@ -217,7 +215,7 @@ PHP;
      * Determines the Handler route(s) from constants or the class name
      * @param IHandler $Handler|NULL The class instance or NULL for the current class
      * @return IRoute[] a list of IRoute instances
-     * @throws \CPath\BuildException when a build exception occurred
+     * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
     private function getHandlerRoutes(IHandler $Handler=NULL) {
         if(!$Handler)
@@ -230,7 +228,7 @@ PHP;
             $R = new \ReflectionClass($Handler);
             $path = $R->getConstant('ROUTE_PATH');
             $method = $R->getConstant('ROUTE_METHODS');
-            $routes = $this->getHandlerDefaultRoutes($method, $path, $Handler);
+            $routes = $this->getHandlerDefaultRoutes($Handler, $method, $path);
         }
         return $routes;
     }

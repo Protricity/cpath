@@ -8,11 +8,11 @@
  */
 namespace CPath\Interfaces;
 
+class ClassNotFoundException extends \Exception {}
 interface IAutoLoader {
     /**
      * Attempts to register a class file from the class name.
      * @param $class String the full class name
-     * @return boolean false if the class was not found
      */
     function loadClass($class);
 }

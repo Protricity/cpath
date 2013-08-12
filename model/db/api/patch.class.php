@@ -32,7 +32,7 @@ class API_Patch extends API_Get {
         $defFilter = $Model::DEFAULT_FILTER;
         foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FlagUpdate) as $Column)
             /** @var PDOColumn $Column */
-            $Column->addToAPI($this, NULL, NULL, NULL, $defFilter);
+            $Column->addToAPI($this, false, NULL, NULL, $defFilter);
     }
 
     /**
@@ -40,7 +40,7 @@ class API_Patch extends API_Get {
      * @return String description for this API
      */
     function getDescription() {
-        return "UPDATE a ".$this->getModel()->modelName();
+        return "Update a ".$this->getModel()->modelName();
     }
 
     /**
@@ -57,6 +57,8 @@ class API_Patch extends API_Get {
         $Policy = $this->getSecurityPolicy();
 
         $Policy->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
+        if($UpdateModel instanceof IWriteAccess)
+            $UpdateModel->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
 
         foreach($Request as $column => $value)
             $UpdateModel->updateColumn($column, $value, false);
