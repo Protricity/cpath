@@ -61,7 +61,8 @@ class API_Patch extends API_Get {
             $UpdateModel->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
 
         foreach($Request as $column => $value)
-            $UpdateModel->updateColumn($column, $value, false);
+            if($value !== NULL)
+                $UpdateModel->updateColumn($column, $value, false);
 
         $c = $UpdateModel->commitColumns();
         if(!$c)

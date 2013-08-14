@@ -15,8 +15,8 @@ class PDOUpdate extends PDOWhere {
     /** @var \PDO */
     private $DB;
     /** @var \PDOStatement */
-    private $stmt=NULL;
-    private $fields=array(), $limit;
+    private $mStmt=NULL;
+    private $fields=array(), $mLimit=NULL;
     public function __construct($table, \PDO $DB, Array $fields, $limit=NULL) {
         parent::__construct($table);
         $this->DB = $DB;
@@ -26,15 +26,7 @@ class PDOUpdate extends PDOWhere {
 
     public function addField($field) {
         $this->fields[] = $field;
-        $this->stmt = NULL;
-        return $this;
-    }
-
-    public function addWhere($field) {
-        if(strpos($field, '?') === false)
-            $field .= '=?';
-        $this->where[] = $field;
-        $this->stmt = NULL;
+        $this->mStmt = NULL;
         return $this;
     }
 
@@ -45,26 +37,26 @@ class PDOUpdate extends PDOWhere {
 
     public function values($_values) {
         if(!is_array($_values)) $_values = func_get_args();
-        if(!$this->stmt) {
+        if(!$this->mStmt) {
             $sql = $this->getSQL();
-            $this->stmt = $this->DB->prepare($sql);
+            $this->mStmt = $this->DB->prepare($sql);
             if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
         }
-        if($this->values) $_values = array_merge($_values, $this->values);
-        $this->stmt->execute($_values);
+        if($this->mValues) $_values = array_merge($_values, $this->mValues);
+        $this->mStmt->execute($_values);
         return $this;
     }
 
-    public function getLastAffectedRows() { return $this->stmt->rowCount(); }
+    public function getLastAffectedRows() { return $this->mStmt->rowCount(); }
 
     public function getSQL() {
-        if(!$this->where)
+        if(!$this->mWhere)
             throw new \Exception("method addWhere() was not called");
-        $SQL = "UPDATE ".$this->table
+        $SQL = "UPDATE ".$this->mTable
             ."\nSET ".implode('=?, ',$this->fields).'=?'
             .parent::getSQL()
-            .($this->limit ? "\nLIMIT ".$this->limit : "");
+            .($this->mLimit ? "\nLIMIT ".$this->mLimit : "");
 
         if(Config::$Debug)
             Log::v2(__CLASS__, $SQL);

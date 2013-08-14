@@ -11,29 +11,42 @@ use CPath\Interfaces\IDatabase;
 use CPath\Log;
 use CPath\Config;
 use \PDO;
-class PDOSelect extends PDOWhere implements \Iterator {
-    private $DB, $select=array(), $limit='1';
+class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     /** @var \PDOStatement */
-    protected $stmt = null;
-    private $row = null;
-    private $count = 0;
-    private $customMethod = null;
+    protected $mStmt=NULL;
+    private $mDB, $mSelect=array(), $mLimit='1', $mOffset=NULL;
+    private $mRow = null;
+    private $mCount = 0;
+    private $mCustomMethod = null;
 
     public function __construct($table, \PDO $DB, Array $select=array()) {
         parent::__construct($table);
-        $this->DB = $DB;
-        $this->table = $table;
-        foreach($select as $name=>$field)
-            $this->select($field, is_int($name) ? NULL : $name);
+        $this->mDB = $DB;
+        foreach($select as $field)
+            $this->select($field);
     }
 
-    public function select($field, $name=NULL) {
-        $this->select[$name ?: $field] = $field;
+    public function select($field, $alias=NULL) {
+        if(strpos($field, '.') === false)
+            $field = ($alias ?: $this->mAlias) . '.' . $field;
+        $this->mSelect[] = $field;
         return $this;
     }
 
     public function limit($limit) {
-        $this->limit = $limit;
+        $this->mLimit = $limit;
+        return $this;
+    }
+
+    public function offset($offset) {
+        $this->mOffset = $offset;
+        return $this;
+    }
+
+    public function page($page) {
+        if(!$this->mLimit)
+            throw new \Exception("For pagination, limit must be set first");
+        $this->mOffset = $page > 1 ? ($page - 1) * $this->mLimit : 0;
         return $this;
     }
 
@@ -42,7 +55,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
      * @return $this
      */
     public function setCallback($callable) {
-        $this->customMethod = $callable;
+        $this->mCustomMethod = $callable;
         return $this;
     }
 
@@ -50,50 +63,51 @@ class PDOSelect extends PDOWhere implements \Iterator {
         $sql = $this->getSQL();
         if(Config::$Debug)
             Log::v2(__CLASS__, $sql);
-        $this->stmt = $this->DB
+        $this->mStmt = $this->mDB
             ->prepare($sql);
-        $this->stmt->execute($this->values);
-        $this->count=-1;
-        return $this->stmt;
+        $this->mStmt->execute($this->mValues);
+        $this->mCount=-1;
+        return $this->mStmt;
     }
 
     public function fetchColumn($i=0) {
-        if(!$this->stmt) $this->exec();
-        $this->count++;
-        return $this->stmt->fetchColumn($i);
+        if(!$this->mStmt) $this->exec();
+        $this->mCount++;
+        return $this->mStmt->fetchColumn($i);
     }
 
     public function fetch() {
-        if(!$this->stmt) $this->exec();
-        $this->count++;
-        $this->row = $this->stmt->fetch();
-        if($this->row && $call = $this->customMethod)
-            $this->row = $call instanceof \Closure ? $call($this->row) : call_user_func($call, $this->row);
-        return $this->row;
+        if(!$this->mStmt) $this->exec();
+        $this->mCount++;
+        $this->mRow = $this->mStmt->fetch();
+        if($this->mRow && $call = $this->mCustomMethod)
+            $this->mRow = $call instanceof \Closure ? $call($this->mRow) : call_user_func($call, $this->mRow);
+        return $this->mRow;
     }
 
     public function fetchObject($Class) {
-        if(!$this->stmt) $this->exec();
-        $this->count++;
-        $this->row = $this->stmt->fetchObject($Class);
-        return $this->row;
+        if(!$this->mStmt) $this->exec();
+        $this->mCount++;
+        $this->mRow = $this->mStmt->fetchObject($Class);
+        return $this->mRow;
     }
 
     public function fetchAll() {
-        if(!$this->stmt) $this->exec();
+        if(!$this->mStmt) $this->exec();
         $fetch = array();
-        while($row = $this->fetch())
-            $fetch[] = $row;
+        while($mRow = $this->fetch())
+            $fetch[] = $mRow;
 
-        $this->count = sizeof($fetch);
+        $this->mCount = sizeof($fetch);
         return $fetch;
     }
 
     public function getSQL() {
-        return "SELECT ".implode(', ', $this->select)
-            ."\nFROM ".$this->table
+        return "SELECT ".implode(', ', $this->mSelect)
+            ."\nFROM ".$this->mTable
             .parent::getSQL()
-            ."\nLIMIT ".$this->limit;
+            .($this->mLimit ? "\nLIMIT ".$this->mLimit : '')
+            .($this->mOffset ? "\nOFFSET ".$this->mOffset : '');
     }
 
     /**
@@ -103,7 +117,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
      */
     public function current()
     {
-        return $this->row;
+        return $this->mRow;
     }
 
     /**
@@ -123,7 +137,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
      */
     public function key()
     {
-        return $this->count;
+        return $this->mCount;
     }
 
     /**
@@ -134,7 +148,7 @@ class PDOSelect extends PDOWhere implements \Iterator {
      */
     public function valid()
     {
-        return $this->row ? true : false;
+        return $this->mRow ? true : false;
     }
 
     /**
@@ -144,7 +158,21 @@ class PDOSelect extends PDOWhere implements \Iterator {
      */
     public function rewind()
     {
-        $this->stmt = null;
+        $this->mStmt = null;
         $this->fetch();
+    }
+
+    /**
+     * (PHP 5 &gt;= 5.1.0)<br/>
+     * Count elements of an object
+     * @link http://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     * </p>
+     * <p>
+     * The return value is cast to an integer.
+     */
+    public function count() {
+        if(!$this->mStmt) $this->exec();
+        return $this->mStmt->rowCount();
     }
 }

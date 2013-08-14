@@ -57,6 +57,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     const INSERT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const UPDATE = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const EXPORT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const EXPORT_SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
     const DEFAULT_FILTER =   FILTER_SANITIZE_SPECIAL_CHARS;
 
@@ -145,13 +146,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     /**
      * Returns an associative array of columns and values for this object filtered by the tokens in constant EXPORT.
      * Defaults to just primary key, if exists.
-     * Modify const EXPORT to change what data gets exported
+     * Modify const EXPORT to change what data gets exported by default
+     * @param mixed|NULL $columns array or list (comma delimited) of columns to export
      * @return Array
      */
-    public function exportData()
+    public function exportData($columns=NULL)
     {
         $export = array();
-        foreach(static::findColumns(static::EXPORT ?: PDOColumn::FlagExport) as $column => $data)
+        foreach(static::findColumns($columns ?: static::EXPORT ?: PDOColumn::FlagExport) as $column => $data)
             $export[$column] = $this->$column;
         return $export;
     }
@@ -414,9 +416,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     /**
      * Creates a PDOModelSelect for searching models.
+     * @param mixed|NULL $columns array or list (comma delimited) of columns to export
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    public static function search() {
+    public static function search($columns=NULL) {
+        if(!$columns)
+            $columns = static::EXPORT_SEARCH;
+        if($columns) {
+            $columns = self::findColumns($columns);
+            return new PDOSelect(static::TABLE, static::getDB(), array_keys($columns));
+        }
         return new PDOModelSelect(static::getDB(), get_called_class());
     }
 
@@ -587,7 +596,7 @@ class PDOModelSelect extends PDOSelect {
      */
     public function exec() {
         parent::exec();
-        $this->stmt->setFetchMode(\PDO::FETCH_CLASS, $this->mClass);
+        $this->mStmt->setFetchMode(\PDO::FETCH_CLASS, $this->mClass);
         return $this;
     }
 

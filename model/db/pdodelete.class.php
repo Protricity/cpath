@@ -30,16 +30,16 @@ class PDODelete extends PDOWhere {
             if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
         }
-        $this->stmt->execute($this->values);
+        $this->stmt->execute($this->mValues);
         return $this;
     }
 
     public function getDeletedRows() { return $this->stmt->rowCount(); }
 
     public function getSQL() {
-        if(!$this->where)
+        if(!$this->mWhere)
             throw new \Exception("method where() was not called");
-        $SQL = "DELETE FROM ".$this->table
+        $SQL = "DELETE FROM ".$this->mTable
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
         if(Config::$Debug)

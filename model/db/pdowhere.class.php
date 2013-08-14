@@ -11,40 +11,42 @@ use \PDO;
 abstract class PDOWhere {
     const DefaultLogicOR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
 
-    protected $table, $where=array(), $values=array();
-    private $lastCond = true;
-    private $alias = NULL;
-    private $joins = array();
+    protected $mTable, $mAlias, $mLastAlias;
+    protected $mWhere=array(), $mValues=array(), $mChr=97;
+    private $mLastCond = true;
+    private $mJoins = array();
     protected $mFlags = 0;
 
     public function __construct($table) {
-        $this->table = $table;
+        $this->mTable = $table;
+        $this->mLastAlias = $this->mAlias = $this->getAlias($table);
+    }
+
+    public function getAlias($table) {
+        if(($p = strpos($table, ' ')) !== false)
+            return substr($table, $p + 1);
+        return $table;
     }
 
     /**
      * @param String $table the table to join
      * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
      * @param String|null $destField The destination field to join on.
-     * @param String|null $alias The alias for the table
      * @return $this
      */
-    public function leftJoin($table, $sourceField, $destField=NULL, $alias=NULL) {
+    public function leftJoin($table, $sourceField, $destField=NULL) {
+        $alias = $this->getAlias($table);
         if($destField != NULL) {
-            if($alias) $table .= ' '.$alias;
-            else $alias = $table;
-            if(strpos($sourceField, '.') === false) {
-                $sAlias = $this->alias ?: $this->table;
-                $sourceField = "{$sAlias}.{$sourceField}";
-            }
-            if(strpos($destField, '.') === false) {
-                $destField = "{$alias}.{$destField}";
-            }
-            $sourceField = "ON {$sourceField} = {$destField}";
-        } else {
-            if($alias) $table .= ' '.$alias;
-        }
+            if(strpos($sourceField, '.') === false)
+                $sourceField = $this->mLastAlias . ".{$sourceField}";
 
-        $this->joins[] = "\nLEFT JOIN {$table} {$sourceField}";
+            if(strpos($destField, '.') === false)
+                $destField = $alias . ".{$destField}";
+
+            $sourceField = "ON {$sourceField} = {$destField}";
+        }
+        $this->mLastAlias = $alias;
+        $this->mJoins[] = "\nLEFT JOIN {$table} {$sourceField}";
         return $this;
     }
 
@@ -52,7 +54,7 @@ abstract class PDOWhere {
      * Adds a WHERE condition to the search
      * @param $field String the field to search. May include comparison characters.
      * Examples:
-     *  ->where('myfield="myvalue"')                       // WHERE table.myfield="myvalue"
+     *  ->where('myfield="myvalue"')                        // WHERE table.myfield="myvalue"
      *  ->where('myfield', 'myvalue')                       // WHERE table.myfield = 'myvalue'
      *  ->where('myfield >', 'myvalue')                     // WHERE table.myfield > 'myvalue'
      *  ->where('? LIKE {}.myfield', 'myvalue', 'myalias')  // WHERE 'myvalue' LIKE myalias.myfield
@@ -63,16 +65,17 @@ abstract class PDOWhere {
      * @throws \InvalidArgumentException
      */
     public function where($field, $value=NULL, $alias=NULL) {
-        if(!$alias) $alias = $this->table;
+        if(!$alias)
+            $alias = $this->mAlias;
 
         if($value !== NULL) {
             if(is_array($value)) {
                 if(!$value)
                     throw new \InvalidArgumentException("An empty array was passed to Column '{$field}'");
-                $this->values = array_merge($this->values, $value);
-                $field .= ' in (?' . str_repeat(', ?', sizeof($this->values) - 1) . ')';
+                $this->mValues = array_merge($this->mValues, $value);
+                $field .= ' in (?' . str_repeat(', ?', sizeof($this->mValues) - 1) . ')';
             } else {
-                $this->values[] = $value;
+                $this->mValues[] = $value;
                 if(strpos($field, '?') === false) {
                     $e = '=';
                     if(preg_match('/([=<>!]+|like)\s*$/i', $field))
@@ -84,22 +87,22 @@ abstract class PDOWhere {
 
 
         if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
-            if($field == '(' && !$this->lastCond)
-                $this->where[] = 'AND';
+            if($field == '(' && !$this->mLastCond)
+                $this->mWhere[] = 'AND';
             if($field != ')')
-                $this->lastCond = true;
-            $this->where[] = $field;
+                $this->mLastCond = true;
+            $this->mWhere[] = $field;
             return $this;
         } else {
             $field = str_replace('{}', $alias, $field, $c);
             if($c==0 && strpos($field, '.') === false)
                 $field = $alias . '.' . $field;
         }
-        if (!$this->lastCond) {
-            $this->where[] = $this->mFlags & self::DefaultLogicOR ? 'OR' : 'AND';
+        if (!$this->mLastCond) {
+            $this->mWhere[] = $this->mFlags & self::DefaultLogicOR ? 'OR' : 'AND';
         }
-        $this->where[] = $field;
-        $this->lastCond = false;
+        $this->mWhere[] = $field;
+        $this->mLastCond = false;
         return $this;
     }
 
@@ -131,7 +134,7 @@ abstract class PDOWhere {
     }
 
     public function getSQL() {
-        return implode('', $this->joins)
-            ."\nWHERE ".($this->where ? implode(' ', $this->where) : '1');
+        return implode('', $this->mJoins)
+            ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : '1');
     }
 }

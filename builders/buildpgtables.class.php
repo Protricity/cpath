@@ -78,7 +78,7 @@ group by column_name;") as $row ) {
      */
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
         $primaryCol = NULL;
-        foreach($DB->query("SELECT c.column_name, c.data_type, c.column_default, d.description as column_comment
+        foreach($DB->query("SELECT c.column_name, c.data_type, c.column_default, c.is_nullable, d.description as column_comment
         FROM information_schema.columns AS c
         LEFT JOIN (
         SELECT c.table_schema,c.table_name,c.column_name,pgd.description
@@ -88,8 +88,10 @@ group by column_name;") as $row ) {
             and  c.table_schema=st.schemaname and c.table_name=st.relname)
         ) d on d.column_name = c.column_name
         WHERE c.table_name = '{$Table->Name}';") as $row) {
-            $name = $row['column_name']; // TODO: get NULL $Column->Flags |= PDOColumn::FlagNull;
+            $name = $row['column_name'];
             $Column = new BuildPDOColumn($name, $row['column_comment']);
+            if(strcasecmp($row['is_nullable'], 'yes') === 0)
+                $Column->Flags |= PDOColumn::FlagNull;
             if(stripos($row['data_type'], 'int') !== false)
                 $Column->Flags |= PDOColumn::FlagNumeric;
             if(stripos($row['column_default'], 'nextval(') ===0)
