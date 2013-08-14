@@ -50,8 +50,12 @@ class APIInfo implements IHandler, ILogListener {
     function renderAPI(IAPI $API, IRoute $Route) {
 
         $basePath = Base::getClassPublicPath($this);
+
+        $domainPath = Config::$Domain;
         $route = $Route->getPrefix();
-        list($method, $path) = explode(' ', $route, 2);
+        list($method, $path) = explode(' /', $route, 2); //TODO: explode hack
+        $path = $domainPath . $path;
+
         foreach($API->getFields() as $name=>$Field)
             if($Field instanceof IAPIParam)
                 $route .= '/:'.$name;
