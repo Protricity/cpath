@@ -53,8 +53,8 @@ class APIInfo implements IHandler, ILogListener {
 
         $domainPath = Config::$Domain;
         $route = $Route->getPrefix();
-        list($method, $path) = explode(' /', $route, 2); //TODO: explode hack
-        $path = $domainPath . $path;
+        list($method, $path) = explode(' ', $route, 2);
+        $path = rtrim($domainPath, '/') . $path;
 
         foreach($API->getFields() as $name=>$Field)
             if($Field instanceof IAPIParam)

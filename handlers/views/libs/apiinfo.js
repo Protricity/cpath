@@ -9,11 +9,13 @@
     var THIS = {};
     var lastHeaders = '';
     var requestHeaders, responseHeaders, responseContent, responseContainer;
+    var basePath;
     jQuery(document).ready(function() {
         requestHeaders = jQuery('div.request-headers');
         responseHeaders = jQuery('div.response-headers');
         responseContent = jQuery('div.response-content');
         responseContainer = jQuery('div.response-container');
+        basePath = jQuery('base').attr('href');
     });
     window.APIInfo = THIS = {
         submit: function(path, form, dataType, method) {

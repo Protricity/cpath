@@ -27,7 +27,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     }
 
     public function select($field, $alias=NULL) {
-        if(strpos($field, '.') === false)
+        if(!preg_match('/[.()]/', $field))
             $field = ($alias ?: $this->mAlias) . '.' . $field;
         $this->mSelect[] = $field;
         return $this;
