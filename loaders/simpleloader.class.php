@@ -28,4 +28,8 @@ class SimpleLoader implements IAutoLoader {
         if(!(include $classPath))
             throw new ClassNotFoundException("Class '{$class}' could not be found: ".$classPath);
     }
+
+    static function add($namespace, $prefix) {
+        Base::addLoader($namespace, new self($prefix));
+    }
 }
