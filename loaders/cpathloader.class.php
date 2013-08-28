@@ -12,7 +12,7 @@ use CPath\Config;
 use CPath\Interfaces\ClassNotFoundException;
 use CPath\Interfaces\IAutoLoader;
 
-class SimpleLoader implements IAutoLoader {
+class CPathLoader implements IAutoLoader {
     private $mPrefix;
     function __construct($prefix=NULL) {
         $this->mPrefix = $prefix ?: Config::$BasePath;
@@ -23,8 +23,8 @@ class SimpleLoader implements IAutoLoader {
      * @param $class String the full class name
      */
     function loadClass($class) {
-        $class = strtr($class, '_\\', '//');
-        $classPath = $this->mPrefix . $class . '.php';
+        $class = strtr(strtolower($class), '_\\', '//');
+        $classPath = $this->mPrefix . $class . '.class.php';
         if(!(include $classPath))
             throw new ClassNotFoundException("Class '{$class}' could not be found: ".$classPath);
     }

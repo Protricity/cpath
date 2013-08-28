@@ -10,6 +10,7 @@ namespace CPath;
 use CPath\Builders\Installer;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Interfaces\IRequest;
+use CPath\Loaders\CPathLoader;
 use CPath\Loaders\SimpleLoader;
 use CPath\Misc\ConfigBuilder;
 use CPath\Request\CLI;
@@ -35,7 +36,7 @@ class Base {
     }
 
     public static function addLoader($namespace, IAutoLoader $Loader=NULL) {
-        self::$mLoaders[$namespace] = $Loader ?: new SimpleLoader();
+        self::$mLoaders[$namespace] = $Loader ?: new CPathLoader();
     }
 
     /** Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class */
