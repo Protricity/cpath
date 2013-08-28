@@ -32,7 +32,9 @@ class Config implements IConfig {
 
     static function init() {
         $path = dirname(__DIR__) . '/config.php';
-        if(!(include $path))
+        if(file_exists($path))
+            include $path;
+        else
             Config::setDefaults();
     }
 
@@ -43,7 +45,8 @@ class Config implements IConfig {
     }
 
     function install() {
-        $Builder = new Builder($this, Config::$ConfigPath, true);
+        $path = dirname(__DIR__) . '/config.php';
+        $Builder = new Builder($this, $path, true);
     }
 }
 Config::init();
