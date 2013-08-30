@@ -32,9 +32,7 @@ class Config implements IConfig {
 
     static function init() {
         $path = dirname(__DIR__) . '/config.php';
-        if(file_exists($path))
-            include $path;
-        else
+        if(!(include $path))
             Config::setDefaults();
     }
 
