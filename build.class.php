@@ -79,7 +79,7 @@ class Build extends API implements IBuildable {
      */
     private static function getConfigPath() {
         static $path = NULL;
-        return $path ?: $path = Config::getGenPath().'build.php';
+        return $path ?: $path = Config::getGenPath().'build.gen.php';
     }
 
     /**

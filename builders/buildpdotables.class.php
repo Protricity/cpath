@@ -646,7 +646,6 @@ class BuildPDOUserTable extends BuildPDOTable {
         $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_PASSWORD;
-        print_r($this);die();
     }
 
     public static function addUserSessionTable(BuildPDOUserSessionTable $Table) {

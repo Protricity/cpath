@@ -34,7 +34,7 @@ class ExceptionResponse extends Response {
         if(Config::$Debug) {
             $ex = $this->mEx->getPrevious() ?: $this->mEx;
             $trace = $ex->getTraceAsString();
-            $JSON['_debug_trace'] = current(explode("\n", $trace));
+            $JSON['_debug_trace'] = $trace; //current(explode("\n", $trace));
         }
     }
 

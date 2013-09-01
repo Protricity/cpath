@@ -52,11 +52,12 @@ class Policy_UserAccount implements ISecurityPolicy {
      * @return void
      */
     function assertReadAccess(PDOModel $User, IRequest $Request, $intent) {
-        $EmptyUser = $this->mUser;
-        $id = $EmptyUser::getUserSession()->getID(); // Assert logged in
-        if(!$this->mReadOther)
+        if(!$this->mReadOther) {
+            $EmptyUser = $this->mUser;
+            $id = $EmptyUser::getUserSession()->getID(); // Assert logged in
             if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
                 throw new InvalidPermissionException("No permission to modify " . $User);
+        }
     }
 
     /**
@@ -67,10 +68,11 @@ class Policy_UserAccount implements ISecurityPolicy {
      * @return void
      */
     function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {
-        $EmptyUser = $this->mUser;
-        $id = $EmptyUser::getUserSession()->getID();    // Assert logged in
-        if(!$this->mReadOther)
+        if(!$this->mReadOther) {
+            $EmptyUser = $this->mUser;
+            $id = $EmptyUser::getUserSession()->getID();    // Assert logged in
             $Select->where($EmptyUser::COLUMN_ID, $id);  // TODO: kinda silly no?
+        }
     }
 
     /**
