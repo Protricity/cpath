@@ -216,7 +216,7 @@ class Build extends API implements IBuildable {
             }
 
             $name = strtr(strtolower($className), '_\\', '//');
-            $classFile2 = realpath(Config::$BasePath . $name . '.class.php');
+            $classFile2 = realpath(Base::getBasePath() . $name . '.class.php');
             if($classFile !== $classFile2) {
                 Log::v2(__CLASS__, "Skipping secondary class '{$Class->getName()}' in $classFile");
                 continue;

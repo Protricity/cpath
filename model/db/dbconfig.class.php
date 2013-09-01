@@ -12,6 +12,9 @@ class DBConfig implements IConfig{
     static $UpgradeAuto = false;
     static $UpgradeEnable = false;
 
-    function install() {}
+    function install() {
+        if(__CLASS__ != get_called_class())
+            throw new \Exception(__CLASS__ . "::install() may only be called from an non-inherited instance of " . __CLASS__);
+    }
 }
 

@@ -15,7 +15,7 @@ use CPath\Interfaces\IAutoLoader;
 class CPathLoader implements IAutoLoader {
     private $mPrefix;
     function __construct($prefix=NULL) {
-        $this->mPrefix = $prefix ?: Config::$BasePath;
+        $this->mPrefix = $prefix ?: Base::getBasePath();
     }
 
     /**

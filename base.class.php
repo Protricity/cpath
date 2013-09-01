@@ -31,8 +31,10 @@ class Base {
 
     static function init() {
         self::$mBasePath = dirname(__DIR__) . "/";
-        spl_autoload_register('self::autoload', true);
+        spl_autoload_register(__NAMESPACE__.'\Base::autoload', true);
         include 'config.class.php';
+        if(Config::$ProfileEnable)
+            Profile::load();
     }
 
     public static function addLoader($namespace, IAutoLoader $Loader=NULL) {
@@ -40,7 +42,7 @@ class Base {
     }
 
     /** Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class */
-    private static function autoload($name) {
+    static function autoload($name) {
         if(stripos($name, 'CPath') === 0) {
             $name = strtr(strtolower($name), '_\\', '//');
             $classPath = self::$mBasePath . $name . '.class.php';
@@ -96,6 +98,10 @@ class Base {
         return $cli !== NULL
             ? $cli
             : $cli = self::getRequest() instanceof CLI;
+    }
+
+    static function getBasePath() {
+        return self::$mBasePath;
     }
 
 }

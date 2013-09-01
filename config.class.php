@@ -10,7 +10,6 @@ use CPath\Config\Builder;
 use CPath\Interfaces\IConfig;
 
 class Config implements IConfig {
-    static $BasePath = NULL;
     static $GenPath = 'gen';
 
     static $Domain = NULL;
@@ -27,7 +26,7 @@ class Config implements IConfig {
     static $ProfileEnable = false;
 
     static function getGenPath() {
-        return self::$BasePath . self::$GenPath . '/';
+        return Base::getBasePath() . self::$GenPath . '/';
     }
 
     static function init() {
@@ -38,11 +37,12 @@ class Config implements IConfig {
 
     private static function setDefaults() {
         self::$Domain = Build::buildDomainPath();
-        self::$BasePath = dirname(__DIR__) . '/';
         self::$APCEnabled = function_exists('apc_fetch');
     }
 
     function install() {
+        if(__CLASS__ != get_called_class())
+            throw new \Exception(__CLASS__ . "::install() may only be called from an non-inherited instance of " . __CLASS__);
         $path = dirname(__DIR__) . '/config.php';
         $Builder = new Builder($this, $path, true);
     }
