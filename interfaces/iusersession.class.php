@@ -30,6 +30,7 @@ interface IUserSession {
      * Create a new Session for an IUser Instance
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param IUser $User
+     * @return IUserSession the new session
      */
     static function createNewSession(IUser $User, $expireInSeconds=NULL);
 

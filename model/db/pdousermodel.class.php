@@ -266,14 +266,14 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
     /**
      * Log in to a user account
-     * @param $search String the user account to search for
-     * @param $password String the password to log in with
-     * @param $expireInSeconds int the amount of time in seconds before an account should expire or 0 for never
+     * @param String $search the user account to search for
+     * @param String $password the password to log in with
+     * @param int $expireInSeconds the amount of time in seconds before an account should expire or 0 for never
+     * @param PDOUserModel $User the user instance loaded during login
      * @throws IncorrectUsernameOrPasswordException
-     * @throws \Exception if the session fails to start
-     * @return PDOUserModel The logged in user instance
+     * @return IUserSession The new user session
      */
-    public static function login($search, $password, $expireInSeconds=NULL) {
+    public static function login($search, $password, $expireInSeconds=NULL, PDOUserModel &$User=NULL) {
         /** @var PDOUserModel $User */
         $User = static::searchByColumns($search, array(
             static::COLUMN_USERNAME,
@@ -286,8 +286,8 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $User->checkPassword($password);
         /** @var IUserSession $class  */
         $class = static::SESSION_CLASS;
-        $class::createNewSession($User, $expireInSeconds);
-        return $User;
+        $Session = $class::createNewSession($User, $expireInSeconds);
+        return $Session;
     }
 
     /**

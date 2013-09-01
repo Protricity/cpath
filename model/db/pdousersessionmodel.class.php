@@ -20,14 +20,16 @@ use CPath\Util;
 
 abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
 
-    const FieldKey = NULL;
-    const FieldUserID = NULL;
-    const FieldExpire = NULL;
+    const COLUMN_KEY = NULL;
+    const COLUMN_USER_ID = NULL;
+    const COLUMN_EXPIRE = NULL;
 
-    const SessionExpireDays = 365;        // The amount of time before a session should expire in days. Overwrite to change. NULL for never.
-    const SessionExpireSeconds = NULL;    // The amount of time before a session should expire in seconds. Overwrite to enable.
-    const SessionKey = '_session';
-    const SessionKeyLength = 48;
+    const SESSION_EXPIRE_DAYS = 365;        // The amount of time before a session should expire in days. Overwrite to change. NULL for never.
+    const SESSION_EXPIRE_SECONDS = NULL;    // The amount of time before a session should expire in seconds. Overwrite to enable.
+    const SESSION_KEY = '_session';
+    const SESSION_COOKIE = 'cpath_session';
+    const SESSION_REQUEST = 'cpath_session';
+    const SESSION_KEY_LENGTH = 48;
 
     /** @var PDOUserSessionModel[] */
     private static $mSession = array();
@@ -37,7 +39,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * @return String User ID
      */
     function getUserID() {
-        return $this->{static::FieldUserID};
+        return $this->{static::COLUMN_USER_ID};
     }
 
     // Statics
@@ -49,8 +51,8 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * @throws SessionExpiredException if the session was active but expired or not found
      */
     static function loadByKey($key) {
-        $Session = static::loadByColumns(static::FieldKey, $key);
-        $expire = $Session->{static::FieldExpire};
+        $Session = static::loadByColumns(static::COLUMN_KEY, $key);
+        $expire = $Session->{static::COLUMN_EXPIRE};
         if($expire && $expire <= time())
             throw new SessionExpiredException("User Session has expired");
         return $Session;
@@ -64,14 +66,22 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      */
     static function loadBySession() {
         $class = get_called_class();
-        if(self::$mSession[$class])
+        if(!empty(self::$mSession[$class]))
             return self::$mSession[$class];
 
         static::startSession();
-        if(isset($_SESSION, $_SESSION[self::SessionKey]))
+        if(isset($_REQUEST[self::SESSION_REQUEST]))
+            $key = $_REQUEST[self::SESSION_REQUEST];
+
+        elseif(isset($_COOKIE[self::SESSION_COOKIE]))
+            $key = $_COOKIE[self::SESSION_COOKIE];
+
+        elseif(isset($_SESSION, $_SESSION[self::SESSION_KEY]))
+            $key = $_SESSION[self::SESSION_KEY];
+
+        else
             throw new SessionNotActiveException("User Session could not be found");
 
-        $key = $_SESSION[self::SessionKey];
         $Session = static::loadByKey($key);
         if($Session)
             self::$mSession[$class] = $Session;
@@ -86,23 +96,24 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * Create a new Session for an IUser Instance
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param IUser $User
+     * @return IUserSession the new session
      */
     static function createNewSession(IUser $User, $expireInSeconds=NULL) {
 
         $key = static::generateSessionKey();
 
         $expireMax = 0;
-        if($e = static::SessionExpireDays)
+        if($e = static::SESSION_EXPIRE_DAYS)
             $expireMax = $e * 60*60*24;
-        if($e = static::SessionExpireSeconds)
+        if($e = static::SESSION_EXPIRE_SECONDS)
             $expireMax = $e;
         if($expireInSeconds === NULL || $expireInSeconds > $expireMax)
             $expireInSeconds = $expireMax;
 
         $Session = static::createFromArray(array(
-            static::FieldKey => $key,
-            static::FieldUserID => $User->getID(),
-            static::FieldExpire => $expireInSeconds ? time() + $expireInSeconds : 0,
+            static::COLUMN_KEY => $key,
+            static::COLUMN_USER_ID => $User->getID(),
+            static::COLUMN_EXPIRE => $expireInSeconds ? time() + $expireInSeconds : 0,
         ));
 
         if(Base::isCLI())
@@ -110,8 +121,9 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
         else{
             static::startSession(true);
         }
-        $_SESSION[static::SessionKey] = $key;
+        $_SESSION[static::SESSION_KEY] = $key;
         self::$mSession[get_called_class()] = $Session;
+        return $Session;
     }
 
     /**
@@ -133,7 +145,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
 
     protected static function generateSessionKey() {
         $s = '';
-        for($i=0; $i<static::SessionKeyLength; $i++) {
+        for($i=0; $i<static::SESSION_KEY_LENGTH; $i++) {
             $s .= rand(1,30)%2 ? chr(rand(97,122)) : chr(rand(48,57));
         }
         return $s;

@@ -17,7 +17,7 @@ use CPath\Log;
 use CPath\Util;
 
 class SimpleUserSession implements IUserSession {
-    const SessionKey = '_session';
+    const SESSION_KEY = '_session';
 
     private $mUserID;
     /** @var SimpleUserSession */
@@ -54,10 +54,10 @@ class SimpleUserSession implements IUserSession {
             return static::$mSession;
 
         static::startSession();
-        if(!isset($_SESSION, $_SESSION[self::SessionKey]))
+        if(!isset($_SESSION, $_SESSION[self::SESSION_KEY]))
             throw new SessionNotActiveException("User Session could not be found");
 
-        $id = $_SESSION[self::SessionKey];
+        $id = $_SESSION[self::SESSION_KEY];
         $Session = new SimpleUserSession();
         $Session->mUserID = $id;
         return $Session;
@@ -67,6 +67,7 @@ class SimpleUserSession implements IUserSession {
      * Create a new Session for an IUser Instance
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param IUser $User
+     * @return IUserSession the new session
      */
     static function createNewSession(IUser $User, $expireInSeconds=NULL) {
 
@@ -75,10 +76,11 @@ class SimpleUserSession implements IUserSession {
         else{
             static::startSession(true);
         }
-        $_SESSION[static::SessionKey] = $User->getID();
+        $_SESSION[static::SESSION_KEY] = $User->getID();
         $Session = new SimpleUserSession();
         $Session->mUserID = $User->getID();
         self::$mSession = $Session;
+        return $Session;
     }
 
     /**

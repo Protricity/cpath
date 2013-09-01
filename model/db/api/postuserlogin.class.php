@@ -48,7 +48,10 @@ class API_PostUserLogin extends API_Base {
     function execute(IRequest $Request) {
         $User = $this->mUser;
         $this->processRequest($Request);
-        $User = $User::login($Request['name'], $Request['password']);
-        return new Response("Logged in as user '".$User->getUsername()."' successfully", true, $User);
+        $Session = $User::login($Request['name'], $Request['password'], NULL, $User);
+        return new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
+            'user' => $User,
+            'session' => $Session,
+        ));
     }
 }

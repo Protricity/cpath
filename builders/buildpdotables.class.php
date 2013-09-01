@@ -155,14 +155,10 @@ PHP;
             $tables = $this->getTables($DB);
 
         foreach($tables as $Table) {
-            $PHP = new BuildPHPClass($Table->ClassName);
-            $PHP->Namespace = $modelNS;
             $Table->Namespace = $modelNS;
 
             $this->getColumns($DB, $Table);
             $this->getIndexes($DB, $Table);
-
-            $file = $modelPath.strtolower($Table->ClassName).'.class.php';
 
             foreach($Table->getColumns() as $Column) {
                 if($Column->Flags & PDOColumn::FlagIndex)
@@ -170,8 +166,15 @@ PHP;
                 if(!($Column->Flags & PDOColumn::FlagNull) && !($Column->Flags & PDOColumn::FlagAutoInc) && !($Column->Flags & PDOColumn::FlagDefault))
                     $Column->Flags |= PDOColumn::FlagRequired;
             }
+        }
 
-            // Model
+        // Model
+
+        foreach($tables as $Table) {
+            $file = $modelPath.strtolower($Table->ClassName).'.class.php';
+
+            $PHP = new BuildPHPClass($Table->ClassName);
+            $PHP->Namespace = $modelNS;
 
             $Table->processModelPHP($PHP);
 
@@ -602,16 +605,18 @@ class BuildPDOUserTable extends BuildPDOTable {
         if(!$this->Session_Class) {
             foreach(self::$mSessionTables as $STable)
                 if($STable->Namespace == $this->Namespace) {
-                    $this->Session_Class = get_class($STable);
+                    $this->Session_Class = $STable->Namespace . '\\' . $STable->ClassName;
                     break;
                 }
-            if(!$this->Session_Class)
-                $this->Session_Class = "CPath\\Model\\SimpleUserSession";
+        }
+        if(!$this->Session_Class) {
+            $this->Session_Class = "CPath\\Model\\SimpleUserSession";
+            Log::e(__CLASS__, "Warning: No User session class found for Table '{$this->Name}'. Defaulting to SimpleUserSession");
         }
         $class = $this->Session_Class;
-        $Session = new $class;
-        if(!($Session instanceof IUserSession))
-            throw new BuildException($class . " is not an instance of IUserSession");
+        //$Session = new $class;
+        //if(!($Session instanceof IUserSession))
+        //    throw new BuildException($class . " is not an instance of IUserSession");
         $PHP->addConst('SESSION_CLASS', $class);
 
         if(!$this->Column_ID && $this->Primary) $this->Column_ID = $this->Primary;
