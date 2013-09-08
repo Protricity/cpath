@@ -21,6 +21,7 @@ class CPathLoader implements IAutoLoader {
     /**
      * Attempts to register a class file from the class name.
      * @param $class String the full class name
+     * @throws ClassNotFoundException if the class file was not found
      */
     function loadClass($class) {
         $class = strtr(strtolower($class), '_\\', '//');
@@ -29,6 +30,12 @@ class CPathLoader implements IAutoLoader {
             throw new ClassNotFoundException("Class '{$class}' could not be found: ".$classPath);
     }
 
+
+    /**
+     * Convenience loader for CPathLoader
+     * @param $namespace
+     * @param $prefix
+     */
     static function add($namespace, $prefix) {
         Base::addLoader($namespace, new self($prefix));
     }

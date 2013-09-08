@@ -69,6 +69,7 @@ class SimpleUserSession implements IUserSession {
      * @param IUser $User
      * @return IUserSession the new session
      */
+    // TODO: allow required hardware id and kill session on mismatch
     static function createNewSession(IUser $User, $expireInSeconds=NULL) {
 
         if(Base::isCLI())

@@ -64,6 +64,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found
      */
+    // TODO: allow required hardware id and kill session on mismatch
     static function loadBySession() {
         $class = get_called_class();
         if(!empty(self::$mSession[$class]))
