@@ -15,12 +15,14 @@ use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Config;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\IWriteAccess;
+use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 use CPath\Validate;
 
@@ -32,9 +34,19 @@ interface IGetDB {
 }
 
 class ModelNotFoundException extends \Exception {}
-class ModelAlreadyExistsException extends \Exception {}
 class ColumnNotFoundException extends \Exception {}
 class InvalidPermissionException extends \Exception {}
+class ModelAlreadyExistsException extends \Exception implements IResponseAggregate {
+
+    /**
+     * @return IResponse
+     */
+    function createResponse() {
+        return ExceptionResponse::getNew($this)
+            ->setStatusCode(IResponse::STATUS_CONFLICT);
+    }
+}
+
 
 abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable {
     //const BUILD_IGNORE = true;
