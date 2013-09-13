@@ -21,6 +21,7 @@ use CPath\Model\Response;
 
 class API_Get extends API_Base {
     private $mColumns;
+    private $mIDField;
 
     /**
      * Construct an instance of the GET API
@@ -32,18 +33,23 @@ class API_Get extends API_Base {
     function __construct(PDOModel $Model, $searchColumns=NULL) {
         parent::__construct($Model);
 
-        $searchColumns = $searchColumns ?: $Model::HANDLER_ID ?: $Model::PRIMARY;
+        $searchColumns = $searchColumns ?: $Model::HANDLER_IDS ?: $Model::PRIMARY;
         $this->mColumns = $Model->findColumns($searchColumns);
 
         if(!$this->mColumns)
             throw new InvalidAPIException($Model->modelName()
-                . " GET/PATCH/DELETE APIs must have a ::PRIMARY or ::HANDLER_ID column or provide at least one alternative column");
+                . " GET/PATCH/DELETE APIs must have a ::PRIMARY or ::HANDLER_IDS column or provide at least one alternative column");
 
         $keys = array_keys($this->mColumns);
-        foreach( $keys as $i => &$key)
-            if($i)
-                $key = ($i == sizeof($keys) - 1 ? ' or ' : ', ') . $key;
-        $this->addField('id', new APIRequiredParam($Model->modelName() . ' ' . implode('', $keys)));
+        if(sizeof($keys) > 1) {
+            foreach( $keys as $i => &$key)
+                if($i)
+                    $key = ($i == sizeof($keys) - 1 ? ' or ' : ', ') . $key;
+            $this->mIDField = 'id';
+        } else {
+            $this->mIDField = $keys[0];
+        }
+        $this->addField($this->mIDField, new APIRequiredParam($Model->modelName() . ' ' . implode('', $keys)));
     }
 
     /**
@@ -67,16 +73,16 @@ class API_Get extends API_Base {
 
         $Model = $this->getModel();
         $this->processRequest($Request);
-        $id = $Request->pluck('id');
+        $id = $Request->pluck($this->mIDField);
 
         /** @var PDOModelSelect $Search  */
         $Search = $Model::search();
         $Search->limit(1);
         $Search->where('(');
-        $Search->setFlag(PDOWhere::DefaultLogicOR);
+        $Search->setFlag(PDOWhere::LOGIC_OR);
         foreach($this->mColumns as $name => $Column)
             $Search->where($name, $id);
-        $Search->unsetFlag(PDOWhere::DefaultLogicOR);
+        $Search->unsetFlag(PDOWhere::LOGIC_OR);
         $Search->where(')');
 
         $Policy = $this->getSecurityPolicy();

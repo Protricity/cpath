@@ -52,7 +52,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     const CACHE_ENABLED = false;
     const CACHE_TTL = 300;
 
-    const HANDLER_ID = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
+    const HANDLER_IDS = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
     const SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const INSERT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const UPDATE = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
@@ -166,7 +166,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     }
 
     public function __toString() {
-        if($id = static::HANDLER_ID ?: static::PRIMARY)
+        if($id = static::HANDLER_IDS ?: static::PRIMARY)
             return static::modelName() . " '" . $this->$id . "'";
         return static::modelName();
     }
@@ -268,7 +268,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
             if(!($tokens = explode(',', $tokens)))
                 return array();
         }
-        return array_intersect_key(static::loadAllColumns(), array_flip($tokens));
+        $cols = static::loadAllColumns();
+        if(Config::$Debug)
+            foreach($tokens as $token)
+                if(!isset($cols[$token]))
+                    throw new \Exception("Column '{$token}' not found in " . self::modelName());
+        return array_intersect_key($cols, array_flip($tokens));
     }
 //
 //    /**

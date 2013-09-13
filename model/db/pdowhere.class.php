@@ -9,7 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Interfaces\IDatabase;
 use \PDO;
 abstract class PDOWhere {
-    const DefaultLogicOR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
+    const LOGIC_OR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
 
     protected $mTable, $mAlias, $mLastAlias;
     protected $mWhere=array(), $mValues=array(), $mChr=97;
@@ -85,10 +85,9 @@ abstract class PDOWhere {
             }
         }
 
-
         if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
             if($field == '(' && !$this->mLastCond)
-                $this->mWhere[] = 'AND';
+                $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
             if($field != ')')
                 $this->mLastCond = true;
             $this->mWhere[] = $field;
@@ -99,7 +98,7 @@ abstract class PDOWhere {
                 $field = $alias . '.' . $field;
         }
         if (!$this->mLastCond) {
-            $this->mWhere[] = $this->mFlags & self::DefaultLogicOR ? 'OR' : 'AND';
+            $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
         }
         $this->mWhere[] = $field;
         $this->mLastCond = false;
@@ -115,8 +114,7 @@ abstract class PDOWhere {
     function setFlag($flags) {
         if(!is_int($flags))
             throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
-        $oldFlags = $this->mFlags;
-        $this->mFlags |= $oldFlags;
+        $this->mFlags |= $flags;
         return $this;
     }
     /**

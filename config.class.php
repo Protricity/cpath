@@ -16,7 +16,7 @@ class Config implements IConfig {
     static $Debug = true;
     static $BuildEnabled = true;
     static $APCEnabled = false;
-    static $LogLevel = NULL;
+    static $LogLevel = 4;
 
     static $ValidationUsername = array();
     static $ValidationPassword = array();
