@@ -69,4 +69,13 @@ class ExceptionResponse extends Response {
             throw $this->mEx->getPrevious() ?: $this->mEx;
         }
     }
+
+    /**
+     * Return a new exception response
+     * @param \Exception $ex the exception
+     * @return ExceptionResponse a new Response instance
+     */
+    static function getNew(\Exception $ex) {
+        return new self($ex);
+    }
 }

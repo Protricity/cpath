@@ -85,7 +85,12 @@ abstract class API implements IAPI {
             if(!($Response instanceof IResponse))
                 $Response = new Response(true, "API executed successfully", $Response);
         } catch (\Exception $ex) {
-            $Response = new ExceptionResponse($ex);
+            if($ex instanceof IResponseAggregate)
+                $Response = $ex->createResponse();
+            elseif($ex instanceof IResponse)
+                $Response = $ex;
+            else
+                $Response = new ExceptionResponse($ex);
         }
         if(static::LOG_ENABLE) {
             foreach($this->mLog->getLogs() as $Log)

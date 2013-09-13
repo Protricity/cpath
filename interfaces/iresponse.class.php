@@ -13,6 +13,7 @@ use CPath\Util;
 interface IResponse extends IJSON, IXML, IText, IHTML {
     const STATUS_SUCCESS = 200;
     const STATUS_ERROR = 400;
+    const STATUS_CONFLICT = 409;
 
     /**
      * Get the Response status code
