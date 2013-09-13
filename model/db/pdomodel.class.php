@@ -15,8 +15,8 @@ use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
+use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Config;
@@ -42,8 +42,9 @@ class ModelAlreadyExistsException extends \Exception implements IResponseAggrega
      * @return IResponse
      */
     function createResponse() {
-        return ExceptionResponse::getNew($this)
-            ->setStatusCode(IResponse::STATUS_CONFLICT);
+        $Response = new ExceptionResponse($this);
+        $Response->setStatusCode(IResponse::STATUS_CONFLICT);
+        return $Response;
     }
 }
 
