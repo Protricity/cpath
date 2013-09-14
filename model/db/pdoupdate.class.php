@@ -58,8 +58,8 @@ class PDOUpdate extends PDOWhere {
             .parent::getSQL()
             .($this->mLimit ? "\nLIMIT ".$this->mLimit : "");
 
-        if(Config::$Debug)
-            Log::v2(__CLASS__, $SQL);
+//        if(Config::$Debug)
+//            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }

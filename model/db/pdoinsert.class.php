@@ -90,8 +90,8 @@ abstract class PDOInsert {
             ."\n (".implode(', ',$this->fields).')'
             ."\nVALUES (".$token.str_repeat(', '.$token, sizeof($this->fields)-1).')';
         $this->updateSQL($SQL);
-        if(Config::$Debug)
-            Log::v2(__CLASS__, $SQL);
+//        if(Config::$Debug)
+//            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }

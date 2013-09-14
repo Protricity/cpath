@@ -42,8 +42,8 @@ class PDODelete extends PDOWhere {
         $SQL = "DELETE FROM ".$this->mTable
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
-        if(Config::$Debug)
-            Log::v2(__CLASS__, $SQL);
+//        if(Config::$Debug)
+//            Log::v2(__CLASS__, $SQL);
         return $SQL;
     }
 }
