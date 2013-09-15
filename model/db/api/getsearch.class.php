@@ -27,7 +27,7 @@ class API_GetSearch extends API_Base {
     function __construct(PDOModel $Model) {
         parent::__construct($Model);
 
-        $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FlagSearch);
+        $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
 
         $this->addField('search', new APIRequiredParam("SEARCH for ".$Model::modelName()));
         $this->addField('search_by', new APIParam("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
@@ -75,7 +75,9 @@ class API_GetSearch extends API_Base {
 
         $Model = $this->getModel();
         /** @var PDOModelSelect $Search */
-        $Search = $Model::searchByColumns($search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
+
+        $export = $Model::EXPORT_SEARCH ?: $Model::EXPORT ?: PDOColumn::FLAG_EXPORT;
+        $Search = $Model::selectByColumns($export, $search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
 
         $Policy = $this->getSecurityPolicy();
 

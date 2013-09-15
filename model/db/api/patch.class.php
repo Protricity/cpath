@@ -30,7 +30,7 @@ class API_Patch extends API_Get {
         parent::__construct($Model, $alternateColumns);
 
         $defFilter = $Model::DEFAULT_FILTER;
-        foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FlagUpdate) as $Column)
+        foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
             /** @var PDOColumn $Column */
             $Column->addToAPI($this, false, NULL, NULL, $defFilter);
     }

@@ -18,22 +18,22 @@ use CPath\Validate;
 class PDOColumn {
     const BUILD_IGNORE = true;
     
-    const FlagNumeric =  0x0001;
-    const FlagEnum =     0x0002;
-    const FlagNull =     0x0004;
-    const FlagDefault =  0x0008;
+    const FLAG_NUMERIC =  0x0001;
+    const FLAG_ENUM =     0x0002;
+    const FLAG_NULL =     0x0004;
+    const FLAG_DEFAULT =  0x0008;
 
-    const FlagIndex =    0x0010;
-    const FlagUnique =   0x0020;
-    const FlagPrimary =  0x0040;
-    const FlagAutoInc =  0x0080;
+    const FLAG_INDEX =    0x0010;
+    const FLAG_UNIQUE =   0x0020;
+    const FLAG_PRIMARY =  0x0040;
+    const FLAG_AUTOINC =  0x0080;
 
-    const FlagRequired = 0x0100;
+    const FLAG_REQUIRED = 0x0100;
 
-    const FlagInsert =   0x1000;
-    const FlagUpdate =   0x2000;
-    const FlagSearch =   0x4000;
-    const FlagExport =   0x8000;
+    const FLAG_INSERT =   0x1000;
+    const FLAG_UPDATE =   0x2000;
+    const FLAG_SEARCH =   0x4000;
+    const FLAG_EXPORT =   0x8000;
 
     protected
         $mName,
@@ -104,7 +104,7 @@ class PDOColumn {
     /**
      * Add this column to an IAPI as a field
      * @param IAPI $API
-     * @param boolean|NULL $required if null, the column flag FlagRequired determines the value
+     * @param boolean|NULL $required if null, the column flag FLAG_REQUIRED determines the value
      * @param boolean|NULL $param
      * @param boolean|NULL $comment
      * @param mixed $defaultValidation
@@ -112,7 +112,7 @@ class PDOColumn {
      */
     function addToAPI(IAPI $API, $required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
-            $required = $this->mFlags & PDOColumn::FlagRequired;
+            $required = $this->mFlags & PDOColumn::FLAG_REQUIRED;
         if($this->mFilter)
             $defaultValidation = $this->mFilter;
         if($param) {

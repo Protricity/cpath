@@ -60,9 +60,9 @@ PHP;
         foreach($DB->query("SHOW KEYS FROM `{$Table->Name}`;") as $row) {
             $name = $row['Column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOColumn::FlagIndex;
+            $Column->Flags |= PDOColumn::FLAG_INDEX;
             if(stripos($row['Key_name'], 'PRIMARY') === 0)
-                $Column->Flags |= PDOColumn::FlagPrimary;
+                $Column->Flags |= PDOColumn::FLAG_PRIMARY;
         }
     }
 
@@ -76,20 +76,20 @@ PHP;
             $name = $row['Field'];
             $Column = new BuildPDOColumn($name, $row['Comment']);
             if($row['Null'] == 'YES')
-                $Column->Flags |= PDOColumn::FlagNull;
+                $Column->Flags |= PDOColumn::FLAG_NULL;
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
                 $Column->EnumValues = array();
                 foreach( explode(',', $matches[1]) as $value )
                     $Column->EnumValues[] = trim( $value, "'" );
-                $Column->Flags |= PDOColumn::FlagEnum;
+                $Column->Flags |= PDOColumn::FLAG_ENUM;
             } else {
                 if(stripos($row['Type'], 'int') !== false)
-                    $Column->Flags |= PDOColumn::FlagNumeric;
+                    $Column->Flags |= PDOColumn::FLAG_NUMERIC;
             }
             if($row['Extra'] == 'auto_increment')
-                $Column->Flags |= PDOColumn::FlagAutoInc;
+                $Column->Flags |= PDOColumn::FLAG_AUTOINC;
             if($row['Default'] !== NULL)
-                $Column->Flags |= PDOColumn::FlagDefault;
+                $Column->Flags |= PDOColumn::FLAG_DEFAULT;
             $Table->addColumn($Column);
         }
     }

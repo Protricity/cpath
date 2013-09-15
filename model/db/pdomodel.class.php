@@ -166,7 +166,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     public function exportData($columns=NULL)
     {
         $export = array();
-        foreach(static::findColumns($columns ?: static::EXPORT ?: PDOColumn::FlagExport) as $column => $data)
+        foreach(static::findColumns($columns ?: static::EXPORT ?: PDOColumn::FLAG_EXPORT) as $column => $data)
             $export[$column] = $this->$column;
         return $export;
     }
@@ -256,15 +256,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
                     case ':none':
                         return array();
                     case ':index':
-                        return static::findColumns(PDOColumn::FlagIndex);
+                        return static::findColumns(PDOColumn::FLAG_INDEX);
                     case ':sindex':
                         $list = array();
                         foreach(static::loadAllColumns() as $col => $data)
-                            if($data->isFlag(PDOColumn::FlagIndex) && !$data->isFlag(PDOColumn::FlagNumeric))
+                            if($data->isFlag(PDOColumn::FLAG_INDEX) && !$data->isFlag(PDOColumn::FLAG_NUMERIC))
                                 $list[$col] = $data;
                         return $list;
                     case ':primary':
-                        return static::findColumns(PDOColumn::FlagPrimary);
+                        return static::findColumns(PDOColumn::FLAG_PRIMARY);
                     case ':exclude':
                         if(empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
                             return array();
@@ -282,11 +282,14 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
                 return array();
         }
         $cols = static::loadAllColumns();
-        if(Config::$Debug)
-            foreach($tokens as $token)
-                if(!isset($cols[$token]))
-                    throw new \Exception("Column '{$token}' not found in " . self::modelName());
-        return array_intersect_key($cols, array_flip($tokens));
+        $ret = array();
+        foreach($tokens as $token)
+            if(isset($cols[$token]))
+                $ret[$token] = $cols[$token];
+            else
+                throw new \Exception("Column '{$token}' not found in " . self::modelName());
+        return $ret;
+        //return array_intersect_key($cols, array_flip($tokens));
     }
 //
 //    /**
@@ -351,11 +354,44 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     /**
      * Create a PDOModelSelect object for this table
      * @param $_selectArgs array|mixed an array or series of varargs of columns to select
-     * @return PDOModelSelect
+     * @return PDOSelect
      */
-    static function select($_selectArgs) {
-        $args = is_array($_selectArgs) ? $_selectArgs : func_get_args();
+    static function select($_selectArgs=NULL) {
+        $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_selectArgs));
         return new PDOSelect(static::TABLE, static::getDB(), $args);
+    }
+
+    /**
+     * Applies a search to PDOSelect based on specified columns and values.
+     * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect instance to search in
+     * @param String $search the column value to search for
+     * @param mixed $columns a string list (comma delimited) or array of columns to search for.
+     * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
+     * @param int $limit the number of rows to return. Default is 1
+     * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
+     * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
+     * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
+     * @throws \Exception if no columns were found
+     */
+    static function selectByColumns($Select, $search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
+        if(!$Select instanceof PDOSelect)
+            $Select = static::select($Select);
+        if($columns instanceof IArrayObject)
+            $columns =$columns->getDataPath();
+        $columns = static::findColumns($columns ?: static::SEARCH ?: PDOColumn::FLAG_SEARCH);
+        if(!$columns)
+            throw new \Exception("No SEARCH fields defined in ".static::modelName());
+
+        $i = 0;
+        if(strcasecmp($logic, 'OR')===0)
+            $Select->setFlag(PDOWhere::LOGIC_OR);
+        foreach($columns as $name=>$Column) {
+            if($compare) $name .= " {$compare} " ;
+            $Select->where($name, $search);
+        }
+
+        $Select->limit($limit);
+        return $Select;
     }
 
     /**
@@ -365,7 +401,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      */
     static function insert($_insertArgs) {
         $DB = static::getDB();
-        $args = is_array($_insertArgs) ? $_insertArgs : func_get_args();
+        $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_insertArgs));
         return $DB->insert(static::TABLE, $args);
     }
 
@@ -375,7 +411,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOUpdate
      */
     static function update($_columnArgs) {
-        $args = is_array($_columnArgs) ? $_columnArgs : func_get_args();
+        $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_columnArgs));
         return new PDOUpdate(static::TABLE, static::getDB(), $args);
     }
 
@@ -418,7 +454,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Loads a model based on a search
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
-     * Default is static::SEARCH or columns with PDOColumn::FlagSearch set
+     * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @param string $logic 'OR' or 'AND' logic between columns
      * @return PDOModel the found model instance
@@ -434,16 +470,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     /**
      * Creates a PDOModelSelect for searching models.
-     * @param mixed|NULL $columns array or list (comma delimited) of columns to export
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    public static function search($columns=NULL) {
-        if(!$columns)
-            $columns = static::EXPORT_SEARCH;
-        if($columns) {
-            $columns = self::findColumns($columns);
-            return new PDOSelect(static::TABLE, static::getDB(), array_keys($columns));
-        }
+    public static function search() {
         return new PDOModelSelect(static::getDB(), get_called_class());
     }
 
@@ -451,7 +480,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Searches for Models based on specified columns and values.
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
-     * Default is static::SEARCH or columns with PDOColumn::FlagSearch set
+     * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param int $limit the number of rows to return. Default is 1
      * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
      * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
@@ -459,23 +488,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @throws \Exception if no columns were found
      */
     public static function searchByColumns($search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
-        if($columns instanceof IArrayObject)
-            $columns =$columns->getDataPath();
-        $columns = static::findColumns($columns ?: static::SEARCH ?: PDOColumn::FlagSearch);
-        if(!$columns)
-            throw new \Exception("No SEARCH fields defined in ".static::modelName());
-
-        $Select = static::search();
-
-        $i = 0;
-        foreach($columns as $name=>$Column) {
-            if(strcasecmp($logic, 'OR')===0 && $i++) $Select->where('OR');
-            if($compare) $name .= " {$compare} " ;
-            $Select->where($name, $search);
-        }
-
-        $Select->limit($limit);
-        return $Select;
+        return static::selectByColumns(static::search(), $search, $columns, $limit, $logic, $compare);
     }
 
 
@@ -483,6 +496,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Delete a model entry by PRIMARY Key Column
      * @param $id mixed the PRIMARY Key to search for
      * @throws \Exception
+     * @throws \InvalidArgumentException if $id is invalid
      */
     public static function removeByPrimary($id) {
         if(!static::PRIMARY)
@@ -607,6 +621,10 @@ class PDOModelSelect extends PDOSelect {
         parent::__construct($table, $DB, array($table . '.*'));
         $this->mClass = is_string($class) ? $class : get_class($class);
     }
+//
+//    public function select($field, $alias=NULL, $name=NULL) {
+//        throw new \BadFunctionCallException("select() is disabled for PDOModelSelect");
+//    }
 
     /**
      * Execute this query

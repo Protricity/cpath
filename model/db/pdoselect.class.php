@@ -18,19 +18,30 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     private $mRow = null;
     private $mCount = 0;
     private $mCustomMethod = null;
+    private $mParse = array();
 
     public function __construct($table, \PDO $DB, Array $select=array()) {
         parent::__construct($table);
         $this->mDB = $DB;
         foreach($select as $field)
-            $this->select($field);
+            self::select($field);
     }
 
-    public function select($field, $alias=NULL) {
+    public function select($field, $alias=NULL, $name=NULL) {
         if(!preg_match('/[.()]/', $field))
             $field = ($alias ?: $this->mAlias) . '.' . $field;
+        if($name)
+            $field .= ' "' . $name .'"';
         $this->mSelect[] = $field;
         return $this;
+    }
+
+    public function selectPrefixed($prefix, $field, $alias=NULL, $name=NULL) {
+        if(!$name)
+            $name = $field;
+        $name = $prefix . '.' . $name;
+        $this->mParse[] = $name;
+        return self::select($field, $alias, $name);
     }
 
     public function limit($limit) {
@@ -80,8 +91,23 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         if(!$this->mStmt) $this->exec();
         $this->mCount++;
         $this->mRow = $this->mStmt->fetch();
-        if($this->mRow && $call = $this->mCustomMethod)
-            $this->mRow = $call instanceof \Closure ? $call($this->mRow) : call_user_func($call, $this->mRow);
+        if($this->mRow) {
+            foreach($this->mParse as $name) {
+                $path = explode('.', $name);
+                $last = array_pop($path);
+                $value = &$this->mRow[$name];
+                unset($this->mRow[$name]);
+                $target = &$this->mRow;
+                foreach($path as $p) {
+                    if(!isset($target[$p]))
+                        $target[$p] = array();
+                    $target = &$target[$p];
+                }
+                $target[$last] = $value;
+            }
+            if($call = $this->mCustomMethod)
+                $this->mRow = $call instanceof \Closure ? $call($this->mRow) : call_user_func($call, $this->mRow);
+        }
         return $this->mRow;
     }
 

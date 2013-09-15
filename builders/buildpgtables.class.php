@@ -67,7 +67,7 @@ where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a
 group by column_name;") as $row ) {
             $name = $row['column_name'];
             $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOColumn::FlagIndex;
+            $Column->Flags |= PDOColumn::FLAG_INDEX;
         }
     }
 
@@ -91,13 +91,13 @@ group by column_name;") as $row ) {
             $name = $row['column_name'];
             $Column = new BuildPDOColumn($name, $row['column_comment']);
             if(strcasecmp($row['is_nullable'], 'yes') === 0)
-                $Column->Flags |= PDOColumn::FlagNull;
+                $Column->Flags |= PDOColumn::FLAG_NULL;
             if(stripos($row['data_type'], 'int') !== false)
-                $Column->Flags |= PDOColumn::FlagNumeric;
+                $Column->Flags |= PDOColumn::FLAG_NUMERIC;
             if(stripos($row['column_default'], 'nextval(') ===0)
-                $Column->Flags |= PDOColumn::FlagAutoInc;
-            if(($Column->Flags & PDOColumn::FlagAutoInc) && !$primaryCol) {
-                $Column->Flags |= PDOColumn::FlagPrimary;
+                $Column->Flags |= PDOColumn::FLAG_AUTOINC;
+            if(($Column->Flags & PDOColumn::FLAG_AUTOINC) && !$primaryCol) {
+                $Column->Flags |= PDOColumn::FLAG_PRIMARY;
                 $primaryCol = $name;
             }
             $Table->addColumn($Column);

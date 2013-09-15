@@ -29,13 +29,27 @@ abstract class PDOWhere {
     }
 
     /**
-     * @param String $table the table to join
+     * Adds a 'LEFT JOIN' from $sourceTable to $destTable
+     * @param String $sourceTable the source table to join from
+     * @param String $destTable the destination table to join to
      * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
      * @param String|null $destField The destination field to join on.
-     * @return $this
+     * @return $this this instance
      */
-    public function leftJoin($table, $sourceField, $destField=NULL) {
-        $alias = $this->getAlias($table);
+    public function leftJoinFrom($sourceTable, $destTable, $sourceField, $destField=NULL) {
+        $this->mLastAlias = $sourceTable;
+        return $this->leftJoin($destTable, $sourceField, $destField);
+    }
+
+    /**
+     * Adds a 'LEFT JOIN' from the last table joined to $destTable
+     * @param String $destTable the table to join
+     * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
+     * @param String|null $destField The destination field to join on.
+     * @return $this this instance
+     */
+    public function leftJoin($destTable, $sourceField, $destField=NULL) {
+        $alias = $this->getAlias($destTable);
         if($destField != NULL) {
             if(strpos($sourceField, '.') === false)
                 $sourceField = $this->mLastAlias . ".{$sourceField}";
@@ -46,7 +60,7 @@ abstract class PDOWhere {
             $sourceField = "ON {$sourceField} = {$destField}";
         }
         $this->mLastAlias = $alias;
-        $this->mJoins[] = "\nLEFT JOIN {$table} {$sourceField}";
+        $this->mJoins[] = "\nLEFT JOIN {$destTable} {$sourceField}";
         return $this;
     }
 

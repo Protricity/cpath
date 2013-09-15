@@ -161,10 +161,10 @@ PHP;
             $this->getIndexes($DB, $Table);
 
             foreach($Table->getColumns() as $Column) {
-                if($Column->Flags & PDOColumn::FlagIndex)
-                    $Column->Flags |= PDOColumn::FlagSearch;
-                if(!($Column->Flags & PDOColumn::FlagNull) && !($Column->Flags & PDOColumn::FlagAutoInc) && !($Column->Flags & PDOColumn::FlagDefault))
-                    $Column->Flags |= PDOColumn::FlagRequired;
+                if($Column->Flags & PDOColumn::FLAG_INDEX)
+                    $Column->Flags |= PDOColumn::FLAG_SEARCH;
+                if(!($Column->Flags & PDOColumn::FLAG_NULL) && !($Column->Flags & PDOColumn::FLAG_AUTOINC) && !($Column->Flags & PDOColumn::FLAG_DEFAULT))
+                    $Column->Flags |= PDOColumn::FLAG_REQUIRED;
             }
         }
 
@@ -220,10 +220,10 @@ PHP;
 //            $ExportFields = array();
 //
 //            foreach($Table->getColumns() as $Column) {
-//                if($Column->Flags & PDOColumn::FlagInsert) $InsertFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FlagUpdate) $UpdateFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FlagSearch) $SearchFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FlagExport) $ExportFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FLAG_INSERT) $InsertFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FLAG_UPDATE) $UpdateFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FLAG_SEARCH) $SearchFields[] = $Column->Name;
+//                if($Column->Flags & PDOColumn::FLAG_EXPORT) $ExportFields[] = $Column->Name;
 //            }
 //
 //            if(!$InsertFields && $Table->INSERT) $InsertFields[] = $Table->INSERT;
@@ -257,7 +257,7 @@ PHP;
             foreach($Table->getColumns() as $Column) {
                 $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if($Column->Flags & PDOColumn::FlagPrimary ? false : true)
+                if($Column->Flags & PDOColumn::FLAG_PRIMARY ? false : true)
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
                 $PHP->addMethodCode();
             }
@@ -364,23 +364,23 @@ class BuildPDOColumn {
             switch(strtolower($args[0])) {
                 case 'i':
                 case 'insert':
-                    $this->Flags |= PDOColumn::FlagInsert;
+                    $this->Flags |= PDOColumn::FLAG_INSERT;
                     break;
                 case 'u':
                 case 'update':
-                    $this->Flags |= PDOColumn::FlagUpdate;
+                    $this->Flags |= PDOColumn::FLAG_UPDATE;
                     break;
                 case 's':
                 case 'search':
-                    $this->Flags |= PDOColumn::FlagSearch;
+                    $this->Flags |= PDOColumn::FLAG_SEARCH;
                     break;
                 case 'e':
                 case 'export':
-                    $this->Flags |= PDOColumn::FlagExport;
+                    $this->Flags |= PDOColumn::FLAG_EXPORT;
                     break;
                 case 'r':
                 case 'required':
-                    $this->Flags |= PDOColumn::FlagRequired;
+                    $this->Flags |= PDOColumn::FLAG_REQUIRED;
                     break;
                 case 'c':
                 case 'comment':
@@ -441,31 +441,31 @@ class BuildPDOTable {
                 case 'insert':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
-                            ->Flags |= PDOColumn::FlagInsert;
+                            ->Flags |= PDOColumn::FLAG_INSERT;
                     break;
                 case 'u':
                 case 'update':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
-                            ->Flags |= PDOColumn::FlagUpdate;
+                            ->Flags |= PDOColumn::FLAG_UPDATE;
                     break;
                 case 's':
                 case 'search':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
-                            ->Flags |= PDOColumn::FlagSearch;
+                            ->Flags |= PDOColumn::FLAG_SEARCH;
                     break;
                 case 'e':
                 case 'export':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
-                            ->Flags |= PDOColumn::FlagExport;
+                            ->Flags |= PDOColumn::FLAG_EXPORT;
                     break;
                 case 'r':
                 case 'required':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
                         $this->getColumn(trim($column))
-                            ->Flags |= PDOColumn::FlagRequired;
+                            ->Flags |= PDOColumn::FLAG_REQUIRED;
                     break;
                 case 'sw':
                 case 'searchwildcard':
@@ -526,7 +526,7 @@ class BuildPDOTable {
 
         if(!$this->Primary)
             foreach($this->getColumns() as $Column) {
-                if($Column->Flags & PDOColumn::FlagPrimary) {
+                if($Column->Flags & PDOColumn::FLAG_PRIMARY) {
                     $this->Primary = $Column->Name;
                     break;
                 }
@@ -638,17 +638,17 @@ class BuildPDOUserTable extends BuildPDOTable {
         }
 
         $Column = $this->getColumn($this->Column_Email);
-        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
+        $Column->Flags |= PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
         if(!$Column->Filter)
             $Column->Filter = FILTER_VALIDATE_EMAIL;
 
         $Column = $this->getColumn($this->Column_Username);
-        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
+        $Column->Flags |= PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_USERNAME;
 
         $Column = $this->getColumn($this->Column_Password);
-        $Column->Flags |= PDOColumn::FlagRequired | PDOColumn::FlagInsert;
+        $Column->Flags |= PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_PASSWORD;
     }

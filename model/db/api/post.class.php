@@ -22,7 +22,7 @@ class API_Post extends API_Base {
     function __construct(PDOModel $Model) {
         parent::__construct($Model);
 
-        foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FlagInsert) as $Column)
+        foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FLAG_INSERT) as $Column)
             $Column->addToAPI($this);
     }
 
