@@ -13,6 +13,7 @@ abstract class PDOWhere {
 
     protected $mTable, $mAlias, $mLastAlias;
     protected $mWhere=array(), $mValues=array(), $mChr=97;
+    protected $mOrderBy, $mGroupBy;
     private $mLastCond = true;
     private $mJoins = array();
     protected $mFlags = 0;
@@ -120,6 +121,27 @@ abstract class PDOWhere {
     }
 
     /**
+     * Set ORDER BY for this statement
+     * @param String $field the field or sql to add to the statement
+     * @param bool $desc if true ORDER BY [field] DESC
+     * @return $this the query instance
+     */
+    function orderBy($field, $desc=false) {
+        $this->mOrderBy = $field . ($desc !== false ? ($desc === true ? ' DESC' : ' '.$desc) : '');
+        return $this;
+    }
+
+    /**
+     * Set GROUP BY for this statement
+     * @param String $field the field or sql to add to the statement
+     * @return $this the query instance
+     */
+    function groupBy($field) {
+        $this->mGroupBy = $field;
+        return $this;
+    }
+
+    /**
      * Set flags for this query instance
      * @param int $flags the flag or flags to set
      * @return $this the query instance
@@ -131,6 +153,7 @@ abstract class PDOWhere {
         $this->mFlags |= $flags;
         return $this;
     }
+
     /**
      * Unset flags for this query instance
      * @param int $flags the flag or flags to unset
@@ -145,8 +168,14 @@ abstract class PDOWhere {
         return $this;
     }
 
+    /**
+     * Return the SQL for this statement
+     * @return string
+     */
     public function getSQL() {
         return implode('', $this->mJoins)
-            ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : '1');
+            ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : '1')
+            .($this->mGroupBy ? "\nGROUP BY ".$this->mGroupBy : '')
+            .($this->mOrderBy ? "\nORDER BY ".$this->mOrderBy : '');
     }
 }

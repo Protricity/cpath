@@ -81,7 +81,9 @@ class BuildPHPClass  {
         }
         if($visibility) $visibility .= ' ';
         if($static) $visibility .= 'static ';
-        $php = "\t{$visibility}function {$name}({$params}) {{$content}}" . "\n";
+        if(strpos($content, "\n") !== false)
+            $content = "\n" . trim($content, "\n") . "\n\t";
+        $php = "\t{$visibility}function {$name}({$params}) {{$content}}\n";
         $static ? $this->mStaticMethods[$name] = $php : $this->mMethods[$name] = $php;
         return $this;
     }

@@ -285,9 +285,9 @@ PHP;
         if(in_array($BUILD, array('ALL', 'PROC')))
             $procs = $this->getProcs($DB);
 
-
-        $phpC = '';
-        $phpP = '';
+        $PHP = new BuildPHPClass('Procs');
+        $PHP->Namespace = $procNS;
+        $PHP->addUse(get_class($DB), 'DB');
         $names = array();
         foreach($procs as $proc) {
             $name = array_shift($proc);
@@ -297,11 +297,28 @@ PHP;
                 $names[$name] = 1;
             }
             $method = $name.'('.(!$proc ? '' : ('%s'.str_repeat(', %s', sizeof($proc)-1))).')';
-            $phpC .= self::getConst(strtoupper($name), $method);
-            $phpP .= $this->getProc($name, $proc);
+            $PHP->addConst(strtoupper($name), $method);
+
+            $sqlParams = $proc ? '?'.str_repeat(', ?', sizeof($proc)-1) : '';
+            $codeParams = $proc ? '$'.implode(', $', $proc) : '';
+
+            $code = <<<PHP
+        static \$stmd = NULL;
+        if(!\$stmd) \$stmd = self::getDB()->prepare('SELECT $name({$sqlParams})');
+        \$stmd->execute(array({$codeParams}));
+        return \$stmd;
+PHP;
+
+            $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
+            $ucName[0] = strtolower($ucName[0]);
+            $PHP->addStaticMethod($ucName, $proc, $code);
+            //$phpC .= self::getConst(strtoupper($name), $method);
         }
-        $php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
-        file_put_contents($procPath.'procs.class.php', $php);
+
+        $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
+        //$php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
+        //file_put_contents($procPath.'procs.class.php', $php);
+        file_put_contents($procPath.'procs.class.php', $PHP->build());
         Log::v(__CLASS__, "Built (".sizeof($procs).") routine(s)");
 
         return true;
@@ -319,16 +336,6 @@ PHP;
         return dirname($Class->getFileName()) . '/' . $subFolder;
     }
 
-    static function getConst($name, $value) {
-        return "\tconst {$name} = ".var_export($value, true).";\n";
-    }
-
-    private function getProc($name, $params) {
-        return sprintf(self::TMPL_PROC,
-            $name, !$params ? '' : ', $'.implode(', $', $params),
-            $name, !$params ? '' : '?'.str_repeat(', ?', sizeof($params)-1),
-            '$'.implode(', $', $params));
-    }
 
     static function toTitleCase($field, $noSpace=false) {
         $field = ucwords(str_replace('_', ' ', $field));

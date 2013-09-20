@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 use CPath\Base;
+use CPath\Build;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IHandler;
@@ -132,19 +133,25 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
     function render(IRequest $Request) {
         if(!Base::isCLI() && !headers_sent())
             header('text/plain');
-        echo "DB Upgrader: ".get_class($this)."\n";
+        Log::u(__CLASS__, "DB Upgrader: ".get_class($this));
         switch(strtolower($Request->getNextArg())) {
             case 'upgrade':
                 $this->upgrade(false);
                 break;
-            case 'rebuild':
+            case 'reset':
                 $this->upgrade(true);
                 break;
+            case 'rebuild':
+                $this->upgrade(true);
+                $Build = new Build();
+                Log::u(__CLASS__, "Rebuilding Models...");
+                $Build->execute($Request);
+                break;
             default:
-                echo "use .../upgrade to upgrade database\n";
+                Log::u(__CLASS__, "Use 'upgrade', 'reset', or 'rebuild' to upgrade database");
                 break;
         }
-        echo "DB Upgrader Completed\n";
+        Log::u(__CLASS__, "DB Upgrader Completed");
     }
 
     // Statics

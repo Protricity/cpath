@@ -13,10 +13,10 @@ class Config implements IConfig {
     static $GenPath = 'gen';
 
     static $Domain = NULL;
-    static $Debug = true;
+    static $Debug = false;
     static $BuildEnabled = true;
     static $APCEnabled = false;
-    static $LogLevel = 4;
+    static $LogLevel = 2;
 
     static $ValidationUsername = array();
     static $ValidationPassword = array();

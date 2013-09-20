@@ -96,7 +96,7 @@ class APIInfo implements IHandler, ILogListener {
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
                     <div class='field-description'><?php echo $Field->getDescription(); ?></div>
-                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo preg_replace('/[^\w _-]/', '', $_GET[$name]); ?>' placeholder='Enter value for <?php echo $name; ?>' /></div>
+                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo htmlspecialchars($_GET[$name], ENT_QUOTES); ?>' placeholder='Enter value for <?php echo $name; ?>' /></div>
                 </li>
             <?php } ?>
             <li class='field-footer clearfix'>
@@ -107,9 +107,10 @@ class APIInfo implements IHandler, ILogListener {
             </li>
         </ul>
         <div>
-            <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>')" />
-            <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>')" />
-            <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>')" />
+            <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+            <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
+            <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
+            <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
         </div>
     </form>
 

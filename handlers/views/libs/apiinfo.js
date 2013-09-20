@@ -59,6 +59,13 @@
                 }})
         },
 
+        updateURL: function(form) {
+            form = jQuery(form);
+            var parts = document.location.href.split('?');
+            var parts2 = parts[0].split('#');
+            document.location.href = parts[0] + '?' + form.serialize() + (parts2[1] ? '#' + parts2[1] : '');
+        },
+
         hackXHR: function() {
             if(XMLHttpRequest.prototype.wrappedSetRequestHeader) {
                 console.error("wrappedSetRequestHeader already exists in XHR");
