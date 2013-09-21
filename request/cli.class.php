@@ -267,14 +267,15 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
         return $CLI;
     }
 
-    static function fromRequest($force=false) {
+    static function fromRequest($force=false, $log=true) {
         static $CLI = NULL;
         if($CLI && !$force)
             return $CLI;
         $args = $_SERVER['argv'];
         array_shift($args);
         $CLI = new CLI($args);
-        $CLI->setOutputLog(true);
+        if($log)
+            $CLI->setOutputLog(true);
         $CLI->mHeaders = function_exists('getallheaders')
             ? getallheaders()
             : array();

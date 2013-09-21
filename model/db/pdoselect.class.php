@@ -27,9 +27,16 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
             self::select($field);
     }
 
+    /**
+     * @param $field
+     * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
+     * characters in '.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
+     * @param null $name
+     * @return $this
+     */
     public function select($field, $alias=NULL, $name=NULL) {
-        if(!preg_match('/[.()]/', $field))
-            $field = ($alias ?: $this->mAlias) . '.' . $field;
+        $field = $this->getAliasedField($field, $alias);
         if($name)
             $field .= ' "' . $name .'"';
         $this->mSelect[] = $field;

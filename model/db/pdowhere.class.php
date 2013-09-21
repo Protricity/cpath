@@ -23,7 +23,7 @@ abstract class PDOWhere {
         $this->mLastAlias = $this->mAlias = $this->getAlias($table);
     }
 
-    public function getAlias($table) {
+    protected function getAlias($table) {
         if(($p = strpos($table, ' ')) !== false)
             return substr($table, $p + 1);
         return $table;
@@ -75,14 +75,13 @@ abstract class PDOWhere {
      *  ->where('? LIKE {}.myfield', 'myvalue', 'myalias')  // WHERE 'myvalue' LIKE myalias.myfield
      *  ->where('myfield', 'myvalue', 'myalias')            // WHERE myalias.myfield = 'myvalue'
      * @param String|null $value The value to compare against. If null, the entire comparison must be in $field
-     * @param String|null $alias The alias to set for the $field. If $value is not set or $field contains '?', then the alias will not be appended to the field.
+     * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
+     * characters in '?.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
      * @return $this returns the query instance
      * @throws \InvalidArgumentException
      */
     public function where($field, $value=NULL, $alias=NULL) {
-        if(!$alias)
-            $alias = $this->mAlias;
-
         if($value !== NULL) {
             if(is_array($value)) {
                 if(!$value)
@@ -108,9 +107,7 @@ abstract class PDOWhere {
             $this->mWhere[] = $field;
             return $this;
         } else {
-            $field = str_replace('{}', $alias, $field, $c);
-            if($c==0 && strpos($field, '.') === false)
-                $field = $alias . '.' . $field;
+            $field = $this->getAliasedField($field, $alias);
         }
         if (!$this->mLastCond) {
             $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
@@ -124,9 +121,12 @@ abstract class PDOWhere {
      * Set ORDER BY for this statement
      * @param String $field the field or sql to add to the statement
      * @param bool $desc if true ORDER BY [field] DESC
+     * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
+     * characters in '.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
      * @return $this the query instance
      */
-    function orderBy($field, $desc=false) {
+    function orderBy($field, $desc=false, $alias=NULL) {
         $this->mOrderBy = $field . ($desc !== false ? ($desc === true ? ' DESC' : ' '.$desc) : '');
         return $this;
     }
@@ -134,10 +134,13 @@ abstract class PDOWhere {
     /**
      * Set GROUP BY for this statement
      * @param String $field the field or sql to add to the statement
+     * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
+     * characters in '.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
      * @return $this the query instance
      */
-    function groupBy($field) {
-        $this->mGroupBy = $field;
+    function groupBy($field, $alias=NULL) {
+        $this->mGroupBy = $this->getAliasedField($field, $alias);
         return $this;
     }
 
@@ -177,5 +180,21 @@ abstract class PDOWhere {
             ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : '1')
             .($this->mGroupBy ? "\nGROUP BY ".$this->mGroupBy : '')
             .($this->mOrderBy ? "\nORDER BY ".$this->mOrderBy : '');
+    }
+
+    /**
+     * @param $field
+     * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
+     * characters in '.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
+     * @return mixed|string
+     */
+    protected function getAliasedField($field, $alias=null) {
+        if(!$alias)
+            $alias = $this->mAlias;
+        $field = str_replace('{}', $alias, $field, $c); // TODO: bad news. change
+        if($c==0 && strpos($field, '.') === false)
+            $field = ($alias) . '.' . $field;
+        return $field;
     }
 }

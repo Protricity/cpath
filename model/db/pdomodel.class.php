@@ -24,6 +24,7 @@ use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
+use CPath\Util;
 use CPath\Validate;
 
 interface IGetDB {
@@ -147,13 +148,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     function toXML(\SimpleXMLElement $xml){
         foreach($this->exportData() as $key=>$val)
-            $xml->addAttribute($key, $val);
-
+            if(is_scalar($val) || $val === null)
+                $xml->addAttribute($key, $val);
+            else {
+                $xml2 = $xml->addChild($key);
+                Util::toXML($val, $xml2);
+            }
     }
 
     function toJSON(Array &$JSON){
         foreach($this->exportData() as $key=>$val)
-            $JSON[$key] = $val;
+            $JSON[$key] = Util::toJSON($val);
     }
 
     /**

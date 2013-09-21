@@ -255,7 +255,7 @@ PHP;
                 $PHP->addProperty($Column->Name);
 
             foreach($Table->getColumns() as $Column) {
-                $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $Column->Name)));
+                $ucName = self::toTitleCase($Column->Name, true);
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
                 if($Column->Flags & PDOColumn::FLAG_PRIMARY ? false : true)
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
@@ -309,7 +309,7 @@ PHP;
         return \$stmd;
 PHP;
 
-            $ucName = str_replace(' ', '', ucwords(str_replace('_', ' ', $name)));
+            $ucName = self::toTitleCase($name, true);
             $ucName[0] = strtolower($ucName[0]);
             $PHP->addStaticMethod($ucName, $proc, $code);
             //$phpC .= self::getConst(strtoupper($name), $method);
