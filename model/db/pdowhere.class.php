@@ -82,6 +82,21 @@ abstract class PDOWhere {
      * @throws \InvalidArgumentException
      */
     public function where($field, $value=NULL, $alias=NULL) {
+
+        if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
+            if($field == '(' && !$this->mLastCond)
+                $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
+            if($field != ')')
+                $this->mLastCond = true;
+            $this->mWhere[] = $field;
+            return $this;
+        } else {
+            $field = $this->getAliasedField($field, $alias);
+        }
+        if (!$this->mLastCond) {
+            $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
+        }
+
         if($value !== NULL) {
             if(is_array($value)) {
                 if(!$value)
@@ -99,19 +114,6 @@ abstract class PDOWhere {
             }
         }
 
-        if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
-            if($field == '(' && !$this->mLastCond)
-                $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
-            if($field != ')')
-                $this->mLastCond = true;
-            $this->mWhere[] = $field;
-            return $this;
-        } else {
-            $field = $this->getAliasedField($field, $alias);
-        }
-        if (!$this->mLastCond) {
-            $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
-        }
         $this->mWhere[] = $field;
         $this->mLastCond = false;
         return $this;
@@ -193,7 +195,7 @@ abstract class PDOWhere {
         if(!$alias)
             $alias = $this->mAlias;
         $field = str_replace('{}', $alias, $field, $c); // TODO: bad news. change
-        if($c==0 && strpos($field, '.') === false)
+        if($c==0 && !preg_match('/[.(]/', $field))
             $field = ($alias) . '.' . $field;
         return $field;
     }

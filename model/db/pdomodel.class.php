@@ -362,7 +362,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOSelect
      */
     static function select($_selectArgs=NULL) {
-        $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_selectArgs));
+        $args = func_num_args() > 1 ? func_get_args() : (Array)$_selectArgs;
         return new PDOSelect(static::TABLE, static::getDB(), $args);
     }
 
