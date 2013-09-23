@@ -90,9 +90,10 @@ abstract class PDOWhere {
                 $this->mLastCond = true;
             $this->mWhere[] = $field;
             return $this;
-        } else {
-            $field = $this->getAliasedField($field, $alias);
         }
+        
+        $field = $this->getAliasedField($field, $alias);
+
         if (!$this->mLastCond) {
             $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
         }

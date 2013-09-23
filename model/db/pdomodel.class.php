@@ -207,6 +207,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return $Handlers;
     }
 
+
+    function __set($name, $value) {
+        throw new \InvalidArgumentException("May not set undefined properties to ".self::modelName());
+    }
+
     // Statics
 
     /**

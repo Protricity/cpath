@@ -85,6 +85,15 @@ class PDOColumn {
     }
 
     /**
+     * Set the comment for this column
+     * @param String $comment
+     * @return void
+     */
+    function setComment($comment) {
+        $this->mComment = $comment;
+    }
+
+    /**
      * Validates an input with the validation config of this column
      * @param mixed $value the input to validate
      * @return mixed
