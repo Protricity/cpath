@@ -160,6 +160,8 @@ PHP;
             $this->getColumns($DB, $Table);
             $this->getIndexes($DB, $Table);
 
+            $Table->processArgs();
+
             foreach($Table->getColumns() as $Column) {
                 if($Column->Flags & PDOColumn::FLAG_INDEX)
                     $Column->Flags |= PDOColumn::FLAG_SEARCH;
@@ -421,6 +423,7 @@ class BuildPDOTable {
         $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler = false, $Primary, $Template;
     protected $mColumns = array();
     protected $mUnfound = array();
+    protected $mArgs = array();
 
     protected function __construct($name, $comment) {
         $this->Name = $name;
@@ -432,18 +435,10 @@ class BuildPDOTable {
             $this->Comment = str_replace(';', ':', $this->Comment);
     }
 
-    function processDefault($field) {
-        $this->mUnfound[] = $field;
-    }
-
-    function replace(array $matches) {
-        foreach(explode('|', $matches[1]) as $field) {
+    function processArgs() {
+        foreach($this->mArgs as $field) {
             list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
             switch(strtolower($name)) {
-                case 't':
-                case 'template':
-                    $this->Template = $this->req($name, $arg);
-                    break;
                 case 'i':
                 case 'insert':
                     foreach(explode(',', $this->req($name, $arg)) as $column)
@@ -500,6 +495,25 @@ class BuildPDOTable {
                     $this->processDefault($field);
             }
         }
+        $this->mArgs = array();
+    }
+
+    function processDefault($field) {
+        $this->mUnfound[] = $field;
+    }
+
+    function replace(array $matches) {
+        foreach(explode('|', $matches[1]) as $field) {
+            list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
+            switch(strtolower($name)) {
+                case 't':
+                case 'template':
+                    $this->Template = $this->req($name, $arg);
+                    break;
+                default:
+                    $this->mArgs[] = $field;
+            }
+        }
         return '';
     }
 
@@ -517,7 +531,7 @@ class BuildPDOTable {
      */
     public function getColumn($name) {
         if(!isset($this->mColumns[$name]))
-            throw new BuildException("Column {$name} not found");
+            throw new BuildException("Column '{$name}' not found". print_r($this, true));
         return $this->mColumns[$name];
     }
 
@@ -526,6 +540,7 @@ class BuildPDOTable {
     }
 
     function processModelPHP(BuildPHPClass $PHP) {
+        $this->processArgs();
         $PHP->setExtend("CPath\\Model\\DB\\PDOModel");
 
         if($this->mUnfound)
@@ -640,7 +655,7 @@ class BuildPDOUserTable extends BuildPDOTable {
 
         foreach(array('Column_ID', 'Column_Username', 'Column_Email', 'Column_Password', 'Column_Flags') as $field) {
             if(!$this->$field)
-                throw new BuildException("The column name for {$field} could not be determined");
+                throw new BuildException("The column name for {$field} could not be determined for ".__CLASS__);
             $PHP->addConst(strtoupper($field), $this->$field);
         }
 
@@ -650,6 +665,8 @@ class BuildPDOUserTable extends BuildPDOTable {
             $Column->Filter = FILTER_VALIDATE_EMAIL;
 
         $Column = $this->getColumn($this->Column_Username);
+        //if(!($Column->Flags & PDOColumn::FLAG_UNIQUE))
+        //    Log::e(__CLASS__, "Warning: The user name Column '{$Column->Name}' may not have a unique constraint for Table '{$this->Name}'");
         $Column->Flags |= PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_USERNAME;
@@ -712,17 +729,20 @@ class BuildPDOUserSessionTable extends BuildPDOTable {
         parent::processModelPHP($PHP);
         $PHP->setExtend("CPath\\Model\\DB\\PDOUserSessionModel");
 
-        if(!$this->Column_Key && $this->Primary) $this->Column_Key = $this->Primary;
         foreach($this->getColumns() as $Column) {
             if(!$this->Column_User_ID && preg_match('/user.*id/i', $Column->Name))
                 $this->Column_User_ID = $Column->Name;
             if(!$this->Column_Expire && stripos($Column->Name, 'expire') !== false)
                 $this->Column_Expire = $Column->Name;
+            if(!$this->Column_Key && stripos($Column->Name, 'key') !== false)
+                $this->Column_Key = $Column->Name;
         }
+        if(!$this->Column_Key && $this->Primary)
+            $this->Column_Key = $this->Primary;
 
         foreach(array('Column_Key', 'Column_User_ID', 'Column_Expire') as $field) {
             if(!$this->$field)
-                throw new BuildException("The field name for {$field} could not be determined");
+                throw new BuildException("The field name for {$field} could not be determined for ".__CLASS__);
             $PHP->addConst(strtoupper($field), $this->$field);
         }
     }

@@ -51,12 +51,18 @@ class API_PostUser extends API_Post {
      * @return IResponse|mixed the api call response with data, message, and status
      */
     function execute(IRequest $Request) {
+        $User = $this->mUser;
+        $pass = $Request[$User::COLUMN_PASSWORD];
+        $name = $Request[$User::COLUMN_USERNAME];
         $this->processRequest($Request);
         $login = $Request->pluck('login');
 
+        if($User::searchByColumns($name, $User::COLUMN_USERNAME)->fetch())
+            throw new ModelAlreadyExistsException("This user already exists");
+
         $User = parent::execute($Request)->getDataPath();
 
-        if($login && $pass = $Request[$User::COLUMN_PASSWORD]) {
+        if($login && $pass) {
             $User::login($User->getUsername(), $pass);
             return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
         }

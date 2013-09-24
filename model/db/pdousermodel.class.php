@@ -177,6 +177,8 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     static function createFromArray($row) {
         if(isset($row[static::COLUMN_PASSWORD]))
             $row[static::COLUMN_PASSWORD] = static::hashPassword($row[static::COLUMN_PASSWORD]);
+        if(!isset($row[static::COLUMN_FLAGS]))
+            $row[static::COLUMN_FLAGS] = 0;
         return parent::createFromArray($row);
     }
 
