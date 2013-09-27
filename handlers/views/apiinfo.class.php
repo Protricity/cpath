@@ -108,9 +108,7 @@ class APIInfo implements IHandler, ILogListener {
         </ul>
         <div>
             <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-            <?php if(strcasecmp($method, 'get') !== 0) { ?>
-            <input type="button" value="Submit JSON Object" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>', true);" />
-            <?php } ?>
+            <input type="button" value="Submit JSON Object" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', 'post', true);" />
             <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
             <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
             <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
