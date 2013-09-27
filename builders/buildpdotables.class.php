@@ -183,8 +183,7 @@ PHP;
             $PHP->addUse(get_class($DB), 'DB');
 
             $PHP->addConst('TABLE', $Table->Name);
-            if($Table->ModelName)
-                $PHP->addConst('MODEL_NAME', $Table->ModelName);
+            $PHP->addConst('MODEL_NAME', $Table->ModelName);
 
             $PHP->addConst('PRIMARY', $Table->Primary);
 
@@ -419,7 +418,7 @@ class BuildPDOColumn {
 
 class BuildPDOTable {
 
-    public $Name, $Namespace, $ClassName, $ModelName, $Comment,
+    public $Name, $Title, $ClassName, $Namespace, $ModelName, $Comment,
         $SearchWildCard, $SearchLimit, $SearchLimitMax, $AllowHandler = false, $Primary, $Template;
     protected $mColumns = array();
     protected $mUnfound = array();
@@ -427,7 +426,9 @@ class BuildPDOTable {
 
     protected function __construct($name, $comment) {
         $this->Name = $name;
-        $this->ClassName = str_replace(' ', '', ucwords(str_replace('_', ' ', $this->Name))) . "Model";
+        $this->Title = ucwords(str_replace('_', ' ', $this->Name));
+        $this->ModelName = $this->Title;
+        $this->ClassName = str_replace(' ', '', $this->Title) . 'Model';
         $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace'), $comment);
         if(!$this->Comment)
             $this->Comment = $comment;

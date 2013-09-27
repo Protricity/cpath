@@ -18,8 +18,9 @@
         basePath = jQuery('base').attr('href');
     });
     window.APIInfo = THIS = {
-        submit: function(path, form, dataType, method) {
+        submit: function(path, form, dataType, method, asObject) {
             form = jQuery(form);
+            var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
             lastHeaders = '';
             THIS.hackXHR();
             responseContainer.show();
@@ -30,7 +31,8 @@
                 url: path,
                 type: method,
                 dataType: dataType,
-                data: form.serialize(),
+                data: data,
+                contentType: asObject ? 'application/json' : null,
                 complete: function(jqXHR, textStatus) {
                     THIS.unhackXHR();
                     var content = jqXHR.responseText;
@@ -61,9 +63,9 @@
 
         updateURL: function(form) {
             form = jQuery(form);
-            var parts = document.location.href.split('?');
-            var parts2 = parts[0].split('#');
-            document.location.href = parts[0] + '?' + form.serialize() + (parts2[1] ? '#' + parts2[1] : '');
+            var parts = document.location.href.split('#');
+            var parts2 = parts[0].split('?');
+            document.location.href = parts2[0] + '?' + form.serialize() + (parts[1] ? '#' + parts[1] : '');
         },
 
         hackXHR: function() {
@@ -83,6 +85,23 @@
         unhackXHR: function() {
             XMLHttpRequest.prototype.setRequestHeader = XMLHttpRequest.prototype.wrappedSetRequestHeader;
             delete XMLHttpRequest.prototype.wrappedSetRequestHeader;
+        },
+
+        formToObject: function(form) {
+            form = jQuery(form);
+            var o = {};
+            var a = form.serializeArray();
+            $.each(a, function() {
+                if (o[this.name] !== undefined) {
+                    if (!o[this.name].push) {
+                        o[this.name] = [o[this.name]];
+                    }
+                    o[this.name].push(this.value || '');
+                } else {
+                    o[this.name] = this.value || '';
+                }
+            });
+            return o;
         }
     }
 
