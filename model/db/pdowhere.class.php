@@ -120,6 +120,26 @@ abstract class PDOWhere {
         return $this;
     }
 
+    public function whereA(Array $array, $logic = 'AND', $alias=null) {
+        $this->where('(');
+        $i=0;
+        foreach($array as $key => $val) {
+            if($i)
+                $this->where(strcasecmp($logic, 'AND')===0 ? 'AND' : 'OR');
+            $this->where($key, $val, $alias);
+        }
+        $this->where(')');
+        return $this;
+    }
+
+    public function whereAny(Array $array, $alias=null) {
+        return $this->whereA($array, "OR", $alias);
+    }
+
+    public function whereAll(Array $array, $alias=null) {
+        return $this->whereA($array, "AND", $alias);
+    }
+
     /**
      * Set ORDER BY for this statement
      * @param String $field the field or sql to add to the statement

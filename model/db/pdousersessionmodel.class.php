@@ -84,11 +84,6 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
             throw new SessionNotActiveException("User Session could not be found");
 
         $Session = static::loadByKey($key);
-        if($Session)
-            self::$mSession[$class] = $Session;
-        else
-            throw new SessionExpiredException("User Session has expired");
-
         self::$mSession[$class] = $Session;
         return $Session;
     }

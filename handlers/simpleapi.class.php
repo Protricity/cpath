@@ -38,12 +38,18 @@ class SimpleAPI extends API {
     }
 
     /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     */
+    protected function setupAPI() {}
+
+    /**
      * Execute this API Endpoint with the entire request.
      * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
      */
-    public function execute(IRequest $Request){
+    final protected function doExecute(IRequest $Request) {
         $call = $this->mCallback;
         if($call instanceof \Closure)
             return $call($this, $Request);

@@ -172,6 +172,8 @@ PHP;
 
         // Model
 
+        $noPrimary = array();
+
         foreach($tables as $Table) {
             $file = $modelPath.strtolower($Table->ClassName).'.class.php';
 
@@ -179,6 +181,9 @@ PHP;
             $PHP->Namespace = $modelNS;
 
             $Table->processModelPHP($PHP);
+
+            if(!$Table->Primary)
+                $noPrimary[] = $Table;
 
             $PHP->addUse(get_class($DB), 'DB');
 
@@ -273,6 +278,15 @@ PHP;
                     break;
                 }
         }
+
+        if($noPrimary) {
+            $t = array();
+            /** @var BuildPDOTable $Table */
+            foreach($noPrimary as $Table)
+                $t[] = $Table->Name;
+            Log::e(__CLASS__, "No PRIMARY key found for (" . count($noPrimary) . ") Table(s) '" . implode("', '", $t) . "'");
+        }
+
         //Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
         Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
@@ -554,9 +568,6 @@ class BuildPDOTable {
                     break;
                 }
             }
-
-        if(!$this->Primary)
-            Log::e(__CLASS__, "Warning: No PRIMARY key found for Table '{$this->Name}'");
     }
     
     protected function req($name, $arg, $preg=NULL, $desc=NULL) {

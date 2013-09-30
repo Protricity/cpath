@@ -16,18 +16,15 @@ use CPath\Interfaces\InvalidAPIException;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
-class API_Patch extends API_Get {
+class API_Patch extends API_Get implements IGetExecute {
 
     /**
-     * Construct an instance of this API
-     * @param string|array $alternateColumns a column or array of columns that may be used to search for Models.
-     * Note: PRIMARY key is already included
-     * Warning: Only the first result will be used if multiple Models are found
-     * @param PDOModel|IWriteAccess $Model the user source object for this API
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    function __construct(PDOModel $Model, $alternateColumns=NULL) {
-        parent::__construct($Model, $alternateColumns);
+    function setupAPI() {
+        $Model = $this->getModel();
 
         $defFilter = $Model::DEFAULT_FILTER;
         foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
@@ -44,15 +41,13 @@ class API_Patch extends API_Get {
     }
 
     /**
-     * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
-     * @throws ModelNotFoundException if the model was not found
+     * Perform on successful API_Get execution
+     * @param PDOModel $UpdateModel the returned model
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|void
      */
-    function execute(IRequest $Request) {
-
-        $UpdateModel = parent::execute($Request);
+    final function onGetExecute(PDOModel $UpdateModel, IRequest $Request, IResponse $Response) {
 
         $Policy = $this->getSecurityPolicy();
 

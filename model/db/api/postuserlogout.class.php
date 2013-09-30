@@ -16,6 +16,18 @@ use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\Response;
 
+interface IPostLogoutExecute {
+
+    /**
+     * Perform on successful API_Get execution
+     * @param PDOUserModel $User the logged out user account instance
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|null
+     */
+    function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
+}
+
 class API_PostUserLogout extends API_Base {
     private $mUser;
 
@@ -27,6 +39,8 @@ class API_PostUserLogout extends API_Base {
         parent::__construct($Model);
         $this->mUser = $Model;
     }
+
+    protected function setupAPI() {}
 
     /**
      * Get the API Description
@@ -42,11 +56,17 @@ class API_PostUserLogout extends API_Base {
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
-    function execute(IRequest $Request) {
+    final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;
         $this->processRequest($Request);
-        if($User::logout())
-            return new Response("Logged out successfully", true);
-        return new Response("User was not logged in", false);
+        if(!$User::logout())
+            return new Response("User was not logged in", false);
+
+        $Response = new Response("Logged out successfully", true);
+
+        if($this instanceof IPostLogoutExecute)
+            $Response = $this->onPostLogoutExecute($User, $Request, $Response) ?: $Response;
+
+        return $Response;
     }
 }
