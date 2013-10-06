@@ -27,6 +27,10 @@ class ExceptionResponse extends Response {
         parent::__construct($ex->getMessage(), false);
     }
 
+    function getException() {
+        return $this->mEx;
+    }
+
     function toJSON(Array &$JSON) {
         parent::toJSON($JSON);
         if($this->mEx instanceof IJSON)

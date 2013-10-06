@@ -95,6 +95,7 @@ abstract class API implements IAPI {
             if($this instanceof IAPIExecute)
                 $this->onAPIPreExecute($Request);
 
+            $this->_setupFields();
             $Response = $this->doExecute($Request);
 
             if($Response instanceof IResponseAggregate)

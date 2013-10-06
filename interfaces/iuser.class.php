@@ -19,8 +19,17 @@ interface IUser {
     function getID();
 
     /**
-     * Loads a user instance from the active session
-     * @return IUser|NULL the found user instance or null if not found
+     * Load or get the current user session
+     * @return IUserSession the user instance or null if not found
+     * @throws InvalidUserSessionException if the user is not logged in
      */
-    static function loadBySession();
+    static function loadSession();
+
+    /**
+     * Load or get the current user via session or return a guest account
+     * @param bool $throwOnFail throws an exception if the user session was not available
+     * @return IUser|NULL the user instance or null if not found
+     * @throws InvalidUserSessionException if the user is not logged in
+     */
+    static function loadBySession($throwOnFail = true);
 }

@@ -24,6 +24,7 @@ class API_Patch extends API_Get implements IGetExecute {
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
     function setupAPI() {
+        parent::setupAPI();
         $Model = $this->getModel();
 
         $defFilter = $Model::DEFAULT_FILTER;

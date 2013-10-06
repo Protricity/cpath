@@ -67,68 +67,80 @@ abstract class PDOWhere {
 
     /**
      * Adds a WHERE condition to the search
-     * @param $field String the field to search. May include comparison characters.
      * Examples:
      *  ->where('myfield="myvalue"')                        // WHERE table.myfield="myvalue"
      *  ->where('myfield', 'myvalue')                       // WHERE table.myfield = 'myvalue'
      *  ->where('myfield >', 'myvalue')                     // WHERE table.myfield > 'myvalue'
      *  ->where('? LIKE {}.myfield', 'myvalue', 'myalias')  // WHERE 'myvalue' LIKE myalias.myfield
      *  ->where('myfield', 'myvalue', 'myalias')            // WHERE myalias.myfield = 'myvalue'
-     * @param String|null $value The value to compare against. If null, the entire comparison must be in $field
+     * @param $field String the field to search. May include comparison characters.
+     * @param String $value The value to compare against.
      * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
      * characters in '?.()', then the alias will not be prepended to the field.
      * If the string '{}' appears, it will be replaced with the alias
      * @return $this returns the query instance
      * @throws \InvalidArgumentException
      */
-    public function where($field, $value=NULL, $alias=NULL) {
+    public function where($field, $value, $alias=NULL) {
+        $field = $this->getAliasedField($field, $alias);
 
-        if(preg_match('/^(AND|OR|\(|\))$/i', $field)) {
-            if($field == '(' && !$this->mLastCond)
+        if(is_array($value)) {
+            if(!$value)
+                throw new \InvalidArgumentException("An empty array was passed to Column '{$field}'");
+            $this->mValues = array_merge($this->mValues, $value);
+            $field .= ' in (?' . str_repeat(', ?', sizeof($this->mValues) - 1) . ')';
+        } else {
+            $this->mValues[] = $value;
+            if(strpos($field, '?') === false) {
+                $e = '=';
+                if(preg_match('/([=<>!]+|like)\s*$/i', $field))
+                    $e = ' ';
+                $field .= $e . '?';
+            }
+        }
+
+        return $this->whereSQL($field, $alias);
+    }
+
+
+    /**
+     * Adds a WHERE condition to the search
+     * Examples:
+     *  ->where('myfield="myvalue"')                        // WHERE table.myfield="myvalue"
+     * @param String|null $sql The sql code to add to WHERE
+     * characters in '?.()', then the alias will not be prepended to the field.
+     * If the string '{}' appears, it will be replaced with the alias
+     * @return $this returns the query instance
+     * @throws \InvalidArgumentException
+     */
+    public function whereSQL($sql) {
+        if(preg_match('/^(AND|OR|\(|\))$/i', $sql)) {
+            if($sql == '(' && !$this->mLastCond)
                 $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
-            if($field != ')')
+            if($sql != ')')
                 $this->mLastCond = true;
-            $this->mWhere[] = $field;
+            $this->mWhere[] = $sql;
             return $this;
         }
-        
-        $field = $this->getAliasedField($field, $alias);
 
         if (!$this->mLastCond) {
             $this->mWhere[] = ($this->mFlags & self::LOGIC_OR) ? 'OR' : 'AND';
         }
 
-        if($value !== NULL) {
-            if(is_array($value)) {
-                if(!$value)
-                    throw new \InvalidArgumentException("An empty array was passed to Column '{$field}'");
-                $this->mValues = array_merge($this->mValues, $value);
-                $field .= ' in (?' . str_repeat(', ?', sizeof($this->mValues) - 1) . ')';
-            } else {
-                $this->mValues[] = $value;
-                if(strpos($field, '?') === false) {
-                    $e = '=';
-                    if(preg_match('/([=<>!]+|like)\s*$/i', $field))
-                        $e = ' ';
-                    $field .= $e . '?';
-                }
-            }
-        }
-
-        $this->mWhere[] = $field;
+        $this->mWhere[] = $sql;
         $this->mLastCond = false;
         return $this;
     }
 
     public function whereA(Array $array, $logic = 'AND', $alias=null) {
-        $this->where('(');
+        $this->whereSQL('(');
         $i=0;
         foreach($array as $key => $val) {
             if($i)
-                $this->where(strcasecmp($logic, 'AND')===0 ? 'AND' : 'OR');
+                $this->whereSQL(strcasecmp($logic, 'AND')===0 ? 'AND' : 'OR');
             $this->where($key, $val, $alias);
         }
-        $this->where(')');
+        $this->whereSQL(')');
         return $this;
     }
 

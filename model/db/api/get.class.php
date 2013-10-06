@@ -14,6 +14,7 @@ use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\InvalidAPIException;
 use CPath\Model\DB\Interfaces\ILimitApiQuery;
 use CPath\Model\DB\Interfaces\IReadAccess;
@@ -98,12 +99,12 @@ class API_Get extends API_Base {
         /** @var PDOModelSelect $Search  */
         $Search = $Model::search();
         $Search->limit(1);
-        $Search->where('(');
+        $Search->whereSQL('(');
         $Search->setFlag(PDOWhere::LOGIC_OR);
         foreach($this->mColumns as $name => $Column)
             $Search->where($name, $id);
         $Search->unsetFlag(PDOWhere::LOGIC_OR);
-        $Search->where(')');
+        $Search->whereSQL(')');
 
         $Policy = $this->getSecurityPolicy();
 
@@ -111,6 +112,7 @@ class API_Get extends API_Base {
         if($Model instanceof IReadAccess)
             $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
 
+        /** @var PDOModel$GetModel  */
         $GetModel = $Search->fetch();
         if(!$GetModel)
             throw new ModelNotFoundException($Model::modelName() . " '{$id}' was not found");
@@ -119,7 +121,7 @@ class API_Get extends API_Base {
         if($Model instanceof IReadAccess)
             $Model->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
 
-        $Response = $GetModel;
+        $Response = $GetModel->createResponse();
 
         if($this instanceof IGetExecute)
             $Response = $this->onGetExecute($GetModel, $Request, $Response) ?: $Response;

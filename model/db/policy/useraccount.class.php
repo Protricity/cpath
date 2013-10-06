@@ -8,15 +8,7 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\InvalidAPIException;
-use CPath\Model\DB\Interfaces\ILimitApiQuery;
-use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
@@ -54,7 +46,7 @@ class Policy_UserAccount implements ISecurityPolicy {
     function assertReadAccess(PDOModel $User, IRequest $Request, $intent) {
         if(!$this->mReadOther) {
             $EmptyUser = $this->mUser;
-            $id = $EmptyUser::getUserSession()->getID(); // Assert logged in
+            $id = $EmptyUser::loadBySession()->getID(); // Assert logged in
             if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
                 throw new InvalidPermissionException("No permission to modify " . $User);
         }
@@ -70,7 +62,7 @@ class Policy_UserAccount implements ISecurityPolicy {
     function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {
         if(!$this->mReadOther) {
             $EmptyUser = $this->mUser;
-            $id = $EmptyUser::getUserSession()->getID();    // Assert logged in
+            $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
             $Select->where($EmptyUser::COLUMN_ID, $id);  // TODO: kinda silly no?
         }
     }
@@ -89,12 +81,12 @@ class Policy_UserAccount implements ISecurityPolicy {
         $EmptyUser = $this->mUser;
         switch($intent) {
             case IWriteAccess::INTENT_PATCH:
-                $id = $EmptyUser::getUserSession()->getID();    // Assert logged in
+                $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
                 if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
                     throw new InvalidPermissionException("No permission to modify " . $User);
                 break;
             case IWriteAccess::INTENT_DELETE:
-                $id = $EmptyUser::getUserSession()->getID();    // Assert logged in
+                $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
                 if(!$this->mDelete
                     || $User->columnValue($EmptyUser::COLUMN_ID) != $id)
                     throw new InvalidPermissionException("No permission to delete " . $User);
