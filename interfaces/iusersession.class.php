@@ -14,6 +14,7 @@ class InvalidUserSessionException extends \Exception {
 }
 class SessionDisabledException extends InvalidUserSessionException {}
 class SessionNotActiveException extends InvalidUserSessionException {}
+class SessionNotFoundException extends InvalidUserSessionException {}
 class SessionExpiredException extends InvalidUserSessionException {}
 
 interface IUserSession {

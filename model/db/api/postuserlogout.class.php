@@ -14,6 +14,7 @@ use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\SessionNotFoundException;
 use CPath\Model\Response;
 
 interface IPostLogoutExecute {
@@ -59,10 +60,14 @@ class API_PostUserLogout extends API_Base {
     final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;
         $this->processRequest($Request);
-        if(!$User::logout())
-            return new Response("User was not logged in", false);
+        try {
+            if(!$User::logout())
+                return new Response("User was not logged in", false);
+            $Response = new Response("Logged out successfully", true);
+        } catch (SessionNotFoundException $ex) {
+            $Response = new ResponseEx;
+        }
 
-        $Response = new Response("Logged out successfully", true);
 
         if($this instanceof IPostLogoutExecute)
             $Response = $this->onPostLogoutExecute($User, $Request, $Response) ?: $Response;

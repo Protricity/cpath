@@ -11,9 +11,11 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
+use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\SessionDisabledException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
+use CPath\Interfaces\SessionNotFoundException;
 use CPath\Log;
 use CPath\Model\Response;
 use CPath\Util;
@@ -83,7 +85,11 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
         else
             throw new SessionNotActiveException("User Session could not be found");
 
-        $Session = static::loadByKey($key);
+        try {
+            $Session = static::loadByKey($key);
+        } catch (ModelNotFoundException $ex) {
+            throw new SessionNotFoundException($ex->getMessage(), NULL, $ex);
+        }
         self::$mSession[$class] = $Session;
         return $Session;
     }
@@ -129,7 +135,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
     static function destroySession() {
         try {
             $Session = static::loadBySession();
-        } catch (SessionNotActiveException $ex ) {}
+        } catch (InvalidUserSessionException $ex ) {}
         session_unset();
         if(!empty($Session)) {
             static::removeModel($Session);
