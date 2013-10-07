@@ -45,7 +45,6 @@ class API_GetSearch extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if the Model was not found
@@ -54,7 +53,6 @@ class API_GetSearch extends API_Base {
     final protected function doExecute(IRequest $Request) {
 
         $Model = $this->getModel();
-        $this->processRequest($Request);
         $limit = $Request->pluck('limit');
         $search = $Request->pluck('search');
         $search_by = $Request->pluck('search_by');

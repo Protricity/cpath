@@ -15,6 +15,7 @@ use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
+use CPath\Interfaces\IHandlerSetEvents;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
@@ -30,6 +31,7 @@ use CPath\Util;
  */
 
 class InvalidRouteException extends \Exception {}
+
 
 class HandlerSet implements IHandlerSet {
 
@@ -125,6 +127,8 @@ class HandlerSet implements IHandlerSet {
         $route = $Request->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        if($this->mSource instanceof IHandlerSetEvents)
+            $this->mSource->onRender($Request);
         $this->get($route)->render($Request);
     }
 

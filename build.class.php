@@ -32,7 +32,6 @@ class Build extends API implements IBuildable {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRoute instance for this render which contains the request and args
      * @return Response the api call response with data, message, and status
      */

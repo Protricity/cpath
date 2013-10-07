@@ -55,15 +55,12 @@ abstract class API implements IAPI {
 
     private $mSetup = false;
 
-    private $mRequestProcessed = false;
-
     public function __construct() {
 
     }
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
@@ -95,7 +92,7 @@ abstract class API implements IAPI {
             if($this instanceof IAPIExecute)
                 $this->onAPIPreExecute($Request);
 
-            $this->_setupFields();
+            $this->_processRequest($Request);
             $Response = $this->doExecute($Request);
 
             if($Response instanceof IResponseAggregate)
@@ -288,10 +285,18 @@ abstract class API implements IAPI {
      * @return void
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    public function processRequest(IRequest $Request) {
+    protected function processRequest(IRequest $Request) {
+    }
+
+    /**
+     * Process a request. Validates each Field. Provides optional Field formatting
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return void
+     * @throws ValidationExceptions if one or more Fields fail to validate
+     */
+    private function _processRequest(IRequest $Request) {
         $this->_setupFields();
-        if($this->mRequestProcessed)                        // Ugly. need a better system. Probably should just force processRequest every time
-            return;
+        $this->processRequest($Request);
         if($Request instanceof IShortOptions)
             $Request->processShortOptions(array_keys($this->getFields()));
         if($arg = $Request->getNextArg()) {
@@ -328,8 +333,6 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
-
-        $this->mRequestProcessed = true;
     }
 
     /**

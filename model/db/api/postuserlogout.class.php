@@ -53,13 +53,11 @@ class API_PostUserLogout extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;
-        $this->processRequest($Request);
         try {
             if(!$User::logout())
                 return new Response("User was not logged in", false);

@@ -85,7 +85,6 @@ class API_Get extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return PDOModel|IResponse the found model which implements IResponseAggregate
      * @throws ModelNotFoundException if the Model was not found
@@ -93,7 +92,6 @@ class API_Get extends API_Base {
     final protected function doExecute(IRequest $Request) {
 
         $Model = $this->getModel();
-        $this->processRequest($Request);
         $id = $Request->pluck($this->mIDField);
 
         /** @var PDOModelSelect $Search  */

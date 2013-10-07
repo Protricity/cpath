@@ -65,12 +65,12 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
      * @return ILogEntry[]
      */
     function getLogs();
-
-    /**
-     * Process a request. Validates each Field. Provides optional Field formatting
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return void
-     * @throws ValidationExceptions if one or more Fields fail to validate
-     */
-    public function processRequest(IRequest $Request);
+//
+//    /**
+//     * Process a request. Validates each Field. Provides optional Field formatting
+//     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+//     * @return void
+//     * @throws ValidationExceptions if one or more Fields fail to validate
+//     */
+//    public function processRequest(IRequest $Request);
 }

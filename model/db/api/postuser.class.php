@@ -71,7 +71,6 @@ class API_PostUser extends API_Post implements IPostExecute {
         $User = $this->mUser;
         $pass = $Request[$User::COLUMN_PASSWORD];
         $name = $Request[$User::COLUMN_USERNAME];
-        $this->processRequest($Request);
         $login = $Request->pluck('login');
 
         if($User::searchByColumns($name, $User::COLUMN_USERNAME)->fetch())

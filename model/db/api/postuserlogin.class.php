@@ -60,13 +60,11 @@ class API_PostUserLogin extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;
-        $this->processRequest($Request);
         $Session = $User::login($Request['name'], $Request['password'], NULL, $User);
         $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
             'user' => $User,
