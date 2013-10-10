@@ -77,7 +77,8 @@ class API_GetSearch extends API_Base {
         /** @var PDOModelSelect $Search */
 
         $export = $Model::EXPORT_SEARCH ?: $Model::EXPORT ?: PDOColumn::FLAG_EXPORT;
-        $Search = $Model::selectByColumns($export, $search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
+        $select = array_keys($Model::findColumns($export));
+        $Search = $Model::selectByColumns($select, $search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
 
         $Policy = $this->getSecurityPolicy();
 
@@ -88,7 +89,9 @@ class API_GetSearch extends API_Base {
         $results = $Search->fetchAll();
 
         foreach($results as $ResultModel)
-            $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
+            if($ResultModel instanceof IReadAccess)
+                $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
+
         if($Model instanceof IReadAccess)
             foreach($results as $ResultModel)
                 $Model->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
