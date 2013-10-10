@@ -18,6 +18,8 @@ use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
 use CPath\Util;
 
+
+
 class ExceptionResponse extends Response {
     /** @var \Exception */
     private $mEx;

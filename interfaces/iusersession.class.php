@@ -7,9 +7,20 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-class InvalidUserSessionException extends \Exception {
+use CPath\Model\ExceptionResponse;
+
+class InvalidUserSessionException extends \Exception implements IResponseAggregate {
     public function __construct($msg="User is not logged in") {
         parent::__construct($msg);
+    }
+
+    /**
+     * @return IResponse
+     */
+    function createResponse() {
+        $Response = new ExceptionResponse($this);
+        $Response->setStatusCode(401);
+        return $Response;
     }
 }
 class SessionDisabledException extends InvalidUserSessionException {}

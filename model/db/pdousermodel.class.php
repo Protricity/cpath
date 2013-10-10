@@ -226,7 +226,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     static function loadSession() {
         /** @var IUserSession $class  */
         $class = static::SESSION_CLASS;
-            return $class::loadBySession();
+        return $class::loadBySession();
     }
 
 
