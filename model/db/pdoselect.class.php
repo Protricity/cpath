@@ -14,7 +14,7 @@ use \PDO;
 class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     /** @var \PDOStatement */
     protected $mStmt=NULL;
-    private $mDB, $mSelect=array(), $mLimit='1', $mOffset=NULL;
+    private $mDB, $mSelect=array(), $mLimit=NULL, $mOffset=NULL;
     private $mDistinct = false;
     private $mRow = null;
     private $mCount = 0;
