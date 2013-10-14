@@ -11,9 +11,11 @@ namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
+use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\SessionDisabledException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
+use CPath\Interfaces\SessionNotFoundException;
 use CPath\Log;
 use CPath\Model\Response;
 use CPath\Util;
@@ -63,6 +65,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
      * @return IUserSession the found user session
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found
+     * @throws SessionNotFoundException if the session was not found
      */
     // TODO: allow required hardware id and kill session on mismatch
     static function loadBySession() {
@@ -83,12 +86,11 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
         else
             throw new SessionNotActiveException("User Session could not be found");
 
-        $Session = static::loadByKey($key);
-        if($Session)
-            self::$mSession[$class] = $Session;
-        else
-            throw new SessionExpiredException("User Session has expired");
-
+        try {
+            $Session = static::loadByKey($key);
+        } catch (ModelNotFoundException $ex) {
+            throw new SessionNotFoundException("Session {$key} not active", NULL, $ex);
+        }
         self::$mSession[$class] = $Session;
         return $Session;
     }
@@ -134,7 +136,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
     static function destroySession() {
         try {
             $Session = static::loadBySession();
-        } catch (SessionNotActiveException $ex ) {}
+        } catch (InvalidUserSessionException $ex ) {}
         session_unset();
         if(!empty($Session)) {
             static::removeModel($Session);

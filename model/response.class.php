@@ -6,6 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model;
+use CPath\Interfaces\IComparable;
+use CPath\Interfaces\IComparator;
+use CPath\Interfaces\NotEqualException;
 use CPath\Util;
 use CPath\Log;
 use CPath\Interfaces\IResponse;
@@ -13,7 +16,7 @@ use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\ILogEntry;
 
-class Response extends ArrayObject implements IResponse {
+class Response extends ArrayObject implements IResponse, IComparable {
     private $mCode, $mData=array(), $mMessage;
     /** @var ILogEntry[] */
     private $mLogs=array();
@@ -130,5 +133,18 @@ class Response extends ArrayObject implements IResponse {
      */
     static function getNew($msg=NULL, $status=true, $data=array()) {
         return new self($msg, $status, $data);
+    }
+
+    /**
+     * Compare two instances of this object
+     * @param IComparable|Response $obj the object to compare against $this
+     * @param IComparator $C the IComparator instance
+     * @throws NotEqualException if the objects were not equal
+     * @return void
+     */
+    function compareTo(IComparable $obj, IComparator $C) {
+        $C->compareScalar($this->mCode, $obj->mCode, "Response Status");
+        $C->compareScalar($this->mMessage, $obj->mMessage, "Response Message");
+        $C->compare($this->mData, $obj->mData, "Response Data");
     }
 }

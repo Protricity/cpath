@@ -25,13 +25,17 @@ class Build extends API implements IBuildable {
     const ROUTE_IGNORE_DIR = '.git|.idea';
 
     /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     */
+    protected function setupAPI(){}
+
+    /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRoute instance for this render which contains the request and args
      * @return Response the api call response with data, message, and status
      */
-    function execute(IRequest $Request)
-    {
+    final protected function doExecute(IRequest $Request) {
         static $built = false;
         if($built)
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
@@ -354,4 +358,5 @@ class Build extends API implements IBuildable {
         }
         return $exCount;
     }
+
 }

@@ -8,6 +8,7 @@
 namespace CPath\Model\DB;
 
 
+use API\UserSession;
 use CPath\Base;
 use CPath\Exceptions\ValidationException;
 use CPath\Handlers\HandlerSet;
@@ -216,15 +217,18 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         return static::loadByPrimaryKey($Session->getUserID());
     }
 
+
     /**
-     * Loads a user instance from the active session
-     * @return PDOUserModel|NULL the found user instance or null if not found
+     * Load or get the current user session
+     * @return UserSession the user instance or null if not found
+     * @throws InvalidUserSessionException if the user is not logged in
      */
-    static function loadBySession() {
+    static function loadSession() {
         /** @var IUserSession $class  */
         $class = static::SESSION_CLASS;
-        return static::loadByPrimaryKey($class::loadBySession()->getUserID());
+        return $class::loadBySession();
     }
+
 
     /**
      * Get the current user session or return a guest account
@@ -232,16 +236,16 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      * @return PDOUserModel|NULL the user instance or null if not found
      * @throws InvalidUserSessionException if the user is not logged in
      */
-    static function getUserSession($throwOnFail = true) {
+    static function loadBySession($throwOnFail = true) {
         $class = get_called_class();
         if(isset(self::$mSession[$class]))
             return self::$mSession[$class];
         if($throwOnFail)
-            return self::$mSession[$class] = static::loadBySession($throwOnFail);
-        try{
-            return self::$mSession[$class] = static::loadBySession($throwOnFail);
+            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail)->getUserID());
+        try {
+            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail)->getUserID());
         } catch (InvalidUserSessionException $ex) {
-            return false;
+            return NULL;
         }
     }
 

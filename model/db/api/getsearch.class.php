@@ -21,11 +21,11 @@ class API_GetSearch extends API_Base {
     private $mSearchColumns;
 
     /**
-     * Construct an instance of this API
-     * @param PDOModel|IReadAccess $Model the user source object for this API
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
      */
-    function __construct(PDOModel $Model) {
-        parent::__construct($Model);
+    protected function setupAPI() {
+        $Model = $this->getModel();
 
         $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
 
@@ -45,16 +45,14 @@ class API_GetSearch extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if the Model was not found
      * @throws \Exception if no valid columns were found
      */
-    function execute(IRequest $Request) {
+    final protected function doExecute(IRequest $Request) {
 
         $Model = $this->getModel();
-        $this->processRequest($Request);
         $limit = $Request->pluck('limit');
         $search = $Request->pluck('search');
         $search_by = $Request->pluck('search_by');

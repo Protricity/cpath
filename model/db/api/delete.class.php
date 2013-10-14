@@ -13,11 +13,12 @@ use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAPIExecute;
 use CPath\Model\DB\Interfaces\ILimitApiQuery;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
-class API_Delete extends API_Get {
+class API_Delete extends API_Get implements IGetExecute {
 
     /**
      * Get the API Description
@@ -28,20 +29,17 @@ class API_Delete extends API_Get {
     }
 
     /**
-     * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
-     * @throws ModelNotFoundException if the model was not found
+     * Perform on successful API_Get execution
+     * @param PDOModel $Model the returned model
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|void
      */
-    function execute(IRequest $Request) {
+    function onGetExecute(PDOModel $Model, IRequest $Request, IResponse $Response) {
+        $this->getSecurityPolicy()->assertWriteAccess($Model, $Request, IWriteAccess::INTENT_DELETE);
 
-        $DeleteModel = parent::execute($Request);
+        $Model::removeModel($Model);
 
-        $this->getSecurityPolicy()->assertWriteAccess($DeleteModel, $Request, IWriteAccess::INTENT_DELETE);
-
-        $DeleteModel::removeModel($DeleteModel);
-
-        return new Response("Removed {$DeleteModel}", true, $DeleteModel);
+        return new Response("Removed {$Model}", true, $Model);
     }
 }

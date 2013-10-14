@@ -13,6 +13,7 @@ use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
+use CPath\Model\ExceptionResponse;
 use CPath\Request\CLI;
 use CPath\Model\Response;
 
@@ -20,6 +21,7 @@ class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
 
 class ApiTester {
+    /** @var \CPath\Interfaces\IAPI */
     private $mAPI;
     private $mRequest;
     public function __construct(IAPI $API, IRequest $Request) {
@@ -31,6 +33,7 @@ class ApiTester {
      * @param array $request
      * @return IResponse
      * @throws APIFailedException
+     * @throws \Exception
      */
     public function test(Array $request=NULL) {
         if($request)
@@ -38,6 +41,8 @@ class ApiTester {
         $Response = $this->mAPI->execute($this->mRequest);
         if(!($Response instanceof IResponse))
             $Response = new Response(true, "API executed successfully", $Response);
+        if($Response instanceof ExceptionResponse)
+            throw $Response->getException();
         if($Response->getStatusCode() != IResponse::STATUS_SUCCESS)
             throw new APIFailedException($Response->getMessage());
         return $Response;

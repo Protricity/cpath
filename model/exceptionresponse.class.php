@@ -18,6 +18,8 @@ use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
 use CPath\Util;
 
+
+
 class ExceptionResponse extends Response {
     /** @var \Exception */
     private $mEx;
@@ -25,6 +27,10 @@ class ExceptionResponse extends Response {
     public function __construct(\Exception $ex) {
         $this->mEx = $ex;
         parent::__construct($ex->getMessage(), false);
+    }
+
+    function getException() {
+        return $this->mEx;
     }
 
     function toJSON(Array &$JSON) {

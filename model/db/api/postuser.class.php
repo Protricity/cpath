@@ -17,17 +17,32 @@ use CPath\Interfaces\IResponse;
 use CPath\Interfaces\InvalidAPIException;
 use CPath\Model\Response;
 
-class API_PostUser extends API_Post {
+interface IPostUserExecute {
+
+    /**
+     * Perform on successful API_Get execution
+     * @param PDOUserModel $NewUser the returned model
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|null
+     */
+    function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, IResponse $Response);
+}
+
+class API_PostUser extends API_Post implements IPostExecute {
     private $mUser;
 
     /**
-     * Construct an instance of this API
-     * @param PDOUserModel $Model the user source object for this API
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     * @throws InvalidAPIException if API was not set up properly
      */
-    function __construct(PDOUserModel $Model) {
+    protected function setupAPI() {
+        /** @var PDOUserModel $Model  */
+        $Model = $this->getModel();
         $this->mUser = $Model;
 
-        parent::__construct($Model);
+        parent::setupAPI();
 
         if($Model::PASSWORD_CONFIRM) {
             if(!$Model::COLUMN_PASSWORD)
@@ -43,18 +58,19 @@ class API_PostUser extends API_Post {
         $this->addField('login', new APIField("Log in after"));
     }
 
-
     /**
-     * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * Perform on successful API_Get execution
+     * @param PDOModel $NewModel the returned model
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|null
+     * @throws ModelAlreadyExistsException if the user already exists
      */
-    function execute(IRequest $Request) {
+    function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response)
+    {
         $User = $this->mUser;
         $pass = $Request[$User::COLUMN_PASSWORD];
         $name = $Request[$User::COLUMN_USERNAME];
-        $this->processRequest($Request);
         $login = $Request->pluck('login');
 
         if($User::searchByColumns($name, $User::COLUMN_USERNAME)->fetch())
@@ -66,6 +82,11 @@ class API_PostUser extends API_Post {
             $User::login($User->getUsername(), $pass);
             return new Response("Created and logged in user '".$User->getUsername()."' successfully", true, $User);
         }
-        return new Response("Created user '".$User->getUsername()."' successfully", true, $User);
+        $Response = new Response("Created user '".$User->getUsername()."' successfully", true, $User);
+
+        if($this instanceof IPostUserExecute)
+            $Response = $this->onPostUserExecute($User, $Request, $Response) ?: $Response;
+
+        return $Response;
     }
 }

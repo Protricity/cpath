@@ -8,30 +8,27 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 use CPath\Base;
+use CPath\Build;
+use CPath\Builders\RouteBuilder;
 use CPath\Exceptions\ValidationException;
 use CPath\Handlers\Views\APIInfo;
 use CPath\Interfaces\APIFieldNotFound;
 use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IAPIExecute;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
-use CPath\Model\ArrayObject;
-use CPath\Model\AutoLoader\SimpleLoader;
 use CPath\Model\ExceptionResponse;
-use CPath\Model\Route;
-use CPath\Util;
-use CPath\Build;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IHandler;
 use CPath\Model\MultiException;
 use CPath\Model\Response;
-use CPath\Builders\RouteBuilder;
+use CPath\Model\Route;
+use CPath\Util;
 use CPath\Validate;
 
 /**
@@ -56,7 +53,7 @@ abstract class API implements IAPI {
     /** @var SimpleLogger */
     private $mLog = NULL;
 
-    private $mRequestProcessed = false;
+    private $mSetup = false;
 
     public function __construct() {
 
@@ -64,22 +61,40 @@ abstract class API implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
-    abstract function execute(IRequest $Request);
+    abstract protected function doExecute(IRequest $Request);
+
+    /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     */
+    abstract protected function setupAPI();
+
+    private function _setupFields() {
+        if($this->mSetup)
+            return;
+        $this->mSetup = true;
+        $this->setupAPI();
+        return;
+    }
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
      */
-    public function executeAsResponse(IRequest $Request) {
+    final public function execute(IRequest $Request) {
         if(static::LOG_ENABLE)
             $this->mLog = new SimpleLogger(true);
         try {
-            $Response = $this->execute($Request);
+            if($this instanceof IAPIExecute)
+                $this->onAPIPreExecute($Request);
+
+            $this->_processRequest($Request);
+            $Response = $this->doExecute($Request);
+
             if($Response instanceof IResponseAggregate)
                 $Response = $Response->createResponse();
             if(!($Response instanceof IResponse))
@@ -92,6 +107,8 @@ abstract class API implements IAPI {
             else
                 $Response = new ExceptionResponse($ex);
         }
+        if($this instanceof IAPIExecute)
+            $this->onAPIPostExecute($Request, $Response);
         if(static::LOG_ENABLE) {
             foreach($this->mLog->getLogs() as $Log)
                 $Response->addLogEntry($Log);
@@ -131,7 +148,7 @@ abstract class API implements IAPI {
             header("Content-Type: text/html");
         $Render = new APIInfo();
         $Render->renderAPI($this, $Request->getRoute());
-        //$Response = $this->executeAsResponse($Route);
+        //$Response = $this->execute($Route);
         //$Response->sendHeaders();
         //$Response->renderHtml();
     }
@@ -144,10 +161,16 @@ abstract class API implements IAPI {
     public function renderJSON(IRequest $Request) {
         if(!headers_sent()) // && !Base::isCLI())
             header("Content-Type: application/json");
-        $Response = $this->executeAsResponse($Request);
+        $Response = $this->execute($Request);
         $Response->sendHeaders();
-        $JSON = Util::toJSON($Response);
-        echo json_encode($JSON);
+        try{
+            $JSON = Util::toJSON($Response);
+            echo json_encode($JSON);
+        } catch (\Exception $ex) {
+            $Response = new ExceptionResponse($ex);
+            $JSON = Util::toJSON($Response);
+            echo json_encode($JSON);
+        }
     }
 
     /**
@@ -158,10 +181,16 @@ abstract class API implements IAPI {
     public function renderXML(IRequest $Request) {
         if(!headers_sent()) // && !Base::isCLI())
             header("Content-Type: text/xml");
-        $Response = $this->executeAsResponse($Request);
+        $Response = $this->execute($Request);
         $Response->sendHeaders();
-        $XML = Util::toXML($Response);
-        echo $XML->asXML();
+        try{
+            $XML = Util::toXML($Response);
+            echo $XML->asXML();
+        } catch (\Exception $ex) {
+            $Response = new ExceptionResponse($ex);
+            $XML = Util::toXML($Response);
+            echo $XML->asXML();
+        }
     }
 
     /**
@@ -170,7 +199,7 @@ abstract class API implements IAPI {
      * @return void
      */
     public function renderText(IRequest $Request) {
-        $Response = $this->executeAsResponse($Request);
+        $Response = $this->execute($Request);
         $Response->sendHeaders('text/plain');
         $Response->renderText();
     }
@@ -192,6 +221,7 @@ abstract class API implements IAPI {
      * @return $this Return the class instance
      */
     public function addField($name, IAPIField $Field, $prepend=false) {
+        $this->_setupFields();
         if($prepend) {
             $old = $this->mFields;
             $this->mFields = array();
@@ -211,6 +241,7 @@ abstract class API implements IAPI {
      * @return $this return the class instance
      */
     public function addFields(Array $fields) {
+        $this->_setupFields();
         foreach($fields as $name => $Field)
             $this->mFields[$name] = $Field;
         return $this;
@@ -221,6 +252,7 @@ abstract class API implements IAPI {
      * @return IAPIField[]
      */
     public function getFields() {
+        $this->_setupFields();
         return $this->mFields;
     }
 
@@ -231,6 +263,7 @@ abstract class API implements IAPI {
      * @throws APIFieldNotFound if the field was not found
      */
     public function getField($fieldName) {
+        $this->_setupFields();
         if(!isset($this->mFields[$fieldName]))
             throw new APIFieldNotFound("Field '{$fieldName}' is not in this API");
         return $this->mFields;
@@ -252,13 +285,22 @@ abstract class API implements IAPI {
      * @return void
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    public function processRequest(IRequest $Request) {
-        if($this->mRequestProcessed)                        // Ugly. need a better system. Probably should just force processRequest every time
-            return;
+    protected function processRequest(IRequest $Request) {
+    }
+
+    /**
+     * Process a request. Validates each Field. Provides optional Field formatting
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return void
+     * @throws ValidationExceptions if one or more Fields fail to validate
+     */
+    private function _processRequest(IRequest $Request) {
+        $this->_setupFields();
+        $this->processRequest($Request);
         if($Request instanceof IShortOptions)
-            $Request->processShortOptions(array_keys($this->mFields));
+            $Request->processShortOptions(array_keys($this->getFields()));
         if($arg = $Request->getNextArg()) {
-            foreach($this->mFields as $name=>$Field) {
+            foreach($this->getFields() as $name=>$Field) {
                 if($Field instanceof IAPIParam) {
                     $Request[$name] = $arg;
                     if(!$arg = $Request->getNextArg())
@@ -268,7 +310,7 @@ abstract class API implements IAPI {
         }
         $FieldExceptions = new ValidationExceptions();
         $data = array();
-        foreach($this->mFields as $name=>$Field) {
+        foreach($this->getFields() as $name=>$Field) {
             try {
                 $data[$name] = $Field->validate($Request[$name]);
             } catch (ValidationException $ex) {
@@ -291,8 +333,6 @@ abstract class API implements IAPI {
 
         if(count($FieldExceptions))
             throw $FieldExceptions;
-
-        $this->mRequestProcessed = true;
     }
 
     /**

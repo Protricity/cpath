@@ -294,10 +294,11 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         $cols = static::loadAllColumns();
         $ret = array();
         foreach($tokens as $token)
-            if(isset($cols[$token]))
+            if(isset($cols[$token])) {
                 $ret[$token] = $cols[$token];
-            else
+            } else {
                 throw new \Exception("Column '{$token}' not found in " . self::modelName());
+            }
         return $ret;
         //return array_intersect_key($cols, array_flip($tokens));
     }
@@ -357,6 +358,13 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
             }
             throw $ex;
         }
+    }
+
+    static function loadOrCreate(Array $columns) {
+        return static::search()
+            ->whereAll($columns)
+            ->fetch()
+            ?: static::createFromArray($columns);
     }
 
     // Database methods

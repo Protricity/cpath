@@ -14,7 +14,21 @@ use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Interfaces\IUserSession;
 use CPath\Model\Response;
+
+interface IPostLoginExecute {
+
+    /**
+     * Perform on successful API_Get execution
+     * @param PDOUserModel $User the logged in user account instance
+     * @param IUserSession $Session the logged in user session
+     * @param IRequest $Request
+     * @param IResponse $Response
+     * @return IResponse|null
+     */
+    function onPostLoginExecute(PDOUserModel $User, IUserSession $Session, IRequest $Request, IResponse $Response);
+}
 
 class API_PostUserLogin extends API_Base {
     private $mUser;
@@ -26,11 +40,16 @@ class API_PostUserLogin extends API_Base {
     function __construct(PDOUserModel $Model) {
         parent::__construct($Model);
         $this->mUser = $Model;
+    }
 
+    /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     */
+    protected function setupAPI() {
         $this->addField('name', new APIRequiredParam("Username or Email Address"));
         $this->addField('password', new APIRequiredParam("Password"));
     }
-
     /**
      * Get the API Description
      * @return String description for this API
@@ -41,17 +60,20 @@ class API_PostUserLogin extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * This method must call processRequest to validate and process the request object.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
-    function execute(IRequest $Request) {
+    final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;
-        $this->processRequest($Request);
         $Session = $User::login($Request['name'], $Request['password'], NULL, $User);
-        return new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
+        $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
             'user' => $User,
             'session' => $Session,
         ));
+
+        if($this instanceof IPostLogoutExecute)
+            $Response = $this->onPostLogoutExecute($User, $Session, $Request, $Response) ?: $Response;
+
+        return $Response;
     }
 }
