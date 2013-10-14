@@ -42,7 +42,7 @@ class API_PostUser extends API_Post implements IPostExecute {
         $Model = $this->getModel();
         $this->mUser = $Model;
 
-        parent::__construct($Model);
+        parent::setupAPI();
 
         if($Model::PASSWORD_CONFIRM) {
             if(!$Model::COLUMN_PASSWORD)
