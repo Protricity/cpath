@@ -52,7 +52,7 @@ class PDOUpdate extends PDOWhere {
 
     public function getSQL() {
         if(!$this->mWhere)
-            throw new \Exception("method addWhere() was not called");
+            throw new \Exception("method where() was not called");
         $SQL = "UPDATE ".$this->mTable
             ."\nSET ".implode('=?, ',$this->fields).'=?'
             .parent::getSQL()
