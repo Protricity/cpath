@@ -31,7 +31,7 @@ class API_Patch extends API_Get implements IGetExecute {
         $defFilter = $Model::DEFAULT_FILTER;
         foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
             /** @var PDOColumn $Column */
-            $Column->addToAPI($this, false, NULL, NULL, $defFilter);
+            $this->addField($Column->getName(), $Column->generateAPIField(false, NULL, NULL, $defFilter));
     }
 
     /**

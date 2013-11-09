@@ -43,7 +43,13 @@ class Install extends API implements IBuildable, IDescribable {
      */
     protected function doExecute(IRequest $Request)
     {
-        echo "Installing Config...\n";
+        Log::u(__CLASS__, "Installing Config File");
+
+        if($Request['no-prompt']) {
+            $this->mNoPrompt = true;
+            Log::u(__CLASS__, "Installing with defaults...");
+        }
+
         $path = Base::getBasePath();
         $targetPath = $path . 'config.php';
         if(file_exists($targetPath))
@@ -60,7 +66,7 @@ class Install extends API implements IBuildable, IDescribable {
                 throw new APIException("Could not copy ($p) to ($targetPath)");
             return new Response("Copied config from: " . $p);
         }
-        Log::u($this, "Default config file not found: " . $p);
+        Log::u(__CLASS__, "Default config file not found: " . $p);
 
         throw new APIException("Could not find a default config to install");
     }

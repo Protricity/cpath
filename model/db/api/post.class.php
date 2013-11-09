@@ -36,7 +36,7 @@ class API_Post extends API_Base {
         $Model = $this->getModel();
 
         foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FLAG_INSERT) as $Column)
-            $Column->addToAPI($this);
+            $this->addField($Column->getName(), $Column->generateAPIField());
     }
 
     /**

@@ -12,6 +12,7 @@ use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Handlers\IAPIField;
 use CPath\Interfaces\IAPI;
 use CPath\Validate;
 
@@ -111,15 +112,14 @@ class PDOColumn {
     }
 
     /**
-     * Add this column to an IAPI as a field
-     * @param IAPI $API
+     * Generate an IAPIField for this column
      * @param boolean|NULL $required if null, the column flag FLAG_REQUIRED determines the value
      * @param boolean|NULL $param
      * @param boolean|NULL $comment
      * @param mixed $defaultValidation
-     * @return APIField
+     * @return IAPIField
      */
-    function addToAPI(IAPI $API, $required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
+    function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
             $required = $this->mFlags & PDOColumn::FLAG_REQUIRED;
         if($this->mFilter)
@@ -135,7 +135,6 @@ class PDOColumn {
             else
                 $Field = new APIField($comment ?: $this->getComment(),  $defaultValidation);
         }
-        $API->addField($this->mName, $Field);
         return $Field;
     }
 }
