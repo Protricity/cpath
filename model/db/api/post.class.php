@@ -8,6 +8,7 @@
 namespace CPath\Model\DB;
 
 
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAssignAccess;
@@ -39,10 +40,10 @@ class API_Post extends API_Base {
     }
 
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Create a new ".$this->getModel()->modelName();
     }
 

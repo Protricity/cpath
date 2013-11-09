@@ -5,6 +5,7 @@ use CPath\Base;
 use CPath\Builders\RouteBuilder;
 use CPath\Config;
 use CPath\Handlers\IAPIParam;
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
@@ -74,7 +75,7 @@ class APIInfo implements IHandler, ILogListener {
     </head>
     <body>
     <h1><?php echo $route."<br />"; ?></h1>
-    <h2><?php echo $API->getDescription(); ?></h2>
+    <h2><?php echo Describable::get($API)->getDescription(); ?></h2>
     <h3>Params:</h3>
     <form class="field-form" onsubmit="jQuery(this).find('input[type=button]:first').click(); return false;">
         <ul class='field-table'>
@@ -95,7 +96,7 @@ class APIInfo implements IHandler, ILogListener {
                 <li class='field-item clearfix'>
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
-                    <div class='field-description'><?php echo $Field->getDescription(); ?></div>
+                    <div class='field-description'><?php echo Describable::get($Field)->getDescription(); ?></div>
                     <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo htmlspecialchars($_GET[$name], ENT_QUOTES); ?>' placeholder='Enter value for <?php echo $name; ?>' /></div>
                 </li>
             <?php } ?>

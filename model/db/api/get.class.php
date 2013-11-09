@@ -12,6 +12,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
@@ -74,10 +75,10 @@ class API_Get extends API_Base {
     }
 
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Get information about this " . $this->getModel()->modelName();
     }
 

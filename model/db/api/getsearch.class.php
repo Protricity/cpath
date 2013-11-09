@@ -12,6 +12,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIParam;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IReadAccess;
@@ -35,11 +36,12 @@ class API_GetSearch extends API_Base {
         $this->addField('logic', new APIField("The search logic to use [AND, OR]. Default=OR"));
     }
 
+
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Search for a " . $this->getModel()->modelName();
     }
 

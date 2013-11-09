@@ -5,19 +5,15 @@ use CPath\Base;
 use CPath\Builders\RouteBuilder;
 use CPath\Config;
 use CPath\Handlers\InvalidRouteException;
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IAPI;
-use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\InvalidHandlerException;
 use CPath\Log;
-use CPath\Model\Route;
-use CPath\Util;
 
 class HandlerSetInfo implements IHandler, ILogListener {
 
@@ -103,8 +99,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
             <?php } else foreach($handlers as $route => $Handler) {
                 $description = "No Description";
                 try{
-                    if($Handler instanceof IDescribable)
-                        $description = $Handler->getDescription();
+                    $description = Describable::get($Handler)->getDescription();
                 } catch (InvalidRouteException $ex) {}
                 ?>
                 <li class='field-item clearfix'>

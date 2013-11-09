@@ -16,6 +16,8 @@ use CPath\Interfaces\APIFieldNotFound;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IAPIExecute;
 use CPath\Interfaces\IBuildable;
+use CPath\Interfaces\IDescribable;
+use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
@@ -60,17 +62,18 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     */
+    abstract protected function setupAPI();
+
+    /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
      */
     abstract protected function doExecute(IRequest $Request);
 
-    /**
-     * Set up API fields. Lazy-loaded when fields are accessed
-     * @return void
-     */
-    abstract protected function setupAPI();
 
     private function _setupFields() {
         if($this->mSetup)
@@ -220,7 +223,15 @@ abstract class API implements IAPI {
      * @param boolean|int $prepend Set true to prepend
      * @return $this Return the class instance
      */
-    public function addField($name, IAPIField $Field, $prepend=false) {
+    protected function addField($name, IAPIField $Field, $prepend=false) {
+
+        if(strpos($name, ':') !== false) {
+            list($name, $shorts) = explode(':', $name, 2);
+            foreach(explode(';', $shorts) as $short)
+                $Field->addShortName($short);
+        }
+        $Field->setName($name);
+
         $this->_setupFields();
         if($prepend) {
             $old = $this->mFields;
@@ -240,10 +251,10 @@ abstract class API implements IAPI {
      * The array key represents the Field name.
      * @return $this return the class instance
      */
-    public function addFields(Array $fields) {
+    protected function addFields(Array $fields) {
         $this->_setupFields();
         foreach($fields as $name => $Field)
-            $this->mFields[$name] = $Field;
+            $this->addField($name, $Field);
         return $this;
     }
 
@@ -298,7 +309,10 @@ abstract class API implements IAPI {
         $this->_setupFields();
         $this->processRequest($Request);
         if($Request instanceof IShortOptions)
-            $Request->processShortOptions(array_keys($this->getFields()));
+            foreach($this->getFields() as $name => $Field)
+                foreach($Field->getShortNames() as $shortName)
+                    $Request->processShortOption($name, $shortName);
+
         if($arg = $Request->getNextArg()) {
             foreach($this->getFields() as $name=>$Field) {
                 if($Field instanceof IAPIParam) {
@@ -308,6 +322,7 @@ abstract class API implements IAPI {
                 }
             }
         }
+
         $FieldExceptions = new ValidationExceptions();
         $data = array();
         foreach($this->getFields() as $name=>$Field) {
@@ -412,24 +427,48 @@ class APIValidation implements IAPIValidation {
         $call($Request);
     }
 }
+
 /**
  * Class IAPIField
  * @package CPath
  * Represents an API Field
  */
-interface IAPIField {
+interface IAPIField extends IDescribableAggregate {
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
      * @param mixed $value the input field to validate
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails
      */
-    public function validate($value);
+    function validate($value);
 
     /**
-     * @return String a description of the Api Field
+     * Internal function used to set the field name.
+     * @param String $name
+     * @return void
+     * @throws \Exception if the name was already set.
      */
-    public function getDescription();
+    function setName($name);
+
+    /**
+     * Adds a short alias to the field.
+     * @param String $shortName
+     * @return void
+     */
+    function addShortName($shortName);
+
+    /**
+     * Returns a list of short names for this field.
+     * @return Array returns an array of short names
+     */
+    function getShortNames();
+
+    /**
+     * Get the field name.
+     * @return string
+     * @throws \Exception if the name was never set.
+     */
+    function getName();
 }
 
 /**
@@ -458,14 +497,17 @@ class ValidationExceptions extends MultiException {
  * Represents an 'optional' API Field
  */
 class APIField implements IAPIField {
-    public $mDescription, $mValidation;
-    public function __construct($description=NULL, $validation=0) {
-        $this->mDescription = $description;
-        $this->mValidation = $validation;
-    }
 
-    public function getDescription() {
-        return $this->mDescription;
+    private $mName, $mDescription, $mValidation;
+    private $mShortNames=array();
+
+    /**
+     * @param String|IDescribable $Description
+     * @param int $validation
+     */
+    public function __construct($Description=NULL, $validation=0) {
+        $this->mDescription = $Description;
+        $this->mValidation = $validation;
     }
 
     public function setValidation($filter) {
@@ -479,6 +521,55 @@ class APIField implements IAPIField {
         if($this->mValidation)
             Validate::input($value, $this->mValidation);
         return $value;
+    }
+
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable() {
+        return $this->mDescription;
+    }
+
+
+    /**
+     * Internal function used to set the field name.
+     * @param String $name
+     * @return void
+     * @throws \Exception if the name was already set.
+     */
+    function setName($name) {
+        if($this->mName !== null)
+            throw new \Exception("Name '" . $name ."' was set twice");
+        $this->mName = $name;
+    }
+
+    /**
+     * Get the field name.
+     * @return string
+     * @throws \Exception if the name was never set.
+     */
+    function getName() {
+        if($this->mName === null)
+            throw new \Exception("Name was not set yet");
+        return $this->mName;
+    }
+
+    /**
+     * Adds a short alias to the field.
+     * @param String $shortName
+     * @return void
+     */
+    function addShortName($shortName) {
+        $this->mShortNames[] = $shortName;
+    }
+
+    /**
+     * Returns a list of short names for this field.
+     * @return Array returns an array of short names
+     */
+    function getShortNames() {
+        return $this->mShortNames;
     }
 }
 
@@ -537,8 +628,12 @@ class APIEnumField extends APIField {
         return $value;
     }
 
-    public function getDescription() {
-        return $this->getDescription() . ": '" . implode("', '", $this->mEnum) . "'";
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable() {
+        return $this->getDescribable() . ": '" . implode("', '", $this->mEnum) . "'";
     }
 }
 

@@ -10,6 +10,12 @@ namespace CPath\Interfaces;
 interface IDescribable {
 
     /**
+     * Get the Object Title
+     * @return String description for this Object
+     */
+    function getTitle();
+
+    /**
      * Get the Object Description
      * @return String description for this Object
      */

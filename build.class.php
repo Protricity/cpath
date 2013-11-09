@@ -9,12 +9,14 @@ namespace CPath;
 
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IDescribable;
+use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IShortOptions;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
-class Build extends API implements IBuildable {
+class Build extends API implements IBuildable, IDescribableAggregate {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
@@ -59,11 +61,12 @@ class Build extends API implements IBuildable {
 
     /**
      * Get the Object Description
-     * @return String description for this Object
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Build All classes";
     }
+
 
     // Statics
 

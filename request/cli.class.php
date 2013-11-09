@@ -62,15 +62,14 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
                     $val = $args[++$i];
 
                 if($arg[1] == '-')
-                    $this->mRequest[substr($arg, 2)] = $val;
+                    $this->mShortRequests[substr($arg, 2)] = $val;
                 else
-                    $this->mShortRequests[substr($arg, 1)] = $val;
+                    $this->mRequests[substr($arg, 1)] = $val;
             } else {
                 $args2[] = $arg;
             }
         }
         $args = $args2;
-
         if($args) {
             if($args[0])
                 foreach(array_reverse(explode('/', array_shift($args))) as $a)
@@ -207,44 +206,15 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
 
     // Implement IShortOptions
 
+
     /**
-     * Generate an associative array of short options from a set of fields
-     * @param array $fields the fields to process
-     * @return array a list of short-field key pairs
+     * Add or generate a short option for the list
+     * @param String $fieldName the field name
+     * @param String $shortName the short name representing the field name
      */
-    function processShortOptions(Array $fields) {
-        $opts = array();
-
-        foreach($fields as $short => $field)
-            if(!is_int($short))
-                $opts[$short] = $field;
-
-        foreach($fields as $field) {
-            $short = '';
-            foreach(explode('_', $field) as $f2)
-                $short .= $f2[0];
-
-            $short = strtolower($short);
-            if(!isset($opts[$short]))
-                $opts[$short] = $field;
-        }
-
-        $i=97;
-        foreach(array_diff($fields, $opts) as $field) {
-            while(isset($opts[chr($i)]))
-                $i++;
-            if($i>122) break;
-            $opts[chr($i)] = $field;
-        }
-
-        foreach($this->mShortRequests as $key=>$val) {
-            if(isset($opts[$key])) {
-                $this->mRequest[$opts[$key]] = $val;
-                unset($this->mShortRequests[$key]);
-            }
-        }
-
-        return $opts;
+    function processShortOption($fieldName, $shortName) {
+        if(isset($this->mShortRequests[$shortName]))
+            $this->mRequest[$fieldName] = $this->mShortRequests[$shortName];
     }
 
     /**

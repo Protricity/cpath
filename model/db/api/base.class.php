@@ -12,6 +12,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\InvalidAPIException;
@@ -22,7 +23,7 @@ use CPath\Model\DB\Interfaces\ISecurityPolicyAggregate;
 use CPath\Model\DB\Interfaces\SecurityPolicyNotFoundException;
 use CPath\Model\Response;
 
-abstract class API_Base extends API {
+abstract class API_Base extends API implements IDescribableAggregate {
 
     private $mModel, $mSecurity = NULL;
 

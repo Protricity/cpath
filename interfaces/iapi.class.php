@@ -11,10 +11,11 @@ use CPath\Handlers\IAPIField;
 use CPath\Handlers\IAPIValidation;
 use CPath\Handlers\ValidationExceptions;
 
-class InvalidAPIException extends \Exception {}
-class APIFieldNotFound extends InvalidAPIException {};
+class APIException extends \Exception {}
+class InvalidAPIException extends APIException {}
+class APIFieldNotFound extends APIException {};
 
-interface IAPI extends IHandler, IRoutable, IDescribable {
+interface IAPI extends IHandler, IRoutable {
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -36,15 +37,6 @@ interface IAPI extends IHandler, IRoutable, IDescribable {
      * @throws APIFieldNotFound if the field was not found
      */
     public function getField($fieldName);
-
-    /**
-     * Add an API Field.
-     * @param string $name name of the Field
-     * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
-     * @param boolean|int $prepend Set true to prepend
-     * @return $this Return the class instance
-     */
-    function addField($name, IAPIField $Field, $prepend=false);
 
     /**
      * Add a validation

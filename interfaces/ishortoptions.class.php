@@ -10,9 +10,9 @@ namespace CPath\Interfaces;
 interface IShortOptions {
 
     /**
-     * Generate a set of short options from a set of fields
-     * @param array $fields the fields to process
-     * @return array the list of short options
+     * Add or generate a short option for the list
+     * @param String $fieldName the field name
+     * @param String $shortName the short name representing the field name
      */
-    function processShortOptions(Array $fields);
+    function processShortOption($fieldName, $shortName);
 }

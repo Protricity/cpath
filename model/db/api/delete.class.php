@@ -11,6 +11,7 @@ namespace CPath\Model\DB;
 use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIExecute;
@@ -21,10 +22,10 @@ use CPath\Model\Response;
 class API_Delete extends API_Get implements IGetExecute {
 
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Delete a ".$this->getModel()->modelName();
     }
 

@@ -9,6 +9,8 @@
 namespace CPath\Handlers;
 use CPath\Build;
 use CPath\Builders\RouteBuilder;
+use CPath\Interfaces\IDescribable;
+use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
@@ -21,7 +23,7 @@ use CPath\Util;
  *
  * Provides a portable Handler template for API calls
  */
-class SimpleAPI extends API {
+class SimpleAPI extends API implements IDescribableAggregate {
 
     private $mCallback;
     private $mDescription;
@@ -56,12 +58,11 @@ class SimpleAPI extends API {
         return call_user_func($call, $Request);
     }
 
-
     /**
-     * Get the IAPI Description
-     * @return String description for this IAPI
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return $this->mDescription ?: "No Description";
     }
 }

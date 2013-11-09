@@ -10,6 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Handlers\API;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\InvalidAPIException;
@@ -34,10 +35,10 @@ class API_Patch extends API_Get implements IGetExecute {
     }
 
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Update a ".$this->getModel()->modelName();
     }
 

@@ -12,6 +12,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\APIField;
 use CPath\Handlers\APIRequiredField;
 use CPath\Handlers\APIRequiredParam;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IUserSession;
@@ -50,11 +51,12 @@ class API_PostUserLogin extends API_Base {
         $this->addField('name', new APIRequiredParam("Username or Email Address"));
         $this->addField('password', new APIRequiredParam("Password"));
     }
+
     /**
-     * Get the API Description
-     * @return String description for this API
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() {
+    function getDescribable() {
         return "Log in as ".$this->mUser->modelName();
     }
 
