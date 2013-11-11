@@ -12,6 +12,7 @@ use CPath\Build;
 use CPath\Builders\RouteBuilder;
 use CPath\Exceptions\ValidationException;
 use CPath\Handlers\Views\APIInfo;
+use CPath\Interfaces\APIException;
 use CPath\Interfaces\APIFieldNotFound;
 use CPath\Interfaces\IAPI;
 use CPath\Interfaces\IAPIExecute;
@@ -71,6 +72,7 @@ abstract class API implements IAPI {
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse|mixed the api call response with data, message, and status
+     * @throws APIException if an exception occurs
      */
     abstract protected function doExecute(IRequest $Request);
 
@@ -84,6 +86,26 @@ abstract class API implements IAPI {
     }
 
     /**
+     * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return IResponse the api call response with data, message, and status
+     */
+    final public function executeOrThrow(IRequest $Request) {
+        if($this instanceof IAPIExecute)
+            $this->onAPIPreExecute($Request);
+
+        $this->_processRequest($Request);
+        $Response = $this->doExecute($Request);
+
+        if($Response instanceof IResponseAggregate)
+            $Response = $Response->createResponse();
+        if(!($Response instanceof IResponse))
+            $Response = new Response(true, "API executed successfully", $Response);
+        return $Response;
+    }
+
+
+    /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
@@ -92,16 +114,7 @@ abstract class API implements IAPI {
         if(static::LOG_ENABLE)
             $this->mLog = new SimpleLogger(true);
         try {
-            if($this instanceof IAPIExecute)
-                $this->onAPIPreExecute($Request);
-
-            $this->_processRequest($Request);
-            $Response = $this->doExecute($Request);
-
-            if($Response instanceof IResponseAggregate)
-                $Response = $Response->createResponse();
-            if(!($Response instanceof IResponse))
-                $Response = new Response(true, "API executed successfully", $Response);
+            $Response = $this->executeOrThrow($Request);
         } catch (\Exception $ex) {
             if($ex instanceof IResponseAggregate)
                 $Response = $ex->createResponse();
@@ -278,6 +291,45 @@ abstract class API implements IAPI {
         if(!isset($this->mFields[$fieldName]))
             throw new APIFieldNotFound("Field '{$fieldName}' is not in this API");
         return $this->mFields;
+    }
+
+    /**
+     * Generates short names for all fields that have no short names and returns a list.
+     * @return array an associative array of short names
+     */
+    public function generateFieldShorts() {
+        $shorts = array();
+        /** @var IAPIField[] $genFields */
+        $genFields = array();
+        foreach($this->getFields() as $Field) {
+            if($list = $Field->getShortNames()) {
+                foreach($list as $short)
+                    $shorts[$short] = $Field->getName();
+            } else {
+                $genFields[] = $Field;
+            }
+        }
+
+        $i=97;
+        foreach($genFields as $Field) {
+            $short = '';
+            foreach(explode('_', $Field->getName()) as $f2)
+                $short .= $f2[0];
+
+            $short = strtolower($short);
+            if(!isset($shorts[$short])) {
+                $shorts[$short] = $Field->getName();
+                $Field->addShortName($short);
+            } else {
+                while(isset($shorts[chr($i)]))
+                    $i++;
+                if($i>122) break;
+                $shorts[chr($i)] = $Field->getName();
+                $Field->addShortName($short);
+            }
+        }
+
+        return $shorts;
     }
 
     /**

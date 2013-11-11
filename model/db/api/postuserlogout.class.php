@@ -42,7 +42,10 @@ class API_PostUserLogout extends API_Base {
         $this->mUser = $Model;
     }
 
-    protected function setupAPI() {}
+    protected function setupAPIFields() {
+        //$this->addField('password', new APIRequiredParam("Password"));
+        $this->generateFieldShorts();
+    }
 
     /**
      * Get the Object Description

@@ -104,7 +104,8 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
         return $ret;
     }
 
-    public function upgrade($rebuild=false) {
+    // TODO: move to builder
+    public function upgrade($rebuild=false, $force=false) {
         $version = static::VERSION;
         if($version === NULL)
             throw new \Exception("Version Constant is missing");
@@ -122,7 +123,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
         Log::v(__CLASS__, "Upgrading Database from version {$oldVersion} to {$version}");
         $Build = new BuildPGTables();
 
-        if(!DBConfig::$UpgradeEnable)
+        if(!DBConfig::$UpgradeEnable && !$force)
             throw new \Exception("Database Upgrade is disabled Config::\$UpgradeEnable==false");
         $Build->upgrade($this, $oldVersion);
         return $this;
@@ -136,13 +137,13 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
         Log::u(__CLASS__, "DB Upgrader: ".get_class($this));
         switch(strtolower($Request->getNextArg())) {
             case 'upgrade':
-                $this->upgrade(false);
+                $this->upgrade(false, $Request['force']);
                 break;
             case 'reset':
-                $this->upgrade(true);
+                $this->upgrade(true, $Request['force']);
                 break;
             case 'rebuild':
-                $this->upgrade(true);
+                $this->upgrade(true, $Request['force']);
                 $Build = new Build();
                 Log::u(__CLASS__, "Rebuilding Models...");
                 $Build->execute($Request);

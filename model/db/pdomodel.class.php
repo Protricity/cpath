@@ -75,6 +75,9 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     const DEFAULT_FILTER =   FILTER_SANITIZE_SPECIAL_CHARS;
 
+    // Auto generate short names for all fields (for use in CLI)
+    const AUTO_SHORTS = false;
+
     const SECURITY_DISABLED = false;
 
     //protected $mRow = null;

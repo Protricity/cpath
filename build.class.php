@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Handlers\APIField;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IDescribable;
@@ -30,7 +31,11 @@ class Build extends API implements IBuildable, IDescribableAggregate {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      */
-    protected function setupAPI(){}
+    protected function setupAPI(){
+        $this->addField('v', new APIField("Display verbose messages"));
+        $this->addField('s', new APIField("Skip broken files"));
+        $this->generateFieldShorts();
+    }
 
     /**
      * Execute this API Endpoint with the entire request.
@@ -42,12 +47,10 @@ class Build extends API implements IBuildable, IDescribableAggregate {
         if($built)
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
         $built = true;
-        if($Request instanceof IShortOptions)
-            $Request->processShortOptions(array('v' => 'verbose', 's' => 'skip-broken'));
 
-        if(!empty($Request['verbose']))
+        if(!empty($Request['v']))
             Log::setDefaultLevel(4);
-        if(!empty($Request['skip-broken']))
+        if(!empty($Request['s']))
             self::$mSkipBroken = true;
 
         $Response = new Response(false, "Starting Build");
@@ -329,12 +332,13 @@ class Build extends API implements IBuildable, IDescribableAggregate {
             }
 
             self::setConfig(__CLASS__, 'lastFile', $filePath, true);
+
             try{
                 require_once($filePath);
             } catch (\Exception $ex) {
-                self::setConfig(__CLASS__, 'lastFile', NULL, true);
+                //self::setConfig(__CLASS__, 'lastFile', NULL, true);
                 $exCount++;
-                Log::ex("Exception occured while loading {$filePath}", $ex);
+                Log::ex("Exception occurred while loading {$filePath}", $ex);
                 continue;
             }
             self::setConfig(__CLASS__, 'lastFile', NULL);

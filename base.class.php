@@ -73,7 +73,7 @@ class Base {
     public static function getClassPublicPath($Class, $withDomain=true) {
         if(is_object($Class))
             $Class = get_class($Class);
-        return ($withDomain ? Config::$Domain : '')
+        return ($withDomain ? Config::getDomainPath() : '')
             .dirname(str_replace('\\', '/', strtolower($Class))).'/';
     }
 

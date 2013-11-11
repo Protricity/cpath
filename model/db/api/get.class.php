@@ -54,7 +54,7 @@ class API_Get extends API_Base {
      * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    protected function setupAPI() {
+    protected function setupAPIFields() {
         $Model = $this->getModel();
         $this->mColumns = $Model->findColumns($this->mSearchColumns);
 

@@ -24,14 +24,15 @@ class API_Patch extends API_Get implements IGetExecute {
      * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    function setupAPI() {
-        parent::setupAPI();
+    function setupAPIFields() {
+        parent::setupAPIFields();
         $Model = $this->getModel();
 
         $defFilter = $Model::DEFAULT_FILTER;
         foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
             /** @var PDOColumn $Column */
             $this->addField($Column->getName(), $Column->generateAPIField(false, NULL, NULL, $defFilter));
+        $this->generateFieldShorts(); // TODO: ugly.
     }
 
     /**

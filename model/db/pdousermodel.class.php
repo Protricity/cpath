@@ -8,7 +8,6 @@
 namespace CPath\Model\DB;
 
 
-use API\UserSession;
 use CPath\Base;
 use CPath\Exceptions\ValidationException;
 use CPath\Handlers\HandlerSet;
@@ -220,7 +219,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
     /**
      * Load or get the current user session
-     * @return UserSession the user instance or null if not found
+     * @return IUserSession the user instance or null if not found
      * @throws InvalidUserSessionException if the user is not logged in
      */
     static function loadSession() {

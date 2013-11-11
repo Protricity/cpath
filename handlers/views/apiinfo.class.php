@@ -52,7 +52,7 @@ class APIInfo implements IHandler, ILogListener {
 
         $basePath = Base::getClassPublicPath($this);
 
-        $domainPath = Config::$Domain;
+        $domainPath = Config::getDomainPath();
         $route = $Route->getPrefix();
         list($method, $path) = explode(' ', $route, 2);
         $path = rtrim($domainPath, '/') . $path;

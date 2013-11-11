@@ -54,8 +54,8 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
                 continue;
             }
             $arg = trim($args[$i]);
-            if($arg === '')
-                return;
+            if($arg === '' || $arg === '-')
+                continue;
             if($arg[0] == '-') {
                 $val = true;
                 if(!empty($args[$i+1]) && $args[$i+1][0] !== '-')
@@ -64,7 +64,7 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
                 if($arg[1] == '-')
                     $this->mShortRequests[substr($arg, 2)] = $val;
                 else
-                    $this->mRequests[substr($arg, 1)] = $val;
+                    $this->mRequest[substr($arg, 1)] = $val;
             } else {
                 $args2[] = $arg;
             }

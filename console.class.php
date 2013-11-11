@@ -7,15 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Request\CLI;
-use CPath\Model\Response;
-use CPath\Handlers\API;
 
-class Console implements IHandler {
+class Console implements IHandler { // Broke }, IBuildable {
 
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
@@ -23,8 +21,9 @@ class Console implements IHandler {
     function render(IRequest $Request)
     {
         $routes = array();
-        foreach(Router::getRoutes() as $route){
-            list($method, $route) = explode(' ', $route[0], 2);
+        foreach(Router::getRoutes() as $Route){
+            /** @var IRoute $Route */
+            list($method, $route) = explode(' ', $Route->getPrefix(), 2);
             if(!isset($routes[$route]))
                 $routes[$route] = array();
             $routes[$route][] = $method;
@@ -90,5 +89,13 @@ class Console implements IHandler {
                     }
             }
         }
+    }
+
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {
+        return new static();
     }
 }

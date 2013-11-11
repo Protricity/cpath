@@ -29,6 +29,10 @@ class Config implements IConfig {
         return Base::getBasePath() . self::$GenPath . '/';
     }
 
+    static function getDomainPath() {
+        return self::$Domain ?: self::$Domain = Build::buildDomainPath();
+    }
+
     static function init() {
         $path = dirname(__DIR__) . '/config.php';
         if(!file_exists($path) || !(include $path))

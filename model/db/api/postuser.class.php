@@ -37,12 +37,12 @@ class API_PostUser extends API_Post implements IPostExecute {
      * @return void
      * @throws InvalidAPIException if API was not set up properly
      */
-    protected function setupAPI() {
+    protected function setupAPIFields() {
         /** @var PDOUserModel $Model  */
         $Model = $this->getModel();
         $this->mUser = $Model;
 
-        parent::setupAPI();
+        parent::setupAPIFields();
 
         if($Model::PASSWORD_CONFIRM) {
             if(!$Model::COLUMN_PASSWORD)
@@ -56,6 +56,7 @@ class API_PostUser extends API_Post implements IPostExecute {
             }));
         }
         $this->addField('login', new APIField("Log in after"));
+        $this->generateFieldShorts();
     }
 
     /**

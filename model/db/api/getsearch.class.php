@@ -25,7 +25,7 @@ class API_GetSearch extends API_Base {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      */
-    protected function setupAPI() {
+    protected function setupAPIFields() {
         $Model = $this->getModel();
 
         $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);

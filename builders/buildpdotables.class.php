@@ -74,7 +74,16 @@ PHP;
             $sql = file_get_contents($schemaFolder.'/'.$schema);
             if(!$sql)
                 throw new UpgradeException("Invalid SQL in ".$schema);
+            $id = rand(1,99);
+            $DB->exec("SET @_cpath_dump_complete=-1");
+            $sql .= "SET @_cpath_dump_complete=" . $id . ";\n";
+            //$sql = "\nSET @_cpath_dump_complete = " . ($id-1) . ";\n" . $sql;
             $DB->exec($sql);
+            $id2 = $DB->query("SELECT @_cpath_dump_complete;")->fetchColumn(0);
+            if($id != $id2)
+                throw new BuildException("FATAL ERROR: Database dump failed (id mismatch {$id} != {$id2})");
+
+            Log::v2(__CLASS__, "DB ID Result: {$id} == {$id2}" );
 
             $DB->setDBVersion($v);
         }
@@ -153,6 +162,10 @@ PHP;
         $tables = array();
         if(in_array($BUILD, array('ALL', 'MODEL')))
             $tables = $this->getTables($DB);
+
+        $tableNames = array();
+        foreach($tables as $Table) $tableNames[] = $Table->Name;
+        Log::v(__CLASS__, "Found Tables (%s): " . implode(', ', $tableNames), count($tableNames));
 
         foreach($tables as $Table) {
             $Table->Namespace = $modelNS;

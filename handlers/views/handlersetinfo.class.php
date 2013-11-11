@@ -69,7 +69,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
 
         $basePath = Base::getClassPublicPath($this);
         list(,$infoPath) = explode(' ', $HandlerRoute->getPrefix(), 2);
-        $infoPath = substr(Config::$Domain, 0, -1) . $infoPath .'/';
+        $infoPath = substr(Config::getDomainPath(), 0, -1) . $infoPath .'/';
 
         $num = 1;
 ?><html>

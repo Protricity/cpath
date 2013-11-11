@@ -38,6 +38,27 @@ abstract class API_Base extends API implements IDescribableAggregate {
         $this->mModel = $Model;
     }
 
+
+    /**
+     * Set up API fields. Replaces setupAPI()
+     * @return void
+     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     */
+    abstract protected function setupAPIFields();
+
+    /**
+     * Set up API fields. Lazy-loaded when fields are accessed
+     * @return void
+     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     */
+    final protected function setupAPI() {
+        $this->setupAPIFields();
+        $Model = $this->mModel;
+        if($Model::AUTO_SHORTS)
+            $this->generateFieldShorts();
+    }
+
+
     /**
      * Get security policy for this model
      * @return ISecurityPolicy
