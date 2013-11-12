@@ -9,13 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Model\DB\Interfaces\IAPIExecute;
-use CPath\Model\DB\Interfaces\ILimitApiQuery;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 

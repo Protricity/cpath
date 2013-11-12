@@ -7,18 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath\Scripts;
 use CPath\Base;
-use CPath\Config\Builder;
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Interfaces\APIException;
+use CPath\Handlers\Api\Field;
+use CPath\Handlers\API\Interfaces\APIException;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IConfig;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IShortOptions;
 use CPath\Log;
-use CPath\Misc\APIFailedException;
 use CPath\Model\Response;
 
 class Install extends API implements IBuildable, IDescribable {
@@ -30,7 +26,7 @@ class Install extends API implements IBuildable, IDescribable {
      * @return void
      */
     protected function setupAPI() {
-        $this->addField('no-prompt:y', new APIField("Use default values and skip prompts"));
+        $this->addField('no-prompt:y', new Field("Use default values and skip prompts"));
     }
 
     public function isNoPrompt() { return $this->mNoPrompt; }

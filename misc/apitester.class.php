@@ -7,12 +7,10 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace CPath\Misc;
-use CPath\Base;
-use CPath\Interfaces\IAPI;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IRoute;
 use CPath\Model\ExceptionResponse;
 use CPath\Request\CLI;
 use CPath\Model\Response;
@@ -21,7 +19,7 @@ class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
 
 class ApiTester {
-    /** @var \CPath\Interfaces\IAPI */
+    /** @var IAPI */
     private $mAPI;
     private $mRequest;
     public function __construct(IAPI $API, IRequest $Request) {

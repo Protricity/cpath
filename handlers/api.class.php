@@ -7,18 +7,19 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
+
 use CPath\Base;
-use CPath\Build;
-use CPath\Builders\RouteBuilder;
-use CPath\Exceptions\ValidationException;
+use CPath\Handlers\Api\Interfaces\APIException;
+use CPath\Handlers\Api\Interfaces\APIFieldNotFound;
+use CPath\Handlers\Api\Interfaces\IParam;
+use CPath\Handlers\Api\Interfaces\IValidation;
+use CPath\Handlers\Api\Interfaces\ValidationException;
+use CPath\Handlers\Api\Interfaces\IField;
+use CPath\Handlers\Api\Interfaces\ValidationExceptions;
 use CPath\Handlers\Views\APIInfo;
-use CPath\Interfaces\APIException;
-use CPath\Interfaces\APIFieldNotFound;
-use CPath\Interfaces\IAPI;
-use CPath\Interfaces\IAPIExecute;
+use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Interfaces\IExecute;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IDescribable;
-use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
@@ -28,11 +29,9 @@ use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Model\ExceptionResponse;
-use CPath\Model\MultiException;
 use CPath\Model\Response;
 use CPath\Model\Route;
 use CPath\Util;
-use CPath\Validate;
 
 /**
  * Class APIHandler
@@ -49,9 +48,9 @@ abstract class API implements IAPI {
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
-    /** @var IAPIField[] */
+    /** @var IField[] */
     protected $mFields = array();
-    /** @var IAPIValidation[] */
+    /** @var IValidation[] */
     protected $mValidations = array();
     /** @var SimpleLogger */
     private $mLog = NULL;
@@ -91,7 +90,7 @@ abstract class API implements IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     final public function executeOrThrow(IRequest $Request) {
-        if($this instanceof IAPIExecute)
+        if($this instanceof IExecute)
             $this->onAPIPreExecute($Request);
 
         $this->_processRequest($Request);
@@ -123,7 +122,7 @@ abstract class API implements IAPI {
             else
                 $Response = new ExceptionResponse($ex);
         }
-        if($this instanceof IAPIExecute)
+        if($this instanceof IExecute)
             $this->onAPIPostExecute($Request, $Response);
         if(static::LOG_ENABLE) {
             foreach($this->mLog->getLogs() as $Log)
@@ -232,11 +231,11 @@ abstract class API implements IAPI {
     /**
      * Add an API Field.
      * @param $name string name of the Field
-     * @param IAPIField $Field Describes the Field. Implement IAPIField for custom validation
+     * @param IField $Field Describes the Field. Implement IField for custom validation
      * @param boolean|int $prepend Set true to prepend
      * @return $this Return the class instance
      */
-    protected function addField($name, IAPIField $Field, $prepend=false) {
+    protected function addField($name, IField $Field, $prepend=false) {
 
         if(strpos($name, ':') !== false) {
             list($name, $shorts) = explode(':', $name, 2);
@@ -273,7 +272,7 @@ abstract class API implements IAPI {
 
     /**
      * Get all API Fields
-     * @return IAPIField[]
+     * @return IField[]
      */
     public function getFields() {
         $this->_setupFields();
@@ -283,7 +282,7 @@ abstract class API implements IAPI {
     /**
      * Get an API field by name
      * @param String $fieldName the field name
-     * @return IAPIField
+     * @return IField
      * @throws APIFieldNotFound if the field was not found
      */
     public function getField($fieldName) {
@@ -299,7 +298,7 @@ abstract class API implements IAPI {
      */
     public function generateFieldShorts() {
         $shorts = array();
-        /** @var IAPIField[] $genFields */
+        /** @var IField[] $genFields */
         $genFields = array();
         foreach($this->getFields() as $Field) {
             if($list = $Field->getShortNames()) {
@@ -334,10 +333,10 @@ abstract class API implements IAPI {
 
     /**
      * Add a validation
-     * @param IAPIValidation $Validation the validation
+     * @param IValidation $Validation the validation
      * @return $this Return the class instance
      */
-    function addValidation(IAPIValidation $Validation){
+    function addValidation(IValidation $Validation){
         $this->mValidations[] = $Validation;
         return $this;
     }
@@ -367,7 +366,7 @@ abstract class API implements IAPI {
 
         if($arg = $Request->getNextArg()) {
             foreach($this->getFields() as $name=>$Field) {
-                if($Field instanceof IAPIParam) {
+                if($Field instanceof IParam) {
                     $Request[$name] = $arg;
                     if(!$arg = $Request->getNextArg())
                         break;
@@ -452,243 +451,4 @@ abstract class API implements IAPI {
     }
 }
 
-interface IAPIValidation {
-    /**
-     * Validate and return request
-     * @param IRequest $Request the pending request to validate
-     * @throws ValidationException if a validation exception occurred
-     */
-    function validate(IRequest $Request);
-}
 
-class APIValidation implements IAPIValidation {
-    protected $mCallback;
-    /**
-     * Create an APIValidation using a callback
-     * @param Callable $callback which accepts the IRequest $Request for validation
-     */
-    function __construct($callback) {
-        $this->mCallback = $callback;
-    }
-
-    /**
-     * Validate and return request
-     * @param IRequest $Request the pending request to validate
-     * @throws ValidationException if a validation exception occurred
-     */
-    function validate(IRequest $Request) {
-        $call = $this->mCallback;
-        $call($Request);
-    }
-}
-
-/**
- * Class IAPIField
- * @package CPath
- * Represents an API Field
- */
-interface IAPIField extends IDescribableAggregate {
-    /**
-     * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param mixed $value the input field to validate
-     * @return mixed the formatted input field that passed validation
-     * @throws ValidationException if validation fails
-     */
-    function validate($value);
-
-    /**
-     * Internal function used to set the field name.
-     * @param String $name
-     * @return void
-     * @throws \Exception if the name was already set.
-     */
-    function setName($name);
-
-    /**
-     * Adds a short alias to the field.
-     * @param String $shortName
-     * @return void
-     */
-    function addShortName($shortName);
-
-    /**
-     * Returns a list of short names for this field.
-     * @return Array returns an array of short names
-     */
-    function getShortNames();
-
-    /**
-     * Get the field name.
-     * @return string
-     * @throws \Exception if the name was never set.
-     */
-    function getName();
-}
-
-/**
- * Class APIParam
- * @package CPath
- * This interface tags an API Field as a route parameter.
- */
-interface IAPIParam extends IAPIField {
-
-}
-
-/**
- * Class ValidationExceptions
- * @package CPath
- * Throw when one or more Fields fails to validate
- */
-class ValidationExceptions extends MultiException {
-    public function addFieldException($fieldName, ValidationException $ex) {
-        parent::add($ex->getFieldError($fieldName), $fieldName);
-    }
-}
-
-/**
- * Class APIField
- * @package CPath
- * Represents an 'optional' API Field
- */
-class APIField implements IAPIField {
-
-    private $mName, $mDescription, $mValidation;
-    private $mShortNames=array();
-
-    /**
-     * @param String|IDescribable $Description
-     * @param int $validation
-     */
-    public function __construct($Description=NULL, $validation=0) {
-        $this->mDescription = $Description;
-        $this->mValidation = $validation;
-    }
-
-    public function setValidation($filter) {
-        $this->mValidation = $filter;
-        return $this;
-    }
-
-    public function validate($value) {
-        if($value === "")
-            $value = NULL;
-        if($this->mValidation)
-            Validate::input($value, $this->mValidation);
-        return $value;
-    }
-
-    /**
-     * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
-     */
-    function getDescribable() {
-        return $this->mDescription;
-    }
-
-
-    /**
-     * Internal function used to set the field name.
-     * @param String $name
-     * @return void
-     * @throws \Exception if the name was already set.
-     */
-    function setName($name) {
-        if($this->mName !== null)
-            throw new \Exception("Name '" . $name ."' was set twice");
-        $this->mName = $name;
-    }
-
-    /**
-     * Get the field name.
-     * @return string
-     * @throws \Exception if the name was never set.
-     */
-    function getName() {
-        if($this->mName === null)
-            throw new \Exception("Name was not set yet");
-        return $this->mName;
-    }
-
-    /**
-     * Adds a short alias to the field.
-     * @param String $shortName
-     * @return void
-     */
-    function addShortName($shortName) {
-        $this->mShortNames[] = $shortName;
-    }
-
-    /**
-     * Returns a list of short names for this field.
-     * @return Array returns an array of short names
-     */
-    function getShortNames() {
-        return $this->mShortNames;
-    }
-}
-
-/**
- * Class RequiredFieldException
- * @package CPath
- * Throw when a required field is missing
- */
-class RequiredFieldException extends ValidationException {
-    function __construct($msg = "Field '%s' is required") {
-        parent::__construct($msg);
-    }
-}
-
-/**
- * Class APIRequiredField
- * @package CPath
- * Represents a 'required' API Field
- */
-class APIRequiredField extends APIField {
-    public function validate($value) {
-        $value = parent::validate($value);
-        if(!$value && $value !== '0')
-            throw new RequiredFieldException();
-        return $value;
-    }
-}
-
-/**
- * Class APIParam
- * @package CPath
- * Represents a Parameter from the route path
- */
-class APIParam extends APIField implements IAPIParam {
-}
-
-/**
- * Class APIRquiredParam
- * @package CPath
- * Represents a Required Parameter from the route path
- */
-class APIRequiredParam extends APIRequiredField implements IAPIParam {
-}
-
-class APIEnumField extends APIField {
-    protected $mEnum;
-    public function __construct($description, $_enumValues) {
-        parent::__construct($description);
-        $this->mEnum = is_array($_enumValues) ? $_enumValues : array_slice(func_get_args(), 1);
-    }
-
-    public function validate($value) {
-        $value = parent::validate($value);
-        if(!in_array($value, $this->mEnum))
-            throw new ValidationException("Field '%s' must be one of the following: '" . implode("', '", $this->mEnum) . "'");
-        return $value;
-    }
-
-    /**
-     * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
-     */
-    function getDescribable() {
-        return $this->getDescribable() . ": '" . implode("', '", $this->mEnum) . "'";
-    }
-}
-
-class APIEnumParam extends APIField implements IAPIParam {}

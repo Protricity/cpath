@@ -9,17 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\InvalidAPIException;
-use CPath\Model\DB\Interfaces\ILimitApiQuery;
-use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\IWriteAccess;
-use CPath\Model\Response;
 
 /**
  * Class Policy_Public implements a 'public' security policy that asserts no permissions

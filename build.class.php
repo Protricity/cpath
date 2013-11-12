@@ -7,13 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Handlers\APIField;
+use CPath\Handlers\Api\Field;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IShortOptions;
 use CPath\Model\Response;
 use CPath\Handlers\API;
 
@@ -32,8 +31,8 @@ class Build extends API implements IBuildable, IDescribableAggregate {
      * @return void
      */
     protected function setupAPI(){
-        $this->addField('v', new APIField("Display verbose messages"));
-        $this->addField('s', new APIField("Skip broken files"));
+        $this->addField('v', new Field("Display verbose messages"));
+        $this->addField('s', new Field("Skip broken files"));
         $this->generateFieldShorts();
     }
 

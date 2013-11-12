@@ -7,10 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-use CPath\Handlers\IAPIField;
-use CPath\Handlers\IAPIValidation;
-use CPath\Handlers\ValidationExceptions;
-
 class NotEqualException extends \Exception {
 
     private $mC = NULL;

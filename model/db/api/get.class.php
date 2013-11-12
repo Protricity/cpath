@@ -9,17 +9,12 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
+use CPath\Handlers\Api\Interfaces\InvalidAPIException;
+use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\InvalidAPIException;
-use CPath\Model\DB\Interfaces\ILimitApiQuery;
 use CPath\Model\DB\Interfaces\IReadAccess;
-use CPath\Model\Response;
 
 interface IGetExecute {
 
@@ -71,7 +66,7 @@ class API_Get extends API_Base {
         } else {
             $this->mIDField = $keys[0];
         }
-        $this->addField($this->mIDField, new APIRequiredParam($Model->modelName() . ' ' . implode('', $keys)));
+        $this->addField($this->mIDField, new RequiredParam($Model->modelName() . ' ' . implode('', $keys)));
     }
 
     /**

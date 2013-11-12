@@ -4,9 +4,9 @@ namespace CPath\Handlers\Views;
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
 use CPath\Config;
-use CPath\Handlers\IAPIParam;
+use CPath\Handlers\Api\Interfaces\IParam;
 use CPath\Helpers\Describable;
-use CPath\Interfaces\IAPI;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
@@ -14,7 +14,6 @@ use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
-use CPath\Util;
 
 class APIInfo implements IHandler, ILogListener {
 
@@ -58,7 +57,7 @@ class APIInfo implements IHandler, ILogListener {
         $path = rtrim($domainPath, '/') . $path;
 
         foreach($API->getFields() as $name=>$Field)
-            if($Field instanceof IAPIParam)
+            if($Field instanceof IParam)
                 $route .= '/:'.$name;
         $num = 1;
 

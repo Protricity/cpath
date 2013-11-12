@@ -5,15 +5,50 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Interfaces;
+namespace CPath\Handlers\Api\Interfaces;
 
-use CPath\Handlers\IAPIField;
-use CPath\Handlers\IAPIValidation;
-use CPath\Handlers\ValidationExceptions;
+use CPath\Interfaces\IHandler;
+use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IRoutable;
+use CPath\Model\MultiException;
 
 class APIException extends \Exception {}
 class InvalidAPIException extends APIException {}
 class APIFieldNotFound extends APIException {};
+
+/**
+ * Class ValidationException
+ * @package CPath
+ * Thrown when input fails to validate
+ */
+class ValidationException extends \Exception {
+    public function getFieldError($fieldName) {
+        return strpos($msg = $this->getMessage(), '%s') !== false
+            ? sprintf($msg, $fieldName)
+            : $msg;
+    }
+
+    /**
+     * @param $fieldName
+     * @return ValidationException
+     */
+    public function updateMessage($fieldName) {
+        $this->message = $this->getFieldError($fieldName);
+        return $this;
+    }
+}
+/**
+ * Class ValidationExceptions
+ * @package CPath
+ * Throw when one or more Fields fails to validate
+ */
+class ValidationExceptions extends MultiException {
+    public function addFieldException($fieldName, ValidationException $ex) {
+        parent::add($ex->getFieldError($fieldName), $fieldName);
+    }
+}
+
 
 interface IAPI extends IHandler, IRoutable {
 
@@ -26,24 +61,24 @@ interface IAPI extends IHandler, IRoutable {
 
     /**
      * Get all API Fields
-     * @return IAPIField[]
+     * @return IField[]
      */
     function getFields();
 
     /**
      * Get an API field by name
      * @param String $fieldName the field name
-     * @return IAPIField
+     * @return IField
      * @throws APIFieldNotFound if the field was not found
      */
     public function getField($fieldName);
 
     /**
      * Add a validation
-     * @param IAPIValidation $Validation the validation
+     * @param IValidation $Validation the validation
      * @return $this Return the class instance
      */
-    function addValidation(IAPIValidation $Validation);
+    function addValidation(IValidation $Validation);
 
     /**
      * Enable or disable logging for this IAPI

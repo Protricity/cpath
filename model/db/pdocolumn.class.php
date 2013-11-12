@@ -8,11 +8,11 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIParam;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
-use CPath\Handlers\IAPIField;
+use CPath\Handlers\Api\Field;
+use CPath\Handlers\Api\Param;
+use CPath\Handlers\Api\RequiredField;
+use CPath\Handlers\Api\RequiredParam;
+use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IAPI;
 use CPath\Validate;
 
@@ -112,12 +112,12 @@ class PDOColumn {
     }
 
     /**
-     * Generate an IAPIField for this column
+     * Generate an IField for this column
      * @param boolean|NULL $required if null, the column flag FLAG_REQUIRED determines the value
      * @param boolean|NULL $param
      * @param boolean|NULL $comment
      * @param mixed $defaultValidation
-     * @return IAPIField
+     * @return IField
      */
     function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
@@ -126,14 +126,14 @@ class PDOColumn {
             $defaultValidation = $this->mFilter;
         if($param) {
             if($required)
-                $Field = new APIRequiredParam($comment ?: $this->getComment(), $defaultValidation);
+                $Field = new RequiredParam($comment ?: $this->getComment(), $defaultValidation);
             else
-                $Field = new APIParam($comment ?: $this->getComment(),  $defaultValidation);
+                $Field = new Param($comment ?: $this->getComment(),  $defaultValidation);
         } else {
             if($required)
-                $Field = new APIRequiredField($comment ?: $this->getComment(), $defaultValidation);
+                $Field = new RequiredField($comment ?: $this->getComment(), $defaultValidation);
             else
-                $Field = new APIField($comment ?: $this->getComment(),  $defaultValidation);
+                $Field = new Field($comment ?: $this->getComment(),  $defaultValidation);
         }
         return $Field;
     }

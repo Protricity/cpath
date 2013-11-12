@@ -9,9 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIParam;
-use CPath\Handlers\APIRequiredParam;
+use CPath\Handlers\Api\Field;
+use CPath\Handlers\Api\Param;
+use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
@@ -30,10 +30,10 @@ class API_GetSearch extends API_Base {
 
         $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
 
-        $this->addField('search', new APIRequiredParam("SEARCH for ".$Model::modelName()));
-        $this->addField('search_by', new APIParam("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
-        $this->addField('limit', new APIField("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
-        $this->addField('logic', new APIField("The search logic to use [AND, OR]. Default=OR"));
+        $this->addField('search', new RequiredParam("SEARCH for ".$Model::modelName()));
+        $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
+        $this->addField('limit', new Field("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
+        $this->addField('logic', new Field("The search logic to use [AND, OR]. Default=OR"));
     }
 
 

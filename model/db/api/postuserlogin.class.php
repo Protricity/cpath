@@ -9,9 +9,7 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
+use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
@@ -48,8 +46,8 @@ class API_PostUserLogin extends API_Base {
      * @return void
      */
     protected function setupAPIFields() {
-        $this->addField('name', new APIRequiredParam("Username or Email Address"));
-        $this->addField('password', new APIRequiredParam("Password"));
+        $this->addField('name', new RequiredParam("Username or Email Address"));
+        $this->addField('password', new RequiredParam("Password"));
         $this->generateFieldShorts();
     }
 

@@ -7,9 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 
-use CPath\Base;
 use CPath\Cache;
-use CPath\Exceptions\ValidationException;
+use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
@@ -20,12 +19,9 @@ use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Config;
-use CPath\Model\DB\Interfaces\IReadAccess;
-use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 use CPath\Util;
-use CPath\Validate;
 
 interface IGetDB {
     /**
@@ -403,7 +399,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         if(!$columns)
             throw new \Exception("No SEARCH fields defined in ".static::modelName());
 
-        $i = 0;
         if(strcasecmp($logic, 'OR')===0)
             $Select->setFlag(PDOWhere::LOGIC_OR);
         foreach($columns as $name=>$Column) {

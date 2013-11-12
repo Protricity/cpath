@@ -9,13 +9,11 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIRequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\SessionNotFoundException;
+use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 
 interface IPostLogoutExecute {
@@ -67,7 +65,7 @@ class API_PostUserLogout extends API_Base {
                 return new Response("User was not logged in", false);
             $Response = new Response("Logged out successfully", true);
         } catch (SessionNotFoundException $ex) {
-            $Response = new ResponseEx;
+            $Response = new ExceptionResponse($ex);
         }
 
 

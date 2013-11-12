@@ -9,12 +9,12 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\APIField;
-use CPath\Handlers\APIRequiredField;
-use CPath\Handlers\APIValidation;
+use CPath\Handlers\Api\Field;
+use CPath\Handlers\Api\Interfaces\InvalidAPIException;
+use CPath\Handlers\Api\RequiredField;
+use CPath\Handlers\Api\Validation;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\InvalidAPIException;
 use CPath\Model\Response;
 
 interface IPostUserExecute {
@@ -30,6 +30,7 @@ interface IPostUserExecute {
 }
 
 class API_PostUser extends API_Post implements IPostExecute {
+    /** @var PDOUserModel */
     private $mUser;
 
     /**
@@ -48,14 +49,14 @@ class API_PostUser extends API_Post implements IPostExecute {
             if(!$Model::COLUMN_PASSWORD)
                 throw new InvalidAPIException("::PASSWORD_CONFIRM requires ::COLUMN_PASSWORD set");
             $this->getField($Model::COLUMN_PASSWORD); // Ensure the password field is in the insert
-            $this->addField($Model::COLUMN_PASSWORD.'_confirm', new APIRequiredField("Confirm Password"));
-            $this->addValidation(new APIValidation(function(IRequest $Request) use ($Model) {
+            $this->addField($Model::COLUMN_PASSWORD.'_confirm', new RequiredField("Confirm Password"));
+            $this->addValidation(new Validation(function(IRequest $Request) use ($Model) {
                 $confirm = $Request->pluck($Model::COLUMN_PASSWORD.'_confirm');
                 $pass = $Request[$Model::COLUMN_PASSWORD];
                 $Model::confirmPassword($pass, $confirm);
             }));
         }
-        $this->addField('login', new APIField("Log in after"));
+        $this->addField('login', new Field("Log in after"));
         $this->generateFieldShorts();
     }
 

@@ -30,7 +30,7 @@ class SimpleAPI extends API implements IDescribableAggregate {
 
     /**
      * @param Callable $callback
-     * @param APIField[] $fields
+     * @param Field[] $fields
      * @param String $description
      */
     public function __construct($callback, Array $fields=array(), $description=NULL) {
