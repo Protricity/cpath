@@ -8,12 +8,14 @@
 namespace CPath\Model\DB;
 
 
+use Aws\ElasticTranscoder\Exception\ValidationException;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\Api\RequiredField;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IRequest;
 use CPath\Validate;
 
 class PDOColumn {
@@ -95,11 +97,14 @@ class PDOColumn {
     }
 
     /**
-     * Validates an input with the validation config of this column
-     * @param mixed $value the input to validate
-     * @return mixed
+     * Validates an input field. Throws a ValidationException if it fails to validate
+     * @param IRequest $Request the request instance
+     * @param String $fieldName the field name
+     * @return mixed the formatted input field that passed validation
+     * @throws ValidationException if validation fails
      */
-    function validate($value) {
+    function validate(IRequest $Request, $fieldName) {
+        $value = $Request[$fieldName];
         return Validate::inputField($this->mName, $value, $this->mFilter);
     }
 
@@ -119,7 +124,7 @@ class PDOColumn {
      * @param mixed $defaultValidation
      * @return IField
      */
-    function generateField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
+    function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
             $required = $this->mFlags & PDOColumn::FLAG_REQUIRED;
         if($this->mFilter)

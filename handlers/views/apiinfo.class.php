@@ -12,8 +12,11 @@ use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
+use CPath\Model\ExceptionResponse;
+use CPath\Util;
 
 class APIInfo implements IHandler, ILogListener {
 
@@ -44,10 +47,10 @@ class APIInfo implements IHandler, ILogListener {
             return;
         }
         $routes = $API->getAllRoutes(new RouteBuilder());
-        $this->renderApi($API, current($routes));
+        $this->renderApi($API, current($routes), $Request);
     }
 
-    function renderAPI(IAPI $API, IRoute $Route) {
+    function renderAPI(IAPI $API, IRoute $Route, IRequest $Request, IResponse $Response=null) {
 
         $basePath = Base::getClassPublicPath($this);
 
@@ -76,7 +79,7 @@ class APIInfo implements IHandler, ILogListener {
     <h1><?php echo $route."<br />"; ?></h1>
     <h2><?php echo Describable::get($API)->getDescription(); ?></h2>
     <h3>Params:</h3>
-    <form class="field-form" onsubmit="jQuery(this).find('input[type=button]:first').click(); return false;">
+    <form class="field-form" method="POST" enctype="multipart/form-data">
         <ul class='field-table'>
             <li class='field-header clearfix'>
                 <div class='field-num'>#</div>
@@ -96,7 +99,7 @@ class APIInfo implements IHandler, ILogListener {
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
                     <div class='field-description'><?php echo Describable::get($Field)->getDescription(); ?></div>
-                    <div class='field-input'><input name='<?php echo $name; ?>' value='<?php if(isset($_GET[$name])) echo htmlspecialchars($_GET[$name], ENT_QUOTES); ?>' placeholder='Enter value for <?php echo $name; ?>' /></div>
+                    <div class='field-input'><?php $Field->render($Request); ?></div>
                 </li>
             <?php } ?>
             <li class='field-footer clearfix'>
@@ -112,12 +115,26 @@ class APIInfo implements IHandler, ILogListener {
             <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
             <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
             <input type="button" value="Submit JSON Object (POST)" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
+            <input type="submit" value="Submit POST"/>
         </div>
     </form>
 
-    <div class="response-container" style="display: none">
+    <div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
         <h3>Response</h3>
-        <div class='response-content'></div>
+        <div class='response-content'>
+            <?php
+            if($Response) {
+                try{
+                    $JSON = Util::toJSON($Response);
+                    echo json_encode($JSON);
+                } catch (\Exception $ex) {
+                    $Response = new ExceptionResponse($ex);
+                    $JSON = Util::toJSON($Response);
+                    echo json_encode($JSON);
+                }
+            }
+            ?>
+        </div>
         <h3>Response Headers</h3>
         <div class='response-headers'></div>
         <h3>Request Headers</h3>

@@ -38,6 +38,18 @@ class ValidationException extends \Exception {
         return $this;
     }
 }
+
+/**
+ * Class RequiredFieldException
+ * @package CPath
+ * Throw when a required field is missing
+ */
+class RequiredFieldException extends ValidationException {
+    function __construct($msg = "Field '%s' is required") {
+        parent::__construct($msg);
+    }
+}
+
 /**
  * Class ValidationExceptions
  * @package CPath

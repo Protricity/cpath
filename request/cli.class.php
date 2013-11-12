@@ -15,6 +15,7 @@ use CPath\Interfaces\IShortOptions;
 use CPath\Log;
 use CPath\LogException;
 use CPath\Model\ArrayObject;
+use CPath\Model\FileUpload;
 use CPath\Model\MissingRoute;
 use CPath\Router;
 
@@ -250,5 +251,16 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
             ? getallheaders()
             : array();
         return $CLI;
+    }
+
+    /**
+     * Returns a file upload by name, or throw an exception
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
+     * @return FileUpload
+     * @throws \InvalidArgumentException if the file was not found
+     */
+    function getFileUpload($_path=NULL) {
+        throw new \InvalidArgumentException("File upload is not supported in CLI requests");
     }
 }

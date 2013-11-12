@@ -9,6 +9,7 @@ namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Interfaces\IDescribable;
+use CPath\Interfaces\IRequest;
 
 
 class EnumField extends Field {
@@ -18,8 +19,15 @@ class EnumField extends Field {
         $this->mEnum = is_array($_enumValues) ? $_enumValues : array_slice(func_get_args(), 1);
     }
 
-    public function validate($value) {
-        $value = parent::validate($value);
+    /**
+     * Validates an input field. Throws a ValidationException if it fails to validate
+     * @param IRequest $Request the request instance
+     * @param String $fieldName the field name
+     * @return mixed the formatted input field that passed validation
+     * @throws ValidationException if validation fails
+     */
+    function validate(IRequest $Request, $fieldName) {
+        $value = parent::validate($Request, $fieldName);
         if(!in_array($value, $this->mEnum))
             throw new ValidationException("Field '%s' must be one of the following: '" . implode("', '", $this->mEnum) . "'");
         return $value;

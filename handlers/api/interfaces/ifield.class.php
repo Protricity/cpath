@@ -7,20 +7,23 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api\Interfaces;
 use CPath\Interfaces\IDescribableAggregate;
+use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
 
 /**
  * Class IField
  * @package CPath
  * Represents an API Field
  */
-interface IField extends IDescribableAggregate {
+interface IField extends IHandler, IDescribableAggregate {
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param mixed $value the input field to validate
+     * @param IRequest $Request the request instance
+     * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails
      */
-    function validate($value);
+    function validate(IRequest $Request, $fieldName);
 
     /**
      * Internal function used to set the field name.

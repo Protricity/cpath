@@ -8,6 +8,8 @@
 namespace CPath\Interfaces;
 
 
+use CPath\Model\FileUpload;
+
 interface IRequest extends IArrayObject {
 
     /**
@@ -75,6 +77,15 @@ interface IRequest extends IArrayObject {
      * @throws \InvalidArgumentException if the data path doesn't exist
      */
     function pluck($_path);
+
+    /**
+     * Returns a file upload by name, or throw an exception
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
+     * @return FileUpload
+     * @throws \InvalidArgumentException if the file was not found
+     */
+    function getFileUpload($_path=NULL);
 
     // Statics
 

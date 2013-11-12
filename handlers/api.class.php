@@ -161,8 +161,11 @@ abstract class API implements IAPI {
     public function renderHTML(IRequest $Request) {
         if(!headers_sent() && !Base::isCLI())
             header("Content-Type: text/html");
+        $Response = null;
+        if(strcasecmp($Request->getMethod(), 'get') !== 0)
+            $Response = $this->execute($Request);
         $Render = new APIInfo();
-        $Render->renderAPI($this, $Request->getRoute());
+        $Render->renderAPI($this, $Request->getRoute(), $Request, $Response);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
         //$Response->renderHtml();
@@ -378,7 +381,7 @@ abstract class API implements IAPI {
         $data = array();
         foreach($this->getFields() as $name=>$Field) {
             try {
-                $data[$name] = $Field->validate($Request[$name]);
+                $data[$name] = $Field->validate($Request, $name);
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException($name, $ex);
                 $data[$name] = NULL;

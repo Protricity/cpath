@@ -17,6 +17,7 @@ use CPath\Log;
 use CPath\LogException;
 use CPath\Model\ArrayObject;
 use CPath\Model\FileRequestRoute;
+use CPath\Model\FileUpload;
 use CPath\Model\MissingRoute;
 use CPath\Router;
 use CPath\RouterAPC;
@@ -30,6 +31,7 @@ class Web extends ArrayObject implements IRequest {
         $mHeaders = array(),
         $mArgs = array(),
         $mPos = 0,
+        $mUploads = null,
         $mRequest = array();
 
     /** @var IRoute */
@@ -234,5 +236,26 @@ class Web extends ArrayObject implements IRequest {
         }
 
         return $Web;
+    }
+
+    /**
+     * Returns a file upload by name, or throw an exception
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
+     * @return FileUpload
+     * @throws \InvalidArgumentException if the file was not found
+     */
+    function getFileUpload($_path=NULL) {
+        if($this->mUploads === null)
+            $this->mUploads = FileUpload::getAll();
+        if($_path === NULL)
+            return $this->mUploads;
+        $data =& $this->mUploads;
+        foreach(func_get_args() as $arg) {
+            if(!is_array($data) || !isset($data[$arg]))
+                throw new \InvalidArgumentException("Invalid file upload path at '{$arg}': " . implode('.', func_get_args()));
+            $data = &$data[$arg];
+        }
+        return $data;
     }
 }

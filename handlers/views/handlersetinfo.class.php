@@ -63,7 +63,7 @@ class HandlerSetInfo implements IHandler, ILogListener {
                 throw new InvalidRouteException("Destination for '{$arg}' does not implement IAPI");
             $APIInfo = new APIInfo();
             $APIRoute = $routes[$route];
-            $APIInfo->renderAPI($API, $APIRoute);
+            $APIInfo->renderAPI($API, $APIRoute, $Request);
             return;
         }
 
