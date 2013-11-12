@@ -44,7 +44,7 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_INFO = true;            // Add an APIInfo route entry for this API
+    const ROUTE_API_INFO = 'api';           // Add an APIInfo route entry i.e. ':api' for this API on GET requests
 
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
@@ -434,8 +434,10 @@ abstract class API implements IAPI {
     public function getAllRoutes(IRouteBuilder $Builder) {
         $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
         $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
-        if(static::ROUTE_API_INFO && !isset($routes['GET']))
-            $routes['GET'] = new Route('GET ' . $path, 'CPath\Handlers\Views\APIInfo', get_called_class());
+        if(static::ROUTE_API_INFO) {
+            $token = ':' . static::ROUTE_API_INFO;
+            $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIInfo()), get_called_class());
+        }
         return $routes;
     }
 

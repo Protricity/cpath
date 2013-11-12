@@ -10,6 +10,7 @@ namespace CPath\Handlers;
 use CPath\Build;
 use CPath\Exceptions\BuildException;
 use CPath\Builders\RouteBuilder;
+use CPath\Handlers\Views\HandlerSetInfo;
 use CPath\Interfaces\HandlerSetException;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
@@ -154,7 +155,7 @@ class HandlerSet implements IHandlerSet {
             else $path = !empty($matches[3]) ? $matches[4] : $defaultPath . '/' .$matches[4];
             $routes[$route] = new Route($matches[1] . ' ' . $path, $Class->getName(), $route);
         }
-        $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', 'CPath\Handlers\Views\HandlerSetInfo', $Class->getName());
+        $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', get_class(new HandlerSetInfo()), $Class->getName());
         return $routes;
     }
 //
