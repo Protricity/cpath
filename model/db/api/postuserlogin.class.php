@@ -45,7 +45,7 @@ class API_PostUserLogin extends API_Base {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      */
-    protected function setupAPIFields() {
+    protected function setupFields() {
         $this->addField('name', new RequiredParam("Username or Email Address"));
         $this->addField('password', new RequiredParam("Password"));
         $this->generateFieldShorts();

@@ -37,7 +37,7 @@ abstract class API_Base extends API implements IDescribableAggregate {
      * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    abstract protected function setupAPIFields();
+    abstract protected function setupFields();
 
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
@@ -45,7 +45,7 @@ abstract class API_Base extends API implements IDescribableAggregate {
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
     final protected function setupAPI() {
-        $this->setupAPIFields();
+        $this->setupFields();
         $Model = $this->mModel;
         if($Model::AUTO_SHORTS)
             $this->generateFieldShorts();

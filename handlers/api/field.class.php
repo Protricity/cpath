@@ -13,7 +13,7 @@ use CPath\Validate;
 
 
 /**
- * Class APIField
+ * Class Field
  * @package CPath
  * Represents an 'optional' API Field
  */

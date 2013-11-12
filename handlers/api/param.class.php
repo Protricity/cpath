@@ -14,7 +14,7 @@ use CPath\Validate;
 
 
 /**
- * Class APIParam
+ * Class Param
  * @package CPath
  * Represents a Parameter from the route path
  */

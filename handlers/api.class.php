@@ -10,7 +10,7 @@ namespace CPath\Handlers;
 
 use CPath\Base;
 use CPath\Handlers\Api\Interfaces\APIException;
-use CPath\Handlers\Api\Interfaces\APIFieldNotFound;
+use CPath\Handlers\Api\Interfaces\FieldNotFound;
 use CPath\Handlers\Api\Interfaces\IParam;
 use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
@@ -283,12 +283,12 @@ abstract class API implements IAPI {
      * Get an API field by name
      * @param String $fieldName the field name
      * @return IField
-     * @throws APIFieldNotFound if the field was not found
+     * @throws FieldNotFound if the field was not found
      */
     public function getField($fieldName) {
         $this->_setupFields();
         if(!isset($this->mFields[$fieldName]))
-            throw new APIFieldNotFound("Field '{$fieldName}' is not in this API");
+            throw new FieldNotFound("Field '{$fieldName}' is not in this API");
         return $this->mFields;
     }
 

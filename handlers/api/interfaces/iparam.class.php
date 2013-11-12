@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Api\Interfaces;
 
 /**
- * Class APIParam
+ * Class Param
  * @package CPath
  * This interface tags an API Field as a route parameter.
  */

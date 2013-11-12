@@ -15,7 +15,7 @@ use CPath\Model\MultiException;
 
 class APIException extends \Exception {}
 class InvalidAPIException extends APIException {}
-class APIFieldNotFound extends APIException {};
+class FieldNotFound extends APIException {};
 
 /**
  * Class ValidationException
@@ -69,7 +69,7 @@ interface IAPI extends IHandler, IRoutable {
      * Get an API field by name
      * @param String $fieldName the field name
      * @return IField
-     * @throws APIFieldNotFound if the field was not found
+     * @throws FieldNotFound if the field was not found
      */
     public function getField($fieldName);
 

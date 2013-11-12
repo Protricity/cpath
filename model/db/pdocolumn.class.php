@@ -119,7 +119,7 @@ class PDOColumn {
      * @param mixed $defaultValidation
      * @return IField
      */
-    function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
+    function generateField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
             $required = $this->mFlags & PDOColumn::FLAG_REQUIRED;
         if($this->mFilter)

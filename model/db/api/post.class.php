@@ -32,11 +32,11 @@ class API_Post extends API_Base {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      */
-    protected function setupAPIFields() {
+    protected function setupFields() {
         $Model = $this->getModel();
 
         foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FLAG_INSERT) as $Column)
-            $this->addField($Column->getName(), $Column->generateAPIField());
+            $this->addField($Column->getName(), $Column->generateField());
     }
 
     /**
