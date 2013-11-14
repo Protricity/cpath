@@ -8,25 +8,17 @@
 namespace CPath\Model\DB;
 
 
+use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAPIPostCallbacks;
 use CPath\Model\DB\Interfaces\IAssignAccess;
 use CPath\Model\Response;
 
-interface IPostExecute {
-
-    /**
-     * Perform on successful API_Get execution
-     * @param PDOModel $NewModel the returned model
-     * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
-     */
-    function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response);
-}
-
 class API_Post extends API_Base {
+
 
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
@@ -35,8 +27,15 @@ class API_Post extends API_Base {
     protected function setupFields() {
         $Model = $this->getModel();
 
+        $fields = array();
         foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FLAG_INSERT) as $Column)
-            $this->addField($Column->getName(), $Column->generateAPIField());
+            $fields[$Column->getName()] = $Column->generateAPIField();
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIPostCallbacks)
+                $fields = $Handler->preparePostFields($fields) ?: $fields;
+
+        $this->addFields($fields);
     }
 
     /**
@@ -55,18 +54,22 @@ class API_Post extends API_Base {
     final protected function doExecute(IRequest $Request) {
         $Model = $this->getModel();
 
-        $Policy = $this->getSecurityPolicy();
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAssignAccess)
+                $Handler->assignAccessID($Request, IAssignAccess::INTENT_POST);
 
-        $Policy->assignAccessID($Request, IAssignAccess::INTENT_POST);
-        if($Model instanceof IAssignAccess)
-            $Model->assignAccessID($Request, IAssignAccess::INTENT_POST);
+        $row = $Request->getDataPath();
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIPostCallbacks)
+                $row = $Handler->preparePostInsert($row, $Request) ?: $row;
 
-        $Model = $Model::createFromArray($Request);
+        $Model = $Model::createFromArray($row);
 
         $Response = new Response("Created " . $Model . " Successfully.", true, $Model);
 
-        if($this instanceof IPostExecute)
-            $Response = $this->onPostExecute($Model, $Request, $Response) ?: $Response;
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIPostCallbacks)
+                $Response = $Handler->onPostExecute($Model, $Request, $Response) ?: $Response;
 
         return $Response;
     }

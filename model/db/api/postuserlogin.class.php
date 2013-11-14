@@ -72,8 +72,9 @@ class API_PostUserLogin extends API_Base {
             'session' => $Session,
         ));
 
-        if($this instanceof IPostLogoutExecute)
-            $Response = $this->onPostLogoutExecute($User, $Session, $Request, $Response) ?: $Response;
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IPostLogoutExecute)
+                $Response = $Handler->onPostLogoutExecute($User, $Session, $Request, $Response) ?: $Response;
 
         return $Response;
     }

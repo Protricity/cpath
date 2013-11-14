@@ -19,5 +19,14 @@ use CPath\Validate;
  * @package CPath
  * Represents a 'required' API Field
  */
-class RequiredField extends Field implements IRequiredField {
+class RequiredField extends Field {
+    /**
+     * Create a new API Field
+     * @param String|IDescribable $Description
+     * @param int $validation
+     * @param bool $isParam
+     */
+    public function __construct($Description=NULL, $validation=0, $isParam=false) {
+        parent::__construct($Description, $validation, true, $isParam);
+    }
 }

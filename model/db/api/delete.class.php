@@ -12,10 +12,11 @@ use CPath\Handlers\API;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
-class API_Delete extends API_Get implements IGetExecute {
+class API_Delete extends API_Get implements IAPIGetCallbacks {
 
     /**
      * Get the Object Description
@@ -33,7 +34,9 @@ class API_Delete extends API_Get implements IGetExecute {
      * @return IResponse|void
      */
     function onGetExecute(PDOModel $Model, IRequest $Request, IResponse $Response) {
-        $this->getSecurityPolicy()->assertWriteAccess($Model, $Request, IWriteAccess::INTENT_DELETE);
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IWriteAccess)
+                $Handler->assertWriteAccess($Model, $Request, IWriteAccess::INTENT_DELETE);
 
         $Model::removeModel($Model);
 

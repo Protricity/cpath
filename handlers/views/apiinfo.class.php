@@ -17,6 +17,7 @@ use CPath\Interfaces\IRoute;
 use CPath\Log;
 use CPath\Model\ExceptionResponse;
 use CPath\Util;
+use CPath\Misc\RenderIndents as RI;
 
 class APIInfo implements IHandler, ILogListener {
 
@@ -66,6 +67,8 @@ class APIInfo implements IHandler, ILogListener {
 
         $fields = $API->getFields();
 
+        RI::get()->setIndent(0, "    ");
+
         ?><html>
     <head>
         <base href="<?php echo $basePath; ?>" />
@@ -76,71 +79,72 @@ class APIInfo implements IHandler, ILogListener {
         <link rel="stylesheet" href="libs/apistyle.css" />
     </head>
     <body>
-    <h1><?php echo $route."<br />"; ?></h1>
-    <h2><?php echo Describable::get($API)->getDescription(); ?></h2>
-    <h3>Params:</h3>
-    <form class="field-form" method="POST" enctype="multipart/form-data">
-        <ul class='field-table'>
-            <li class='field-header clearfix'>
-                <div class='field-num'>#</div>
-                <div class='field-name'>Name</div>
-                <div class='field-description'>Description</div>
-                <div class='field-input'>Test</div>
-            </li>
-            <?php if(!$fields) { ?>
+        <h1><?php echo $route."<br />"; ?></h1>
+        <h2><?php echo Describable::get($API)->getDescription(); ?></h2>
+        <h3>Params:</h3>
+        <form class="field-form" method="POST" enctype="multipart/form-data">
+            <ul class='field-table'>
+                <li class='field-header clearfix'>
+                    <div class='field-num'>#</div>
+                    <div class='field-name'>Name</div>
+                    <div class='field-description'>Description</div>
+                    <div class='field-input'>Test</div>
+                </li>
+                <?php if(!$fields) { ?>
                 <li class='field-item clearfix'>
                     <div class='field-num'>&nbsp;</div>
                     <div class='field-name'>&nbsp;</div>
                     <div class='field-description'>No Fields in this API</div>
                     <div class='field-input'>&nbsp;</div>
                 </li>
-            <?php } else foreach($fields as $name=>$Field) { ?>
+                <?php } else foreach($fields as $name=>$Field) { echo "\n"; ?>
                 <li class='field-item clearfix'>
                     <div class='field-num'><?php echo $num++; ?>.</div>
                     <div class='field-name'><?php echo $name; ?></div>
                     <div class='field-description'><?php echo Describable::get($Field)->getDescription(); ?></div>
-                    <div class='field-input'><?php $Field->render($Request); ?></div>
+                    <div class='field-input'><?php
+                            RI::si(5);
+                            $Field->render($Request);
+                            echo "\n"; ?>
+                    </div>
+                </li><?php } echo "\n"; ?>
+                <li class='field-footer clearfix'>
+                    <div class='field-num'></div>
+                    <div class='field-name'></div>
+                    <div class='field-description'></div>
+                    <div class='field-input'></div>
                 </li>
-            <?php } ?>
-            <li class='field-footer clearfix'>
-                <div class='field-num'></div>
-                <div class='field-name'></div>
-                <div class='field-description'></div>
-                <div class='field-input'></div>
-            </li>
-        </ul>
-        <div>
-            <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-            <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
-            <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
-            <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
-            <input type="button" value="Submit JSON Object (POST)" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
-            <input type="submit" value="Submit POST"/>
-        </div>
-    </form>
-
-    <div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
-        <h3>Response</h3>
-        <div class='response-content'>
-            <?php
-            if($Response) {
-                try{
-                    $JSON = Util::toJSON($Response);
-                    echo json_encode($JSON);
-                } catch (\Exception $ex) {
-                    $Response = new ExceptionResponse($ex);
-                    $JSON = Util::toJSON($Response);
-                    echo json_encode($JSON);
+            </ul>
+            <div>
+                <input type="button" value="Submit JSON" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+                <input type="button" value="Submit XML" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
+                <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
+                <input type="submit" value="Submit POST"/>
+                <input type="button" value="Submit JSON Object (POST)" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
+                <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
+            </div>
+        </form>
+        <div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
+            <h3>Response</h3>
+            <div class='response-content'>
+                <?php
+                if($Response) {
+                    try{
+                        $JSON = Util::toJSON($Response);
+                        echo json_encode($JSON);
+                    } catch (\Exception $ex) {
+                        $Response = new ExceptionResponse($ex);
+                        $JSON = Util::toJSON($Response);
+                        echo json_encode($JSON);
+                    }
                 }
-            }
-            ?>
+                ?>
+            </div>
+            <h3>Response Headers</h3>
+            <div class='response-headers'></div>
+            <h3>Request Headers</h3>
+            <div class='request-headers'></div>
         </div>
-        <h3>Response Headers</h3>
-        <div class='response-headers'></div>
-        <h3>Request Headers</h3>
-        <div class='request-headers'></div>
-    </div>
-
     <?php if(false && Config::$Debug) { ?>
         <h3>Debug</h3>
         <table><?php
@@ -149,8 +153,8 @@ class APIInfo implements IHandler, ILogListener {
             //    echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
 
             ?></table>
-    <?php } ?>
+    <?php } echo "\n"; ?>
     </body>
-        </html><?php
+</html><?php
     }
 }

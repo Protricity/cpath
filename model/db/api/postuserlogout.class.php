@@ -68,9 +68,9 @@ class API_PostUserLogout extends API_Base {
             $Response = new ExceptionResponse($ex);
         }
 
-
-        if($this instanceof IPostLogoutExecute)
-            $Response = $this->onPostLogoutExecute($User, $Request, $Response) ?: $Response;
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IPostLogoutExecute)
+                $Response = $Handler->onPostLogoutExecute($User, $Request, $Response) ?: $Response;
 
         return $Response;
     }

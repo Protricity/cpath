@@ -80,21 +80,16 @@ class API_GetSearch extends API_Base {
         $select = array_keys($Model::findColumns($export));
         $Search = $Model::selectByColumns($select, $search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
 
-        $Policy = $this->getSecurityPolicy();
-
-        $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
-        if($Model instanceof IReadAccess)
-            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IReadAccess)
+                $Handler->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
 
         $results = $Search->fetchAll();
 
-        foreach($results as $ResultModel)
-            if($ResultModel instanceof IReadAccess)
-                $Policy->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
-
-        if($Model instanceof IReadAccess)
-            foreach($results as $ResultModel)
-                $Model->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
+//        foreach($this->getHandlers() as $Handler)
+//            if($Handler instanceof IReadAccess)
+//                foreach($results as $ResultModel)
+//                    $Handler->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
 
         return new Response("Found (".sizeof($results).") ".$Model::modelName()."(s)", true, $results);
     }

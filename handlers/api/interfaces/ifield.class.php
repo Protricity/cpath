@@ -52,4 +52,10 @@ interface IField extends IHandler, IDescribableAggregate {
      * @throws \Exception if the name was never set.
      */
     function getName();
+
+    /**
+     * Returns true if this Field is a Param Field
+     * @return bool
+     */
+    function isParam();
 }

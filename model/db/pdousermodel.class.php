@@ -86,11 +86,11 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     function setFlag($flags, $commit=true, $remove=false) {
         if(!is_int($flags))
             throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
-        $oldFlags = $this->mFlags;
+        //$oldFlags = $this->mFlags;
         if(!$remove)
-            $this->mFlags |= $oldFlags;
+            $this->mFlags |= $flags;
         else
-            $this->mFlags = $oldFlags & ~$flags;
+            $this->mFlags = $this->mFlags & ~$flags;
         $this->updateColumn(static::COLUMN_FLAGS, $this->mFlags, $commit);
     }
 

@@ -11,7 +11,6 @@ namespace CPath\Handlers;
 use CPath\Base;
 use CPath\Handlers\Api\Interfaces\APIException;
 use CPath\Handlers\Api\Interfaces\FieldNotFound;
-use CPath\Handlers\Api\Interfaces\IParam;
 use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\IField;
@@ -237,8 +236,12 @@ abstract class API implements IAPI {
      * @param IField $Field Describes the Field. Implement IField for custom validation
      * @param boolean|int $prepend Set true to prepend
      * @return $this Return the class instance
+     * @throw \InvalidArgumentException if the field already exist, or is replacing a field that does not exist
      */
     protected function addField($name, IField $Field, $prepend=false) {
+
+        if(isset($this->mFields[$name]))
+            throw new \InvalidArgumentException("Field {$name} already exists.");
 
         if(strpos($name, ':') !== false) {
             list($name, $shorts) = explode(':', $name, 2);
@@ -369,7 +372,7 @@ abstract class API implements IAPI {
 
         if($arg = $Request->getNextArg()) {
             foreach($this->getFields() as $name=>$Field) {
-                if($Field instanceof IParam) {
+                if($Field->isParam()) {
                     $Request[$name] = $arg;
                     if(!$arg = $Request->getNextArg())
                         break;
@@ -381,7 +384,8 @@ abstract class API implements IAPI {
         $data = array();
         foreach($this->getFields() as $name=>$Field) {
             try {
-                $data[$name] = $Field->validate($Request, $name);
+                $value = $Field->validate($Request, $name);
+                $data[$name] = $value;
             } catch (ValidationException $ex) {
                 $FieldExceptions->addFieldException($name, $ex);
                 $data[$name] = NULL;

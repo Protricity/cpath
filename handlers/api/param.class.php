@@ -18,5 +18,15 @@ use CPath\Validate;
  * @package CPath
  * Represents a Parameter from the route path
  */
-class Param extends Field implements IParam {
+class Param extends Field {
+
+    /**
+     * Create a new API Field
+     * @param String|IDescribable $Description
+     * @param int $validation
+     * @param bool $isRequired
+     */
+    public function __construct($Description=NULL, $validation=0, $isRequired=false) {
+        parent::__construct($Description, $validation, $isRequired, true);
+    }
 }

@@ -324,6 +324,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     public static function createFromArray($row) {
         if($row instanceof IArrayObject)
             $row = $row->getDataPath();
+
+        foreach(static::loadAllColumns() as $Column)
+            if($Column->hasDefaultValue())
+                if(!isset($row[$Column->getName()]))
+                    $row[$Column->getName()] = $Column->getDefaultValue();
+
         foreach($row as $k=>$v)
             if($v===null)
                 unset($row[$k]);

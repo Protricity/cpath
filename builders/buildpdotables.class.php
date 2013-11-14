@@ -81,7 +81,7 @@ PHP;
             $DB->exec($sql);
             $id2 = $DB->query("SELECT @_cpath_dump_complete;")->fetchColumn(0);
             if($id != $id2)
-                throw new BuildException("FATAL ERROR: Database dump failed (id mismatch {$id} != {$id2})");
+                throw new BuildException("FATAL ERROR: Database dump failed (id mismatch {$id} != {$id2}). Please check your schema sql syntax");
 
             Log::v2(__CLASS__, "DB ID Result: {$id} == {$id2}" );
 
@@ -178,7 +178,10 @@ PHP;
             foreach($Table->getColumns() as $Column) {
                 if($Column->Flags & PDOColumn::FLAG_INDEX)
                     $Column->Flags |= PDOColumn::FLAG_SEARCH;
-                if(!($Column->Flags & PDOColumn::FLAG_NULL) && !($Column->Flags & PDOColumn::FLAG_AUTOINC) && !($Column->Flags & PDOColumn::FLAG_DEFAULT))
+                if(!($Column->Flags & PDOColumn::FLAG_NULL)
+                    && !($Column->Flags & PDOColumn::FLAG_AUTOINC)
+                    && !($Column->Flags & PDOColumn::FLAG_DEFAULT)
+                    && !($Column->Flags & PDOColumn::FLAG_OPTIONAL))
                     $Column->Flags |= PDOColumn::FLAG_REQUIRED;
             }
         }
@@ -213,10 +216,12 @@ PHP;
                 $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
                 $columns .= var_export($Column->Name, true);
                 $columns .= ',0x' . dechex($Column->Flags ?: 0);
-                if($Column->Comment || $Column->Filter || $Column->EnumValues)
+                if($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
                     $columns .= ',' . ($Column->Filter ?: 0);
-                if($Column->Comment || $Column->EnumValues)
+                if($Column->Comment || $Column->Default || $Column->EnumValues)
                     $columns .= ',' . var_export($Column->Comment ?: '', true);
+                if($Column->Default || $Column->EnumValues)
+                    $columns .= ',' . var_export($Column->Default ?: '', true);
                 if($Column->EnumValues) {
                     $a = '';
                     foreach($Column->EnumValues as $e)
@@ -382,7 +387,7 @@ PHP;
 }
 
 class BuildPDOColumn {
-    public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL;
+    public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL, $Default=NULL;
 
     public function __construct($name, $comment) {
         $this->Name = $name;
@@ -417,9 +422,18 @@ class BuildPDOColumn {
                 case 'required':
                     $this->Flags |= PDOColumn::FLAG_REQUIRED;
                     break;
+                case 'o':
+                case 'optional':
+                    $this->Flags &= ~PDOColumn::FLAG_REQUIRED;
+                    $this->Flags |= PDOColumn::FLAG_OPTIONAL;
+                    break;
                 case 'c':
                 case 'comment':
                     $this->Comment = $this->req($args);
+                    break;
+                case 'd':
+                case 'default':
+                    $this->Default = $this->req($args);
                     break;
                 case 'f':
                 case 'filter':
@@ -428,6 +442,8 @@ class BuildPDOColumn {
                         $filter = constant($filter);
                     $this->Filter |= (int)$filter;
                     break;
+                default:
+                    throw new BuildException("Unrecognized Flag: " . $args[0]);
             }
         }
         return '';

@@ -16,8 +16,24 @@
         responseContent = jQuery('div.response-content');
         responseContainer = jQuery('div.response-container');
         basePath = jQuery('base').attr('href');
+
+        var content = responseContent.text();
+        if(content)
+            APIInfo.setPrettyJSON(content, responseContent);
     });
     window.APIInfo = THIS = {
+        setPrettyJSON: function(json, elm) {
+            try {
+                json = vkbeautify.json(json);
+                elm.html(json);
+            } catch (e) {}
+        },
+        setPrettyXML: function(xml, elm) {
+            try {
+                xml = vkbeautify.xml(xml);
+                elm.text(xml);
+            } catch (e) {}
+        },
         submit: function(path, form, dataType, method, asObject) {
             form = jQuery(form);
             var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
@@ -40,21 +56,15 @@
 
                     switch(dataType) {
                         case 'json':
-                            try {
-                                content = vkbeautify.json(content);
-                            } catch (e) {}
+                            THIS.setPrettyJSON(content, responseContent);
                             break;
                         case 'xml':
-                            try {
-                                content = vkbeautify.xml(content);
-                            } catch (e) {}
-                            call = 'text';
+                            THIS.setPrettyXML(content, responseContent);
                             break;
                     }
 
                     requestHeaders.html(method + ' ' + path + " HTTP/1.1\n" + lastHeaders);
                     responseHeaders.html(jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders());
-                    responseContent[call](content);
                     console.log(arguments);
                 },
                 error: function(jqXHR, textStatus, errorThrown) {

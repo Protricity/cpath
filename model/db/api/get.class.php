@@ -14,19 +14,8 @@ use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IReadAccess;
-
-interface IGetExecute {
-
-    /**
-     * Perform on successful API_Get execution
-     * @param PDOModel $Model the returned model
-     * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
-     */
-    function onGetExecute(PDOModel $Model, IRequest $Request, IResponse $Response);
-}
 
 class API_Get extends API_Base {
     private $mSearchColumns;
@@ -100,25 +89,24 @@ class API_Get extends API_Base {
         $Search->unsetFlag(PDOWhere::LOGIC_OR);
         $Search->whereSQL(')');
 
-        $Policy = $this->getSecurityPolicy();
-
-        $Policy->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
-        if($Model instanceof IReadAccess)
-            $Model->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IReadAccess)
+                $Handler->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_GET);
 
         /** @var PDOModel$GetModel  */
         $GetModel = $Search->fetch();
         if(!$GetModel)
             throw new ModelNotFoundException($Model::modelName() . " '{$id}' was not found");
 
-        $Policy->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
-        if($Model instanceof IReadAccess)
-            $Model->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IReadAccess)
+                $Handler->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
 
         $Response = $GetModel->createResponse();
 
-        if($this instanceof IGetExecute)
-            $Response = $this->onGetExecute($GetModel, $Request, $Response) ?: $Response;
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIGetCallbacks)
+                $Response = $Handler->onGetExecute($GetModel, $Request, $Response) ?: $Response;
 
         return $Response;
     }

@@ -9,10 +9,10 @@ namespace CPath\Handlers\Api;
 
 use Aws\DynamoDb\Exception\ValidationException;
 use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Handlers\Api\Interfaces\IRequiredField;
 use CPath\Handlers\Api\Interfaces\RequiredFieldException;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
+use CPath\Misc\RenderIndents as RI;
 use CPath\Validate;
 
 
@@ -23,16 +23,26 @@ use CPath\Validate;
  */
 class Field implements IField {
 
-    private $mName, $mDescription, $mValidation;
+    private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mRequired = false, $mIsParam = false;
     private $mShortNames=array();
 
     /**
+     * Create a new API Field
      * @param String|IDescribable $Description
      * @param int $validation
+     * @param bool $isRequired
+     * @param bool $isParam
      */
-    public function __construct($Description=NULL, $validation=0) {
+    public function __construct($Description=NULL, $validation=0, $isRequired=false, $isParam=false) {
         $this->mDescription = $Description;
         $this->mValidation = $validation;
+        $this->mRequired = $isRequired;
+        $this->mIsParam = $isParam;
+    }
+
+    public function setDefaultValue($value) {
+        $this->mDefaultValue = $value;
+        return $this;
     }
 
     public function setValidation($filter) {
@@ -52,11 +62,23 @@ class Field implements IField {
         $value = $Request[$fieldName];
         if($value === "")
             $value = NULL;
+        if($value === NULL && $this->mDefaultValue)
+            $value = $this->mDefaultValue;
         if($this->mValidation)
             Validate::input($value, $this->mValidation);
-        if(!$value && $value !== '0' && $this instanceof IRequiredField)
-            throw new RequiredFieldException();
+        if($this->mRequired)
+            $this->validateRequired($value);
         return $value;
+    }
+
+    /**
+     * Test required field value
+     * @param $value
+     * @throws Interfaces\RequiredFieldException
+     */
+    protected function validateRequired($value) {
+        if(!$value && $value !== '0')
+            throw new RequiredFieldException();
     }
 
     /**
@@ -109,6 +131,14 @@ class Field implements IField {
     }
 
     /**
+     * Returns true if this Field is a Param Field
+     * @return bool
+     */
+    function isParam() {
+        return $this->mIsParam;
+    }
+
+    /**
      * Render this input field as html
      * @param IRequest $Request the IRequest instance for this render
      * @return void
@@ -119,6 +149,6 @@ class Field implements IField {
         if($value)
             $value = htmlspecialchars($value, ENT_QUOTES);
 
-        echo "<input name='{$this->getName()}' value='{$value}' placeholder='Enter value for {$this->getName()}' />";
+        echo RI::ni(), "<input name='{$this->getName()}' value='{$value}' placeholder='Enter value for {$this->getName()}' />";
     }
 }

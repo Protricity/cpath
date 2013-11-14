@@ -7,7 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use CPath\Handlers\Api\Interfaces\IParam;
 
 
-class EnumParam extends Field implements IParam {}
+class EnumParam extends EnumField  {
+    public function __construct($description, $_enumValues, $isRequired=false, $isParam=false) {
+        parent::__construct($description, $_enumValues, $isRequired, true);
+    }
+}

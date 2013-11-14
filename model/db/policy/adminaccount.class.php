@@ -14,42 +14,33 @@ use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
 /**
- * Class Policy_Public implements a 'public' security policy that asserts no permissions
+ * Class Policy_AdminAccount implements an Admin-Only security policy
  * @package CPath\Model\DB
  */
-class Policy_UserAccount implements ISecurityPolicy {
+class Policy_AdminAccount extends Policy_UserAccountViewer {
+
     private $mUser;
-    private $mReadOther;
-    private $mDelete;
 
     /**
-     * Create a 'user' security policy
-     * @param PDOUserModel $User an empty instance of the UserModel
-     * @param bool $readOtherUsers allow 'GET' and 'GET search' on other user accounts
-     * @param bool $deleteOwn allow 'DELETE' on own user account
+     * Create an 'admin only' security policy
+     * @param PDOUserModel $User an instance of the current user session
      */
-    public function __construct(PDOUserModel $User, $readOtherUsers=false, $deleteOwn=false) {
+    public function __construct(PDOUserModel $User) {
         $this->mUser = $User;
-        $this->mReadOther = $readOtherUsers;
-        $this->mDelete = $deleteOwn;
     }
 
     /**
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
-     * @param PDOModel $User the User Model to assert access upon
+     * @param PDOModel $Model the User Model to assert access upon
      * @param IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      * @return void
      */
-    function assertReadAccess(PDOModel $User, IRequest $Request, $intent) {
-        if(!$this->mReadOther) {
-            $EmptyUser = $this->mUser;
-            $id = $EmptyUser::loadBySession()->getID(); // Assert logged in
-            if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
-                throw new InvalidPermissionException("No permission to modify " . $User);
-        }
+    function assertReadAccess(PDOModel $Model, IRequest $Request, $intent) {
+        if(!$this->getUserAccount()->isAdmin())
+            throw new InvalidPermissionException("No permission to modify " . $Model);
     }
 
     /**
@@ -58,13 +49,11 @@ class Policy_UserAccount implements ISecurityPolicy {
      * @param IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
      * @return void
+     * @throws InvalidPermissionException if the user is not an Admin account
      */
     function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {
-        if(!$this->mReadOther) {
-            $EmptyUser = $this->mUser;
-            $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
-            $Select->where($EmptyUser::COLUMN_ID, $id);  // TODO: kinda silly no?
-        }
+        if(!$this->getUserAccount()->isAdmin())
+            throw new InvalidPermissionException("No permission to query");
     }
 
     /**
@@ -75,23 +64,11 @@ class Policy_UserAccount implements ISecurityPolicy {
      * @param int $intent the read intent.
      * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
      * Note: during IWriteAccess::INTENT_POST, the instance $Model contains no data.
-     * @throws InvalidPermissionException if the user does not have permission to handle this Model
+     * @throws InvalidPermissionException if the user account is not an Admin account
      */
     function assertWriteAccess(PDOModel $User, IRequest $Request, $intent) {
-        $EmptyUser = $this->mUser;
-        switch($intent) {
-            case IWriteAccess::INTENT_PATCH:
-                $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
-                if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
-                    throw new InvalidPermissionException("No permission to modify " . $User);
-                break;
-            case IWriteAccess::INTENT_DELETE:
-                $id = $EmptyUser::loadBySession()->getID();    // Assert logged in
-                if(!$this->mDelete
-                    || $User->columnValue($EmptyUser::COLUMN_ID) != $id)
-                    throw new InvalidPermissionException("No permission to delete " . $User);
-                break;
-        }
+        if(!$this->getUserAccount()->isAdmin())
+            throw new InvalidPermissionException("No permission to query");
     }
 
     /**
@@ -102,5 +79,14 @@ class Policy_UserAccount implements ISecurityPolicy {
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */
-    function assignAccessID(IRequest $Request, $intent) { }
+    function assignAccessID(IRequest $Request, $intent) {
+        if(!$this->getUserAccount()->isAdmin())
+            throw new InvalidPermissionException("No permission to query");
+    }
+
+    /**
+     * Return the user model instance
+     * @return PDOUserModel
+     */
+    function getUserAccount() { return $this->mUser; }
 }

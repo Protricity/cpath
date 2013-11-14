@@ -9,32 +9,21 @@ namespace CPath\Request;
 
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
-use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IShortOptions;
 use CPath\Log;
 use CPath\LogException;
-use CPath\Model\ArrayObject;
 use CPath\Model\FileUpload;
 use CPath\Model\MissingRoute;
+use CPath\Model\NoUploadFoundException;
 use CPath\Router;
 
-class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
+class CLI extends AbstractBase implements ILogListener, IShortOptions {
 
     private
-        $mMethod,
-        $mPath,
-        $mHeaders = array(),
-        $mArgs = array(),
-        $mPos = 0,
-        $mRequest = array(),
         $mShortRequests = array();
-    /** @var IRoute */
-    private
-        $mRoute = NULL;
 
     protected function __construct(Array $args) {
-
         if(!$args[0]) {
             $this->mMethod = 'CLI';
         } else {
@@ -92,79 +81,6 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
         $enable ? Log::addCallback($this) : Log::removeCallback($this);
     }
 
-    // Implement IRequest
-
-    /**
-     * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
-     * @return String the method
-     */
-    function getMethod() { return $this->mMethod; }
-
-    /**
-     * Get the URL Path
-     * @return String the url path starting with '/'
-     */
-    function getPath() { return $this->mPath; }
-
-    /**
-     * Returns Request headers
-     * @param String|Null $key the header key to return or all headers if null
-     * @return mixed
-     */
-    function getHeaders($key=NULL) {
-        if($key === NULL)
-            return $this->mHeaders;
-        return isset($this->mHeaders[$key]) ? $this->mHeaders[$key] : NULL;
-    }
-
-//    /**
-//     * Add an argument to the arg list
-//     * @param String $arg the argument value toa dd
-//     * @return void
-//     */
-//    function addArg($arg) {
-//        $this->mArgs[] = $arg;
-//    }
-
-    /**
-     * Return the next argument for this request
-     * @return String argument
-     */
-    function getNextArg() {
-        return isset($this->mArgs[$this->mPos])
-            ? $this->mArgs[$this->mPos++]
-            : NULL;
-    }
-
-    /**
-     * Get the IRoute instance for this request
-     * @return IRoute
-     */
-    function getRoute() {
-        return $this->mRoute;
-    }
-
-//    /**
-//     * Set the IRoute instance for this request
-//     * @param IRoute $Route
-//     * @return void
-//     */
-//    function setRoute(IRoute $Route) {
-//        $this->mArgs = $Route->getRequestArgs($this);
-//        $this->mRoute = $Route;
-//    }
-
-    /**
-     * Merges an associative array into the current request
-     * @param array $request the array to merge
-     * @param boolean $replace if true, the array is replaced instead of merged
-     * @return void
-     */
-    function merge(Array $request, $replace=false) {
-        if($replace) $this->mRequest = $request;
-        $this->mRequest = $request + $this->mRequest;
-    }
-
     /**
      * Attempt to find a Route
      * @return IRoute the route instance found. MissingRoute is returned if no route was found
@@ -187,16 +103,6 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
             echo $log->getException();
     }
 
-    // Extend ArrayObject
-
-    /**
-     * Return a reference to this object's associative array
-     * @return array the associative array
-     */
-    protected function &getArray() {
-        return $this->mRequest;
-    }
-
     /**
      * Returns a list of mimetypes accepted by this request
      * @return Array
@@ -216,15 +122,6 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
     function processShortOption($fieldName, $shortName) {
         if(isset($this->mShortRequests[$shortName]))
             $this->mRequest[$fieldName] = $this->mShortRequests[$shortName];
-    }
-
-    /**
-     * Prevent notices and return null if the parameter is missing
-     * @param mixed $offset
-     * @return mixed|NULL .
-     */
-    public function offsetGet($offset) {
-        return isset($this->mRequest[$offset]) ? $this->mRequest[$offset] : NULL;
     }
 
     // Statics
@@ -260,7 +157,7 @@ class CLI extends ArrayObject implements ILogListener, IRequest, IShortOptions {
      * @return FileUpload
      * @throws \InvalidArgumentException if the file was not found
      */
-    function getFileUpload($_path=NULL) {
-        throw new \InvalidArgumentException("File upload is not supported in CLI requests");
+    function getFileUpload($_path = NULL) {
+        throw new \InvalidArgumentException("File upload is not supported by " . __CLASS__);
     }
 }

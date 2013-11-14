@@ -18,7 +18,9 @@ use CPath\Model\DB\Interfaces\SecurityPolicyNotFoundException;
 
 abstract class API_Base extends API implements IDescribableAggregate {
 
-    private $mModel, $mSecurity = NULL;
+    private $mHandlers = array();
+
+    private $mModel;
 
     /**
      * Construct an instance of the GET API
@@ -29,8 +31,16 @@ abstract class API_Base extends API implements IDescribableAggregate {
     function __construct(PDOModel $Model) {
         parent::__construct();
         $this->mModel = $Model;
+        $this->mHandlers = array($this, $Model);
     }
 
+    function addCallbackHandler($Object) {
+        $this->mHandlers[] = $Object;
+    }
+
+    protected function getHandlers() {
+        return $this->mHandlers;
+    }
 
     /**
      * Set up API fields. Replaces setupAPI()
@@ -43,34 +53,52 @@ abstract class API_Base extends API implements IDescribableAggregate {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     * @throws SecurityPolicyNotFoundException if no security policy was found and ::SECURITY_DISABLED was not set for the model
      */
     final protected function setupAPI() {
         $this->setupFields();
         $Model = $this->mModel;
         if($Model::AUTO_SHORTS)
             $this->generateFieldShorts();
+
+        $Policies = array();
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof ISecurityPolicyAggregate)
+                $this->mHandlers[] = $Policies[] = $Handler->getSecurityPolicy();
+            elseif($Handler instanceof ISecurityPolicy)
+                $Policies[] = $Handler;
+
+        if(!$Policies) {
+            $Model = $this->getModel();
+            if($Model::SECURITY_DISABLED !== true)
+                throw new SecurityPolicyNotFoundException("No security policy implemented for ".$Model->modelName() . "\n"
+                    . "Security can be disabled with 'const SECURITY_DISABLED = true;'");
+            $this->mHandlers[] = $Policies[] = new Policy_Public();
+        }
     }
 
 
     /**
-     * Get security policy for this model
-     * @return ISecurityPolicy
+     * Get all security policies for this model
+     * @return ISecurityPolicy[]
      * @throws SecurityPolicyNotFoundException if no policy is found and ::SECURITY_DISABLED !== true
      */
-    function getSecurityPolicy() {
-        if($this->mSecurity)
-            return $this->mSecurity;
-        $Model = $this->mModel;
-        $Policy = $Model;
-        if($Policy instanceof ISecurityPolicyAggregate)
-            $Policy = $Policy->getSecurityPolicy();
-        if(!$Policy instanceof ISecurityPolicy) {
+    function getSecurityPolicies() {
+        $Policies = array();
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof ISecurityPolicyAggregate)
+                $Policies[] = $Handler->getSecurityPolicy();
+            elseif($Handler instanceof ISecurityPolicy)
+                $Policies[] = $Handler;
+
+        if(!$Policies) {
+            $Model = $this->getModel();
             if($Model::SECURITY_DISABLED !== true)
                 throw new SecurityPolicyNotFoundException("No security policy implemented for ".$Model->modelName() . "\n"
                     . "Security can be disabled with 'const SECURITY_DISABLED = true;'");
-            $Policy = new Policy_Public();
+            $Policies[] = new Policy_Public();
         }
-        return $this->mSecurity = $Policy;
+        return $Policies;
     }
 
     /**

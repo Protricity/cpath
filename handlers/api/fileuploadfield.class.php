@@ -7,14 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Handlers\Api\Interfaces\IRequiredField;
-use CPath\Handlers\Api\Interfaces\RequiredFieldException;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Model\FileUpload;
-use CPath\Validate;
+use CPath\Misc\RenderIndents as RI;
+use CPath\Model\NoUploadFoundException;
 
 /**
  * Class FileUploadField
@@ -22,18 +20,38 @@ use CPath\Validate;
  * Represents a 'required' API Field
  */
 class FileUploadField extends Field {
+
+    private $mFileWildCard, $mMimeWildCard;
+
+    /**
+     * Create a new FileUploadField
+     * @param String|IDescribable $Description
+     * @param string $fileWildCard filter files by a file wild card
+     * @param string $mimeWildCard filter files by mime type
+     */
+    public function __construct($Description=NULL, $fileWildCard='*.*', $mimeWildCard='*/*') {
+        parent::__construct($Description);
+        $this->mFileWildCard = $fileWildCard;
+        $this->mMimeWildCard = $mimeWildCard;
+    }
+
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return FileUpload|Array an instance of the file upload data or an array of instances
      * @throws ValidationException if validation fails
-     * @throws RequiredFieldException if a required field has no value
      */
     function validate(IRequest $Request, $fieldName) {
-        $File = $Request->getFileUpload($fieldName);
-        if(!$File && $this instanceof IRequiredField)
-            throw new RequiredFieldException();
+        $File = null;
+        try {
+            $File = $Request->getFileUpload($fieldName);
+        } catch (NoUploadFoundException $ex) {}
+        $this->validateRequired($File);
+        if($this->mFileWildCard && !fnmatch($this->mFileWildCard, $File->getName()))
+            throw new ValidationException("File name '{$File->getName()}' does not match Wildcard: " . $this->mFileWildCard);
+        if($this->mMimeWildCard && !fnmatch($this->mMimeWildCard, $File->getMimeType()))
+            throw new ValidationException("Mime type '{$File->getMimeType()}' does not match Wildcard: " . $this->mMimeWildCard);
         return $File;
     }
 
@@ -44,6 +62,6 @@ class FileUploadField extends Field {
      */
     function render(IRequest $Request)
     {
-        echo "<input type='file' name='{$this->getName()}' placeholder='Enter value for {$this->getName()}' />";
+        echo RI::ni(), "<input type='file' name='{$this->getName()}' accept='{$this->mMimeWildCard}' placeholder='Enter value for {$this->getName()}' />";
     }
 }

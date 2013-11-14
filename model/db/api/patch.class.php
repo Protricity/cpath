@@ -9,15 +9,15 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
-use CPath\Handlers\RequiredParam;
+use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\InvalidAPIException;
+use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IWriteAccess;
 use CPath\Model\Response;
 
-class API_Patch extends API_Get implements IGetExecute {
+class API_Patch extends API_Get implements IAPIGetCallbacks {
 
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
@@ -52,11 +52,9 @@ class API_Patch extends API_Get implements IGetExecute {
      */
     final function onGetExecute(PDOModel $UpdateModel, IRequest $Request, IResponse $Response) {
 
-        $Policy = $this->getSecurityPolicy();
-
-        $Policy->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
-        if($UpdateModel instanceof IWriteAccess)
-            $UpdateModel->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IWriteAccess)
+                $Handler->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
 
         foreach($Request as $column => $value)
             if($value !== NULL)

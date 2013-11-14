@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 
 use Aws\ElasticTranscoder\Exception\ValidationException;
+use CPath\Handlers\Api\EnumField;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\Api\RequiredField;
@@ -32,6 +33,7 @@ class PDOColumn {
     const FLAG_AUTOINC =  0x0080;
 
     const FLAG_REQUIRED = 0x0100;
+    const FLAG_OPTIONAL = 0x0200;
 
     const FLAG_INSERT =   0x1000;
     const FLAG_UPDATE =   0x2000;
@@ -43,6 +45,7 @@ class PDOColumn {
         $mComment,
         $mFlags,
         $mFilter,
+        $mDefault,
         $mEnum;
 
     /**
@@ -51,13 +54,15 @@ class PDOColumn {
      * @param int $flags the flags
      * @param int $filter the default validation/filter
      * @param String $comment the comment
+     * @param String $default the default value
      * @param Array $enum the enum values
      */
-    function __construct($name, $flags, $filter=0, $comment=NULL, $enum=NULL) {
+    function __construct($name, $flags, $filter=0, $comment=NULL, $default=NULL, $enum=NULL) {
         $this->mName = $name;
         $this->mFlags = $flags;
         $this->mFilter = $filter;
         $this->mComment = $comment;
+        $this->mDefault = $default;
         $this->mEnum = $enum;
     }
 
@@ -85,6 +90,25 @@ class PDOColumn {
     function getComment() {
         return $this->mComment
             ?: $this->mComment = ucwords(str_replace('_', ' ', $this->mName));
+    }
+
+    function hasDefaultValue() {
+        return $this->mDefault ? true : false;
+    }
+
+    /**
+     * Generate default value for this
+     */
+    function getDefaultValue() {
+        if(!$this->mDefault)
+            return NULL;
+//        switch(strtolower($this->mDefault)) {
+//            case 'time()': return time();
+//            case 'uniqid()': return uniqid();
+//        }
+//        throw new \Exception("Invalid Default value: " . $this->mDefault);
+        $eval = trim($this->mDefault);
+        return eval('return ' . $eval . ';');
     }
 
     /**
@@ -126,20 +150,15 @@ class PDOColumn {
      */
     function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
         if($required === NULL)
-            $required = $this->mFlags & PDOColumn::FLAG_REQUIRED;
+            $required = ($this->mFlags & PDOColumn::FLAG_REQUIRED) && !($this->mFlags & PDOColumn::FLAG_OPTIONAL);
         if($this->mFilter)
             $defaultValidation = $this->mFilter;
-        if($param) {
-            if($required)
-                $Field = new RequiredParam($comment ?: $this->getComment(), $defaultValidation);
-            else
-                $Field = new Param($comment ?: $this->getComment(),  $defaultValidation);
-        } else {
-            if($required)
-                $Field = new RequiredField($comment ?: $this->getComment(), $defaultValidation);
-            else
-                $Field = new Field($comment ?: $this->getComment(),  $defaultValidation);
-        }
+        if($this->mEnum)
+            $Field = new EnumField($comment ?: $this->getComment(), $this->mEnum, $required, $param);
+        else
+            $Field = new Field($comment ?: $this->getComment(), $defaultValidation, $required, $param);
+        if($this->hasDefaultValue())
+            $Field->setDefaultValue($this->getDefaultValue());
         return $Field;
     }
 }

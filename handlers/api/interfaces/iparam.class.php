@@ -14,4 +14,9 @@ namespace CPath\Handlers\Api\Interfaces;
  */
 interface IParam extends IField {
 
+    /**
+     * Returns true if this Field is a Param Field
+     * @return bool
+     */
+    function isParam();
 }
