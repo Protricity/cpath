@@ -59,8 +59,8 @@ class Web extends AbstractBase {
      * Returns a file upload by name, or throw an exception
      * @param mixed|NULL $_path optional varargs specifying a path to data
      * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
-     * @return FileUpload
-     * @throws NoUploadFoundException if the file was not found
+     * @return FileUpload|NULL a file upload instance or null if no file upload was found
+     * @throws \Exception if the path was invalid
      */
     function getFileUpload($_path=NULL) {
         if($this->mUploads === null)
@@ -70,7 +70,7 @@ class Web extends AbstractBase {
         $data =& $this->mUploads;
         foreach(func_get_args() as $arg) {
             if(!is_array($data) || !isset($data[$arg]))
-                throw new NoUploadFoundException("Invalid file upload path at '{$arg}': " . implode('.', func_get_args()));
+                throw new \Exception("Invalid file upload path at '{$arg}': " . implode('.', func_get_args()));
             $data = &$data[$arg];
         }
         return $data;

@@ -58,4 +58,10 @@ interface IField extends IHandler, IDescribableAggregate {
      * @return bool
      */
     function isParam();
+
+    /**
+     * Returns true if this Field is a required Field
+     * @return bool
+     */
+    function isRequired();
 }

@@ -86,6 +86,7 @@ class APIInfo implements IHandler, ILogListener {
             <ul class='field-table'>
                 <li class='field-header clearfix'>
                     <div class='field-num'>#</div>
+                    <div class='field-required'>Req'd</div>
                     <div class='field-name'>Name</div>
                     <div class='field-description'>Description</div>
                     <div class='field-input'>Test</div>
@@ -93,6 +94,7 @@ class APIInfo implements IHandler, ILogListener {
                 <?php if(!$fields) { ?>
                 <li class='field-item clearfix'>
                     <div class='field-num'>&nbsp;</div>
+                    <div class='field-required'>&nbsp;</div>
                     <div class='field-name'>&nbsp;</div>
                     <div class='field-description'>No Fields in this API</div>
                     <div class='field-input'>&nbsp;</div>
@@ -100,6 +102,7 @@ class APIInfo implements IHandler, ILogListener {
                 <?php } else foreach($fields as $name=>$Field) { echo "\n"; ?>
                 <li class='field-item clearfix'>
                     <div class='field-num'><?php echo $num++; ?>.</div>
+                    <div class='field-required'><?php echo $Field->isRequired() ? 'yes' : '&nbsp;'; ?></div>
                     <div class='field-name'><?php echo $name; ?></div>
                     <div class='field-description'><?php echo Describable::get($Field)->getDescription(); ?></div>
                     <div class='field-input'><?php
@@ -110,6 +113,7 @@ class APIInfo implements IHandler, ILogListener {
                 </li><?php } echo "\n"; ?>
                 <li class='field-footer clearfix'>
                     <div class='field-num'></div>
+                    <div class='field-required'></div>
                     <div class='field-name'></div>
                     <div class='field-description'></div>
                     <div class='field-input'></div>

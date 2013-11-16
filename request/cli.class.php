@@ -154,10 +154,10 @@ class CLI extends AbstractBase implements ILogListener, IShortOptions {
      * Returns a file upload by name, or throw an exception
      * @param mixed|NULL $_path optional varargs specifying a path to data
      * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
-     * @return FileUpload
-     * @throws \InvalidArgumentException if the file was not found
+     * @return FileUpload|NULL a file upload instance or null if no file upload was found
+     * @throws \Exception if the path was invalid
      */
     function getFileUpload($_path = NULL) {
-        throw new \InvalidArgumentException("File upload is not supported by " . __CLASS__);
+        return null;
     }
 }

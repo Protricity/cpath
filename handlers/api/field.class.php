@@ -139,6 +139,14 @@ class Field implements IField {
     }
 
     /**
+     * Returns true if this Field is a required Field
+     * @return bool
+     */
+    function isRequired() {
+        return $this->mRequired;
+    }
+
+    /**
      * Render this input field as html
      * @param IRequest $Request the IRequest instance for this render
      * @return void

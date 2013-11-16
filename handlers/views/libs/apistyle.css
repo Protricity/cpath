@@ -37,7 +37,8 @@ body {
 /* APIInfo */
 
 .field-table div.field-num { width: 10px; border-left: 1px solid #ccc; }
-.field-table div.field-name { width: 120px; }
+.field-table div.field-required { width: 40px; }
+.field-table div.field-name { width: 80px; }
 .field-table div.field-description { width: 50%; min-width: 280px;  }
 .field-table div.field-input { width: 25%; min-width: 160px; }
 .field-table div.field-input input { width: 100%; margin: 0; padding: 0; border: 0; font: 11px Arial, Helvetica, Geneva, sans-serif; }

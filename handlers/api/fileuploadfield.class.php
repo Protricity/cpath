@@ -8,6 +8,7 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Model\FileUpload;
@@ -43,10 +44,12 @@ class FileUploadField extends Field {
      * @throws ValidationException if validation fails
      */
     function validate(IRequest $Request, $fieldName) {
-        $File = null;
-        try {
-            $File = $Request->getFileUpload($fieldName);
-        } catch (NoUploadFoundException $ex) {}
+        $File = $Request->getFileUpload($fieldName);
+        if($File && $Request[$fieldName])
+            throw new ValidationException("File upload was replaced by " . Describable::get($Request[$fieldName]));
+        if(!$File && $Request[$fieldName])
+            $File = $Request[$fieldName];
+
         $this->validateRequired($File);
         if($this->mFileWildCard && !fnmatch($this->mFileWildCard, $File->getName()))
             throw new ValidationException("File name '{$File->getName()}' does not match Wildcard: " . $this->mFileWildCard);
@@ -60,8 +63,7 @@ class FileUploadField extends Field {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function render(IRequest $Request)
-    {
+    function render(IRequest $Request) {
         echo RI::ni(), "<input type='file' name='{$this->getName()}' accept='{$this->mMimeWildCard}' placeholder='Enter value for {$this->getName()}' />";
     }
 }

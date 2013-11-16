@@ -6,9 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
-
-
 use CPath\Model\FileUpload;
+
+
 
 interface IRequest extends IArrayObject {
 
