@@ -8,19 +8,11 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Base;
-use CPath\Exceptions\ValidationException;
 use CPath\Handlers\HandlerSet;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 use CPath\Interfaces\InvalidUserSessionException;
-use CPath\Log;
-use CPath\Model\DB\Interfaces\IReadAccess;
-use CPath\Model\DB\Interfaces\IWriteAccess;
-use CPath\Model\Response;
-use CPath\Util;
-use CPath\Validate;
+use CPath\Handlers\Api\Interfaces\ValidationException;
 
 /** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}
@@ -103,7 +95,9 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     function changePassword($newPassword, $confirmPassword=NULL) {
         if($confirmPassword !== NULL)
             static::confirmPassword($newPassword, $confirmPassword);
-        $this->updateColumn(static::COLUMN_PASSWORD, static::hashPassword($newPassword), true);
+        if(!$newPassword)
+            throw new \InvalidArgumentException("Empty password provided");
+        $this->updateColumn(static::COLUMN_PASSWORD, $newPassword, true); // It should auto hash
     }
 
     /**
@@ -146,6 +140,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
 
     /**
      * Returns the default IHandlerSet collection for this PDOModel type
+     * Note: This method must be STATELESS should NOT be affected by outside factors such as user session
      * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
      * @return HandlerSet a set of common handler routes for this PDOModel type
      */
@@ -158,6 +153,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
         $Handlers->add('POST', new API_PostUser($this));
         $Handlers->add('POST login', new API_PostUserLogin($this));
         $Handlers->add('POST logout', new API_PostUserLogout($this));
+        $Handlers->add('POST password', new API_PostUserPassword($this));
         $Handlers->add('PATCH', new API_Patch($this));
         $Handlers->add('DELETE', new API_Delete($this));
 
@@ -200,7 +196,8 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      * @return string
      */
     private static function hashPassword($password, $oldPassword=NULL) {
-        return crypt($password, $oldPassword);
+        $hash = crypt($password, $oldPassword);
+        return $hash;
     }
 
     /**
@@ -232,18 +229,23 @@ abstract class PDOUserModel extends PDOModel implements IUser {
     /**
      * Get the current user session or return a guest account
      * @param bool $throwOnFail throws an exception if the user session was not available
+     * @param bool $allowGuest returns a guest account if no session is available
      * @return PDOUserModel|NULL the user instance or null if not found
      * @throws InvalidUserSessionException if the user is not logged in
      */
-    static function loadBySession($throwOnFail = true) {
+    static function loadBySession($throwOnFail = true, $allowGuest = false) {
         $class = get_called_class();
         if(isset(self::$mSession[$class]))
             return self::$mSession[$class];
-        if($throwOnFail)
-            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail)->getUserID());
+        if($throwOnFail && !$allowGuest)
+            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail, $allowGuest)->getUserID());
         try {
-            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail)->getUserID());
+            return self::$mSession[$class] = static::loadByPrimaryKey(static::loadSession($throwOnFail, $allowGuest)->getUserID());
         } catch (InvalidUserSessionException $ex) {
+            if($allowGuest)
+                return static::loadGuestAccount();
+            if($throwOnFail)
+                throw $ex;
             return NULL;
         }
     }

@@ -23,7 +23,9 @@ class Web extends AbstractBase {
         $mMimeTypes,
         $mUploads = null;
 
-    protected function __construct() {}
+    protected function __construct() {
+        parent::__construct();
+    }
 
     /**
      * Returns a list of mimetypes accepted by this request

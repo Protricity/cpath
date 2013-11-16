@@ -713,7 +713,7 @@ class BuildPDOUserTable extends BuildPDOTable {
             $Column->Filter = Validate::FILTER_VALIDATE_USERNAME;
 
         $Column = $this->getColumn($this->Column_Password);
-        $Column->Flags |= PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
+        $Column->Flags |= PDOColumn::FLAG_PASSWORD | PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT;
         if(!$Column->Filter)
             $Column->Filter = Validate::FILTER_VALIDATE_PASSWORD;
     }

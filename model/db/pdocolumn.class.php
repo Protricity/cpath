@@ -12,6 +12,7 @@ use Aws\ElasticTranscoder\Exception\ValidationException;
 use CPath\Handlers\Api\EnumField;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Param;
+use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\Api\RequiredField;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Handlers\Api\Interfaces\IField;
@@ -22,23 +23,25 @@ use CPath\Validate;
 class PDOColumn {
     const BUILD_IGNORE = true;
     
-    const FLAG_NUMERIC =  0x0001;
-    const FLAG_ENUM =     0x0002;
-    const FLAG_NULL =     0x0004;
-    const FLAG_DEFAULT =  0x0008;
+    const FLAG_NUMERIC =  0x000001;
+    const FLAG_ENUM =     0x000002;
+    const FLAG_NULL =     0x000004;
+    const FLAG_DEFAULT =  0x000008;
 
-    const FLAG_INDEX =    0x0010;
-    const FLAG_UNIQUE =   0x0020;
-    const FLAG_PRIMARY =  0x0040;
-    const FLAG_AUTOINC =  0x0080;
+    const FLAG_INDEX =    0x000010;
+    const FLAG_UNIQUE =   0x000020;
+    const FLAG_PRIMARY =  0x000040;
+    const FLAG_AUTOINC =  0x000080;
 
-    const FLAG_REQUIRED = 0x0100;
-    const FLAG_OPTIONAL = 0x0200;
+    const FLAG_REQUIRED = 0x000100;
+    const FLAG_OPTIONAL = 0x000200;
 
-    const FLAG_INSERT =   0x1000;
-    const FLAG_UPDATE =   0x2000;
-    const FLAG_SEARCH =   0x4000;
-    const FLAG_EXPORT =   0x8000;
+    const FLAG_INSERT =   0x001000;
+    const FLAG_UPDATE =   0x002000;
+    const FLAG_SEARCH =   0x004000;
+    const FLAG_EXPORT =   0x008000;
+
+    const FLAG_PASSWORD = 0x010000;
 
     protected
         $mName,
@@ -153,10 +156,14 @@ class PDOColumn {
             $required = ($this->mFlags & PDOColumn::FLAG_REQUIRED) && !($this->mFlags & PDOColumn::FLAG_OPTIONAL);
         if($this->mFilter)
             $defaultValidation = $this->mFilter;
+
         if($this->mEnum)
             $Field = new EnumField($comment ?: $this->getComment(), $this->mEnum, $required, $param);
+        elseif($this->isFlag(self::FLAG_PASSWORD))
+            $Field = new PasswordField($comment ?: $this->getComment(), $defaultValidation, $required, $param);
         else
             $Field = new Field($comment ?: $this->getComment(), $defaultValidation, $required, $param);
+
         if($this->hasDefaultValue())
             $Field->setDefaultValue($this->getDefaultValue());
         return $Field;

@@ -18,7 +18,6 @@ use CPath\Model\NoUploadFoundException;
 /**
  * Class FileUploadField
  * @package CPath
- * Represents a 'required' API Field
  */
 class FileUploadField extends Field {
 

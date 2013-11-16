@@ -26,13 +26,17 @@
             try {
                 json = vkbeautify.json(json);
                 elm.html(json);
-            } catch (e) {}
+            } catch (e) {
+                elm.text(json);
+            }
         },
         setPrettyXML: function(xml, elm) {
             try {
                 xml = vkbeautify.xml(xml);
                 elm.text(xml);
-            } catch (e) {}
+            } catch (e) {
+                elm.text(xml);
+            }
         },
         submit: function(path, form, dataType, method, asObject) {
             form = jQuery(form);
@@ -43,12 +47,26 @@
             requestHeaders.html("Loading...");
             responseHeaders.html("Loading...");
             responseContent.html("Loading...");
+            var accepts = '*/*';
+            switch(dataType) {
+                case 'json':
+                    accepts = 'application/json';
+                    break;
+                case 'xml':
+                    accepts = 'text/xml';
+                    break;
+            }
             jQuery.ajax({
                 url: path,
                 type: method,
                 dataType: dataType,
                 data: data,
+                accepts: accepts,
                 contentType: asObject ? 'application/json' : null,
+                headers: {
+                    Accept : accepts + "; charset=utf-8",
+                    "Content-Type": asObject ? 'application/json' : null
+                },
                 complete: function(jqXHR, textStatus) {
                     THIS.unhackXHR();
                     var content = jqXHR.responseText;
@@ -60,6 +78,9 @@
                             break;
                         case 'xml':
                             THIS.setPrettyXML(content, responseContent);
+                            break;
+                        default :
+                            responseContent.text(content);
                             break;
                     }
 

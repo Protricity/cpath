@@ -7,9 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Exceptions\ValidationException;
+use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Interfaces\IValidate;
-use CPath\Interfaces\IValidateRequest;
 
 /**
  * Class Util provides information about the current request

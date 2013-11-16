@@ -128,6 +128,7 @@ class HandlerSet implements IHandlerSet {
         $route = $Request->getNextArg();
         if(!$route)
             throw new InvalidRouteException("Route is missing. Possible routes are: ".implode(', ', array_keys($this->mHandlers)));
+        //$route = $Request->getMethod() . ' ' . $route;
         if($this->mSource instanceof IHandlerSetEvents)
             $this->mSource->onRender($Request);
         $this->get($route)->render($Request);
@@ -156,6 +157,7 @@ class HandlerSet implements IHandlerSet {
             $routes[$route] = new Route($matches[1] . ' ' . $path, $Class->getName(), $route);
         }
         $routes['GET :api'] = new Route('GET ' . $defaultPath . '/:api', get_class(new HandlerSetInfo()), $Class->getName());
+        $routes['POST :api'] = new Route('POST ' . $defaultPath . '/:api', get_class(new HandlerSetInfo()), $Class->getName());
         return $routes;
     }
 //

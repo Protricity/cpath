@@ -7,10 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Exceptions\ValidationException;
-use CPath\Interfaces\IValidate;
-use CPath\Interfaces\IValidateRequest;
-
 /**
  * Class Profile provides profiling information on the framework
  * @package CPath

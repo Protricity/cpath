@@ -33,8 +33,7 @@ class APIInfo implements IHandler, ILogListener {
         $this->mLog[] = $log;
     }
 
-    function render(IRequest $Request)
-    {
+    function render(IRequest $Request) {
         if(!$apiClass = $Request->getNextArg()) {
             print("No API Class passed to ".__CLASS__);
             return;
@@ -53,6 +52,10 @@ class APIInfo implements IHandler, ILogListener {
 
     function renderAPI(IAPI $API, IRoute $Route, IRequest $Request, IResponse $Response=null) {
 
+
+        if($Response == NULL && strcasecmp($Request->getMethod(), 'get') !== 0)
+            $Response = $API->execute($Request);
+
         $basePath = Base::getClassPublicPath($this);
 
         $domainPath = Config::getDomainPath();
@@ -68,7 +71,6 @@ class APIInfo implements IHandler, ILogListener {
         $fields = $API->getFields();
 
         RI::get()->setIndent(0, "    ");
-
         ?><html>
     <head>
         <base href="<?php echo $basePath; ?>" />
@@ -80,7 +82,7 @@ class APIInfo implements IHandler, ILogListener {
     </head>
     <body>
         <h1><?php echo $route."<br />"; ?></h1>
-        <h2><?php echo Describable::get($API)->getDescription(); ?></h2>
+        <h2><?php echo Describable::get($API)->getDescription();  ?></h2>
         <h3>Params:</h3>
         <form class="field-form" method="POST" enctype="multipart/form-data">
             <ul class='field-table'>

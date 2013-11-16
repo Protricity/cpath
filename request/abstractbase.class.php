@@ -31,6 +31,18 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
     protected
         $mRoute = NULL;
 
+    protected function __construct() {
+    }
+
+    /**
+     * Returns a file upload by name, or throw an exception
+     * @param mixed|NULL $_path optional varargs specifying a path to data
+     * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
+     * @return FileUpload
+     * @throws NoUploadFoundException if the file was not found
+     */
+    abstract function getFileUpload($_path=NULL);
+
     // Implement IRequest
 
     /**
@@ -70,9 +82,12 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
      * @return String argument
      */
     function getNextArg() {
-        return isset($this->mArgs[$this->mPos])
-            ? $this->mArgs[$this->mPos++]
-            : NULL;
+        if(isset($this->mArgs[$this->mPos])) {
+            $value = $this->mArgs[$this->mPos];
+            $this->mPos++;
+            return $value;
+        }
+        return NULL;
     }
 
     /**
@@ -139,39 +154,4 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
     public function offsetGet($offset) {
         return isset($this->mRequest[$offset]) ? $this->mRequest[$offset] : NULL;
     }
-
-    // Statics
-
-    static function fromArgs($args, Array $request=NULL) {
-        if(is_string($args))
-            $args = explode(' ', $args);
-        $CLI = new CLI($args);
-        if($request)
-            $CLI->merge($request);
-        return $CLI;
-    }
-
-    static function fromRequest($force=false, $log=true) {
-        static $CLI = NULL;
-        if($CLI && !$force)
-            return $CLI;
-        $args = $_SERVER['argv'];
-        array_shift($args);
-        $CLI = new CLI($args);
-        if($log)
-            $CLI->setOutputLog(true);
-        $CLI->mHeaders = function_exists('getallheaders')
-            ? getallheaders()
-            : array();
-        return $CLI;
-    }
-
-    /**
-     * Returns a file upload by name, or throw an exception
-     * @param mixed|NULL $_path optional varargs specifying a path to data
-     * Example: ->getFileUpload(0, 'key') gets $_FILES[0]['key'] formatted as a FileUpload instance;
-     * @return FileUpload
-     * @throws NoUploadFoundException if the file was not found
-     */
-    abstract function getFileUpload($_path=NULL);
 }

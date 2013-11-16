@@ -8,6 +8,7 @@
 namespace CPath\Model\DB;
 
 
+use CPath\Base;
 use CPath\Handlers\API;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
@@ -29,15 +30,19 @@ interface IPostLogoutExecute {
 }
 
 class API_PostUserLogout extends API_Base {
-    private $mUser;
+    private $mUser, $mLoggedIn = false;
 
     /**
      * Construct an instance of this API
-     * @param PDOUserModel $Model the user source object for this API
+     * @param PDOUserModel $User the user source object for this API
      */
-    function __construct(PDOUserModel $Model) {
-        parent::__construct($Model);
-        $this->mUser = $Model;
+    function __construct(PDOUserModel $User) {
+        if(!Base::isCLI() && $SessionUser = $User::loadBySession(false, false)) {
+            $User = $SessionUser;
+            $this->mLoggedIn = true;
+        }
+        $this->mUser = $User;
+        parent::__construct($this->mUser);
     }
 
     protected function setupFields() {
@@ -50,7 +55,9 @@ class API_PostUserLogout extends API_Base {
      * @return IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
-        return "Log out";
+        if($this->mLoggedIn)
+            return "Log out as " . $this->mUser;
+        return "Log out (Requires user session)";
     }
 
     /**

@@ -42,7 +42,7 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_INFO = 'api';           // Add an APIInfo route entry i.e. ':api' for this API on GET requests
+    const ROUTE_API_INFO = ':api';           // Add an APIInfo route entry i.e. ':api' for this API on GET requests
 
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
@@ -161,8 +161,8 @@ abstract class API implements IAPI {
         if(!headers_sent() && !Base::isCLI())
             header("Content-Type: text/html");
         $Response = null;
-        if(strcasecmp($Request->getMethod(), 'get') !== 0)
-            $Response = $this->execute($Request);
+        //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
+        //    $Response = $this->execute($Request);
         $Render = new APIInfo();
         $Render->renderAPI($this, $Request->getRoute(), $Request, $Response);
         //$Response = $this->execute($Route);
@@ -441,8 +441,10 @@ abstract class API implements IAPI {
         $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
         $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
         if(static::ROUTE_API_INFO) {
-            $token = ':' . static::ROUTE_API_INFO;
+            $token = static::ROUTE_API_INFO;
             $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIInfo()), get_called_class());
+            $routes['POST ' . $token] = new Route('POST ' . $path . '/' . $token, get_class(new APIInfo()), get_called_class());
+            // TODO: wildcard methods
         }
         return $routes;
     }

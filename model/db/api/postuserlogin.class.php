@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
+use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
@@ -47,7 +48,7 @@ class API_PostUserLogin extends API_Base {
      */
     protected function setupFields() {
         $this->addField('name', new RequiredParam("Username or Email Address"));
-        $this->addField('password', new RequiredParam("Password"));
+        $this->addField('password', new PasswordField("Password"));
         $this->generateFieldShorts();
     }
 
@@ -56,7 +57,7 @@ class API_PostUserLogin extends API_Base {
      * @return IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
-        return "Log in as ".$this->mUser->modelName();
+        return "Log in as a ".$this->mUser->modelName();
     }
 
     /**

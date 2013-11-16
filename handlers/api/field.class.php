@@ -149,14 +149,24 @@ class Field implements IField {
     /**
      * Render this input field as html
      * @param IRequest $Request the IRequest instance for this render
+     * @param Array $attr optional array of attributes for the input field
      * @return void
      */
-    function render(IRequest $Request)
+    function render(IRequest $Request, Array $attr=array())
     {
         $value = $Request[$this->getName()];
         if($value)
             $value = htmlspecialchars($value, ENT_QUOTES);
+        if(!isset($attr['name']))
+            $attr['name'] = $this->getName();
+        if(!isset($attr['value']))
+            $attr['value'] = $value;
+        if(!isset($attr['placeholder']))
+            $attr['placeholder'] = "Enter value for " . $this->getName();
 
-        echo RI::ni(), "<input name='{$this->getName()}' value='{$value}' placeholder='Enter value for {$this->getName()}' />";
+        echo RI::ni(), "<input";
+        foreach($attr as $key=>$val)
+            echo " $key='$val'";
+        echo RI::ni(), "/>";
     }
 }
