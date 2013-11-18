@@ -24,7 +24,7 @@ class API_Post extends API_Base {
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
      */
-    protected function setupFields() {
+    final protected function setupFields() {
         $Model = $this->getModel();
 
         $fields = array();

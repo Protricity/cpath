@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\API;
+use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
@@ -20,19 +21,20 @@ use CPath\Model\Response;
 class API_Patch extends API_Get implements IAPIGetCallbacks {
 
     /**
-     * Set up API fields. Lazy-loaded when fields are accessed
-     * @return void
-     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     * Add or modify fields of an API.
+     * Note: Leave empty if unused.
+     * @param Array &$fields the existing API fields to modify
+     * @return IField[]|NULL return an array of prepared fields to use or NULL to ignore.
      */
-    function setupFields() {
-        parent::setupFields();
+    function prepareGetFields(Array &$fields)
+    {
         $Model = $this->getModel();
 
         $defFilter = $Model::DEFAULT_FILTER;
         foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
             /** @var PDOColumn $Column */
-            $this->addField($Column->getName(), $Column->generateAPIField(false, NULL, NULL, $defFilter));
-        $this->generateFieldShorts(); // TODO: ugly.
+            if(!isset($fields[$Column->getName()]))
+                $fields[$Column->getName()] = $Column->generateAPIField(false, NULL, NULL, $defFilter);
     }
 
     /**

@@ -75,7 +75,7 @@ class APIInfo implements IHandler, ILogListener {
     <head>
         <base href="<?php echo $basePath; ?>" />
         <title><?php echo $route; ?></title>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.0/jquery.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
         <script src="libs/apiinfo.js"></script>
         <script src="libs/vkbeautify.min.js"></script>
         <link rel="stylesheet" href="libs/apistyle.css" />

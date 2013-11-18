@@ -48,7 +48,7 @@ class Policy_UserAccountViewer implements ISecurityPolicy {
             $EmptyUser = $this->mUser;
             $id = $EmptyUser::loadBySession()->getID(); // Assert logged in
             if($User->columnValue($EmptyUser::COLUMN_ID) !== $id)
-                throw new InvalidPermissionException("No permission to modify " . $Model);
+                throw new InvalidPermissionException("No permission to modify " . $User);
         }
     }
 

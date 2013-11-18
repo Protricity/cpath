@@ -38,7 +38,7 @@ class API_Get extends API_Base {
      * @return void
      * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
-    protected function setupFields() {
+    final protected function setupFields() {
         $Model = $this->getModel();
         $this->mColumns = $Model->findColumns($this->mSearchColumns);
 
@@ -55,7 +55,16 @@ class API_Get extends API_Base {
         } else {
             $this->mIDField = $keys[0];
         }
-        $this->addField($this->mIDField, new RequiredParam($Model->modelName() . ' ' . implode('', $keys)));
+
+        $fields = array();
+        $fields[$this->mIDField] = new RequiredParam($Model->modelName() . ' ' . implode('', $keys));
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIGetCallbacks)
+                $fields = $Handler->prepareGetFields($fields) ?: $fields;
+
+        $this->addFields($fields);
+        $this->generateFieldShorts();
     }
 
     /**
