@@ -13,7 +13,6 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Handlers\Api\PasswordField;
-use CPath\Handlers\Api\RequiredField;
 use CPath\Handlers\Api\Validation;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;

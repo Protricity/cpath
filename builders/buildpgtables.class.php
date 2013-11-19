@@ -51,7 +51,7 @@ PHP;
         FROM information_schema.tables t
         LEFT JOIN pg_class c on c.relname = t.table_name
         WHERE table_schema='public'") as $row)
-            $tables[] = BuildPDOTable::create($row['table_name'], $row['table_comment']);
+            $tables[] = $this->createTable($row['table_name'], $row['table_comment']);
         return $tables;
     }
 

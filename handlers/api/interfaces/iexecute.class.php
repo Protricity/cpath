@@ -22,7 +22,8 @@ interface IExecute {
 
 
     /**
-     * Perform after API execution
+     * Perform after successful API execution
+     * Note: is not performed when exceptions are thrown or if the response status is not 200 (success)
      * @param IRequest $Request
      * @param IResponse $Response
      * @return void

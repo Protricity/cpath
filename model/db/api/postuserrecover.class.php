@@ -31,7 +31,7 @@ class API_PostUserRecover extends API_Base {
 
     protected function setupFields() {
         /** @var PDOUserModel $User  */
-        $User = $this->mUser;
+        //$User = $this->mUser;
         $this->addField(self::FIELD_NAME, new RequiredField("User name or email"));
         $this->generateFieldShorts();
     }

@@ -9,13 +9,9 @@
 namespace CPath\Builders;
 
 
-use CPath\Base;
-use CPath\Build;
 use CPath\Interfaces\IBuildable;
-use CPath\Log;
 use CPath\Model\DB\MySQLDatabase;
 use CPath\Model\DB\PDOColumn;
-use CPath\Model\DB\PDOModel;
 
 class BuildMySQLTables extends BuildPDOTables implements IBuildable {
 
@@ -46,7 +42,7 @@ PHP;
     protected function getTables(\PDO $DB){
         $tables = array();
         foreach($DB->query("SHOW TABLE STATUS") as $row) {
-            $tables[] = BuildPDOTable::create($row['Name'], $row['Comment']);
+            $tables[$row['Name']] = $this->createTable($row['Name'], $row['Comment']);
         }
         return $tables;
     }

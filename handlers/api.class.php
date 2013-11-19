@@ -113,6 +113,8 @@ abstract class API implements IAPI {
             $this->mLog = new SimpleLogger(true);
         try {
             $Response = $this->executeOrThrow($Request);
+            if($Response->getStatusCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
+                $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {
             if($ex instanceof IResponseAggregate)
                 $Response = $ex->createResponse();
@@ -121,8 +123,6 @@ abstract class API implements IAPI {
             else
                 $Response = new ExceptionResponse($ex);
         }
-        if($this instanceof IExecute)
-            $this->onAPIPostExecute($Request, $Response);
         if(static::LOG_ENABLE) {
             foreach($this->mLog->getLogs() as $Log)
                 $Response->addLogEntry($Log);

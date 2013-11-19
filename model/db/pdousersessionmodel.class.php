@@ -12,15 +12,12 @@ use CPath\Base;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 use CPath\Interfaces\InvalidUserSessionException;
-use CPath\Interfaces\SessionDisabledException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
 use CPath\Interfaces\SessionNotFoundException;
 use CPath\Log;
-use CPath\Model\Response;
-use CPath\Util;
 
-abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
+abstract class PDOUserSessionModel extends PDOPrimaryKeyModel implements IUserSession {
 
     const COLUMN_KEY = NULL;
     const COLUMN_USER_ID = NULL;
@@ -113,7 +110,7 @@ abstract class PDOUserSessionModel extends PDOModel implements IUserSession {
         if($expireInSeconds === NULL || $expireInSeconds > $expireMax)
             $expireInSeconds = $expireMax;
 
-        $Session = static::createFromArray(array(
+        $Session = static::createAndLoad(array(
             static::COLUMN_KEY => $key,
             static::COLUMN_USER_ID => $User->getID(),
             static::COLUMN_EXPIRE => $expireInSeconds ? time() + $expireInSeconds : 0,

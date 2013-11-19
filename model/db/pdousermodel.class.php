@@ -36,7 +36,7 @@ class PasswordsDoNotMatchException extends \Exception {
  * Provides additional user-specific functionality and API endpoints
  * @package CPath\Model\DB
  */
-abstract class PDOUserModel extends PDOModel implements IUser {
+abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
 
     // User-specific column
     /** (primary int) The User Account integer identifier */
@@ -145,37 +145,21 @@ abstract class PDOUserModel extends PDOModel implements IUser {
      * @return HandlerSet a set of common handler routes for this PDOModel type
      */
     function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
-        if($Handlers === NULL)
-            $Handlers = new HandlerSet($this);
-
-        $Handlers->add('GET', new API_Get($this));
-        $Handlers->add('GET search', new API_GetSearch($this));
-        $Handlers->add('POST', new API_PostUser($this));
+        $Handlers = parent::loadDefaultHandlers($Handlers);
         $Handlers->add('POST login', new API_PostUserLogin($this));
         $Handlers->add('POST logout', new API_PostUserLogout($this));
         $Handlers->add('POST password', new API_PostUserPassword($this));
-        $Handlers->add('PATCH', new API_Patch($this));
-        $Handlers->add('DELETE', new API_Delete($this));
-
         return $Handlers;
     }
 
     // Statics
 
-    /**
-     * Creates a new Model based on the provided row of column value pairs
-     * @param array|mixed $row column value pairs to insert into new row
-     * @return PDOUserModel|null returns NULL if no primary key column is available
-     * @throws ModelAlreadyExistsException
-     * @throws \Exception|\PDOException
-     * @throws ValidationException if a column fails to validate
-     */
-    static function createFromArray($row) {
+    protected static function insertRow(Array $row) {
         if(isset($row[static::COLUMN_PASSWORD]))
             $row[static::COLUMN_PASSWORD] = static::hashPassword($row[static::COLUMN_PASSWORD]);
         if(!isset($row[static::COLUMN_FLAGS]))
             $row[static::COLUMN_FLAGS] = 0;
-        return parent::createFromArray($row);
+        parent::insertRow($row);
     }
 
     /**
@@ -262,7 +246,7 @@ abstract class PDOUserModel extends PDOModel implements IUser {
             if(!isset($insertFields[static::COLUMN_FLAGS]))
                 $insertFields[static::COLUMN_FLAGS] = 0;
             $insertFields[static::COLUMN_FLAGS] |= static::FLAG_GUEST;
-            $User = static::createFromArray($insertFields + array(
+            $User = static::createAndLoad($insertFields + array(
                 static::COLUMN_USERNAME => 'guest',
                 static::COLUMN_EMAIL => 'guest@noemail.com',
             ));

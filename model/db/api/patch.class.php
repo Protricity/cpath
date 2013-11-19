@@ -47,7 +47,7 @@ class API_Patch extends API_Get implements IAPIGetCallbacks {
 
     /**
      * Perform on successful API_Get execution
-     * @param PDOModel $UpdateModel the returned model
+     * @param PDOModel|PDOPrimaryKeyModel $UpdateModel the returned model
      * @param IRequest $Request
      * @param IResponse $Response
      * @return IResponse|void

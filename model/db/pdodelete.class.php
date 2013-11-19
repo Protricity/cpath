@@ -23,6 +23,7 @@ class PDODelete extends PDOWhere {
         $this->limit = $limit;
     }
 
+    // TODO: move to PDOWhere ?
     public function execute() {
         if(!$this->stmt) {
             $sql = $this->getSQL();

@@ -24,13 +24,21 @@ class API_Get extends API_Base {
 
     /**
      * Construct an instance of the GET API
-     * @param PDOModel|IReadAccess $Model the user source object for this API
+     * @param PDOPrimaryKeyModel|IReadAccess $Model the user source object for this API
      * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
      * PRIMARY key is already included
      */
-    function __construct(PDOModel $Model, $searchColumns=NULL) {
+    function __construct(PDOPrimaryKeyModel $Model, $searchColumns=NULL) {
         parent::__construct($Model);
         $this->mSearchColumns = $searchColumns ?: $Model::HANDLER_IDS ?: $Model::PRIMARY;
+    }
+
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable() {
+        return "Get information about this " . $this->getModel()->modelName();
     }
 
     /**
@@ -67,20 +75,11 @@ class API_Get extends API_Base {
         $this->generateFieldShorts();
     }
 
-    /**
-     * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
-     */
-    function getDescribable() {
-        return "Get information about this " . $this->getModel()->modelName();
-    }
-
-
 
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return PDOModel|IResponse the found model which implements IResponseAggregate
+     * @return PDOPrimaryKeyModel|IResponse the found model which implements IResponseAggregate
      * @throws ModelNotFoundException if the Model was not found
      */
     final protected function doExecute(IRequest $Request) {

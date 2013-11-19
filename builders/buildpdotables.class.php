@@ -8,16 +8,13 @@
  * Date: 4/06/11 */
 namespace CPath\Builders;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IUserSession;
 use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDODatabase;
 use CPath\Exceptions\BuildException;
-use CPath\Base;
 use CPath\Build;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
 use CPath\Builders\Tools\BuildPHPClass;
-use CPath\Model\DB\PDOModel;
 use CPath\Validate;
 
 
@@ -41,6 +38,7 @@ PHP;
 	}
 PHP;
 
+    private $mBuildDB = NULL;
 
     // TODO: move out of the build class
     public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
@@ -113,6 +111,43 @@ PHP;
 
     protected abstract function getProcs(\PDO $DB);
 
+
+    public function createTable($name, $comment) {
+        $Table = new BuildPDOTable($name, $comment);
+
+        if(!($DB = $this->mBuildDB))
+            throw new \Exception("No DB Instance for table build");
+
+        $this->getColumns($DB, $Table);
+        $this->getIndexes($DB, $Table);
+        $Table->init();
+
+        if($Table->Template) {
+            switch(strtolower($Table->Template)) {
+                case 'u':
+                case 'user':
+                    Log::v(__CLASS__, "Table identified as template 'User': " . $name);
+                    $Table = new BuildPDOUserTable($name, $comment);
+                    break;
+                case 'us':
+                case 'usersession':
+                Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
+                    $Table = new BuildPDOUserSessionTable($name, $comment);
+                    break;
+            }
+        } elseif($Table->Primary) {
+            Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
+            $Table = new BuildPDOPKTable($name, $comment);
+        } else {
+            return $Table;
+        }
+
+        $this->getColumns($DB, $Table); // Redo for new table
+        $this->getIndexes($DB, $Table);
+        $Table->init();
+        return $Table;
+    }
+
     /**
      * Builds class references for existing database tables
      * @param IBuildable $Buildable
@@ -123,7 +158,7 @@ PHP;
 
         if(!$Buildable instanceof PDODatabase)
             return false;
-        $DB = $Buildable;
+        $this->mBuildDB = $DB = $Buildable;
 
         $BUILD = $Buildable::BUILD_DB;
         if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
@@ -164,15 +199,13 @@ PHP;
             $tables = $this->getTables($DB);
 
         $tableNames = array();
-        foreach($tables as $Table) $tableNames[] = $Table->Name;
+        foreach($tables as $Table) {
+            $Table->Namespace = $modelNS;
+            $tableNames[] = $Table->Name;
+        }
         Log::v(__CLASS__, "Found Tables (%s): " . implode(', ', $tableNames), count($tableNames));
 
         foreach($tables as $Table) {
-            $Table->Namespace = $modelNS;
-
-            $this->getColumns($DB, $Table);
-            $this->getIndexes($DB, $Table);
-
             $Table->processArgs();
 
             foreach($Table->getColumns() as $Column) {
@@ -194,7 +227,7 @@ PHP;
             $file = $modelPath.strtolower($Table->ClassName).'.class.php';
 
             $PHP = new BuildPHPClass($Table->ClassName);
-            $PHP->Namespace = $modelNS;
+            $PHP->Namespace = $Table->Namespace;
 
             $Table->processModelPHP($PHP);
 
@@ -238,28 +271,6 @@ PHP;
             //$PHP->addStaticProperty('_columns', NULL, 'private');
             $PHP->addUse('CPath\Model\DB\PDOColumn');
 
-//            $InsertFields = array();
-//            $UpdateFields = array();
-//            $SearchFields = array();
-//            $ExportFields = array();
-//
-//            foreach($Table->getColumns() as $Column) {
-//                if($Column->Flags & PDOColumn::FLAG_INSERT) $InsertFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FLAG_UPDATE) $UpdateFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FLAG_SEARCH) $SearchFields[] = $Column->Name;
-//                if($Column->Flags & PDOColumn::FLAG_EXPORT) $ExportFields[] = $Column->Name;
-//            }
-//
-//            if(!$InsertFields && $Table->INSERT) $InsertFields[] = $Table->INSERT;
-//            if(!$UpdateFields && $Table->UPDATE) $UpdateFields[] = $Table->UPDATE;
-//            if(!$SearchFields && $Table->SEARCH) $SearchFields[] = $Table->SEARCH;
-//            if(!$ExportFields && $Table->EXPORT) $ExportFields[] = $Table->EXPORT;
-
-//            if($InsertFields) $PHP->addConst('INSERT', implode(',', $InsertFields));
-//            if($UpdateFields) $PHP->addConst('UPDATE', implode(',', $UpdateFields));
-//            if($SearchFields) $PHP->addConst('SEARCH', implode(',', $SearchFields));
-//            if($ExportFields) $PHP->addConst('EXPORT', implode(',', $ExportFields));
-
             if($Table->SearchWildCard)
                 $PHP->addConst('SEARCH_WILDCARD', true);
             if($Table->SearchLimit)
@@ -276,12 +287,20 @@ PHP;
                 $PHP->addConst($this->toTitleCase($Column->Name, true), $Column->Name);
 
             foreach($Table->getColumns() as $Column)
+                if($Column->EnumConstants) {
+                    $PHP->addConstCode();
+                    $PHP->addConstCode("// Column Enum Values for '" . $Column->Name ."'");
+                    foreach($Column->EnumValues as $enum)
+                        $PHP->addConst($this->toTitleCase($Column->Name, true) . '_Enum_' . $this->toTitleCase($enum, true), $enum);
+                }
+
+            foreach($Table->getColumns() as $Column)
                 $PHP->addProperty($Column->Name);
 
             foreach($Table->getColumns() as $Column) {
                 $ucName = self::toTitleCase($Column->Name, true);
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if($Column->Flags & PDOColumn::FLAG_PRIMARY ? false : true)
+                if($Column->Flags & PDOColumn::FLAG_PRIMARY ?0:1)
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
                 $PHP->addMethodCode();
             }
@@ -289,12 +308,14 @@ PHP;
             $PHP->addStaticMethod('remove', $Table->ClassName . ' $' . $Table->ClassName, " parent::removeModel(\${$Table->ClassName}); ");
             $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
 
+            //Log::v2(__CLASS__, "Writing file: " . $file);
             file_put_contents($file, $PHP->build());
             foreach($oldFiles as $i => $f)
                 if($modelPath.$f == $file) {
                     unset($oldFiles[$i]);
                     break;
                 }
+            $this->mBuildDB = NULL;
         }
 
         if($noPrimary) {
@@ -371,7 +392,8 @@ PHP;
 
 
     static function toTitleCase($field, $noSpace=false) {
-        $field = ucwords(str_replace('_', ' ', $field));
+        $field = preg_replace('/[^a-zA-Z0-9]/', ' ', $field);
+        $field = ucwords($field);
         $words = explode(' ', $field);
         foreach($words as &$word) {
             if(strlen($word) === 2)
@@ -387,7 +409,7 @@ PHP;
 }
 
 class BuildPDOColumn {
-    public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL, $Default=NULL;
+    public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL, $Default=NULL, $EnumConstants = false;
 
     public function __construct($name, $comment) {
         $this->Name = $name;
@@ -402,6 +424,10 @@ class BuildPDOColumn {
         foreach(explode('|', $matches[1]) as $field) {
             $args = explode(':', $field, 2);
             switch(strtolower($args[0])) {
+                case 'ce':
+                case 'constant_enums':
+                    $this->EnumConstants |= PDOColumn::FLAG_INSERT;
+                    break;
                 case 'i':
                 case 'insert':
                     $this->Flags |= PDOColumn::FLAG_INSERT;
@@ -443,7 +469,7 @@ class BuildPDOColumn {
                     $this->Filter |= (int)$filter;
                     break;
                 default:
-                    throw new BuildException("Unrecognized Flag: " . $args[0]);
+                    throw new BuildException("Unrecognized Flag: " . $args[0] . " for column '" . $this->Name ."'");
             }
         }
         return '';
@@ -467,7 +493,7 @@ class BuildPDOTable {
     protected $mUnfound = array();
     protected $mArgs = array();
 
-    protected function __construct($name, $comment) {
+    public function __construct($name, $comment) {
         $this->Name = $name;
         $this->Title = ucwords(str_replace('_', ' ', $this->Name));
         $this->ModelName = $this->Title;
@@ -479,7 +505,16 @@ class BuildPDOTable {
             $this->Comment = str_replace(';', ':', $this->Comment);
     }
 
+    function init() {
+        if(!$this->Primary)
+            foreach($this->mColumns as $Column)
+                if($Column->Flags & PDOColumn::FLAG_PRIMARY)
+                    $this->Primary = $Column->Name;
+    }
+
     function processArgs() {
+
+
         foreach($this->mArgs as $field) {
             list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
             switch(strtolower($name)) {
@@ -590,13 +625,6 @@ class BuildPDOTable {
         if($this->mUnfound)
             throw new BuildException("Invalid Table Comment Token '" . implode('|', $this->mUnfound) . "' in Table '{$this->Name}'");
 
-        if(!$this->Primary)
-            foreach($this->getColumns() as $Column) {
-                if($Column->Flags & PDOColumn::FLAG_PRIMARY) {
-                    $this->Primary = $Column->Name;
-                    break;
-                }
-            }
     }
     
     protected function req($name, $arg, $preg=NULL, $desc=NULL) {
@@ -607,24 +635,19 @@ class BuildPDOTable {
         array_shift($matches);
         return $matches;
     }
+}
 
-    static function create($name, $comment) {
-        $Table = new BuildPDOTable($name, $comment);
-        if($Table->Template) switch(strtolower($Table->Template)) {
-            case 'u':
-            case 'user':
-                $Table = new BuildPDOUserTable($name, $comment);
-                break;
-            case 'us':
-            case 'usersession':
-                $Table = new BuildPDOUserSessionTable($name, $comment);
-                break;
-        }
-        return $Table;
+
+class BuildPDOPKTable extends BuildPDOTable {
+
+    function processModelPHP(BuildPHPClass $PHP) {
+        parent::processModelPHP($PHP);
+        $PHP->setExtend("CPath\\Model\\DB\\PDOPrimaryKeyModel");
     }
 }
 
-class BuildPDOUserTable extends BuildPDOTable {
+
+class BuildPDOUserTable extends BuildPDOPKTable {
     public $Column_ID, $Column_Username, $Column_Email, $Column_Password, $Column_Flags, $Session_Class;
     /** @var BuildPDOUserSessionTable[] */
     protected static $mSessionTables = array();
@@ -723,7 +746,7 @@ class BuildPDOUserTable extends BuildPDOTable {
     }
 }
 
-class BuildPDOUserSessionTable extends BuildPDOTable {
+class BuildPDOUserSessionTable extends BuildPDOPKTable {
     public $Column_Key, $Column_User_ID, $Column_Expire;
     public $SessionExpireDays, $SessionExpireSeconds, $SessionKey, $SessionKeyLength;
 

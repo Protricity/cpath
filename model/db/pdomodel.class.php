@@ -7,13 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 
-use CPath\Cache;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IXML;
@@ -52,15 +50,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     const TABLE = null;
     const MODEL_NAME = null;
-    const PRIMARY = null;
-    const VALIDATIONS = null;
 
     const SEARCH_LIMIT_MAX = 100;
     const SEARCH_LIMIT = 25;
     const SEARCH_WILDCARD = false;   // true or false
-
-    const CACHE_ENABLED = false;
-    const CACHE_TTL = 300;
 
     const HANDLER_IDS = NULL;   // Identifier column or list of columns for such endpoints as GET, PATCH, DELETE
     const SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
@@ -76,8 +69,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     const SECURITY_DISABLED = false;
 
-    //protected $mRow = null;
-    private $mCommit = NULL;
 
     /**
      * PDOModel Constructor parameters must be optional.
@@ -96,52 +87,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     function columnValue($column) {
         $this->loadColumn($column);
         return $this->$column;
-    }
-
-    /**
-     * UPDATE a column value for this Model
-     * @param String $column the column name to update
-     * @param String $value the value to set
-     * @param bool $commit set true to commit now, otherwise use ->commitColumns
-     * @return $this
-     */
-    function updateColumn($column, $value, $commit=true) {
-        if($this->$column == $value)
-            return $this;
-        $this->mCommit[$column] = $value;
-        if($commit)
-            $this->commitColumns();
-        $this->$column = $value;
-        return $this;
-    }
-
-    /**
-     * UPDATE column values for this Model
-     * @return int the number of columns updated
-     * @throws \Exception if no primary key exists
-     */
-    function commitColumns() {
-        if(!($primary = static::PRIMARY))
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot UPDATE table without it");
-        $id = $this->$primary;
-        if(!$this->mCommit) {
-            Log::u(get_called_class(), "No Fields Updated for ".static::modelName()." '{$id}'");
-            return 0;
-        }
-        $set = '';
-        $DB = static::getDB();
-        foreach($this->mCommit as $column=>$value)
-            $set .= ($set ? ",\n\t" : '') . "{$column} = ".$DB->quote($value);
-        $SQL = "UPDATE ".static::TABLE
-            ."\n SET {$set}"
-            ."\n WHERE ".static::PRIMARY." = ".$DB->quote($id);
-        $DB->exec($SQL);
-        Log::u(get_called_class(), "Updated " . $this);
-        $c = sizeof($this->mCommit);
-        $this->mCommit = NULL;
-        if(static::CACHE_ENABLED)
-            static::$mCache->store(get_called_class() . ':id:' . $id, $this, static::CACHE_TTL);
-        return $c;
     }
 
 
@@ -182,12 +127,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return new Response("Retrieved " . $this, true, $this);
     }
 
-    public function __toString() {
-        if($id = static::HANDLER_IDS ?: static::PRIMARY)
-            return static::modelName() . " '" . $this->$id . "'";
-        return static::modelName();
-    }
-
     /**
      * Returns the default IHandlerSet collection for this PDOModel type.
      * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
@@ -197,13 +136,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         if($Handlers === NULL)
             $Handlers = new HandlerSet($this);
 
-        $Handlers->add('GET', new API_Get($this));
         $Handlers->add('GET search', new API_GetSearch($this));
         $Handlers->add('POST', new API_Post($this));
-        $Handlers->add('PATCH', new API_Patch($this));
-        $Handlers->add('DELETE', new API_Delete($this));
 
         return $Handlers;
+    }
+
+
+    public function __toString() {
+        if($id = static::HANDLER_IDS)
+            return static::modelName() . " '" . $this->$id . "'";
+        return static::modelName();
     }
 
 
@@ -212,18 +155,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     }
 
     // Statics
-
-    /**
-     * @var Cache
-     */
-    protected static $mCache = NULL;
-
-    /**
-     * Initialize this class
-     */
-    public static function init() {
-        self::$mCache = Cache::get();
-    }
 
     /**
      * Return all columns for this Model
@@ -313,10 +244,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 //                ->validate($value);
 //    }
 
+    protected static function insertRow(Array $row) {
+        static::insert(array_keys($row))
+            ->values(array_values($row));
+        Log::u(get_called_class(), "Created " . static::MODEL_NAME);
+    }
+
     /**
      * Creates a new Model based on the provided row of column value pairs
      * @param array|mixed $row column value pairs to insert into new row
-     * @return PDOModel|null returns NULL if no primary key column is available
+     * @return void
      * @throws ModelAlreadyExistsException
      * @throws \Exception|\PDOException
      * @throws ValidationException if a column fails to validate
@@ -336,23 +273,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         try {
 //            foreach($row as $column => $value) // No re-validation
 //                static::validateColumn($column, $value);
-
-            if(!static::PRIMARY) {
-                static::insert(array_keys($row))
-                    ->values(array_values($row));
-                return NULL;
-            } else {
-                if(isset($row[static::PRIMARY]))
-                    $id = $row[static::PRIMARY];
-                $Insert = static::insert(array_keys($row))
-                    ->requestInsertID(static::PRIMARY)
-                    ->values(array_values($row));
-                if(!isset($id))
-                    $id = $Insert->getInsertID();
-                $Model = static::loadByPrimaryKey($id);
-                Log::u(get_called_class(), "Created " . $Model);
-                return $Model;
-            }
+            static::insertRow($row);
+            return;
         } catch (\PDOException $ex) {
             if(stripos($ex->getMessage(), 'Duplicate')!==false) {
                 $err = "A Duplicate ".static::modelName()." already exists";
@@ -365,11 +287,19 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         }
     }
 
-    static function loadOrCreate(Array $columns) {
-        return static::search()
-            ->whereAll($columns)
-            ->fetch()
-            ?: static::createFromArray($columns);
+    /**
+     * Creates a new Model based on the provided row of column value pairs and returns a model instance
+     * Note: This model instance is NOT pulled from the database, but is instead filled with the row values.
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return PDOModel the new instance with filled values
+     * @throws ModelAlreadyExistsException
+     * @throws ValidationException if a column fails to validate
+     */
+    public static function createAndFill($row) {
+        static::createFromArray($row);
+        $Model = new static();
+        foreach($row as $k=>$v)
+            $Model->$k = $v;
     }
 
     // Database methods
@@ -446,33 +376,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     }
 
     /**
-     * Loads a model based on a primary key column value
-     * @param $id String the primary key value to search for
-     * @param boolean $throwIfNotFound if true, throws an exception if not found
-     * @return PDOModel the found model instance
-     * @throws ModelNotFoundException if a model entry was not found
-     * @throws \Exception if the model does not contain primary keys
-     */
-    public static function loadByPrimaryKey($id, $throwIfNotFound=true) {
-        if(!static::PRIMARY)
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot load " . static::modelName() . " Model");
-        if(static::CACHE_ENABLED
-            && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
-            return $Model;
-        $Model = static::search()
-            ->where(static::PRIMARY, $id)
-            ->fetch();
-        if(!$Model) {
-            if($throwIfNotFound)
-                throw new ModelNotFoundException(static::modelName() . " '{$id}' was not found");
-            return NULL;
-        }
-        if(static::CACHE_ENABLED)
-            static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
-        return $Model;
-    }
-
-    /**
      * Loads a model based on a search
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
@@ -513,96 +416,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return static::selectByColumns(static::search(), $search, $columns, $limit, $logic, $compare);
     }
 
-
-    /**
-     * Delete a model entry by PRIMARY Key Column
-     * @param $id mixed the PRIMARY Key to search for
-     * @throws \Exception
-     * @throws \InvalidArgumentException if $id is invalid
-     */
-    public static function removeByPrimary($id) {
-        if(!static::PRIMARY)
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Delete " . static::modelName());
-        if($id === NULL)
-            throw new \InvalidArgumentException("Remove ID can not be NULL. Cannot Delete " . static::modelName());
-        $c = static::delete()
-            ->where(static::PRIMARY, $id)
-            ->execute()
-            ->getDeletedRows();
-        if(!$c)
-            throw new \Exception("Unable to delete ".static::modelName()." '{$id}'");
-        if(static::CACHE_ENABLED)
-            static::$mCache->remove(get_called_class() . ':id:' . $id);
-    }
-
-    /**
-     * Remove the row associated with a model from the database
-     * @param PDOModel $Model the model to remove
-     * @throws \Exception if no primary key is identified for this model
-     */
-    static function removeModel(PDOModel $Model) {
-        if(!static::PRIMARY)
-            throw new \Exception("Constant 'PRIMARY' is not set. Cannot Delete " . static::modelName());
-        static::removeByPrimary($Model->{static::PRIMARY});
-        Log::u(get_called_class(), "Deleted " . $Model);
-    }
-//
-//    /**
-//     * Override this to limit all default API 'GET', 'GET search', 'PATCH', and 'DELETE' calls by limiting the queries
-//     * @param PDOWhere $Select the statement to limit.
-//     * @param IRequest $Request The api request
-//     * @return void
-//     */
-//    protected static function processAPI(PDOWhere $Select, IRequest $Request) { }
-//
-//    /**
-//     * Override this to limit all default API 'GET' calls
-//     * Modify $Request to update the request (i.e. unset($Request['id']); $Request['column'] = 'value';)
-//     * @param PDOWhere $Select the statement to limit.
-//     * @param IRequest $Request The api request to process and validate
-//     * @return void
-//     */
-//    protected static function processAPIGet(PDOWhere $Select, IRequest $Request) { static::processAPI($Select, $Request); }
-//
-//    /**
-//     * Override this to limit all default API 'GET search' calls
-//     * @param PDOWhere $Select the statement to limit.
-//     * @param IRequest $Request The api request to process and validate
-//     * @return void
-//     */
-//    protected static function processAPISearch(PDOWhere $Select, IRequest $Request) { static::processAPIGet($Select, $Request); }
-//
-//    /**
-//     * Override this to change or validate the request all default API 'POST' calls
-//     * @param IRequest $Request The api request to process and validate
-//     * @return void
-//     */
-//    protected static function processAPIPost(IRequest $Request) { }
-//
-//    /**
-//     * Override this to limit all default API 'PATCH' calls
-//     * @param PDOWhere $Select the statement to limit.
-//     * @param IRequest $Request The api request to process and validate
-//     * @return void
-//     */
-//    protected static function processAPIPatch(PDOWhere $Select, IRequest $Request) { static::processAPIGet($Select, $Request); }
-//
-//    /**
-//     * Override this to limit all default API 'DELETE' calls
-//     * @param PDOWhere $Select the statement to limit.
-//     * @param IRequest $Request The api request to process and validate
-//     * @return void
-//     */
-//    protected static function processAPIDelete(PDOWhere $Select, IRequest $Request) { static::processAPI($Select, $Request); }
-
-    /**
-     * Override this to limit all default API calls for this class
-     * @param PDOWhere $Select the query statement to limit.
-     * @param IRequest $Request The api request to process and or validate validate
-     * @return void
-     */
-    static function limitAPIQuery(PDOWhere $Select, IRequest $Request) { }
-
     /**
      * Returns the model name from comment or the class name
      * @return string the model name
@@ -623,7 +436,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return null;
     }
 }
-PDOModel::init();
 
 /**
  * Custom select object returns PDOModel instances instead of arrays

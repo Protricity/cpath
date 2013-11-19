@@ -19,7 +19,6 @@ use CPath\Model\Response;
 
 class API_Post extends API_Base {
 
-
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
@@ -63,13 +62,17 @@ class API_Post extends API_Base {
             if($Handler instanceof IAPIPostCallbacks)
                 $row = $Handler->preparePostInsert($row, $Request) ?: $row;
 
-        $Model = $Model::createFromArray($row);
+        if($Model instanceof PDOPrimaryKeyModel) {
+            $NewModel = $Model::createAndLoad($row);
+        } else {
+            $NewModel = $Model::createAndFill($row);
+        }
 
-        $Response = new Response("Created " . $Model . " Successfully.", true, $Model);
+        $Response = new Response("Created " . $NewModel . " Successfully.", true, $NewModel);
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAPIPostCallbacks)
-                $Response = $Handler->onPostExecute($Model, $Request, $Response) ?: $Response;
+                $Response = $Handler->onPostExecute($NewModel, $Request, $Response) ?: $Response;
 
         return $Response;
     }
