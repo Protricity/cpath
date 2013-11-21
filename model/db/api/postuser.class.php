@@ -34,7 +34,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
      * @return IField[]|NULL return an array of prepared fields to use or NULL to ignore.
      * @throws InvalidAPIException
      */
-    function preparePostFields(Array &$fields){
+    final function preparePostFields(Array &$fields){
         /** @var PDOUserModel $Model  */
         $Model = $this->getModel();
         $this->mUser = $Model;
@@ -52,6 +52,11 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
             }));
         }
         $fields[self::FIELD_LOGIN] = new Field("Log in after");
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IAPIPostUserCallbacks)
+                $fields = $Handler->preparePostUserFields($fields) ?: $fields;
+
         $this->generateFieldShorts();
     }
 
@@ -64,7 +69,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
      * @throws ModelAlreadyExistsException if the account already exists
      * Note: a log in may occur if field 'login' == true and the password is correct
      */
-    function preparePostInsert(Array &$row, IRequest $Request) {
+    final function preparePostInsert(Array &$row, IRequest $Request) {
 
         $User = $this->mUser;
         $name = $Request[$User::COLUMN_USERNAME];
@@ -93,7 +98,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
      * @return IResponse|null
      * @throws ModelAlreadyExistsException if the user already exists
      */
-    function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response)
+    final function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response)
     {
         $User = $NewModel;
         $pass = $Request[$User::COLUMN_PASSWORD];

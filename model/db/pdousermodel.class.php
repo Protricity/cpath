@@ -146,6 +146,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
      */
     function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
         $Handlers = parent::loadDefaultHandlers($Handlers);
+        $Handlers->add('POST', new API_PostUser($this), true);
         $Handlers->add('POST login', new API_PostUserLogin($this));
         $Handlers->add('POST logout', new API_PostUserLogout($this));
         $Handlers->add('POST password', new API_PostUserPassword($this));

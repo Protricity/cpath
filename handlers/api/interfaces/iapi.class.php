@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api\Interfaces;
 
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
@@ -56,6 +57,10 @@ class RequiredFieldException extends ValidationException {
  * Throw when one or more Fields fails to validate
  */
 class ValidationExceptions extends MultiException {
+    public function __construct(IAPI $API, $message=NULL) {
+        parent::__construct("Errors occurred in API '" . Describable::get($API)->getDescription(). "':\n");
+    }
+
     public function addFieldException($fieldName, ValidationException $ex) {
         parent::add($ex->getFieldError($fieldName), $fieldName);
     }

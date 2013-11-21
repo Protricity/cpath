@@ -380,7 +380,7 @@ abstract class API implements IAPI {
             }
         }
 
-        $FieldExceptions = new ValidationExceptions();
+        $FieldExceptions = new ValidationExceptions($this);
         $data = array();
         foreach($this->getFields() as $name=>$Field) {
             try {
