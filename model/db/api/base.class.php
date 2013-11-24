@@ -26,7 +26,6 @@ abstract class API_Base extends API implements IDescribableAggregate {
      * Construct an instance of the GET API
      * @param PDOModel|IReadAccess $Model the user source object for this API
      * PRIMARY key is already included
-     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
      */
     function __construct(PDOModel $Model) {
         parent::__construct();

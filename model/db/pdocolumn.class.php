@@ -79,6 +79,7 @@ class PDOColumn {
 
     /**
      * Returns true one or more flags are set, otherwise false
+     * Note: multiple flags follows 'OR' logic. Only one flag has to match to return true
      * @param int $flag the flag or flags to check
      * @return bool true one or more flags are set, otherwise false
      */

@@ -48,9 +48,9 @@ abstract class API implements IAPI {
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IField[] */
-    protected $mFields = array();
+    private $mColumns = array();
     /** @var IValidation[] */
-    protected $mValidations = array();
+    private $mValidations = array();
     /** @var SimpleLogger */
     private $mLog = NULL;
 
@@ -240,7 +240,7 @@ abstract class API implements IAPI {
      */
     protected function addField($name, IField $Field, $prepend=false) {
 
-        if(isset($this->mFields[$name]))
+        if(isset($this->mColumns[$name]))
             throw new \InvalidArgumentException("Field {$name} already exists.");
 
         if(strpos($name, ':') !== false) {
@@ -252,13 +252,13 @@ abstract class API implements IAPI {
 
         $this->_setupFields();
         if($prepend) {
-            $old = $this->mFields;
-            $this->mFields = array();
-            $this->mFields[$name] = $Field;
+            $old = $this->mColumns;
+            $this->mColumns = array();
+            $this->mColumns[$name] = $Field;
             foreach($old as $k=>$v)
-                $this->mFields[$k] = $v;
+                $this->mColumns[$k] = $v;
         } else {
-            $this->mFields[$name] = $Field;
+            $this->mColumns[$name] = $Field;
         }
         return $this;
     }
@@ -282,7 +282,7 @@ abstract class API implements IAPI {
      */
     public function getFields() {
         $this->_setupFields();
-        return $this->mFields;
+        return $this->mColumns;
     }
 
     /**
@@ -293,9 +293,9 @@ abstract class API implements IAPI {
      */
     public function getField($fieldName) {
         $this->_setupFields();
-        if(!isset($this->mFields[$fieldName]))
+        if(!isset($this->mColumns[$fieldName]))
             throw new FieldNotFound("Field '{$fieldName}' is not in this API");
-        return $this->mFields;
+        return $this->mColumns;
     }
 
     /**

@@ -22,6 +22,7 @@
             APIInfo.setPrettyJSON(content, responseContent);
     });
     window.APIInfo = THIS = {
+        accepts: '*/*',
         setPrettyJSON: function(json, elm) {
             try {
                 json = vkbeautify.json(json);
@@ -38,7 +39,7 @@
                 elm.text(xml);
             }
         },
-        submit: function(path, form, dataType, method, asObject) {
+        submit: function(path, form, dataType, method, asObject, accepts) {
             form = jQuery(form);
             var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
             lastHeaders = '';
@@ -47,7 +48,8 @@
             requestHeaders.html("Loading...");
             responseHeaders.html("Loading...");
             responseContent.html("Loading...");
-            var accepts = '*/*';
+            if(!accepts)
+                accepts = THIS.accepts;
             switch(dataType) {
                 case 'json':
                     accepts = 'application/json';

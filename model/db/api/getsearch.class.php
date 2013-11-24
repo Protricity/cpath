@@ -19,7 +19,7 @@ use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\Response;
 
 class API_GetSearch extends API_Base {
-    private $mSearchColumns;
+    private $mColumns;
 
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
@@ -28,10 +28,10 @@ class API_GetSearch extends API_Base {
     protected function setupFields() {
         $Model = $this->getModel();
 
-        $this->mSearchColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
+        $this->mColumns = $Model->findColumns($Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
 
         $this->addField('search', new RequiredParam("SEARCH for ".$Model::modelName()));
-        $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mSearchColumns))."]"));
+        $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mColumns))."]"));
         $this->addField('limit', new Field("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
         $this->addField('logic', new Field("The search logic to use [AND, OR]. Default=OR"));
     }
@@ -70,8 +70,8 @@ class API_GetSearch extends API_Base {
                 $search .= '%';
         }
 
-        if($search_by && !isset($this->mSearchColumns[$search_by]))
-            throw new \Exception("Invalid search_by column: " . implode(', ', $this->mSearchColumns));
+        if($search_by && !isset($this->mColumns[$search_by]))
+            throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
 
         $Model = $this->getModel();
         /** @var PDOModelSelect $Search */

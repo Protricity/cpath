@@ -52,7 +52,6 @@ class APIInfo implements IHandler, ILogListener {
 
     function renderAPI(IAPI $API, IRoute $Route, IRequest $Request, IResponse $Response=null) {
 
-
         if($Response == NULL && strcasecmp($Request->getMethod(), 'get') !== 0)
             $Response = $API->execute($Request);
 
@@ -81,6 +80,7 @@ class APIInfo implements IHandler, ILogListener {
         <link rel="stylesheet" href="libs/apistyle.css" />
     </head>
     <body>
+        <?php if(!empty($_SERVER['HTTP_REFERER'])) { ?><h4><a href="<?php echo $_SERVER['HTTP_REFERER']; ?>">Go Back</a></h4><?php } echo "\n"; ?>
         <h1><?php echo $route."<br />"; ?></h1>
         <h2><?php echo Describable::get($API)->getDescription();  ?></h2>
         <h3>Params:</h3>
@@ -127,6 +127,15 @@ class APIInfo implements IHandler, ILogListener {
                 <input type="button" value="Submit TEXT" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
                 <input type="submit" value="Submit POST"/>
                 <input type="button" value="Submit JSON Object (POST)" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
+                <span id="spanCustom" style="display: none">
+                    <label>Accepts:
+                        <input  id="txtCustomText" type="text" value="*/*" size="4" />
+                    </label>
+                    <label>Method:
+                        <input id="txtCustomMethod" type="text" value="GET" size="4" />
+                    </label>
+                </span>
+                <input id="btnCustomSubmit" type="button" value="Submit Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIInfo.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
                 <input type="button" value="Update URL" onclick="APIInfo.updateURL(this.form);" />
             </div>
         </form>
