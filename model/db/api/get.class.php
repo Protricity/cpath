@@ -15,6 +15,7 @@ use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
+use CPath\Model\DB\Interfaces\IPDOModelRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
 
 class API_Get extends API_Base {
@@ -117,5 +118,29 @@ class API_Get extends API_Base {
                 $Response = $Handler->onGetExecute($GetModel, $Request, $Response) ?: $Response;
 
         return $Response;
+    }
+
+
+    /**
+     * Sends headers, executes the request, and renders an IResponse as HTML
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @return void
+     */
+    public function renderHTML(IRequest $Request) {
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IPDOModelRender)
+            {
+                try {
+                    $Model = $this->executeOrThrow($Request)->getDataPath();
+                    $Handler->renderModel($Model, $Request);
+                    return;
+                } catch (\Exception $ex) {
+                    $Handler->renderException($ex, $Request);
+                    return;
+                }
+            }
+
+        parent::renderHTML($Request);
     }
 }

@@ -317,7 +317,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     /**
      * Applies a search to PDOSelect based on specified columns and values.
      * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect instance to search in
-     * @param String $search the column value to search for
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param int $limit the number of rows to return. Default is 1
@@ -329,17 +330,25 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     static function selectByColumns($Select, $search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
         if(!$Select instanceof PDOSelect)
             $Select = static::select($Select);
-        if($columns instanceof IArrayObject)
-            $columns =$columns->getDataPath();
-        $columns = static::findColumns($columns ?: static::SEARCH ?: PDOColumn::FLAG_SEARCH);
-        if(!$columns)
-            throw new \Exception("No SEARCH fields defined in ".static::modelName());
 
         if(strcasecmp($logic, 'OR')===0)
             $Select->setFlag(PDOWhere::LOGIC_OR);
-        foreach($columns as $name=>$Column) {
-            if($compare) $name .= " {$compare} " ;
-            $Select->where($name, $search);
+
+        if(!is_array($search)) {
+
+            if($columns instanceof IArrayObject)
+                $columns = $columns->getDataPath();
+            $columns = static::findColumns($columns ?: static::SEARCH ?: PDOColumn::FLAG_SEARCH);
+            if(!$columns)
+                throw new \Exception("No SEARCH fields defined in ".static::modelName());
+            foreach($columns as $name=>$Column) {
+                if($compare) $name .= " {$compare} " ;
+                $Select->where($name, $search);
+            }
+
+        } else {
+            foreach($search as $name => $value)
+                $Select->where($name, $value);
         }
 
         $Select->limit($limit);
@@ -377,7 +386,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     /**
      * Loads a model based on a search
-     * @param String $search the column value to search for
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param boolean $throwIfNotFound if true, throws an exception if not found
@@ -403,7 +413,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     /**
      * Searches for Models based on specified columns and values.
-     * @param String $search the column value to search for
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param int $limit the number of rows to return. Default is 1

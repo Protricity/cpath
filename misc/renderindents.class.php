@@ -44,6 +44,16 @@ final class RenderIndents {
         return $this;
     }
 
+    /**
+     * Update the current tab count and optionally replace the characters used
+     * @param int $addCount the number tabs to add to the total
+     * @return $this
+     */
+    public function addIndent($addCount) {
+        $this->mCount += $addCount;
+        return $this;
+    }
+
     // Statics
 
     private static $mStatic = null;
@@ -69,7 +79,7 @@ final class RenderIndents {
         static::get()->indent($addCount);
     }
 
-    /** Shorthand for ::get()->indent($addCount) prepended by a new line character
+    /** Shorthand for ::get()->setIndent($addCount)
      * @param int $tabCount the number of total tabs to set
      * @param null $newTab
      * @return String always returns null
@@ -77,6 +87,15 @@ final class RenderIndents {
     public static function si($tabCount=0, $newTab=null) {
         static::get()
             ->setIndent($tabCount, $newTab);
+    }
+
+    /** Shorthand for ::get()->addIndent($addCount)
+     * @param int $addCount the number of total tabs to set
+     * @return String always returns null
+     */
+    public static function ai($addCount=0) {
+        static::get()
+            ->addIndent($addCount);
     }
 
 }
