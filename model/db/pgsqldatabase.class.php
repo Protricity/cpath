@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use \PDO;
-use CPath\Builders\BuildPGTables;
+use PDO;
+
 abstract class PGSQLDatabase extends PDODatabase {
     const FUNC_FORMAT = "SELECT %s";
     protected $mConfig = array();

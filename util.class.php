@@ -9,9 +9,6 @@ namespace CPath;
 
 
 // TODO split this class up into generic methods and request-oriented methods
-use CPath\Interfaces\IRequest;
-use CPath\Request\CLI;
-use CPath\Request\Web;
 
 /**
  * Class Util provides information about the current request

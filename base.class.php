@@ -11,7 +11,6 @@ use CPath\Builders\Installer;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Interfaces\IRequest;
 use CPath\Loaders\CPathLoader;
-use CPath\Loaders\SimpleLoader;
 use CPath\Misc\ConfigBuilder;
 use CPath\Request\CLI;
 use CPath\Request\Web;

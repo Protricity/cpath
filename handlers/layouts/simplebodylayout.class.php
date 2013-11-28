@@ -1,11 +1,22 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
+use CPath\Base;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 abstract class SimpleBodyLayout extends View {
+
+//    public function __construct($Target, ITheme $Theme=NULL) {
+//        parent::__construct($Target, $Theme);
+//    }
+
+    protected function setupHeadFields() {
+        parent::setupHeadFields();
+        //$basePath = Base::getClassPublicPath(__CLASS__, false);
+        //$this->addHeadStyleSheet($basePath . 'assets/simplebodylayout.css');
+    }
 
     /**
      * Render the header
@@ -46,7 +57,13 @@ abstract class SimpleBodyLayout extends View {
         echo RI::ni(), "<body>";
         RI::ai(1);
         $this->renderBodyHeader($Request);
+
+        //echo RI::ni(), "<div class='body'>";
+        //RI::ai(1);
         $this->renderBodyContent($Request);
+        //RI::ai(-1);
+        //echo RI::ni(), "</div>";
+
         $this->renderBodyFooter($Request);
         RI::ai(-1);
         echo RI::ni(), "</body>";

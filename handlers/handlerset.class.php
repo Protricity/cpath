@@ -7,12 +7,10 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Build;
-use CPath\Exceptions\BuildException;
 use CPath\Builders\RouteBuilder;
+use CPath\Exceptions\BuildException;
 use CPath\Handlers\Views\HandlerSetInfo;
 use CPath\Interfaces\HandlerSetException;
-use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
@@ -20,9 +18,7 @@ use CPath\Interfaces\IHandlerSetEvents;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
-use CPath\Model\Response;
 use CPath\Model\Route;
-use CPath\Util;
 
 /**
  * Class HandlerSet

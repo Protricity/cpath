@@ -9,7 +9,6 @@ namespace CPath\Handlers;
 
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
 
 class File implements IHandler{
     const BUILD_IGNORE = true;

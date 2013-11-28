@@ -12,8 +12,8 @@ use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\ExceptionResponse;
-use CPath\Request\CLI;
 use CPath\Model\Response;
+use CPath\Request\CLI;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}

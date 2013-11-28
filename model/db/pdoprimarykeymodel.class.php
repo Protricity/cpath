@@ -8,10 +8,10 @@
 namespace CPath\Model\DB;
 
 use CPath\Cache;
+use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
 use CPath\Log;
-use CPath\Config;
 
 abstract class PDOPrimaryKeyModel extends PDOModel {
     const PRIMARY = null;

@@ -8,14 +8,8 @@
  * Date: 4/06/11 */
 namespace CPath\Builders;
 use CPath\DataBase\PostGreSQL;
-use CPath\Exceptions\BuildException;
-use CPath\Base;
-use CPath\Build;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IBuilder;
-use CPath\Log;
 use CPath\Model\DB\PDOColumn;
-use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PGSQLDatabase;
 
 

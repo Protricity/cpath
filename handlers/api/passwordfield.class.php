@@ -8,12 +8,9 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Model\FileUpload;
-use CPath\Misc\RenderIndents as RI;
-use CPath\Model\NoUploadFoundException;
 
 /**
  * Class PasswordField

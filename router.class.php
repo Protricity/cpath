@@ -6,9 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
-use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IRoute;
-use CPath\Model\FileRequestRoute;
 
 /**
  * Class Router - finds routes to match paths and renders them

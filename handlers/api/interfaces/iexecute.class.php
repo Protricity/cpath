@@ -8,9 +8,6 @@
  */
 namespace CPath\Interfaces;
 
-use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-
 interface IExecute {
 
     /**

@@ -9,7 +9,6 @@ namespace CPath\Interfaces;
 use CPath\Model\FileUpload;
 
 
-
 interface IRequest extends IArrayObject {
 
     /**

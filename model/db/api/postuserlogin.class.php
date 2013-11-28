@@ -8,8 +8,8 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Handlers\API;
 use CPath\Handlers\Api\PasswordField;
+use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;

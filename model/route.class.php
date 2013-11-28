@@ -6,14 +6,11 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model;
-use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
+use CPath\Interfaces\InvalidHandlerException;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
-use CPath\Interfaces\InvalidHandlerException;
-use CPath\Log;
-use CPath\Util;
 
 /**
  * Class Route - a route entry

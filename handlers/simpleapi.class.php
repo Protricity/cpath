@@ -7,15 +7,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Build;
-use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IRoute;
-use CPath\Model\Response;
-use CPath\Util;
 
 /**
  * Class SimpleAPI

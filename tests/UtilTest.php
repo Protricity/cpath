@@ -8,8 +8,9 @@
  * Time: 8:04 PM */
 include_once __DIR__.'/../base.class.php';
 
-use CPath\Util;
 use CPath\Request\CLI;
+use CPath\Util;
+
 class UtilTest extends PHPUnit_Framework_TestCase {
 
     public function testCLI()

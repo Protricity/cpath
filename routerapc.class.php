@@ -8,7 +8,6 @@
 namespace CPath;
 use CPath\Builders\RouteBuilder;
 use CPath\Interfaces\IRoute;
-use CPath\Model\FileRequestRoute;
 
 /**
  * Class RouterAPC - finds routes in APC to match paths and renders them

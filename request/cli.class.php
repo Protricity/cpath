@@ -15,7 +15,6 @@ use CPath\Log;
 use CPath\LogException;
 use CPath\Model\FileUpload;
 use CPath\Model\MissingRoute;
-use CPath\Model\NoUploadFoundException;
 use CPath\Router;
 
 class CLI extends AbstractBase implements ILogListener, IShortOptions {

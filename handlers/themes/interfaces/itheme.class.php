@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Themes\Interfaces;
 
 
-use CPath\Interfaces\IRequest;
+use CPath\Handlers\Interfaces\IView;
 
 interface ITheme {
 

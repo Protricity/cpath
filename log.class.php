@@ -7,10 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IXML;
-use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\ILogListener;
 
 /**
  * Class Log

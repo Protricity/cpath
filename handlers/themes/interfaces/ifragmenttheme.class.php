@@ -8,6 +8,7 @@
 namespace CPath\Handlers\Themes\Interfaces;
 
 
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 
 interface IFragmentTheme extends ITheme {
@@ -15,9 +16,10 @@ interface IFragmentTheme extends ITheme {
     /**
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
+     * @param IDescribable|String|Null $Description optional fragment header text or description
      * @return void
      */
-    function renderFragmentStart(IRequest $Request);
+    function renderFragmentStart(IRequest $Request, $Description=null);
 
     /**
      * Render the end of a fragment.

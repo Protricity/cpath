@@ -13,7 +13,6 @@ use CPath\Log;
 use CPath\Model\FileRequestRoute;
 use CPath\Model\FileUpload;
 use CPath\Model\MissingRoute;
-use CPath\Model\NoUploadFoundException;
 use CPath\Router;
 use CPath\RouterAPC;
 

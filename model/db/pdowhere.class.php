@@ -6,8 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use CPath\Interfaces\IDatabase;
-use \PDO;
 abstract class PDOWhere {
     const LOGIC_OR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
 

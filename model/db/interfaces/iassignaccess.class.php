@@ -10,7 +10,6 @@ namespace CPath\Model\DB\Interfaces;
 
 use CPath\Interfaces\IRequest;
 use CPath\Model\DB\InvalidPermissionException;
-use CPath\Model\DB\PDOWhere;
 
 interface IAssignAccess {
 

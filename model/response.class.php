@@ -8,13 +8,10 @@
 namespace CPath\Model;
 use CPath\Interfaces\IComparable;
 use CPath\Interfaces\IComparator;
-use CPath\Interfaces\NotEqualException;
-use CPath\Util;
-use CPath\Log;
+use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
-use CPath\Interfaces\ILogListener;
-use CPath\Interfaces\ILogEntry;
+use CPath\Interfaces\NotEqualException;
 
 class Response extends ArrayObject implements IResponse, IComparable {
     private $mCode, $mData=array(), $mMessage;

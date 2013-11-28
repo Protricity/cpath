@@ -6,11 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model;
-use CPath\Builders\RouteBuilder;
-use CPath\Handlers\InvalidRouteException;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
-use CPath\Util;
 
 /**
  * Class Route - a route entry

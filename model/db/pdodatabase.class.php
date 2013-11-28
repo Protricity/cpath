@@ -8,18 +8,15 @@
 namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Build;
+use CPath\Builders\BuildPGTables;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IBuilder;
+use CPath\Interfaces\IDatabase;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoutable;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
 use CPath\Log;
-use CPath\Builders\BuildPGTables;
-use CPath\Interfaces\IDatabase;
-use CPath\Builders\RouteBuilder;
-use CPath\Util;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {

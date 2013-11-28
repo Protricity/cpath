@@ -9,9 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Base;
+use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
-use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
 use CPath\Interfaces\SessionNotFoundException;

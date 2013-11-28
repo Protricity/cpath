@@ -7,11 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Model;
 
-use CPath\Base;
 use CPath\Interfaces\IHTML;
 use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
 

@@ -7,14 +7,14 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Builders;
-use CPath\Interfaces\IBuildable;
-use CPath\Model\DB\PDOColumn;
-use CPath\Model\DB\PDODatabase;
-use CPath\Exceptions\BuildException;
 use CPath\Build;
+use CPath\Builders\Tools\BuildPHPClass;
+use CPath\Exceptions\BuildException;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
-use CPath\Builders\Tools\BuildPHPClass;
+use CPath\Model\DB\PDOColumn;
+use CPath\Model\DB\PDODatabase;
 use CPath\Validate;
 
 

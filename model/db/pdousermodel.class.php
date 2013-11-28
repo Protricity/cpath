@@ -9,10 +9,9 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\HandlerSet;
+use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
-use CPath\Interfaces\InvalidUserSessionException;
-use CPath\Handlers\Api\Interfaces\ValidationException;
 
 /** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}

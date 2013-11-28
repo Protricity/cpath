@@ -8,8 +8,6 @@
 namespace CPath\Interfaces;
 
 
-use CPath\Builders\RouteBuilder;
-
 interface IRoutable {
 
     /**

@@ -6,11 +6,10 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use CPath\Base;
 use CPath\Config;
-use CPath\Interfaces\IDatabase;
 use CPath\Log;
-use \PDO;
+use PDO;
+
 class PDODelete extends PDOWhere {
     /** @var \PDO */
     private $DB;

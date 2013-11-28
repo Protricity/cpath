@@ -9,17 +9,13 @@ namespace CPath\Model\DB;
 
 
 use CPath\Base;
-use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\APIException;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Handlers\Api\PasswordField;
-use CPath\Handlers\Api\RequiredParam;
+use CPath\Handlers\API;
 use CPath\Handlers\Api\Validation;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
-use CPath\Interfaces\SessionNotFoundException;
-use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 
 class API_PostUserPassword extends API_Base {

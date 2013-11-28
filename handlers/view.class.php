@@ -1,9 +1,9 @@
 <?php
 namespace CPath\Handlers;
 
-use CPath\Base;
-use CPath\Handlers\Themes\Interfaces\ITheme;
+use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
@@ -23,7 +23,7 @@ abstract class View implements IView {
     public function __construct($Target, ITheme $Theme=NULL) {
         $this->mTarget = $Target;
         $this->mTheme = $Theme;
-        $this->mBasePath = Base::getClassPublicPath($Target);
+        $this->mBasePath = Config::getDomainPath();
         $this->setupHeadFields();
         if($Theme)
             $Theme->setupView($this);

@@ -6,8 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use CPath\Interfaces\IDatabase;
-use \PDO;
 class MySQLInsert extends PDOInsert {
 
 

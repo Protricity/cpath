@@ -9,9 +9,6 @@ namespace CPath\Model\DB;
 
 
 use CPath\Interfaces\IRequest;
-use CPath\Model\DB\Interfaces\ISecurityPolicy;
-use CPath\Model\DB\Interfaces\IWriteAccess;
-use CPath\Model\Response;
 
 /**
  * Class Policy_AdminAccount implements an Admin-Only security policy

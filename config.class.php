@@ -13,6 +13,7 @@ class Config implements IConfig {
     static $GenPath = 'gen';
 
     static $Domain = NULL;
+    static $SiteName = NULL;
     static $Debug = false;
     static $BuildEnabled = true;
     static $APCEnabled = false;
@@ -33,6 +34,10 @@ class Config implements IConfig {
         return self::$Domain ?: self::$Domain = Build::buildDomainPath();
     }
 
+    static function getSiteName() {
+        return self::$SiteName ?: self::$SiteName = parse_url(self::$Domain, PHP_URL_HOST);
+    }
+
     static function init() {
         $path = dirname(__DIR__) . '/config.php';
         if(!file_exists($path) || !(include $path))
@@ -40,7 +45,8 @@ class Config implements IConfig {
     }
 
     private static function setDefaults() {
-        self::$Domain = Build::buildDomainPath();
+        self::$Domain = self::getDomainPath();
+        self::$SiteName = self::getSiteName();
         self::$APCEnabled = function_exists('apc_fetch');
     }
 

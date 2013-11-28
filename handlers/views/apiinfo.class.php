@@ -4,9 +4,9 @@ namespace CPath\Handlers\Views;
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
 use CPath\Config;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Api\Interfaces\IParam;
 use CPath\Helpers\Describable;
-use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
@@ -15,9 +15,9 @@ use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
+use CPath\Misc\RenderIndents as RI;
 use CPath\Model\ExceptionResponse;
 use CPath\Util;
-use CPath\Misc\RenderIndents as RI;
 
 class APIInfo implements IHandler, ILogListener {
 

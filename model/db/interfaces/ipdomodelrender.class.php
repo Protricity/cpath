@@ -8,9 +8,7 @@
  */
 namespace CPath\Model\DB\Interfaces;
 
-use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
 use CPath\Model\DB\PDOModel;
 
 interface IPDOModelRender {

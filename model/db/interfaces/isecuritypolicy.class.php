@@ -8,10 +8,6 @@
  */
 namespace CPath\Model\DB\Interfaces;
 
-use CPath\Interfaces\IRequest;
-use CPath\Model\DB\InvalidPermissionException;
-use CPath\Model\DB\PDOWhere;
-
 class SecurityPolicyNotFoundException extends \Exception {}
 
 interface ISecurityPolicy extends IReadAccess, IWriteAccess, IAssignAccess {

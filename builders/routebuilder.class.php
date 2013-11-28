@@ -8,7 +8,6 @@
  * Date: 4/06/11 */
 namespace CPath\Builders;
 use CPath\Base;
-use CPath\Build;
 use CPath\Compile;
 use CPath\Config;
 use CPath\Exceptions\BuildException;
@@ -22,7 +21,6 @@ use CPath\Log;
 use CPath\Model\Route;
 use CPath\Router;
 use CPath\RouterAPC;
-use CPath\Util;
 
 /**
  * Class BuildHandlers

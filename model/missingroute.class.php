@@ -6,12 +6,10 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model;
-use CPath\Builders\RouteBuilder;
 use CPath\Handlers\InvalidRouteException;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\NoRoutesFoundException;
-use CPath\Util;
 
 /**
  * Class MissingRoute - a placeholder for missing routes

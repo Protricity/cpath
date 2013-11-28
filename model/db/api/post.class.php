@@ -8,8 +8,6 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;

@@ -10,11 +10,9 @@ namespace CPath\Model;
 use CPath\Base;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
-use CPath\Interfaces\SessionDisabledException;
 use CPath\Interfaces\SessionExpiredException;
 use CPath\Interfaces\SessionNotActiveException;
 use CPath\Log;
-use CPath\Util;
 
 class SimpleUserSession implements IUserSession {
     const SESSION_KEY = '_session';
