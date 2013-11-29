@@ -10,7 +10,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 
-interface IFragmentTheme extends ITheme {
+interface IFragmentTheme {
 
     /**
      * Render the start of a fragment.

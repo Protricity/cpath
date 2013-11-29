@@ -7,5 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
-interface ITheme extends IViewTheme, ITableTheme, IFragmentTheme{
+
+interface IThemeAggregate {
+
+    /**
+     * Set up a view according to this theme
+     * @return ITheme
+     */
+    function loadTheme();
 }

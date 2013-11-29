@@ -2,10 +2,12 @@
 namespace CPath\Handlers\Layouts;
 
 use CPath\Base;
+use CPath\Handlers\Interfaces\IRenderContent;
+use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
-abstract class NavBarLayout extends SimpleBodyLayout {
+abstract class NavBarLayout extends View implements IRenderContent {
 
 //    public function __construct($Target, ITheme $Theme=NULL) {
 //        parent::__construct($Target, $Theme);
@@ -19,18 +21,55 @@ abstract class NavBarLayout extends SimpleBodyLayout {
     }
 
     /**
+     * Render the header
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    abstract protected function renderBodyHeaderContent(IRequest $Request);
+
+
+    /**
+     * Render the header
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    abstract protected function renderBodyFooterContent(IRequest $Request);
+
+    /**
      * Render the navigation bar content
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderNavBarContent(IRequest $Request);
 
+
+    protected function renderBodyHeader(IRequest $Request) {
+        echo RI::ni(), "<div class='header'>";
+        RI::ai(1);
+        $this->renderBodyHeaderContent($Request);
+        RI::ai(-1);
+        echo RI::ni(), "</div>";
+    }
+
+
     /**
-     * Render the page center content
+     * Render the view body
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    abstract protected function renderCenterContent(IRequest $Request);
+    final function renderBody(IRequest $Request) {
+        echo RI::ni(), "<body>";
+        echo RI::ni(1), "<div class='page'>";
+        RI::ai(2);
+
+        $this->renderBodyHeader($Request);
+        $this->renderBodyContent($Request);
+        $this->renderBodyFooter($Request);
+
+        RI::ai(-2);
+        echo RI::ni(1), "</div>";
+        echo RI::ni(), "</body>";
+    }
 
     /**
      * Render the page center content
@@ -43,10 +82,18 @@ abstract class NavBarLayout extends SimpleBodyLayout {
             $this->renderNavBarContent($Request);
         echo RI::ni(-1), "</div>";
         echo RI::ni(-1), "<div class='content'>";
-            $this->renderCenterContent($Request);
+            $this->renderViewContent($Request);
         echo RI::ni(-1), "</div>";
         RI::ai(-1);
     }
 
+
+    protected function renderBodyFooter(IRequest $Request) {
+        echo RI::ni(), "<div class='footer'>";
+        RI::ai(1);
+        $this->renderBodyFooterContent($Request);
+        RI::ai(-1);
+        echo RI::ni(), "</div>";
+    }
 }
 

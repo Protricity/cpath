@@ -9,29 +9,38 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Interfaces\IRequest;
 
-interface ITableTheme extends ITheme {
+interface ITableTheme {
+
+    /**
+     * Render the start of a table.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String|NULL $captionText text that should appear in the table caption
+     * @return void
+     */
+    function renderTableStart(IRequest $Request, $captionText = NULL);
 
     /**
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|NULL $headerText text that should appear in the footer
+     * @param bool $isHeader set true if this row is a <th>
      * @return void
      */
-    function renderTableStart(IRequest $Request, $headerText=NULL);
+    function renderTableRowStart(IRequest $Request, $isHeader=false);
+
+    /**
+     * Render the start of a table data element.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param int $span set span attribute
+     * @return void
+     */
+    function renderTableDataStart(IRequest $Request, $span=0);
 
     /**
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderTableColumnStart(IRequest $Request);
-
-    /**
-     * Render the start of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    function renderTableRowStart(IRequest $Request);
+    function renderTableDataEnd(IRequest $Request);
 
     /**
      * Render the start of a fragment.
@@ -39,13 +48,6 @@ interface ITableTheme extends ITheme {
      * @return void
      */
     function renderTableRowEnd(IRequest $Request);
-
-    /**
-     * Render the start of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    function renderTableColumnEnd(IRequest $Request);
 
     /**
      * Render the end of a fragment.

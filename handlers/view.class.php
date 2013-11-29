@@ -20,7 +20,7 @@ abstract class View implements IView {
     private $mHeadFields = array();
     private $mTarget, $mTheme, $mBasePath;
 
-    public function __construct($Target, ITheme $Theme=NULL) {
+    public function __construct($Target, ITheme $Theme) {
         $this->mTarget = $Target;
         $this->mTheme = $Theme;
         $this->mBasePath = Config::getDomainPath();

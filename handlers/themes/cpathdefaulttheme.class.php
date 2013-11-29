@@ -3,15 +3,16 @@ namespace CPath\Handlers\Themes;
 
 use CPath\Base;
 use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Themes\Interfaces\IFragmentTheme;
-use CPath\Handlers\Themes\Interfaces\ITableTheme;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 
-class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
+class CPathDefaultTheme implements ITheme {
+
+    private $mIsHeader = false;
 
     public function __construct() {
     }
@@ -56,57 +57,83 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
     }
 
     /**
-     * Render the start of a fragment.
+     * Render the start of a table.
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|NULL $headerText text that should appear in the footer
+     * @param String|NULL $captionText text that should appear in the table caption
      * @return void
      */
-    function renderTableStart(IRequest $Request, $headerText = NULL)
+    function renderTableStart(IRequest $Request, $captionText = NULL)
     {
         echo RI::ni(), "<table class='table'>";
-        echo RI::ni(1), "<caption><em>info</em></caption>";
-        RI::ai(2);
-    }
-
-    /**
-     * Render the start of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    function renderTableColumnStart(IRequest $Request)
-    {
-        echo RI::ni(), "<tr>";
+        if($captionText)
+            echo RI::ni(1), "<caption><em>{$captionText}</em></caption>";
         RI::ai(1);
     }
 
     /**
-     * Render the start of a fragment.
+     * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
+     * @param bool $isHeader set true if this row is a <th>
      * @return void
      */
-    function renderTableRowStart(IRequest $Request)
+    function renderTableRowStart(IRequest $Request, $isHeader=false)
     {
-        echo RI::ni(), "<td>";
+        $this->mIsHeader = $isHeader;
+
+        echo RI::ni(), "<tr";
+
+        if($isHeader)
+            echo " class='table-header'";
+
+        echo ">";
+
         RI::ai(1);
     }
 
     /**
-     * Render the start of a fragment.
+     * Render the start of a table data element.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param int $span set span attribute
+     * @return void
+     */
+    function renderTableDataStart(IRequest $Request, $span=0)
+    {
+        echo RI::ni();
+        if($this->mIsHeader)
+            echo '<th';
+        else
+            echo '<td';
+
+        if($span)
+            echo " rowspan='{$span}'";
+
+        echo '>';
+
+        RI::ai(1);
+    }
+
+    /**
+     * Render the start of a table data element.
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    function renderTableDataEnd(IRequest $Request)
+    {
+        RI::ai(-1);
+        echo RI::ni();
+
+        if($this->mIsHeader)
+            echo "</th>";
+        else
+            echo "</td>";
+    }
+
+    /**
+     * Render the end of a table row.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderTableRowEnd(IRequest $Request)
-    {
-        RI::ai(-1);
-        echo RI::ni(), "</td>";
-    }
-
-    /**
-     * Render the start of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    function renderTableColumnEnd(IRequest $Request)
     {
         RI::ai(-1);
         echo RI::ni(), "</tr>";

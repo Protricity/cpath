@@ -51,6 +51,8 @@ final class RenderIndents {
      */
     public function addIndent($addCount) {
         $this->mCount += $addCount;
+        if($this->mCount < 0)
+            $this->mCount = 0;
         return $this;
     }
 
