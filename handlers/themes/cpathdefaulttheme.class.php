@@ -63,7 +63,9 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableStart(IRequest $Request, $headerText = NULL)
     {
-        // TODO: Implement renderTableStart() method.
+        echo RI::ni(), "<table class='table'>";
+        echo RI::ni(1), "<caption><em>info</em></caption>";
+        RI::ai(2);
     }
 
     /**
@@ -73,7 +75,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableColumnStart(IRequest $Request)
     {
-        // TODO: Implement renderTableColumnStart() method.
+        echo RI::ni(), "<tr>";
+        RI::ai(1);
     }
 
     /**
@@ -83,7 +86,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableRowStart(IRequest $Request)
     {
-        // TODO: Implement renderTableRowStart() method.
+        echo RI::ni(), "<td>";
+        RI::ai(1);
     }
 
     /**
@@ -93,7 +97,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableRowEnd(IRequest $Request)
     {
-        // TODO: Implement renderTableRowEnd() method.
+        RI::ai(-1);
+        echo RI::ni(), "</td>";
     }
 
     /**
@@ -103,7 +108,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableColumnEnd(IRequest $Request)
     {
-        // TODO: Implement renderTableColumnEnd() method.
+        RI::ai(-1);
+        echo RI::ni(), "</tr>";
     }
 
     /**
@@ -114,7 +120,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme {
      */
     function renderTableEnd(IRequest $Request, $footerText = NULL)
     {
-        // TODO: Implement renderTableEnd() method.
+        RI::ai(-1);
+        echo RI::ni(), "</table>";
     }
 }
 
