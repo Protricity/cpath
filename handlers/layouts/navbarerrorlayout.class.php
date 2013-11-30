@@ -10,11 +10,16 @@ use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 abstract class NavBarErrorLayout extends NavBarLayout {
+
+    const RESPONSE_CODE = 400;
+    const RESPONSE_MESSAGE = 'OK';
+
     private $mException;
     public function __construct(\Exception $Exception, ITheme $Theme) {
         parent::__construct($Exception, $Theme);
         $this->mException = $Exception;
     }
+
     /**
      * Render the main view content
      * @param IRequest $Request the IRequest instance for this render
@@ -22,12 +27,11 @@ abstract class NavBarErrorLayout extends NavBarLayout {
      */
     function renderViewContent(IRequest $Request)
     {
-        $Theme = $this->getTheme();
-        $Util = new TableThemeUtil($Theme);
-        $Util->renderStart($Request, $this->mException->getMessage());
-        $Util->renderTD($Request, $this->mException);
-        $Util->renderEnd($Request);
-
+        $Util = new TableThemeUtil($Request, $this->getTheme());
+        $Util->renderStart("An exception has occurred");
+        $Util->renderTR(array($this->mException->getMessage()), true);
+        $Util->renderTD("<code>" . $this->mException . "</code>");
+        $Util->renderEnd();
     }
 }
 

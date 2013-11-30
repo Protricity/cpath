@@ -35,11 +35,9 @@ abstract class PageLayout extends View implements IRenderContent {
 
 
     protected function renderBodyHeader(IRequest $Request) {
-        echo RI::ni(), "<div class='header'>";
-        RI::ai(1);
+        $this->getTheme()->renderSectionStart($Request, 'header');
         $this->renderBodyHeaderContent($Request);
-        RI::ai(-1);
-        echo RI::ni(), "</div>";
+        $this->getTheme()->renderSectionEnd($Request);
     }
 
     /**
@@ -48,25 +46,19 @@ abstract class PageLayout extends View implements IRenderContent {
      * @return void
      */
     final function renderBody(IRequest $Request) {
-        echo RI::ni(), "<body>";
-        echo RI::ni(1), "<div class='page'>";
-        RI::ai(2);
+        $this->getTheme()->renderBodyStart($Request);
 
         $this->renderBodyHeader($Request);
         $this->renderViewContent($Request);
         $this->renderBodyFooter($Request);
 
-        RI::ai(-2);
-        echo RI::ni(1), "</div>";
-        echo RI::ni(), "</body>";
+        $this->getTheme()->renderBodyEnd($Request);
     }
 
     protected function renderBodyFooter(IRequest $Request) {
-        echo RI::ni(), "<div class='footer'>";
-        RI::ai(1);
+        $this->getTheme()->renderSectionStart($Request, 'footer');
         $this->renderBodyFooterContent($Request);
-        RI::ai(-1);
-        echo RI::ni(), "</div>";
+        $this->getTheme()->renderSectionEnd($Request);
     }
 }
 

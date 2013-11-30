@@ -13,30 +13,31 @@ use CPath\Misc\RenderIndents as RI;
 
 
 class TableThemeUtil {
-    private $mTheme, $mLastElm='none';
+    private $mTheme, $mRequest, $mLastElm='none';
 
-    public function __construct(ITableTheme $Theme) {
+    public function __construct(IRequest $Request, ITableTheme $Theme) {
+        $this->mRequest = $Request;
         $this->mTheme = $Theme;
     }
 
-    public function renderStart(IRequest $Request, $captionText=null) {
-        $this->mTheme->renderTableStart($Request, $captionText);
+    public function renderStart($captionText=null) {
+        $this->mTheme->renderTableStart($this->mRequest, $captionText);
         $this->mLastElm = 'table';
     }
 
-    public function renderEnd(IRequest $Request) {
+    public function renderEnd() {
         switch($this->mLastElm) {
             case 'table':
-                $this->mTheme->renderTableEnd($Request);
+                $this->mTheme->renderTableEnd($this->mRequest);
                 break;
             case 'tr':
-                $this->mTheme->renderTableRowEnd($Request);
-                $this->mTheme->renderTableEnd($Request);
+                $this->mTheme->renderTableRowEnd($this->mRequest);
+                $this->mTheme->renderTableEnd($this->mRequest);
                 break;
             case 'td':
-                $this->mTheme->renderTableDataEnd($Request);
-                $this->mTheme->renderTableRowEnd($Request);
-                $this->mTheme->renderTableEnd($Request);
+                $this->mTheme->renderTableDataEnd($this->mRequest);
+                $this->mTheme->renderTableRowEnd($this->mRequest);
+                $this->mTheme->renderTableEnd($this->mRequest);
                 break;
             case 'done':
             case 'none':
@@ -45,57 +46,61 @@ class TableThemeUtil {
         $this->mLastElm = 'done';
     }
 
-    public function renderTD(IRequest $Request, $content, $span=0) {
+    /**
+     * @param String|Callable $content
+     * @param int $span
+     */
+    public function renderTD($content, $span=0) {
         switch($this->mLastElm) {
             case 'table':
-                $this->mTheme->renderTableRowStart($Request);
+                $this->mTheme->renderTableRowStart($this->mRequest);
                 break;
             case 'tr': break;
             case 'td': break;
             case 'none':
-                $this->mTheme->renderTableStart($Request);
-                $this->mTheme->renderTableRowStart($Request);
+                $this->mTheme->renderTableStart($this->mRequest);
+                $this->mTheme->renderTableRowStart($this->mRequest);
                 break;
         }
-        $this->mTheme->renderTableDataStart($Request, $span);
-        echo RI::ni(), $content;
-        $this->mTheme->renderTableDataEnd($Request);
+        $this->mTheme->renderTableDataStart($this->mRequest, $span);
+        echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
+        $this->mTheme->renderTableDataEnd($this->mRequest);
         $this->mLastElm = 'tr';
     }
 
-    public function renderTR(IRequest $Request, Array $rowContent, $isHeader=false) {
+    public function renderTR(Array $rowContent, $isHeader=false) {
         switch($this->mLastElm) {
             case 'table':
-                $this->mTheme->renderTableRowStart($Request);
+                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
                 break;
             case 'tr':
-                $this->mTheme->renderTableRowEnd($Request);
-                $this->mTheme->renderTableRowStart($Request, $isHeader);
+                $this->mTheme->renderTableRowEnd($this->mRequest);
+                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
                 break;
             case 'td':
-                $this->mTheme->renderTableDataEnd($Request);
-                $this->mTheme->renderTableRowEnd($Request);
-                $this->mTheme->renderTableRowStart($Request, $isHeader);
+                $this->mTheme->renderTableDataEnd($this->mRequest);
+                $this->mTheme->renderTableRowEnd($this->mRequest);
+                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
                 break;
             default:
-                $this->mTheme->renderTableStart($Request);
-                $this->mTheme->renderTableRowStart($Request);
+                $this->mTheme->renderTableStart($this->mRequest);
+                $this->mTheme->renderTableRowStart($this->mRequest);
         }
         foreach($rowContent as $content) {
-            $this->mTheme->renderTableDataStart($Request);
+            $this->mTheme->renderTableDataStart($this->mRequest);
             echo RI::ni(), $content;
-            $this->mTheme->renderTableDataEnd($Request);
+            $this->mTheme->renderTableDataEnd($this->mRequest);
         }
-        $this->mTheme->renderTableRowEnd($Request);
+        $this->mTheme->renderTableRowEnd($this->mRequest);
         $this->mLastElm = 'table';
     }
 
-    public function renderKeyPairsTable(IRequest $Request, Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {
-        $this->renderStart($Request, $captionText);
-        $this->renderTR($Request, array($keyTitle, $valueTitle), true);
+    public function renderKeyPairsTable(Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {
+        $this->renderStart($captionText);
+        $this->renderTR(array($keyTitle, $valueTitle), true);
         foreach($keyPairs as $key=>$value) {
-            $this->renderTR($Request, array($key, $value), false);
+            $this->renderTR(array($key, $value), false);
         }
-        $this->renderEnd($Request);
+        $this->renderEnd();
     }
 }

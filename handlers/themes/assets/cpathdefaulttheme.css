@@ -61,10 +61,22 @@ body {
     border-collapse: collapse;
 }
 
+.table.error {
+    background-color: #DBB;
+    border: solid #aaa;
+    border-width: 1pt 0;
+    margin: 3pt;
+    border-collapse: collapse;
+}
+
 .table .table-header {
     background-color: #bbb;
     border: solid #aaa;
     border-width: 1pt 0;
+}
+
+.table.error .table-header {
+    background-color: #CAA;
 }
 
 table.table td, table.table th {

@@ -12,9 +12,9 @@ use CPath\Misc\RenderIndents as RI;
 
 class CPathDefaultTheme implements ITheme {
 
-    private $mIsHeader = false;
+    private $mIsHeader = false, $mIsException = false;
 
-    public function __construct() {
+    protected function __construct() {
     }
 
     /**
@@ -36,7 +36,8 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderFragmentStart(IRequest $Request, $Description=null)
     {
-        echo RI::ni(), "<div class='fragment'>";
+        $errClass = $this->mIsException ? ' error' : '';
+        echo RI::ni(), "<div class='fragment{$errClass}'>";
         echo RI::ai(1);
         if($Description) {
             echo RI::ni(), "<div class='fragment-title'>", Describable::get($Description)->getTitle(), "</div>";
@@ -64,7 +65,8 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderTableStart(IRequest $Request, $captionText = NULL)
     {
-        echo RI::ni(), "<table class='table'>";
+        $errClass = $this->mIsException ? ' error' : '';
+        echo RI::ni(), "<table class='table{$errClass}'>";
         if($captionText)
             echo RI::ni(1), "<caption><em>{$captionText}</em></caption>";
         RI::ai(1);
@@ -149,6 +151,76 @@ class CPathDefaultTheme implements ITheme {
     {
         RI::ai(-1);
         echo RI::ni(), "</table>";
+    }
+
+    /**
+     * Render the start of an html <body>.
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    function renderBodyStart(IRequest $Request)
+    {
+        $errClass = $this->mIsException ? ' error' : '';
+        echo RI::ni(), "<body>";
+        echo RI::ni(1), "<div class='page{$errClass}'>";
+        RI::ai(2);
+    }
+
+    /**
+     * Render the end of an html <body>.
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    function renderBodyEnd(IRequest $Request)
+    {
+        RI::ai(-2);
+        echo RI::ni(1), "</div>";
+        echo RI::ni(), "</body>";
+    }
+
+    /**
+     * Render the start of an html body section.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String|Null $className optional class name for this section
+     * @return void
+     */
+    function renderSectionStart(IRequest $Request, $className = NULL)
+    {
+        echo RI::ni();
+
+        echo '<div';
+
+        if($this->mIsException)
+            $className .= $className ? ' error' : 'error';
+
+        if($className)
+            echo " class='", $className, "'";
+
+        echo ">";
+
+        RI::ai(1);
+    }
+
+    /**
+     * Render the end of an html body section.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String|Null $className optional class name for this section
+     * @return void
+     */
+    function renderSectionEnd(IRequest $Request, $className = NULL)
+    {
+        RI::ai(-1);
+        echo RI::ni(), '</div>';
+    }
+
+    // Static
+
+    static function get() { return new static; }
+    static function getError() {
+        /** @var CPathDefaultTheme $inst */
+        $inst = new static;
+        $inst->mIsException = true;
+        return $inst;
     }
 }
 

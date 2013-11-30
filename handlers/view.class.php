@@ -17,6 +17,10 @@ abstract class View implements IView {
     const TAB = '    ';
     const TAB_START = 0;
 
+    const RESPONSE_CODE = 200;
+    const RESPONSE_MESSAGE = 'OK';
+    const RESPONSE_MIMETYPE = 'text/html';
+
     private $mHeadFields = array();
     private $mTarget, $mTheme, $mBasePath;
 
@@ -31,12 +35,22 @@ abstract class View implements IView {
         RI::si(static::TAB_START, static::TAB);
     }
 
+    protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
+        if(!headers_sent()) {
+            $message = preg_replace('/[^\w -]/', '', $message ?: static::RESPONSE_MESSAGE);
+            header("HTTP/1.1 " . ($code ?: static::RESPONSE_CODE) . " " . $message);
+            if(static::RESPONSE_MIMETYPE)
+                header("Content-Type: " . ($mimeType ?: static::RESPONSE_MIMETYPE));
+        }
+    }
+
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     final function render(IRequest $Request) {
+        $this->sendHeaders();
         $this->renderHtmlTagStart();
         RI::ai(1);
         $this->renderHead($Request);

@@ -44,11 +44,9 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
 
     protected function renderBodyHeader(IRequest $Request) {
-        echo RI::ni(), "<div class='header'>";
-        RI::ai(1);
+        $this->getTheme()->renderSectionStart($Request, 'header');
         $this->renderBodyHeaderContent($Request);
-        RI::ai(-1);
-        echo RI::ni(), "</div>";
+        $this->getTheme()->renderSectionEnd($Request);
     }
 
 
@@ -58,17 +56,13 @@ abstract class NavBarLayout extends View implements IRenderContent {
      * @return void
      */
     final function renderBody(IRequest $Request) {
-        echo RI::ni(), "<body>";
-        echo RI::ni(1), "<div class='page'>";
-        RI::ai(2);
+        $this->getTheme()->renderBodyStart($Request);
 
         $this->renderBodyHeader($Request);
         $this->renderBodyContent($Request);
         $this->renderBodyFooter($Request);
 
-        RI::ai(-2);
-        echo RI::ni(1), "</div>";
-        echo RI::ni(), "</body>";
+        $this->getTheme()->renderBodyEnd($Request);
     }
 
     /**
@@ -77,23 +71,21 @@ abstract class NavBarLayout extends View implements IRenderContent {
      * @return void
      */
     final protected function renderBodyContent(IRequest $Request) {
-        RI::ai(1);
-        echo RI::ni(-1), "<div class='navbar'>";
-            $this->renderNavBarContent($Request);
-        echo RI::ni(-1), "</div>";
-        echo RI::ni(-1), "<div class='content'>";
-            $this->renderViewContent($Request);
-        echo RI::ni(-1), "</div>";
-        RI::ai(-1);
+        $Theme = $this->getTheme();
+        $Theme->renderSectionStart($Request, 'navbar');
+        $this->renderNavBarContent($Request);
+        $Theme->renderSectionEnd($Request);
+
+        $Theme->renderSectionStart($Request, 'content');
+        $this->renderViewContent($Request);
+        $Theme->renderSectionEnd($Request);
     }
 
 
     protected function renderBodyFooter(IRequest $Request) {
-        echo RI::ni(), "<div class='footer'>";
-        RI::ai(1);
+        $this->getTheme()->renderSectionStart($Request, 'footer');
         $this->renderBodyFooterContent($Request);
-        RI::ai(-1);
-        echo RI::ni(), "</div>";
+        $this->getTheme()->renderSectionEnd($Request);
     }
 }
 

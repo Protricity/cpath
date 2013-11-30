@@ -7,5 +7,5 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
-interface ITheme extends IViewTheme, ITableTheme, IFragmentTheme{
+interface ITheme extends IViewTheme, ITableTheme, IFragmentTheme, IPageTheme{
 }

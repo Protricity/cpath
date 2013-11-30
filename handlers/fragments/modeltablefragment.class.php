@@ -15,7 +15,7 @@ class ModelTableFragment implements IHandler{
 
     public function __construct(PDOModel $Model, ITableTheme $Theme = null) {
         $this->mModel = $Model;
-        $this->mTheme = $Theme ?: new CPathDefaultTheme();
+        $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
 
     /**
@@ -26,8 +26,7 @@ class ModelTableFragment implements IHandler{
     function render(IRequest $Request)
     {
         $Model = $this->mModel;
-        $Theme = $this->mTheme;
-        $Util = new TableThemeUtil($Theme);
-        $Util->renderKeyPairsTable($Request, $Model->exportData(), 'Column', 'Value', Describable::get($Model)->getTitle());
+        $Util = new TableThemeUtil($Request, $this->mTheme);
+        $Util->renderKeyPairsTable($Model->exportData(), 'Column', 'Value', Describable::get($Model)->getTitle());
     }
 }

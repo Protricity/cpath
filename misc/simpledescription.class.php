@@ -8,6 +8,7 @@
  */
 namespace CPath\Misc;
 
+use CPath\Helpers\Strings;
 use CPath\Interfaces\IDescribable;
 
 class SimpleDescription implements IDescribable {
@@ -16,14 +17,17 @@ class SimpleDescription implements IDescribable {
 
     function __construct($object) {
         if(!is_object($object)) {
-            $this->mTitle = (String) $object;
         } else {
             if(method_exists($object, '__toString')) {
-                $this->mTitle = (String) $object;
             } else {
-                $this->mTitle = get_class($object);
+                $this->mDesc = get_class($object);
             }
         }
+
+        if(!$this->mDesc)
+            $this->mDesc = (String) $object;
+
+        $this->mTitle = Strings::truncate($this->mDesc, 128, '...', false);
     }
 
     /**
@@ -44,7 +48,7 @@ class SimpleDescription implements IDescribable {
      * Get the Object Description
      * @return String description for this Object
      */
-    function getDescription() { return $this->mDesc ?: $this->mTitle; }
+    function getDescription() { return $this->mDesc; }
 
     /**
      * Set the Object Description
