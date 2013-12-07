@@ -12,12 +12,17 @@ use CPath\Handlers\API;
 use CPath\Handlers\API\Interfaces\APIException;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IDescribable;
+use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Log;
 use CPath\Model\Response;
 
-class Install extends API implements IBuildable, IDescribable {
+class Install extends API implements IBuildable, IDescribable, IHandler {
+
+    const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
+    const ROUTE_METHODS = 'CLI';    // CLI only
+    const ROUTE_API_INFO = false;   // Add an APIInfo route entry for this API
 
     private $mNoPrompt = false;
 

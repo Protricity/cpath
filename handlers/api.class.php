@@ -33,7 +33,7 @@ use CPath\Model\Route;
 use CPath\Util;
 
 /**
- * Class APIHandler
+ * Class API
  * @package CPath
  *
  * Provides a Handler template for API calls
@@ -42,7 +42,7 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_INFO = ':api';           // Add an APIInfo route entry i.e. ':api' for this API on GET requests
+    const ROUTE_API_INFO = ':api';          // Add an APIInfo route entry i.e. ':api' for this API on GET requests
 
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
