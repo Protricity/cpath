@@ -154,6 +154,11 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
 
     // Statics
 
+    /**
+     * Internal method inserts an associative array into the database.
+     * Overwritten methods must include parent::insertRow($row);
+     * @param array $row
+     */
     protected static function insertRow(Array $row) {
         if(isset($row[static::COLUMN_PASSWORD]))
             $row[static::COLUMN_PASSWORD] = static::hashPassword($row[static::COLUMN_PASSWORD]);

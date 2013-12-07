@@ -122,12 +122,15 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
     /**
      * Initialize this class
      */
-    public static function init() {
+    final public static function init() {
         self::$mCache = Cache::get();
     }
 
-
-
+    /**
+     * Internal method inserts an associative array into the database.
+     * Overwritten methods must include parent::insertRow($row);
+     * @param array $row
+     */
     protected static function insertRow(Array $row) {
         if(isset($row[static::PRIMARY]))
             $id = $row[static::PRIMARY];
@@ -140,10 +143,24 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
         Log::u(get_called_class(), "Created " . static::modelName() . " '{$id}'");
     }
 
-    protected static function loadLastInsertModel() {
+    /**
+     * Load last inserted PDOModel for this class
+     * @return PDOModel
+     * @throws \InvalidArgumentException
+     */
+    final protected static function loadLastInsertModel() {
+        return static::loadByPrimaryKey(static::loadLastInsertID());
+    }
+
+    /**
+     * Load last insert ID
+     * @return int
+     * @throws \InvalidArgumentException
+     */
+    final protected static function loadLastInsertID() {
         if(!self::$mLastModelID)
             throw new \InvalidArgumentException("Model was not inserted");
-        return static::loadByPrimaryKey(self::$mLastModelID);
+        return self::$mLastModelID;
     }
 
     /**
@@ -153,7 +170,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * @throws ModelAlreadyExistsException
      * @throws ValidationException if a column fails to validate
      */
-    static function createAndLoad($row) {
+    final static function createAndLoad($row) {
         static::createFromArray($row);
         return static::loadLastInsertModel();
     }
@@ -165,7 +182,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * @throws ModelAlreadyExistsException
      * @throws ValidationException if a column fails to validate
      */
-    static function createOrLoad($row) {
+    final static function createOrLoad($row) {
         $Model = static::search()
             ->whereAll($row)
             ->fetch();
@@ -185,7 +202,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * @throws ModelNotFoundException if a model entry was not found
      * @throws \Exception if the model does not contain primary keys
      */
-    public static function loadByPrimaryKey($id, $throwIfNotFound=true) {
+    final static function loadByPrimaryKey($id, $throwIfNotFound=true) {
         if(static::CACHE_ENABLED
             && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
             return $Model;
@@ -208,7 +225,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * @throws \Exception
      * @throws \InvalidArgumentException if $id is invalid
      */
-    public static function removeByPrimary($id) {
+    final static function removeByPrimary($id) {
         if($id === NULL)
             throw new \InvalidArgumentException("Remove ID can not be NULL. Cannot Delete " . static::modelName());
         $c = static::delete()
@@ -226,7 +243,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * @param PDOModel $Model the model to remove
      * @throws \Exception if no primary key is identified for this model
      */
-    static function removeModel(PDOModel $Model) {
+    final static function removeModel(PDOModel $Model) {
         static::removeByPrimary($Model->{static::PRIMARY});
         Log::u(get_called_class(), "Deleted " . $Model);
     }

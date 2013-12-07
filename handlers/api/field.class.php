@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use Aws\DynamoDb\Exception\ValidationException;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\RequiredFieldException;
+use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;

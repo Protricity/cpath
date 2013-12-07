@@ -168,7 +168,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOColumn
      * @throws ColumnNotFoundException if the column was not found
      */
-    static function loadColumn($name) {
+    final static function loadColumn($name) {
         $cols = static::loadAllColumns();
         if(!isset($cols[$name]))
             throw new ColumnNotFoundException("Column '{$name}' could not be found in " . static::modelName());
@@ -181,7 +181,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOColumn[] associative array of $columns and config data
      * @throws \Exception if an invalid token was used
      */
-    static function findColumns($tokens) {
+    final static function findColumns($tokens) {
         if(is_int($tokens)) {
             $list = array();
             foreach(static::loadAllColumns() as $col => $data)
@@ -258,7 +258,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @throws \Exception|\PDOException
      * @throws ValidationException if a column fails to validate
      */
-    public static function createFromArray($row) {
+    final public static function createFromArray($row) {
         if($row instanceof IArrayObject)
             $row = $row->getDataPath();
 
@@ -295,11 +295,28 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @throws ModelAlreadyExistsException
      * @throws ValidationException if a column fails to validate
      */
-    public static function createAndFill($row) {
+    final public static function createAndFill($row) {
         static::createFromArray($row);
         $Model = new static();
         foreach($row as $k=>$v)
             $Model->$k = $v;
+        return $Model;
+    }
+
+    /**
+     * Creates a new Model based on the provided row of column value pairs and returns a new instance
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return PDOPrimaryKeyModel the created model instance
+     * @throws ModelAlreadyExistsException
+     * @throws ValidationException if a column fails to validate
+     */
+    final static function createOrFill($row) {
+        $Model = static::search()
+            ->whereAll($row)
+            ->fetch();
+        if($Model)
+            return $Model;
+        return static::createAndFill($row);
     }
 
     // Database methods
@@ -309,7 +326,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param $_selectArgs array|mixed an array or series of varargs of columns to select
      * @return PDOSelect
      */
-    static function select($_selectArgs=NULL) {
+    final static function select($_selectArgs=NULL) {
         $args = func_num_args() > 1 ? func_get_args() : (Array)$_selectArgs;
         return new PDOSelect(static::TABLE, static::getDB(), $args);
     }
@@ -327,7 +344,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if no columns were found
      */
-    static function selectByColumns($Select, $search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
+    final static function selectByColumns($Select, $search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
         if(!$Select instanceof PDOSelect)
             $Select = static::select($Select);
 
@@ -360,7 +377,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param $_insertArgs array|mixed an array or series of varargs of columns to insert
      * @return PDOInsert
      */
-    static function insert($_insertArgs) {
+    final static function insert($_insertArgs) {
         $DB = static::getDB();
         $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_insertArgs));
         return $DB->insert(static::TABLE, $args);
@@ -371,7 +388,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param $_columnArgs array|mixed an array or series of varargs of columns to be updated
      * @return PDOUpdate
      */
-    static function update($_columnArgs) {
+    final static function update($_columnArgs) {
         $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_columnArgs));
         return new PDOUpdate(static::TABLE, static::getDB(), $args);
     }
@@ -380,7 +397,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Create a PDODelete object for this table
      * @return PDODelete
      */
-    static function delete() {
+    final static function delete() {
         return new PDODelete(static::TABLE, static::getDB());
     }
 
@@ -395,11 +412,12 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    public static function loadByColumns($search, $columns=NULL, $throwIfNotFound=true, $logic='OR') {
+    final public static function loadByColumns($search, $columns=NULL, $throwIfNotFound=true, $logic='OR') {
         $Model = static::searchByColumns($search, $columns, 1, $logic)
             ->fetch();
-        if(!$Model && $throwIfNotFound)
+        if(!$Model && $throwIfNotFound) {
             throw new ModelNotFoundException(static::modelName() . " '{$search}' was not found");
+        }
         return $Model;
     }
 
@@ -407,7 +425,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Creates a PDOModelSelect for searching models.
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    public static function search() {
+    final public static function search() {
         return new PDOModelSelect(static::getDB(), get_called_class());
     }
 
@@ -423,7 +441,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if no columns were found
      */
-    public static function searchByColumns($search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
+    final public static function searchByColumns($search, $columns=NULL, $limit=1, $logic='OR', $compare=NULL) {
         return static::selectByColumns(static::search(), $search, $columns, $limit, $logic, $compare);
     }
 
