@@ -72,18 +72,35 @@ PHP;
             $sql = file_get_contents($schemaFolder.'/'.$schema);
             if(!$sql)
                 throw new UpgradeException("Invalid SQL in ".$schema);
-            $id = rand(1,99);
-            $DB->exec("SET @_cpath_dump_complete=-1");
-            $sql .= "SET @_cpath_dump_complete=" . $id . ";\n";
+
+            $statusTable = '__cpath_dump_complete_' . rand(1,99);
+            $sql .= "\nCREATE TABLE $statusTable (status int);\nINSERT INTO $statusTable (status) VALUES (1)";
             //$sql = "\nSET @_cpath_dump_complete = " . ($id-1) . ";\n" . $sql;
             $DB->exec($sql);
-            $id2 = $DB->query("SELECT @_cpath_dump_complete;")->fetchColumn(0);
-            if($id != $id2)
-                throw new BuildException("FATAL ERROR: Database dump failed (id mismatch {$id} != {$id2}). Please check your schema sql syntax");
+            $status = $DB->query("SELECT status from $statusTable;")->fetchColumn(0);
+            if(!$status)
+                throw new BuildException("FATAL ERROR: Database dump failed (Status table was not created). Please check your schema sql syntax");
 
-            Log::v2(__CLASS__, "DB ID Result: {$id} == {$id2}" );
+            $DB->exec("DROP TABLE $statusTable;");
+
+            Log::v2(__CLASS__, "DB ID Result: $status" );
 
             $DB->setDBVersion($v);
+
+
+
+//            $id = rand(1,99);
+//            $DB->exec("SET @_cpath_dump_complete=-1");
+//            $sql .= "SET @_cpath_dump_complete=" . $id . ";\n";
+//            //$sql = "\nSET @_cpath_dump_complete = " . ($id-1) . ";\n" . $sql;
+//            $DB->exec($sql);
+//            $id2 = $DB->query("SELECT @_cpath_dump_complete;")->fetchColumn(0);
+//            if($id != $id2)
+//                throw new BuildException("FATAL ERROR: Database dump failed (id mismatch {$id} != {$id2}). Please check your schema sql syntax");
+//
+//            Log::v2(__CLASS__, "DB ID Result: {$id} == {$id2}" );
+//
+//            $DB->setDBVersion($v);
         }
         Log::v(__CLASS__, "Upgraded Database from version $oldVersion to $curVersion.");
     }
