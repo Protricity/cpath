@@ -1,6 +1,7 @@
 <?php
 namespace CPath\Handlers;
 
+use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
@@ -22,17 +23,23 @@ abstract class View implements IView {
     const RESPONSE_MIMETYPE = 'text/html';
 
     private $mHeadFields = array();
-    private $mTarget, $mTheme, $mBasePath;
+    private $mTheme, $mBasePath;
 
-    public function __construct($Target, ITheme $Theme) {
-        $this->mTarget = $Target;
+    public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
         $this->mBasePath = Config::getDomainPath();
         $this->setupHeadFields();
-        if($Theme)
-            $Theme->setupView($this);
+
+        $Theme->setupView($this);
 
         RI::si(static::TAB_START, static::TAB);
+    }
+
+    protected function setupHeadFields() {
+        $basePath = Base::getClassPublicPath(__CLASS__, false);
+        $this->addHeadHTML("<base href='{$this->mBasePath}' />", self::FIELD_BASE);
+        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', self::FIELD_SCRIPT_JQUERY);
+        $this->addHeadScript($basePath . 'assets/cpath.js');
     }
 
     protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
@@ -75,16 +82,6 @@ abstract class View implements IView {
 
     protected function renderHtmlTagEnd() {
         echo RI::ni(), '</html>';
-    }
-
-    protected function setupHeadFields() {
-        $this->mHeadFields[self::FIELD_TITLE] = "<title>" . Describable::get($this->mTarget)->getTitle() . "</title>";NULL;
-        $this->mHeadFields[self::FIELD_BASE] = "<base href='{$this->mBasePath}' />";
-        $this->mHeadFields[self::FIELD_SCRIPT_JQUERY] = "<script src='https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js'></script>";
-    }
-
-    function getTarget() {
-        return $this->mTarget;
     }
 
     function getTheme() {

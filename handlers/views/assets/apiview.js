@@ -19,9 +19,9 @@
 
         var content = responseContent.text();
         if(content)
-            APIInfo.setPrettyJSON(content, responseContent);
+            APIView.setPrettyJSON(content, responseContent);
     });
-    window.APIInfo = THIS = {
+    window.APIView = THIS = {
         accepts: '*/*',
         setPrettyJSON: function(json, elm) {
             try {

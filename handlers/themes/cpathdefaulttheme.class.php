@@ -26,6 +26,7 @@ class CPathDefaultTheme implements ITheme {
     {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
         $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css');
+        $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js');
     }
 
     /**
@@ -161,7 +162,7 @@ class CPathDefaultTheme implements ITheme {
     function renderBodyStart(IRequest $Request)
     {
         $errClass = $this->mIsException ? ' error' : '';
-        echo RI::ni(), "<body>";
+        echo RI::ni(), "<body class='narrow'>";
         echo RI::ni(1), "<div class='page{$errClass}'>";
         RI::ai(2);
     }

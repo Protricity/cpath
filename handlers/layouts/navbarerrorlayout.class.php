@@ -1,13 +1,10 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
-use CPath\Base;
-use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Handlers\View;
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IRequest;
-use CPath\Misc\RenderIndents as RI;
 
 abstract class NavBarErrorLayout extends NavBarLayout {
 
@@ -16,9 +13,19 @@ abstract class NavBarErrorLayout extends NavBarLayout {
 
     private $mException;
     public function __construct(\Exception $Exception, ITheme $Theme) {
-        parent::__construct($Exception, $Theme);
+        parent::__construct($Theme);
         $this->mException = $Exception;
     }
+
+    public function getException() {
+        return $this->mException;
+    }
+
+    protected function setupHeadFields() {
+        $this->addHeadHTML("<title>" . Describable::get($this->mException)->getTitle() . "</title>", self::FIELD_TITLE);
+        parent::setupHeadFields();
+    }
+
 
     /**
      * Render the main view content

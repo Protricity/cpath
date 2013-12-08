@@ -16,7 +16,7 @@ use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
-use CPath\Handlers\Views\APIInfo;
+use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
@@ -42,7 +42,7 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_INFO = ':api';          // Add an APIInfo route entry i.e. ':api' for this API on GET requests
+    const ROUTE_API_VIEW = ':api';          // Add an APIView route entry i.e. ':api' for this API on GET requests
 
     const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
@@ -163,7 +163,7 @@ abstract class API implements IAPI {
         $Response = null;
         //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
         //    $Response = $this->execute($Request);
-        $Render = new APIInfo();
+        $Render = new APIView();
         $Render->renderAPI($this, $Request->getRoute(), $Request, $Response);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
@@ -440,10 +440,10 @@ abstract class API implements IAPI {
     public function getAllRoutes(IRouteBuilder $Builder) {
         $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
         $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
-        if(static::ROUTE_API_INFO) {
-            $token = static::ROUTE_API_INFO;
-            $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIInfo()), get_called_class());
-            $routes['POST ' . $token] = new Route('POST ' . $path . '/' . $token, get_class(new APIInfo()), get_called_class());
+        if(static::ROUTE_API_VIEW) {
+            $token = static::ROUTE_API_VIEW;
+            $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
+            $routes['POST ' . $token] = new Route('POST ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
             // TODO: wildcard methods
         }
         return $routes;

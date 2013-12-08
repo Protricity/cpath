@@ -28,12 +28,6 @@ interface IView extends IHandler {
     function renderHead(IRequest $Request);
 
     /**
-     * Return the view target object
-     * @return mixed
-     */
-    function getTarget();
-
-    /**
      * Return the view theme or null if none exists
      * @return mixed
      */

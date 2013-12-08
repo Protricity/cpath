@@ -162,7 +162,7 @@ class Field implements IField {
         if(!isset($attr['value']))
             $attr['value'] = $value;
         if(!isset($attr['placeholder']))
-            $attr['placeholder'] = "Enter value for " . $this->getName();
+            $attr['placeholder'] = $this->getName() . ' value';
 
         echo RI::ni(), "<input";
         foreach($attr as $key=>$val)

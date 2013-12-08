@@ -22,7 +22,7 @@ class Install extends API implements IBuildable, IDescribable, IHandler {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
     const ROUTE_METHODS = 'CLI';    // CLI only
-    const ROUTE_API_INFO = false;   // Add an APIInfo route entry for this API
+    const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
 
     private $mNoPrompt = false;
 

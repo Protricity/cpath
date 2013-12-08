@@ -1,0 +1,97 @@
+
+.field-table {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font: 11px Arial, Helvetica, Geneva, sans-serif;
+    clear: both;
+}
+
+body.wide .field-table { width: 1000px; }
+body.narrow .field-table { width: 620px; }
+body.mobile .field-table { width: 320px; }
+
+body.wide .field-table, body.wide .field-table input { font-size: 8pt; }
+body.narrow .field-table, body.narrow .field-table input { font-size: 7pt; }
+body.mobile .field-table, body.mobile .field-table input { font-size: 6pt; }
+
+.field-table li {
+    overflow: hidden;
+}
+
+.field-table li div {
+    display: inline-block;
+    float: left;
+    border-bottom: 1px solid #ccc;
+    border-right: 1px solid #ccc;
+    padding: 3px 5px;
+    overflow-y: auto;
+    text-overflow: clip;
+}
+
+.field-table li.field-item div {
+    background-color: #fff;
+}
+
+.field-table li.field-header div, .field-table li.field-footer div{
+    background-color: #ccc;
+    font-weight: bold;
+    cursor: default;
+}
+
+/* APIView */
+
+.field-table div.field-num { width: 10px; border-left: 1px solid #ccc; }
+
+.field-table div.field-required { width: 40px; }
+body.mobile .field-table div.field-required {  display: none;  }
+
+.field-table div.field-name { width: 80px; }
+
+body.wide .field-table div.field-description {  width: 600px;  }
+body.narrow .field-table div.field-description {  width: 200px;  }
+body.mobile .field-table div.field-description {  width: 196px; float: right;  }
+body.mobile .field-table .field-item div.field-description { min-height: 31px; }
+
+.field-table div.field-input { width: 160px; }
+body.mobile .field-table div.field-input { display: none; width: 102px; }
+body.mobile .field-table .field-item div.field-input { display: block; }
+
+.field-table div.field-input input { margin: 0; padding: 0; border: 0; }
+.field-table div.field-input select { margin: 0; padding: 0; border: 0; height: 14px; }
+.field-table li.field-item div.field-input { overflow: hidden;  }
+
+
+/* HandlerSetView */
+
+.navbar-menu
+{
+    margin: 0px;
+    padding: 0px;
+    list-style-type: none;
+}
+
+.navbar-menu a
+{
+    display: block;
+    width: 8em;
+    background-color: #DDD;
+    text-decoration: none;
+    text-align: center;
+}
+
+.navbar-menu a:hover
+{
+    background-color: #CCC;
+}
+
+.field-table div.field-prefix { width: 10%; min-width: 200px; }
+.field-table div.field-destination { width: 30%; min-width: 180px;  }
+
+
+.response-content, .response-headers, .request-headers {
+    font: 10px Courier New, Courier New, monospace;
+    white-space: pre;
+    overflow: hidden;
+    word-wrap: break-word;
+}
