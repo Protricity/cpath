@@ -20,79 +20,43 @@ class TableThemeUtil {
         $this->mTheme = $Theme;
     }
 
-    public function renderStart($captionText=null) {
-        $this->mTheme->renderTableStart($this->mRequest, $captionText);
-        $this->mLastElm = 'table';
-    }
-
-    public function renderEnd() {
-        switch($this->mLastElm) {
-            case 'table':
-                $this->mTheme->renderTableEnd($this->mRequest);
-                break;
-            case 'tr':
-                $this->mTheme->renderTableRowEnd($this->mRequest);
-                $this->mTheme->renderTableEnd($this->mRequest);
-                break;
-            case 'td':
-                $this->mTheme->renderTableDataEnd($this->mRequest);
-                $this->mTheme->renderTableRowEnd($this->mRequest);
-                $this->mTheme->renderTableEnd($this->mRequest);
-                break;
-            case 'done':
-            case 'none':
-                break;
-        }
-        $this->mLastElm = 'done';
-    }
-
     /**
      * @param String|Callable $content
      * @param int $span
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      */
-    public function renderTD($content, $span=0) {
-        switch($this->mLastElm) {
-            case 'table':
-                $this->mTheme->renderTableRowStart($this->mRequest);
-                break;
-            case 'tr': break;
-            case 'td': break;
-            case 'none':
-                $this->mTheme->renderTableStart($this->mRequest);
-                $this->mTheme->renderTableRowStart($this->mRequest);
-                break;
-        }
-        $this->mTheme->renderTableDataStart($this->mRequest, $span);
-        echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
-        $this->mTheme->renderTableDataEnd($this->mRequest);
-        $this->mLastElm = 'tr';
+    public function renderTD($content, $span=0, $class=null, $attr=null) {
+        $this->renderDataStart($span, $class, $attr);
+        if($content)
+            echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
+        $this->renderDataEnd();
     }
 
-    public function renderTR(Array $rowContent, $isHeader=false) {
+    public function renderTR(Array $rowContent, $rowFlags=0) {
         switch($this->mLastElm) {
             case 'table':
-                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
+                $this->renderRowStart($rowFlags);
                 break;
             case 'tr':
-                $this->mTheme->renderTableRowEnd($this->mRequest);
-                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
+                $this->renderRowEnd();
+                $this->renderRowStart($rowFlags);
                 break;
             case 'td':
-                $this->mTheme->renderTableDataEnd($this->mRequest);
-                $this->mTheme->renderTableRowEnd($this->mRequest);
-                $this->mTheme->renderTableRowStart($this->mRequest, $isHeader);
+                $this->renderDataEnd();
+                $this->renderRowEnd();
+                $this->renderRowStart($rowFlags);
                 break;
             default:
-                $this->mTheme->renderTableStart($this->mRequest);
-                $this->mTheme->renderTableRowStart($this->mRequest);
+                $this->renderStart();
+                $this->renderRowStart();
         }
         foreach($rowContent as $content) {
-            $this->mTheme->renderTableDataStart($this->mRequest);
+            $this->renderDataStart();
             echo RI::ni(), $content;
-            $this->mTheme->renderTableDataEnd($this->mRequest);
+            $this->renderDataEnd();
         }
-        $this->mTheme->renderTableRowEnd($this->mRequest);
-        $this->mLastElm = 'table';
+        $this->renderRowEnd();
     }
 
     public function renderKeyPairsTable(Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {
@@ -103,4 +67,185 @@ class TableThemeUtil {
         }
         $this->renderEnd();
     }
+
+    /**
+     * Render the start of a table header row.
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderHeaderStart($class = null, $attr = null) {
+        $this->renderRowStart(ITableTheme::FLAG_ROW_IS_HEADER, $class, $attr);
+    }
+
+    /**
+     * Render the start of a table footer row.
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderFooterStart($class = null, $attr = null) {
+        $this->renderRowStart(ITableTheme::FLAG_ROW_IS_FOOTER, $class, $attr);
+    }
+
+//    /**
+//     * Render the end of a table header row.
+//     * @return void
+//     */
+//    function renderHeaderEnd() {
+//        $this->renderRowEnd();
+//    }
+
+
+    // ITableTheme
+
+    /**
+     * Render the start of a table.
+     * @param String|NULL $captionText text that should appear in the table caption
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderStart($captionText = NULL, $class = null, $attr = null) {
+        switch($this->mLastElm) {
+            case 'table':
+                $this->renderEnd();
+                break;
+            case 'tr':
+                $this->renderRowEnd();
+                $this->renderEnd();
+                break;
+            case 'td':
+                $this->renderDataEnd();
+                $this->renderRowEnd();
+                $this->renderEnd();
+                break;
+            case 'none': break;
+        }
+        $this->mTheme->renderTableStart($this->mRequest, $captionText, $class, $attr);
+        $this->mLastElm = 'table';
+    }
+
+    /**
+     * Render the start of a table row.
+     * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderRowStart($flags = 0, $class = null, $attr = null) {
+        switch($this->mLastElm) {
+            case 'table': break;
+            case 'tr':
+                $this->renderRowEnd();
+                break;
+            case 'td':
+                $this->renderDataEnd();
+                $this->renderRowEnd();
+                break;
+            case 'none':
+                $this->renderStart();
+                break;
+        }
+        $this->mTheme->renderTableRowStart($this->mRequest, $flags, $class, $attr);
+        $this->mLastElm = 'tr';
+    }
+
+    /**
+     * Render the start of a table data element.
+     * @param int $span set span attribute
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderDataStart($span = 0, $class = null, $attr = null) {
+        switch($this->mLastElm) {
+            case 'table':
+                $this->renderRowStart();
+                break;
+            case 'tr': break;
+            case 'td':
+                $this->renderRowEnd();
+                break;
+            case 'none':
+                $this->renderStart();
+                $this->renderRowStart();
+                break;
+        }
+        $this->mTheme->renderTableDataStart($this->mRequest, $span, $class, $attr);
+        $this->mLastElm = 'td';
+    }
+
+    /**
+     * Render the end of a table data element.
+     * @return void
+     */
+    function renderDataEnd() {
+        switch($this->mLastElm) {
+            case 'table':
+                $this->renderRowStart();
+                $this->renderDataStart();
+                break;
+            case 'tr':
+                $this->renderDataStart();
+                break;
+            case 'td': break;
+            case 'none':
+                $this->renderStart();
+                $this->renderRowStart();
+                $this->renderDataStart();
+                break;
+        }
+        $this->mTheme->renderTableDataEnd($this->mRequest);
+        $this->mLastElm = 'tr';
+    }
+
+    /**
+     * Render the start of a table data element.
+     * @return void
+     */
+    function renderRowEnd() {
+        switch($this->mLastElm) {
+            case 'table':
+                $this->renderRowStart();
+                break;
+            case 'tr': break;
+            case 'td':
+                $this->renderDataEnd();
+                break;
+            case 'none':
+                $this->renderStart();
+                $this->renderRowStart();
+                break;
+        }
+        $this->mTheme->renderTableRowEnd($this->mRequest);
+        $this->mLastElm = 'table';
+    }
+
+
+
+    /**
+     * Render the end of a table.
+     * @param String|NULL $footerText text that should appear in the footer
+     * @return void
+     */
+    function renderEnd($footerText = NULL) {
+        switch($this->mLastElm) {
+            case 'table': break;
+            case 'tr':
+                $this->renderRowEnd();
+                break;
+            case 'td':
+                $this->renderDataEnd();
+                $this->renderRowEnd();
+                break;
+            case 'none':
+                $this->renderStart();
+                break;
+        }
+        $this->mTheme->renderTableEnd($this->mRequest, $footerText);
+        $this->mLastElm = 'none';
+    }
+
+
 }

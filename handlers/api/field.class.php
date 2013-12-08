@@ -167,6 +167,6 @@ class Field implements IField {
         echo RI::ni(), "<input";
         foreach($attr as $key=>$val)
             echo " $key='$val'";
-        echo RI::ni(), "/>";
+        echo "/>";
     }
 }

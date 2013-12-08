@@ -3,6 +3,7 @@ namespace CPath\Handlers\Themes;
 
 use CPath\Base;
 use CPath\Handlers\Interfaces\IView;
+use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
@@ -12,7 +13,7 @@ use CPath\Misc\RenderIndents as RI;
 
 class CPathDefaultTheme implements ITheme {
 
-    private $mIsHeader = false, $mIsException = false;
+    private $mRowFlags=0, $mRowBody = null, $mIsException = false;
 
     protected function __construct() {
     }
@@ -62,12 +63,21 @@ class CPathDefaultTheme implements ITheme {
      * Render the start of a table.
      * @param IRequest $Request the IRequest instance for this render
      * @param String|NULL $captionText text that should appear in the table caption
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableStart(IRequest $Request, $captionText = NULL)
+    function renderTableStart(IRequest $Request, $captionText = NULL, $class=null, $attr=null)
     {
-        $errClass = $this->mIsException ? ' error' : '';
-        echo RI::ni(), "<table class='table{$errClass}'>";
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
+
+        $class = 'table' . ($class ? ' ' : '') . $class;
+
+        if($this->mIsException)
+            $class .= ' error';
+
+        echo RI::ni(), "<table", $attr ? ' '.$attr : '', " class='{$class}'", ">";
         if($captionText)
             echo RI::ni(1), "<caption><em>{$captionText}</em></caption>";
         RI::ai(1);
@@ -76,20 +86,37 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
-     * @param bool $isHeader set true if this row is a <th>
+     * @param int $rowFlags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $isHeader=false)
+    function renderTableRowStart(IRequest $Request, $rowFlags=0, $class=null, $attr=null)
     {
-        $this->mIsHeader = $isHeader;
+        $this->mRowFlags = $rowFlags;
 
-        echo RI::ni(), "<tr";
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
 
-        if($isHeader)
-            echo " class='table-header'";
+        if($rowFlags & ITableTheme::FLAG_ROW_IS_HEADER)
+                $body = 'thead';
+        elseif($rowFlags & ITableTheme::FLAG_ROW_IS_FOOTER)
+            $body = 'tfoot';
+        else
+            $body = 'tbody';
 
-        echo ">";
+        if($this->mRowBody != $body) {
+            if($this->mRowBody) {
+                RI::ai(-1);
+                echo RI::ni(), "</", $this->mRowBody, ">";
+            }
+            echo RI::ni(), "<", $body, ">";
+            RI::ai(1);
 
+        }
+        $this->mRowBody = $body;
+
+        echo RI::ni(), "<tr", $attr ? ' '.$attr : '', $class ? ' class=\''.$class.'\'' : '', ">";
         RI::ai(1);
     }
 
@@ -97,20 +124,23 @@ class CPathDefaultTheme implements ITheme {
      * Render the start of a table data element.
      * @param IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableDataStart(IRequest $Request, $span=0)
+    function renderTableDataStart(IRequest $Request, $span=0, $class=null, $attr=null)
     {
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
+        if($span)               $attr .= ($attr ? ' ' : '') . "colspan='{$span}'";
+
         echo RI::ni();
-        if($this->mIsHeader)
+        if($this->mRowFlags && (ITableTheme::FLAG_ROW_IS_HEADER | ITableTheme::FLAG_ROW_IS_FOOTER))
             echo '<th';
         else
             echo '<td';
 
-        if($span)
-            echo " rowspan='{$span}'";
-
-        echo '>';
+        echo $attr ? ' '.$attr : '', $class ? ' class=\''.$class.'\'' : '', ">";
 
         RI::ai(1);
     }
@@ -125,7 +155,7 @@ class CPathDefaultTheme implements ITheme {
         RI::ai(-1);
         echo RI::ni();
 
-        if($this->mIsHeader)
+        if($this->mRowFlags && (ITableTheme::FLAG_ROW_IS_HEADER | ITableTheme::FLAG_ROW_IS_FOOTER))
             echo "</th>";
         else
             echo "</td>";
@@ -140,6 +170,7 @@ class CPathDefaultTheme implements ITheme {
     {
         RI::ai(-1);
         echo RI::ni(), "</tr>";
+        $this->mRowFlags = 0;
     }
 
     /**
@@ -150,6 +181,12 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderTableEnd(IRequest $Request, $footerText = NULL)
     {
+        if($this->mRowBody) {
+            RI::ai(-1);
+            echo RI::ni(), "</", $this->mRowBody, ">";
+        }
+        $this->mRowBody = null;
+
         RI::ai(-1);
         echo RI::ni(), "</table>";
     }

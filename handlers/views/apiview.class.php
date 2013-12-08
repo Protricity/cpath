@@ -11,6 +11,7 @@ use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Layouts\PageLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
+use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
@@ -111,96 +112,90 @@ class APIView extends NavBarLayout implements ILogListener {
 
         $fields = $API->getFields();
 
-        RI::get()->setIndent(0, "    ");
-        ?>
-        <h3>Params:</h3>
-        <form class="field-form" method="POST" enctype="multipart/form-data">
-            <ul class='field-table'>
-                <li class='field-header clearfix'>
-                    <div class='field-num'>#</div>
-                    <div class='field-required'>Req'd</div>
-                    <div class='field-name'>Name</div>
-                    <div class='field-description'>Description</div>
-                    <div class='field-input'>Test</div>
-                </li>
-                <?php if(!$fields) { ?>
-                <li class='field-item clearfix'>
-                    <div class='field-num'>&nbsp;</div>
-                    <div class='field-required'>&nbsp;</div>
-                    <div class='field-name'>&nbsp;</div>
-                    <div class='field-description'>No Fields in this API</div>
-                    <div class='field-input'>&nbsp;</div>
-                </li>
-                <?php } else foreach($fields as $name=>$Field) { echo "\n"; ?>
-                <li class='field-item clearfix'>
-                    <div class='field-num'><?php echo $num++; ?>.</div>
-                    <div class='field-required'><?php echo $Field->isRequired() ? 'yes' : '&nbsp;'; ?></div>
-                    <div class='field-name'><?php echo $name; ?></div>
-                    <div class='field-description'><?php echo Describable::get($Field)->getDescription(); ?></div>
-                    <div class='field-input'><?php
-                            RI::si(5);
-                            $Field->render($Request);
-                            echo "\n"; ?>
-                    </div>
-                </li><?php } echo "\n"; ?>
-                <li class='field-footer clearfix'>
-                    <div class='field-num'></div>
-                    <div class='field-required'></div>
-                    <div class='field-name'></div>
-                    <div class='field-description'></div>
-                    <div class='field-input'></div>
-                </li>
-                <li class='field-footer-buttons'>
-                    <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-                    <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
-                    <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
-                    <input type="submit" value="POST"/>
-                    <input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
-                    <span id="spanCustom" style="display: none">
-                        <label>Accepts:
-                            <input  id="txtCustomText" type="text" value="*/*" size="4" />
-                        </label>
-                        <label>Method:
-                            <input id="txtCustomMethod" type="text" value="GET" size="4" />
-                        </label>
-                    </span>
-                    <input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
-                    <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
-                </li>
-            </ul>
-            <div>
-            </div>
-        </form>
-        <div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
-            <h3>Response</h3>
-            <div class='response-content'>
-                <?php
-                if($Response) {
-                    try{
-                        $JSON = Util::toJSON($Response);
-                        echo json_encode($JSON);
-                    } catch (\Exception $ex) {
-                        $Response = new ExceptionResponse($ex);
-                        $JSON = Util::toJSON($Response);
-                        echo json_encode($JSON);
-                    }
-                }
-                ?>
-            </div>
-            <h3>Response Headers</h3>
-            <div class='response-headers'></div>
-            <h3>Request Headers</h3>
-            <div class='request-headers'></div>
-        </div>
-    <?php if(false && Config::$Debug) { ?>
-        <h3>Debug</h3>
-        <table><?php
-            /** @var ILogEntry $log */
-            //foreach($this->mLog as $log)
-            //    echo "<tr><td>",$log->getTag(),"</td><td style='white-space: pre'>{$log}</td></tr>";
+        $Table = new TableThemeUtil($Request, $this->getTheme());
 
-            ?></table>
-    <?php } echo "\n";
+        echo RI::ni(), "<form class='apiview-form' method='POST' enctype='multipart/form-data'>";
+        RI::ai(1);
+
+            $Table->renderStart(Describable::get($API)->getDescription(), 'apiview-table');
+                $Table->renderHeaderStart();
+                    $Table->renderTD('#',           0, 'table-field-num');
+                    $Table->renderTD('Req\'d',      0, 'table-field-required');
+                    $Table->renderTD('Name',        0, 'table-field-name');
+                    $Table->renderTD('Description', 0, 'table-field-description');
+                    $Table->renderTD('Test',        0, 'table-field-input');
+            if(!$fields) {
+                $Table->renderRowStart();
+                    $Table->renderTD('&nbsp;',      0, 'table-field-num');
+                    $Table->renderTD('&nbsp;',      0, 'table-field-required');
+                    $Table->renderTD('&nbsp;',      0, 'table-field-name');
+                    $Table->renderTD('&nbsp;',      0, 'table-field-description');
+                    $Table->renderTD('&nbsp;',      0, 'table-field-input');
+            } else foreach($fields as $name=>$Field) {
+                $req = $Field->isRequired() ? 'yes' : '&nbsp;';
+                $desc = Describable::get($Field)->getDescription();;
+
+                $Table->renderRowStart();
+                $Table->renderTD($num++,    0, 'table-field-num');
+                $Table->renderTD($req,      0, 'table-field-required');
+                $Table->renderTD($name,     0, 'table-field-name');
+                $Table->renderTD($desc,     0, 'table-field-description');
+                $Table->renderDataStart(    0, 'table-field-input');
+                    $Field->render($Request);
+            }
+    //        $Table->renderFooterStart();
+    //            $Table->renderTD('', 0, 'table-field-num');
+    //            $Table->renderTD('', 0, 'table-field-required');
+    //            $Table->renderTD('', 0, 'table-field-name');
+    //            $Table->renderTD('', 0, 'table-field-description');
+    //            $Table->renderTD('', 0, 'table-field-input');
+
+            $Table->renderFooterStart();
+                $Table->renderDataStart(5, 'table-field-footer-buttons', "style='text-align: left'");
+            ?>
+
+                                    <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+                                    <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
+                                    <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
+                                    <input type="submit" value="POST"/>
+                                    <input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
+                                    <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
+                                    <input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
+                                    <span id="spanCustom" style="display: none">
+                                        <label>Accepts:
+                                            <input  id="txtCustomText" type="text" value="*/*" size="4" />
+                                        </label>
+                                        <label>Method:
+                                            <input id="txtCustomMethod" type="text" value="GET" size="4" />
+                                        </label>
+                                    </span>
+            <?php
+            $Table->renderEnd();
+
+        RI::ai(-1);
+        echo RI::ni(), "</form>";
+        RI::ni();
+                    ?><div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
+                        <h3>Response</h3>
+                        <div class='response-content'>
+                            <?php
+                            if($Response) {
+                                try{
+                                    $JSON = Util::toJSON($Response);
+                                    echo json_encode($JSON);
+                                } catch (\Exception $ex) {
+                                    $Response = new ExceptionResponse($ex);
+                                    $JSON = Util::toJSON($Response);
+                                    echo json_encode($JSON);
+                                }
+                            }
+                            ?>
+                        </div>
+                        <h3>Response Headers</h3>
+                        <div class='response-headers'></div>
+                        <h3>Request Headers</h3>
+                        <div class='request-headers'></div>
+                    </div><?php
     }
 
     /**
@@ -215,8 +210,6 @@ class APIView extends NavBarLayout implements ILogListener {
         $route = $Route->getPrefix();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
-        if(!empty($_SERVER['HTTP_REFERER']))
-            echo RI::ni(), "<h4><a href=", $_SERVER['HTTP_REFERER'], ">Go Back</a></h4>";
     }
 
     /**

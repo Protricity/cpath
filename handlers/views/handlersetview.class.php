@@ -7,9 +7,9 @@ use CPath\Config;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\InvalidRouteException;
 use CPath\Handlers\Layouts\NavBarLayout;
-use CPath\Handlers\Layouts\PageLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
+use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
@@ -17,7 +17,7 @@ use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
 use CPath\Log;
-use CPath\Misc\RenderIndents;
+use CPath\Misc\RenderIndents as RI;
 
 class HandlerSetView extends NavBarLayout implements ILogListener {
 
@@ -69,33 +69,32 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
 
         $num = 1;
 
-        RenderIndents::ni();
-        ?>
-    <ul class='field-table'>
-        <li class='field-header clearfix'>
-            <div class='field-num'>#</div>
-            <div class='field-prefix'>Route</div>
-            <div class='field-description'>Description</div>
-            <div class='field-destination'>Destination</div>
-        </li><?php foreach($this->mHandlers as $route => $Handler) {
+        $Table = new TableThemeUtil($Request, $this->getTheme());
+
+        $Table->renderStart("Endpoints", 'handlersetview-table');
+        $Table->renderHeaderStart();
+        $Table->renderTD('#',           0, 'table-field-num');
+        $Table->renderTD('Route',       0, 'table-field-route');
+        $Table->renderTD('Description', 0, 'table-field-description');
+        $Table->renderTD('Destination', 0, 'table-field-destination');
+        foreach($this->mHandlers as $route => $Handler) {
             $description = "No Description";
             try{
                 $description = Describable::get($Handler)->getDescription();
             } catch (InvalidRouteException $ex) {}
-            echo "\n"; ?>
-        <li class='field-item clearfix'>
-            <div class='field-num'><?php echo $num++; ?>.</div>
-            <div class='field-prefix'><a href='<?php echo $infoPath . $this->mHandlerIDs[$route]. '#' . $route; ?>'><?php echo $routes[$route]->getPrefix(); ?></a></div>
-            <div class='field-description'><?php echo $description; ?></div>
-            <div class='field-destination'><?php echo $routes[$route]->getDestination(); ?></div>
-        </li><?php } echo "\n"; ?>
-        <li class='field-footer clearfix'>
-            <div class='field-num'></div>
-            <div class='field-prefix'></div>
-            <div class='field-description'></div>
-            <div class='field-destination'></div>
-        </li>
-    </ul><?php
+
+            $url = "<a href='{$infoPath}{$this->mHandlerIDs[$route]}'#'{$route}'>{$routes[$route]->getPrefix()}</a>";
+            $destination = $routes[$route]->getDestination();
+            $Table->renderRowStart();
+            $Table->renderTD($num++,      0, 'table-field-num');
+            $Table->renderTD($url,      0, 'table-field-required');
+            $Table->renderTD($description,      0, 'table-field-name');
+            $Table->renderTD($destination,      0, 'table-field-description');
+        }
+
+        $Table->renderFooterStart();
+        $Table->renderDataStart(5, 'table-field-footer-buttons', "style='text-align: left'");
+        $Table->renderEnd();
     }
 
     /**
@@ -107,13 +106,13 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
     {
         $this->processRequest($Request);
         if($this->mPageLayout) {
-            $this->mPageLayout->renderBodyHeader($Request);
+            $this->mPageLayout->renderBodyHeaderContent($Request);
             return;
         }
 
         $HandlerRoute = $Request->getRoute();
         $handlerRoute = $HandlerRoute->getPrefix();
-        echo "<h1>{$handlerRoute}</h1>";
+        echo RI::get()->ni(), "<h1>{$handlerRoute}</h1>";
     }
 
     /**
@@ -129,21 +128,13 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
         list(,$infoPath) = explode(' ', $Request->getRoute()->getPrefix(), 2);
         $infoPath = substr(Config::getDomainPath(), 0, -1) . $infoPath .'/';
 
-        $num = 1;
-
-        RenderIndents::ni();
-        ?>
-        <ul class='navbar-menu'>
-        <?php foreach($this->mHandlers as $route => $Handler) {
+        foreach($this->mHandlers as $route => $Handler) {
             $description = "No Description";
-            try{ move to layout
+            try{
                 $description = Describable::get($Handler)->getDescription();
             } catch (InvalidRouteException $ex) {}
-            echo "\n"; ?>
-            <li class='navbar-menu-item clearfix'>
-            <?php echo $num++; ?>. <a href='<?php echo $infoPath . $this->mHandlerIDs[$route]. '#' . $route; ?>'><?php echo $routes[$route]->getPrefix(); ?></a>
-            </li><?php } echo "\n"; ?>
-        </ul><?php
+            $this->renderNavBarEntry("{$infoPath}{$this->mHandlerIDs[$route]}#{$route}", $description, $routes[$route]->getPrefix());
+        }
     }
 
     /**

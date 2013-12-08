@@ -28,20 +28,32 @@ final class RenderIndents {
      * @return String
      */
     public function indent($addCount=0, $newLine='') {
-        echo $newLine . str_repeat($this->mTabString, $this->mCount + $addCount);
+        echo $newLine, str_repeat($this->mTabString, $this->mCount + $addCount);
+    }
+
+    /**
+     * Render an indentation
+     * @param int $addCount the number of tabs to add for this render
+     * @param String|Null $newLine optionally append a newline character
+     * @return String
+     */
+    public function getIndent($addCount=0, $newLine='') {
+        return $newLine . str_repeat($this->mTabString, $this->mCount + $addCount);
     }
 
     /**
      * Update the current tab count and optionally replace the characters used
-     * @param int $tabCount the number of total tabs to set
-     * @param null $newTab
-     * @return $this
+     * @param int|null $tabCount the number of total tabs to set or null to keep count as is
+     * @param null|String $newTab
+     * @return RenderIndentsEnd to reset the tabs
      */
-    public function setIndent($tabCount, $newTab=NULL) {
+    public function setIndent($tabCount=NULL, $newTab=NULL) {
+        $R = new RenderIndentsEnd($this->mCount, $this->mTabString);
         if($newTab)
             $this->mTabString = $newTab;
-        $this->mCount = $tabCount;
-        return $this;
+        if($tabCount !== NULL)
+            $this->mCount = $tabCount;
+        return $R;
     }
 
     /**
@@ -82,12 +94,12 @@ final class RenderIndents {
     }
 
     /** Shorthand for ::get()->setIndent($addCount)
-     * @param int $tabCount the number of total tabs to set
+     * @param int|null $tabCount the number of total tabs to set or null to keep count as is
      * @param null $newTab
-     * @return String always returns null
+     * @return RenderIndentsEnd to reset the tabs
      */
-    public static function si($tabCount=0, $newTab=null) {
-        static::get()
+    public static function si($tabCount=null, $newTab=null) {
+        return static::get()
             ->setIndent($tabCount, $newTab);
     }
 
@@ -100,4 +112,17 @@ final class RenderIndents {
             ->addIndent($addCount);
     }
 
+}
+
+class RenderIndentsEnd {
+    private $mTab, $mCount;
+    public function __construct($tabCount, $newTab) {
+        $this->mTab = $newTab;
+        $this->mCount = $tabCount;
+    }
+
+    public function reset() {
+        $I = RenderIndents::get();
+        $I->setIndent($this->mCount, $this->mTab);
+    }
 }

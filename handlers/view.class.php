@@ -32,7 +32,7 @@ abstract class View implements IView {
 
         $Theme->setupView($this);
 
-        RI::si(static::TAB_START, static::TAB);
+        RI::si(null, static::TAB);
     }
 
     protected function setupHeadFields() {

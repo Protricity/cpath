@@ -4,8 +4,11 @@ namespace CPath\Handlers\Layouts;
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
+use CPath\Misc\RenderIndents as RI;
 
 abstract class NavBarLayout extends View implements IRenderContent {
+
+    private $navBarStarted=false;
 
 //    public function __construct($Target, ITheme $Theme=NULL) {
 //        parent::__construct($Target, $Theme);
@@ -41,6 +44,26 @@ abstract class NavBarLayout extends View implements IRenderContent {
     abstract protected function renderNavBarContent(IRequest $Request);
 
 
+    /**
+     * Render the navigation bar content
+     * @param String $url the url for this navbar entry
+     * @param String|NULL $text the html for this navbar entry
+     * @param String|NULL $title the title for this navbar entry
+     * @return void
+     */
+    protected function renderNavBarEntry($url, $text=null, $title=null)
+    {
+        if(!$this->navBarStarted) {
+            echo RI::ni(), "<ul class='navbar-menu'>";
+            $this->navBarStarted = true;
+        }
+
+        echo RI::ni(1), "<li class='navbar-menu-item clearfix'>";
+        echo RI::ni(2), "<a href='{$url}' title='", $title ?: $text ,"'>", $text ?: $url, "</a>";
+        echo RI::ni(1), "</li>";
+    }
+
+
     protected function renderBodyHeader(IRequest $Request) {
         $this->getTheme()->renderSectionStart($Request, 'header');
         $this->renderBodyHeaderContent($Request);
@@ -72,6 +95,10 @@ abstract class NavBarLayout extends View implements IRenderContent {
         $Theme = $this->getTheme();
         $Theme->renderSectionStart($Request, 'navbar');
         $this->renderNavBarContent($Request);
+        if($this->navBarStarted) {
+            echo RI::ni(), "</ul>";
+            $this->navBarStarted = false;
+        }
         $Theme->renderSectionEnd($Request);
 
         $Theme->renderSectionStart($Request, 'content');

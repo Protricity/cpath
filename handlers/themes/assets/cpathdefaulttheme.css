@@ -49,7 +49,6 @@ body.wide .page {
     padding: 3pt;
 }
 
-
 /** Simple Body With Nav Bar Layout **/
 
 .navbar {
@@ -61,6 +60,38 @@ body.wide .page {
     padding: 3pt;
     margin: 0 3pt 3pt 0;
     min-height: 60pt;
+}
+
+.navbar-menu
+{
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    font-size: 9pt;
+}
+body.wide .navbar-menu { font-size: 10pt; }
+body.narrow .navbar-menu, { font-size: 9pt; }
+body.mobile .navbar-menu { font-size: 8pt; }
+
+.navbar-menu a
+{
+    display: block;
+    color: #66A;
+    background-color: #DDD;
+    font-weight: bold;
+    text-decoration: none;
+    padding: 1pt;
+
+    -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -o-transition: font-size 0.3s ease, background-color 0.3s ease;
+    -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
+    transition: font-size 0.3s ease, background-color 0.3s ease;
+}
+
+.navbar-menu a:hover
+{
+    background-color: #CCC;
 }
 
 .content {
@@ -78,34 +109,42 @@ body.wide .page {
 /* ITableTheme */
 
 .table {
-    background-color: #e0e0e0;
-    border: solid #aaa;
-    border-width: 1pt 0;
+    background-color: #fff;
+    border: solid #bbb 1px;
     margin: 3pt;
     border-collapse: collapse;
+    font: 11px Arial, Helvetica, Geneva, sans-serif;
 }
 
 .table.error {
-    background-color: #DBB;
-    border: solid #aaa;
-    border-width: 1pt 0;
-    margin: 3pt;
-    border-collapse: collapse;
 }
 
-.table .table-header {
-    background-color: #bbb;
-    border: solid #aaa;
-    border-width: 1pt 0;
-}
-
-.table.error .table-header {
-    background-color: #CAA;
+table.table thead tr, table.table tfoot tr {
+    background-color: #ddd;
 }
 
 table.table td, table.table th {
-    padding: 1pt 3pt 3pt 8pt;
+    border: 1px solid #ddd;
 }
+
+table.table thead tr {
+}
+
+table.table.error thead tr, table.table.error tfoot tr {
+    background-color: #CAA;
+}
+
+table.table tbody td {
+    padding: 3pt 5pt 3pt 5pt;
+}
+
+table.table tbody td input { margin: 0; padding: 0; border: 0; }
+table.table tbody td select { margin: 0; padding: 0; border: 0; }
+table.table tbody td  { overflow: hidden;  }
+
+body.wide .table, body.wide .table input, body.wide .table select { font-size: 8pt; }
+body.narrow .table, body.narrow .table input, body.narrow .table select { font-size: 7pt; }
+body.mobile .table, body.mobile .table input, body.mobile .table select { font-size: 6pt; }
 
 /* Misc: */
 

@@ -11,46 +11,55 @@ use CPath\Interfaces\IRequest;
 
 interface ITableTheme {
 
+    const FLAG_ROW_IS_HEADER = 0x01;
+    const FLAG_ROW_IS_FOOTER = 0x02;
+
     /**
      * Render the start of a table.
      * @param IRequest $Request the IRequest instance for this render
      * @param String|NULL $captionText text that should appear in the table caption
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableStart(IRequest $Request, $captionText = NULL);
+    function renderTableStart(IRequest $Request, $captionText = NULL, $class=null, $attr=null);
 
     /**
-     * Render the start of a fragment.
+     * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
-     * @param bool $isHeader set true if this row is a <th>
+     * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $isHeader=false);
+    function renderTableRowStart(IRequest $Request, $flags=0, $class=null, $attr=null);
 
     /**
      * Render the start of a table data element.
-     * @param IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableDataStart(IRequest $Request, $span=0);
+    function renderTableDataStart(IRequest $Request, $span=0, $class=null, $attr=null);
 
     /**
-     * Render the start of a fragment.
+     * Render the end of a table data element.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderTableDataEnd(IRequest $Request);
 
     /**
-     * Render the start of a fragment.
+     * Render the end of a table row.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderTableRowEnd(IRequest $Request);
 
     /**
-     * Render the end of a fragment.
+     * Render the end of a table.
      * @param IRequest $Request the IRequest instance for this render
      * @param String|NULL $footerText text that should appear in the footer
      * @return void
