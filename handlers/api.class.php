@@ -163,8 +163,8 @@ abstract class API implements IAPI {
         $Response = null;
         //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
         //    $Response = $this->execute($Request);
-        $Render = new APIView();
-        $Render->renderAPI($this, $Request->getRoute(), $Request, $Response);
+        $Render = new APIView($this, $Request->getRoute(), $Response);
+        $Render->render($Request);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
         //$Response->renderHtml();

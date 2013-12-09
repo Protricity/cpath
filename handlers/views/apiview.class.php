@@ -32,7 +32,7 @@ class APIView extends NavBarLayout implements ILogListener {
     private $mRoute = null;
     private $mResponse = null;
 
-    public function __construct(ITheme $Theme=null, IAPI $API=null, IRoute $Route=null, IResponse $Response=null) {
+    public function __construct(IAPI $API=null, IRoute $Route=null, IResponse $Response=null, ITheme $Theme=null) {
         parent::__construct($Theme ?: CPathDefaultTheme::get());
         $this->mAPI = $API;
         $this->mRoute = $Route;
