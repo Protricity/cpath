@@ -58,8 +58,9 @@ body.wide .page {
     float: left;
     width: 200px;
     padding: 3pt;
-    margin: 0 3pt 3pt 0;
+    margin: 0 24pt 24pt 0;
     min-height: 60pt;
+
 }
 
 .navbar-menu
@@ -73,11 +74,14 @@ body.wide .navbar-menu { font-size: 10pt; }
 body.narrow .navbar-menu, { font-size: 9pt; }
 body.mobile .navbar-menu { font-size: 8pt; }
 
+.navbar-menu {
+    padding: 3pt;
+}
+
 .navbar-menu a
 {
     display: block;
     color: #66A;
-    background-color: #DDD;
     font-weight: bold;
     text-decoration: none;
     padding: 1pt;

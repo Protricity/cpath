@@ -7,10 +7,6 @@ body.mobile table.table .table-field-required { display: none; }
 
 /* HandlerSetView */
 
-.field-table div.field-prefix { width: 10%; min-width: 200px; }
-.field-table div.field-destination { width: 30%; min-width: 180px;  }
-
-
 .response-content, .response-headers, .request-headers {
     font: 10px Courier New, Courier New, monospace;
     white-space: pre;

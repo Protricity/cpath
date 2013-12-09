@@ -83,7 +83,7 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
                 $description = Describable::get($Handler)->getDescription();
             } catch (InvalidRouteException $ex) {}
 
-            $url = "<a href='{$infoPath}{$this->mHandlerIDs[$route]}'#'{$route}'>{$routes[$route]->getPrefix()}</a>";
+            $url = "<a href='{$infoPath}{$this->mHandlerIDs[$route]}#{$route}'>{$routes[$route]->getPrefix()}</a>";
             $destination = $routes[$route]->getDestination();
             $Table->renderRowStart();
             $Table->renderTD($num++,      0, 'table-field-num');
