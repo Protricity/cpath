@@ -186,7 +186,7 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
                 throw new InvalidRouteException("Destination for '{$arg}' does not implement IAPI");
             $routes = $this->mHandlers->getAllRoutes(new RouteBuilder());
             $APIRoute = $routes[$route];
-            $this->mPageLayout = new APIView($this->getTheme(), $API, $APIRoute);
+            $this->mPageLayout = new APIView($API, $APIRoute, null, $this->getTheme());
             //$APIView->renderViewContent($Request);
             return;
         }
