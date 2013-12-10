@@ -72,7 +72,7 @@ group by column_name;") as $row ) {
      */
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
         $primaryCol = NULL;
-        foreach($DB->query("SELECT c.column_name, c.data_type, c.column_default, c.is_nullable, d.description as column_comment
+        foreach($DB->query("SELECT DISTINCT ON (c.table_name, c.column_name) c.column_name, c.data_type, c.column_default, c.is_nullable, d.description as column_comment
         FROM information_schema.columns AS c
         LEFT JOIN (
         SELECT c.table_schema,c.table_name,c.column_name,pgd.description

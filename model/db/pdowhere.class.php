@@ -160,7 +160,7 @@ abstract class PDOWhere {
      * @return $this the query instance
      */
     function orderBy($field, $desc=false, $alias=NULL) {
-        $this->mOrderBy = $field . ($desc !== false ? ($desc === true ? ' DESC' : ' '.$desc) : '');
+        $this->mOrderBy = $this->getAliasedField($field, $alias) . ($desc !== false ? ($desc === true ? ' DESC' : ' '.$desc) : '');
         return $this;
     }
 

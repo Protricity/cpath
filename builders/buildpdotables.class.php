@@ -22,6 +22,8 @@ class UpgradeException extends \Exception {}
 
 abstract class BuildPDOTables implements IBuilder{
 
+    const TAB = null;
+
     const TMPL_PROC_CLASS = <<<PHP
 <?php
 namespace %s;
@@ -266,6 +268,7 @@ PHP;
                 $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
                 $columns .= var_export($Column->Name, true);
                 $columns .= ',0x' . dechex($Column->Flags ?: 0);
+
                 if($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
                     $columns .= ',' . ($Column->Filter ?: 0);
                 if($Column->Comment || $Column->Default || $Column->EnumValues)
@@ -317,21 +320,31 @@ PHP;
             foreach($Table->getColumns() as $Column) {
                 $ucName = self::toTitleCase($Column->Name, true);
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if($Column->Flags & PDOColumn::FLAG_PRIMARY ?0:1)
+                if($Column->Flags & PDOColumn::FLAG_PRIMARY ?0:1 && $Table->Primary) // TODO: primary hack needs oop
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
                 $PHP->addMethodCode();
             }
 
-            $PHP->addStaticMethod('remove', $Table->ClassName . ' $' . $Table->ClassName, " parent::removeModel(\${$Table->ClassName}); ");
+            if($Table->Primary) // TODO: primary hack needs oop
+                $PHP->addStaticMethod('remove', $Table->ClassName . ' $' . $Table->ClassName, " parent::removeModel(\${$Table->ClassName}); ");
             $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
 
             //Log::v2(__CLASS__, "Writing file: " . $file);
             file_put_contents($file, $PHP->build());
             foreach($oldFiles as $i => $f)
-                if($modelPath.$f == $file) {
+                if($modelPath.$f == $file && !is_dir($modelPath.$f)) {
                     unset($oldFiles[$i]);
                     break;
                 }
+
+            // CSharp
+
+            $fileCSharp = $modelPath . 'csharp/' . ($Table->ClassName).'.cs';
+            if(!file_exists($dir = dirname($fileCSharp)))
+                mkdir($dir, null, true);
+            $CBuilder = new BuildCSharpTables($DB::BUILD_DB_CSHARP_NAMESPACE);
+            $CBuilder->build($Table, $fileCSharp);
+
             $this->mBuildDB = NULL;
         }
 
@@ -347,7 +360,9 @@ PHP;
         Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
         if($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated model classes");
-            foreach($oldFiles as $file) unlink($modelPath.$file);
+            foreach($oldFiles as $file)
+                if(!is_dir($modelPath.$file))
+                    unlink($modelPath.$file);
         }
 
         // Stored Procedures

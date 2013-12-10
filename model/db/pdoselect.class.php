@@ -51,8 +51,13 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         return self::select($field, $alias, $name);
     }
 
-    public function distinct($on=true) {
-        $this->mDistinct = $on ? true : false;
+    /**
+     * TODO: Refactor. Check PDO DB for config const
+     * @param String|bool|NULL $sql SQL code to append, true for 'DISTINCT', false for no DISTINCT
+     * @return $this
+     */
+    public function distinct($sql=null) {
+        $this->mDistinct = $sql;
         return $this;
     }
 
@@ -141,7 +146,9 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     }
 
     public function getSQL() {
-        $d = $this->mDistinct ? 'DISTINCT ' : '';
+        $d = $this->mDistinct;
+        if($d === true) $d = 'DISTINCT ';
+        elseif($d !== false) $d = 'DISTINCT ' . $d . ' ';
         return "SELECT " . $d . implode(', ', $this->mSelect)
             ."\nFROM ".$this->mTable
             .parent::getSQL()

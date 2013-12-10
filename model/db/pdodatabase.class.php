@@ -22,6 +22,7 @@ class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
+    const BUILD_DB_CSHARP_NAMESPACE = null;
     const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = NULL;
 
