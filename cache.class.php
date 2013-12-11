@@ -8,6 +8,7 @@
 namespace CPath;
 
 use CPath\Cache\APC;
+use CPath\Cache\File;
 use CPath\Cache\None;
 
 /**
@@ -24,7 +25,7 @@ abstract class Cache{
         if(Config::$APCEnabled)
             return self::$Cache = new APC();
         else
-            return self::$Cache = new None();
+            return self::$Cache = new File();
     }
 
 

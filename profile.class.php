@@ -35,8 +35,8 @@ abstract class Profile {
 
         self::$mStart = microtime();
         self::$mConfig['time'] = NULL;
-        spl_autoload_unregister(__NAMESPACE__.'\Base::autoload');
-        spl_autoload_register(__NAMESPACE__.'\Profile::profileClass', true);
+        spl_autoload_unregister(__NAMESPACE__ . '\Base::autoload');
+        spl_autoload_register(__NAMESPACE__ . '\Profile::profileClass', true);
         register_shutdown_function(__NAMESPACE__.'\Profile::unload');
     }
 
