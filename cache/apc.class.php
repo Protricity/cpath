@@ -8,6 +8,7 @@
 namespace CPath\Cache;
 
 use CPath\Cache;
+use CPath\Config;
 
 /**
  * Class APC - Implements APC cache
@@ -50,6 +51,6 @@ class APC extends Cache {
      * @return boolean true if this cache is enabled
      */
     function enabled() {
-        return true;
+        return Config::$APCEnabled;
     }
 }

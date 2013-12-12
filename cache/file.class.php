@@ -10,6 +10,7 @@ namespace CPath\Cache;
 
 use CPath\Cache;
 use CPath\Config;
+use CPath\Interfaces\IPHPExport;
 
 /**
  * Class None - Placeholder class for when no cache is available
@@ -22,6 +23,19 @@ class File extends Cache {
     const TTL = 2;
 
     private $mCache = array();
+
+    private $mPath, $mEnabled = true;
+
+    public function __construct() {
+        if(!$this->mPath) {
+            $this->mPath = Config::getGenPath().'cache/';
+            if(!file_exists($this->mPath))
+                if(!mkdir($this->mPath, NULL, true))
+                    $this->mEnabled = false;
+            elseif(!is_dir($this->mPath))
+                $this->mEnabled = false;
+        }
+    }
 
     /**
      * Caches model after a fetch. To be overwritten by derived class
@@ -70,7 +84,7 @@ class File extends Cache {
      * @return boolean true if this cache is enabled
      */
     function enabled() {
-        return true;
+        return $this->mEnabled;
     }
 
     private function &getCache($key) {
@@ -79,30 +93,34 @@ class File extends Cache {
         if(!file_exists($path))
             return $data;
 
-        $arr = null;
+        $d = null;
         include $path;
 
-        if(isset($arr[self::TTL]))
-            if(($arr[self::CREATED] + $arr[self::TTL]) < time())
+        if(isset($d[self::TTL]))
+            if(($d[self::CREATED] + $d[self::TTL]) < time())
                 return $data;
 
-        return $arr[self::DATA];
+        return $d[self::DATA];
     }
 
     private function setCache($key, $data, $ttl=0) {
         $path = $this->getConfigPath($key);
-        $arr = array (
-            self::DATA => $data,
-            self::CREATED => time(),
-        );
-        if($ttl)
-            $arr[self::TTL] = $ttl;
+        $php = "<?php\n\$d=array(";
 
-        if(is_object($data))
-            $export = 'unserialize(\'' . serialize($arr) . '\')';
+        if(is_object($data)) {
+            if($data instanceof IPHPExport)
+                $php .= $data->exportToPHP();
+            else
+                $php .= 'unserialize(\'' . serialize($data) . '\')';
+        }
         else
-            $export = var_export($arr, true);
-        $php = "<?php\n\$arr=".$export.";";
+            $php .= var_export($data, true);
+
+        $php .= "," . time();
+        if($ttl)
+            $php .= $ttl;
+
+        $php .= ");";
         file_put_contents($path, $php);
     }
 
@@ -112,13 +130,7 @@ class File extends Cache {
      * @return string build config full path
      */
     private function getConfigPath($name) {
-        static $path = NULL;
-        if(!$path) {
-            $path = Config::getGenPath().'cache/';
-            if(!file_exists($path))
-                mkdir($path, NULL, true);
-        }
-        return $path . md5($name) . '.cache.php';
+        return $this->mPath . md5($name) . '.cache.php';
     }
 
 }

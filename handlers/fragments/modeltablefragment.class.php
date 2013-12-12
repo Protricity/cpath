@@ -13,7 +13,11 @@ class ModelTableFragment implements IHandler{
 
     private $mModel, $mTheme;
 
-    public function __construct(PDOModel $Model, ITableTheme $Theme = null) {
+    /**
+     * @param PDOModel|Array $Model
+     * @param ITableTheme $Theme
+     */
+    public function __construct($Model, ITableTheme $Theme = null) {
         $this->mModel = $Model;
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
@@ -25,8 +29,13 @@ class ModelTableFragment implements IHandler{
      */
     function render(IRequest $Request)
     {
-        $Model = $this->mModel;
+        $export = $this->mModel;
+        $caption = null;
+        if($export instanceof PDOModel) {
+            $caption = Describable::get($export)->getTitle();
+            $export = $export->exportData();
+        }
         $Util = new TableThemeUtil($Request, $this->mTheme);
-        $Util->renderKeyPairsTable($Model->exportData(), 'Column', 'Value', Describable::get($Model)->getTitle());
+        $Util->renderKeyPairsTable($export, 'Column', 'Value', $caption);
     }
 }

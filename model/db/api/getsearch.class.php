@@ -15,10 +15,12 @@ use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
+use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
+use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\Response;
 
-class API_GetSearch extends API_Base {
+class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     private $mColumns;
 
     /**
@@ -32,8 +34,10 @@ class API_GetSearch extends API_Base {
 
         $this->addField('search', new RequiredParam("SEARCH for ".$Model::modelName()));
         $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mColumns))."]"));
-        $this->addField('limit', new Field("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
+        //$this->addField('limit', new Field("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
         $this->addField('logic', new Field("The search logic to use [AND, OR]. Default=OR"));
+
+        parent::setupFields();
     }
 
 
@@ -46,51 +50,64 @@ class API_GetSearch extends API_Base {
     }
 
     /**
-     * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
-     * @throws ModelNotFoundException if the Model was not found
-     * @throws \Exception if no valid columns were found
+     * Sends headers, executes the request, and renders an IResponse as HTML
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @return void
      */
-    final protected function doExecute(IRequest $Request) {
+    public function renderHTML(IRequest $Request) {
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IPDOModelSearchRender)
+            {
+                try {
+                    $Model = $this->executeOrThrow($Request)->getDataPath();
+                    $Handler->renderSearch($Model, $Request);
+                    return;
+                } catch (\Exception $ex) {
+                    $Handler->renderException($ex, $Request);
+                    return;
+                }
+            }
+
+        parent::renderHTML($Request);
+    }
+
+    /**
+     * Prepare a Search query
+     * Use this interface call to constrain a query by adding WHERE statements
+     * @param PDOWhere $Select the query statement to limit.
+     * @param IRequest $Request The api request to process and or validate validate
+     * @return void
+     * @throws \Exception
+     */
+    function prepareQuery(PDOWhere $Select, IRequest $Request) {
 
         $Model = $this->getModel();
-        $limit = $Request->pluck('limit');
         $search = $Request->pluck('search');
         $search_by = $Request->pluck('search_by');
         $logic = $Request->pluck('logic') ?: 'OR';
 
-        if($limit < 1 || $limit > $Model::SEARCH_LIMIT_MAX)
-            $limit = $Model::SEARCH_LIMIT;
+
+        if(strcasecmp($logic, 'OR')===0)
+            $Select->setFlag(PDOWhere::LOGIC_OR);
+
+        if($search_by && !isset($this->mColumns[$search_by]))
+            throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
+
+        $columns = $Model::findColumns($search_by ?: $Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
+        if(!$columns)
+            throw new \Exception("No SEARCH fields defined in ".$Model::modelName());
 
         if($Model::SEARCH_WILDCARD) {
             if(strpos($search, '*') !== false)
                 $search = str_replace('*', '%', $search);
             else
                 $search .= '%';
+            foreach($columns as $name=>$Column)
+                $Select->where($name . ' LIKE', $search);
+        } else {
+            foreach($columns as $name=>$Column)
+                $Select->where($name, $search);
         }
-
-        if($search_by && !isset($this->mColumns[$search_by]))
-            throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
-
-        $Model = $this->getModel();
-        /** @var PDOModelSelect $Search */
-
-        $export = $Model::EXPORT_SEARCH ?: $Model::EXPORT ?: PDOColumn::FLAG_EXPORT;
-        $select = array_keys($Model::findColumns($export));
-        $Search = $Model::selectByColumns($select, $search, $search_by, $limit, $logic, $Model::SEARCH_WILDCARD ? 'LIKE' : '');
-
-        foreach($this->getHandlers() as $Handler)
-            if($Handler instanceof IReadAccess)
-                $Handler->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
-
-        $results = $Search->fetchAll();
-
-//        foreach($this->getHandlers() as $Handler)
-//            if($Handler instanceof IReadAccess)
-//                foreach($results as $ResultModel)
-//                    $Handler->assertReadAccess($ResultModel, $Request, IReadAccess::INTENT_SEARCH);
-
-        return new Response("Found (".sizeof($results).") ".$Model::modelName()."(s)", true, $results);
     }
 }

@@ -87,7 +87,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
 
     function checkPassword($password) {
         $hash = $this->{static::COLUMN_PASSWORD};
-        if(static::hashPassword($password, $hash) != $hash)
+        if(!static::checkHash($password, $hash))
             throw new IncorrectUsernameOrPasswordException();
     }
 
@@ -181,12 +181,30 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
     /**
      * Hash passwords
      * @param $password
-     * @param null $oldPassword
      * @return string
      */
-    private static function hashPassword($password, $oldPassword=NULL) {
-        $hash = crypt($password, $oldPassword);
+    private static function hashPassword($password) {
+        if(function_exists('password_hash')) {
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+        } else {
+            $salt = mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
+            $salt = base64_encode($salt);
+            $salt = str_replace('+', '.', $salt);
+            $hash = crypt($password, '$2y$10$'.$salt.'$');
+        }
         return $hash;
+    }
+
+    /**
+     * Check a password against a hash
+     * @param $password
+     * @param null $oldPassword
+     * @return bool true if hash matches
+     */
+    private static function checkHash($password, $oldPassword=NULL) {
+        if(crypt($password, $oldPassword) == $oldPassword)
+            return true;
+        return false;
     }
 
     /**

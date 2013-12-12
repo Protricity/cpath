@@ -2,6 +2,7 @@
 namespace CPath\Handlers\Themes;
 
 use CPath\Base;
+use CPath\Handlers\Fragments\ModelTableFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
@@ -9,6 +10,7 @@ use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
+use CPath\Model\DB\PDOSelect;
 
 
 class CPathDefaultTheme implements ITheme {
@@ -259,6 +261,35 @@ class CPathDefaultTheme implements ITheme {
         $inst = new static;
         $inst->mIsException = true;
         return $inst;
+    }
+
+    /**
+     * Render the end of an html body section.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param PDOSelect $Query query instance to render (not yet executed)
+     * @param String|Null $className optional class name for this section
+     * @return void
+     */
+    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $className = NULL) {
+        foreach($Query as $data) {
+            $MF = new ModelTableFragment($data, $this);
+            $MF->render($Request);
+        }
+    }
+
+    /**
+     * Render the end of an html body section.
+     * @param IRequest $Request the IRequest instance for this render
+     * @param PDOSelect $Query query instance to render (not yet executed)
+     * @param String|Null $className optional class name for this section
+     * @return void
+     */
+    function renderSearchContent(IRequest $Request, PDOSelect $Query, $className = NULL)
+    {
+        foreach($Query as $data) {
+            $MF = new ModelTableFragment($data, $this);
+            $MF->render($Request);
+        }
     }
 }
 

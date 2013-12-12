@@ -101,7 +101,10 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     public function fetchColumn($i=0) {
         if(!$this->mStmt) $this->exec();
         $this->mCount++;
-        return $this->mStmt->fetchColumn($i);
+        if(is_int($i))
+            return $this->mStmt->fetchColumn($i);
+        $data = $this->mStmt->fetch();
+        return $data[$i];
     }
 
     public function fetch() {

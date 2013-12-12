@@ -13,6 +13,7 @@ use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
+use CPath\Interfaces\IPHPExport;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IXML;
@@ -44,7 +45,7 @@ class ModelAlreadyExistsException extends \Exception implements IResponseAggrega
 }
 
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport {
     //const BUILD_IGNORE = true;
     //const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
 
@@ -60,7 +61,8 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     const INSERT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const UPDATE = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
     const EXPORT = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const EXPORT_SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const EXPORT_OBJECT = false;    // Export as array by default.
+    //const EXPORT_SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
     const DEFAULT_FILTER =   FILTER_SANITIZE_SPECIAL_CHARS;
 
@@ -137,11 +139,29 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
             $Handlers = new HandlerSet($this);
 
         $Handlers->add('GET search', new API_GetSearch($this));
+        $Handlers->add('GET browse', new API_GetBrowse($this));
         $Handlers->add('POST', new API_Post($this));
 
         return $Handlers;
     }
 
+
+
+    /**
+     * EXPORT Object to PHP Code
+     * @return String
+     */
+    function exportToPHP() {
+        $c = get_called_class();
+        foreach(static::loadAllColumns() as $name => $Column)
+            $data[$name] = $this->$name;
+        $php = "$c::__set_state(array(";
+        foreach(static::loadAllColumns() as $name => $Column) {
+            $php .= "'{$name}'=>" . var_export($this->$name, true) . ", ";
+        }
+        $php = substr($php, 0, strlen($php) - 2) . "))";
+        return $php;
+    }
 
     public function __toString() {
         if($id = static::HANDLER_IDS)
@@ -463,6 +483,19 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         if(!$R->isAbstract())
             return new static;
         return null;
+    }
+
+    /**
+     * Instantiate an Object
+     * @param Array $array associative array of data
+     * @return PDOModel
+     */
+    static function __set_state($array) {
+        $Inst = new static();
+        foreach(static::loadAllColumns() as $name => $Column)
+            if(isset($array[$name]))
+                $Inst->$name = $array[$name];
+        return $Inst;
     }
 }
 

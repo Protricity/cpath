@@ -22,10 +22,12 @@ abstract class Cache{
     public static function get() {
         if(self::$Cache)
             return self::$Cache;
-        if(Config::$APCEnabled)
-            return self::$Cache = new APC();
-        else
-            return self::$Cache = new File();
+        $Cache = new APC();
+        if(!$Cache->enabled())
+            $Cache = new File();
+        if(!$Cache->enabled())
+            $Cache = new None();
+        return self::$Cache = $Cache;
     }
 
 
