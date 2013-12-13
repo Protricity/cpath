@@ -13,7 +13,7 @@ use CPath\Misc\RenderIndents as RI;
 
 
 class TableThemeUtil {
-    private $mTheme, $mRequest, $mLastElm='none';
+    private $mTheme, $mRequest, $mLastElm='none', $mRowFlags=0;
 
     public function __construct(IRequest $Request, ITableTheme $Theme) {
         $this->mRequest = $Request;
@@ -22,49 +22,55 @@ class TableThemeUtil {
 
     /**
      * @param String|Callable $content
-     * @param int $span
+     * @param int $flags ::FLAG_DATA_IS_LABEL
      * @param String|Array|NULL $class element classes
+     * @param int $span
      * @param String|Array|NULL $attr element attributes
      */
-    public function renderTD($content, $span=0, $class=null, $attr=null) {
-        $this->renderDataStart($span, $class, $attr);
+    public function renderTD($content, $class=null, $span=0, $flags=0, $attr=null) {
+        $this->renderDataStart($class, $span, $flags, $attr);
         if($content)
             echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
         $this->renderDataEnd();
     }
 
-    public function renderTR(Array $rowContent, $rowFlags=0) {
+    public function renderTR(Array $rowContent, $flags=0) {
         switch($this->mLastElm) {
             case 'table':
-                $this->renderRowStart($rowFlags);
+                $this->renderRowStart($flags);
                 break;
             case 'tr':
                 $this->renderRowEnd();
-                $this->renderRowStart($rowFlags);
+                $this->renderRowStart($flags);
                 break;
             case 'td':
                 $this->renderDataEnd();
                 $this->renderRowEnd();
-                $this->renderRowStart($rowFlags);
+                $this->renderRowStart($flags);
                 break;
             default:
                 $this->renderStart();
-                $this->renderRowStart();
+                $this->renderRowStart($flags);
         }
+        $i=0;
         foreach($rowContent as $content) {
-            $this->renderDataStart();
+            if($i==0 && $flags & ITableTheme::FLAG_ROW_FIRST_DATA_IS_LABEL)
+                $this->renderDataStart(null, 0, $flags | ITableTheme::FLAG_DATA_IS_LABEL);
+            else
+                $this->renderDataStart(null, 0, $flags);
             echo RI::ni(), $content;
             $this->renderDataEnd();
+            $i++;
         }
         $this->renderRowEnd();
     }
 
     public function renderKeyPairsTable(Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {
         $this->renderStart($captionText);
-        $this->renderTR(array($keyTitle, $valueTitle), true);
-        foreach($keyPairs as $key=>$value) {
-            $this->renderTR(array($key, $value), false);
-        }
+        $this->renderTR(array($keyTitle, $valueTitle), ITableTheme::FLAG_ROW_IS_HEADER);
+        foreach($keyPairs as $key=>$value)
+            $this->renderTR(array($key, $value), ITableTheme::FLAG_ROW_FIRST_DATA_IS_LABEL);
+
         $this->renderEnd();
     }
 
@@ -147,18 +153,20 @@ class TableThemeUtil {
                 $this->renderStart();
                 break;
         }
+        $this->mRowFlags = $flags;
         $this->mTheme->renderTableRowStart($this->mRequest, $flags, $class, $attr);
         $this->mLastElm = 'tr';
     }
 
     /**
      * Render the start of a table data element.
-     * @param int $span set span attribute
      * @param String|Array|NULL $class element classes
+     * @param int $span set span attribute
+     * @param int $flags ::FLAG_DATA_IS_LABEL
      * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderDataStart($span = 0, $class = null, $attr = null) {
+    function renderDataStart($class = null, $span = 0, $flags = 0, $attr = null) {
         switch($this->mLastElm) {
             case 'table':
                 $this->renderRowStart();
@@ -172,7 +180,7 @@ class TableThemeUtil {
                 $this->renderRowStart();
                 break;
         }
-        $this->mTheme->renderTableDataStart($this->mRequest, $span, $class, $attr);
+        $this->mTheme->renderTableDataStart($this->mRequest, $span, $class, $flags | $this->mRowFlags, $attr);
         $this->mLastElm = 'td';
     }
 
@@ -219,6 +227,7 @@ class TableThemeUtil {
                 break;
         }
         $this->mTheme->renderTableRowEnd($this->mRequest);
+        $this->mRowFlags = 0;
         $this->mLastElm = 'table';
     }
 

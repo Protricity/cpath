@@ -140,7 +140,7 @@ class APIView extends NavBarLayout implements ILogListener {
                 $Table->renderTD($req,      0, 'table-field-required');
                 $Table->renderTD($name,     0, 'table-field-name');
                 $Table->renderTD($desc,     0, 'table-field-description');
-                $Table->renderDataStart(    0, 'table-field-input');
+                $Table->renderDataStart(    0, 0, 'table-field-input');
                     $Field->render($Request);
             }
     //        $Table->renderFooterStart();
@@ -151,7 +151,7 @@ class APIView extends NavBarLayout implements ILogListener {
     //            $Table->renderTD('', 0, 'table-field-input');
 
             $Table->renderFooterStart();
-                $Table->renderDataStart(5, 'table-field-footer-buttons', "style='text-align: left'");
+                $Table->renderDataStart(5, 0, 'table-field-footer-buttons', "style='text-align: left'");
             ?>
 
                                     <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />

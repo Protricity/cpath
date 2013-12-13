@@ -2,7 +2,9 @@
 namespace CPath\Handlers\Themes;
 
 use CPath\Base;
+use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
+use CPath\Handlers\Fragments\ModelTableListFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
@@ -10,12 +12,13 @@ use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
+use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 
 
 class CPathDefaultTheme implements ITheme {
 
-    private $mRowFlags=0, $mRowBody = null, $mIsException = false;
+    private $mRowBody = null, $mIsException = false, $mLastDataElm = null;
 
     protected function __construct() {
     }
@@ -88,21 +91,19 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
-     * @param int $rowFlags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
+     * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
      * @param String|Array|NULL $class element classes
      * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $rowFlags=0, $class=null, $attr=null)
+    function renderTableRowStart(IRequest $Request, $flags=0, $class=null, $attr=null)
     {
-        $this->mRowFlags = $rowFlags;
-
         if(is_array($attr))     $attr = implode(' ', $attr);
         if(is_array($class))    $class = implode(' ', $class);
 
-        if($rowFlags & ITableTheme::FLAG_ROW_IS_HEADER)
+        if($flags & ITableTheme::FLAG_ROW_IS_HEADER)
                 $body = 'thead';
-        elseif($rowFlags & ITableTheme::FLAG_ROW_IS_FOOTER)
+        elseif($flags & ITableTheme::FLAG_ROW_IS_FOOTER)
             $body = 'tfoot';
         else
             $body = 'tbody';
@@ -127,20 +128,23 @@ class CPathDefaultTheme implements ITheme {
      * @param IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
      * @param String|Array|NULL $class element classes
+     * @param int $flags ::FLAG_DATA_IS_LABEL
      * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderTableDataStart(IRequest $Request, $span=0, $class=null, $attr=null)
+    function renderTableDataStart(IRequest $Request, $span=0, $class=null, $flags=0, $attr=null)
     {
         if(is_array($attr))     $attr = implode(' ', $attr);
         if(is_array($class))    $class = implode(' ', $class);
         if($span)               $attr .= ($attr ? ' ' : '') . "colspan='{$span}'";
 
+
         echo RI::ni();
-        if($this->mRowFlags && (ITableTheme::FLAG_ROW_IS_HEADER | ITableTheme::FLAG_ROW_IS_FOOTER))
-            echo '<th';
+        if($flags & ITableTheme::CHECK_FLAG_DATA_IS_LABEL)
+            $this->mLastDataElm = 'th';
         else
-            echo '<td';
+            $this->mLastDataElm = 'td';
+        echo '<' . $this->mLastDataElm;
 
         echo $attr ? ' '.$attr : '', $class ? ' class=\''.$class.'\'' : '', ">";
 
@@ -157,10 +161,7 @@ class CPathDefaultTheme implements ITheme {
         RI::ai(-1);
         echo RI::ni();
 
-        if($this->mRowFlags && (ITableTheme::FLAG_ROW_IS_HEADER | ITableTheme::FLAG_ROW_IS_FOOTER))
-            echo "</th>";
-        else
-            echo "</td>";
+        echo '</' . $this->mLastDataElm . '>';
     }
 
     /**
@@ -172,7 +173,6 @@ class CPathDefaultTheme implements ITheme {
     {
         RI::ai(-1);
         echo RI::ni(), "</tr>";
-        $this->mRowFlags = 0;
     }
 
     /**
@@ -286,10 +286,8 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderSearchContent(IRequest $Request, PDOSelect $Query, $className = NULL)
     {
-        foreach($Query as $data) {
-            $MF = new ModelTableFragment($data, $this);
-            $MF->render($Request);
-        }
+        $MTLF = new ModelResultsTableFragment($Query, $this);
+        $MTLF->render($Request);
     }
 }
 

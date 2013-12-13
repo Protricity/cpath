@@ -17,6 +17,7 @@ use CPath\Interfaces\IRoutable;
 use CPath\Interfaces\IRoute;
 use CPath\Interfaces\IRouteBuilder;
 use CPath\Log;
+use CPath\Model\DB\Interfaces\ISelectDescriptor;
 
 class NotConfiguredException extends \Exception{}
 abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {
@@ -37,9 +38,12 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
      * @param $_selectArgs
      * @return PDOSelect
      */
-    public function select($tableName, $_selectArgs) {
+    public function select($tableName, $_selectArgs, ISelectDescriptor $Descriptor=null) {
         $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
-        return new PDOSelect($tableName, $this, $args);
+        $Select = new PDOSelect($tableName, $this, $args, $Descriptor);
+        if($Descriptor)
+            $Select->setDescriptor($Descriptor);
+        return $Select;
     }
 
     /**

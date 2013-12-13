@@ -14,10 +14,11 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Interfaces\IAPI;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Validate;
 
-class PDOColumn {
+class PDOColumn implements IDescribable {
     const BUILD_IGNORE = true;
     
     const FLAG_NUMERIC =  0x000001;
@@ -165,5 +166,21 @@ class PDOColumn {
         if($this->hasDefaultValue())
             $Field->setDefaultValue($this->getDefaultValue());
         return $Field;
+    }
+
+    /**
+     * Get the Object Title
+     * @return String description for this Object
+     */
+    function getTitle() {
+        return $this->getComment();
+    }
+
+    /**
+     * Get the Object Description
+     * @return String description for this Object
+     */
+    function getDescription() {
+        return $this->getComment();
     }
 }

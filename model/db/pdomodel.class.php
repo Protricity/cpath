@@ -10,6 +10,7 @@ namespace CPath\Model\DB;
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
+use CPath\Helpers\Describable;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
@@ -18,6 +19,7 @@ use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IXML;
 use CPath\Log;
+use CPath\Model\DB\Interfaces\ISelectDescriptor;
 use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 use CPath\Util;
@@ -45,7 +47,7 @@ class ModelAlreadyExistsException extends \Exception implements IResponseAggrega
 }
 
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport, ISelectDescriptor {
     //const BUILD_IGNORE = true;
     //const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
 
@@ -163,7 +165,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return $php;
     }
 
-    public function __toString() {
+    /**
+     * Return the column description for a query row value
+     * @param String $columnName the name of the column to be translated
+     * @return Describable
+     */
+    function getColumnDescriptor($columnName) {
+        return static::loadColumn($columnName);
+    }
+
+    function __toString() {
         if($id = static::HANDLER_IDS)
             return static::modelName() . " '" . $this->$id . "'";
         return static::modelName();
@@ -348,7 +359,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      */
     final static function select($_selectArgs=NULL) {
         $args = func_num_args() > 1 ? func_get_args() : (Array)$_selectArgs;
-        return new PDOSelect(static::TABLE, static::getDB(), $args);
+        return new PDOSelect(static::TABLE, static::getDB(), $args, new static);
     }
 
     /**
@@ -446,7 +457,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      */
     final public static function search() {
-        return new PDOModelSelect(static::getDB(), get_called_class());
+        return new PDOModelSelect(static::getDB(), new static);
     }
 
     /**
@@ -505,17 +516,17 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
  * @package CPath\Model\DB
  */
 class PDOModelSelect extends PDOSelect {
-    private $mClass;
+    private $mTemplate;
 
     /**
      * Create a new PDOModelSelect
      * @param \PDO $DB the database instance
-     * @param String|PDOModel $class The class name or instance
+     * @param PDOModel $Template An empty instance of the PDOModel class to fetch
      */
-    public function __construct(\PDO $DB, $class) {
-        $table = $class::TABLE;
-        parent::__construct($table, $DB, array($table . '.*'));
-        $this->mClass = is_string($class) ? $class : get_class($class);
+    public function __construct(\PDO $DB, PDOModel $Template) {
+        $table = $Template::TABLE;
+        parent::__construct($table, $DB, array($table . '.*'), $Template);
+        $this->mTemplate = $Template;
     }
 //
 //    public function select($field, $alias=NULL, $name=NULL) {
@@ -528,7 +539,7 @@ class PDOModelSelect extends PDOSelect {
      */
     public function exec() {
         parent::exec();
-        $this->mStmt->setFetchMode(\PDO::FETCH_CLASS, $this->mClass);
+        $this->mStmt->setFetchMode(\PDO::FETCH_CLASS, get_class($this->mTemplate));
         return $this;
     }
 

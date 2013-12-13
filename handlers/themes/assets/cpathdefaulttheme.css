@@ -118,13 +118,23 @@ body.mobile .navbar-menu { font-size: 8pt; }
     margin: 3pt;
     border-collapse: collapse;
     font: 11px Arial, Helvetica, Geneva, sans-serif;
+    display: inline-block;
 }
 
 .table.error {
 }
 
-table.table thead tr, table.table tfoot tr {
+table.table th {
     background-color: #ddd;
+    padding: 2pt 4pt;
+}
+
+table.table tbody th {
+    background-color: #e5e5e5;
+}
+
+table.table.error th {
+    background-color: #CAA;
 }
 
 table.table td, table.table th {
@@ -132,10 +142,6 @@ table.table td, table.table th {
 }
 
 table.table thead tr {
-}
-
-table.table.error thead tr, table.table.error tfoot tr {
-    background-color: #CAA;
 }
 
 table.table tbody td {

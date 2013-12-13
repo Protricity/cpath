@@ -11,10 +11,11 @@ use CPath\Model\DB\PDOModel;
 
 class ModelTableFragment implements IHandler{
 
-    private $mModel, $mTheme;
+    private $mModel, $mTemplate, $mTheme;
 
     /**
      * @param PDOModel|Array $Model
+     * @param PDOModel $Template a PDOModel instance to use as a template
      * @param ITableTheme $Theme
      */
     public function __construct($Model, ITableTheme $Theme = null) {
@@ -29,11 +30,17 @@ class ModelTableFragment implements IHandler{
      */
     function render(IRequest $Request)
     {
-        $export = $this->mModel;
+        $Model = $this->mModel;
+        $export = array();
         $caption = null;
-        if($export instanceof PDOModel) {
-            $caption = Describable::get($export)->getTitle();
-            $export = $export->exportData();
+        if($Model instanceof PDOModel) {
+            $caption = Describable::get($this->mTemplate)->getTitle();
+            $data = $Model->exportData();
+            foreach($Model->loadAllColumns() as $name => $Column)
+                if(isset($data[$name]))
+                    $export[$Column->getComment()] = $data[$name];
+        } else {
+            $export = $Model;
         }
         $Util = new TableThemeUtil($Request, $this->mTheme);
         $Util->renderKeyPairsTable($export, 'Column', 'Value', $caption);

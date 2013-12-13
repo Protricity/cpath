@@ -73,10 +73,10 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
 
         $Table->renderStart("Endpoints", 'handlersetview-table');
         $Table->renderHeaderStart();
-        $Table->renderTD('#',           0, 'table-field-num');
-        $Table->renderTD('Route',       0, 'table-field-route');
-        $Table->renderTD('Description', 0, 'table-field-description');
-        $Table->renderTD('Destination', 0, 'table-field-destination');
+        $Table->renderTD('#',           'table-field-num');
+        $Table->renderTD('Route',       'table-field-route');
+        $Table->renderTD('Description', 'table-field-description');
+        $Table->renderTD('Destination', 'table-field-destination');
         foreach($this->mHandlers as $route => $Handler) {
             $description = "No Description";
             try{
@@ -86,14 +86,14 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
             $url = "<a href='{$infoPath}{$this->mHandlerIDs[$route]}#{$route}'>{$routes[$route]->getPrefix()}</a>";
             $destination = $routes[$route]->getDestination();
             $Table->renderRowStart();
-            $Table->renderTD($num++,      0, 'table-field-num');
-            $Table->renderTD($url,      0, 'table-field-required');
-            $Table->renderTD($description,      0, 'table-field-name');
-            $Table->renderTD($destination,      0, 'table-field-description');
+            $Table->renderTD($num++,            'table-field-num');
+            $Table->renderTD($url,              'table-field-required');
+            $Table->renderTD($description,      'table-field-name');
+            $Table->renderTD($destination,      'table-field-description');
         }
 
         $Table->renderFooterStart();
-        $Table->renderDataStart(5, 'table-field-footer-buttons', "style='text-align: left'");
+        $Table->renderDataStart('table-field-footer-buttons', 5, 0, "style='text-align: left'");
         $Table->renderEnd();
     }
 

@@ -8,6 +8,7 @@
 namespace CPath\Model\DB;
 use CPath\Config;
 use CPath\Log;
+use CPath\Model\DB\Interfaces\ISelectDescriptor;
 use PDO;
 
 class PDOSelect extends PDOWhere implements \Iterator, \Countable {
@@ -19,12 +20,36 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     private $mCount = 0;
     private $mCustomMethod = null;
     private $mParse = array();
+    private $mDescriptor;
 
-    public function __construct($table, \PDO $DB, Array $select=array()) {
+    public function __construct($table, \PDO $DB, Array $select=array(), ISelectDescriptor $Descriptor=null) {
         parent::__construct($table);
         $this->mDB = $DB;
+
+        if($Descriptor)
+            $this->setDescriptor($Descriptor);
+
         foreach($select as $field)
             self::select($field);
+    }
+
+    /**
+     * @return ISelectDescriptor
+     * @throws \InvalidArgumentException
+     */
+    public function getDescriptor() {
+        if(!$this->mDescriptor)
+            throw new \InvalidArgumentException("No ISelectDescriptor was set");
+        return $this->mDescriptor;
+    }
+
+    public function hasDescriptor() {
+        return $this->mDescriptor ? true : false;
+    }
+
+    public function setDescriptor(ISelectDescriptor $Descriptor) {
+        $this->mDescriptor = $Descriptor;
+        return $this;
     }
 
     /**
