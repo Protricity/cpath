@@ -288,6 +288,7 @@ class CPathDefaultTheme implements ITheme {
     {
         $MTLF = new ModelResultsTableFragment($Query, $this);
         $MTLF->render($Request);
+
     }
 }
 

@@ -8,6 +8,7 @@
  */
 namespace CPath\Model\DB\Interfaces;
 
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Interfaces\IDescribable;
 
 
@@ -19,4 +20,10 @@ interface ISelectDescriptor {
      * @return IDescribable
      */
     function getColumnDescriptor($columnName);
+
+    /**
+     * Return the API used for this query
+     * @return IAPI
+     */
+    function getAPI();
 }

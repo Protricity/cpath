@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\Api\Field;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
@@ -18,6 +19,7 @@ use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
+use CPath\Model\DB\Interfaces\ISelectDescriptor;
 use CPath\Model\Response;
 
 class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {

@@ -42,6 +42,11 @@ abstract class View implements IView {
         $this->addHeadScript($basePath . 'assets/cpath.js');
     }
 
+    public function addHeadFieldsToView(View $View) {
+        foreach($this->mHeadFields as $key => $html)
+            $View->addHeadHTML($html, is_string($key) ? $key : null);
+    }
+
     protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
         if(!headers_sent()) {
             $message = preg_replace('/[^\w -]/', '', $message ?: static::RESPONSE_MESSAGE);

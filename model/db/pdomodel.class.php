@@ -47,7 +47,7 @@ class ModelAlreadyExistsException extends \Exception implements IResponseAggrega
 }
 
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport, ISelectDescriptor {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport {
     //const BUILD_IGNORE = true;
     //const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
 
@@ -163,15 +163,6 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         }
         $php = substr($php, 0, strlen($php) - 2) . "))";
         return $php;
-    }
-
-    /**
-     * Return the column description for a query row value
-     * @param String $columnName the name of the column to be translated
-     * @return Describable
-     */
-    function getColumnDescriptor($columnName) {
-        return static::loadColumn($columnName);
     }
 
     function __toString() {
@@ -522,10 +513,11 @@ class PDOModelSelect extends PDOSelect {
      * Create a new PDOModelSelect
      * @param \PDO $DB the database instance
      * @param PDOModel $Template An empty instance of the PDOModel class to fetch
+     * @param ISelectDescriptor $Descriptor
      */
-    public function __construct(\PDO $DB, PDOModel $Template) {
+    public function __construct(\PDO $DB, PDOModel $Template, ISelectDescriptor $Descriptor=null) {
         $table = $Template::TABLE;
-        parent::__construct($table, $DB, array($table . '.*'), $Template);
+        parent::__construct($table, $DB, array($table . '.*'), $Descriptor);
         $this->mTemplate = $Template;
     }
 //

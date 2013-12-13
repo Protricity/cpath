@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 
 use CPath\Handlers\Api\Field;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
@@ -18,6 +19,7 @@ use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
+use CPath\Model\DB\Interfaces\ISelectDescriptor;
 use CPath\Model\Response;
 
 class API_GetBrowse extends API_Base {
@@ -73,6 +75,7 @@ class API_GetBrowse extends API_Base {
         }
 
         $Search
+            ->setDescriptor(new API_GetBrowseDescriptor($Model, $this))
             ->limit($limit)
             ->page($page);
 
@@ -109,5 +112,33 @@ class API_GetBrowse extends API_Base {
             }
 
         parent::renderHTML($Request);
+    }
+}
+
+
+class API_GetBrowseDescriptor implements ISelectDescriptor {
+    private $mModel, $mAPI;
+
+    function __construct(PDOModel $Model, IAPI $API) {
+        $this->mModel = $Model;
+        $this->mAPI = $API;
+    }
+
+    /**
+     * Return the column title for a query row value
+     * @param String $columnName the name of the column to be translated
+     * @return IDescribable
+     */
+    function getColumnDescriptor($columnName) {
+        $Model = $this->mModel;
+        return $Model::loadColumn($columnName);
+    }
+
+    /**
+     * Return the API used for this query
+     * @return IAPI
+     */
+    function getAPI() {
+        return $this->mAPI;
     }
 }

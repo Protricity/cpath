@@ -91,6 +91,17 @@ class APIView extends NavBarLayout implements ILogListener {
      */
     function renderViewContent(IRequest $Request)
     {
+        $this->renderForm($Request, true);
+    }
+
+    /**
+     * Render the main view content
+     * @param IRequest $Request the IRequest instance for this render
+     * @param bool $devMode display developer tools
+     * @return void
+     */
+    function renderForm(IRequest $Request, $devMode=false)
+    {
         $API = $this->getAPIFromRequest($Request);
         $Route = $this->getAPIRouteFromRequest($Request);
         $Response = $this->mResponse;
@@ -119,28 +130,28 @@ class APIView extends NavBarLayout implements ILogListener {
 
             $Table->renderStart(Describable::get($API)->getDescription(), 'apiview-table');
                 $Table->renderHeaderStart();
-                    $Table->renderTD('#',           0, 'table-field-num');
-                    $Table->renderTD('Req\'d',      0, 'table-field-required');
-                    $Table->renderTD('Name',        0, 'table-field-name');
-                    $Table->renderTD('Description', 0, 'table-field-description');
-                    $Table->renderTD('Test',        0, 'table-field-input');
+                    $Table->renderTD('#',           'table-field-num');
+                    $Table->renderTD('Req\'d',      'table-field-required');
+                    $Table->renderTD('Name',        'table-field-name');
+                    $Table->renderTD('Description', 'table-field-description');
+                    $Table->renderTD('Test',        'table-field-input');
             if(!$fields) {
                 $Table->renderRowStart();
-                    $Table->renderTD('&nbsp;',      0, 'table-field-num');
-                    $Table->renderTD('&nbsp;',      0, 'table-field-required');
-                    $Table->renderTD('&nbsp;',      0, 'table-field-name');
-                    $Table->renderTD('&nbsp;',      0, 'table-field-description');
-                    $Table->renderTD('&nbsp;',      0, 'table-field-input');
+                    $Table->renderTD('&nbsp;',      'table-field-num');
+                    $Table->renderTD('&nbsp;',      'table-field-required');
+                    $Table->renderTD('&nbsp;',      'table-field-name');
+                    $Table->renderTD('&nbsp;',      'table-field-description');
+                    $Table->renderTD('&nbsp;',      'table-field-input');
             } else foreach($fields as $name=>$Field) {
                 $req = $Field->isRequired() ? 'yes' : '&nbsp;';
                 $desc = Describable::get($Field)->getDescription();;
 
                 $Table->renderRowStart();
-                $Table->renderTD($num++,    0, 'table-field-num');
-                $Table->renderTD($req,      0, 'table-field-required');
-                $Table->renderTD($name,     0, 'table-field-name');
-                $Table->renderTD($desc,     0, 'table-field-description');
-                $Table->renderDataStart(    0, 0, 'table-field-input');
+                $Table->renderTD($num++,    'table-field-num');
+                $Table->renderTD($req,      'table-field-required');
+                $Table->renderTD($name,     'table-field-name');
+                $Table->renderTD($desc,     'table-field-description');
+                $Table->renderDataStart(    'table-field-input');
                     $Field->render($Request);
             }
     //        $Table->renderFooterStart();
@@ -150,10 +161,15 @@ class APIView extends NavBarLayout implements ILogListener {
     //            $Table->renderTD('', 0, 'table-field-description');
     //            $Table->renderTD('', 0, 'table-field-input');
 
-            $Table->renderFooterStart();
-                $Table->renderDataStart(5, 0, 'table-field-footer-buttons', "style='text-align: left'");
-            ?>
 
+        $Table->renderFooterStart();
+        $Table->renderDataStart('table-field-footer-buttons', 5, 0, "style='text-align: left'");
+        if(!$devMode) {
+            ?>
+                                    <input type="button" value="Submit" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+            <?php
+        } else {
+            ?>
                                     <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
                                     <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
                                     <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
@@ -170,7 +186,9 @@ class APIView extends NavBarLayout implements ILogListener {
                                         </label>
                                     </span>
             <?php
-            $Table->renderEnd();
+
+        }
+        $Table->renderEnd();
 
         RI::ai(-1);
         echo RI::ni(), "</form>";
