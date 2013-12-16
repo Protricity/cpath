@@ -35,7 +35,7 @@
                     var html = '<tr>';
                     jQuery.each(row, function(key, value) {
                         if(value)
-                            value = value.replace( /<.*?>/g, ' ' );
+                            value = value.toString().replace( /<.*?>/g, ' ' );
                         html += '<td>' + value + '</td>'
                     });
                     html += '</tr>';
