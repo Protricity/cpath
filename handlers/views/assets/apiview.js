@@ -35,6 +35,7 @@
                 elm.html(json);
             } catch (e) {
                 elm.text(json);
+                console.error("Error: " + e);
             }
         },
         setPrettyXML: function(xml, elm) {

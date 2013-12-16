@@ -51,6 +51,7 @@ class APIView extends NavBarLayout implements ILogListener {
         $basePath = Base::getClassPublicPath($this, false);
         $this->addHeadStyleSheet($basePath . 'assets/apiview.css');
         $this->addHeadScript($basePath . 'assets/apiview.js');
+        $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
     }
 
     function getAPIFromRequest(IRequest $Request) {
