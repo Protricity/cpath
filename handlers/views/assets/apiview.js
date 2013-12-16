@@ -54,7 +54,7 @@
 
             var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
             lastHeaders = '';
-            THIS.hackXHR();
+            //THIS.hackXHR();
             responseContainer.show();
             requestHeaders.html("Loading...");
             responseHeaders.html("Loading...");
@@ -81,7 +81,7 @@
                     "Content-Type": asObject ? 'application/json' : null
                 },
                 complete: function(jqXHR, textStatus) {
-                    THIS.unhackXHR();
+                    //THIS.unhackXHR();
                     var content = jqXHR.responseText;
                     var call = 'html';
                     var response;
