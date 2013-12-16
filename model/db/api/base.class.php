@@ -16,7 +16,7 @@ use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\ISecurityPolicyAggregate;
 use CPath\Model\DB\Interfaces\SecurityPolicyNotFoundException;
 
-abstract class API_Base extends API implements IDescribableAggregate {
+abstract class API_Base extends API {
 
     private $mHandlers = array();
 

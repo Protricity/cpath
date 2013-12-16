@@ -17,7 +17,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     private $mDB, $mSelect=array(), $mLimit=NULL, $mOffset=NULL;
     private $mDistinct = false;
     private $mRow = null;
-    private $mCount = 0;
+    private $mCurRow = 0;
     private $mCustomMethod = null;
     private $mParse = array();
     private $mDescriptor;
@@ -86,6 +86,10 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         return $this;
     }
 
+    /**
+     * @param int $limit
+     * @return $this
+     */
     public function limit($limit) {
         $this->mLimit = $limit;
         return $this;
@@ -103,6 +107,13 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         return $this;
     }
 
+    public function getLimitedStats() {
+        return new PDOSelectLimitedStats(
+            $this->mLimit,
+            $this->mOffset
+        );
+    }
+
     /**
      * @param $callable
      * @return $this
@@ -112,6 +123,16 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         return $this;
     }
 
+    public function execStats($sql='count(*)') {
+        $sql = $this->getStatSQL($sql);
+        if(Config::$Debug)
+            Log::v2(__CLASS__, $sql);
+        $stmt = $this->mDB
+            ->prepare($sql);
+        $stmt->execute($this->mValues);
+        return $stmt;
+    }
+
     public function exec() {
         $sql = $this->getSQL();
         if(Config::$Debug)
@@ -119,13 +140,13 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         $this->mStmt = $this->mDB
             ->prepare($sql);
         $this->mStmt->execute($this->mValues);
-        $this->mCount=-1;
+        $this->mCurRow=-1;
         return $this->mStmt;
     }
 
     public function fetchColumn($i=0) {
         if(!$this->mStmt) $this->exec();
-        $this->mCount++;
+        $this->mCurRow++;
         if(is_int($i))
             return $this->mStmt->fetchColumn($i);
         $data = $this->mStmt->fetch();
@@ -134,7 +155,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
 
     public function fetch() {
         if(!$this->mStmt) $this->exec();
-        $this->mCount++;
+        $this->mCurRow++;
         $this->mRow = $this->mStmt->fetch();
         if($this->mRow) {
             foreach($this->mParse as $name) {
@@ -158,7 +179,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
 
     public function fetchObject($Class) {
         if(!$this->mStmt) $this->exec();
-        $this->mCount++;
+        $this->mCurRow++;
         $this->mRow = $this->mStmt->fetchObject($Class);
         return $this->mRow;
     }
@@ -169,7 +190,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         while($mRow = $this->fetch())
             $fetch[] = $mRow;
 
-        $this->mCount = sizeof($fetch);
+        $this->mCurRow = sizeof($fetch);
         return $fetch;
     }
 
@@ -178,10 +199,16 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         if($d === true) $d = 'DISTINCT ';
         elseif($d !== false) $d = 'DISTINCT ' . $d . ' ';
         return "SELECT " . $d . implode(', ', $this->mSelect)
-            ."\nFROM ".$this->mTable
-            .parent::getSQL()
-            .($this->mLimit ? "\nLIMIT ".$this->mLimit : '')
-            .($this->mOffset ? "\nOFFSET ".$this->mOffset : '');
+        ."\nFROM ".$this->mTable
+        .parent::getSQL()
+        .($this->mLimit ? "\nLIMIT ".$this->mLimit : '')
+        .($this->mOffset ? "\nOFFSET ".$this->mOffset : '');
+    }
+
+    private function getStatSQL($statSQL) {
+        return "SELECT " . $statSQL
+        ."\nFROM ".$this->mTable
+        .parent::getSQL();
     }
 
     /**
@@ -211,7 +238,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
      */
     public function key()
     {
-        return $this->mCount;
+        return $this->mCurRow;
     }
 
     /**

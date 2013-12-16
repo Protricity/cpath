@@ -33,10 +33,10 @@ class APIView extends NavBarLayout implements ILogListener {
     private $mResponse = null;
 
     public function __construct(IAPI $API=null, IRoute $Route=null, IResponse $Response=null, ITheme $Theme=null) {
-        parent::__construct($Theme ?: CPathDefaultTheme::get());
         $this->mAPI = $API;
         $this->mRoute = $Route;
         $this->mResponse = $Response;
+        parent::__construct($Theme ?: CPathDefaultTheme::get());
 
         if(Config::$Debug)
             Log::addCallback($this);
@@ -77,9 +77,10 @@ class APIView extends NavBarLayout implements ILogListener {
         if($this->mRoute)
             return $this->mRoute;
 
-        $API = $this->getAPIFromRequest($Request);
-        $routes = $API->getAllRoutes(new RouteBuilder());
-        $this->mRoute = current($routes);
+        $this->mRoute = $Request->getRoute();
+        //$API = $this->getAPIFromRequest($Request);
+        //$routes = $API->getAllRoutes(new RouteBuilder());
+        //$this->mRoute = current($routes);
 
         return $this->mRoute;
     }
@@ -98,10 +99,17 @@ class APIView extends NavBarLayout implements ILogListener {
      * Render the main view content
      * @param IRequest $Request the IRequest instance for this render
      * @param bool $devMode display developer tools
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderForm(IRequest $Request, $devMode=false)
+    function renderForm(IRequest $Request, $devMode=false, $class=null, $attr=null)
     {
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
+        $class = 'apiview-form' . ($class ? ' ' . $class : '');
+        $attr = "method='POST' enctype='multipart/form-data'" . ($attr ? " " . $attr : '');
+
         $API = $this->getAPIFromRequest($Request);
         $Route = $this->getAPIRouteFromRequest($Request);
         $Response = $this->mResponse;
@@ -123,9 +131,10 @@ class APIView extends NavBarLayout implements ILogListener {
 
         $fields = $API->getFields();
 
-        $Table = new TableThemeUtil($Request, $this->getTheme());
+        $Theme = $this->getTheme();
+        $Table = new TableThemeUtil($Request, $Theme);
 
-        echo RI::ni(), "<form class='apiview-form' method='POST' enctype='multipart/form-data'>";
+        echo RI::ni(), "<form", $attr ? ' '.$attr : '', " class='{$class}'", ">";
         RI::ai(1);
 
             $Table->renderStart(Describable::get($API)->getDescription(), 'apiview-table');
@@ -152,7 +161,9 @@ class APIView extends NavBarLayout implements ILogListener {
                 $Table->renderTD($name,     'table-field-name');
                 $Table->renderTD($desc,     'table-field-description');
                 $Table->renderDataStart(    'table-field-input');
-                    $Field->render($Request);
+                if(isset($_GET[$name]))
+                    $Field->setValue($_GET[$name]);
+                $Field->render($Request);
             }
     //        $Table->renderFooterStart();
     //            $Table->renderTD('', 0, 'table-field-num');
@@ -168,7 +179,8 @@ class APIView extends NavBarLayout implements ILogListener {
             ?>
                                     <input type="button" value="Submit" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
             <?php
-        } else {
+        }
+        if($devMode || Config::$Debug) {
             ?>
                                     <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
                                     <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
@@ -192,28 +204,31 @@ class APIView extends NavBarLayout implements ILogListener {
 
         RI::ai(-1);
         echo RI::ni(), "</form>";
+
+        $Theme->renderFragmentStart($Request, null, null, !$Response ? "style='display: none'" : null);
         RI::ni();
-                    ?><div class="response-container" style="<?php if(!$Response) echo 'display: none'; ?>">
-                        <h3>Response</h3>
-                        <div class='response-content'>
-                            <?php
-                            if($Response) {
-                                try{
-                                    $JSON = Util::toJSON($Response);
-                                    echo json_encode($JSON);
-                                } catch (\Exception $ex) {
-                                    $Response = new ExceptionResponse($ex);
-                                    $JSON = Util::toJSON($Response);
-                                    echo json_encode($JSON);
-                                }
+                    ?>
+                    <h3>Response</h3>
+                    <div class='response-content'>
+                        <?php
+                        if($Response) {
+                            try{
+                                $JSON = Util::toJSON($Response);
+                                echo json_encode($JSON);
+                            } catch (\Exception $ex) {
+                                $Response = new ExceptionResponse($ex);
+                                $JSON = Util::toJSON($Response);
+                                echo json_encode($JSON);
                             }
-                            ?>
-                        </div>
-                        <h3>Response Headers</h3>
-                        <div class='response-headers'></div>
-                        <h3>Request Headers</h3>
-                        <div class='request-headers'></div>
-                    </div><?php
+                        }
+                        ?>
+                    </div>
+                    <h3>Response Headers</h3>
+                    <div class='response-headers'></div>
+                    <h3>Request Headers</h3>
+                    <div class='request-headers'></div>
+                    <?php
+        $Theme->renderFragmentEnd($Request);
     }
 
     /**

@@ -16,9 +16,11 @@ interface IFragmentTheme {
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
      * @param IDescribable|String|Null $Description optional fragment header text or description
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderFragmentStart(IRequest $Request, $Description=null);
+    function renderFragmentStart(IRequest $Request, $Description=null, $class=null, $attr=null);
 
     /**
      * Render the end of a fragment.

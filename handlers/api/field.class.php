@@ -23,7 +23,7 @@ use CPath\Validate;
  */
 class Field implements IField {
 
-    private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mRequired = false, $mIsParam = false;
+    private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mRequired = false, $mIsParam = false, $mValue=null;
     private $mShortNames=array();
 
     /**
@@ -103,6 +103,16 @@ class Field implements IField {
     }
 
     /**
+     * Internal function used to set the field name.
+     * @param String $value
+     * @return IField
+     */
+    function setValue($value) {
+        $this->mValue = $value;
+        return $this;
+    }
+
+    /**
      * Get the field name.
      * @return string
      * @throws \Exception if the name was never set.
@@ -154,7 +164,7 @@ class Field implements IField {
      */
     function render(IRequest $Request, Array $attr=array())
     {
-        $value = $Request[$this->getName()];
+        $value = $this->mValue ?: $Request[$this->getName()];
         if($value)
             $value = htmlspecialchars($value, ENT_QUOTES);
         if(!isset($attr['name']))

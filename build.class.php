@@ -16,7 +16,7 @@ use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Model\Response;
 
-class Build extends API implements IBuildable, IDescribableAggregate {
+class Build extends API implements IBuildable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only

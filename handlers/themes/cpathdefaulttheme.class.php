@@ -11,9 +11,11 @@ use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IResponse;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
+use CPath\Model\DB\SearchResponse;
 
 
 class CPathDefaultTheme implements ITheme {
@@ -39,15 +41,22 @@ class CPathDefaultTheme implements ITheme {
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
      * @param IDescribable|String|Null $Description optional fragment header text or description
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderFragmentStart(IRequest $Request, $Description=null)
+    function renderFragmentStart(IRequest $Request, $Description=null, $class=null, $attr=null)
     {
-        $errClass = $this->mIsException ? ' error' : '';
-        echo RI::ni(), "<div class='fragment{$errClass}'>";
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
+        $class = 'fragment' . ($class ? ' ' . $class : '');
+        if($this->mIsException)
+            $class .= ' error';
+
+        echo RI::ni(), "<div", $attr ? ' '.$attr : '', " class='{$class}'", ">";
         echo RI::ai(1);
         if($Description) {
-            echo RI::ni(), "<div class='fragment-title'>", Describable::get($Description)->getTitle(), "</div>";
+            echo RI::ni(), "<h4 class='fragment-title'>", Describable::get($Description)->getTitle(), "</h4>";
         }
         echo RI::ni(), "<div>";
     }
@@ -264,13 +273,14 @@ class CPathDefaultTheme implements ITheme {
     }
 
     /**
-     * Render the end of an html body section.
+     * Render the results of a query.
      * @param IRequest $Request the IRequest instance for this render
      * @param PDOSelect $Query query instance to render (not yet executed)
-     * @param String|Null $className optional class name for this section
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $className = NULL) {
+    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $class = NULL, $attr = NULL) {
         foreach($Query as $data) {
             $MF = new ModelTableFragment($data, $this);
             $MF->render($Request);
@@ -280,14 +290,15 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the end of an html body section.
      * @param IRequest $Request the IRequest instance for this render
-     * @param PDOSelect $Query query instance to render (not yet executed)
-     * @param String|Null $className optional class name for this section
+     * @param SearchResponse $Response the SearchResponse instance for this query
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderSearchContent(IRequest $Request, PDOSelect $Query, $className = NULL)
+    function renderSearchContent(IRequest $Request, SearchResponse $Response, $class = NULL, $attr = NULL)
     {
-        $MTLF = new ModelResultsTableFragment($Query, $this);
-        $MTLF->render($Request);
+        $MTLF = new ModelResultsTableFragment($Response, $this);
+        $MTLF->render($Request, $class, $attr);
 
     }
 }

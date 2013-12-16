@@ -58,9 +58,8 @@ body.wide .page {
     float: left;
     width: 200px;
     padding: 3pt;
-    margin: 0 24pt 24pt 0;
+    margin: 0 24pt 6pt 0;
     min-height: 60pt;
-
 }
 
 .navbar-menu
@@ -108,17 +107,39 @@ body.mobile .navbar-menu { font-size: 8pt; }
 
 .fragment {
     margin: 3pt;
+    padding: 3pt;
+    background-color: #fbfbfb;
+    border: solid #bbb 1px;
+    font: 11px Arial, Helvetica, Geneva, sans-serif;
+}
+
+.fragment .fragment { background-color: #f9f9f9; }
+.fragment .fragment .fragment { background-color: #f7f7f7; }
+.fragment .fragment .fragment .fragment { background-color: #f5f5f5; }
+
+
+.fragment-title {
+    background-color: #ddd;
+    padding: 2pt 4pt;
+    margin: 0;
 }
 
 /* ITableTheme */
 
 .table {
     background-color: #fff;
-    border: solid #bbb 1px;
+    border: solid #ccc 1px;
     margin: 3pt;
     border-collapse: collapse;
     font: 11px Arial, Helvetica, Geneva, sans-serif;
     display: inline-block;
+}
+
+.table a {
+    text-decoration: none;
+}
+.table a:hover {
+    text-decoration: underline;
 }
 
 .table.error {
@@ -128,6 +149,11 @@ table.table th {
     background-color: #ddd;
     padding: 2pt 4pt;
 }
+
+table.table tfoot th {
+    font-weight: normal;
+}
+
 
 table.table tbody th {
     background-color: #e5e5e5;
@@ -155,6 +181,30 @@ table.table tbody td  { overflow: hidden;  }
 body.wide .table, body.wide .table input, body.wide .table select { font-size: 8pt; }
 body.narrow .table, body.narrow .table input, body.narrow .table select { font-size: 7pt; }
 body.mobile .table, body.mobile .table input, body.mobile .table select { font-size: 6pt; }
+
+/* Search: */
+
+.search-form-controls {
+    position: relative;
+}
+
+.search-form-page-previous, .search-form-page-next{
+    padding: 1pt;
+    top: 1pt;
+    position: absolute;
+}
+
+.search-form-page-next {
+    right: 1pt;
+}
+
+.search-form-page-previous {
+    left: 1pt;
+}
+
+.search-form-pages {
+    margin: 0 48pt;
+}
 
 /* Misc: */
 

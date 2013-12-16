@@ -42,9 +42,14 @@ abstract class View implements IView {
         $this->addHeadScript($basePath . 'assets/cpath.js');
     }
 
-    public function addHeadFieldsToView(View $View) {
+    /**
+     * Add or replace head elements into another IView
+     * @param IView $View the view instance to copy into
+     * @return void
+     */
+    function mergeHeadElementsInto(IView $View) {
         foreach($this->mHeadFields as $key => $html)
-            $View->addHeadHTML($html, is_string($key) ? $key : null);
+            $View->addHeadHTML($html, $key, true);
     }
 
     protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
@@ -105,12 +110,12 @@ abstract class View implements IView {
 
     function addHeadHTML($html, $key=null, $replace=false) {
         if(!$key) {
-            $this->mHeadFields[] = $html;
+            $this->mHeadFields[crc32($html)] = $html;
             return;
         }
         if(!isset($this->mHeadFields[$key])) {
-            if($replace)
-                throw new \InvalidArgumentException("Key '{$key}' does not exist in header fields");
+            //if($replace)
+            //    throw new \InvalidArgumentException("Key '{$key}' does not exist in header fields");
             $this->mHeadFields[$key] = $html;
         } else {
             if(!$replace)

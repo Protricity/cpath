@@ -14,7 +14,8 @@ interface IUser {
 
     const FLAG_DEBUG = 0x10;
     const FLAG_MANAGER = 0x20;
-    const FLAG_ADMIN = 0x40;
+    const FLAG_DEVELOPER = 0x40;
+    const FLAG_ADMIN = 0x80;
 
     function getID();
 

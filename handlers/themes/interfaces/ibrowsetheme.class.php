@@ -12,13 +12,13 @@ use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 
 interface IBrowseTheme {
-
     /**
      * Render the results of a query.
      * @param IRequest $Request the IRequest instance for this render
      * @param PDOSelect $Query query instance to render (not yet executed)
-     * @param String|Null $className optional class name for this section
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $className = NULL);
+    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $class = NULL, $attr = NULL);
 }

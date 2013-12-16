@@ -56,4 +56,13 @@ class SimpleDescription implements IDescribable {
      * @return $this
      */
     function setDescription($desc) { $this->mDesc = $desc; return $this; }
+
+    /**
+     * Get a simple world-visible description of this object as it would be used in a sentence (i.e. "User Acct 'root'")
+     * Note: This method typically contains "return $this->getTitle();"
+     * @return String simple description for this Object
+     */
+    function __toString() {
+        return $this->getTitle();
+    }
 }

@@ -8,6 +8,7 @@
 namespace CPath\Handlers\Interfaces;
 
 
+use CPath\Handlers\View;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 

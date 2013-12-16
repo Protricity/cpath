@@ -8,6 +8,7 @@
 namespace CPath\Handlers\Api\Interfaces;
 
 use CPath\Helpers\Describable;
+use CPath\Interfaces\IDescribableAggregate;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
@@ -67,7 +68,7 @@ class ValidationExceptions extends MultiException {
 }
 
 
-interface IAPI extends IHandler, IRoutable {
+interface IAPI extends IHandler, IRoutable, IDescribableAggregate {
 
     /**
      * Execute this API Endpoint with the entire request.

@@ -8,12 +8,13 @@
 namespace CPath\Model;
 use CPath\Interfaces\IComparable;
 use CPath\Interfaces\IComparator;
+use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\NotEqualException;
 
-class Response extends ArrayObject implements IResponse, IComparable {
+class Response extends ArrayObject implements IResponse, IComparable, IDescribable {
     private $mCode, $mData=array(), $mMessage;
     /** @var ILogEntry[] */
     private $mLogs=array();
@@ -119,19 +120,6 @@ class Response extends ArrayObject implements IResponse, IComparable {
         IResponseHelper::renderText($this);
     }
 
-    // Statics
-
-    /**
-     * Return a new response
-     * @param String $msg the response message
-     * @param bool $status the response status
-     * @param mixed $data additional response data
-     * @return Response a new Response instance
-     */
-    static function getNew($msg=NULL, $status=true, $data=array()) {
-        return new self($msg, $status, $data);
-    }
-
     /**
      * Compare two instances of this object
      * @param IComparable|Response $obj the object to compare against $this
@@ -144,4 +132,26 @@ class Response extends ArrayObject implements IResponse, IComparable {
         $C->compareScalar($this->mMessage, $obj->mMessage, "Response Message");
         $C->compare($this->mData, $obj->mData, "Response Data");
     }
+
+    /**
+     * Get a simple public-visible title of this object as it would be displayed in a header (i.e. "Mr. Root")
+     * @return String title for this Object
+     */
+    function getTitle() {
+        return $this->getMessage();
+    }
+
+    /**
+     * Get a simple public-visible description of this object as it would appear in a paragraph (i.e. "User account 'root' with ID 1234")
+     * @return String simple description for this Object
+     */
+    function getDescription() {
+        return $this->getMessage();
+    }
+
+    function __toString() {
+        return $this->getTitle();
+    }
+
+    // Statics
 }

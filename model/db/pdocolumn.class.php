@@ -168,19 +168,33 @@ class PDOColumn implements IDescribable {
         return $Field;
     }
 
+
     /**
-     * Get the Object Title
-     * @return String description for this Object
+     * Get a simple public-visible title of this object as it would be displayed in a header (i.e. "Mr. Root")
+     * @return String title for this Object
      */
     function getTitle() {
+        $words = explode('_', $this->mName);
+        foreach($words as &$word)
+            if(strlen($word) <= 2)
+                $word = strtoupper($word);
+        return ucwords(implode(' ', $words));
+    }
+
+    /**
+     * Get a simple public-visible description of this object as it would appear in a paragraph (i.e. "User account 'root' with ID 1234")
+     * @return String simple description for this Object
+     */
+    function getDescription() {
         return $this->getComment();
     }
 
     /**
-     * Get the Object Description
-     * @return String description for this Object
+     * Get a simple world-visible description of this object as it would be used when cast to a String (i.e. "root", 1234)
+     * Note: This method typically contains "return $this->getTitle();"
+     * @return String simple description for this Object
      */
-    function getDescription() {
-        return $this->getComment();
+    function __toString() {
+        return $this->mName;
     }
 }

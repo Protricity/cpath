@@ -10,6 +10,7 @@
     var lastHeaders = '';
     var requestHeaders, responseHeaders, responseContent, responseContainer;
     var basePath;
+
     jQuery(document).ready(function() {
         requestHeaders = jQuery('div.request-headers');
         responseHeaders = jQuery('div.response-headers');
@@ -20,7 +21,12 @@
         var content = responseContent.text();
         if(content)
             APIView.setPrettyJSON(content, responseContent);
+
+        jQuery('form').on("cpath-submit", function(event, url) {
+            THIS.submit(url, jQuery(this), 'json', 'GET');
+        });
     });
+
     window.APIView = THIS = {
         accepts: '*/*',
         setPrettyJSON: function(json, elm) {
@@ -41,6 +47,11 @@
         },
         submit: function(path, form, dataType, method, asObject, accepts) {
             form = jQuery(form);
+            var params = CPath.parseQueryString(path.split('?')[1]);
+            jQuery.each(params, function(key, value) {
+                form.find('input[name=' + key + ']').val(value);
+            });
+
             var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
             lastHeaders = '';
             THIS.hackXHR();
@@ -73,18 +84,26 @@
                     THIS.unhackXHR();
                     var content = jqXHR.responseText;
                     var call = 'html';
+                    var response;
 
                     switch(dataType) {
                         case 'json':
                             THIS.setPrettyJSON(content, responseContent);
+                            response = new CPath.API.JSONSearchResponse(jQuery.parseJSON(content));
+                            form.trigger( "cpath-response-json", [response, content], jqXHR);
                             break;
                         case 'xml':
                             THIS.setPrettyXML(content, responseContent);
+                            response = new CPath.API.XMLSearchResponse(jQuery.parseXML(content));
+                            form.trigger( "cpath-response-xml", [response, content], jqXHR);
                             break;
                         default :
                             responseContent.text(content);
+                            response = new CPath.API.Response(content);
                             break;
                     }
+
+                    form.trigger( "cpath-response", [response, content] , jqXHR);
 
                     requestHeaders.html(method + ' ' + path + " HTTP/1.1\n" + lastHeaders);
                     responseHeaders.html(jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders());

@@ -13,7 +13,7 @@ use CPath\Misc\RenderIndents as RI;
 
 
 class TableThemeUtil {
-    private $mTheme, $mRequest, $mLastElm='none', $mRowFlags=0;
+    private $mTheme, $mRequest, $mLastElm='none', $mRowFlags=0, $mColNum=0, $mColMax=0;
 
     public function __construct(IRequest $Request, ITableTheme $Theme) {
         $this->mRequest = $Request;
@@ -29,8 +29,7 @@ class TableThemeUtil {
      */
     public function renderTD($content, $class=null, $span=0, $flags=0, $attr=null) {
         $this->renderDataStart($class, $span, $flags, $attr);
-        if($content)
-            echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
+        $this->renderContent($content);
         $this->renderDataEnd();
     }
 
@@ -58,11 +57,15 @@ class TableThemeUtil {
                 $this->renderDataStart(null, 0, $flags | ITableTheme::FLAG_DATA_IS_LABEL);
             else
                 $this->renderDataStart(null, 0, $flags);
-            echo RI::ni(), $content;
+            $this->renderContent($content);
             $this->renderDataEnd();
             $i++;
         }
         $this->renderRowEnd();
+    }
+
+    private function renderContent ($content) {
+        echo RI::ni(), is_callable($content) ? call_user_func($content) : ($content === null ? 'null' : $content);
     }
 
     public function renderKeyPairsTable(Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {
@@ -154,6 +157,9 @@ class TableThemeUtil {
                 break;
         }
         $this->mRowFlags = $flags;
+        if($this->mColNum > $this->mColMax)
+            $this->mColMax = $this->mColNum;
+        $this->mColNum = 0;
         $this->mTheme->renderTableRowStart($this->mRequest, $flags, $class, $attr);
         $this->mLastElm = 'tr';
     }
@@ -180,6 +186,15 @@ class TableThemeUtil {
                 $this->renderRowStart();
                 break;
         }
+        if(is_string($span))
+            switch($span) {
+                case 'end':
+                    $span = $this->mColMax - $this->mColNum;
+                    if($span < 0)
+                        $span = 0;
+                    break;
+            }
+        $this->mColNum++;
         $this->mTheme->renderTableDataStart($this->mRequest, $span, $class, $flags | $this->mRowFlags, $attr);
         $this->mLastElm = 'td';
     }

@@ -10,9 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Handlers\Api\Param;
 use CPath\Handlers\API;
-use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
@@ -20,7 +18,6 @@ use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
-use CPath\Model\Response;
 
 class API_GetBrowse extends API_Base {
 
@@ -74,8 +71,9 @@ class API_GetBrowse extends API_Base {
             $Search = $Model::select($select);
         }
 
+        $Descriptor = new API_GetBrowseDescriptor($Model, $Search, $this);
         $Search
-            ->setDescriptor(new API_GetBrowseDescriptor($Model, $this))
+            ->setDescriptor($Descriptor)
             ->limit($limit)
             ->page($page);
 
@@ -87,7 +85,9 @@ class API_GetBrowse extends API_Base {
             if($Handler instanceof IReadAccess)
                 $Handler->assertQueryReadAccess($Search, $Request, IReadAccess::INTENT_SEARCH);
 
-        return new Response($Model::modelName()." Query Successful", true, $Search);
+        $Stats = $Descriptor->execFullStats();
+        $c = $Stats->getTotal();
+        return new SearchResponse("Browsing ({$c}) " . $Model::modelName() . " results", $Search);
     }
 
 
@@ -102,8 +102,9 @@ class API_GetBrowse extends API_Base {
             if($Handler instanceof IPDOModelSearchRender)
             {
                 try {
-                    $Model = $this->executeOrThrow($Request)->getDataPath();
-                    $Handler->renderSearch($Model, $Request);
+                    /** @var SearchResponse $Response */
+                    $Response = $this->executeOrThrow($Request);
+                    $Handler->renderSearch($Request, $Response);
                     return;
                 } catch (\Exception $ex) {
                     $Handler->renderException($ex, $Request);
@@ -117,19 +118,36 @@ class API_GetBrowse extends API_Base {
 
 
 class API_GetBrowseDescriptor implements ISelectDescriptor {
-    private $mModel, $mAPI;
+    private $mModel, $mAPI, $mQuery, $mStatsCache;
 
-    function __construct(PDOModel $Model, IAPI $API) {
+    function __construct(PDOModel $Model, PDOSelect $Query, IAPI $API) {
         $this->mModel = $Model;
+        $this->mQuery = $Query;
         $this->mAPI = $API;
     }
 
+
+    public function getLimitedStats() {
+        return $this->mQuery->getLimitedStats();
+    }
+
+    public function execFullStats($allowCache=true) {
+        $Stats = $this->getLimitedStats();
+        if(!$allowCache)
+            $this->mStatsCache = NULL;
+        return $this->mStatsCache ?: $this->mStatsCache = new PDOSelectStats(
+            (int)$this->mQuery->execStats('count(*)')->fetchColumn(0),
+            $Stats->getLimit(),
+            $Stats->getOffset()
+        );
+    }
+
     /**
-     * Return the column title for a query row value
+     * Return the column for a query row value
      * @param String $columnName the name of the column to be translated
-     * @return IDescribable
+     * @return PDOColumn
      */
-    function getColumnDescriptor($columnName) {
+    function getColumn($columnName) {
         $Model = $this->mModel;
         return $Model::loadColumn($columnName);
     }

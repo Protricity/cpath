@@ -34,6 +34,13 @@ interface IField extends IHandler, IDescribableAggregate {
     function setName($name);
 
     /**
+     * Internal function used to set the field name.
+     * @param String $value
+     * @return IField
+     */
+    function setValue($value);
+
+    /**
      * Adds a short alias to the field.
      * @param String $shortName
      * @return void

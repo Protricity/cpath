@@ -7,6 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
+/**
+ * Interface IDescribableAggregate
+ * Warning: getDescribable might return a String or it might return an IDescribable instance which implements __toString().
+ * Use CPath\Helpers\Describable::get($object) to return an IDescribable in all instances
+ * @package CPath\Interfaces
+ */
 interface IDescribableAggregate {
 
     /**
