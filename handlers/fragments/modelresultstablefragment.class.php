@@ -4,16 +4,12 @@ namespace CPath\Handlers\Fragments;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Helpers\Describable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDOModel;
-use CPath\Model\DB\PDOSelect;
 use CPath\Model\DB\PDOSelectStats;
 use CPath\Model\DB\SearchResponse;
-use SP\Product;
 
 class ModelResultsTableFragment implements IHandler{
 

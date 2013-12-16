@@ -58,7 +58,7 @@ class CPathDefaultTheme implements ITheme {
         if($Description) {
             echo RI::ni(), "<h4 class='fragment-title'>", Describable::get($Description)->getTitle(), "</h4>";
         }
-        echo RI::ni(), "<div>";
+        echo RI::ni(), "<div class='fragment-content'>";
     }
 
     /**

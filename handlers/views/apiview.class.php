@@ -93,6 +93,7 @@ class APIView extends NavBarLayout implements ILogListener {
     function renderViewContent(IRequest $Request)
     {
         $this->renderForm($Request, true);
+        $this->renderDebugBox($Request);
     }
 
     /**
@@ -112,10 +113,6 @@ class APIView extends NavBarLayout implements ILogListener {
 
         $API = $this->getAPIFromRequest($Request);
         $Route = $this->getAPIRouteFromRequest($Request);
-        $Response = $this->mResponse;
-
-        if($Response == NULL && strcasecmp($Request->getMethod(), 'get') !== 0)
-            $Response = $API->execute($Request);
 
         //$basePath = Base::getClassPublicPath($this);
 
@@ -137,59 +134,60 @@ class APIView extends NavBarLayout implements ILogListener {
         echo RI::ni(), "<form", $attr ? ' '.$attr : '', " class='{$class}'", ">";
         RI::ai(1);
 
-            $Table->renderStart(Describable::get($API)->getDescription(), 'apiview-table');
-                $Table->renderHeaderStart();
-                    $Table->renderTD('#',           'table-field-num');
-                    $Table->renderTD('Req\'d',      'table-field-required');
-                    $Table->renderTD('Name',        'table-field-name');
-                    $Table->renderTD('Description', 'table-field-description');
-                    $Table->renderTD('Test',        'table-field-input');
-            if(!$fields) {
-                $Table->renderRowStart();
-                    $Table->renderTD('&nbsp;',      'table-field-num');
-                    $Table->renderTD('&nbsp;',      'table-field-required');
-                    $Table->renderTD('&nbsp;',      'table-field-name');
-                    $Table->renderTD('&nbsp;',      'table-field-description');
-                    $Table->renderTD('&nbsp;',      'table-field-input');
-            } else foreach($fields as $name=>$Field) {
-                $req = $Field->isRequired() ? 'yes' : '&nbsp;';
-                $desc = Describable::get($Field)->getDescription();;
+        $Table->renderStart(Describable::get($API)->getDescription(), 'apiview-table');
+        $Table->renderHeaderStart();
+        $Table->renderTD('#',           'table-field-num');
+        $Table->renderTD('Req\'d',      'table-field-required');
+        $Table->renderTD('Name',        'table-field-name');
+        $Table->renderTD('Description', 'table-field-description');
+        $Table->renderTD('Test',        'table-field-input');
+        if(!$fields) {
+            $Table->renderRowStart();
+            $Table->renderTD('&nbsp;',      'table-field-num');
+            $Table->renderTD('&nbsp;',      'table-field-required');
+            $Table->renderTD('&nbsp;',      'table-field-name');
+            $Table->renderTD('&nbsp;',      'table-field-description');
+            $Table->renderTD('&nbsp;',      'table-field-input');
+        } else foreach($fields as $name=>$Field) {
+            $req = $Field->isRequired() ? 'yes' : '&nbsp;';
+            $desc = Describable::get($Field)->getDescription();;
 
-                $Table->renderRowStart();
-                $Table->renderTD($num++,    'table-field-num');
-                $Table->renderTD($req,      'table-field-required');
-                $Table->renderTD($name,     'table-field-name');
-                $Table->renderTD($desc,     'table-field-description');
-                $Table->renderDataStart(    'table-field-input');
-                if(isset($_GET[$name]))
-                    $Field->setValue($_GET[$name]);
-                $Field->render($Request);
-            }
-    //        $Table->renderFooterStart();
-    //            $Table->renderTD('', 0, 'table-field-num');
-    //            $Table->renderTD('', 0, 'table-field-required');
-    //            $Table->renderTD('', 0, 'table-field-name');
-    //            $Table->renderTD('', 0, 'table-field-description');
-    //            $Table->renderTD('', 0, 'table-field-input');
+            $Table->renderRowStart();
+            $Table->renderTD($num++,    'table-field-num');
+            $Table->renderTD($req,      'table-field-required');
+            $Table->renderTD($name,     'table-field-name');
+            $Table->renderTD($desc,     'table-field-description');
+            $Table->renderDataStart(    'table-field-input');
+            if(isset($_GET[$name]))
+                $Field->setValue($_GET[$name]);
+            $Field->render($Request);
+        }
+        //        $Table->renderFooterStart();
+        //            $Table->renderTD('', 0, 'table-field-num');
+        //            $Table->renderTD('', 0, 'table-field-required');
+        //            $Table->renderTD('', 0, 'table-field-name');
+        //            $Table->renderTD('', 0, 'table-field-description');
+        //            $Table->renderTD('', 0, 'table-field-input');
 
 
         $Table->renderFooterStart();
         $Table->renderDataStart('table-field-footer-buttons', 5, 0, "style='text-align: left'");
         if(!$devMode) {
             ?>
-                                    <input type="button" value="Submit" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-            <?php
+            <input type="button" value="Submit" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+        <?php
         }
         if($devMode || Config::$Debug) {
             ?>
-                                    <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-                                    <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
-                                    <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
-                                    <input type="submit" value="POST"/>
-                                    <input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
-                                    <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
-                                    <input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
-                                    <span id="spanCustom" style="display: none">
+            <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+            <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
+            <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
+            <input type="submit" value="POST"/>
+            <input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
+            <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
+            <input type="button" value="Response" onclick="jQuery('.response-container').toggle();" />
+            <input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
+            <span id="spanCustom" style="display: none">
                                         <label>Accepts:
                                             <input  id="txtCustomText" type="text" value="*/*" size="4" />
                                         </label>
@@ -197,37 +195,54 @@ class APIView extends NavBarLayout implements ILogListener {
                                             <input id="txtCustomMethod" type="text" value="GET" size="4" />
                                         </label>
                                     </span>
-            <?php
+        <?php
 
         }
         $Table->renderEnd();
 
         RI::ai(-1);
         echo RI::ni(), "</form>";
+    }
 
-        $Theme->renderFragmentStart($Request, null, null, !$Response ? "style='display: none'" : null);
-        RI::ni();
-                    ?>
-                    <h3>Response</h3>
-                    <div class='response-content'>
-                        <?php
-                        if($Response) {
-                            try{
-                                $JSON = Util::toJSON($Response);
-                                echo json_encode($JSON);
-                            } catch (\Exception $ex) {
-                                $Response = new ExceptionResponse($ex);
-                                $JSON = Util::toJSON($Response);
-                                echo json_encode($JSON);
-                            }
-                        }
-                        ?>
-                    </div>
-                    <h3>Response Headers</h3>
-                    <div class='response-headers'></div>
-                    <h3>Request Headers</h3>
-                    <div class='request-headers'></div>
-                    <?php
+    /**
+     * Render the response/debug box
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String|Array|NULL $class element classes
+     * @param String|Array|NULL $attr element attributes
+     * @return void
+     */
+    function renderDebugBox(IRequest $Request, $class=null, $attr=null)
+    {
+        if(is_array($attr))     $attr = implode(' ', $attr);
+        if(is_array($class))    $class = implode(' ', $class);
+        $class = 'response-container' . ($class ? ' ' . $class : '');
+        $attr = "style='display: none'" . ($attr ? " " . $attr : '');
+
+        $API = $this->getAPIFromRequest($Request);
+        $Response = $this->mResponse;
+
+        if($Response == NULL && strcasecmp($Request->getMethod(), 'get') !== 0)
+            $Response = $API->execute($Request);
+
+        $Theme = $this->getTheme();
+
+        $Theme->renderFragmentStart($Request, "Ajax Info", $class, $attr);
+            $Theme->renderFragmentStart($Request, "Response", 'response-content');
+            if($Response) {
+                try{
+                    $JSON = Util::toJSON($Response);
+                    echo json_encode($JSON);
+                } catch (\Exception $ex) {
+                    $Response = new ExceptionResponse($ex);
+                    $JSON = Util::toJSON($Response);
+                    echo json_encode($JSON);
+                }
+            }
+            $Theme->renderFragmentEnd($Request);
+            $Theme->renderFragmentStart($Request, "Response Headers", 'response-headers');
+            $Theme->renderFragmentEnd($Request);
+            $Theme->renderFragmentStart($Request, "Request Headers", 'request-headers');
+            $Theme->renderFragmentEnd($Request);
         $Theme->renderFragmentEnd($Request);
     }
 

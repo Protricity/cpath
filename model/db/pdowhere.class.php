@@ -210,7 +210,7 @@ abstract class PDOWhere {
      */
     public function getSQL() {
         return implode('', $this->mJoins)
-            ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : '1')
+            ."\nWHERE ".($this->mWhere ? implode(' ', $this->mWhere) : 'TRUE')
             .($this->mGroupBy ? "\nGROUP BY ".$this->mGroupBy : '')
             .($this->mOrderBy ? "\nORDER BY ".$this->mOrderBy : '');
     }

@@ -18,7 +18,7 @@ use CPath\Interfaces\IResponse;
 use CPath\Log;
 use CPath\Model\Response;
 
-class Install extends API implements IBuildable, IDescribable, IHandler {
+class Install extends API implements IBuildable, IHandler {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
     const ROUTE_METHODS = 'CLI';    // CLI only
@@ -73,14 +73,8 @@ class Install extends API implements IBuildable, IDescribable, IHandler {
     }
 
     /**
-     * Get the Object Title
-     * @return String description for this Object
-     */
-    function getTitle() { return "Install CPath"; }
-
-    /**
      * Get the Object Description
-     * @return String description for this Object
+     * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescription() { return "Installation script for CPath"; }
+    function getDescribable() { return "Installation script for CPath"; }
 }

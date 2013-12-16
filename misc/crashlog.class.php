@@ -18,24 +18,24 @@ class CrashLog {
 
     const CACHE_TOKEN = ':crash';
 
-    const STATE_STARTED = 0;
-    const STATE_COMPLETE = 1;
-    const STATE_ERROR = 2;
+    const STATE_NONE = 0;
+    const STATE_STARTED = 1;
+    const STATE_COMPLETE = 2;
+    const STATE_ERROR = 3;
 
     const PARAM_STATE = 0;
     const PARAM_REQUEST = 1;
     const PARAM_ERROR = 2;
     const PARAM_EXCEPTION = 3;
-    const PARAM_LAST_EMAIL = 3;
-    const PARAM_URL = 4;
+    const PARAM_LAST_EMAIL = 4;
+    const PARAM_URL = 5;
 
     private $mEmail;
 
     private function __construct($email, $catchExceptions=false) {
 
         $this->mEmail = $email;
-
-        $config = Cache::get()->fetch(__CLASS__ . self::CACHE_TOKEN) ?: array(self::PARAM_STATE => self::STATE_COMPLETE);
+        $config = $this->getConfig();
         if($config[self::PARAM_STATE] == self::STATE_STARTED)
             $this->reportException(new \Exception("Last instance did not shut down"), $config);
 
@@ -53,7 +53,7 @@ class CrashLog {
     }
 
     private function processShutdown() {
-        $config = Cache::get()->fetch(__CLASS__ . self::CACHE_TOKEN) ?: array();
+        $config = $this->getConfig();
 
         $error = error_get_last();
         if (in_array($error['type'], array(E_PARSE, E_ERROR)) && $config[self::PARAM_STATE] != self::STATE_ERROR) {
@@ -63,29 +63,29 @@ class CrashLog {
         } else {
             $config[self::PARAM_STATE] = self::STATE_COMPLETE;
         }
-        Cache::get()->store(__CLASS__ . self::CACHE_TOKEN, $config);
+        $this->storeConfig($config);
     }
 
     private function processException(\Exception $ex) {
-        $config = Cache::get()->fetch(__CLASS__ . self::CACHE_TOKEN) ?: array();
+        $config = $this->getConfig();
 
         $this->reportException($ex, $config);
 
         $config[self::PARAM_STATE] = self::STATE_ERROR;
         $config[self::PARAM_EXCEPTION] = $ex->getMessage();
 
-        Cache::get()->store(__CLASS__ . self::CACHE_TOKEN, $config);
+        $this->storeConfig($config);
         echo $ex;
     }
 
     private function processError($num, $str, $file, $line, $context = null) {
-        $config = Cache::get()->fetch(__CLASS__ . self::CACHE_TOKEN) ?: array();
+        $config = $this->getConfig();
 
         $this->reportException(new \Exception($str . " ($num)\n" . $file . ':' . $line), $config);
 
         $config[self::PARAM_STATE] = self::STATE_ERROR;
-        $config[self::PARAM_ERROR] = func_get_args();
-        Cache::get()->store(__CLASS__ . self::CACHE_TOKEN, $config);
+        $config[self::PARAM_ERROR] = array_slice(func_get_args(), 0, 4);
+        $this->storeConfig($config);
     }
 
     /**
@@ -107,7 +107,7 @@ class CrashLog {
             $headers = 'From: ateam@newaer.com' . "\r\n" .
                 'Reply-To: ateam@newaer.com' . "\r\n" .
                 'X-Mailer: PHP/' . phpversion();
-            mail($this->mEmail, $ex->getMessage(), $text, $headers);
+            @mail($this->mEmail, $ex->getMessage(), $text, $headers);
             $config[self::PARAM_LAST_EMAIL] = time();
             return true;
         }
@@ -121,6 +121,18 @@ class CrashLog {
     private function getConfigPath() {
         static $path = NULL;
         return $path ?: $path = Config::getGenPath().'crash.log';
+    }
+
+    private function getConfig() {
+        $config = Cache::get()->fetch(__CLASS__ . self::CACHE_TOKEN) ?: array();
+        return $config + array(NULL, NULL, NULL, NULL, NULL, NULL);
+    }
+
+    private function storeConfig($config) {
+        foreach($config as $k=>$v)
+            if($v === null)
+                unset($config[$k]);
+        Cache::get()->store(__CLASS__ . self::CACHE_TOKEN, $config);
     }
 
 

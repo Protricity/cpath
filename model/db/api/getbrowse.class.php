@@ -126,7 +126,6 @@ class API_GetBrowseDescriptor implements ISelectDescriptor {
         $this->mAPI = $API;
     }
 
-
     public function getLimitedStats() {
         return $this->mQuery->getLimitedStats();
     }

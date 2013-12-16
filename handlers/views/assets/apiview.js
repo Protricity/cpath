@@ -12,9 +12,9 @@
     var basePath;
 
     jQuery(document).ready(function() {
-        requestHeaders = jQuery('div.request-headers');
-        responseHeaders = jQuery('div.response-headers');
-        responseContent = jQuery('div.response-content');
+        requestHeaders = jQuery('.request-headers .fragment-content');
+        responseHeaders = jQuery('.response-headers .fragment-content');
+        responseContent = jQuery('.response-content .fragment-content');
         responseContainer = jQuery('div.response-container');
         basePath = jQuery('base').attr('href');
 
