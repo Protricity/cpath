@@ -10,6 +10,7 @@ use CPath\Misc\RenderIndents as RI;
 use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelectStats;
 use CPath\Model\DB\SearchResponse;
+use CPath\Request\Web;
 
 class ModelResultsTableFragment implements IHandler{
 
@@ -73,7 +74,9 @@ class ModelResultsTableFragment implements IHandler{
     function renderFooterLinks(IRequest $Request, TableThemeUtil $Table, PDOSelectStats $Stats, $pageLinks=15) {
         //$Stats = new PDOSelectStats(800, 35, 258);
         $Table->renderFooterStart();
-        $url = $Request->getPath();
+        $url = substr($Request->getPath(), 1);
+        if($Request instanceof Web)
+            $url = $Request->getURL();
 
         $Table->renderTD(function() use ($Stats, $pageLinks, $url) {
             //echo RI::ni(), "<a href='", $url, $Stats->getURL(1), "' class='search-form-page-first'>First</a>";

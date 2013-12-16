@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Request;
 
+use CPath\Base;
 use CPath\Config;
 use CPath\Interfaces\IRoute;
 use CPath\Log;
@@ -35,12 +36,25 @@ class Web extends AbstractBase {
     }
 
     /**
+     * Get the URL Path
+     * @param bool $absolute return with absolute path
+     * @param bool $withQuery return with query string
+     * @return string
+     */
+    function getURL($absolute=true, $withQuery=true) {
+        return
+            ($absolute ? Config::getDomainPath() : '')
+            . substr($this->getPath(), 1)
+            . ($withQuery ? '?' . http_build_query($this->mRequest) : '');
+    }
+
+    /**
      * Attempt to find a Route
      * @return IRoute the route instance found. MissingRoute is returned if no route was found
      */
     public function findRoute() {
         $args = array();
-        $routePath = $this->mMethod . ' ' . $this->mPath;
+        $routePath = $this->mMethod . ' ' . $this->getPath();
         if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico'))) {
             $Route = new FileRequestRoute($routePath);

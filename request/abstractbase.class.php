@@ -52,7 +52,7 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
     function getMethod() { return $this->mMethod; }
 
     /**
-     * Get the URL Path
+     * Get the Route Path starting at the root path of the framework
      * @return String the url path starting with '/'
      */
     function getPath() { return $this->mPath; }
