@@ -41,7 +41,7 @@ class Web extends AbstractBase {
      * @param bool $withQuery return with query string
      * @return string
      */
-    function getURL($absolute=true, $withQuery=true) {
+    function getURL($absolute=false, $withQuery=false) {
         return
             ($absolute ? Config::getDomainPath() : '')
             . substr($this->getPath(), 1)
