@@ -14,10 +14,11 @@ use CPath\Handlers\Views\APIView;
 use CPath\Helpers\Describable;
 use CPath\Interfaces\IDescribable;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 use CPath\Model\DB\SearchResponse;
 
 
-class SearchFormUtil implements IDescribable {
+class SearchFormUtil implements IDescribable, IViewConfig {
     private $mTheme, $mAPIView, $mResponse, $mAPI, $mDescriptor, $mDescribable;
 
     public function __construct(SearchResponse $Response, ITheme $Theme=null) {
@@ -30,15 +31,20 @@ class SearchFormUtil implements IDescribable {
         $this->mDescribable = Describable::get($this->mAPI);
     }
 
-    function getQuery() {
-        return $this->mResponse->getQuery();
-    }
-
-    public function addHeadElementsTo(IView $View) {
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
         $this->mAPIView->mergeHeadElementsInto($View);
         $basePath = Base::getClassPublicPath($this, false);
-        $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css');
-        $View->addHeadScript($basePath . 'assets/searchformutil.js');
+        $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css', true);
+        $View->addHeadScript($basePath . 'assets/searchformutil.js', true);
+    }
+
+    function getQuery() {
+        return $this->mResponse->getQuery();
     }
 
     public function renderForm(IRequest $Request) {
@@ -67,4 +73,5 @@ class SearchFormUtil implements IDescribable {
      * @return String simple description for this Object
      */
     function __toString() { return (String)$this->mDescribable; }
+
 }

@@ -22,19 +22,24 @@ class CPathDefaultTheme implements ITheme {
 
     private $mRowBody = null, $mIsException = false, $mLastDataElm = null;
 
+    /** @var  ModelResultsTableFragment */
+    private $mMTLF;
+
     protected function __construct() {
+        $this->mMTLF = new ModelResultsTableFragment($this);
     }
 
     /**
-     * Set up a view according to this theme
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
      * @param IView $View
-     * @return mixed
      */
-    function setupView(IView $View)
-    {
+    function addHeadElementsToView(IView $View) {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
-        $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css');
-        $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js');
+        $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css', true);
+        $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js', true);
+
+        $this->mMTLF->addHeadElementsToView($View);
     }
 
     /**
@@ -297,9 +302,7 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderSearchContent(IRequest $Request, SearchResponse $Response, $class = NULL, $attr = NULL)
     {
-        $MTLF = new ModelResultsTableFragment($Response, $this);
-        $MTLF->render($Request, $class, $attr);
-
+        $this->mMTLF->render($Request, $Response, $class, $attr);
     }
 }
 

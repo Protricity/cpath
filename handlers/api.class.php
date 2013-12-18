@@ -16,6 +16,7 @@ use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
+use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
@@ -58,6 +59,17 @@ abstract class API implements IAPI {
 
     public function __construct() {
 
+    }
+
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
+        $basePath = Base::getClassPublicPath(__CLASS__, false);
+        $View->addHeadScript($basePath . 'assets/api.js', true);
+        $View->addHeadStyleSheet($basePath . 'assets/api.css');
     }
 
     /**

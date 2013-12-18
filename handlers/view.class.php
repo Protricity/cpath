@@ -10,11 +10,6 @@ use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 abstract class View implements IView {
-
-    const FIELD_BASE = 'basePath';
-    const FIELD_TITLE = 'title';
-    const FIELD_SCRIPT_JQUERY = 'script_jQuery';
-
     const TAB = '    ';
     const TAB_START = 0;
 
@@ -30,16 +25,16 @@ abstract class View implements IView {
         $this->mBasePath = Config::getDomainPath();
         $this->setupHeadFields();
 
-        $Theme->setupView($this);
+        $Theme->addHeadElementsToView($this);
 
         RI::si(null, static::TAB);
     }
 
     protected function setupHeadFields() {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
-        $this->addHeadHTML("<base href='{$this->mBasePath}' />", self::FIELD_BASE);
-        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', self::FIELD_SCRIPT_JQUERY);
-        $this->addHeadScript($basePath . 'assets/cpath.js');
+        $this->addHeadHTML("<base href='{$this->mBasePath}' />", true);
+        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
+        $this->addHeadScript($basePath . 'assets/cpath.js', true);
     }
 
     /**
@@ -105,14 +100,11 @@ abstract class View implements IView {
     }
 
     function setTitle($title) {
-        $this->mHeadFields[self::FIELD_TITLE] = "<title>{$title}</title>";
+        $this->mHeadFields['title'] = "<title>{$title}</title>";
     }
 
-    function addHeadHTML($html, $key=null, $replace=false) {
-        if(!$key) {
-            $this->mHeadFields[crc32($html)] = $html;
-            return;
-        }
+    function addHeadHTML($html, $replace=false) {
+        $key = crc32($html);
         if(!isset($this->mHeadFields[$key])) {
             //if($replace)
             //    throw new \InvalidArgumentException("Key '{$key}' does not exist in header fields");
@@ -124,11 +116,11 @@ abstract class View implements IView {
         }
     }
 
-    function addHeadScript($src, $key=null, $replace=false) {
-        $this->addHeadHTML("<script src='{$src}'></script>", $key, $replace);
+    function addHeadScript($src, $replace=false) {
+        $this->addHeadHTML("<script src='{$src}'></script>", $replace);
     }
 
-    function addHeadStyleSheet($href, $key=null, $replace=false) {
-        $this->addHeadHTML("<link rel='stylesheet' href='{$href}' />", $key, $replace);
+    function addHeadStyleSheet($href, $replace=false) {
+        $this->addHeadHTML("<link rel='stylesheet' href='{$href}' />", $replace);
     }
 }

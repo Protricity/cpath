@@ -13,6 +13,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IRoutable;
+use CPath\Interfaces\IViewConfig;
 use CPath\Model\MultiException;
 
 class APIException extends \Exception {}
@@ -68,7 +69,7 @@ class ValidationExceptions extends MultiException {
 }
 
 
-interface IAPI extends IHandler, IRoutable, IDescribableAggregate {
+interface IAPI extends IHandler, IRoutable, IDescribableAggregate, IViewConfig {
 
     /**
      * Execute this API Endpoint with the entire request.

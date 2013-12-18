@@ -52,6 +52,7 @@ class APIView extends NavBarLayout implements ILogListener {
         $this->addHeadStyleSheet($basePath . 'assets/apiview.css');
         $this->addHeadScript($basePath . 'assets/apiview.js');
         $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
+        $this->mAPI->addHeadElementsToView($this);
     }
 
     function getAPIFromRequest(IRequest $Request) {
@@ -110,7 +111,7 @@ class APIView extends NavBarLayout implements ILogListener {
         if(is_array($attr))     $attr = implode(' ', $attr);
         if(is_array($class))    $class = implode(' ', $class);
         $class = 'apiview-form' . ($class ? ' ' . $class : '');
-        $attr = "method='POST' enctype='multipart/form-data'" . ($attr ? " " . $attr : '');
+        $attr = "enctype='multipart/form-data'" . ($attr ? " " . $attr : '');
 
         $API = $this->getAPIFromRequest($Request);
         $Route = $this->getAPIRouteFromRequest($Request);
@@ -120,7 +121,9 @@ class APIView extends NavBarLayout implements ILogListener {
         $domainPath = Config::getDomainPath();
         $route = $Route->getPrefix();
         list($method, $path) = explode(' ', $route, 2);
+        $attr .= " method='{$method}'";
         $path = rtrim($domainPath, '/') . $path;
+        $attr .= " action='{$path}'";
 
         foreach($API->getFields() as $name=>$Field)
             if($Field instanceof IParam)
@@ -175,27 +178,27 @@ class APIView extends NavBarLayout implements ILogListener {
         $Table->renderDataStart('table-field-footer-buttons', 5, 0, "style='text-align: left'");
         if(!$devMode) {
             ?>
-            <input type="button" value="Submit" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
+                                    <input type="button" value="Submit" class="form-button-submit"/>
         <?php
         }
         if($devMode || Config::$Debug) {
             ?>
-            <input type="button" value="JSON" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', '<?php echo $method; ?>');" />
-            <input type="button" value="XML" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'xml', '<?php echo $method; ?>');" />
-            <input type="button" value="TEXT" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'text', '<?php echo $method; ?>');" />
-            <input type="submit" value="POST"/>
-            <input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" />
-            <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
-            <input type="button" value="Response" onclick="jQuery('.response-container').toggle();" />
-            <input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
-            <span id="spanCustom" style="display: none">
+                                    <input type="button" value="JSON" class="form-button-submit-json"/>
+                                    <input type="button" value="XML" class="form-button-submit-xml" />
+                                    <input type="button" value="TEXT" class="form-button-submit-text" />
+                                    <input type="submit" value="POST"/>
+                                    <!--input type="button" value="JSON Object (POST)" onclick="APIView.submit('<?php echo $path; ?>', this.form, 'json', 'POST', true);" /-->
+                                    <input type="button" value="Update URL" onclick="APIView.updateURL(this.form);" />
+                                    <input type="button" value="Response" onclick="jQuery('.apiview-response').toggle();" />
+                                    <!--input id="btnCustomSubmit" type="button" value="Custom" onmousemove="jQuery('#spanCustom').fadeIn();" onclick="APIView.submit('<?php echo $path; ?>', this.form, '', jQuery('#txtCustomMethod').val(), false, jQuery('#txtCustomText').val());" />
+                                    <span id="spanCustom" style="display: none">
                                         <label>Accepts:
                                             <input  id="txtCustomText" type="text" value="*/*" size="4" />
                                         </label>
                                         <label>Method:
                                             <input id="txtCustomMethod" type="text" value="GET" size="4" />
                                         </label>
-                                    </span>
+                                    </span-->
         <?php
 
         }
@@ -216,7 +219,7 @@ class APIView extends NavBarLayout implements ILogListener {
     {
         if(is_array($attr))     $attr = implode(' ', $attr);
         if(is_array($class))    $class = implode(' ', $class);
-        $class = 'response-container' . ($class ? ' ' . $class : '');
+        $class = 'apiview-response' . ($class ? ' ' . $class : '');
         $attr = "style='display: none'" . ($attr ? " " . $attr : '');
 
         $API = $this->getAPIFromRequest($Request);

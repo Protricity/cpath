@@ -8,27 +8,64 @@
 (function(){
     var THIS = {};
     var lastHeaders = '';
-    var requestHeaders, responseHeaders, responseContent, responseContainer;
-    var basePath;
 
     jQuery(document).ready(function() {
-        requestHeaders = jQuery('.request-headers .fragment-content');
-        responseHeaders = jQuery('.response-headers .fragment-content');
-        responseContent = jQuery('.response-content .fragment-content');
-        responseContainer = jQuery('div.response-container');
-        basePath = jQuery('base').attr('href');
+        var basePath = jQuery('base').attr('href');
 
-        var content = responseContent.text();
-        if(content)
-            APIView.setPrettyJSON(content, responseContent);
 
-        jQuery('form').on("cpath-submit", function(event, url) {
-            THIS.submit(url, jQuery(this), 'json', 'GET');
+//        jQuery('form').on("cpath-submit", function(event, url) {
+//            THIS.submit(url, jQuery(this), 'json', 'GET');
+//        });
+        jQuery('.apiview-form').each(function() {
+            var form = jQuery(this);
+            var Form = new CPath.Form(form);
+            var btnSubmit = form.find('.form-button-submit');
+            var btnSubmitJSON = form.find('.form-button-submit-json');
+            var btnSubmitXML = form.find('.form-button-submit-xml');
+            var btnSubmitTEXT = form.find('.form-button-submit-text');
+
+
+            var divResponseContainer = form.parent().find('.apiview-response');
+            if(divResponseContainer.length != 1)
+                throw new Error("Could not find response container");
+            var divRequestHeaders = divResponseContainer.find('.request-headers .fragment-content');
+            var divResponseHeaders = divResponseContainer.find('.response-headers .fragment-content');
+            var divResponseContent = divResponseContainer.find('.response-content .fragment-content');
+
+            btnSubmit.click(function() { Form.submit({dataType: 'json'}); });
+            btnSubmitJSON.click(function() { Form.submit({dataType: 'json'}); });
+            btnSubmitXML.click(function() { Form.submit({dataType: 'xml'}); });
+            btnSubmitTEXT.click(function() { Form.submit({dataType: 'text'}); });
+
+            var content = jQuery.trim(divResponseContent.text());
+            if(content)
+                APIView.setPrettyJSON(content, divResponseContent);
+
+            jQuery(Form).on('api-response', function(evt, response, API, jqXHR) {
+                var content = jqXHR.responseText;
+
+                switch(content.substr(0, 1)) {
+                    case '{':
+                        THIS.setPrettyJSON(content, divResponseContent);
+                        break;
+                    case '<':
+                        THIS.setPrettyXML(content, divResponseContent);
+                        break;
+                    default :
+                        divResponseContent.text(content);
+                        response = new CPath.API.Response(content);
+                        break;
+                }
+
+                divResponseContainer.fadeIn();
+                divRequestHeaders.html(API.getMethod() + ' ' + API.getPath() + " HTTP/1.1\n" + lastHeaders);
+                divResponseHeaders.html(jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders());
+                console.log(arguments);
+            });
         });
     });
 
     window.APIView = THIS = {
-        accepts: '*/*',
         setPrettyJSON: function(json, elm) {
             try {
                 json = vkbeautify.json(json);
@@ -45,73 +82,6 @@
             } catch (e) {
                 elm.text(xml);
             }
-        },
-        submit: function(path, form, dataType, method, asObject, accepts) {
-            form = jQuery(form);
-            var params = CPath.parseQueryString(path.split('?')[1]);
-            jQuery.each(params, function(key, value) {
-                form.find('input[name=' + key + ']').val(value);
-            });
-
-            var data = asObject ? JSON.stringify(THIS.formToObject(form)) : form.serialize();
-            lastHeaders = '';
-            //THIS.hackXHR();
-            responseContainer.show();
-            requestHeaders.html("Loading...");
-            responseHeaders.html("Loading...");
-            responseContent.html("Loading...");
-            if(!accepts)
-                accepts = THIS.accepts;
-            switch(dataType) {
-                case 'json':
-                    accepts = 'application/json';
-                    break;
-                case 'xml':
-                    accepts = 'text/xml';
-                    break;
-            }
-            jQuery.ajax({
-                url: path,
-                type: method,
-                dataType: dataType,
-                data: data,
-                accepts: accepts,
-                contentType: asObject ? 'application/json' : null,
-                headers: {
-                    Accept : accepts + "; charset=utf-8",
-                    "Content-Type": asObject ? 'application/json' : null
-                },
-                complete: function(jqXHR, textStatus) {
-                    //THIS.unhackXHR();
-                    var content = jqXHR.responseText;
-                    var call = 'html';
-                    var response;
-
-                    switch(dataType) {
-                        case 'json':
-                            THIS.setPrettyJSON(content, responseContent);
-                            response = new CPath.API.JSONSearchResponse(jQuery.parseJSON(content));
-                            form.trigger( "cpath-response-json", [response, content], jqXHR);
-                            break;
-                        case 'xml':
-                            THIS.setPrettyXML(content, responseContent);
-                            response = new CPath.API.XMLSearchResponse(jQuery.parseXML(content));
-                            form.trigger( "cpath-response-xml", [response, content], jqXHR);
-                            break;
-                        default :
-                            responseContent.text(content);
-                            response = new CPath.API.Response(content);
-                            break;
-                    }
-
-                    form.trigger( "cpath-response", [response, content] , jqXHR);
-
-                    requestHeaders.html(method + ' ' + path + " HTTP/1.1\n" + lastHeaders);
-                    responseHeaders.html(jqXHR.status + ' ' + jqXHR.statusText + "\n" + jqXHR.getAllResponseHeaders());
-                    console.log(arguments);
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                }})
         },
 
         updateURL: function(form) {
