@@ -11,7 +11,7 @@ namespace CPath\Model\DB;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\API;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
@@ -38,7 +38,7 @@ class API_GetBrowse extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Browse for a " . $this->getModel()->modelName();

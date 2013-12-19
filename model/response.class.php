@@ -8,7 +8,7 @@
 namespace CPath\Model;
 use CPath\Interfaces\IComparable;
 use CPath\Interfaces\IComparator;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseHelper;

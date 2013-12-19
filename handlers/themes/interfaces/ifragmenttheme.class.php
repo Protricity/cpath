@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 
 interface IFragmentTheme {

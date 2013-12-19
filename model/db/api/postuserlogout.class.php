@@ -10,7 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Base;
 use CPath\Handlers\API;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\SessionNotFoundException;
@@ -52,7 +52,7 @@ class API_PostUserLogout extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         if($this->mLoggedIn)

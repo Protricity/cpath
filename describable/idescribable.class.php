@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Interfaces;
+namespace CPath\Describable;
 
 interface IDescribable {
 

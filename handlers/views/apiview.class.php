@@ -12,7 +12,7 @@ use CPath\Handlers\Layouts\PageLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;

@@ -8,7 +8,7 @@
 namespace CPath\Model\DB;
 
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIPostCallbacks;
@@ -35,7 +35,7 @@ class API_Put extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Create or update a ".$this->getModel()->modelName();

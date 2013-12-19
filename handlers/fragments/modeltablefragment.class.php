@@ -4,7 +4,7 @@ namespace CPath\Handlers\Fragments;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Model\DB\PDOModel;

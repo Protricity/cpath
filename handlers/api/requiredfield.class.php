@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\IRequiredField;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 
 
 /**
@@ -19,7 +19,7 @@ use CPath\Interfaces\IDescribable;
 class RequiredField extends Field {
     /**
      * Create a new API Field
-     * @param String|IDescribable $Description
+     * @param String|\CPath\Describable\IDescribable $Description
      * @param int $validation
      * @param bool $isParam
      */

@@ -5,11 +5,12 @@ use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 
-abstract class View implements IView {
+abstract class View implements IView, IViewConfig {
     const TAB = '    ';
     const TAB_START = 0;
 
@@ -38,11 +39,11 @@ abstract class View implements IView {
     }
 
     /**
-     * Add or replace head elements into another IView
-     * @param IView $View the view instance to copy into
-     * @return void
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
      */
-    function mergeHeadElementsInto(IView $View) {
+    function addHeadElementsToView(IView $View) {
         foreach($this->mHeadFields as $key => $html)
             $View->addHeadHTML($html, $key, true);
     }

@@ -4,7 +4,7 @@ namespace CPath\Handlers;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 

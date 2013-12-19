@@ -10,7 +10,8 @@ namespace CPath\Cache;
 
 use CPath\Cache;
 use CPath\Config;
-use CPath\Interfaces\IPHPExport;
+use CPath\Serializer\ISerializable;
+use CPath\Serializer\Serializer;
 
 /**
  * Class None - Placeholder class for when no cache is available
@@ -108,8 +109,8 @@ class File extends Cache {
         $php = "<?php\n\$d=array(";
 
         if(is_object($data)) {
-            if($data instanceof IPHPExport)
-                $php .= $data->exportToPHP();
+            if($data instanceof ISerializable)
+                $php .= Serializer::exportToPHPCode($data);
             else
                 $php .= 'unserialize(\'' . serialize($data) . '\')';
         }

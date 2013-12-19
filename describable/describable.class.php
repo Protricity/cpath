@@ -5,11 +5,8 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Helpers;
+namespace CPath\Describable;
 
-use CPath\Interfaces\IDescribable;
-use CPath\Interfaces\IDescribableAggregate;
-use CPath\Misc\SimpleDescription;
 
 class IsNotDescribableException extends \Exception {}
 

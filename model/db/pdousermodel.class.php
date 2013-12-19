@@ -8,8 +8,14 @@
 namespace CPath\Model\DB;
 
 
+use CPath\Actions\IActionable;
+use CPath\Actions\IActionAggregate;
+use CPath\Actions\IActionManager;
+use CPath\Handlers\Api\Action\APIAction;
 use CPath\Handlers\HandlerSet;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\InvalidUserSessionException;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
 
@@ -35,7 +41,7 @@ class PasswordsDoNotMatchException extends \Exception {
  * Provides additional user-specific functionality and API endpoints
  * @package CPath\Model\DB
  */
-abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
+abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IActionAggregate {
 
     // User-specific column
     /** (primary int) The User Account integer identifier */
@@ -74,7 +80,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
     public function getEmail() { return $this->{static::COLUMN_EMAIL}; }
     public function setEmail($value, $commit=true) { return $this->updateColumn(static::COLUMN_EMAIL, $value, $commit, FILTER_VALIDATE_EMAIL); }
 
-    function setFlag($flags, $commit=true, $remove=false) {
+    function setFlags($flags, $commit=true, $remove=false) {
         if(!is_int($flags))
             throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
         //$oldFlags = $this->mFlags;
@@ -150,6 +156,13 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
         $Handlers->add('POST logout', new API_PostUserLogout($this));
         $Handlers->add('POST password', new API_PostUserPassword($this));
         return $Handlers;
+    }
+
+    /**
+     * Load all available actions from this object.
+     */
+    function loadActions(IActionManager $Manager) {
+        $Manager->addAction(new Action_Login($this));
     }
 
     // Statics
@@ -274,7 +287,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
                 static::COLUMN_EMAIL => 'guest@noemail.com',
             ));
         }
-        $User->setFlag(static::FLAG_GUEST);
+        $User->setFlags(static::FLAG_GUEST);
         return $User;
     }
 

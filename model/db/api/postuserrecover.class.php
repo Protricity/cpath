@@ -10,7 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredField;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 

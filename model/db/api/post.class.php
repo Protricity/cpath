@@ -8,7 +8,7 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIPostCallbacks;

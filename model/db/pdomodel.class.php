@@ -10,13 +10,12 @@ namespace CPath\Model\DB;
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
-use CPath\Helpers\Describable;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IPHPExport;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
+use CPath\Serializer\ISerializable;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
@@ -47,7 +46,7 @@ class ModelAlreadyExistsException extends \Exception implements IResponseAggrega
 }
 
 
-abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, IPHPExport {
+abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBuildable, ISerializable {
     //const BUILD_IGNORE = true;
     //const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
 
@@ -147,22 +146,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
         return $Handlers;
     }
 
-
-
     /**
-     * EXPORT Object to PHP Code
-     * @return String
+     * EXPORT Object to a simple data structure to be used in var_export($data, true)
+     * @return mixed
      */
-    function exportToPHP() {
-        $c = get_called_class();
+    function serialize()
+    {
+        $data = array();
         foreach(static::loadAllColumns() as $name => $Column)
             $data[$name] = $this->$name;
-        $php = "$c::__set_state(array(";
-        foreach(static::loadAllColumns() as $name => $Column) {
-            $php .= "'{$name}'=>" . var_export($this->$name, true) . ", ";
-        }
-        $php = substr($php, 0, strlen($php) - 2) . "))";
-        return $php;
+        return $data;
     }
 
     function __toString() {
@@ -488,15 +481,16 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     }
 
     /**
-     * Instantiate an Object
-     * @param Array $array associative array of data
-     * @return PDOModel
+     * Unserialize and instantiate an Object with the stored data
+     * @param mixed $data the exported data
+     * @return ISerializable|Object
      */
-    static function __set_state($array) {
+    static function unserialize($data)
+    {
         $Inst = new static();
         foreach(static::loadAllColumns() as $name => $Column)
-            if(isset($array[$name]))
-                $Inst->$name = $array[$name];
+            if(isset($data[$name]))
+                $Inst->$name = $data[$name];
         return $Inst;
     }
 }

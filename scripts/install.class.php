@@ -11,7 +11,7 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Handlers\API\Interfaces\APIException;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;

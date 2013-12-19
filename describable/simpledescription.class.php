@@ -6,10 +6,10 @@
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-namespace CPath\Misc;
+namespace CPath\Describable;
 
 use CPath\Helpers\Strings;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 
 class SimpleDescription implements IDescribable {
     private $mTitle = null;
@@ -17,15 +17,14 @@ class SimpleDescription implements IDescribable {
 
     function __construct($object) {
         if(!is_object($object)) {
+            $this->mDesc = (String) $object;
         } else {
             if(method_exists($object, '__toString')) {
+                $this->mDesc = (String) $object;
             } else {
                 $this->mDesc = get_class($object);
             }
         }
-
-        if(!$this->mDesc)
-            $this->mDesc = (String) $object;
 
         $this->mTitle = Strings::truncate($this->mDesc, 128, '...', false);
     }

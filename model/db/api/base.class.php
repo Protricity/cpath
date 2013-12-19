@@ -10,7 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\ISecurityPolicyAggregate;

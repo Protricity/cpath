@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Model\FileUpload;
 
@@ -20,7 +20,7 @@ class PasswordField extends Field {
 
     /**
      * Create a new API Field
-     * @param String|IDescribable $Description
+     * @param String|\CPath\Describable\IDescribable $Description
      * @param int $validation
      * @param bool $isRequired
      * @param bool $isParam

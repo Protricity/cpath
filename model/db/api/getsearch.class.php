@@ -13,7 +13,7 @@ use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;

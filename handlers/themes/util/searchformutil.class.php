@@ -11,8 +11,8 @@ use CPath\Base;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Views\APIView;
-use CPath\Helpers\Describable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Model\DB\SearchResponse;
@@ -37,7 +37,7 @@ class SearchFormUtil implements IDescribable, IViewConfig {
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $this->mAPIView->mergeHeadElementsInto($View);
+        $this->mAPIView->addHeadElementsToView($View);
         $basePath = Base::getClassPublicPath($this, false);
         $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css', true);
         $View->addHeadScript($basePath . 'assets/searchformutil.js', true);

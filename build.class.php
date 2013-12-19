@@ -11,8 +11,8 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
-use CPath\Interfaces\IDescribable;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Describable\IDescribable;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Model\Response;
 

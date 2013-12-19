@@ -13,6 +13,12 @@
         //THIS.test();
     });
 
+    function APIException(message, API) {
+        this.message = message;
+        this.API = API;
+        this.toString = function() { return this.message; };
+    }
+
     window.CPath.API = THIS = function(method, path, dataType) {
         path = path.split('?')[0]; // TODO: parse params
         TRIGGERS = jQuery([this, THIS]);
@@ -29,14 +35,14 @@
          * query string (string) ajax settings (object) or success callback (function)
          */
         this.execute = function(args) {
-            var data = {}, ajax = {};
+            var data = {}, ajax = {}, onResponse2 = onResponse.slice(0);
             for(var i=0; i<arguments.length; i++){
                 var arg = arguments[i];
                 switch(typeof arg) {
                     default:
                     case 'string': data = arg; break;
                     case 'object': ajax = arg; break;
-                    case 'function': onResponse.push(arg);
+                    case 'function': onResponse2.push(arg);
                 }
             }
             var url = this.getPath();
@@ -72,9 +78,9 @@
                     }
 
                     TRIGGERS.trigger( "response", [response, jqXHR]);
-                    for(var iii=0; iii<onResponse.length; iii++)
+                    for(var iii=0; iii<onResponse2.length; iii++)
                         try {
-                            onResponse[iii](response, jqXHR);
+                            onResponse2[iii](response, jqXHR);
                         } catch (e) {
                             ajax.error(jqXHR, e.message, e);
                         }
@@ -110,7 +116,7 @@
             });
 
             if(pending)
-                throw new THIS.APIException("Waiting for last execution to complete");
+                throw new APIException("Waiting for last execution to complete");
             pending = true;
             jQuery.ajax(ajax);
         };
@@ -120,10 +126,7 @@
         return jQuery('base').attr('href');
     };
 
-    THIS.APIException = function(message) {
-        this.base = Error;
-        this.base(message);
-    };
+    THIS.APIException = APIException;
 
     THIS.Response = function(data) {
         var context = this;

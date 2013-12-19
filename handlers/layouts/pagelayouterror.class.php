@@ -5,7 +5,7 @@ use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Handlers\View;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 

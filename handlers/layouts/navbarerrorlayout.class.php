@@ -3,7 +3,7 @@ namespace CPath\Handlers\Layouts;
 
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 
 abstract class NavBarErrorLayout extends NavBarLayout {
@@ -22,7 +22,7 @@ abstract class NavBarErrorLayout extends NavBarLayout {
     }
 
     protected function setupHeadFields() {
-        $this->addHeadHTML("<title>" . Describable::get($this->mException)->getTitle() . "</title>", self::FIELD_TITLE);
+        $this->setTitle(Describable::get($this->mException)->getTitle());
         parent::setupHeadFields();
     }
 

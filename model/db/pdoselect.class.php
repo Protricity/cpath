@@ -91,7 +91,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
      * @return $this
      */
     public function limit($limit) {
-        $this->mLimit = $limit;
+        $this->mLimit = (int)$limit;
         return $this;
     }
 
