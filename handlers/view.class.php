@@ -1,6 +1,9 @@
 <?php
 namespace CPath\Handlers;
 
+use CPath\Actions\ActionManager;
+use CPath\Actions\IActionAggregate;
+use CPath\Actions\IActionManager;
 use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
@@ -20,6 +23,7 @@ abstract class View implements IView, IViewConfig {
 
     private $mHeadFields = array();
     private $mTheme, $mBasePath;
+    private $mManager = null;
 
     public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
@@ -31,11 +35,32 @@ abstract class View implements IView, IViewConfig {
         RI::si(null, static::TAB);
     }
 
+    /**
+     * Add additional actions to this view Manager
+     * @param IActionManager $Manager
+     * @return void
+     */
+    abstract protected function addActions(IActionManager $Manager);
+
     protected function setupHeadFields() {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
         $this->addHeadHTML("<base href='{$this->mBasePath}' />", true);
         $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
         $this->addHeadScript($basePath . 'assets/cpath.js', true);
+
+        $this->getActionManager()->addHeadElementsToView($this);
+    }
+
+    /**
+     * Get the default Action Manager
+     *
+     */
+    final public function getActionManager() {
+        if($this->mManager)
+            return $this->mManager;
+        $this->mManager = new ActionManager();
+        $this->addActions($this->mManager);
+        return $this->mManager;
     }
 
     /**

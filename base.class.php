@@ -60,7 +60,7 @@ class Base {
     public static function render() {
         $Request = self::getRequest();
         $Request->findRoute()
-            ->render($Request);
+            ->renderDestination($Request);
     }
 
     /**

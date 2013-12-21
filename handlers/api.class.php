@@ -18,19 +18,18 @@ use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Views\APIView;
+use CPath\Handlers\Views\Routes\APIViewRoute;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IRouteBuilder;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
-use CPath\Model\Route;
+use CPath\Route\RouteSet;
 use CPath\Util;
 
 /**
@@ -45,7 +44,7 @@ abstract class API implements IAPI {
     const LOG_ENABLE = true;                // Enable API Logging
     const ROUTE_API_VIEW = ':api';          // Add an APIView route entry i.e. ':api' for this API on GET requests
 
-    const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
+    const ROUTE_METHOD = 'ANY';             // Default accepted methods are ANY
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IField[] */
@@ -175,7 +174,7 @@ abstract class API implements IAPI {
         $Response = null;
         //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
         //    $Response = $this->execute($Request);
-        $Render = new APIView($this, $Request->getRoute(), $Response);
+        $Render = new APIView($this, $Response);
         $Render->render($Request);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
@@ -444,32 +443,6 @@ abstract class API implements IAPI {
         $this->renderDefault($Request);
     }
 
-    /**
-     * Returns an array of all routes for this class
-     * @param IRouteBuilder $Builder the IRouteBuilder instance
-     * @return IRoute[]
-     */
-    public function getAllRoutes(IRouteBuilder $Builder) {
-        $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
-        $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
-        if(static::ROUTE_API_VIEW) {
-            $token = static::ROUTE_API_VIEW;
-            $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
-            $routes['POST ' . $token] = new Route('POST ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
-            // TODO: wildcard methods
-        }
-        return $routes;
-    }
-
-    // Statics
-
-    /**
-     * Return an instance of the class for building purposes
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
-     */
-    static function createBuildableInstance() {
-        return new static;
-    }
 }
 
 

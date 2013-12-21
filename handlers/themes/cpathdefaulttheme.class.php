@@ -4,16 +4,13 @@ namespace CPath\Handlers\Themes;
 use CPath\Base;
 use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
-use CPath\Handlers\Fragments\ModelTableListFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 use CPath\Model\DB\SearchResponse;
 
@@ -64,6 +61,7 @@ class CPathDefaultTheme implements ITheme {
             echo RI::ni(), "<h4 class='fragment-title'>", Describable::get($Description)->getTitle(), "</h4>";
         }
         echo RI::ni(), "<div class='fragment-content'>";
+        echo RI::ai(1);
     }
 
     /**
@@ -73,7 +71,7 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderFragmentEnd(IRequest $Request)
     {
-        echo RI::ai(-1);
+        echo RI::ai(-2);
         echo RI::ni(1), "</div>";
         echo RI::ni(), "</div>";
     }

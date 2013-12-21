@@ -6,7 +6,8 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Builders;
+namespace CPath\Model\DB\Builders;
+
 use CPath\Build;
 use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
@@ -17,10 +18,8 @@ use CPath\Model\DB\PDOColumn;
 use CPath\Model\DB\PDODatabase;
 use CPath\Validate;
 
-
-class UpgradeException extends \Exception {}
-
-abstract class BuildPDOTables implements IBuilder{
+abstract class BuildPDOTables implements IBuilder
+{
 
     const TAB = null;
 
@@ -43,52 +42,52 @@ PHP;
     private $mBuildDB = NULL;
 
     // TODO: move out of the build class
-    public function upgrade(PDODatabase $DB, $oldVersion=NULL) {
-        if($oldVersion===NULL)
+    public function upgrade(PDODatabase $DB, $oldVersion = NULL)
+    {
+        if ($oldVersion === NULL)
             $oldVersion = $DB->getDBVersion();
         $curVersion = $DB::VERSION;
         $Class = new \ReflectionClass($DB);
         $schemaFolder = $this->getFolder($Class, 'schema');
         $files = scandir($schemaFolder);
-        if(!$files)
-            throw new UpgradeException("No Schemas found in ".$schemaFolder);
+        if (!$files)
+            throw new UpgradeException("No Schemas found in " . $schemaFolder);
         $schemas = array();
-        foreach($files as $i=>$file) {
-            if(in_array($file, array('.', '..')))
+        foreach ($files as $i => $file) {
+            if (in_array($file, array('.', '..')))
                 continue;
-            if(!is_file($schemaFolder.'/'.$file))
+            if (!is_file($schemaFolder . '/' . $file))
                 continue;
             $name = pathinfo($file, PATHINFO_FILENAME);
-            if(!is_numeric($name))
+            if (!is_numeric($name))
                 continue;
             //throw new UpgradeException("File '{$file}' is not numeric");
             $name = (int)$name;
-            if($name <= $oldVersion)
+            if ($name <= $oldVersion)
                 continue;
             $schemas[$name] = $file;
         }
-        if(!$schemas)
+        if (!$schemas)
             throw new UpgradeException("New Version Number, but no new schemas found");
         ksort($schemas);
-        foreach($schemas as $v=>$schema) {
-            $sql = file_get_contents($schemaFolder.'/'.$schema);
-            if(!$sql)
-                throw new UpgradeException("Invalid SQL in ".$schema);
+        foreach ($schemas as $v => $schema) {
+            $sql = file_get_contents($schemaFolder . '/' . $schema);
+            if (!$sql)
+                throw new UpgradeException("Invalid SQL in " . $schema);
 
-            $statusTable = '__cpath_dump_complete_' . rand(1,99);
+            $statusTable = '__cpath_dump_complete_' . rand(1, 99);
             $sql .= "\nCREATE TABLE $statusTable (status int);\nINSERT INTO $statusTable (status) VALUES (1)";
             //$sql = "\nSET @_cpath_dump_complete = " . ($id-1) . ";\n" . $sql;
             $DB->exec($sql);
             $status = $DB->query("SELECT status from $statusTable;")->fetchColumn(0);
-            if(!$status)
+            if (!$status)
                 throw new BuildException("FATAL ERROR: Database dump failed (Status table was not created). Please check your schema sql syntax");
 
             $DB->exec("DROP TABLE $statusTable;");
 
-            Log::v2(__CLASS__, "DB ID Result: $status" );
+            Log::v2(__CLASS__, "DB ID Result: $status");
 
             $DB->setDBVersion($v);
-
 
 
 //            $id = rand(1,99);
@@ -131,18 +130,19 @@ PHP;
     protected abstract function getProcs(\PDO $DB);
 
 
-    public function createTable($name, $comment) {
+    public function createTable($name, $comment)
+    {
         $Table = new BuildPDOTable($name, $comment);
 
-        if(!($DB = $this->mBuildDB))
+        if (!($DB = $this->mBuildDB))
             throw new \Exception("No DB Instance for table build");
 
         $this->getColumns($DB, $Table);
         $this->getIndexes($DB, $Table);
         $Table->init();
 
-        if($Table->Template) {
-            switch(strtolower($Table->Template)) {
+        if ($Table->Template) {
+            switch (strtolower($Table->Template)) {
                 case 'u':
                 case 'user':
                     Log::v(__CLASS__, "Table identified as template 'User': " . $name);
@@ -150,11 +150,11 @@ PHP;
                     break;
                 case 'us':
                 case 'usersession':
-                Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
+                    Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
                     $Table = new BuildPDOUserSessionTable($name, $comment);
                     break;
             }
-        } elseif($Table->Primary) {
+        } elseif ($Table->Primary) {
             Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
             $Table = new BuildPDOPKTable($name, $comment);
         } else {
@@ -173,15 +173,16 @@ PHP;
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
-    public function build(IBuildable $Buildable) {
+    public function build(IBuildable $Buildable)
+    {
 
-        if(!$Buildable instanceof PDODatabase)
+        if (!$Buildable instanceof PDODatabase)
             return false;
         $this->mBuildDB = $DB = $Buildable;
 
         $BUILD = $Buildable::BUILD_DB;
-        if(!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
-            Log::v(__CLASS__, "(BUILD_DB = {$BUILD}) Skipping Build for ".get_class($Buildable));
+        if (!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
+            Log::v(__CLASS__, "(BUILD_DB = {$BUILD}) Skipping Build for " . get_class($Buildable));
             return false;
         }
 
@@ -198,14 +199,19 @@ PHP;
         $force = Build::force();
 
         $oldFiles = array();
-        if(!file_exists($procPath))  { mkdir($procPath, null, true);  $force = true; }
-        if(!file_exists($modelPath)) { mkdir($modelPath, null, true); $force = true; }
-        else $oldFiles = array_diff(scandir($modelPath), array('..', '.'));
+        if (!file_exists($procPath)) {
+            mkdir($procPath, null, true);
+            $force = true;
+        }
+        if (!file_exists($modelPath)) {
+            mkdir($modelPath, null, true);
+            $force = true;
+        } else $oldFiles = array_diff(scandir($modelPath), array('..', '.'));
 
-        foreach(scandir($schemaFolder) as $file)
-            $hash += filemtime($schemaFolder.$file);
-        if(!$force && isset($Config['schemaHash']) && $Config['schemaHash'] == $hash) {
-            Log::v(__CLASS__, "Skipping Build for ".$Class->getName());
+        foreach (scandir($schemaFolder) as $file)
+            $hash += filemtime($schemaFolder . $file);
+        if (!$force && isset($Config['schemaHash']) && $Config['schemaHash'] == $hash) {
+            Log::v(__CLASS__, "Skipping Build for " . $Class->getName());
             return false;
         }
         $Config['schemaHash'] = $hash;
@@ -214,26 +220,27 @@ PHP;
         // Tables
 
         $tables = array();
-        if(in_array($BUILD, array('ALL', 'MODEL')))
+        if (in_array($BUILD, array('ALL', 'MODEL')))
             $tables = $this->getTables($DB);
 
         $tableNames = array();
-        foreach($tables as $Table) {
+        foreach ($tables as $Table) {
             $Table->Namespace = $modelNS;
             $tableNames[] = $Table->Name;
         }
         Log::v(__CLASS__, "Found Tables (%s): " . implode(', ', $tableNames), count($tableNames));
 
-        foreach($tables as $Table) {
+        foreach ($tables as $Table) {
             $Table->processArgs();
 
-            foreach($Table->getColumns() as $Column) {
-                if($Column->Flags & PDOColumn::FLAG_INDEX)
+            foreach ($Table->getColumns() as $Column) {
+                if ($Column->Flags & PDOColumn::FLAG_INDEX)
                     $Column->Flags |= PDOColumn::FLAG_SEARCH;
-                if(!($Column->Flags & PDOColumn::FLAG_NULL)
+                if (!($Column->Flags & PDOColumn::FLAG_NULL)
                     && !($Column->Flags & PDOColumn::FLAG_AUTOINC)
                     && !($Column->Flags & PDOColumn::FLAG_DEFAULT)
-                    && !($Column->Flags & PDOColumn::FLAG_OPTIONAL))
+                    && !($Column->Flags & PDOColumn::FLAG_OPTIONAL)
+                )
                     $Column->Flags |= PDOColumn::FLAG_REQUIRED;
             }
         }
@@ -242,15 +249,15 @@ PHP;
 
         $noPrimary = array();
 
-        foreach($tables as $Table) {
-            $file = $modelPath.strtolower($Table->ClassName).'.class.php';
+        foreach ($tables as $Table) {
+            $file = $modelPath . strtolower($Table->ClassName) . '.class.php';
 
             $PHP = new BuildPHPClass($Table->ClassName);
             $PHP->Namespace = $Table->Namespace;
 
             $Table->processModelPHP($PHP);
 
-            if(!$Table->Primary)
+            if (!$Table->Primary)
                 $noPrimary[] = $Table;
 
             $PHP->addUse(get_class($DB), 'DB');
@@ -262,24 +269,24 @@ PHP;
 
             $columns = "\n\t\tstatic \$columns = NULL;";
             $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
-            $i=0;
-            foreach($Table->getColumns() as $Column) {
-                if($i++) $columns .= ',';
+            $i = 0;
+            foreach ($Table->getColumns() as $Column) {
+                if ($i++) $columns .= ',';
                 $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
                 $columns .= var_export($Column->Name, true);
-                $columns .= ',0x' . dechex($Column->Flags ?: 0);
+                $columns .= ',0x' . dechex($Column->Flags ? : 0);
 
-                if($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
-                    $columns .= ',' . ($Column->Filter ?: 0);
-                if($Column->Comment || $Column->Default || $Column->EnumValues)
-                    $columns .= ',' . var_export($Column->Comment ?: '', true);
-                if($Column->Default || $Column->EnumValues)
-                    $columns .= ',' . var_export($Column->Default ?: '', true);
-                if($Column->EnumValues) {
+                if ($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
+                    $columns .= ',' . ($Column->Filter ? : 0);
+                if ($Column->Comment || $Column->Default || $Column->EnumValues)
+                    $columns .= ',' . var_export($Column->Comment ? : '', true);
+                if ($Column->Default || $Column->EnumValues)
+                    $columns .= ',' . var_export($Column->Default ? : '', true);
+                if ($Column->EnumValues) {
                     $a = '';
-                    foreach($Column->EnumValues as $e)
+                    foreach ($Column->EnumValues as $e)
                         $a .= ($a ? ',' : '') . var_export($e, true);
-                    $columns .= ',array('.$a.')';
+                    $columns .= ',array(' . $a . ')';
                 }
                 $columns .= ")";
             }
@@ -291,56 +298,56 @@ PHP;
             //$PHP->addStaticProperty('_columns', NULL, 'private');
             $PHP->addUse('CPath\Model\DB\PDOColumn');
 
-            if($Table->SearchWildCard)
+            if ($Table->SearchWildCard)
                 $PHP->addConst('SEARCH_WILDCARD', true);
-            if($Table->SearchLimit)
+            if ($Table->SearchLimit)
                 $PHP->addConst('SEARCH_LIMIT', $Table->SearchLimit);
-            if($Table->SearchLimitMax)
+            if ($Table->SearchLimitMax)
                 $PHP->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
-            if($Table->AllowHandler)
+            if ($Table->AllowHandler)
                 $PHP->addImplements('CPath\Interfaces\IBuildable');
-                //$PHP->addConst('BUILD_IGNORE', false);
+            //$PHP->addConst('BUILD_IGNORE', false);
 
             $PHP->addConstCode();
             $PHP->addConstCode("// Table Columns ");
-            foreach($Table->getColumns() as $Column)
+            foreach ($Table->getColumns() as $Column)
                 $PHP->addConst($this->toTitleCase($Column->Name, true), $Column->Name);
 
-            foreach($Table->getColumns() as $Column)
-                if($Column->EnumConstants) {
+            foreach ($Table->getColumns() as $Column)
+                if ($Column->EnumConstants) {
                     $PHP->addConstCode();
-                    $PHP->addConstCode("// Column Enum Values for '" . $Column->Name ."'");
-                    foreach($Column->EnumValues as $enum)
+                    $PHP->addConstCode("// Column Enum Values for '" . $Column->Name . "'");
+                    foreach ($Column->EnumValues as $enum)
                         $PHP->addConst($this->toTitleCase($Column->Name, true) . '_Enum_' . $this->toTitleCase($enum, true), $enum);
                 }
 
-            foreach($Table->getColumns() as $Column)
+            foreach ($Table->getColumns() as $Column)
                 $PHP->addProperty($Column->Name);
 
-            foreach($Table->getColumns() as $Column) {
-                $ucName = self::toTitleCase($Column->Name, true);
+            foreach ($Table->getColumns() as $Column) {
+                $ucName = $this->toTitleCase($Column->Name, true);
                 $PHP->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if($Column->Flags & PDOColumn::FLAG_PRIMARY ?0:1 && $Table->Primary) // TODO: primary hack needs oop
+                if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $Table->Primary) // TODO: primary hack needs oop
                     $PHP->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
                 $PHP->addMethodCode();
             }
 
-            if($Table->Primary) // TODO: primary hack needs oop
+            if ($Table->Primary) // TODO: primary hack needs oop
                 $PHP->addStaticMethod('remove', $Table->ClassName . ' $' . $Table->ClassName, " parent::removeModel(\${$Table->ClassName}); ");
             $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
 
             //Log::v2(__CLASS__, "Writing file: " . $file);
             file_put_contents($file, $PHP->build());
-            foreach($oldFiles as $i => $f)
-                if($modelPath.$f == $file && !is_dir($modelPath.$f)) {
+            foreach ($oldFiles as $i => $f)
+                if ($modelPath . $f == $file && !is_dir($modelPath . $f)) {
                     unset($oldFiles[$i]);
                     break;
                 }
 
             // CSharp
 
-            $fileCSharp = $modelPath . 'csharp/' . ($Table->ClassName).'.cs';
-            if(!file_exists($dir = dirname($fileCSharp)))
+            $fileCSharp = $modelPath . 'csharp/' . ($Table->ClassName) . '.cs';
+            if (!file_exists($dir = dirname($fileCSharp)))
                 mkdir($dir, null, true);
             $CBuilder = new BuildCSharpTables($DB::BUILD_DB_CSHARP_NAMESPACE);
             $CBuilder->build($Table, $fileCSharp);
@@ -348,45 +355,45 @@ PHP;
             $this->mBuildDB = NULL;
         }
 
-        if($noPrimary) {
+        if ($noPrimary) {
             $t = array();
             /** @var BuildPDOTable $Table */
-            foreach($noPrimary as $Table)
+            foreach ($noPrimary as $Table)
                 $t[] = $Table->Name;
             Log::e(__CLASS__, "No PRIMARY key found for (" . count($noPrimary) . ") Table(s) '" . implode("', '", $t) . "'");
         }
 
         //Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");
-        Log::v(__CLASS__, "Built (".sizeof($tables).") table model(s)");
-        if($c = sizeof($oldFiles)) {
+        Log::v(__CLASS__, "Built (" . sizeof($tables) . ") table model(s)");
+        if ($c = sizeof($oldFiles)) {
             Log::v(__CLASS__, "Removing ({$c}) depreciated model classes");
-            foreach($oldFiles as $file)
-                if(!is_dir($modelPath.$file))
-                    unlink($modelPath.$file);
+            foreach ($oldFiles as $file)
+                if (!is_dir($modelPath . $file))
+                    unlink($modelPath . $file);
         }
 
         // Stored Procedures
 
         $procs = array();
-        if(in_array($BUILD, array('ALL', 'PROC')))
+        if (in_array($BUILD, array('ALL', 'PROC')))
             $procs = $this->getProcs($DB);
 
         $PHP = new BuildPHPClass('Procs');
         $PHP->Namespace = $procNS;
         $PHP->addUse(get_class($DB), 'DB');
         $names = array();
-        foreach($procs as $proc) {
+        foreach ($procs as $proc) {
             $name = array_shift($proc);
-            if(isset($names[$name])) {
+            if (isset($names[$name])) {
                 $name .= ++$names[$name];
             } else {
                 $names[$name] = 1;
             }
-            $method = $name.'('.(!$proc ? '' : ('%s'.str_repeat(', %s', sizeof($proc)-1))).')';
+            $method = $name . '(' . (!$proc ? '' : ('%s' . str_repeat(', %s', sizeof($proc) - 1))) . ')';
             $PHP->addConst(strtoupper($name), $method);
 
-            $sqlParams = $proc ? '?'.str_repeat(', ?', sizeof($proc)-1) : '';
-            $codeParams = $proc ? '$'.implode(', $', $proc) : '';
+            $sqlParams = $proc ? '?' . str_repeat(', ?', sizeof($proc) - 1) : '';
+            $codeParams = $proc ? '$' . implode(', $', $proc) : '';
 
             $code = <<<PHP
         static \$stmd = NULL;
@@ -395,7 +402,7 @@ PHP;
         return \$stmd;
 PHP;
 
-            $ucName = self::toTitleCase($name, true);
+            $ucName = \CPath\Model\DB\Builders\self::toTitleCase($name, true);
             $ucName[0] = strtolower($ucName[0]);
             $PHP->addStaticMethod($ucName, $proc, $code);
             //$phpC .= self::getConst(strtoupper($name), $method);
@@ -404,8 +411,8 @@ PHP;
         $PHP->addStaticMethod('getDB', '', " return DB::get(); ");
         //$php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
         //file_put_contents($procPath.'procs.class.php', $php);
-        file_put_contents($procPath.'procs.class.php', $PHP->build());
-        Log::v(__CLASS__, "Built (".sizeof($procs).") routine(s)");
+        file_put_contents($procPath . 'procs.class.php', $PHP->build());
+        Log::v(__CLASS__, "Built (" . sizeof($procs) . ") routine(s)");
 
         return true;
     }
@@ -413,32 +420,38 @@ PHP;
     /**
      * Unused
      */
-    public function buildComplete() {
+    public function buildComplete()
+    {
 
     }
 
-    private function getFolder(\ReflectionClass $Class, $subFolder=NULL) {
-        if($subFolder) $subFolder .= '/';
+    private function getFolder(\ReflectionClass $Class, $subFolder = NULL)
+    {
+        if ($subFolder) $subFolder .= '/';
         return dirname($Class->getFileName()) . '/' . $subFolder;
     }
 
 
-    static function toTitleCase($field, $noSpace=false) {
+    static function toTitleCase($field, $noSpace = false)
+    {
         $field = preg_replace('/[^a-zA-Z0-9]/', ' ', $field);
         $field = ucwords($field);
         $words = explode(' ', $field);
-        foreach($words as &$word) {
-            if(strlen($word) === 2)
+        foreach ($words as &$word) {
+            if (strlen($word) === 2)
                 $word = strtoupper($word);
         }
-        if(!$noSpace) return implode(' ', $words);;
+        if (!$noSpace) return implode(' ', $words);;
         return implode('', $words);
     }
 
-    static function createBuildableInstance() {
+    static function createBuildableInstance()
+    {
         return new static;
     }
 }
+
+class UpgradeException extends \Exception {}
 
 class BuildPDOColumn {
     public $Name, $Comment, $Flags=0, $EnumValues, $Filter=NULL, $Default=NULL, $EnumConstants = false;

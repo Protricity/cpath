@@ -15,10 +15,9 @@ namespace CPath\Interfaces;
  */
 
 interface IBuildable {
-    //const BUILD_IGNORE = true; // Set to true to ignore this class during builds
 
     /**
-     * Return an instance of the class for building purposes
+     * Return an instance of the class for building and other tasks
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
     static function createBuildableInstance();

@@ -11,15 +11,15 @@ use CPath\Actions\Action;
 use CPath\Base;
 use CPath\Describable\IDescribable;
 use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Handlers\API\Fragments\SimpleFormFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IRequest;
 
 
 
 abstract class APIAction extends Action {
-    private $mAPI=null, $mAPIView=null, $mTheme;
+    private $mAPI=null, $mUtil=null, $mTheme;
     function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme;
     }
@@ -33,8 +33,8 @@ abstract class APIAction extends Action {
         return $this->mAPI ?: $this->mAPI = $this->loadAPI();
     }
 
-    private function getAPIView() {
-        return $this->mAPIView ?: $this->mAPIView = new APIView($this->getAPI(), null, null, $this->mTheme);
+    private function getUtil() {
+        return $this->mUtil ?: $this->mUtil = new SimpleFormFragment($this->getAPI(), $this->mTheme);
     }
 
     /**
@@ -49,7 +49,7 @@ abstract class APIAction extends Action {
         $View->addHeadStyleSheet($basePath . 'assets/apiactions.css', true);
         $View->addHeadScript($basePath . 'assets/apiactions.js', true);
 
-        $this->getAPIView()->addHeadElementsToView($View);
+        $this->getUtil()->addHeadElementsToView($View);
     }
 
     /**
@@ -75,7 +75,7 @@ abstract class APIAction extends Action {
      * @return void
      */
     function renderFragmentContent(IRequest $Request) {
-        $this->getAPIView()->renderForm($Request, false, 'api-action'); // TODO: serialize?
+        $this->getUtil()->render($Request, 'api-action'); // TODO: serialize?
     }
 //
 //    // Static

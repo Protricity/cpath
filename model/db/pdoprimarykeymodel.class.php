@@ -11,7 +11,11 @@ use CPath\Cache;
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
+use CPath\Handlers\Views\APIMultiView;
+use CPath\Handlers\Views\APIView;
+use CPath\Handlers\Views\Routes\APIViewRoute;
 use CPath\Log;
+use CPath\Route\RouteSet;
 
 abstract class PDOPrimaryKeyModel extends PDOModel {
     const PRIMARY = null;
@@ -76,20 +80,30 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
         return $this;
     }
 
-
-
     /**
      * Returns the default IHandlerSet collection for this PDOModel type.
-     * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
-     * @return HandlerSet a set of common handler routes for this PDOModel type
+     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
+     * @param bool $readOnly
+     * @param bool $allowDelete
+     * @return RouteSet a set of common routes for this PDOModel type
      */
-    function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
-        $Handlers = parent::loadDefaultHandlers($Handlers);
-        $Handlers->add('GET', new API_Get($this));
-        $Handlers->add('PATCH', new API_Patch($this));
-        $Handlers->add('DELETE', new API_Delete($this));
+    function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
+        $Routes = parent::loadDefaultRouteSet($readOnly, $allowDelete);
 
-        return $Handlers;
+        $Routes['GET :api'] = new APIMultiView($Routes);
+        $Routes['POST :api'] = new APIMultiView($Routes);
+        $Routes['GET'] = new API_Get($this);
+        if(!$readOnly) {
+            $Routes['PATCH'] = new API_Patch($this);
+            if(!$allowDelete)
+                $Routes['DELETE'] = new API_Delete($this);
+        } else if($allowDelete) {
+            error_log('allowDelete == true while $readOnly != true');
+        }
+
+        $Routes->setDefault($Routes['GET search'], true);
+        //$Routes->setDefault($Routes['GET'], true);
+        return $Routes;
     }
 
     /**

@@ -15,11 +15,12 @@ use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Model\Response;
+use CPath\Route\IRoutable;
 
-class Build extends API implements IBuildable {
+class Build extends API {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
-    const ROUTE_METHODS = 'CLI';    // CLI only
+    const ROUTE_METHOD = 'CLI';    // CLI only
     const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
 
 
@@ -264,7 +265,12 @@ class Build extends API implements IBuildable {
     private static function buildClasses() {
         $exCount = 0;
         foreach(self::$mClasses as $Class) {
-            $Buildable = $Class->getMethod('createBuildableInstance')->invoke(null);
+            $Method = $Class->getMethod('createBuildableInstance');
+            if($Method->isAbstract()) {
+                Log::v2(__CLASS__, "Ignoring abstract method found in '{$Class->getName()}'");
+                continue;
+            }
+            $Buildable = $Method->invoke(null);
 
             if(!$Buildable) {
                 Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
@@ -365,4 +371,11 @@ class Build extends API implements IBuildable {
         return $exCount;
     }
 
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {
+        return new static();
+    }
 }

@@ -5,7 +5,12 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Interfaces;
+namespace CPath\Route;
+
+use CPath\Constructable\IConstructable;
+use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRequest;
+
 
 /** Thrown when a valid route could not find a corresponding handler */
 class DestinationNotFoundException extends \Exception {}
@@ -13,8 +18,10 @@ class DestinationNotFoundException extends \Exception {}
 class InvalidHandlerException extends \Exception {}
 /** Thrown when no valid routes could be found */
 class NoRoutesFoundException extends \Exception {}
+class InvalidRouteException extends \Exception {}
 
-interface IRoute {
+interface IRoute extends IConstructable
+{
 
     const METHODS = 'GET,POST,PUT,PATCH,DELETE,CLI';
 
@@ -30,22 +37,27 @@ interface IRoute {
      * @param IRequest $Request the request to render
      * @return void
      */
-    function render(IRequest $Request);
+    function renderDestination(IRequest $Request);
 
     function getPrefix();
+
     function getDestination();
 
     /**
-     * Get a list of arguments that the constructor calls to instantiate this instance
-     * @return Array
-     */
-    function getExportArgs();
-
-    /**
-     * Renders the route destination
+     * Get a buildable instance of the route destination
+     * Note: this method should throw an exception if the requested route
      * @return IHandler
-     * @throws InvalidHandlerException if the destination handler was invalid
      */
     function getHandler();
 
+    /**
+     * Match the destination to the route and return an instance of the destination object
+     * Note: this method should throw an exception if the requested route (method + path) didn't match
+     * @param IRequest $Request the request to render
+     * @return IHandler
+     * @throws InvalidRouteException if the requested route (method + path) didn't match
+     */
+    function routeRequestToHandler(IRequest $Request);
+
 }
+

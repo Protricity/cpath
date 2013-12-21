@@ -6,21 +6,17 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Builders;
+namespace CPath\Route;
 use CPath\Base;
 use CPath\Compile;
 use CPath\Config;
+use CPath\Constructable\Constructable;
 use CPath\Exceptions\BuildException;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IHandlerAggregate;
-use CPath\Interfaces\IRoutable;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IRouteBuilder;
 use CPath\Log;
-use CPath\Model\Route;
-use CPath\Router;
-use CPath\RouterAPC;
+use CPath\Route\Router;
+use CPath\Route\RouterAPC;
 
 /**
  * Class BuildHandlers
@@ -57,13 +53,14 @@ PHP;
      * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
     public function build(IBuildable $Buildable) {
-        if($Buildable instanceof IHandlerAggregate)
-            $Buildable = $Buildable->getAggregateHandler();
-        if(!$Buildable instanceof IHandler)
+        if(!$Buildable instanceof IRoutable)
             return false;
         $this->mCurrentClass = $Buildable;
-        $routes = $this->getHandlerRoutes($Buildable);
-        foreach($routes as $Route)
+        $Route = $Buildable->loadRoute();
+        echo get_class($Route);
+        if(!$Route)
+            Log::e(__CLASS__, "Invalid Route returned for " . get_class($Buildable));
+        else
             $this->addRoute($Route);
         return true;
     }
@@ -87,16 +84,24 @@ PHP;
     }
 
     /**
-     * Add a route to the builder
-     * @param IRoute $Route the route instance to add
-     * @param bool $replace if true, replace any existing routes
-     * @throws \CPath\Exceptions\BuildException if a route already exists and $replace==false
+     * Add an IRoute to the Route Builder
+     * @param IRoute $Route the route path or null for default
+     * @param bool $replace
+     * @return void
+     * @throws BuildException
      */
-    private function addRoute(IRoute $Route, $replace=false) {
+    function addRoute(IRoute $Route, $replace=false) {
         if(!$replace && isset($this->mRoutes[$Route->getPrefix()])) {
             throw new BuildException("Route Prefix already exists: ".$Route->getPrefix());
         }
         $this->mRoutes[$Route->getPrefix()] = $Route;
+    }
+
+    /**
+     * @return IRoute[] array of IRoute instances
+     */
+    function getRoutes() {
+        return array_values($this->mRoutes);
     }
 
     /**
@@ -105,7 +110,7 @@ PHP;
     public function buildComplete() {
         if(!$this->mRoutes)
             return;
-        /** @var IRoute $Route */
+        /** @var \CPath\Route\IRoute $Route */
         foreach($this->getCustomRoutes() as $Route)
             $this->addRoute($Route);
 
@@ -134,11 +139,13 @@ PHP;
             $phpUse .= "\nuse " . $class . " as " . $alias . ";";
         $phpRoute = '';
         foreach($this->mRoutes as $Route) {
+            $constName = $useClass[get_class($Route)];
             $args = '';
             $i=0;
-            foreach($Route->getExportArgs() as $arg)
-                $args .= ($i++ ? ', ' : '') . var_export($arg, true);
-            $phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';
+            //foreach($Route->getExportArgs() as $arg)
+            //    $args .= ($i++ ? ', ' : '') . var_export($arg, true);
+            //$phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';
+            $phpRoute .= "\n\t" . Constructable::exportToPHPCode($Route, $constName) . ',';
         }
         $output = sprintf(self::TMPL_ROUTES, $phpUse, $phpRoute);
         $path = Config::getGenPath().'routes.gen.php';
@@ -154,81 +161,6 @@ PHP;
         Compile::commit();
 
         $this->mRoutes = array();
-    }
-
-    /**
-     * Returns a list of allowed route methods associated with this class
-     * @param String|Array $methods an array of methods or a string list delimited by '|'
-     * @return array a validated list of methods
-     * @throws \CPath\Exceptions\BuildException if no class was specified and no default class exists
-     */
-    public function parseMethods($methods) {
-        //$methods = $Handler::ROUTE_METHODS ?: 'GET,POST,CLI';
-
-        $allowed = explode(',', IRoute::METHODS);
-        if(!is_array($methods))
-            $methods = explode(',', $methods);
-        foreach($methods as &$method) {
-            $method = strtoupper($method);
-            if($method == 'ANY') {
-                $methods = $allowed;
-                break;
-            }
-            if(!in_array($method, $allowed))
-                throw new BuildException("Method '{$method}' is not supported");
-        }
-        return $methods;
-    }
-
-    /**
-     * Get all default routes for this Handler
-     * @param String|IHandler $Handler The class instance or class name
-     * @param String|Array|null $methods the allowed methods
-     * @param String|null $path the route path or null for default
-     * @return array
-     */
-    function getHandlerDefaultRoutes($Handler, $methods='GET,POST,CLI', $path=NULL) {
-        $methods = $this->parseMethods($methods ?: 'GET,POST,CLI');
-        if(!$path)
-            $path = $this->getHandlerDefaultPath($Handler);
-        $routes = array();
-        foreach($methods as $method)
-            $routes[$method] = new Route($method . ' ' . $path, get_class($Handler));
-        return $routes;
-    }
-
-    /**
-     * Gets the default public route path for this handler
-     * @param String|IHandler $Handler The class instance or class name
-     * @return string The public route path
-     */
-    function getHandlerDefaultPath($Handler) {
-        $path = str_replace('\\', '/', strtolower(get_class($Handler)));
-        if($path[0] !== '/')
-            $path = '/' . $path;
-        return $path;
-    }
-
-    /**
-     * Determines the Handler route(s) from constants or the class name
-     * @param IHandler $Handler|NULL The class instance or NULL for the current class
-     * @return IRoute[] a list of IRoute instances
-     * @throws \CPath\Exceptions\BuildException when a build exception occurred
-     */
-    private function getHandlerRoutes(IHandler $Handler=NULL) {
-        if(!$Handler)
-            $Handler = $this->getCurrentClass();
-
-        $routes = array();
-        if($Handler instanceof IRoutable) {
-            $routes = $Handler->getAllRoutes($this);
-        } else {
-            $R = new \ReflectionClass($Handler);
-            $path = $R->getConstant('ROUTE_PATH');
-            $method = $R->getConstant('ROUTE_METHODS');
-            $routes = $this->getHandlerDefaultRoutes($Handler, $method, $path);
-        }
-        return $routes;
     }
 
     // Statics
@@ -253,7 +185,7 @@ PHP;
         Log::v(__CLASS__, "Cleared {$c} APC Entries");
 
         $routes = Router::getRoutes();
-        /** @var IRoute $Route */
+        /** @var \CPath\Route\IRoute $Route */
         foreach($routes as $Route)
             apc_store(RouterAPC::PREFIX_ROUTE.$Route->getPrefix(), $Route);
 

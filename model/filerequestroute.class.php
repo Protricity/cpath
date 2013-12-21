@@ -7,7 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Model;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
+use CPath\Route\IRoute;
+use CPath\Route\MissingRoute;
 
 /**
  * Class Route - a route entry
@@ -24,7 +25,7 @@ class FileRequestRoute extends MissingRoute implements IRoute{
      * @param IRequest $Request
      * @return void
      */
-    public function render(IRequest $Request) {
+    public function renderDestination(IRequest $Request) {
         header("HTTP/1.0 404 File request was passed to Script");
     }
 

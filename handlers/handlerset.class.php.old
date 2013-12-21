@@ -7,18 +7,15 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers;
-use CPath\Builders\RouteBuilder;
 use CPath\Exceptions\BuildException;
 use CPath\Handlers\Views\HandlerSetView;
 use CPath\Interfaces\HandlerSetException;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IHandlerSetEvents;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IRouteBuilder;
-use CPath\Model\Route;
+use CPath\Route\IRoute;
+use CPath\Route\Route;
 
 /**
  * Class HandlerSet
@@ -27,7 +24,6 @@ use CPath\Model\Route;
  * Provides a Handler Set for Handler calls
  */
 
-class InvalidRouteException extends \Exception {}
 
 
 class HandlerSet implements IHandlerSet {

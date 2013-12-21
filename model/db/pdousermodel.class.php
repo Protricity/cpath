@@ -8,16 +8,12 @@
 namespace CPath\Model\DB;
 
 
-use CPath\Actions\IActionable;
 use CPath\Actions\IActionAggregate;
 use CPath\Actions\IActionManager;
-use CPath\Handlers\Api\Action\APIAction;
-use CPath\Handlers\HandlerSet;
-use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\InvalidUserSessionException;
-use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
+use CPath\Route\RouteSet;
 
 /** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}
@@ -80,14 +76,19 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
     public function getEmail() { return $this->{static::COLUMN_EMAIL}; }
     public function setEmail($value, $commit=true) { return $this->updateColumn(static::COLUMN_EMAIL, $value, $commit, FILTER_VALIDATE_EMAIL); }
 
-    function setFlags($flags, $commit=true, $remove=false) {
+    function addFlags($flags, $commit=true) {
         if(!is_int($flags))
-            throw new \InvalidArgumentException("setFlags 'flags' parameter must be an integer");
+            throw new \InvalidArgumentException("addFlags 'flags' parameter must be an integer");
         //$oldFlags = $this->mFlags;
-        if(!$remove)
-            $this->mFlags |= $flags;
-        else
-            $this->mFlags = $this->mFlags & ~$flags;
+        $this->mFlags |= $flags;
+        $this->updateColumn(static::COLUMN_FLAGS, $this->mFlags, $commit);
+    }
+
+    function removeFlags($flags, $commit=true) {
+        if(!is_int($flags))
+            throw new \InvalidArgumentException("removeFlags 'flags' parameter must be an integer");
+        //$oldFlags = $this->mFlags;
+        $this->mFlags = $this->mFlags & ~$flags;
         $this->updateColumn(static::COLUMN_FLAGS, $this->mFlags, $commit);
     }
 
@@ -144,18 +145,25 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
     }
 
     /**
-     * Returns the default IHandlerSet collection for this PDOModel type
-     * Note: This method must be STATELESS should NOT be affected by outside factors such as user session
-     * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
-     * @return HandlerSet a set of common handler routes for this PDOModel type
+     * Returns the default IHandlerSet collection for this PDOModel type.
+     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
+     * @param bool $readOnly
+     * @param bool $allowDelete
+     * @return RouteSet a set of common routes for this PDOModel type
      */
-    function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
-        $Handlers = parent::loadDefaultHandlers($Handlers);
-        $Handlers->add('POST', new API_PostUser($this), true);
-        $Handlers->add('POST login', new API_PostUserLogin($this));
-        $Handlers->add('POST logout', new API_PostUserLogout($this));
-        $Handlers->add('POST password', new API_PostUserPassword($this));
-        return $Handlers;
+    function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
+        $Routes = RouteSet::fromHandler($this);
+        $Routes['GET'] = new API_Get($this);
+        $Routes['GET search'] = new API_GetSearch($this);
+        $Routes['GET browse'] = new API_GetBrowse($this);
+
+        if(!$readOnly)
+            $Routes['POST'] = new API_PostUser($this);
+        $Routes['POST login'] = new API_PostUserLogin($this);
+        $Routes['POST logout'] = new API_PostUserLogout($this);
+        $Routes['POST password'] = new API_PostUserPassword($this);
+        $Routes->setDefault($Routes['GET browse']);
+        return $Routes;
     }
 
     /**
@@ -200,7 +208,11 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
         if(function_exists('password_hash')) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
         } else {
-            $salt = mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
+            if(!function_exists('mcrypt_create_iv')) {
+                $salt = uniqid(null, true);
+            } else {
+                $salt = \mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
+            }
             $salt = base64_encode($salt);
             $salt = str_replace('+', '.', $salt);
             $hash = crypt($password, '$2y$10$'.$salt.'$');
@@ -287,7 +299,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
                 static::COLUMN_EMAIL => 'guest@noemail.com',
             ));
         }
-        $User->setFlags(static::FLAG_GUEST);
+        $User->addFlags(static::FLAG_GUEST);
         return $User;
     }
 

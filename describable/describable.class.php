@@ -51,8 +51,12 @@ final class Describable {
 
     private static function getAgg(IDescribableAggregate $agg) {
         $agg = $agg->getDescribable();
-        if(is_string($agg))
+        if($agg instanceof IDescribableAggregate)
+            return self::getAgg($agg);
+        elseif(is_string($agg))
             $agg = new SimpleDescription($agg);
+        elseif(!($agg instanceof IDescribable))
+            throw new \InvalidArgumentException("getDescribable did not return a string or instance of IDescribable");
         return $agg;
     }
 

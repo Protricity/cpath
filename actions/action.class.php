@@ -8,6 +8,7 @@
 namespace CPath\Actions;
 
 use CPath\Base;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Handlers\Fragments\IRenderFragmentContent;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Interfaces\IRequest;

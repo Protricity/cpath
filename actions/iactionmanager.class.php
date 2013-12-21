@@ -7,7 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Actions;
 
-interface IActionManager {
+use CPath\Interfaces\IViewConfig;
+
+interface IActionManager extends IViewConfig {
 
     /**
      * Add an action to the available list

@@ -19,10 +19,6 @@
         jQuery('.apiview-form').each(function() {
             var form = jQuery(this);
             var Form = new CPath.Form(form);
-            var btnSubmit = form.find('.form-button-submit');
-            var btnSubmitJSON = form.find('.form-button-submit-json');
-            var btnSubmitXML = form.find('.form-button-submit-xml');
-            var btnSubmitTEXT = form.find('.form-button-submit-text');
 
 
             var divResponseContainer = form.parent().find('.apiview-response');
@@ -32,10 +28,6 @@
             var divResponseHeaders = divResponseContainer.find('.response-headers .fragment-content');
             var divResponseContent = divResponseContainer.find('.response-content .fragment-content');
 
-            btnSubmit.click(function() { Form.submit({dataType: 'json'}); });
-            btnSubmitJSON.click(function() { Form.submit({dataType: 'json'}); });
-            btnSubmitXML.click(function() { Form.submit({dataType: 'xml'}); });
-            btnSubmitTEXT.click(function() { Form.submit({dataType: 'text'}); });
 
             var content = jQuery.trim(divResponseContent.text());
             if(content)

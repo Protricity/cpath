@@ -6,8 +6,7 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Builders;
-
+namespace CPath\Model\DB\Builders;
 
 use CPath\Interfaces\IBuildable;
 use CPath\Model\DB\MySQLDatabase;

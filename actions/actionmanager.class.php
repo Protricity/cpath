@@ -7,6 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Actions;
 
+use CPath\Handlers\Interfaces\IView;
+use CPath\Interfaces\IViewConfig;
+
 class ActionManager implements IActionManager {
 
     /** @var IActionable[] */
@@ -15,6 +18,18 @@ class ActionManager implements IActionManager {
     public function __construct() {
 
     }
+
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
+        foreach($this->mActions as $Action)
+            if($Action instanceof IViewConfig)
+                $Action->addHeadElementsToView($View);
+    }
+
     /**
      * Add an action to the available list
      * @param IActionable $Action

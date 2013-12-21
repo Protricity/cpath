@@ -12,9 +12,12 @@ use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
+use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IJSON;
+use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IResponse;
 use CPath\Interfaces\IResponseAggregate;
+use CPath\Route\RouteSet;
 use CPath\Serializer\ISerializable;
 use CPath\Interfaces\IXML;
 use CPath\Log;
@@ -72,6 +75,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     const SECURITY_DISABLED = false;
 
+    const ROUTE_METHOD = null;
 
     /**
      * PDOModel Constructor parameters must be optional.
@@ -132,18 +136,19 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
     /**
      * Returns the default IHandlerSet collection for this PDOModel type.
-     * @param HandlerSet $Handlers a set of handlers to add to, otherwise a new HandlerSet is created
-     * @return HandlerSet a set of common handler routes for this PDOModel type
+     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
+     * @param bool $readOnly
+     * @param bool $allowDelete
+     * @return RouteSet a set of common routes for this PDOModel type
      */
-    function loadDefaultHandlers(HandlerSet $Handlers=NULL) {
-        if($Handlers === NULL)
-            $Handlers = new HandlerSet($this);
-
-        $Handlers->add('GET search', new API_GetSearch($this));
-        $Handlers->add('GET browse', new API_GetBrowse($this));
-        $Handlers->add('POST', new API_Post($this));
-
-        return $Handlers;
+    function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
+        $Routes = RouteSet::fromHandler($this);
+        $Routes['GET search'] = new API_GetSearch($this);
+        $Routes['GET browse'] = new API_GetBrowse($this);
+        if(!$readOnly)
+            $Routes['POST'] = new API_Post($this);
+        $Routes->setDefault($Routes['GET search']);
+        return $Routes;
     }
 
     /**

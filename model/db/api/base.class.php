@@ -11,6 +11,7 @@ namespace CPath\Model\DB;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Describable\IDescribableAggregate;
+use CPath\Interfaces\IBuildable;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\ISecurityPolicyAggregate;
@@ -107,4 +108,9 @@ abstract class API_Base extends API {
         return $this->mModel;
     }
 
+    /**
+     * Return an instance of the class for building and other tasks
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {}
 }

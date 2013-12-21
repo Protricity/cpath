@@ -223,16 +223,18 @@
         var url = form.attr('action') || document.location.href.split('?')[0];
         var method = form.attr('method') || 'GET';
 
-        this.API = new CPath.API(method, url);
-        jQuery(this.API).on('response', function(evt, response, jqXHR) {
+        var API = new CPath.API(method, url);
+        jQuery(API).on('response', function(evt, response, jqXHR) {
             jQuery([window.CPath.Form, context, formElm]).trigger('api-response', [response, context.API, jqXHR]);
         });
 
         this.submit = function(ajax) {
             if(typeof ajax != "object")
                 ajax = {type: ajax};
-            context.API.execute(form.serialize());
+            API.execute(form.serialize());
         };
+
+        this.getAPI = function() { return API; };
 
         if(!forms.has(form)) {
             forms.add(form);

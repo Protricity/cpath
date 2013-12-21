@@ -5,17 +5,15 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Model;
-use CPath\Handlers\InvalidRouteException;
+namespace CPath\Route;
+use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\NoRoutesFoundException;
 
 /**
  * Class MissingRoute - a placeholder for missing routes
  * @package CPath
  */
-class MissingRoute extends ArrayObject implements IRoute{
+class MissingRoute implements IRoute{
     private $mRoutePath;
     public function __construct($routePath) {
         $this->mRoutePath = $routePath;
@@ -26,7 +24,7 @@ class MissingRoute extends ArrayObject implements IRoute{
      * @param IRequest $Request
      * @return void
      */
-    public function render(IRequest $Request) {
+    public function renderDestination(IRequest $Request) {
         header("HTTP/1.0 404 Route not found");
         print("No Routes Matched: " . $this->mRoutePath);
     }
@@ -39,5 +37,7 @@ class MissingRoute extends ArrayObject implements IRoute{
     function setRequest(Array $request) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getRequest() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getExportArgs() { throw new InvalidRouteException("File request was passed to Script"); }
+    function exportConstructorArgs() { throw new InvalidRouteException("File request was passed to Script"); }
+    function routeRequestToHandler(IRequest $Request) { throw new InvalidRouteException("File request was passed to Script"); }
     protected function &getArray() { throw new InvalidRouteException("File request was passed to Script"); }
 }

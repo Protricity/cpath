@@ -14,6 +14,9 @@ use CPath\Interfaces\IResponse;
 use CPath\Model\ExceptionResponse;
 use CPath\Model\Response;
 use CPath\Request\CLI;
+use CPath\Route\InvalidRouteException;
+use CPath\Route\IRoutable;
+use CPath\Route\RouteSet;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -49,12 +52,17 @@ class ApiTester {
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLI::fromArgs($args, $request);
         $Route = $Cli->findRoute();
-        $Api = $Route->getHandler();
-        if($Api instanceof IHandlerSet)
-            $Api = $Api->get($Cli->getNextArg());
-        if(!($Api instanceof IAPI))
-            throw new NotAnApiException(get_class($Api) . " does not implement IAPI");
-        return new static($Api, $Cli);
+        $Handler = $Route->getHandler();
+        if($Handler instanceof IRoutable)
+            $Route = $Handler->loadRoute();
+
+        if($Route instanceof RouteSet) {
+            $Handler = $Route->routeRequestToHandler($Cli);
+        }
+
+        if(!($Handler instanceof IAPI))
+            throw new NotAnApiException(get_class($Handler) . " does not implement IAPI");
+        return new static($Handler, $Cli);
     }
 
     /**

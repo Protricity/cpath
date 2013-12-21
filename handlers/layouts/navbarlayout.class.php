@@ -1,6 +1,8 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
@@ -14,12 +16,12 @@ abstract class NavBarLayout extends View implements IRenderContent {
 //        parent::__construct($Target, $Theme);
 //    }
 
-
-    protected function setupHeadFields() {
-        parent::setupHeadFields();
-        //$basePath = Base::getClassPublicPath(__CLASS__, false);
-        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
-    }
+//
+//    protected function setupHeadFields() {
+//        parent::setupHeadFields();
+//        //$basePath = Base::getClassPublicPath(__CLASS__, false);
+//        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
+//    }
 
     /**
      * Render the header
@@ -47,19 +49,19 @@ abstract class NavBarLayout extends View implements IRenderContent {
     /**
      * Render the navigation bar content
      * @param String $url the url for this navbar entry
-     * @param String|NULL $text the html for this navbar entry
-     * @param String|NULL $title the title for this navbar entry
+     * @param String|IDescribable $description the description of this nave entry
      * @return void
      */
-    protected function renderNavBarEntry($url, $text=null, $title=null)
+    protected function renderNavBarEntry($url, $description)
     {
+        $Describable = Describable::get($description);
         if(!$this->navBarStarted) {
             echo RI::ni(), "<ul class='navbar-menu'>";
             $this->navBarStarted = true;
         }
 
         echo RI::ni(1), "<li class='navbar-menu-item clearfix'>";
-        echo RI::ni(2), "<a href='{$url}' title='", $title ?: $text ,"'>", $text ?: $url, "</a>";
+        echo RI::ni(2), "<a href='{$url}' title='", $Describable->getTitle(), "'>", $Describable->getDescription(), "</a>";
         echo RI::ni(1), "</li>";
     }
 

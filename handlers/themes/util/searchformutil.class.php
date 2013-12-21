@@ -27,7 +27,7 @@ class SearchFormUtil implements IDescribable, IViewConfig {
         $this->mAPI = $this->mDescriptor->getAPI();
         $this->mTheme = $Theme;
         $this->mResponse = $Response;
-        $this->mAPIView = new APIView($this->mAPI, null, null, $Theme);
+        $this->mAPIView = new APIView($this->mAPI, null, $Theme);
         $this->mDescribable = Describable::get($this->mAPI);
     }
 

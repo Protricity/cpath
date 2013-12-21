@@ -5,8 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath;
-use CPath\Interfaces\IRoute;
+namespace CPath\Route;
+use CPath\Build;
+use CPath\Config;
+use CPath\Route\IRoute;
 
 /**
  * Class Router - finds routes to match paths and renders them
@@ -27,7 +29,7 @@ final class Router{
     public static function findRoute($routePath, &$args) {
 
         $routes = self::getRoutes();
-        /** @var IRoute $Route */
+        /** @var \CPath\Route\IRoute $Route */
         foreach($routes as $Route) {
             $args = $Route->match($routePath);
             if($args === false)

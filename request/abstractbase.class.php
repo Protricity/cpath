@@ -7,9 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Request;
 
+use CPath\Config;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
+use CPath\Route\IRoute;
 use CPath\LogException;
 use CPath\Model\ArrayObject;
 use CPath\Model\FileUpload;
@@ -27,7 +28,7 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
         $mArgs = array(),
         $mRequest = array();
 
-    /** @var IRoute */
+    /** @var \CPath\Route\IRoute */
     protected
         $mRoute = NULL;
 
@@ -42,6 +43,24 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
      * @throws NoUploadFoundException if the file was not found
      */
     abstract function getFileUpload($_path=NULL);
+
+    /**
+     * Build a url from the request
+     * @param bool $withArgs
+     * @param bool $withDomain
+     * @return string
+     */
+    function getRequestURL($withArgs=true, $withDomain=false) {
+        list($method, $path) = explode(' ', $this->mRoute->getPrefix());
+        if($withArgs)
+            foreach($this->mArgs as $arg)
+                $path .=  '/' . $arg;
+
+        if($withDomain)
+            $path = Config::$Domain . $path;
+
+        return $path;
+    }
 
     // Implement IRequest
 
@@ -79,12 +98,14 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
 
     /**
      * Return the next argument for this request
+     * @param bool $advance if true, the argument position advances forward 1
      * @return String argument
      */
-    function getNextArg() {
+    function getNextArg($advance=true) {
         if(isset($this->mArgs[$this->mPos])) {
             $value = $this->mArgs[$this->mPos];
-            $this->mPos++;
+            if($advance)
+                $this->mPos++;
             return $value;
         }
         return NULL;
@@ -92,7 +113,7 @@ abstract class AbstractBase extends ArrayObject implements IRequest {
 
     /**
      * Get the IRoute instance for this request
-     * @return IRoute
+     * @return \CPath\Route\IRoute
      */
     function getRoute() {
         return $this->mRoute;
