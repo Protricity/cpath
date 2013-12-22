@@ -21,9 +21,21 @@ abstract class NavBarErrorLayout extends NavBarLayout {
         return $this->mException;
     }
 
-    protected function setupHeadFields() {
+    /**
+     * Add additional <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract function addHeadFields(IRequest $Request);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    final protected function setupHeadFields(IRequest $Request) {
         $this->setTitle(Describable::get($this->mException)->getTitle());
-        parent::setupHeadFields();
+        $this->addHeadFields($Request);
     }
 
 

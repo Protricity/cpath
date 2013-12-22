@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Util;
 
+use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -17,12 +18,20 @@ class HTMLRenderUtil {
         $this->mRequest = $Request;
     }
 
-    function render($nodeType, $class=null, $attr=null) {
-        echo RI::ni(), "<", $this->renderElementContent($nodeType, $attr, $class), "/>";
+    /**
+     * @param $nodeType
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function render($nodeType, $Attr=null) {
+        echo RI::ni(), "<", $this->renderElementContent($nodeType, $Attr), "/>";
     }
 
-    function open($nodeType, $class=null, $attr=null) {
-        echo RI::ni(), "<", $this->renderElementContent($nodeType, $attr, $class), ">";
+    /**
+     * @param $nodeType
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function open($nodeType, $Attr=null) {
+        echo RI::ni(), "<", $this->renderElementContent($nodeType, $Attr), ">";
         RI::ai(1);
     }
 
@@ -31,24 +40,43 @@ class HTMLRenderUtil {
         echo RI::ni(), '</', $nodeType, ">";
     }
 
-    function formOpen($class=null, $attr=null) {
-        $this->open('form', $class, $attr);
+    /**
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function formOpen($Attr=NULL) {
+        $this->open('form', $Attr);
     }
 
     function formClose() {
         $this->close('form');
     }
 
-    function input($value, $type='button', $class=null, $attr=null) {
-        $this->render('input', $class, $this->getAttr($attr, array('type' => $type, 'value' => $value)));
+    /**
+     * @param $value
+     * @param $type
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function input($value, $type='button', $Attr=NULL) {
+        $Attr = Attr::get($Attr);
+        $Attr->add('type', $type);
+        $Attr->add('value', $value);
+        $this->render('input', $Attr);
     }
 
-    function button($value, $class=null, $attr=null) {
-        $this->input($value, 'button', $class, $attr);
+    /**
+     * @param $value
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function button($value, $Attr=NULL) {
+        $this->input($value, 'button', $Attr);
     }
 
-    function submit($value, $class=null, $attr=null) {
-        $this->input($value, 'submit', $class, $attr);
+    /**
+     * @param $value
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     */
+    function submit($value, $Attr=NULL) {
+        $this->input($value, 'submit', $Attr);
     }
 
 
@@ -77,6 +105,7 @@ class HTMLRenderUtil {
         return $attr;
     }
 
+
     private function getAttrString($attr) {
         if(is_array($attr)) {
             if(key($attr) !== 0) {
@@ -100,14 +129,12 @@ class HTMLRenderUtil {
 
     /**
      * @param $nodeType
-     * @param $attr
-     * @param $class
-     * @return String
+     * @param String|IAttributes|Null $Attr optional attributes for this element
+     * @return null|String always returns null
      */
-    private function renderElementContent($nodeType, $attr, $class) {
+    private function renderElementContent($nodeType, $Attr=null) {
         echo $nodeType;
-        $class = $this->getClassString($class);
-        if($attr = $this->getAttr($attr, array('class' => $class)))
-            echo ' ', $attr;
+        if($Attr)
+            Attr::get($Attr)->render($this->mRequest);
     }
 }

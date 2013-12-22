@@ -90,7 +90,7 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
 
             list($m, $p) = explode(' ', $this->getPrefix(), 2);
             if(in_array($m, array('ANY', $Request->getMethod())))
-                return $this->getHandler();
+                return $this->getHandler(); // TODO: tried the ANY hack, didnt work. need a better route. good luck!
             //return $this->getHandler();
             throw new InvalidRouteException("Routable could not be found: " . var_export($route, true));
         }

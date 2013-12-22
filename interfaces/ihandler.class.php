@@ -15,7 +15,7 @@ interface IHandler {
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
-     * @return void
+     * @return String|void always returns void
      */
     function render(IRequest $Request);
 }

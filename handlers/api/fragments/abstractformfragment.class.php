@@ -4,6 +4,7 @@ namespace CPath\Handlers\API\Fragments;
 use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
@@ -39,11 +40,10 @@ abstract class AbstractFormFragment implements IHandler, IViewConfig{
     /**
      * Render this API Form
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    abstract function renderForm(IRequest $Request, $class=null, $attr=null);
+    abstract function renderForm(IRequest $Request, IAttributes $Attr=NULL);
 
     public function getAPI() { return $this->mAPI; }
     public function getTheme() { return $this->mTheme; }
@@ -51,14 +51,12 @@ abstract class AbstractFormFragment implements IHandler, IViewConfig{
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function render(IRequest $Request, $class=null, $attr=null)
+    function render(IRequest $Request, IAttributes $Attr=null)
     {
-        $Util = new HTMLRenderUtil($Request);
-        $this->renderForm($Request, $Util->getClass($class, 'fragment-form'), $attr);
+        $this->renderForm($Request, $Attr);
     }
 
     protected function renderFormButtons(IRequest $Request) {

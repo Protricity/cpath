@@ -28,9 +28,6 @@ abstract class View implements IView, IViewConfig {
     public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
         $this->mBasePath = Config::getDomainPath();
-        $this->setupHeadFields();
-
-        $Theme->addHeadElementsToView($this);
 
         RI::si(null, static::TAB);
     }
@@ -42,11 +39,24 @@ abstract class View implements IView, IViewConfig {
      */
     abstract protected function addActions(IActionManager $Manager);
 
-    protected function setupHeadFields() {
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract protected function setupHeadFields(IRequest $Request);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHead(IRequest $Request) {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
         $this->addHeadHTML("<base href='{$this->mBasePath}' />", true);
         $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
         $this->addHeadScript($basePath . 'assets/cpath.js', true);
+
+        $this->setupHeadFields($Request);
 
         $this->getActionManager()->addHeadElementsToView($this);
     }
@@ -88,6 +98,9 @@ abstract class View implements IView, IViewConfig {
      * @return void
      */
     final function render(IRequest $Request) {
+        $this->setupHead($Request);
+        $this->getTheme()->addHeadElementsToView($this);
+
         $this->sendHeaders();
         $this->renderHtmlTagStart();
         RI::ai(1);

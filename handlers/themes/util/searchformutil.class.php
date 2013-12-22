@@ -8,18 +8,19 @@
 namespace CPath\Handlers\Themes\Util;
 
 use CPath\Base;
+use CPath\Handlers\API\Fragments\APIDebugFormFragment;
+use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
+use CPath\Handlers\API\Fragments\APIResponseFormFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Handlers\Views\APIView;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Model\DB\SearchResponse;
 
-
 class SearchFormUtil implements IDescribable, IViewConfig {
-    private $mTheme, $mAPIView, $mResponse, $mAPI, $mDescriptor, $mDescribable;
+    private $mTheme, $mResponse, $mAPI, $mDescriptor, $mDescribable, $mForm, $mResponseBox;
 
     public function __construct(SearchResponse $Response, ITheme $Theme=null) {
         $Query = $Response->getQuery();
@@ -27,8 +28,10 @@ class SearchFormUtil implements IDescribable, IViewConfig {
         $this->mAPI = $this->mDescriptor->getAPI();
         $this->mTheme = $Theme;
         $this->mResponse = $Response;
-        $this->mAPIView = new APIView($this->mAPI, null, $Theme);
         $this->mDescribable = Describable::get($this->mAPI);
+
+        $this->mForm = new APIDebugFormFragment($this->mAPI);
+        $this->mResponseBox = new APIResponseBoxFragment($Theme);
     }
 
     /**
@@ -37,7 +40,11 @@ class SearchFormUtil implements IDescribable, IViewConfig {
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $this->mAPIView->addHeadElementsToView($View);
+        $this->mForm->addHeadElementsToView($View);
+
+        if($this->mResponseBox instanceof IViewConfig)
+            $this->mResponseBox->addHeadElementsToView($View);
+
         $basePath = Base::getClassPublicPath($this, false);
         $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css', true);
         $View->addHeadScript($basePath . 'assets/searchformutil.js', true);
@@ -49,9 +56,9 @@ class SearchFormUtil implements IDescribable, IViewConfig {
 
     public function renderForm(IRequest $Request) {
         $this->mTheme->renderFragmentStart($Request, $this, 'search-form-util');
-            $this->mAPIView->renderForm($Request);
+            $this->mForm->render($Request);
             $this->mTheme->renderSearchContent($Request, $this->mResponse, 'search-content');
-            $this->mAPIView->renderDebugBox($Request);
+            $this->mResponseBox->renderResponseBox($Request);
         $this->mTheme->renderFragmentEnd($Request);
     }
 

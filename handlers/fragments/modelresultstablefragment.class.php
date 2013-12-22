@@ -2,6 +2,7 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Base;
+use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
@@ -41,11 +42,10 @@ class ModelResultsTableFragment implements IHandler, IViewConfig{
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
      * @param SearchResponse $Response
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function render(IRequest $Request, SearchResponse $Response = NULL, $class = NULL, $attr = NULL)
+    function render(IRequest $Request, SearchResponse $Response = NULL, IAttributes $Attr=null)
     {
         if(is_array($attr))     $attr = implode(' ', $attr);
 

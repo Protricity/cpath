@@ -7,6 +7,7 @@ use CPath\Interfaces\IRequest;
 
 class APIDebugFormFragment extends APIFormFragment{
 
+
     protected function renderFormButtons(IRequest $Request) {
         $Util = new HTMLRenderUtil($Request);
         $Util->button('JSON', 'form-button-submit-json');

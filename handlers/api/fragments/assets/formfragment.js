@@ -10,7 +10,7 @@
 
     jQuery(document).ready(function() {
         var basePath = jQuery('base').attr('href');
-        jQuery('form.fragment-form').each(function(i, frag) {
+        jQuery('form.api-form-fragment').each(function(i, frag) {
             var form = jQuery(this);
             var Form = new CPath.Form(form);
             var API = Form.getAPI();
@@ -20,7 +20,7 @@
             var btnSubmitXML = form.find('.form-button-submit-xml');
             var btnSubmitTEXT = form.find('.form-button-submit-text');
 
-            if(!btnSubmit.length && !btnSubmit.length && !btnSubmit.length && !btnSubmit.length)
+            if(!btnSubmit.length && !btnSubmitJSON.length && !btnSubmitXML.length && !btnSubmitTEXT.length)
                 throw new Error("No inputs were detected");
 
             btnSubmit.click(function() { Form.submit({dataType: 'json'}); });

@@ -46,9 +46,6 @@ class APIMultiView extends APIView {
 
     function getAPI() { return $this->mSelectedAPI; }
 
-    public function render(IRequest $Request) {
-        // TODO: Rethink multi
-    }
 
     /**
      * Render the navigation bar content

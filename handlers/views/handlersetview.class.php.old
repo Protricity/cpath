@@ -38,7 +38,11 @@ class HandlerSetView extends NavBarLayout implements ILogListener {
     }
 
 
-    protected function setupHeadFields() {
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    protected function setupHeadFields(IRequest $Request) {
         parent::setupHeadFields();
         $basePath = Base::getClassPublicPath($this, false);
         $this->addHeadStyleSheet($basePath . 'assets/apiview.css', true);

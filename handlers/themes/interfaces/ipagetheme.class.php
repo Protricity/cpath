@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
+use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Interfaces\IRequest;
 
 interface IPageTheme {
@@ -14,9 +15,10 @@ interface IPageTheme {
     /**
      * Render the start of an html <body>.
      * @param IRequest $Request the IRequest instance for this render
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderBodyStart(IRequest $Request);
+    function renderBodyStart(IRequest $Request, IAttributes $Attr=NULL);
 
     /**
      * Render the end of an html <body>.
@@ -28,10 +30,10 @@ interface IPageTheme {
     /**
      * Render the start of an html body section.
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Null $className optional class name for this section
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSectionStart(IRequest $Request, $className=NULL);
+    function renderSectionStart(IRequest $Request, IAttributes $Attr=NULL);
 
     /**
      * Render the end of an html body section.

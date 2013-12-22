@@ -22,8 +22,20 @@ abstract class ObjectView extends View{
         parent::__construct($Theme);
     }
 
-    protected function setupHeadFields() {
+    /**
+     * Add additional <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract function addHeadFields(IRequest $Request);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHeadFields(IRequest $Request) {
         $this->addHeadHTML("<title>" . Describable::get($this->mTarget)->getTitle() . "</title>", self::FIELD_TITLE);
+        $this->addHeadFields($Request);
     }
 
     function getTarget() {

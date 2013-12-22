@@ -4,6 +4,7 @@ namespace CPath\Handlers\Layouts;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Handlers\Interfaces\IRenderContent;
+use CPath\Handlers\Util\Attr;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
@@ -17,7 +18,11 @@ abstract class NavBarLayout extends View implements IRenderContent {
 //    }
 
 //
-//    protected function setupHeadFields() {
+//    /**
+//     * Set up <head> element fields for this View
+//     * @param IRequest $Request
+//     */
+//    protected function setupHeadFields(IRequest $Request) {
 //        parent::setupHeadFields();
 //        //$basePath = Base::getClassPublicPath(__CLASS__, false);
 //        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
@@ -67,7 +72,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
 
     protected function renderBodyHeader(IRequest $Request) {
-        $this->getTheme()->renderSectionStart($Request, 'header');
+        $this->getTheme()->renderSectionStart($Request, Attr::get('header'));
         $this->renderBodyHeaderContent($Request);
         $this->getTheme()->renderSectionEnd($Request);
     }
@@ -95,7 +100,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
      */
     final protected function renderBodyContent(IRequest $Request) {
         $Theme = $this->getTheme();
-        $Theme->renderSectionStart($Request, 'navbar');
+        $Theme->renderSectionStart($Request, Attr::get('navbar'));
         $this->renderNavBarContent($Request);
         if($this->navBarStarted) {
             echo RI::ni(), "</ul>";
@@ -103,14 +108,14 @@ abstract class NavBarLayout extends View implements IRenderContent {
         }
         $Theme->renderSectionEnd($Request);
 
-        $Theme->renderSectionStart($Request, 'content');
+        $Theme->renderSectionStart($Request, Attr::get('content'));
         $this->renderViewContent($Request);
         $Theme->renderSectionEnd($Request);
     }
 
 
     protected function renderBodyFooter(IRequest $Request) {
-        $this->getTheme()->renderSectionStart($Request, 'footer');
+        $this->getTheme()->renderSectionStart($Request, Attr::get('footer'));
         $this->renderBodyFooterContent($Request);
         $this->getTheme()->renderSectionEnd($Request);
     }

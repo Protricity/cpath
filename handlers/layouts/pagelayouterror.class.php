@@ -16,13 +16,24 @@ abstract class PageLayoutError extends PageLayout {
         $this->mException = $Exception;
     }
 
+    /**
+     * Add additional <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract function addHeadFields(IRequest $Request);
+
     public function getException() {
         return $this->mException;
     }
 
-    protected function setupHeadFields() {
-        $this->addHeadHTML("<title>" . Describable::get($this->mException)->getTitle() . "</title>", self::FIELD_TITLE);
-        parent::setupHeadFields();
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHeadFields(IRequest $Request) {
+        $this->setTitle(Describable::get($this->mException)->getTitle());
+        $this->addHeadFields($Request);
     }
 
     /**

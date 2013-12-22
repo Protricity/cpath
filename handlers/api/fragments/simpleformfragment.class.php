@@ -2,6 +2,8 @@
 namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
+use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Describable\Describable;
@@ -16,7 +18,8 @@ class SimpleFormFragment extends AbstractFormFragment{
      * @param String|Array|NULL $attr element attributes
      * @return void
      */
-    function renderForm(IRequest $Request, $class=null, $attr=null) {
+    function renderForm(IRequest $Request, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
 
         $API = $this->getAPI();
         $Fields = $API->getFields();
@@ -29,10 +32,12 @@ class SimpleFormFragment extends AbstractFormFragment{
 
         $Util = new HTMLRenderUtil($Request);
 
-        $Util->formOpen(
-            $Util->getClass('apiview-form', $class),
-            $Util->getAttr($attr, array('enctype'=>'multipart/form-data', 'method' => $method, 'action' => $path))
-        );
+        $Attr->addClass('apiview-form');
+        $Attr->add('enctype', 'multipart/form-data');
+        $Attr->add('method', $method);
+        $Attr->add('action', $path);
+
+        $Util->formOpen($Attr);
 
         $Table = new TableThemeUtil($Request, $this->getTheme());
         $Table->renderStart(null, 'apiview-table'); // Describable::get($API)->getDescription()
@@ -56,7 +61,8 @@ class SimpleFormFragment extends AbstractFormFragment{
         }
 
         $Table->renderFooterStart();
-        $Table->renderDataStart('table-field-footer-buttons', 5, 0, "style='text-align: left'");
+        $Attr = new Attr('table-field-footer-buttons', 'text-align: left');
+        $Table->renderDataStart($Attr, 5, 0);
         $this->renderFormButtons($Request);
         $Table->renderEnd();
 
