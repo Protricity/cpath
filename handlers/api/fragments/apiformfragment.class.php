@@ -2,14 +2,29 @@
 namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
+use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Themes\CPathDefaultTheme;
+use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
+use CPath\Route\IRoutable;
 
 class APIFormFragment extends AbstractFormFragment{
+
+    private $mAPI;
+
+    /**
+     * @param IAPI $API
+     * @param ITableTheme $Theme
+     */
+    public function __construct(IAPI $API, ITableTheme $Theme = null) {
+        $this->mAPI = $API;
+        parent::__construct($Theme);
+    }
 
     /**
      * Render this API Form
@@ -20,9 +35,12 @@ class APIFormFragment extends AbstractFormFragment{
     function renderForm(IRequest $Request, IAttributes $Attr=NULL) {
         $Attr = Attr::get($Attr);
 
-        $API = $this->getAPI();
+        $API = $this->mAPI;
         $Fields = $API->getFields();
-        $Route = $Request->getRoute();
+        if($API instanceof IRoutable)
+            $Route = $API->loadRoute();
+        else
+            $Route = $Request->getRoute();
         $num = 1;
         $domainPath = Config::getDomainPath();
         $route = $Route->getPrefix();

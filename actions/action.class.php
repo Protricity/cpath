@@ -12,7 +12,7 @@ use CPath\Describable\IDescribableAggregate;
 use CPath\Handlers\Fragments\IRenderFragmentContent;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Serializer\ISerializable;
 
 abstract class Action implements IActionable, IRenderFragmentContent {
@@ -113,7 +113,7 @@ abstract class Action implements IActionable, IRenderFragmentContent {
      * If the action has executed successfully (or otherwise needs to be removed), setting STATUS_EXPIRED would provide
      * the signal to remove the action from the queue
      * @param IRequest $Request
-     * @return String|IResponse the action response
+     * @return String|\CPath\Response\IResponse the action response
      * @throws InvalidActionStateException if the action is in the wrong state to execute
      * @throws \Exception if an error occurred
      */

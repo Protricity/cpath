@@ -9,7 +9,7 @@ namespace CPath\Actions;
 
 use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Interfaces\IViewConfig;
 use CPath\Serializer\ISerializable;
 

@@ -13,7 +13,7 @@ use CPath\Actions\IActionManager;
 use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
-use CPath\Route\RouteSet;
+use CPath\Route\RoutableSet;
 
 /** Thrown if a user account was not found */
 class UserNotFoundException extends \Exception {}
@@ -149,10 +149,10 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
      * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
      * @param bool $readOnly
      * @param bool $allowDelete
-     * @return RouteSet a set of common routes for this PDOModel type
+     * @return RoutableSet a set of common routes for this PDOModel type
      */
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
-        $Routes = RouteSet::fromHandler($this);
+        $Routes = RoutableSet::fromHandler($this);
         $Routes['GET'] = new API_Get($this);
         $Routes['GET search'] = new API_GetSearch($this);
         $Routes['GET browse'] = new API_GetBrowse($this);

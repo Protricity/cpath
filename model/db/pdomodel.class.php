@@ -15,15 +15,15 @@ use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Interfaces\IResponseAggregate;
-use CPath\Route\RouteSet;
+use CPath\Route\RoutableSet;
 use CPath\Serializer\ISerializable;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
 use CPath\Util;
 
 interface IGetDB {
@@ -139,10 +139,10 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
      * @param bool $readOnly
      * @param bool $allowDelete
-     * @return RouteSet a set of common routes for this PDOModel type
+     * @return RoutableSet a set of common routes for this PDOModel type
      */
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
-        $Routes = RouteSet::fromHandler($this);
+        $Routes = RoutableSet::fromHandler($this);
         $Routes['GET search'] = new API_GetSearch($this);
         $Routes['GET browse'] = new API_GetBrowse($this);
         if(!$readOnly)

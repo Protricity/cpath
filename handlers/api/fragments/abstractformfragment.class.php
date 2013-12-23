@@ -15,14 +15,12 @@ use CPath\Interfaces\IViewConfig;
 
 abstract class AbstractFormFragment implements IHandler, IViewConfig{
 
-    private $mAPI, $mTheme;
+    private $mTheme;
 
     /**
-     * @param IAPI $API
      * @param ITableTheme $Theme
      */
-    public function __construct(IAPI $API, ITableTheme $Theme = null) {
-        $this->mAPI = $API;
+    public function __construct(ITableTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
 
@@ -45,7 +43,6 @@ abstract class AbstractFormFragment implements IHandler, IViewConfig{
      */
     abstract function renderForm(IRequest $Request, IAttributes $Attr=NULL);
 
-    public function getAPI() { return $this->mAPI; }
     public function getTheme() { return $this->mTheme; }
 
     /**

@@ -5,14 +5,13 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Model;
+namespace CPath\Response;
 use CPath\Interfaces\IComparable;
 use CPath\Interfaces\IComparator;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\ILogEntry;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseHelper;
 use CPath\Interfaces\NotEqualException;
+use CPath\Model\ArrayObject;
 
 class Response extends ArrayObject implements IResponse, IComparable, IDescribable {
     private $mCode, $mData=array(), $mMessage;
@@ -93,15 +92,18 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
     }
 
     function sendHeaders($mimeType=NULL) {
-        IResponseHelper::sendHeaders($this, $mimeType);
+        ResponseUtil::get($this)
+            ->sendHeaders($mimeType);
     }
 
     function toJSON(Array &$JSON) {
-        IResponseHelper::toJSON($this, $JSON);
+        ResponseUtil::get($this)
+            ->toJSON($this, $JSON);
     }
 
     function toXML(\SimpleXMLElement $xml) {
-        IResponseHelper::toXML($this, $xml);
+        ResponseUtil::get($this)
+            ->toXML($this, $xml);
     }
 
     /**
@@ -109,7 +111,8 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
      * @return void
      */
     function renderHtml() {
-        IResponseHelper::renderHtml($this);
+        ResponseUtil::get($this)
+            ->renderHtml($this);
     }
 
     /**
@@ -117,7 +120,8 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
      * @return void
      */
     function renderText() {
-        IResponseHelper::renderText($this);
+        ResponseUtil::get($this)
+            ->renderText($this);
     }
 
     /**

@@ -10,8 +10,6 @@ use CPath\Config;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Serializer\ISerializable;
-use CPath\Serializer\Serializer;
 
 /**
  * Class Route - a route entry
@@ -22,35 +20,50 @@ abstract class AbstractRoute implements IRoute {
     private
         $mPrefix,
         $mDestination,
+        $mHandlerInst=null,
         $mArgs = array();
 
     /**
      * Constructs a new Route Entry
      * @param $routePrefix string the route prefix
-     * @param $destination string the handler class for this route
+     * @param $destination string|IHandler the handler class for this route
      * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
      */
-    public function __construct($routePrefix, $destination, $_args=NULL) {
+    final function __construct($routePrefix, $destination, $_args=NULL) {
         $this->mPrefix = $routePrefix;
-        $this->mDestination = $destination;
+        
+        if(is_object($destination)) {
+            $this->mHandlerInst = $destination;
+            $this->mDestination = get_class($destination);
+        } else {
+            $this->mDestination = $destination;
+        }
+        
         if($_args)
             $this->mArgs = array_slice(func_get_args(), 2);
     }
 
-    function getPrefix() { return $this->mPrefix; }
-    function getDestination() { return $this->mDestination; }
+    /**
+     * Get the Route Prefix ("[method] [path]" or just "[method]")
+     * @return mixed
+     */
+    final function getPrefix() { return $this->mPrefix; }
+    
+    /**
+     * Get the Route Destination class or asset
+     * @return String
+     */
+    final function getDestination() { return $this->mDestination; }
 
     /**
      * Get a buildable instance of the route destination
      * @throws InvalidHandlerException
-     * @internal param \CPath\Interfaces\IRequest $Request
-     * @internal param \CPath\Interfaces\IRequest $Request the request to render
      * @return IHandler
      */
-    function getHandler() {
+    final function loadHandler() {
         /** @var IBuildable $dest */
         $dest = $this->getDestination();
-        $Handler = $dest::createBuildableInstance();
+        $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
 
         if(!$Handler instanceof IHandler)
             throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
@@ -63,7 +76,7 @@ abstract class AbstractRoute implements IRoute {
      * @param string|null $requestPath the request path to match
      * @return array|boolean return all parsed request args or false if no match is found
      */
-    public function match($requestPath) {
+    final function match($requestPath) {
         if(strpos($requestPath, $this->mPrefix) !== 0)
             return false;
 
@@ -81,14 +94,14 @@ abstract class AbstractRoute implements IRoute {
     }
 
     /**
-     * Renders the route destination using an IRequest instance
-     * @param IRequest $Request the request to render
-     * @return void
-     * @throws InvalidHandlerException if the destination handler was invalid
+     * Exports constructor parameters for code generation
+     * @return Array constructor params for var_export
      */
-    public function renderDestination(IRequest $Request) {
-        $Handler = $this->getHandler();
-        $Handler->render($Request);
+    final function exportConstructorArgs() {
+        $dest = $this->mDestination;
+        $dest = is_object($dest) ? get_class($dest) : $dest;
+        $args = array_merge(array($this->mPrefix, $dest), $this->mArgs);
+        return $args;
     }
 
     // Static
@@ -98,35 +111,14 @@ abstract class AbstractRoute implements IRoute {
      * @param IHandler $Handler The class instance or class name
      * @param String $method the route prefix method (GET, POST...) for this IHandler
      * @param String $path a custom path for this IHandler
-     * @return RouteSet
+     * @return RoutableSet
      */
-    static function getPrefixFromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+    static final function getPrefixFromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
         $cls = get_class($Handler);
         if(!$path)
             $path = str_replace('\\', '/', strtolower($cls));
         if($path[0] !== '/')
             $path = '/' . $path;
         return $method . ' ' . $path;
-    }
-
-    /**
-     * Creates a new RouteSet for an IHandler with multiple routes
-     * @param IHandler $Handler The class instance or class name
-     * @param String $method the route prefix method (GET, POST...) for this IHandler
-     * @param String $path a custom path for this IHandler
-     * @return RouteSet
-     */
-    static function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
-        $prefix = RouteSet::getPrefixFromHandler($Handler, $method, $path);
-        return new static($prefix, get_class($Handler));
-    }
-
-    /**
-     * Exports constructor parameters for code generation
-     * @return Array constructor params for var_export
-     */
-    function exportConstructorArgs() {
-        $args = array_merge(array($this->mPrefix, $this->mDestination), $this->mArgs);
-        return $args;
     }
 }

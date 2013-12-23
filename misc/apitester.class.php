@@ -10,13 +10,13 @@ namespace CPath\Misc;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
+use CPath\Response\IResponse;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
 use CPath\Request\CLI;
 use CPath\Route\InvalidRouteException;
 use CPath\Route\IRoutable;
-use CPath\Route\RouteSet;
+use CPath\Route\RoutableSet;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -32,7 +32,7 @@ class ApiTester {
 
     /**
      * @param array $request
-     * @return IResponse
+     * @return \CPath\Response\IResponse
      * @throws APIFailedException
      * @throws \Exception
      */
@@ -52,11 +52,11 @@ class ApiTester {
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLI::fromArgs($args, $request);
         $Route = $Cli->findRoute();
-        $Handler = $Route->getHandler();
+        $Handler = $Route->loadHandler();
         if($Handler instanceof IRoutable)
             $Route = $Handler->loadRoute();
 
-        if($Route instanceof RouteSet) {
+        if($Route instanceof RoutableSet) {
             $Handler = $Route->routeRequestToHandler($Cli);
         }
 
@@ -67,7 +67,7 @@ class ApiTester {
 
     /**
      * @param $_cmd
-     * @return IResponse
+     * @return \CPath\Response\IResponse
      */
     static function cmd($args, Array $request=NULL) {
         return self::fromCMD($args, $request)->test();

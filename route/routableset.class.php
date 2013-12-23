@@ -14,12 +14,13 @@ use Traversable;
  * Class Route - a route entry
  * @package CPath
  */
-class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate {
+class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate {
 
     const PREFIX_DEFAULT = "#Default";
 
     private
-        $mHandlers = array();
+        $mRoutes = array();
+        //$mHandlers = array();
 
 //    /**
 //     * Constructs a new Route Entry
@@ -38,14 +39,31 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
         //$Route = $Handler->loadRoute();
         //if($prefix === null)
         //    $prefix = $Route->getPrefix(); // TODO: good idea?
-        if(isset($this->mHandlers[$prefix]) && !$replace)
-            throw new \InvalidArgumentException("Routable Prefix already exists: " . $prefix);
-        $this->mHandlers[$prefix] = $Handler;
+        $method = $prefix;
+        if(strpos($method, ' ') === false)
+            $path = '';
+        else
+            list($method, $path) = explode(' ', $method, 2);
+        list(, $basePath) = explode(' ', $this->getPrefix(), 2);
+        $newPrefix = $method . ' ' . $basePath;
+        if($path)
+            $newPrefix .= '/' . $path;
+        $Route = new Route($newPrefix, $Handler);
+        $this->addRoute($prefix, $Route, $replace);
     }
 
-    function getDefault() { return $this->mHandlers[static::PREFIX_DEFAULT]; }
-    function hasDefault() { return isset($this->mHandlers[static::PREFIX_DEFAULT]); }
-    function setDefault(IHandler $Handler, $replace=false) { } // $this->add(static::PREFIX_DEFAULT, $Handler, $replace); }
+    function addRoute($prefix, IRoute $Route, $replace=false) {
+        if(isset($this->mRoutes[$prefix]) && !$replace)
+            throw new \InvalidArgumentException("Routable Prefix already exists: " . $prefix);
+        $this->mRoutes[$prefix] = $Route;
+    }
+
+    /** * @return IRoute */
+    function getDefault() { return $this->mRoutes[static::PREFIX_DEFAULT]; }
+    /** * @return bool */
+    function hasDefault() { return isset($this->mRoutes[static::PREFIX_DEFAULT]); }
+    //function setDefault(IHandler $Handler, $replace=false) { $this->add(static::PREFIX_DEFAULT, $Handler, $replace); }
+    function setDefault(IRoute $Route, $replace=false) { $this->addRoute(static::PREFIX_DEFAULT, $Route, $replace); }
 
     /**
      * Renders the route destination using an IRequest instance
@@ -54,47 +72,62 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     public function renderSet(IRequest $Request) {
-        $Handler = $this->routeRequestToHandler($Request);
+        $Route = $this->findRequestRoute($Request);
+        $Handler = $Route->loadHandler();
         $Handler->render($Request);
     }
 
     /**
      * Match the destination to the route and return an instance of the destination object
      * Note: this method should throw an exception if the requested route (method + path) didn't match
+     * Note: if successful, this method should consume one argument from the IRequest
      * @param IRequest $Request the request to render
-     * @return IHandler
+     * @return IRoute the found route instance
      * @throws InvalidRouteException if the requested route (method + path) didn't match
      */
-    function routeRequestToHandler(IRequest $Request) {
+    function findRequestRoute(IRequest $Request) {
         $path = $Request->getNextArg(false);
-        $route = $Request->getMethod();
+        $Route = $this->findRoute($path, $Request->getMethod());
+        $Request->getNextArg(true);
+        return $Route;
+    }
+
+    /**
+     * Find an IRoute in the RouteSet.
+     * @param $path
+     * @param $method
+     * @return IRoute the found route instance
+     * @throws InvalidRouteException if the requested route (method + path) didn't match
+     */
+    function findRoute($path, $method) {
+        $route = $method;
         if($path)
             $route .= ' ' . $path;
 
-        if(isset($this->mHandlers[$route])) {
-            $Request->getNextArg(true);
-            return $this->mHandlers[$route];
+        if(isset($this->mRoutes[$route])) {
+            return $this->mRoutes[$route];
         } else {
             while($route) {
-                if(isset($this->mHandlers[$route]))
-                    return $this->mHandlers[$route];
+                if(isset($this->mRoutes[$route]))
+                    return $this->mRoutes[$route];
                 if($p = strrpos($route, '/'))
                     $route = substr($route, 0, $p);
                 elseif(strpos($route, ' '))
-                    $route = $Request->getMethod();
+                    $route = $method;
                 else
                     break;
             }
-            if(isset($this->mHandlers[static::PREFIX_DEFAULT]))
-                return $this->mHandlers[static::PREFIX_DEFAULT];
+            if(isset($this->mRoutes[static::PREFIX_DEFAULT]))
+                return $this->mRoutes[static::PREFIX_DEFAULT];
 
-            list($m, $p) = explode(' ', $this->getPrefix(), 2);
-            if(in_array($m, array('ANY', $Request->getMethod())))
-                return $this->getHandler(); // TODO: tried the ANY hack, didnt work. need a better route. good luck!
+            //list($m, $p) = explode(' ', $this->getPrefix(), 2);
+            //if(in_array($m, array('ANY', $Request->getMethod())))
+            //    return $this->getHandler();
             //return $this->getHandler();
             throw new InvalidRouteException("Routable could not be found: " . var_export($route, true));
         }
     }
+
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -104,7 +137,7 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * <b>Traversable</b>
      */
     public function getIterator() {
-        return new \ArrayIterator($this->mHandlers);
+        return new \ArrayIterator($this->mRoutes);
     }
 
     /**
@@ -120,7 +153,7 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset) {
-        return isset($this->mHandlers[$offset]);
+        return isset($this->mRoutes[$offset]);
     }
 
     /**
@@ -130,10 +163,10 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * @param mixed $offset <p>
      * The offset to retrieve.
      * </p>
-     * @return IHandler .
+     * @return IRoute .
      */
     public function offsetGet($offset) {
-        return $this->mHandlers[$offset];
+        return $this->mRoutes[$offset];
     }
 
     /**
@@ -143,13 +176,16 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * @param mixed $offset <p>
      * The offset to assign the value to.
      * </p>
-     * @param IHandler $value <p>
+     * @param IHandler|IRoute $value <p>
      * The value to set.
      * </p>
      * @return void
      */
     public function offsetSet($offset, $value) {
-        $this->add($offset, $value, false);
+        if($value instanceof IHandler)
+            $this->add($offset, $value, false);
+        else
+            $this->addRoute($offset, $value, false);
     }
 
     /**
@@ -162,7 +198,7 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * @return void
      */
     public function offsetUnset($offset) {
-        unset($this->mHandlers[$offset]);
+        unset($this->mRoutes[$offset]);
     }
 
     // Static
@@ -172,9 +208,10 @@ class RouteSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate
      * @param IHandler $Handler The class instance or class name
      * @param String $method the route prefix method (GET, POST...) for this IHandler
      * @param String $path a custom path for this IHandler
-     * @return RouteSet
+     * @return RoutableSet
      */
-    static function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
-        return parent::fromHandler($Handler, $method, $path);
+    static final function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+        $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
+        return new static($prefix, get_class($Handler));
     }
 }

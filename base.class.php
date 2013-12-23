@@ -59,8 +59,9 @@ class Base {
     /** Attempt to route a web request to it's destination */
     public static function render() {
         $Request = self::getRequest();
-        $Request->findRoute()
-            ->renderDestination($Request);
+        $Route = $Request->findRoute();
+        $Handler = $Route->loadHandler();
+        $Handler->render($Request);
     }
 
     /**

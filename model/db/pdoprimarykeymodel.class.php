@@ -15,7 +15,7 @@ use CPath\Handlers\Views\APIMultiView;
 use CPath\Handlers\Views\APIView;
 use CPath\Handlers\Views\Routes\APIViewRoute;
 use CPath\Log;
-use CPath\Route\RouteSet;
+use CPath\Route\RoutableSet;
 
 abstract class PDOPrimaryKeyModel extends PDOModel {
     const PRIMARY = null;
@@ -85,7 +85,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
      * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
      * @param bool $readOnly
      * @param bool $allowDelete
-     * @return RouteSet a set of common routes for this PDOModel type
+     * @return RoutableSet a set of common routes for this PDOModel type
      */
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
         $Routes = parent::loadDefaultRouteSet($readOnly, $allowDelete);

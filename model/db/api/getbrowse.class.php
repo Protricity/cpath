@@ -13,7 +13,7 @@ use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\API;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;

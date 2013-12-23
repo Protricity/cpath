@@ -5,13 +5,14 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Model;
+namespace CPath\Response;
 
 use CPath\Config;
 use CPath\Interfaces\IHTML;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
+use CPath\Response\Response;
 use CPath\Util;
 
 

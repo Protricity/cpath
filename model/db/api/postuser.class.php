@@ -15,10 +15,10 @@ use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Validation;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIPostCallbacks;
 use CPath\Model\DB\Interfaces\IAPIPostUserCallbacks;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 
 class API_PostUser extends API_Post implements IAPIPostCallbacks {

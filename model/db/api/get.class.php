@@ -13,7 +13,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelRender;
 use CPath\Model\DB\Interfaces\IReadAccess;

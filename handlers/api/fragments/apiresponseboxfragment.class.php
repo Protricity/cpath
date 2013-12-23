@@ -3,19 +3,20 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
 use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Model\ExceptionResponse;
+use CPath\Response\IResponse;
+use CPath\Response\ExceptionResponse;
 use CPath\Util;
 
 class APIResponseBoxFragment{
     private $mTheme;
 
     function __construct(ITheme $Theme=null) {
-        $this->mTheme = $Theme;
+        $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
 
     function renderResponseBox(IRequest $Request, IResponse $Response=null, IAttributes $Attr=null) {

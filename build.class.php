@@ -14,7 +14,7 @@ use CPath\Interfaces\IBuilder;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
-use CPath\Model\Response;
+use CPath\Response\Response;
 use CPath\Route\IRoutable;
 
 class Build extends API {

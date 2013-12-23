@@ -14,9 +14,9 @@ use CPath\Interfaces\IBuildable;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Log;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class Install extends API {
 
@@ -39,7 +39,7 @@ class Install extends API {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      * @throws APIException if no config file could be installed
      */
     protected function doExecute(IRequest $Request)

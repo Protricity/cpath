@@ -12,7 +12,7 @@ use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredField;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 class API_PostUserRecover extends API_Base {
 

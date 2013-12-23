@@ -15,12 +15,12 @@ use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     private $mColumns;

@@ -2,11 +2,20 @@
 namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
+use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Interfaces\IRequest;
 
 class APIDebugFormFragment extends APIFormFragment{
 
+    /**
+     * @param IAPI $API
+     * @param ITableTheme $Theme
+     */
+    public function __construct(IAPI $API, ITableTheme $Theme = null) {
+        parent::__construct($API, $Theme);
+    }
 
     protected function renderFormButtons(IRequest $Request) {
         $Util = new HTMLRenderUtil($Request);

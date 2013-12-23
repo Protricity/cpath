@@ -23,13 +23,13 @@ use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
-use CPath\Route\RouteSet;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
+use CPath\Route\RoutableSet;
 use CPath\Util;
 
 /**

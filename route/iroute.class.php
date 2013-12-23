@@ -33,22 +33,22 @@ interface IRoute extends IConstructable
     function match($requestPath);
 
     /**
-     * Renders the route destination using an IRequest instance
-     * @param IRequest $Request the request to render
-     * @return void
+     * Get the Route Prefix ("[method] [path]")
+     * @return mixed
      */
-    function renderDestination(IRequest $Request);
-
     function getPrefix();
 
+    /**
+     * Get the Route Destination class or asset
+     * @return String
+     */
     function getDestination();
 
     /**
-     * Get a buildable instance of the route destination
-     * Note: this method should throw an exception if the requested route
+     * Load a buildable instance of the route destination
      * @return IHandler
      */
-    function getHandler();
+    function loadHandler();
 
     /**
      * Match the destination to the route and return an instance of the destination object
@@ -57,7 +57,7 @@ interface IRoute extends IConstructable
      * @return IHandler
      * @throws InvalidRouteException if the requested route (method + path) didn't match
      */
-    function routeRequestToHandler(IRequest $Request);
+    //function routeRequestToHandler(IRequest $Request);
 
 }
 

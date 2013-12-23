@@ -9,7 +9,7 @@ namespace CPath\Model\DB;
 use CPath\Interfaces\IComparable;
 use CPath\Interfaces\IComparator;
 use CPath\Interfaces\NotEqualException;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class SearchResponse extends Response {
     private $mQuery, $mTotal;

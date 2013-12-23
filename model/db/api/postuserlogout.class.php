@@ -12,10 +12,10 @@ use CPath\Base;
 use CPath\Handlers\API;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Interfaces\SessionNotFoundException;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
 
 interface IPostLogoutExecute {
 
@@ -23,8 +23,8 @@ interface IPostLogoutExecute {
      * Perform on successful API_Get execution
      * @param PDOUserModel $User the logged out user account instance
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Response\IResponse $Response
+     * @return \CPath\Response\IResponse|null
      */
     function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
 }
@@ -63,7 +63,7 @@ class API_PostUserLogout extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;

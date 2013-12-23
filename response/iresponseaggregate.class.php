@@ -6,6 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
+use CPath\Response\IResponse;
+
 interface IResponseAggregate {
     /**
      * @return IResponse

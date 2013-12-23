@@ -10,10 +10,10 @@ namespace CPath\Model\DB;
 
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIPostCallbacks;
 use CPath\Model\DB\Interfaces\IAssignAccess;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class API_Post extends API_Base {
 

@@ -16,13 +16,19 @@ use CPath\Interfaces\IRequest;
  */
 class Route extends AbstractRoute {
 
+
+
+    // Static
+
     /**
-     * Match the destination to the route and return an instance of the destination object
-     * Note: this method should throw an exception if the requested route (method + path) didn't match
-     * @param IRequest $Request the request to render
-     * @return IHandler
+     * Creates a new Route for an IHandler
+     * @param IHandler $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IHandler
+     * @param String $path a custom path for this IHandler
+     * @return Route
      */
-    function routeRequestToHandler(IRequest $Request) {
-        return $this->getHandler();
+    static final function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+        $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
+        return new static($prefix, get_class($Handler));
     }
 }

@@ -74,7 +74,7 @@ interface IAPI extends IHandler, IDescribableAggregate, IViewConfig {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
     function execute(IRequest $Request);
 

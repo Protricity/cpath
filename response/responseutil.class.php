@@ -5,61 +5,22 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Interfaces;
+namespace CPath\Response;
+use CPath\Util;
 use CPath\Base;
 use CPath\Config;
 use CPath\Log;
-use CPath\Util;
 
-interface IResponse extends IJSON, IXML, IText, IHTML {
-    const STATUS_SUCCESS = 200;
-    const STATUS_ERROR = 400;
-    const STATUS_CONFLICT = 409;
+final class ResponseUtil {
+    private $mResponse;
 
-    /**
-     * Get the Response status code
-     * @return int
-     */
-    function getStatusCode();
+    function __construct(IResponse $Response) {
+        $this->mResponse = $Response;
+    }
 
-    /**
-     * Get the IResponse Message
-     * @return String
-     */
-    function getMessage();
-
-    /**
-     * @param mixed|NULL $_path optional varargs specifying a path to data
-     * Example: ->getData(0, 'key') gets $data[0]['key'];
-     * @return mixed the data array or targeted data specified by path
-     * @throws \InvalidArgumentException
-     */
-    function &getDataPath($_path=NULL);
-
-    /**
-     * Add a log entry to the response
-     * @param ILogEntry $Log
-     */
-    function addLogEntry(ILogEntry $Log);
-
-    /**
-     * Get all log entries
-     * @return ILogEntry[]
-     */
-    function getLogs();
-
-    /**
-     * Send response headers for this request
-     * @param null $mimeType
-     * @return mixed
-     */
-    function sendHeaders($mimeType=NULL);
-}
-
-final class IResponseHelper {
-
-    static function toJSON(IResponse $Response, Array &$JSON) {
-        $JSON['status'] = $Response->getStatusCode() == IResponse::STATUS_SUCCESS;
+    function toJSON(Array &$JSON) {
+        $Response = $this->mResponse;
+        $JSON['status'] = $Response->getStatusCode() == \CPath\Response\IResponse::STATUS_SUCCESS;
         $JSON['msg'] = $Response->getMessage();
         if($data = $Response->getDataPath()) {
             $JSON['response'] = array();
@@ -71,8 +32,9 @@ final class IResponseHelper {
         }
     }
 
-    static function toXML(IResponse $Response, \SimpleXMLElement $xml) {
-        $xml->addChild('status', $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 1 : 0);
+    function toXML(\SimpleXMLElement $xml) {
+        $Response = $this->mResponse;
+        $xml->addChild('status', $Response->getStatusCode() == \CPath\Response\IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addChild('msg', $Response->getMessage());
         if($data = $Response->getDataPath())
             Util::toXML($data, $xml->addChild('response'));
@@ -83,13 +45,15 @@ final class IResponseHelper {
         return $xml;
     }
 
-    static function renderText(IResponse $Response) {
+    function renderText() {
+        $Response = $this->mResponse;
         echo "Status:  ", $Response->getStatusCode(), "\n";
         echo "Message: ", $Response->getMessage(), "\n";
         print_r($Response->getDataPath()); // TODO: make pretty and safe
     }
 
-    static function renderHtml(IResponse $Response) {
+    function renderHtml() {
+        $Response = $this->mResponse;
         echo "<pre>";
         echo "Status:  ", $Response->getStatusCode(), "\n";
         echo "Message: ", htmlentities($Response->getMessage()), "\n";
@@ -97,7 +61,8 @@ final class IResponseHelper {
         echo "</pre>";
     }
 
-    static function sendHeaders(IResponse $Response, $mimeType=NULL) {
+    function sendHeaders($mimeType=NULL) {
+        $Response = $this->mResponse;
         if(Base::isCLI())
             return;
         if(headers_sent($file, $line)) {
@@ -113,9 +78,16 @@ final class IResponseHelper {
         header('Access-Control-Allow-Origin: *');
     }
 
-    static function toString(IResponse $Response) {
+    function toString() {
+        $Response = $this->mResponse;
         return
             $Response->getStatusCode() . " " . $Response->getMessage()
             . (Config::$Debug ? "\n" . print_r($Response->getDataPath() ?: NULL, true) : ''); // TODO: IText
+    }
+
+    // Static
+
+    static function get(IResponse $Response) {
+        return new static($Response);
     }
 }

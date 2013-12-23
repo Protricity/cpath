@@ -84,7 +84,8 @@ class Console implements IHandler { // Broke }, IBuildable {
                     $Cli = CLI::fromArgs($args);
                     try{
                         $Cli->findRoute()
-                            ->renderDestination($Cli);
+                            ->loadHandler()
+                            ->render($Cli);
                     } catch (\Exception $ex) {
                         echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";
                     }
