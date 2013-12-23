@@ -9,16 +9,12 @@ namespace CPath\Model\DB;
 
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Handlers\HandlerSet;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseAggregate;
 use CPath\Route\RoutableSet;
-use CPath\Serializer\ISerializable;
 use CPath\Interfaces\IXML;
 use CPath\Log;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
@@ -406,7 +402,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     /**
      * Create a PDOUpdate object for this table
      * @param $_columnArgs array|mixed an array or series of varargs of columns to be updated
-     * @return PDOUpdate
+     * @return \CPath\Model\DB\PDOUpdate
      */
     final static function update($_columnArgs) {
         $args = func_num_args() > 1 ? func_get_args() : array_keys(static::findColumns($_columnArgs));
