@@ -16,7 +16,7 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IRequest;
 use CPath\Response\IResponse;
-use CPath\Interfaces\IResponseAggregate;
+use CPath\Response\IResponseAggregate;
 use CPath\Route\RoutableSet;
 use CPath\Serializer\ISerializable;
 use CPath\Interfaces\IXML;
@@ -128,7 +128,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
     }
 
     /**
-     * @return IResponseAggregate
+     * @return \CPath\Response\IResponseAggregate
      */
     public function createResponse() {
         return new Response("Retrieved " . $this, true, $this);

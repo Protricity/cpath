@@ -18,18 +18,15 @@ use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Views\APIView;
-use CPath\Handlers\Views\Routes\APIViewRoute;
-use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
+use CPath\Response\IResponseAggregate;
 use CPath\Response\IResponse;
-use CPath\Interfaces\IResponseAggregate;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\Response;
-use CPath\Route\RoutableSet;
 use CPath\Util;
 
 /**

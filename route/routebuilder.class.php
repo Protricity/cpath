@@ -15,8 +15,6 @@ use CPath\Exceptions\BuildException;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Log;
-use CPath\Route\Router;
-use CPath\Route\RouterAPC;
 
 /**
  * Class BuildHandlers
@@ -35,7 +33,7 @@ PHP;
 
     const TMPL_CUSTOM_ROUTES = <<<'PHP'
 <?php
-use CPath\Model\Route;
+use CPath\Route\Route;
 $routes = array(
 //  new Route('GET /path/to', 'My\Handler', array('my'=>'custom', 'request'=>'parameters')),
 );
@@ -65,11 +63,11 @@ PHP;
         return true;
     }
 
-    private function getCurrentClass() {
-        if(!$this->mCurrentClass)
-            throw new BuildException("No current class available");
-        return $this->mCurrentClass;
-    }
+//    private function getCurrentClass() {
+//        if(!$this->mCurrentClass)
+//            throw new BuildException("No current class available");
+//        return $this->mCurrentClass;
+//    }
 
     private function getCustomRoutes() {
         $routes = array();
@@ -127,8 +125,9 @@ PHP;
         $useClass = array();
         $i=0;
         foreach($this->mRoutes as $Route) {
-            if(!isset($useClass[get_class($Route)]))
-                $useClass[get_class($Route)] = 'Route' . ($i++ ?: '');
+            $class = get_class(new Route('', '')); // TODO: hack
+            if(!isset($useClass[$class]))
+                $useClass[$class] = 'Route' . ($i++ ?: '');
             if(($l = strlen($Route->getPrefix())) > $max)
                 $max = $l;
         }
@@ -140,8 +139,8 @@ PHP;
         $phpRoute = '';
         foreach($this->mRoutes as $Route) {
             $constName = $useClass[get_class($Route)];
-            $args = '';
-            $i=0;
+            //$args = '';
+            //$i=0;
             //foreach($Route->getExportArgs() as $arg)
             //    $args .= ($i++ ? ', ' : '') . var_export($arg, true);
             //$phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';

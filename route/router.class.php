@@ -8,7 +8,6 @@
 namespace CPath\Route;
 use CPath\Build;
 use CPath\Config;
-use CPath\Route\IRoute;
 
 /**
  * Class Router - finds routes to match paths and renders them
@@ -29,7 +28,7 @@ final class Router{
     public static function findRoute($routePath, &$args) {
 
         $routes = self::getRoutes();
-        /** @var \CPath\Route\IRoute $Route */
+        /** @var IRoute $Route */
         foreach($routes as $Route) {
             $args = $Route->match($routePath);
             if($args === false)

@@ -6,8 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
 use CPath\Response\IResponseCode;
 use CPath\Response\CodedException;
 

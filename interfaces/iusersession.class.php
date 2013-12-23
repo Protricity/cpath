@@ -9,6 +9,7 @@ namespace CPath\Interfaces;
 
 use CPath\Response\ExceptionResponse;
 use CPath\Response\IResponse;
+use CPath\Response\IResponseAggregate;
 
 class InvalidUserSessionException extends \Exception implements IResponseAggregate {
     public function __construct($msg="User is not logged in") {

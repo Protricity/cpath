@@ -9,7 +9,6 @@ namespace CPath\Route;
 use CPath\Config;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
 
 /**
  * Class Route - a route entry

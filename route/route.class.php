@@ -6,9 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
 
 /**
  * Class Route - a route entry

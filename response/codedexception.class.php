@@ -7,12 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Response;
 
-use CPath\Interfaces\IResponseCode;
-
 class CodedException extends \Exception implements IResponseCode {
     private $mCode;
-    function __construct($message, $statusCode=400) {
+    function __construct($message, $statusCode=400, $previous=null) {
         $this->mCode = $statusCode;
+        parent::__construct($message, $statusCode, $previous);
     }
 
     /**
