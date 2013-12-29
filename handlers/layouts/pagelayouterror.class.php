@@ -21,7 +21,7 @@ abstract class PageLayoutError extends PageLayout {
      * @param IRequest $Request
      * @return void
      */
-    abstract function addHeadFields(IRequest $Request);
+    abstract protected function addHeadFields(IRequest $Request);
 
     public function getException() {
         return $this->mException;

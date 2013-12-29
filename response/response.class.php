@@ -98,12 +98,12 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
 
     function toJSON(Array &$JSON) {
         ResponseUtil::get($this)
-            ->toJSON($this, $JSON);
+            ->toJSON($JSON);
     }
 
     function toXML(\SimpleXMLElement $xml) {
         ResponseUtil::get($this)
-            ->toXML($this, $xml);
+            ->toXML($xml);
     }
 
     /**

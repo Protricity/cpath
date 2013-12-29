@@ -23,7 +23,7 @@ class RouteUtil implements IHandler{
         $this->mRoute = $Route;
         $prefix = $Route->getPrefix();
 
-        if(strpos($prefix, ' ') === false)
+        if(strpos($prefix, ' ') !== false)
             list($this->mMethod, $this->mPath) = explode(' ', $prefix);
         else
             $this->mMethod = $prefix;
@@ -33,7 +33,7 @@ class RouteUtil implements IHandler{
     function getPath() { return $this->mPath; }
 
     function buildPublicURL($withDomain=true) {
-        return ($withDomain ? Config::getDomainPath() : '')
+        return ($withDomain ? rtrim(Config::getDomainPath(), '/') : '')
             . $this->mPath;
     }
 

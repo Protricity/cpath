@@ -10,6 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Actions\IActionAggregate;
 use CPath\Actions\IActionManager;
+use CPath\Handlers\Views\APIMultiView;
 use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
@@ -153,6 +154,9 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
      */
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
         $Routes = RoutableSet::fromHandler($this);
+        $Routes['GET :api'] = new APIMultiView($Routes);
+        $Routes['POST :api'] = new APIMultiView($Routes);
+
         $Routes['GET'] = new API_Get($this);
         $Routes['GET search'] = new API_GetSearch($this);
         $Routes['GET browse'] = new API_GetBrowse($this);

@@ -17,7 +17,7 @@ use CPath\Route\MissingRoute;
 use CPath\Route\Router;
 use CPath\Route\RouterAPC;
 
-class Web extends AbstractBase {
+class Web extends AbstractRequest {
 
     private
         $mMimeTypes,

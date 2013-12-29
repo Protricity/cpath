@@ -1,2 +1,3 @@
-.search-form-util {
-}
+
+body.mobile table.table .table-field-num { display: none; }
+body.mobile table.table .table-field-required { display: none; }

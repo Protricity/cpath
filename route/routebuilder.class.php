@@ -124,8 +124,10 @@ PHP;
         $max = 0;
         $useClass = array();
         $i=0;
+
+        $defaultClass = get_class(new Route('', '')); // TODO: hack
         foreach($this->mRoutes as $Route) {
-            $class = get_class(new Route('', '')); // TODO: hack
+            $class = $defaultClass;
             if(!isset($useClass[$class]))
                 $useClass[$class] = 'Route' . ($i++ ?: '');
             if(($l = strlen($Route->getPrefix())) > $max)
@@ -138,7 +140,7 @@ PHP;
             $phpUse .= "\nuse " . $class . " as " . $alias . ";";
         $phpRoute = '';
         foreach($this->mRoutes as $Route) {
-            $constName = $useClass[get_class($Route)];
+            $constName = $useClass[$defaultClass]; // get_class($Route)];
             //$args = '';
             //$i=0;
             //foreach($Route->getExportArgs() as $arg)

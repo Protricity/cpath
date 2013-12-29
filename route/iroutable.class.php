@@ -14,7 +14,7 @@ interface IRoutable extends IHandler, IBuildable {
 
     /**
      * Returns the route for this IHandler
-     * @return IRoute
+     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
      */
     function loadRoute();
 }

@@ -57,23 +57,12 @@ class APIView extends AbstractAPIView {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    protected function renderBodyHeaderContent(IRequest $Request)
-    {
+    protected function renderBodyHeaderContent(IRequest $Request) {
         $API = $this->mAPI;
         $Route = $this->mRoute ?: $Request->getRoute();
         $route = $Route->getPrefix();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
-    }
-
-    /**
-     * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    protected function renderNavBarContent(IRequest $Request)
-    {
-        // TODO: Implement renderNavBarContent() method.
     }
 
     /**

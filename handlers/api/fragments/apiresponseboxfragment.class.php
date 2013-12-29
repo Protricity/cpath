@@ -1,22 +1,35 @@
 <?php
 namespace CPath\Handlers\API\Fragments;
 
+use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 use CPath\Response\IResponse;
 use CPath\Response\ExceptionResponse;
 use CPath\Util;
 
-class APIResponseBoxFragment{
+class APIResponseBoxFragment implements IViewConfig{
     private $mTheme;
 
     function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
+    }
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
+        $basePath = Base::getClassPublicPath($this, false);
+        $View->addHeadStyleSheet($basePath . 'assets/apiresponseboxfragment.css', true);
+        $View->addHeadScript($basePath . 'assets/apiresponseboxfragment.js', true);
     }
 
     function renderResponseBox(IRequest $Request, IResponse $Response=null, IAttributes $Attr=null) {
@@ -24,7 +37,7 @@ class APIResponseBoxFragment{
         $Util = new HTMLRenderUtil($Request);
         //$Util->button('JSON', 'form-button-submit-json');
 
-        $Attr->addClass('apiview-response');
+        $Attr->addClass('apiresponsebox-fragment');
         $Attr->addStyle('display: none');
 
         $Theme = $this->mTheme;

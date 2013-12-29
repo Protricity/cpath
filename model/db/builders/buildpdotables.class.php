@@ -402,7 +402,7 @@ PHP;
         return \$stmd;
 PHP;
 
-            $ucName = \CPath\Model\DB\Builders\self::toTitleCase($name, true);
+            $ucName = self::toTitleCase($name, true);
             $ucName[0] = strtolower($ucName[0]);
             $PHP->addStaticMethod($ucName, $proc, $code);
             //$phpC .= self::getConst(strtoupper($name), $method);

@@ -9,6 +9,7 @@ namespace CPath\Model\DB;
 
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
+use CPath\Handlers\Views\APIMultiView;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IJSON;
@@ -20,6 +21,7 @@ use CPath\Log;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\Response;
+use CPath\Serializer\ISerializable;
 use CPath\Util;
 
 interface IGetDB {
@@ -139,11 +141,15 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      */
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
         $Routes = RoutableSet::fromHandler($this);
+        $Routes['GET :api'] = new APIMultiView($Routes);
+        $Routes['POST :api'] = new APIMultiView($Routes);
+
         $Routes['GET search'] = new API_GetSearch($this);
         $Routes['GET browse'] = new API_GetBrowse($this);
         if(!$readOnly)
             $Routes['POST'] = new API_Post($this);
-        $Routes->setDefault($Routes['GET search']);
+
+        $Routes->setDefault($Routes['GET :api']);
         return $Routes;
     }
 

@@ -16,8 +16,11 @@ use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Response\Response;
 use CPath\Route\IRoutable;
+use CPath\Route\IRoute;
+use CPath\Route\RoutableSet;
+use CPath\Route\Route;
 
-class Build extends API {
+class Build extends API implements IRoutable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHOD = 'CLI';    // CLI only
@@ -70,6 +73,13 @@ class Build extends API {
         return "Build All classes";
     }
 
+    /**
+     * Returns the route for this IHandler
+     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
+     */
+    function loadRoute() {
+        return Route::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
+    }
 
     // Statics
 

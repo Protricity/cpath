@@ -16,7 +16,7 @@ use CPath\Model\ArrayObject;
 use CPath\Model\FileUpload;
 use CPath\Model\NoUploadFoundException;
 
-abstract class AbstractBase extends ArrayObject implements IRequest {
+abstract class AbstractRequest extends ArrayObject implements IRequest {
 
     protected
         $mTab = "\t",

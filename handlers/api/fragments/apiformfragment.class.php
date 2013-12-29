@@ -12,6 +12,7 @@ use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Route\IRoutable;
+use CPath\Route\RouteUtil;
 
 class APIFormFragment extends AbstractFormFragment{
 
@@ -41,17 +42,15 @@ class APIFormFragment extends AbstractFormFragment{
             $Route = $API->loadRoute();
         else
             $Route = $Request->getRoute();
+        $RouteUtil = new RouteUtil($Route);
         $num = 1;
-        $domainPath = Config::getDomainPath();
-        $route = $Route->getPrefix();
-        list($method, $path) = explode(' ', $route, 2);
-        $path = rtrim($domainPath, '/') . $path;
+        $path = $RouteUtil->buildPublicURL(true);
 
         $Util = new HTMLRenderUtil($Request);
 
         $Attr->addClass('api-form-fragment');
         $Attr->add('enctype', 'multipart/form-data');
-        $Attr->add('method', $method);
+        $Attr->add('method', $RouteUtil->getMethod());
         $Attr->add('action', $path);
 
         $Util->formOpen($Attr);

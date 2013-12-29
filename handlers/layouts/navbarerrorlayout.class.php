@@ -26,7 +26,7 @@ abstract class NavBarErrorLayout extends NavBarLayout {
      * @param IRequest $Request
      * @return void
      */
-    abstract function addHeadFields(IRequest $Request);
+    abstract protected function addHeadFields(IRequest $Request);
 
     /**
      * Set up <head> element fields for this View

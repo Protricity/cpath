@@ -15,7 +15,7 @@
 
     function APIException(message, API) {
         this.message = message;
-        this.API = API;
+        this.getAPI = function() { return API; };
         this.toString = function() { return this.message; };
     }
 
@@ -225,7 +225,7 @@
 
         var API = new CPath.API(method, url);
         jQuery(API).on('response', function(evt, response, jqXHR) {
-            jQuery([window.CPath.Form, context, formElm]).trigger('api-response', [response, context.API, jqXHR]);
+            jQuery([window.CPath.Form, context, formElm]).trigger('api-response', [response, context.getAPI(), jqXHR]);
         });
 
         this.submit = function(ajax) {

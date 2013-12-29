@@ -3,6 +3,7 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Describable\Describable;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -12,6 +13,8 @@ use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
 use CPath\Log;
 use CPath\Route\RoutableSet;
+use CPath\Route\RoutableSetWrapper;
+use CPath\Route\RouteUtil;
 
 abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
 
@@ -42,6 +45,27 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
         $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
 
         $this->setupAPIHeadFields($Request);
+    }
+
+
+    /**
+     * Render the navigation bar content
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    protected function renderNavBarContent(IRequest $Request) {
+        if($Request instanceof RoutableSetWrapper) {
+            $Routes = $Request->getRoutableSet();
+            $Route = $Request->getRoute();
+            $Util = new RouteUtil($Route);
+            $i=1;
+            foreach($Routes as $Route) {
+                $Handler = $Route->loadHandler();
+                $Describable = Describable::get($Handler);
+                $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+                $i++;
+            }
+        }
     }
 
     // Static

@@ -17,7 +17,7 @@ use CPath\Model\FileUpload;
 use CPath\Route\MissingRoute;
 use CPath\Route\Router;
 
-class CLI extends AbstractBase implements ILogListener, IShortOptions {
+class CLI extends AbstractRequest implements ILogListener, IShortOptions {
 
     private
         $mShortRequests = array();

@@ -17,12 +17,15 @@ use CPath\Misc\RenderIndents as RI;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
+use CPath\Route\RoutableSetWrapper;
+use CPath\Route\RouteUtil;
 
 class APIMultiView extends AbstractAPIView {
     private $mResponse = null;
     /** @var APIFormFragment */
     private $mForm;
     private $mResponseBox;
+    /** @var IRoute[]|RoutableSet */
     private $mRoutes=array();
     private $mSelectedAPI;
 
@@ -97,20 +100,6 @@ class APIMultiView extends AbstractAPIView {
         $route = $Route->getPrefix();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
-    }
-
-    /**
-     * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    protected function renderNavBarContent(IRequest $Request) {
-        foreach($this->mRoutes as $i=>$Route) {
-            $Handler = $Route->loadHandler();
-            $Describable = Describable::get($Handler);
-            $route = $this->mRoutes->getPrefix();
-            $this->renderNavBarEntry($route . '/' . $i . '#' . $Describable->getTitle(), $Describable);
-        }
     }
 
     /**

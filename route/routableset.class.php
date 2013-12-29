@@ -53,6 +53,10 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
     }
 
     function addRoute($prefix, IRoute $Route, $replace=false) {
+
+        //if($Route instanceof AbstractRoute)
+        //    $Route->setPrefix($newPrefix);
+
         if(isset($this->mRoutes[$prefix]) && !$replace)
             throw new \InvalidArgumentException("Routable Prefix already exists: " . $prefix);
         $this->mRoutes[$prefix] = $Route;
@@ -74,7 +78,8 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
     public function renderSet(IRequest $Request) {
         $Route = $this->findRequestRoute($Request);
         $Handler = $Route->loadHandler();
-        $Handler->render($Request);
+        $Wrapper = new RoutableSetWrapper($Request, $this, $Route);
+        $Handler->render($Wrapper);
     }
 
     /**

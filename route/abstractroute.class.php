@@ -42,6 +42,8 @@ abstract class AbstractRoute implements IRoute {
             $this->mArgs = array_slice(func_get_args(), 2);
     }
 
+    protected function setPrefix($prefix) { $this->mPrefix = $prefix; }
+
     /**
      * Get the Route Prefix ("[method] [path]" or just "[method]")
      * @return mixed

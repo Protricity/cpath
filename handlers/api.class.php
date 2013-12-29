@@ -17,6 +17,7 @@ use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
 use CPath\Handlers\Interfaces\IView;
+use CPath\Handlers\Views\APIMultiView;
 use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
@@ -27,6 +28,7 @@ use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\Response;
+use CPath\Route\RoutableSetWrapper;
 use CPath\Util;
 
 /**
@@ -171,7 +173,13 @@ abstract class API implements IAPI {
         $Response = null;
         //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
         //    $Response = $this->execute($Request);
-        $Render = new APIView($this, $Response);
+        //if($Request instanceof RoutableSetWrapper) {
+        //    $RoutableSet = $Request->getRoutableSet();
+         //   $Render = new APIMultiView($RoutableSet, $Response);
+        //} else {
+            $Route = $Request->getRoute();
+            $Render = new APIView($this, $Route, $Response);
+        //}
         $Render->render($Request);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
@@ -420,7 +428,7 @@ abstract class API implements IAPI {
      * Render this API Call. The output format is based on the requested mimeType from the browser
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      */
-    public function render(IRequest $Request) {
+    function render(IRequest $Request) {
         foreach($Request->getMimeTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
@@ -439,7 +447,6 @@ abstract class API implements IAPI {
         }
         $this->renderDefault($Request);
     }
-
 }
 
 
