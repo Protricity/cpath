@@ -87,6 +87,7 @@ class CLI extends AbstractRequest implements ILogListener, IShortOptions {
     public function findRoute() {
         $routePath = $this->mMethod . ' ' . $this->mPath;
         $routePathAny = 'ANY ' . $this->mPath;
+        $args = array();
         $Route = Router::findRoute($routePath, $args)
             ?: Router::findRoute($routePathAny, $args)
             ?: new MissingRoute($routePath);

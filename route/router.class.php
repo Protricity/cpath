@@ -30,8 +30,7 @@ final class Router{
         $routes = self::getRoutes();
         /** @var IRoute $Route */
         foreach($routes as $Route) {
-            $args = $Route->match($routePath);
-            if($args === false)
+            if(!$Route->match($routePath, $args))
                 continue;
             return $Route;
         }

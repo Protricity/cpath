@@ -28,9 +28,10 @@ interface IRoute extends IConstructable
     /**
      * Try's a route against a request path and parse out any request args
      * @param string|null $requestPath the request path to match
-     * @return array|boolean return all parsed request args or false if no match is found
+     * @param Array &$args populated with args parsed out of the path
+     * @return boolean return true if match is found
      */
-    function match($requestPath);
+    function match($requestPath, Array &$args=array());
 
     /**
      * Get the Route Prefix ("[method] [path]")

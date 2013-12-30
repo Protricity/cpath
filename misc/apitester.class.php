@@ -57,7 +57,9 @@ class ApiTester {
             $Route = $Handler->loadRoute();
 
         if($Route instanceof RoutableSet) {
-            $Handler = $Route->routeRequestToHandler($Cli);
+            $Handler = $Route
+                ->findRequestRoute($Cli, true)
+                ->loadHandler();
         }
 
         if(!($Handler instanceof IAPI))

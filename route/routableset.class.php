@@ -8,6 +8,7 @@
 namespace CPath\Route;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 use Traversable;
 
 /**
@@ -59,6 +60,7 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
 
         if(isset($this->mRoutes[$prefix]) && !$replace)
             throw new \InvalidArgumentException("Routable Prefix already exists: " . $prefix);
+
         $this->mRoutes[$prefix] = $Route;
     }
 
@@ -76,7 +78,7 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     public function renderSet(IRequest $Request) {
-        $Route = $this->findRequestRoute($Request);
+        $Route = $this->findRequestRoute($Request, true);
         $Handler = $Route->loadHandler();
         $Wrapper = new RoutableSetWrapper($Request, $this, $Route);
         $Handler->render($Wrapper);
@@ -87,14 +89,47 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
      * Note: this method should throw an exception if the requested route (method + path) didn't match
      * Note: if successful, this method should consume one argument from the IRequest
      * @param IRequest $Request the request to render
+     * @param $allowDefault
      * @return IRoute the found route instance
-     * @throws InvalidRouteException if the requested route (method + path) didn't match
+     * @throws RouteNotFoundException if the requested route (method + path) didn't match
      */
-    function findRequestRoute(IRequest $Request) {
-        $path = $Request->getNextArg(false);
-        $Route = $this->findRoute($path, $Request->getMethod());
-        $Request->getNextArg(true);
-        return $Route;
+    function findRequestRoute(IRequest $Request, $allowDefault=false) {
+        $path = $Request->getMethod() . ' ' . $Request->getRequestURL(true);
+
+        $args = array();
+
+        // TODO: refactor/ugly. Wrap IRequest with new params!
+        uasort($this->mRoutes, function (IRoute $a, IRoute $b){
+            $b = $b->getPrefix();
+            $a = $a->getPrefix();
+            return (substr_count($b, '/')-substr_count($a, '/'));
+        });
+
+        /** @var IRoute $Route */
+        foreach($this->mRoutes as $Route) {
+            if($Route->match($path, $args)) {
+                return $Route;
+            }
+        }
+
+        if($allowDefault && $this->hasDefault())
+            return $this->getDefault();
+
+        if($allowDefault)
+            return $this;
+
+        throw new RouteNotFoundException("Route not found: " . $path);
+//
+//        try {
+//            $Route = $this->findRoute($path, $Request->getMethod());
+//            $Request->getNextArg(true);
+//        } catch (RouteNotFoundException $ex) {
+//            if(!$allowDefault || !$this->hasDefault())
+//                throw $ex;
+//            $Route = $this->getDefault();
+//        }
+//
+//        return $Route;
     }
 
     /**
@@ -102,9 +137,9 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
      * @param $path
      * @param $method
      * @return IRoute the found route instance
-     * @throws InvalidRouteException if the requested route (method + path) didn't match
+     * @throws RouteNotFoundException if the requested route (method + path) didn't match
      */
-    function findRoute($path, $method) {
+    private function findRoute($path, $method) {
         $route = $method;
         if($path)
             $route .= ' ' . $path;
@@ -122,14 +157,12 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
                 else
                     break;
             }
-            if(isset($this->mRoutes[static::PREFIX_DEFAULT]))
-                return $this->mRoutes[static::PREFIX_DEFAULT];
 
             //list($m, $p) = explode(' ', $this->getPrefix(), 2);
             //if(in_array($m, array('ANY', $Request->getMethod())))
             //    return $this->getHandler();
             //return $this->getHandler();
-            throw new InvalidRouteException("Routable could not be found: " . var_export($route, true));
+            throw new RouteNotFoundException("Routable could not be found: " . var_export($route, true));
         }
     }
 

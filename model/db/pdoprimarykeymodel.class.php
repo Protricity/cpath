@@ -90,8 +90,8 @@ abstract class PDOPrimaryKeyModel extends PDOModel {
     function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
         $Routes = parent::loadDefaultRouteSet($readOnly, $allowDelete);
 
-        $Routes['GET :api'] = new APIMultiView($Routes);
-        $Routes['POST :api'] = new APIMultiView($Routes);
+        //$Routes['GET :api'] = new APIMultiView($Routes);
+        //$Routes['POST :api'] = new APIMultiView($Routes);
         $Routes['GET'] = new API_Get($this);
         if(!$readOnly) {
             $Routes['PATCH'] = new API_Patch($this);

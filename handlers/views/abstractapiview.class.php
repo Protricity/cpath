@@ -12,6 +12,7 @@ use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Interfaces\IRequest;
 use CPath\Log;
+use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 use CPath\Route\RoutableSetWrapper;
 use CPath\Route\RouteUtil;
@@ -47,6 +48,21 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
         $this->setupAPIHeadFields($Request);
     }
 
+    protected function getRoutableSetIDs(RoutableSet $Routes) {
+        $ids = array();
+        $i = 1;
+        /** @var IRoute $Route */
+        foreach($Routes as $prefix => $Route) {
+            $Handler = $Route->loadHandler();
+            if($prefix[0] == '#')
+                continue;
+            if(!$Handler instanceof IAPI)
+                continue;
+            $ids[$i++] = $prefix;
+        }
+        return $ids;
+    }
+
 
     /**
      * Render the navigation bar content
@@ -58,12 +74,16 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
             $Routes = $Request->getRoutableSet();
             $Route = $Request->getRoute();
             $Util = new RouteUtil($Route);
-            $i=1;
-            foreach($Routes as $Route) {
+
+            $ids = $this->getRoutableSetIDs($Routes);
+            foreach($ids as $i=>$prefix) {
+                /** @var IRoute $Route */
+                $Route = $Routes[$prefix];
                 $Handler = $Route->loadHandler();
+                if(!$Handler instanceof IAPI)
+                    continue;
                 $Describable = Describable::get($Handler);
                 $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
-                $i++;
             }
         }
     }

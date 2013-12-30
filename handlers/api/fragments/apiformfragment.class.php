@@ -12,6 +12,7 @@ use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Route\IRoutable;
+use CPath\Route\RoutableSetWrapper;
 use CPath\Route\RouteUtil;
 
 class APIFormFragment extends AbstractFormFragment{
@@ -42,7 +43,9 @@ class APIFormFragment extends AbstractFormFragment{
             $Route = $API->loadRoute();
         else
             $Route = $Request->getRoute();
+
         $RouteUtil = new RouteUtil($Route);
+
         $num = 1;
         $path = $RouteUtil->buildPublicURL(true);
 

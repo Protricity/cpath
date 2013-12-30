@@ -75,9 +75,10 @@ abstract class AbstractRoute implements IRoute {
     /**
      * Try's a route against a request path and parse out any request args
      * @param string|null $requestPath the request path to match
-     * @return array|boolean return all parsed request args or false if no match is found
+     * @param Array &$args populated with args parsed out of the path
+     * @return boolean return true if match is found
      */
-    final function match($requestPath) {
+    final function match($requestPath, Array &$args=array()) {
         if(strpos($requestPath, $this->mPrefix) !== 0)
             return false;
 
@@ -86,12 +87,13 @@ abstract class AbstractRoute implements IRoute {
             return false;
 
         $argString = substr($requestPath, strlen($this->mPrefix) + 1);
-        $args = $this->mArgs;
+        $args2 = $this->mArgs;
         if($argString)
             foreach(explode('/', $argString) as $arg)
-                if($arg) $args[] = $arg;
+                if($arg) $args2[] = $arg;
 
-        return $args;
+        $args = $args2;
+        return true;
     }
 
     /**

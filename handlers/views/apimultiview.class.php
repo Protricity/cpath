@@ -28,6 +28,7 @@ class APIMultiView extends AbstractAPIView {
     /** @var IRoute[]|RoutableSet */
     private $mRoutes=array();
     private $mSelectedAPI;
+    private $mSelectedRoute;
 
     /**
      * @param RoutableSet $Routes
@@ -53,18 +54,26 @@ class APIMultiView extends AbstractAPIView {
     final protected function setupAPIHeadFields(IRequest $Request) {
         $Routes = $this->mRoutes;
 
+
+        $ids = $this->getRoutableSetIDs($Routes);
+
         $arg = (int)$Request->getNextArg();
-        if($arg && isset($this->mRoutes[$arg]))
-            $Route = $this->mRoutes[$arg];
+        if($arg && isset($ids[$arg]))
+            $Route = $this->mRoutes[$ids[$arg]];
         elseif($Routes->hasDefault())
             $Route = $Routes->getDefault();
         else
             $Route = $this->mRoutes[0];
 
         $this->mSelectedAPI = $Route->loadHandler();
+        $this->mSelectedRoute = $Route;
 
-        if(!$this->mSelectedAPI instanceof IAPI)
-            throw new \InvalidArgumentException(get_class($this->mSelectedAPI) . " does not implement IAPI");
+        if(!$this->mSelectedAPI instanceof IAPI) {
+            //$Route = $Routes->getDefault();
+            //$this->mSelectedAPI = $Route->loadHandler();
+            //if(!$this->mSelectedAPI instanceof IAPI)
+                throw new \InvalidArgumentException(get_class($this->mSelectedAPI) . " does not implement IAPI");
+        }
 
         $this->mForm = new APIDebugFormFragment($this->mSelectedAPI, $this->getTheme());
         $this->mForm->addHeadElementsToView($this);
@@ -81,8 +90,9 @@ class APIMultiView extends AbstractAPIView {
      * @return void
      */
     function renderViewContent(IRequest $Request) {
-        $this->mForm->render($Request);
-        $this->mResponseBox->renderResponseBox($Request);
+        $WrappedRequest = new RoutableSetWrapper($Request, $this->mRoutes, $this->mSelectedRoute);
+        $this->mForm->render($WrappedRequest);
+        $this->mResponseBox->renderResponseBox($WrappedRequest);
     }
 
     /**
@@ -90,8 +100,7 @@ class APIMultiView extends AbstractAPIView {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    protected function renderBodyHeaderContent(IRequest $Request)
-    {
+    protected function renderBodyHeaderContent(IRequest $Request) {
         $API = $this->mSelectedAPI;
         if($API instanceof IRoutable)
             $Route = $API->loadRoute();
