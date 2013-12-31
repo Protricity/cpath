@@ -17,6 +17,7 @@ use CPath\Request\CLI;
 use CPath\Route\InvalidRouteException;
 use CPath\Route\IRoutable;
 use CPath\Route\RoutableSet;
+use CPath\Route\RouteUtil;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -57,9 +58,14 @@ class ApiTester {
             $Route = $Handler->loadRoute();
 
         if($Route instanceof RoutableSet) {
+<<<<<<< Updated upstream
             $Handler = $Route
                 ->findRequestRoute($Cli, true)
                 ->loadHandler();
+=======
+            $Route = $Route->findRequestRoute($Cli);
+            $Handler = $Route->loadHandler();
+>>>>>>> Stashed changes
         }
 
         if(!($Handler instanceof IAPI))

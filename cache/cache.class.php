@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath;
+namespace CPath\Cache;
 
 use CPath\Cache\APC;
 use CPath\Cache\File;
