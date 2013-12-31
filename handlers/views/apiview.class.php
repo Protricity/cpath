@@ -70,8 +70,7 @@ class APIView extends AbstractAPIView {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    protected function renderBodyFooterContent(IRequest $Request)
-    {
+    protected function renderBodyFooterContent(IRequest $Request) {
         // TODO: Implement renderBodyFooterContent() method.
     }
 
@@ -80,8 +79,7 @@ class APIView extends AbstractAPIView {
      * @param IActionManager $Manager
      * @return void
      */
-    protected function addActions(IActionManager $Manager)
-    {
+    protected function addActions(IActionManager $Manager) {
         // TODO: Implement addActions() method.
     }
 }

@@ -8,7 +8,6 @@
 namespace CPath\Cache;
 
 
-use CPath\Cache;
 use CPath\Config;
 use CPath\Serializer\ISerializable;
 use CPath\Serializer\Serializer;

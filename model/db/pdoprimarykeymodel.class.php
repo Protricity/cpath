@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 
-use CPath\Cache;
+use CPath\Cache\Cache;
 use CPath\Config;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\HandlerSet;

@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Cache;
 
-use CPath\Cache;
 use CPath\Config;
 
 /**
