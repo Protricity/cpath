@@ -456,7 +456,9 @@ abstract class API implements IAPI {
     protected function loadDefaultRouteSet() {
         $Routes = RoutableSet::fromHandler($this);
         APIView::addRoutes($Routes, $this, static::ROUTE_API_VIEW_TOKEN);
-        $Routes[static::ROUTE_METHOD] = $this;
+        $methods = explode(',', static::ROUTE_METHOD);
+        foreach($methods as $method)
+            $Routes[$method] = $this;
         return $Routes;
     }
 }

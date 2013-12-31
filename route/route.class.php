@@ -82,7 +82,8 @@ class Route implements IRoute {
     function match($requestPath, Array &$args=array()) {
         if(substr_compare($this->mPrefix, 'ANY', 0, 3, true) === 0) {
             list(, $path) = explode(' ', $requestPath, 2);
-            if(strpos($path, substr($this->mPrefix, 4)) !== 4)
+            $prefix = substr($this->mPrefix, 4);
+            if(strpos($path, $prefix) !== 0)
                 return false;
         } else {
             if(strpos($requestPath, $this->mPrefix) !== 0)

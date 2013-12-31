@@ -30,7 +30,6 @@ class FileRequestRoute extends MissingRoute implements IRoute{
     }
 
 
-    function match($requestPath) { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getPrefix() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function getDestination() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
     function exportConstructorArgs() { throw new InvalidRouteException("File request was passed to Script"); }
