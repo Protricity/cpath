@@ -6,13 +6,9 @@
  * Time: 3:54 PM
  * To change this template use File | Settings | File Templates.
  */
-namespace CPath\Misc;
+namespace CPath\Compare;
 
-use CPath\Interfaces\IComparable;
-use CPath\Interfaces\IComparator;
-use CPath\Interfaces\NotEqualException;
-
-class SimpleComparator implements IComparator{
+class Comparator implements IComparator{
 
     private $mLastName = NULL;
 
@@ -91,8 +87,8 @@ class SimpleComparator implements IComparator{
 
     /**
      * Compare two objects
-     * @param IComparable $o1
-     * @param IComparable $o2
+     * @param \CPath\Compare\IComparable $o1
+     * @param \CPath\Compare\IComparable $o2
      * @throws NotEqualException if the objects were not equal
      * @return void
      */
@@ -113,5 +109,17 @@ class SimpleComparator implements IComparator{
         if(!$name && $this->mLastName)
             $name = $this->mLastName;
         return $name ? $name . ": " : '';
+    }
+
+    // Static
+
+    static function areEqual(IComparable $obj1, IComparable $obj2) {
+        $C = new Comparator();
+        try {
+            $obj1->compareTo($obj2, $C);
+            return true;
+        } catch (NotEqualException $ex) {
+            return false;
+        }
     }
 }

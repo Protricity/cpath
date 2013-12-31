@@ -139,7 +139,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param bool $allowDelete
      * @return RoutableSet a set of common routes for this PDOModel type
      */
-    function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
+    protected function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
         $Routes = RoutableSet::fromHandler($this);
         $Routes['GET :api'] = new APIMultiView($Routes);
         $Routes['POST :api'] = new APIMultiView($Routes);

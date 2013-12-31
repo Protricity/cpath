@@ -8,8 +8,10 @@
 namespace CPath\Route;
 
 use CPath\Constructable\IConstructable;
+use CPath\Compare\IComparable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
+use CPath\Response\CodedException;
 
 
 /** Thrown when a valid route could not find a corresponding handler */
@@ -17,10 +19,12 @@ class DestinationNotFoundException extends \Exception {}
 /** Thrown when a valid route's handler is invalid */
 class InvalidHandlerException extends \Exception {}
 /** Thrown when no valid routes could be found */
-class NoRoutesFoundException extends \Exception {}
+class NoRoutesFoundException extends CodedException {
+    const DEFAULT_CODE = 404;
+}
 class InvalidRouteException extends \Exception {}
 
-interface IRoute extends IConstructable
+interface IRoute extends IConstructable, IComparable
 {
 
     const METHODS = 'GET,POST,PUT,PATCH,DELETE,CLI';

@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
-use CPath\Interfaces\IComparable;
-use CPath\Interfaces\IComparator;
+use CPath\Compare\IComparable;
+use CPath\Compare\IComparator;
 use CPath\Interfaces\NotEqualException;
 use CPath\Response\Response;
 

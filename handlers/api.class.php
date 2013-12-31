@@ -17,7 +17,6 @@ use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
 use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Views\APIMultiView;
 use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
@@ -28,7 +27,7 @@ use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\Response;
-use CPath\Route\RoutableSetWrapper;
+use CPath\Route\RoutableSet;
 use CPath\Util;
 
 /**
@@ -41,9 +40,9 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_VIEW = ':api';          // Add an APIView route entry i.e. ':api' for this API on GET requests
+    const ROUTE_API_VIEW_TOKEN = ':api';    // Add an APIView route entry i.e. ':api' for this API on GET requests
 
-    const ROUTE_METHOD = 'ANY';             // Default accepted methods are ANY
+    const ROUTE_METHOD = 'POST';            // Default accepted method is POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IField[] */
@@ -446,6 +445,19 @@ abstract class API implements IAPI {
             }
         }
         $this->renderDefault($Request);
+    }
+
+
+
+    /**
+     * Returns the default IHandlerSet collection for this API.
+     * @return RoutableSet a set of common routes for this API
+     */
+    protected function loadDefaultRouteSet() {
+        $Routes = RoutableSet::fromHandler($this);
+        APIView::addRoutes($Routes, $this, static::ROUTE_API_VIEW_TOKEN);
+        $Routes[static::ROUTE_METHOD] = $this;
+        return $Routes;
     }
 }
 

@@ -1,11 +1,11 @@
 <?php
 /**
- * Project: CleverPath Framework
- * IDE: JetBrains PhpStorm
- * Author: Ari Asulin
- * Email: ari.asulin@gmail.com
- * Date: 4/06/11 */
-namespace CPath\Interfaces;
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 12/31/13
+ * Time: 10:27 AM
+ */
+namespace CPath\Compare;
 
 class NotEqualException extends \Exception {
 
@@ -16,7 +16,7 @@ class NotEqualException extends \Exception {
      * @param integer $c < 0 if $this is less than $obj; > 0 if $this is greater than $obj, and 0 if they are equal.
      * @param \Exception|NULL $previous
      */
-    function __construct($message, $c, \Exception $previous=NULL) {
+    function __construct($message, $c=0, \Exception $previous=NULL) {
         $this->mC = (int)$c;
         parent::__construct($message, $c, $previous);
     }
@@ -30,7 +30,9 @@ class NotEqualException extends \Exception {
     }
 }
 
-interface IComparator {
+
+interface IComparator
+{
 
     /**
      * Compare two variables of any type
@@ -40,7 +42,7 @@ interface IComparator {
      * @return void
      * @throws NotEqualException if the objects were not equal
      */
-    function compare($o1, $o2, $name=NULL);
+    function compare($o1, $o2, $name = NULL);
 
     /**
      * Compare two objects
@@ -59,7 +61,7 @@ interface IComparator {
      * @throws NotEqualException if the objects were not equal
      * @return void
      */
-    function compareArray(Array $a1, Array $a2, $_ignoreKeys=NULL);
+    function compareArray(Array $a1, Array $a2, $_ignoreKeys = NULL);
 
     /**
      * Compare two scalars
@@ -69,6 +71,6 @@ interface IComparator {
      * @throws NotEqualException if the objects were not equal
      * @return void
      */
-    function compareScalar($s1, $s2, $name=null);
+    function compareScalar($s1, $s2, $name = null);
 
 }

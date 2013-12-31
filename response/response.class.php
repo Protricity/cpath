@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Response;
-use CPath\Interfaces\IComparable;
-use CPath\Interfaces\IComparator;
+use CPath\Compare\IComparable;
+use CPath\Compare\IComparator;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\NotEqualException;
@@ -127,7 +127,7 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
     /**
      * Compare two instances of this object
      * @param IComparable|Response $obj the object to compare against $this
-     * @param IComparator $C the IComparator instance
+     * @param \CPath\Compare\IComparator $C the IComparator instance
      * @throws NotEqualException if the objects were not equal
      * @return void
      */

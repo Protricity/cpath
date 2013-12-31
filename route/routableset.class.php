@@ -6,35 +6,162 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
+use CPath\Compare\Comparator;
+use CPath\Interfaces\IBuildable;
+use CPath\Compare\IComparable;
+use CPath\Compare\IComparator;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
+use CPath\Log;
 use Traversable;
 
 /**
  * Class Route - a route entry
  * @package CPath
  */
-class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggregate {
+class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
 
     const PREFIX_DEFAULT = "#Default";
 
     private
-        $mRoutes = array();
-        //$mHandlers = array();
+        $mPrefix,
+        $mRoutes = array(),
+        $mDestination,
+        $mHandlerInst=null,
+        $mArgs = array();
 
-//    /**
-//     * Constructs a new Route Entry
-//     * @param $routePrefix string the route prefix
-//     * @param $destination string the handler class for this route
-//     * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
-//     */
-//    public function __construct($routePrefix, $destination, $_args=NULL) {
-//        $this->mPrefix = $routePrefix;
-//        $this->mDestination = $destination;
-//        if($_args)
-//            $this->mArgs = array_slice(func_get_args(), 2);
-//    }
+    /** @var IRoute */
+    private
+        $mUsedRoute = null;
+
+    /**
+     * Constructs a new Route Entry
+     * @param $routePrefix string the route prefix
+     * @param $destination string|IHandler the handler class for this route
+     * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
+     */
+    final function __construct($routePrefix, $destination, $_args=NULL) {
+        $this->mPrefix = $routePrefix;
+
+        if(is_object($destination)) {
+            $this->mHandlerInst = $destination;
+            $this->mDestination = get_class($destination);
+        } else {
+            $this->mDestination = $destination;
+        }
+
+        if($_args)
+            $this->mArgs = array_slice(func_get_args(), 2);
+    }
+
+    protected function setPrefix($prefix) { $this->mPrefix = $prefix; }
+
+    /**
+     * Get the Route Prefix ("[method] [path]" or just "[method]")
+     * @return mixed
+     */
+    final function getPrefix() { return $this->mPrefix; }
+
+    /**
+     * Get the Route Destination class or asset
+     * @return String
+     */
+    final function getDestination() { return $this->mDestination; }
+
+    /**
+     * Get a buildable instance of the route destination
+     * @throws InvalidHandlerException
+     * @return IHandler
+     */
+    function loadHandler() {
+        /** @var IBuildable $dest */
+        $dest = $this->getDestination();
+        $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
+
+        if(!$Handler instanceof IHandler)
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+
+        return $Handler;
+    }
+
+    /**
+     * Try's a route against a request path and parse out any request args
+     * @param string|null $requestPath the request path to match
+     * @param Array &$args populated with args parsed out of the path
+     * @return boolean return true if match is found
+     * @throws InvalidHandlerException
+     */
+    function match($requestPath, Array &$args=array()) {
+        if(substr_compare($this->mPrefix, 'ANY', 0, 3, true) === 0) {
+            list(, $path) = explode(' ', $requestPath, 2);
+            $prefix = substr($this->mPrefix, 4);
+            if(strpos($path, $prefix) !== 0)
+                return false;
+        } else {
+            if(strpos($requestPath, $this->mPrefix) !== 0)
+                return false;
+        }
+
+        //if(strlen($requestPath) > ($c = strlen($this->mPrefix))
+        //    && substr($requestPath, $c, 1) != '/')
+        //    return false;
+        // TODO: remove?
+
+        $args2 = $this->mArgs;
+        /** @var IBuildable $dest */
+        $dest = $this->getDestination();
+        $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
+
+        if(!$Handler instanceof IHandler)
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+
+        if($Handler instanceof IRoutable) {
+            $this->mUsedRoute = $Route = $Handler->loadRoute();
+            if($Route instanceof RoutableSet) {
+                // TODO: refactor/ugly.
+                uasort($Route->mRoutes, function (IRoute $a, IRoute $b){
+                    $b = $b->getPrefix();
+                    $a = $a->getPrefix();
+                    return (substr_count($b, '/')-substr_count($a, '/'));
+                });
+
+                /** @var IRoute $SubRoute */
+                foreach($Route->mRoutes as $SubRoute) {
+                    if(!($SubRoute instanceof RoutableSet) // TODO: Fix hack
+                        && $SubRoute->match($requestPath, $args2)) {
+                        $this->mDestination = $SubRoute->getDestination();
+                        $this->mHandlerInst = $SubRoute->loadHandler();
+                        $args = $args2;
+                        return true;
+                    }
+                }
+
+                Log::e(__CLASS__, "Sub route could not be found: " . $requestPath);
+                return false;
+            }
+        }
+
+        $argString = substr($requestPath, strlen($this->mPrefix) + 1);
+        if($argString)
+            foreach(explode('/', $argString) as $arg)
+                if($arg) $args2[] = $arg;
+
+        $args = $args2;
+        return true;
+    }
+
+
+
+    /**
+     * Exports constructor parameters for code generation
+     * @return Array constructor params for var_export
+     */
+    final function exportConstructorArgs() {
+        $dest = $this->mDestination;
+        $dest = is_object($dest) ? get_class($dest) : $dest;
+        $args = array_merge(array($this->mPrefix, $dest), $this->mArgs);
+        return $args;
+    }
 
     function add($prefix, IHandler $Handler, $replace=false) {
         //$Route = $Handler->loadRoute();
@@ -78,94 +205,27 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
      * @throws InvalidHandlerException if the destination handler was invalid
      */
     public function renderSet(IRequest $Request) {
-        $Route = $this->findRequestRoute($Request, true);
-        $Handler = $Route->loadHandler();
-        $Wrapper = new RoutableSetWrapper($Request, $this, $Route);
-        $Handler->render($Wrapper);
-    }
-
-    /**
-     * Match the destination to the route and return an instance of the destination object
-     * Note: this method should throw an exception if the requested route (method + path) didn't match
-     * Note: if successful, this method should consume one argument from the IRequest
-     * @param IRequest $Request the request to render
-     * @param $allowDefault
-     * @return IRoute the found route instance
-     * @throws RouteNotFoundException if the requested route (method + path) didn't match
-     */
-    function findRequestRoute(IRequest $Request, $allowDefault=false) {
-        $path = $Request->getMethod() . ' ' . $Request->getRequestURL(true);
-
-        $args = array();
-
-        // TODO: refactor/ugly. Wrap IRequest with new params!
-        uasort($this->mRoutes, function (IRoute $a, IRoute $b){
-            $b = $b->getPrefix();
-            $a = $a->getPrefix();
-            return (substr_count($b, '/')-substr_count($a, '/'));
-        });
-
-        /** @var IRoute $Route */
-        foreach($this->mRoutes as $Route) {
-            if($Route->match($path, $args)) {
-                return $Route;
-            }
-        }
-
-        if($allowDefault && $this->hasDefault())
-            return $this->getDefault();
-
-        if($allowDefault)
-            return $this;
-
-        throw new RouteNotFoundException("Route not found: " . $path);
-//
-//        try {
-//            $Route = $this->findRoute($path, $Request->getMethod());
-//            $Request->getNextArg(true);
-//        } catch (RouteNotFoundException $ex) {
-//            if(!$allowDefault || !$this->hasDefault())
-//                throw $ex;
-//            $Route = $this->getDefault();
-//        }
-//
-//        return $Route;
-    }
-
-    /**
-     * Find an IRoute in the RouteSet.
-     * @param $path
-     * @param $method
-     * @return IRoute the found route instance
-     * @throws RouteNotFoundException if the requested route (method + path) didn't match
-     */
-    private function findRoute($path, $method) {
-        $route = $method;
-        if($path)
-            $route .= ' ' . $path;
-
-        if(isset($this->mRoutes[$route])) {
-            return $this->mRoutes[$route];
+        if($this->mUsedRoute) {
+            $Handler = $this->mUsedRoute->loadHandler();
+            $Wrapper = new RoutableSetWrapper($Request, $this, $this->mUsedRoute);
+            $Handler->render($Wrapper);
         } else {
-            while($route) {
-                if(isset($this->mRoutes[$route]))
-                    return $this->mRoutes[$route];
-                if($p = strrpos($route, '/'))
-                    $route = substr($route, 0, $p);
-                elseif(strpos($route, ' '))
-                    $route = $method;
-                else
-                    break;
-            }
-
-            //list($m, $p) = explode(' ', $this->getPrefix(), 2);
-            //if(in_array($m, array('ANY', $Request->getMethod())))
-            //    return $this->getHandler();
-            //return $this->getHandler();
-            throw new RouteNotFoundException("Routable could not be found: " . var_export($route, true));
+            $Handler = $this->loadHandler();
+            $Handler->render($Request);
         }
     }
 
+    /**
+     * Determine if two IRoute objects are equal
+     * @param \CPath\Compare\IComparable|IRoute $obj the object to compare against $this
+     * @param \CPath\Compare\IComparator $C the IComparator instance
+     * @return integer < 0 if $this is less than $obj; > 0 if $this is greater than $obj, and 0 if they are equal.
+     */
+    function compareTo(IComparable $obj, IComparator $C)
+    {
+        $C->compareScalar($this->getPrefix(), $obj->getPrefix());
+        $C->compareScalar($this->getDestination(), $obj->getDestination());
+    }
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -251,5 +311,21 @@ class RoutableSet extends AbstractRoute implements \ArrayAccess, \IteratorAggreg
     static final function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
         $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
         return new static($prefix, get_class($Handler));
+    }
+
+    /**
+     * Gets the default public route path for this handler
+     * @param IHandler $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IHandler
+     * @param String $path a custom path for this IHandler
+     * @return RoutableSet
+     */
+    static final function getPrefixFromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+        $cls = get_class($Handler);
+        if(!$path)
+            $path = str_replace('\\', '/', strtolower($cls));
+        if($path[0] !== '/')
+            $path = '/' . $path;
+        return $method . ' ' . $path;
     }
 }

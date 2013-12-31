@@ -8,15 +8,11 @@
  */
 namespace CPath\Misc;
 use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\Response;
 use CPath\Request\CLI;
-use CPath\Route\InvalidRouteException;
-use CPath\Route\IRoutable;
-use CPath\Route\RoutableSet;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -53,14 +49,6 @@ class ApiTester {
         $Cli = CLI::fromArgs($args, $request);
         $Route = $Cli->findRoute();
         $Handler = $Route->loadHandler();
-        if($Handler instanceof IRoutable)
-            $Route = $Handler->loadRoute();
-
-        if($Route instanceof RoutableSet) {
-            $Handler = $Route
-                ->findRequestRoute($Cli, true)
-                ->loadHandler();
-        }
 
         if(!($Handler instanceof IAPI))
             throw new NotAnApiException(get_class($Handler) . " does not implement IAPI");

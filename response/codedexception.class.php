@@ -8,10 +8,10 @@
 namespace CPath\Response;
 
 class CodedException extends \Exception implements IResponseCode {
-    private $mCode;
-    function __construct($message, $statusCode=400, $previous=null) {
-        $this->mCode = $statusCode;
-        parent::__construct($message, $statusCode, $previous);
+    const DEFAULT_CODE = 400;
+
+    function __construct($message, $statusCode=null, $previous=null) {
+        parent::__construct($message, $statusCode ?: static::DEFAULT_CODE, $previous);
     }
 
     /**
@@ -19,6 +19,6 @@ class CodedException extends \Exception implements IResponseCode {
      * @return int
      */
     function getStatusCode() {
-        return $this->mCode;
+        return $this->getCode();
     }
 }

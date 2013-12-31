@@ -22,7 +22,7 @@ class Install extends API {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
     const ROUTE_METHOD = 'CLI';    // CLI only
-    const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
+    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
 
     private $mNoPrompt = false;
 

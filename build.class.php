@@ -24,7 +24,7 @@ class Build extends API implements IRoutable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHOD = 'CLI';    // CLI only
-    const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
+    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
 
 
     const ROUTE_IGNORE_FILES = '.buildignore';

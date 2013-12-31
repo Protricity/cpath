@@ -66,11 +66,11 @@ class Web extends AbstractRequest {
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico'))) {
             $Route = new FileRequestRoute($routePath);
         } elseif(Config::$APCEnabled) {
-            $Route = RouterAPC::findRoute($routePath, $args)
-                ?: RouterAPC::findRoute($routePathAny, $args);
+            $Route = RouterAPC::findRoute($routePath, $args);
+                //?: RouterAPC::findRoute($routePathAny, $args);
         } else {
-            $Route = Router::findRoute($routePath, $args)
-                ?: Router::findRoute($routePathAny, $args);
+            $Route = Router::findRoute($routePath, $args);
+                //?: Router::findRoute($routePathAny, $args);
         }
         if(!$Route)
             $Route = new MissingRoute($routePath);
