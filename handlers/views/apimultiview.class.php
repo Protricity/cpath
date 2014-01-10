@@ -103,7 +103,7 @@ class APIMultiView extends AbstractAPIView {
             if(!$Handler instanceof IAPI)
                 continue;
             $Describable = Describable::get($Handler);
-            $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+            $this->renderNavBarEntry($Util->buildPublicURL(true) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
         }
     }
 
