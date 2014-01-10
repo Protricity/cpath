@@ -13,10 +13,10 @@ use CPath\Handlers\Api\Interfaces\APIException;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Validation;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Model\Response;
+use CPath\Response\IResponse;
+use CPath\Response\Response;
 
 class API_PostUserPassword extends API_Base {
 
@@ -77,7 +77,7 @@ class API_PostUserPassword extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         if($this->mLoggedIn)
@@ -88,7 +88,7 @@ class API_PostUserPassword extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
         $User = $this->mUser;

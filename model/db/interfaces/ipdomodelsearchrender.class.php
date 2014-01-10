@@ -9,7 +9,7 @@
 namespace CPath\Model\DB\Interfaces;
 
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 use CPath\Model\DB\SearchResponse;

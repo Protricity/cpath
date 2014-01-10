@@ -12,12 +12,6 @@ abstract class PageLayout extends View implements IRenderContent {
 //        parent::__construct($Target, $Theme);
 //    }
 
-    protected function setupHeadFields() {
-        parent::setupHeadFields();
-        //$basePath = Base::getClassPublicPath(__CLASS__, false);
-        //$this->addHeadStyleSheet($basePath . 'assets/pagelayout.css');
-    }
-
     /**
      * Render the header
      * @param IRequest $Request the IRequest instance for this render

@@ -1,7 +1,10 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
 use CPath\Handlers\Interfaces\IRenderContent;
+use CPath\Handlers\Util\Attr;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
@@ -14,12 +17,16 @@ abstract class NavBarLayout extends View implements IRenderContent {
 //        parent::__construct($Target, $Theme);
 //    }
 
-
-    protected function setupHeadFields() {
-        parent::setupHeadFields();
-        //$basePath = Base::getClassPublicPath(__CLASS__, false);
-        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
-    }
+//
+//    /**
+//     * Set up <head> element fields for this View
+//     * @param IRequest $Request
+//     */
+//    protected function setupHeadFields(IRequest $Request) {
+//        parent::setupHeadFields();
+//        //$basePath = Base::getClassPublicPath(__CLASS__, false);
+//        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
+//    }
 
     /**
      * Render the header
@@ -47,25 +54,25 @@ abstract class NavBarLayout extends View implements IRenderContent {
     /**
      * Render the navigation bar content
      * @param String $url the url for this navbar entry
-     * @param String|NULL $text the html for this navbar entry
-     * @param String|NULL $title the title for this navbar entry
+     * @param String|IDescribable $description the description of this nave entry
      * @return void
      */
-    protected function renderNavBarEntry($url, $text=null, $title=null)
+    protected function renderNavBarEntry($url, $description)
     {
+        $Describable = Describable::get($description);
         if(!$this->navBarStarted) {
             echo RI::ni(), "<ul class='navbar-menu'>";
             $this->navBarStarted = true;
         }
 
         echo RI::ni(1), "<li class='navbar-menu-item clearfix'>";
-        echo RI::ni(2), "<a href='{$url}' title='", $title ?: $text ,"'>", $text ?: $url, "</a>";
+        echo RI::ni(2), "<a href='{$url}' title='", $Describable->getTitle(), "'>", $Describable->getDescription(), "</a>";
         echo RI::ni(1), "</li>";
     }
 
 
     protected function renderBodyHeader(IRequest $Request) {
-        $this->getTheme()->renderSectionStart($Request, 'header');
+        $this->getTheme()->renderSectionStart($Request, Attr::get('header'));
         $this->renderBodyHeaderContent($Request);
         $this->getTheme()->renderSectionEnd($Request);
     }
@@ -93,7 +100,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
      */
     final protected function renderBodyContent(IRequest $Request) {
         $Theme = $this->getTheme();
-        $Theme->renderSectionStart($Request, 'navbar');
+        $Theme->renderSectionStart($Request, Attr::get('navbar'));
         $this->renderNavBarContent($Request);
         if($this->navBarStarted) {
             echo RI::ni(), "</ul>";
@@ -101,14 +108,14 @@ abstract class NavBarLayout extends View implements IRenderContent {
         }
         $Theme->renderSectionEnd($Request);
 
-        $Theme->renderSectionStart($Request, 'content');
+        $Theme->renderSectionStart($Request, Attr::get('content'));
         $this->renderViewContent($Request);
         $Theme->renderSectionEnd($Request);
     }
 
 
     protected function renderBodyFooter(IRequest $Request) {
-        $this->getTheme()->renderSectionStart($Request, 'footer');
+        $this->getTheme()->renderSectionStart($Request, Attr::get('footer'));
         $this->renderBodyFooterContent($Request);
         $this->getTheme()->renderSectionEnd($Request);
     }

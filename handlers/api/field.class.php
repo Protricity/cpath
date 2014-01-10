@@ -10,7 +10,7 @@ namespace CPath\Handlers\Api;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\RequiredFieldException;
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Validate;
@@ -28,7 +28,7 @@ class Field implements IField {
 
     /**
      * Create a new API Field
-     * @param String|IDescribable $Description
+     * @param String|\CPath\Describable\IDescribable $Description
      * @param int $validation
      * @param bool $isRequired
      * @param bool $isParam
@@ -83,7 +83,7 @@ class Field implements IField {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return $this->mDescription;

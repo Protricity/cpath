@@ -4,16 +4,15 @@ namespace CPath\Handlers\Themes;
 use CPath\Base;
 use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
-use CPath\Handlers\Fragments\ModelTableListFragment;
+use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
+use CPath\Handlers\Util\Attr;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelect;
 use CPath\Model\DB\SearchResponse;
 
@@ -22,43 +21,47 @@ class CPathDefaultTheme implements ITheme {
 
     private $mRowBody = null, $mIsException = false, $mLastDataElm = null;
 
+    /** @var  ModelResultsTableFragment */
+    private $mMTLF;
+
     protected function __construct() {
+        $this->mMTLF = new ModelResultsTableFragment($this);
     }
 
     /**
-     * Set up a view according to this theme
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
      * @param IView $View
-     * @return mixed
      */
-    function setupView(IView $View)
-    {
+    function addHeadElementsToView(IView $View) {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
-        $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css');
-        $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js');
+        $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css', true);
+        $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js', true);
+
+        $this->mMTLF->addHeadElementsToView($View);
     }
 
     /**
      * Render the start of a fragment.
      * @param IRequest $Request the IRequest instance for this render
      * @param IDescribable|String|Null $Description optional fragment header text or description
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderFragmentStart(IRequest $Request, $Description=null, $class=null, $attr=null)
-    {
-        if(is_array($attr))     $attr = implode(' ', $attr);
-        if(is_array($class))    $class = implode(' ', $class);
-        $class = 'fragment' . ($class ? ' ' . $class : '');
-        if($this->mIsException)
-            $class .= ' error';
+    function renderFragmentStart(IRequest $Request, $Description=null, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
 
-        echo RI::ni(), "<div", $attr ? ' '.$attr : '', " class='{$class}'", ">";
+        $Attr->addClass('fragment');
+        if($this->mIsException)
+            $Attr->addClass('error');
+
+        echo RI::ni(), "<div", $Attr->render($Request), ">";
         echo RI::ai(1);
         if($Description) {
             echo RI::ni(), "<h4 class='fragment-title'>", Describable::get($Description)->getTitle(), "</h4>";
         }
         echo RI::ni(), "<div class='fragment-content'>";
+        echo RI::ai(1);
     }
 
     /**
@@ -68,7 +71,7 @@ class CPathDefaultTheme implements ITheme {
      */
     function renderFragmentEnd(IRequest $Request)
     {
-        echo RI::ai(-1);
+        echo RI::ai(-2);
         echo RI::ni(1), "</div>";
         echo RI::ni(), "</div>";
     }
@@ -77,38 +80,33 @@ class CPathDefaultTheme implements ITheme {
      * Render the start of a table.
      * @param IRequest $Request the IRequest instance for this render
      * @param String|NULL $captionText text that should appear in the table caption
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableStart(IRequest $Request, $captionText = NULL, $class=null, $attr=null)
-    {
-        if(is_array($attr))     $attr = implode(' ', $attr);
-        if(is_array($class))    $class = implode(' ', $class);
+    function renderTableStart(IRequest $Request, $captionText = NULL, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
 
-        $class = 'table' . ($class ? ' ' : '') . $class;
+        $Attr->addClass('table');
 
         if($this->mIsException)
-            $class .= ' error';
+            $Attr->addClass('error');
 
-        echo RI::ni(), "<table", $attr ? ' '.$attr : '', " class='{$class}'", ">";
+        echo RI::ni(), "<table", $Attr->render($Request), ">";
         if($captionText)
             echo RI::ni(1), "<caption><em>{$captionText}</em></caption>";
         RI::ai(1);
     }
 
+
     /**
      * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
-     * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER, FLAG_ROW_FIRST_DATA_IS_LABEL
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $flags=0, $class=null, $attr=null)
-    {
-        if(is_array($attr))     $attr = implode(' ', $attr);
-        if(is_array($class))    $class = implode(' ', $class);
+    function renderTableRowStart(IRequest $Request, $flags=0, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
 
         if($flags & ITableTheme::FLAG_ROW_IS_HEADER)
                 $body = 'thead';
@@ -128,7 +126,7 @@ class CPathDefaultTheme implements ITheme {
         }
         $this->mRowBody = $body;
 
-        echo RI::ni(), "<tr", $attr ? ' '.$attr : '', $class ? ' class=\''.$class.'\'' : '', ">";
+        echo RI::ni(), "<tr", $Attr->render($Request), ">";
         RI::ai(1);
     }
 
@@ -136,26 +134,22 @@ class CPathDefaultTheme implements ITheme {
      * Render the start of a table data element.
      * @param IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
-     * @param String|Array|NULL $class element classes
      * @param int $flags ::FLAG_DATA_IS_LABEL
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableDataStart(IRequest $Request, $span=0, $class=null, $flags=0, $attr=null)
-    {
-        if(is_array($attr))     $attr = implode(' ', $attr);
-        if(is_array($class))    $class = implode(' ', $class);
-        if($span)               $attr .= ($attr ? ' ' : '') . "colspan='{$span}'";
+    function renderTableDataStart(IRequest $Request, $span=0, $flags=0, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
 
+        if($span)
+            $Attr->add('colspan', $span);
 
         echo RI::ni();
         if($flags & ITableTheme::CHECK_FLAG_DATA_IS_LABEL)
             $this->mLastDataElm = 'th';
         else
             $this->mLastDataElm = 'td';
-        echo '<' . $this->mLastDataElm;
-
-        echo $attr ? ' '.$attr : '', $class ? ' class=\''.$class.'\'' : '', ">";
+        echo '<', $this->mLastDataElm, $Attr->render($Request), ">";
 
         RI::ai(1);
     }
@@ -205,13 +199,20 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the start of an html <body>.
      * @param IRequest $Request the IRequest instance for this render
+     * @param String|IAttributes|NULL $Attr optional attributes to add to the content.
+     * Note: If a string is passed instead of IAttributes, it is added as a class to a new instance of IAttributes
      * @return void
      */
-    function renderBodyStart(IRequest $Request)
-    {
-        $errClass = $this->mIsException ? ' error' : '';
+    function renderBodyStart(IRequest $Request, IAttributes $Attr=NULL) {
+        $Attr = Attr::get($Attr);
+
+        $Attr->addClass('page');
+
+        if($this->mIsException)
+            $Attr->addClass('error');
+
         echo RI::ni(), "<body class='narrow'>";
-        echo RI::ni(1), "<div class='page{$errClass}'>";
+        echo RI::ni(1), "<div", $Attr->render($Request), ">";
         RI::ai(2);
     }
 
@@ -230,22 +231,18 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the start of an html body section.
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Null $className optional class name for this section
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSectionStart(IRequest $Request, $className = NULL)
-    {
+    function renderSectionStart(IRequest $Request, IAttributes $Attr=NULL) {
+        $Attr = Attr::get($Attr);
+
         echo RI::ni();
 
-        echo '<div';
-
         if($this->mIsException)
-            $className .= $className ? ' error' : 'error';
+            $Attr->addClass('error');
 
-        if($className)
-            echo " class='", $className, "'";
-
-        echo ">";
+        echo '<div', $Attr->render($Request), '>';
 
         RI::ai(1);
     }
@@ -276,11 +273,10 @@ class CPathDefaultTheme implements ITheme {
      * Render the results of a query.
      * @param IRequest $Request the IRequest instance for this render
      * @param PDOSelect $Query query instance to render (not yet executed)
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderBrowseContent(IRequest $Request, PDOSelect $Query, $class = NULL, $attr = NULL) {
+    function renderBrowseContent(IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL) {
         foreach($Query as $data) {
             $MF = new ModelTableFragment($data, $this);
             $MF->render($Request);
@@ -291,15 +287,11 @@ class CPathDefaultTheme implements ITheme {
      * Render the end of an html body section.
      * @param IRequest $Request the IRequest instance for this render
      * @param SearchResponse $Response the SearchResponse instance for this query
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSearchContent(IRequest $Request, SearchResponse $Response, $class = NULL, $attr = NULL)
-    {
-        $MTLF = new ModelResultsTableFragment($Response, $this);
-        $MTLF->render($Request, $class, $attr);
-
+    function renderSearchContent(IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL) {
+        $this->mMTLF->render($Request, $Response, $Attr);
     }
 }
 

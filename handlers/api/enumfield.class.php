@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -36,7 +36,7 @@ class EnumField extends Field {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return parent::getDescribable() . ": '" . implode("', '", $this->mEnum) . "'";

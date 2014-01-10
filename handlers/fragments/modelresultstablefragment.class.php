@@ -1,45 +1,64 @@
 <?php
 namespace CPath\Handlers\Fragments;
 
+use CPath\Base;
+use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Model\DB\PDOModel;
 use CPath\Model\DB\PDOSelectStats;
 use CPath\Model\DB\SearchResponse;
 use CPath\Request\Web;
 
-class ModelResultsTableFragment implements IHandler{
+class ModelResultsTableFragment implements IHandler, IViewConfig{
 
-    private $mResponse, $mTheme;
+    private $mTheme;
 
     /**
-     * @param SearchResponse $Response
      * @param ITableTheme $Theme
      */
-    public function __construct(SearchResponse $Response, ITableTheme $Theme = null) {
-        $this->mResponse = $Response;
+    public function __construct(ITableTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
+    }
+
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
+        $basePath = Base::getClassPublicPath($this, false);
+        $View->addHeadStyleSheet($basePath . 'assets/modelresultstablefragment.css', true);
+        $View->addHeadScript($basePath . 'assets/modelresultstablefragment.js', true);
     }
 
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param SearchResponse $Response
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function render(IRequest $Request, $class = NULL, $attr = NULL)
+    function render(IRequest $Request, SearchResponse $Response = NULL, IAttributes $Attr=null)
     {
+        if(is_array($attr))     $attr = implode(' ', $attr);
+
         $Table = new TableThemeUtil($Request, $this->mTheme);
 
-        $Query = $this->mResponse->getQuery();
+        $Query = $Response->getQuery();
         $Stats = $Query->getDescriptor()->execFullStats();
+        $json = array();
+        $Stats->toJSON($json);
+        $json = json_encode($json);
+        $attr = "data-stats='{$json}'" . ($attr ? ' ' . $attr : '');
 
-        $Table->renderStart($this->mResponse, $class, $attr);
+        $Table->renderStart($Response, $class, $attr);
         $Table->renderHeaderStart();
 
         $row = $Query->fetch();
@@ -82,7 +101,7 @@ class ModelResultsTableFragment implements IHandler{
             //echo RI::ni(), "<a href='", $url, $Stats->getURL(1), "' class='search-form-page-first'>First</a>";
             //echo RI::ni(), "<a href='". $url. $Stats->getURL($Stats->getTotalPages()). "' class='search-form-page-last'>Last</a>";
             echo RI::ni(),"<a", (($p = $Stats->getPreviousPage()) ? " href='". $url. $Stats->getURL($p). "'" : ''), " class='search-form-page search-form-page-previous'>Previous</a>";
-                echo RI::ni(), "<div class='search-form-pages' data-template-url='" .  $url . $Stats->getURL('%PAGE%', '%LIMIT%') . "'>";
+                echo RI::ni(), "<div class='search-form-pages'>";// data-template-url='" .  $url . $Stats->getURL('%PAGE%', '%LIMIT%') . "'>";
                 foreach($Stats->getPageIDs() as $i=>$id) {
                     echo RI::ni(1), "<a href='", $url, $Stats->getURL($id), "' class='search-form-page'>{$id}</a>";
                 }

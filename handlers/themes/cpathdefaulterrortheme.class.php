@@ -4,8 +4,8 @@ namespace CPath\Handlers\Themes;
 use CPath\Base;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -17,9 +17,9 @@ class CPathDefaultErrorTheme extends CPathDefaultTheme {
      * @param IView $View
      * @return mixed
      */
-    function setupView(IView $View)
+    function addHeadElementsToView(IView $View)
     {
-        parent::setupView($View);
+        parent::addHeadElementsToView($View);
         $basePath = Base::getClassPublicPath(__CLASS__, false);
         $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulterrortheme.css');
     }

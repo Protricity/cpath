@@ -1,15 +1,3 @@
 
 /* APIView */
 
-
-body.mobile table.table .table-field-num { display: none; }
-body.mobile table.table .table-field-required { display: none; }
-
-/* HandlerSetView */
-
-.response-content .fragment-content, .response-headers .fragment-content, .request-headers .fragment-content{
-    font: 10px Courier New, Courier New, monospace;
-    white-space: pre;
-    overflow: hidden;
-    word-wrap: break-word;
-}

@@ -4,7 +4,7 @@ namespace CPath\Handlers;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -22,8 +22,20 @@ abstract class ObjectView extends View{
         parent::__construct($Theme);
     }
 
-    protected function setupHeadFields() {
+    /**
+     * Add additional <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract protected function addHeadFields(IRequest $Request);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHeadFields(IRequest $Request) {
         $this->addHeadHTML("<title>" . Describable::get($this->mTarget)->getTitle() . "</title>", self::FIELD_TITLE);
+        $this->addHeadFields($Request);
     }
 
     function getTarget() {

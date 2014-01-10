@@ -9,7 +9,7 @@
 namespace CPath\Misc;
 
 use CPath\Base;
-use CPath\Cache;
+use CPath\Cache\Cache;
 use CPath\Config;
 
 class CrashLog {

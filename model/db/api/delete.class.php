@@ -10,12 +10,12 @@ namespace CPath\Model\DB;
 
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IWriteAccess;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class API_Delete extends API_Get implements IAPIGetCallbacks {
 

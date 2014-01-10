@@ -11,7 +11,7 @@ namespace CPath\Model\DB\Interfaces;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\PDOUserModel;
 
 interface IAPIPostUserCallbacks {
@@ -32,5 +32,5 @@ interface IAPIPostUserCallbacks {
      * @param IResponse $Response
      * @return IResponse|null
      */
-    function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, IResponse $Response);
+    function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, \CPath\Response\IResponse $Response);
 }

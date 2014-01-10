@@ -11,18 +11,18 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Handlers\API\Interfaces\APIException;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Log;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
-class Install extends API implements IBuildable, IHandler {
+class Install extends API {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
-    const ROUTE_METHODS = 'CLI';    // CLI only
-    const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
+    const ROUTE_METHOD = 'CLI';    // CLI only
+    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
 
     private $mNoPrompt = false;
 
@@ -39,7 +39,7 @@ class Install extends API implements IBuildable, IHandler {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      * @throws APIException if no config file could be installed
      */
     protected function doExecute(IRequest $Request)
@@ -77,4 +77,10 @@ class Install extends API implements IBuildable, IHandler {
      * @return IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() { return "Installation script for CPath"; }
+
+    /**
+     * Return an instance of the class for building and other tasks
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {}
 }

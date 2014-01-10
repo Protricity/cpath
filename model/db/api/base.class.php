@@ -7,16 +7,17 @@
  * Date: 4/06/11 */
 namespace CPath\Model\DB;
 
-
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Interfaces\IBuildable;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISecurityPolicy;
 use CPath\Model\DB\Interfaces\ISecurityPolicyAggregate;
 use CPath\Model\DB\Interfaces\SecurityPolicyNotFoundException;
+use CPath\Route\IRoute;
+use CPath\Route\RoutableSet;
 
-abstract class API_Base extends API {
+abstract class API_Base extends API { // TODO: IBuildable?
 
     private $mHandlers = array();
 
@@ -31,6 +32,23 @@ abstract class API_Base extends API {
         parent::__construct();
         $this->mModel = $Model;
         $this->mHandlers = array($this, $Model);
+    }
+
+
+    /**
+     * Return an instance of the class for building and other tasks
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {
+        // TODO: Implement createBuildableInstance() method.
+    }
+
+    /**
+     * Returns the route for this IHandler
+     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
+     */
+    function loadRoute() {
+        // TODO: Implement loadRoute() method.
     }
 
     function addCallbackHandler($Object) {
@@ -106,5 +124,4 @@ abstract class API_Base extends API {
     protected function getModel() {
         return $this->mModel;
     }
-
 }

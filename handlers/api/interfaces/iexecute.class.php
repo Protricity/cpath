@@ -8,6 +8,8 @@
  */
 namespace CPath\Interfaces;
 
+use CPath\Response\IResponse;
+
 interface IExecute {
 
     /**

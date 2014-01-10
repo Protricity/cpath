@@ -8,13 +8,13 @@
 namespace CPath\Model\DB;
 
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIPostCallbacks;
 use CPath\Model\DB\Interfaces\IAssignAccess;
 use CPath\Model\DB\Interfaces\IWriteAccess;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class API_Put extends API_Base {
 
@@ -35,7 +35,7 @@ class API_Put extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Create or update a ".$this->getModel()->modelName();
@@ -66,7 +66,7 @@ class API_Put extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
      * @throws InvalidAPIException if multiple duplicate rows were found
