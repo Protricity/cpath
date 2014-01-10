@@ -7,12 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api\Interfaces;
 
-use CPath\Helpers\Describable;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoutable;
+use CPath\Route\IRoutable;
+use CPath\Interfaces\IViewConfig;
 use CPath\Model\MultiException;
 
 class APIException extends \Exception {}
@@ -68,12 +69,12 @@ class ValidationExceptions extends MultiException {
 }
 
 
-interface IAPI extends IHandler, IRoutable, IDescribableAggregate {
+interface IAPI extends IHandler, IDescribableAggregate, IViewConfig {
 
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Interfaces\IResponse the api call response with data, message, and status
+     * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
     function execute(IRequest $Request);
 

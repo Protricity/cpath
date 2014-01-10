@@ -10,8 +10,9 @@ namespace CPath;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
+use CPath\Route\IRoute;
 use CPath\Request\CLI;
+use CPath\Route\Router;
 
 class Console implements IHandler { // Broke }, IBuildable {
 
@@ -22,7 +23,7 @@ class Console implements IHandler { // Broke }, IBuildable {
     {
         $routes = array();
         foreach(Router::getRoutes() as $Route){
-            /** @var IRoute $Route */
+            /** @var \CPath\Route\IRoute $Route */
             list($method, $route) = explode(' ', $Route->getPrefix(), 2);
             if(!isset($routes[$route]))
                 $routes[$route] = array();
@@ -83,6 +84,7 @@ class Console implements IHandler { // Broke }, IBuildable {
                     $Cli = CLI::fromArgs($args);
                     try{
                         $Cli->findRoute()
+                            ->loadHandler()
                             ->render($Cli);
                     } catch (\Exception $ex) {
                         echo "Exception: ",$ex->getMessage(),"\n",$ex->getFile(),":",$ex->getLine(),"\n";

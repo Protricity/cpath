@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 
 /**
  * Class APIRquiredParam
@@ -17,7 +17,7 @@ use CPath\Interfaces\IDescribable;
 class RequiredParam extends Field {
     /**
      * Create a new API Field
-     * @param String|IDescribable $Description
+     * @param String|\CPath\Describable\IDescribable $Description
      * @param int $validation
      */
     public function __construct($Description=NULL, $validation=0) {

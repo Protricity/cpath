@@ -8,7 +8,7 @@
 namespace CPath\Cache;
 
 
-use CPath\Cache;
+use CPath\Cache\Cache;
 
 /**
  * Class None - Placeholder class for when no cache is available

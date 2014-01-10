@@ -10,7 +10,7 @@ namespace CPath\Model\DB\Interfaces;
 
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\PDOModel;
 
 interface IAPIPostCallbacks {
@@ -28,10 +28,10 @@ interface IAPIPostCallbacks {
      * Note: Leave empty if unused.
      * @param PDOModel $NewModel the returned model
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Response\IResponse $Response
+     * @return \CPath\Response\IResponse|null
      */
-    function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response);
+    function onPostExecute(PDOModel $NewModel, IRequest $Request, \CPath\Response\IResponse $Response);
 
     /**
      * Modify the API_Post IRequest and/or return a row of fields to use in PDOModel::createFromArray

@@ -8,26 +8,25 @@
 namespace CPath\Model\DB;
 use CPath\Base;
 use CPath\Build;
-use CPath\Builders\BuildPGTables;
+use CPath\Model\DB\Builders\BuildPGTables;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IDatabase;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoutable;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IRouteBuilder;
+use CPath\Route\IRoute;
 use CPath\Log;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
+use CPath\Route\Route;
 
 class NotConfiguredException extends \Exception{}
-abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutable {
+abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
     const BUILD_TABLE_PATH = 'tables';
     const FUNC_FORMAT = NULL;
 
-    const ROUTE_METHODS = 'CLI';   // Default accepted methods are GET and POST
+    const ROUTE_METHOD = 'CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;       // No custom route path. Path is based on namespace + class name
 
     private $mPrefix;
@@ -169,14 +168,11 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler, IRoutabl
         return static::get();
     }
 
-    // Implement IRoutable
-
     /**
-     * Returns an array of all routes for this class
-     * @param IRouteBuilder $Builder the IRouteBuilder instance
-     * @return IRoute[]
+     * Returns the route for this IHandler
+     * @return IRoute
      */
-    function getAllRoutes(IRouteBuilder $Builder) {
-        return $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, static::ROUTE_PATH);
+    function loadRoute() {
+        return Route::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
     }
 }

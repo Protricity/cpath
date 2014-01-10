@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 
 
 /**

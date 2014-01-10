@@ -7,7 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Model;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IRoute;
+use CPath\Response\CodedException;
+use CPath\Response\IResponseCode;
+use CPath\Route\InvalidRouteException;
+use CPath\Route\IRoute;
+use CPath\Route\MissingRoute;
+use CPath\Route\NoRoutesFoundException;
 
 /**
  * Class Route - a route entry
@@ -19,13 +24,14 @@ class FileRequestRoute extends MissingRoute implements IRoute{
         $this->mRoutePath = $routePrefixPath;
     }
 
-    /**
-     * Renders the route destination
-     * @param IRequest $Request
-     * @return void
-     */
-    public function render(IRequest $Request) {
-        header("HTTP/1.0 404 File request was passed to Script");
+
+    public function loadHandler() {
+        throw new CodedException("File request was passed to Script", IResponseCode::STATUS_NOT_FOUND);
     }
 
+
+    function getPrefix() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function getDestination() { throw new NoRoutesFoundException("Route '{$this->mRoutePath}' was not found"); }
+    function exportConstructorArgs() { throw new InvalidRouteException("File request was passed to Script"); }
+    protected function &getArray() { throw new InvalidRouteException("File request was passed to Script"); }
 }

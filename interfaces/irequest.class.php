@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 use CPath\Model\FileUpload;
+use CPath\Route\IRoute;
 
 
 interface IRequest extends IArrayObject {
@@ -24,6 +25,14 @@ interface IRequest extends IArrayObject {
     function getMethod();
 
     /**
+     * Build a url from the request
+     * @param bool $withArgs
+     * @param bool $withDomain
+     * @return string
+     */
+    function getRequestURL($withArgs=true, $withDomain=false);
+
+    /**
      * Returns Request headers
      * @param String|Null $key the header key to return or all headers if null
      * @return mixed
@@ -39,9 +48,10 @@ interface IRequest extends IArrayObject {
 
     /**
      * Return the next argument for this request
+     * @param bool $advance if true, the argument position advances forward 1
      * @return String argument
      */
-    function getNextArg();
+    function getNextArg($advance=true);
 
     /**
      * Returns a list of mimetypes accepted by this request

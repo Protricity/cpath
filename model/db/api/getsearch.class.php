@@ -13,14 +13,14 @@ use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Api\Param;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelSearchRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
 use CPath\Model\DB\Interfaces\ISelectDescriptor;
-use CPath\Model\Response;
+use CPath\Response\Response;
 
 class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     private $mColumns;
@@ -97,6 +97,16 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
             throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
 
         $columns = $Model::findColumns($search_by ?: $Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
+
+        if(!is_int($search)) {
+            $columns2 = array();
+            foreach($columns as $name => $Column)
+                if(!$Column->isFlag(PDOColumn::FLAG_NUMERIC))
+                    $columns2[$name] = $Column;
+            if($columns2)
+                $columns = $columns2;
+        }
+
         if(!$columns)
             throw new \Exception("No SEARCH fields defined in ".$Model::modelName());
 

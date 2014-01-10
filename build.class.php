@@ -11,16 +11,20 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
-use CPath\Interfaces\IDescribable;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Describable\IDescribable;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
-use CPath\Model\Response;
+use CPath\Response\Response;
+use CPath\Route\IRoutable;
+use CPath\Route\IRoute;
+use CPath\Route\RoutableSet;
+use CPath\Route\Route;
 
-class Build extends API implements IBuildable {
+class Build extends API implements IRoutable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
-    const ROUTE_METHODS = 'CLI';    // CLI only
-    const ROUTE_API_VIEW = false;   // Add an APIView route entry for this API
+    const ROUTE_METHOD = 'CLI';    // CLI only
+    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
 
 
     const ROUTE_IGNORE_FILES = '.buildignore';
@@ -69,6 +73,13 @@ class Build extends API implements IBuildable {
         return "Build All classes";
     }
 
+    /**
+     * Returns the route for this IHandler
+     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
+     */
+    function loadRoute() {
+        return Route::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
+    }
 
     // Statics
 
@@ -264,7 +275,12 @@ class Build extends API implements IBuildable {
     private static function buildClasses() {
         $exCount = 0;
         foreach(self::$mClasses as $Class) {
-            $Buildable = $Class->getMethod('createBuildableInstance')->invoke(null);
+            $Method = $Class->getMethod('createBuildableInstance');
+            if($Method->isAbstract()) {
+                Log::v2(__CLASS__, "Ignoring abstract method found in '{$Class->getName()}'");
+                continue;
+            }
+            $Buildable = $Method->invoke(null);
 
             if(!$Buildable) {
                 Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
@@ -365,4 +381,11 @@ class Build extends API implements IBuildable {
         return $exCount;
     }
 
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance() {
+        return new static();
+    }
 }

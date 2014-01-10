@@ -28,7 +28,7 @@ class PageThemeUtil {
      */
     public function renderSection($className=null, $content=null) {
         $this->mTheme->renderSectionStart($this->mRequest, $className);
-        echo RI::ni(), is_callable($content) ? call_user_func($content) : $content;
+        echo RI::ni(), !is_string($content) && is_callable($content) ? call_user_func($content) : $content;
         $this->mTheme->renderSectionEnd($this->mRequest);
     }
 }

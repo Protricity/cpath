@@ -1,20 +1,19 @@
 <?php
 namespace CPath\Handlers;
 
+use CPath\Actions\ActionManager;
+use CPath\Actions\IActionAggregate;
+use CPath\Actions\IActionManager;
 use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 
-abstract class View implements IView {
-
-    const FIELD_BASE = 'basePath';
-    const FIELD_TITLE = 'title';
-    const FIELD_SCRIPT_JQUERY = 'script_jQuery';
-
+abstract class View implements IView, IViewConfig {
     const TAB = '    ';
     const TAB_START = 0;
 
@@ -24,30 +23,62 @@ abstract class View implements IView {
 
     private $mHeadFields = array();
     private $mTheme, $mBasePath;
+    private $mManager = null;
 
     public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
         $this->mBasePath = Config::getDomainPath();
-        $this->setupHeadFields();
-
-        $Theme->setupView($this);
 
         RI::si(null, static::TAB);
     }
 
-    protected function setupHeadFields() {
+    /**
+     * Add additional actions to this view Manager
+     * @param IActionManager $Manager
+     * @return void
+     */
+    abstract protected function addActions(IActionManager $Manager);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract protected function setupHeadFields(IRequest $Request);
+
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHead(IRequest $Request) {
         $basePath = Base::getClassPublicPath(__CLASS__, false);
-        $this->addHeadHTML("<base href='{$this->mBasePath}' />", self::FIELD_BASE);
-        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', self::FIELD_SCRIPT_JQUERY);
-        $this->addHeadScript($basePath . 'assets/cpath.js');
+        $this->addHeadHTML("<base href='{$this->mBasePath}' />", true);
+        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
+        $this->addHeadScript($basePath . 'assets/cpath.js', true);
+
+        $this->setupHeadFields($Request);
+
+        $this->getActionManager()->addHeadElementsToView($this);
     }
 
     /**
-     * Add or replace head elements into another IView
-     * @param IView $View the view instance to copy into
-     * @return void
+     * Get the default Action Manager
+     *
      */
-    function mergeHeadElementsInto(IView $View) {
+    final public function getActionManager() {
+        if($this->mManager)
+            return $this->mManager;
+        $this->mManager = new ActionManager();
+        $this->addActions($this->mManager);
+        return $this->mManager;
+    }
+
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
         foreach($this->mHeadFields as $key => $html)
             $View->addHeadHTML($html, $key, true);
     }
@@ -67,6 +98,9 @@ abstract class View implements IView {
      * @return void
      */
     final function render(IRequest $Request) {
+        $this->setupHead($Request);
+        $this->getTheme()->addHeadElementsToView($this);
+
         $this->sendHeaders();
         $this->renderHtmlTagStart();
         RI::ai(1);
@@ -105,14 +139,11 @@ abstract class View implements IView {
     }
 
     function setTitle($title) {
-        $this->mHeadFields[self::FIELD_TITLE] = "<title>{$title}</title>";
+        $this->mHeadFields['title'] = "<title>{$title}</title>";
     }
 
-    function addHeadHTML($html, $key=null, $replace=false) {
-        if(!$key) {
-            $this->mHeadFields[crc32($html)] = $html;
-            return;
-        }
+    function addHeadHTML($html, $replace=false) {
+        $key = crc32($html);
         if(!isset($this->mHeadFields[$key])) {
             //if($replace)
             //    throw new \InvalidArgumentException("Key '{$key}' does not exist in header fields");
@@ -124,11 +155,11 @@ abstract class View implements IView {
         }
     }
 
-    function addHeadScript($src, $key=null, $replace=false) {
-        $this->addHeadHTML("<script src='{$src}'></script>", $key, $replace);
+    function addHeadScript($src, $replace=false) {
+        $this->addHeadHTML("<script src='{$src}'></script>", $replace);
     }
 
-    function addHeadStyleSheet($href, $key=null, $replace=false) {
-        $this->addHeadHTML("<link rel='stylesheet' href='{$href}' />", $key, $replace);
+    function addHeadStyleSheet($href, $replace=false) {
+        $this->addHeadHTML("<link rel='stylesheet' href='{$href}' />", $replace);
     }
 }

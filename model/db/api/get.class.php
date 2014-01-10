@@ -11,9 +11,9 @@ namespace CPath\Model\DB;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Model\DB\Interfaces\IAPIGetCallbacks;
 use CPath\Model\DB\Interfaces\IPDOModelRender;
 use CPath\Model\DB\Interfaces\IReadAccess;
@@ -36,7 +36,7 @@ class API_Get extends API_Base {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Get information about this " . $this->getModel()->modelName();

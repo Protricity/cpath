@@ -9,15 +9,15 @@ namespace CPath\Request;
 
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
-use CPath\Interfaces\IRoute;
+use CPath\Route\IRoute;
 use CPath\Interfaces\IShortOptions;
 use CPath\Log;
 use CPath\LogException;
 use CPath\Model\FileUpload;
-use CPath\Model\MissingRoute;
-use CPath\Router;
+use CPath\Route\MissingRoute;
+use CPath\Route\Router;
 
-class CLI extends AbstractBase implements ILogListener, IShortOptions {
+class CLI extends AbstractRequest implements ILogListener, IShortOptions {
 
     private
         $mShortRequests = array();
@@ -82,11 +82,14 @@ class CLI extends AbstractBase implements ILogListener, IShortOptions {
 
     /**
      * Attempt to find a Route
-     * @return IRoute the route instance found. MissingRoute is returned if no route was found
+     * @return \CPath\Route\IRoute the route instance found. MissingRoute is returned if no route was found
      */
     public function findRoute() {
         $routePath = $this->mMethod . ' ' . $this->mPath;
+        //$routePathAny = 'ANY ' . $this->mPath;
+        $args = array();
         $Route = Router::findRoute($routePath, $args)
+            //?: Router::findRoute($routePathAny, $args)
             ?: new MissingRoute($routePath);
         $this->mRoute = $Route;
         $this->mArgs = $args;

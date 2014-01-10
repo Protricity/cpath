@@ -16,20 +16,18 @@ use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\IValidation;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Api\Interfaces\ValidationExceptions;
+use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Views\APIView;
-use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Interfaces\IResponseAggregate;
-use CPath\Interfaces\IRoute;
-use CPath\Interfaces\IRouteBuilder;
+use CPath\Response\IResponseAggregate;
+use CPath\Response\IResponse;
 use CPath\Interfaces\IShortOptions;
 use CPath\Misc\SimpleLogger;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
-use CPath\Model\Route;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
+use CPath\Route\RoutableSet;
 use CPath\Util;
 
 /**
@@ -42,9 +40,9 @@ abstract class API implements IAPI {
 
     const BUILD_IGNORE = false;             // API Calls are built to provide routes
     const LOG_ENABLE = true;                // Enable API Logging
-    const ROUTE_API_VIEW = ':api';          // Add an APIView route entry i.e. ':api' for this API on GET requests
+    const ROUTE_API_VIEW_TOKEN = ':api';    // Add an APIView route entry i.e. ':api' for this API on GET requests
 
-    const ROUTE_METHODS = 'GET,POST,CLI';   // Default accepted methods are GET and POST
+    const ROUTE_METHOD = 'POST';            // Default accepted method is POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
     /** @var IField[] */
@@ -58,6 +56,17 @@ abstract class API implements IAPI {
 
     public function __construct() {
 
+    }
+
+    /**
+     * Provide head elements to any IView
+     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
+     * @param IView $View
+     */
+    function addHeadElementsToView(IView $View) {
+        $basePath = Base::getClassPublicPath(__CLASS__, false);
+        $View->addHeadScript($basePath . 'assets/api.js', true);
+        $View->addHeadStyleSheet($basePath . 'assets/api.css');
     }
 
     /**
@@ -163,7 +172,13 @@ abstract class API implements IAPI {
         $Response = null;
         //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
         //    $Response = $this->execute($Request);
-        $Render = new APIView($this, $Request->getRoute(), $Response);
+        //if($Request instanceof RoutableSetWrapper) {
+        //    $RoutableSet = $Request->getRoutableSet();
+         //   $Render = new APIMultiView($RoutableSet, $Response);
+        //} else {
+            $Route = $Request->getRoute();
+            $Render = new APIView($this, $Route, $Response);
+        //}
         $Render->render($Request);
         //$Response = $this->execute($Route);
         //$Response->sendHeaders();
@@ -412,7 +427,7 @@ abstract class API implements IAPI {
      * Render this API Call. The output format is based on the requested mimeType from the browser
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      */
-    public function render(IRequest $Request) {
+    function render(IRequest $Request) {
         foreach($Request->getMimeTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
@@ -432,31 +447,19 @@ abstract class API implements IAPI {
         $this->renderDefault($Request);
     }
 
-    /**
-     * Returns an array of all routes for this class
-     * @param IRouteBuilder $Builder the IRouteBuilder instance
-     * @return IRoute[]
-     */
-    public function getAllRoutes(IRouteBuilder $Builder) {
-        $path = static::ROUTE_PATH ?: $Builder->getHandlerDefaultPath($this);
-        $routes = $Builder->getHandlerDefaultRoutes($this, static::ROUTE_METHODS, $path);
-        if(static::ROUTE_API_VIEW) {
-            $token = static::ROUTE_API_VIEW;
-            $routes['GET ' . $token] = new Route('GET ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
-            $routes['POST ' . $token] = new Route('POST ' . $path . '/' . $token, get_class(new APIView()), get_called_class());
-            // TODO: wildcard methods
-        }
-        return $routes;
-    }
 
-    // Statics
 
     /**
-     * Return an instance of the class for building purposes
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     * Returns the default IHandlerSet collection for this API.
+     * @return RoutableSet a set of common routes for this API
      */
-    static function createBuildableInstance() {
-        return new static;
+    protected function loadDefaultRouteSet() {
+        $Routes = RoutableSet::fromHandler($this);
+        APIView::addRoutes($Routes, $this, static::ROUTE_API_VIEW_TOKEN);
+        $methods = explode(',', static::ROUTE_METHOD);
+        foreach($methods as $method)
+            $Routes[$method] = $this;
+        return $Routes;
     }
 }
 

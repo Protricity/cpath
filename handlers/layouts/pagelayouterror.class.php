@@ -5,7 +5,7 @@ use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Handlers\View;
-use CPath\Helpers\Describable;
+use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -16,13 +16,24 @@ abstract class PageLayoutError extends PageLayout {
         $this->mException = $Exception;
     }
 
+    /**
+     * Add additional <head> element fields for this View
+     * @param IRequest $Request
+     * @return void
+     */
+    abstract protected function addHeadFields(IRequest $Request);
+
     public function getException() {
         return $this->mException;
     }
 
-    protected function setupHeadFields() {
-        $this->addHeadHTML("<title>" . Describable::get($this->mException)->getTitle() . "</title>", self::FIELD_TITLE);
-        parent::setupHeadFields();
+    /**
+     * Set up <head> element fields for this View
+     * @param IRequest $Request
+     */
+    final protected function setupHeadFields(IRequest $Request) {
+        $this->setTitle(Describable::get($this->mException)->getTitle());
+        $this->addHeadFields($Request);
     }
 
     /**

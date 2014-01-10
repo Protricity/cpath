@@ -6,7 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api\Interfaces;
-use CPath\Interfaces\IDescribableAggregate;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 

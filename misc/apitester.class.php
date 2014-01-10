@@ -8,11 +8,10 @@
  */
 namespace CPath\Misc;
 use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IRequest;
-use CPath\Interfaces\IResponse;
-use CPath\Model\ExceptionResponse;
-use CPath\Model\Response;
+use CPath\Response\IResponse;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\Response;
 use CPath\Request\CLI;
 
 class NotAnApiException extends \Exception {}
@@ -29,7 +28,7 @@ class ApiTester {
 
     /**
      * @param array $request
-     * @return IResponse
+     * @return \CPath\Response\IResponse
      * @throws APIFailedException
      * @throws \Exception
      */
@@ -49,17 +48,17 @@ class ApiTester {
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLI::fromArgs($args, $request);
         $Route = $Cli->findRoute();
-        $Api = $Route->getHandler();
-        if($Api instanceof IHandlerSet)
-            $Api = $Api->get($Cli->getNextArg());
-        if(!($Api instanceof IAPI))
-            throw new NotAnApiException(get_class($Api) . " does not implement IAPI");
-        return new static($Api, $Cli);
+        $Handler = $Route->loadHandler();
+
+        if(!($Handler instanceof IAPI)) {
+            throw new NotAnApiException(get_class($Handler) . " does not implement IAPI");
+        }
+        return new static($Handler, $Cli);
     }
 
     /**
      * @param $_cmd
-     * @return IResponse
+     * @return \CPath\Response\IResponse
      */
     static function cmd($args, Array $request=NULL) {
         return self::fromCMD($args, $request)->test();

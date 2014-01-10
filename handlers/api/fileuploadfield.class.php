@@ -8,8 +8,8 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Helpers\Describable;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Model\FileUpload;

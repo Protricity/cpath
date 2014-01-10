@@ -14,7 +14,7 @@ use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Interfaces\IAPI;
-use CPath\Interfaces\IDescribable;
+use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Validate;
 
