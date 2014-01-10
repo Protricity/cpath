@@ -13,6 +13,9 @@ use CPath\Response\IResponse;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Route\IRoute;
+use CPath\Route\RoutableSet;
+use CPath\Route\RoutableSetWrapper;
+use CPath\Route\RouteUtil;
 
 class APIView extends AbstractAPIView {
 
@@ -81,5 +84,29 @@ class APIView extends AbstractAPIView {
      */
     protected function addActions(IActionManager $Manager) {
         // TODO: Implement addActions() method.
+    }
+
+    /**
+     * Render the navigation bar content
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    protected function renderNavBarContent(IRequest $Request) {
+        $RouteSet = $Request->getRoute();
+        if($RouteSet instanceof RoutableSet) {
+            $Util = new RouteUtil($RouteSet);
+            $Routes = $RouteSet->getRoutes();
+
+            $ids = $this->getRoutableSetIDs($RouteSet);
+            foreach($ids as $i=>$prefix) {
+                /** @var IRoute $Route */
+                $Route = $Routes[$prefix];
+                $Handler = $Route->loadHandler();
+                if(!$Handler instanceof IAPI)
+                    continue;
+                $Describable = Describable::get($Handler);
+                $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+            }
+        }
     }
 }

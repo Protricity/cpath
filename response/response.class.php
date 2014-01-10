@@ -8,13 +8,13 @@
 namespace CPath\Response;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
+use CPath\Compare\NotEqualException;
 use CPath\Describable\IDescribable;
 use CPath\Interfaces\ILogEntry;
-use CPath\Interfaces\NotEqualException;
 use CPath\Model\ArrayObject;
 
 class Response extends ArrayObject implements IResponse, IComparable, IDescribable {
-    private $mCode, $mData=array(), $mMessage;
+    private $mCode, $mData=array(), $mMessage, $mEnableLog = false;
     /** @var ILogEntry[] */
     private $mLogs=array();
 
@@ -76,11 +76,19 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
     }
 
     /**
+     * @param bool $enabled set to true to enable logging or false to disable
+     */
+    function setLogging($enabled) {
+        $this->mEnableLog = $enabled ? true : false;
+    }
+
+    /**
      * Add a log entry to the response
      * @param ILogEntry $Log
      */
     function addLogEntry(ILogEntry $Log) {
-        $this->mLogs[] = $Log;
+        if($this->mEnableLog)
+            $this->mLogs[] = $Log;
     }
 
     /**
@@ -127,7 +135,7 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
     /**
      * Compare two instances of this object
      * @param IComparable|Response $obj the object to compare against $this
-     * @param \CPath\Compare\IComparator $C the IComparator instance
+     * @param IComparator $C the IComparator instance
      * @throws NotEqualException if the objects were not equal
      * @return void
      */

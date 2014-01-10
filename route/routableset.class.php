@@ -119,16 +119,18 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
             $this->mUsedRoute = $Route = $Handler->loadRoute();
             if($Route instanceof RoutableSet) {
                 // TODO: refactor/ugly.
-                uasort($Route->mRoutes, function (IRoute $a, IRoute $b){
+                $this->mRoutes = $Route->mRoutes;
+                uasort($this->mRoutes, function (IRoute $a, IRoute $b){
                     $b = $b->getPrefix();
                     $a = $a->getPrefix();
                     return (substr_count($b, '/')-substr_count($a, '/'));
                 });
 
                 /** @var IRoute $SubRoute */
-                foreach($Route->mRoutes as $SubRoute) {
+                foreach($this->mRoutes as $SubRoute) {
                     if(!($SubRoute instanceof RoutableSet) // TODO: Fix hack
                         && $SubRoute->match($requestPath, $args2)) {
+                        $this->mPrefix = $SubRoute->getPrefix();
                         $this->mDestination = $SubRoute->getDestination();
                         $this->mHandlerInst = $SubRoute->loadHandler();
                         $args = $args2;
@@ -136,8 +138,16 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
                     }
                 }
 
+                if($this->hasDefault()) {
+                    $SubRoute = $this->getDefault();
+                    $this->mPrefix = $SubRoute->getPrefix();
+                    $this->mDestination = $SubRoute->getDestination();
+                    $this->mHandlerInst = $SubRoute->loadHandler();
+                    $args = $args2;
+                    return true;
+                }
                 Log::e(__CLASS__, "Sub route could not be found: " . $requestPath);
-                return false;
+                //return false;
             }
         }
 
@@ -161,6 +171,10 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
         $dest = is_object($dest) ? get_class($dest) : $dest;
         $args = array_merge(array($this->mPrefix, $dest), $this->mArgs);
         return $args;
+    }
+
+    function getRoutes() {
+        return $this->mRoutes;
     }
 
     function add($prefix, IHandler $Handler, $replace=false) {

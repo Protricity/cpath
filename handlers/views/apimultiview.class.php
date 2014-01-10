@@ -84,6 +84,29 @@ class APIMultiView extends AbstractAPIView {
             $this->mResponseBox->addHeadElementsToView($this);
     }
 
+
+    /**
+     * Render the navigation bar content
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    protected function renderNavBarContent(IRequest $Request) {
+        $Routes = $this->mRoutes;
+        $Route = $Request->getRoute();
+        $Util = new RouteUtil($Route);
+
+        $ids = $this->getRoutableSetIDs($Routes);
+        foreach($ids as $i=>$prefix) {
+            /** @var IRoute $Route */
+            $Route = $Routes[$prefix];
+            $Handler = $Route->loadHandler();
+            if(!$Handler instanceof IAPI)
+                continue;
+            $Describable = Describable::get($Handler);
+            $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+        }
+    }
+
     /**
      * Render the main view content
      * @param IRequest $Request the IRequest instance for this render

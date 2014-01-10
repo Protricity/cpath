@@ -117,8 +117,7 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
      * @param mixed|NULL $columns array or list (comma delimited) of columns to export
      * @return Array
      */
-    public function exportData($columns=NULL)
-    {
+    public function exportData($columns=NULL) {
         $export = array();
         foreach(static::findColumns($columns ?: static::EXPORT ?: PDOColumn::FLAG_EXPORT) as $column => $data)
             $export[$column] = $this->$column;

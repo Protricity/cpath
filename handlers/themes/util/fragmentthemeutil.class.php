@@ -44,6 +44,6 @@ class FragmentThemeUtil {
     }
 
     private function renderContent ($content) {
-        echo RI::ni(), is_callable($content) ? call_user_func($content) : ($content === null ? 'null' : $content);
+        echo RI::ni(), !is_string($content) && is_callable($content) ? call_user_func($content) : ($content === null ? 'null' : $content);
     }
 }

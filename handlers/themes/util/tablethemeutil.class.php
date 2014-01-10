@@ -66,7 +66,7 @@ class TableThemeUtil {
     }
 
     private function renderContent ($content) {
-        echo RI::ni(), is_callable($content) ? call_user_func($content) : ($content === null ? 'null' : $content);
+        echo RI::ni(), !is_string($content) && is_callable($content) ? call_user_func($content) : ($content === null ? 'null' : $content);
     }
 
     public function renderKeyPairsTable(Array $keyPairs, $keyTitle, $valueTitle, $captionText=null) {

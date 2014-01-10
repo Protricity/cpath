@@ -97,6 +97,16 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
             throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
 
         $columns = $Model::findColumns($search_by ?: $Model::SEARCH ?: PDOColumn::FLAG_SEARCH);
+
+        if(!is_int($search)) {
+            $columns2 = array();
+            foreach($columns as $name => $Column)
+                if(!$Column->isFlag(PDOColumn::FLAG_NUMERIC))
+                    $columns2[$name] = $Column;
+            if($columns2)
+                $columns = $columns2;
+        }
+
         if(!$columns)
             throw new \Exception("No SEARCH fields defined in ".$Model::modelName());
 

@@ -46,6 +46,9 @@ class APIFormFragment extends AbstractFormFragment{
 
         $RouteUtil = new RouteUtil($Route);
 
+        $method = $RouteUtil->getMethod();
+        if($method == 'ANY') // TODO: Is this a hack?
+            $method = 'GET';
         $num = 1;
         $path = $RouteUtil->buildPublicURL(true);
 
@@ -53,7 +56,7 @@ class APIFormFragment extends AbstractFormFragment{
 
         $Attr->addClass('api-form-fragment');
         $Attr->add('enctype', 'multipart/form-data');
-        $Attr->add('method', $RouteUtil->getMethod());
+        $Attr->add('method', $method);
         $Attr->add('action', $path);
 
         $Util->formOpen($Attr);
