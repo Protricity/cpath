@@ -187,7 +187,12 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
         if(function_exists('password_hash')) {
             $hash = password_hash($password, PASSWORD_DEFAULT);
         } else {
-            $salt = mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
+
+            if(!function_exists('mcrypt_create_iv')) {
+                $salt = uniqid(null, true);
+            } else {
+                $salt = \mcrypt_create_iv(22, MCRYPT_DEV_URANDOM);
+            }
             $salt = base64_encode($salt);
             $salt = str_replace('+', '.', $salt);
             $hash = crypt($password, '$2y$10$'.$salt.'$');
