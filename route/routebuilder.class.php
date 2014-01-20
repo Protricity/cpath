@@ -188,7 +188,8 @@ PHP;
         $routes = Router::getRoutes();
         /** @var \CPath\Route\IRoute $Route */
         foreach($routes as $Route)
-            apc_store(RouterAPC::PREFIX_ROUTE.$Route->getPrefix(), $Route);
+            if(true !== apc_store(RouterAPC::PREFIX_ROUTE.$Route->getPrefix(), $Route))
+                throw new BuildException("Router APC failed to store Route: " . $Route->getPrefix());
 
         Log::v(__CLASS__, "Stored (%s) into APC Cache", sizeof($routes));
     }

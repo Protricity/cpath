@@ -127,8 +127,9 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
                 });
 
                 /** @var IRoute $SubRoute */
-                foreach($this->mRoutes as $SubRoute) {
+                foreach($this->mRoutes as $short => $SubRoute) {
                     if(!($SubRoute instanceof RoutableSet) // TODO: Fix hack
+                        && $short != self::PREFIX_DEFAULT // TODO: Fix hack
                         && $SubRoute->match($requestPath, $args2)) {
                         $this->mPrefix = $SubRoute->getPrefix();
                         $this->mDestination = $SubRoute->getDestination();
