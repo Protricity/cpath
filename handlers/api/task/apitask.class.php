@@ -5,20 +5,20 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Handlers\Api\Action;
+namespace CPath\Handlers\Api\Tasks;
 
-use CPath\Actions\Action;
 use CPath\Base;
 use CPath\Describable\IDescribable;
+use CPath\Describable\IDescribableAggregate;
+use CPath\Framework\Task\ITask;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\API\Fragments\SimpleFormFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IRequest;
+use CPath\Interfaces\IViewConfig;
 
-
-
-abstract class APIAction extends Action {
+abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
     private $mAPI=null, $mUtil=null, $mTheme;
     function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme;
@@ -34,7 +34,7 @@ abstract class APIAction extends Action {
     }
 
     private function getUtil() {
-        return $this->mUtil ?: $this->mUtil = new SimpleFormFragment($this->getAPI(), $this->mTheme);
+        return $this->mUtil ?: $this->mUtil = new SimpleFormFragment($this->mTheme);
     }
 
     /**
@@ -43,7 +43,7 @@ abstract class APIAction extends Action {
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        parent::addHeadElementsToView($View);
+        //parent::addHeadElementsToView($View);
 
         $basePath = Base::getClassPublicPath($this, false);
         $View->addHeadStyleSheet($basePath . 'assets/apiactions.css', true);
@@ -77,35 +77,5 @@ abstract class APIAction extends Action {
     function renderFragmentContent(IRequest $Request) {
         $this->getUtil()->render($Request, 'api-action'); // TODO: serialize?
     }
-//
-//    // Static
-//
-//    static function getFromAPI(IAPI $API, ITheme $Theme=null) {
-//        return new APIActionAvailable($API, $Theme);
-//    }
+
 }
-//
-//class APIActionAvailable extends APIAction {
-//
-//    /**
-//     * Filter this action according to the present circumstances
-//     * @return bool true if this action is available. Return not true if this action is not available
-//     */
-//    function isAvailable() { return true; }
-//
-//    /**
-//     * Called when an exception occurred. This should capture exceptions that occur in ::execute and ::filter
-//     * @param IRequest $Request
-//     * @param \Exception $Ex
-//     * @return void
-//     */
-//    function onException(IRequest $Request, \Exception $Ex) {}
-//
-//    /**
-//     * Called when a request to store the action in persistent data has been made.
-//     * Warning: This method may perform storage of the action in rapid succession.
-//     * @param IRequest $Request
-//     * @return void
-//     */
-//    function onStore(IRequest $Request) {}
-//}

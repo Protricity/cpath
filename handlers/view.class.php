@@ -1,14 +1,10 @@
 <?php
 namespace CPath\Handlers;
 
-use CPath\Actions\ActionManager;
-use CPath\Actions\IActionAggregate;
-use CPath\Actions\IActionManager;
 use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
@@ -23,7 +19,6 @@ abstract class View implements IView, IViewConfig {
 
     private $mHeadFields = array();
     private $mTheme, $mBasePath;
-    private $mManager = null;
 
     public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
@@ -31,13 +26,6 @@ abstract class View implements IView, IViewConfig {
 
         RI::si(null, static::TAB);
     }
-
-    /**
-     * Add additional actions to this view Manager
-     * @param IActionManager $Manager
-     * @return void
-     */
-    abstract protected function addActions(IActionManager $Manager);
 
     /**
      * Set up <head> element fields for this View
@@ -58,19 +46,7 @@ abstract class View implements IView, IViewConfig {
 
         $this->setupHeadFields($Request);
 
-        $this->getActionManager()->addHeadElementsToView($this);
-    }
-
-    /**
-     * Get the default Action Manager
-     *
-     */
-    final public function getActionManager() {
-        if($this->mManager)
-            return $this->mManager;
-        $this->mManager = new ActionManager();
-        $this->addActions($this->mManager);
-        return $this->mManager;
+        //$this->getActionManager()->addHeadElementsToView($this);
     }
 
     /**

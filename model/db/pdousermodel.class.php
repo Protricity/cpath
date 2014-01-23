@@ -10,6 +10,7 @@ namespace CPath\Model\DB;
 
 use CPath\Actions\IActionAggregate;
 use CPath\Actions\IActionManager;
+use CPath\Framework\Task\ITaskCollection;
 use CPath\Interfaces\InvalidUserSessionException;
 use CPath\Interfaces\IUser;
 use CPath\Interfaces\IUserSession;
@@ -37,7 +38,7 @@ class PasswordsDoNotMatchException extends \Exception {
  * Provides additional user-specific functionality and API endpoints
  * @package CPath\Model\DB
  */
-abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IActionAggregate {
+abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
 
     // User-specific column
     /** (primary int) The User Account integer identifier */
@@ -169,8 +170,9 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser, IAction
     /**
      * Load all available actions from this object.
      */
-    function loadActions(IActionManager $Manager) {
-        $Manager->addAction(new Action_Login($this));
+    function loadDefaultTasks(ITaskCollection $Manager) {
+        parent::loadDefaultTasks($Manager);
+        $Manager->add(new Task_Login($this));
     }
 
     // Statics

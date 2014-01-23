@@ -3,6 +3,7 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
 use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
@@ -10,6 +11,13 @@ use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 
 class SimpleFormFragment extends AbstractFormFragment{
+
+    /**
+     * @param ITableTheme $Theme
+     */
+    public function __construct(ITableTheme $Theme = null) {
+        parent::__construct($Theme);
+    }
 
     /**
      * Render this API Form

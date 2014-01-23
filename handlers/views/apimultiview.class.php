@@ -9,7 +9,6 @@ use CPath\Handlers\API\Fragments\APIFormFragment;
 use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Interfaces\IViewConfig;

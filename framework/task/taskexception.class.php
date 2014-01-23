@@ -5,6 +5,6 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Actions;
+namespace CPath\Framework\Task;
 
-class ActionException extends \Exception {}
+class TaskException extends \Exception {}

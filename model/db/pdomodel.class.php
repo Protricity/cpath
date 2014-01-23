@@ -8,6 +8,7 @@
 namespace CPath\Model\DB;
 
 use CPath\Config;
+use CPath\Framework\Task\ITaskCollection;
 use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Handlers\Views\APIMultiView;
 use CPath\Interfaces\IArrayObject;
@@ -150,6 +151,13 @@ abstract class PDOModel implements IResponseAggregate, IGetDB, IJSON, IXML, IBui
 
         $Routes->setDefault($Routes['GET :api']);
         return $Routes;
+    }
+
+
+    /**
+     * Load all available actions from this object.
+     */
+    function loadDefaultTasks(ITaskCollection $Manager) {
     }
 
     /**

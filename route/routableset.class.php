@@ -6,7 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Compare\Comparator;
 use CPath\Interfaces\IBuildable;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
@@ -21,7 +20,7 @@ use Traversable;
  */
 class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
 
-    const PREFIX_DEFAULT = "#Default";
+    const PATH_DEFAULT = "#Default";
 
     private
         $mPrefix,
@@ -92,8 +91,8 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
      * @throws InvalidHandlerException
      */
     function match($requestPath, Array &$args=array()) {
+        list($method, $path) = explode(' ', $requestPath, 2);
         if(substr_compare($this->mPrefix, 'ANY', 0, 3, true) === 0) {
-            list(, $path) = explode(' ', $requestPath, 2);
             $prefix = substr($this->mPrefix, 4);
             if(strpos($path, $prefix) !== 0)
                 return false;
@@ -129,7 +128,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
                 /** @var IRoute $SubRoute */
                 foreach($this->mRoutes as $short => $SubRoute) {
                     if(!($SubRoute instanceof RoutableSet) // TODO: Fix hack
-                        && $short != self::PREFIX_DEFAULT // TODO: Fix hack
+                        && $short != self::PATH_DEFAULT // TODO: Fix hack
                         && $SubRoute->match($requestPath, $args2)) {
                         $this->mPrefix = $SubRoute->getPrefix();
                         $this->mDestination = $SubRoute->getDestination();
@@ -139,8 +138,8 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
                     }
                 }
 
-                if($this->hasDefault()) {
-                    $SubRoute = $this->getDefault();
+                if($this->hasDefault($method)) {
+                    $SubRoute = $this->getDefault($method);
                     $this->mPrefix = $SubRoute->getPrefix();
                     $this->mDestination = $SubRoute->getDestination();
                     $this->mHandlerInst = $SubRoute->loadHandler();
@@ -149,6 +148,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
                 }
                 Log::e(__CLASS__, "Sub route could not be found: " . $requestPath);
                 //return false;
+                throw new InvalidRouteException("Sub route could not be found: " . $requestPath);
             }
         }
 
@@ -206,12 +206,33 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
         $this->mRoutes[$prefix] = $Route;
     }
 
-    /** * @return IRoute */
-    function getDefault() { return $this->mRoutes[static::PREFIX_DEFAULT]; }
-    /** * @return bool */
-    function hasDefault() { return isset($this->mRoutes[static::PREFIX_DEFAULT]); }
-    //function setDefault(IHandler $Handler, $replace=false) { $this->add(static::PREFIX_DEFAULT, $Handler, $replace); }
-    function setDefault(IRoute $Route, $replace=false) { $this->addRoute(static::PREFIX_DEFAULT, $Route, $replace); }
+    /**
+     * Returns a default route for a prefix or a default route for all prefixes
+     * @param string $prefix the request method to used by default or ANY for all prefixes
+     * @return IRoute;
+     */
+    function getDefault($prefix='GET') {
+        $req = $prefix. ' ' . static::PATH_DEFAULT;
+        $aReq = 'ALL ' . static::PATH_DEFAULT;
+        return
+            isset($this->mRoutes[$req]) ? $this->mRoutes[$req] :
+            isset($this->mRoutes[$aReq]) ? $this->mRoutes[$aReq] :
+            $this->mRoutes[$req]; // Throw notice
+    }
+
+    /**
+     * Checks for the existance of a default route or default for all routes
+     * @param string $prefix the request method to used by default or ANY for all prefixes
+     * @return bool
+     */
+    function hasDefault($prefix='GET') {
+        return isset($this->mRoutes[$prefix. ' ' . static::PATH_DEFAULT])
+            || ($prefix === 'ALL' && $this->hasDefault('ALL'));
+    }
+
+    function setDefault(IRoute $Route, $prefix='GET', $replace=false) {
+        $this->addRoute($prefix. ' ' . static::PATH_DEFAULT, $Route, $replace);
+    }
 
     /**
      * Renders the route destination using an IRequest instance
