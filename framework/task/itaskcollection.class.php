@@ -7,7 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Task;
 
-interface ITaskCollection extends \IteratorAggregate {
+use CPath\Type\Collection\ICollection;
+
+interface ITaskCollection extends ICollection {
 
     /**
      * Add an ITask to the collection
@@ -17,38 +19,17 @@ interface ITaskCollection extends \IteratorAggregate {
     function add(ITask $Task);
 
     /**
-     * Return a list of tasks as filtered by filter* commands
-     * @param boolean $reset if true, the filters will be reset
-     * @return ITask[]
-     */
-    function getTasks($reset=true);
-
-    /**
      * Filter the task list by flags using AND logic
      * @param int $flags - flags to filter by
      * @return ITaskCollection return self
      */
-    function byFlags($flags);
+    function whereFlags($flags);
 
     /**
-     * Filter the task list by flags using AND logic
+     * Filter the task list by flags using OR logic
      * @param int $flags - flags to filter by
      * @return ITaskCollection return self
      */
-    function byAnyFlag($flags);
+    function whereAnyFlag($flags);
 
-    /**
-     * Filter the task list by class name
-     * @param String $className - class name to filter by
-     * @return ITaskCollection return self
-     */
-    function byClass($className);
-
-    /**
-     * Filter the task list by a callback
-     * @callback bool function(ITask $Task)
-     * @param Callable|\Closure $callback - callback to filter by. Return === true to keep a task in the collection
-     * @return ITaskCollection return self
-     */
-    function byCallback($callback);
 }

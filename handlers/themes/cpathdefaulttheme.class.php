@@ -13,8 +13,8 @@ use CPath\Describable\IDescribable;
 use CPath\Handlers\Util\Attr;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Model\DB\PDOSelect;
-use CPath\Model\DB\SearchResponse;
+use CPath\Framework\PDO\Query\PDOSelect;
+use CPath\Framework\PDO\Response\SearchResponse;
 
 
 class CPathDefaultTheme implements ITheme {

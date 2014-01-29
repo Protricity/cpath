@@ -1,0 +1,415 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 1/28/14
+ * Time: 11:46 AM
+ */
+namespace CPath\Framework\PDO\Table;
+
+use CPath\Config;
+use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Model\Query\PDOModelSelect;
+use CPath\Framework\PDO\Query\PDODelete;
+use CPath\Framework\PDO\Query\PDOInsert;
+use CPath\Framework\PDO\Query\PDOSelect;
+use CPath\Framework\PDO\Query\PDOUpdate;
+use CPath\Framework\PDO\Query\PDOWhere;
+use CPath\Handlers\Api\Interfaces\ValidationException;
+use CPath\Interfaces\IArrayObject;
+use CPath\Interfaces\IBuildable;
+use CPath\Log;
+
+abstract class PDOTable implements IPDOTable
+{
+
+    const MODEL_CLASS = null;
+    const TABLE = null;
+
+    const COLUMN_ID = NULL; // Identifier column used in such endpoints as GET, PATCH, DELETE. Defaults to ::COLUMN_PRIMARY or ::COLUMN_ID
+    const COLUMN_TITLE = NULL; // Title column used to describe a model instance. Defaults to ::COLUMN_ID
+
+    const SEARCH_LIMIT_MAX = 100;
+    const SEARCH_LIMIT = 25;
+    const SEARCH_WILDCARD = false; // true or false
+
+    // TODO: get rid of all these consts
+    const SEARCH = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const INSERT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const UPDATE = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const EXPORT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    const EXPORT_OBJECT = false; // Export as array by default.
+    //const EXPORT_SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+
+    // TODO: get rid of all these consts
+    const DEFAULT_FILTER = FILTER_SANITIZE_SPECIAL_CHARS;
+
+    // Auto generate short names for all fields (for use in CLI)
+    const AUTO_SHORTS = false;
+
+    // TODO: get rid of all these consts
+    const SECURITY_DISABLED = false;
+
+    const ROUTE_METHOD = null;
+
+    /**
+     * PDOTable Constructor parameters must be optional.
+     */
+    final function __construct()
+    {
+
+    }
+
+//
+//    /**
+//     * Returns the default IHandlerSet collection for this PDOModel type.
+//     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
+//     * @param bool $readOnly
+//     * @param bool $allowDelete
+//     * @return RoutableSet a set of common routes for this PDOModel type
+//     */
+//    function loadDefaultRouteSet($readOnly=true, $allowDelete=false) {
+//        $Routes = RoutableSet::fromHandler($this);
+//        $Routes['GET :api'] = new APIMultiView($Routes);
+//        $Routes['POST :api'] = new APIMultiView($Routes);
+//
+//        $Routes['GET search'] = new API_GetSearch($this);
+//        $Routes['GET browse'] = new API_GetBrowse($this);
+//        if(!$readOnly)
+//            $Routes['POST'] = new API_Post($this);
+//
+//        $Routes->setDefault($Routes['GET :api']);
+//        return $Routes;
+//    }
+
+    /**
+     * Returns the model class name
+     * @return string|PDOModel the model class name
+     */
+    public function getModelClass()
+    {
+        $class = static::MODEL_CLASS;
+        return $class;
+    }
+
+    /**
+     * Returns the model name from comment or the class name
+     * @return string the model name
+     */
+    public function getModelName()
+    {
+        $class = $this->getModelClass();
+        return $class::modelName();
+    }
+
+    /**
+     * Return information for a column
+     * @param String $name the name of the column
+     * @return PDOColumn
+     * @throws ColumnNotFoundException if the column was not found
+     */
+    final function loadColumn($name)
+    {
+        $cols = static::loadAllColumns();
+        if (!isset($cols[$name]))
+            throw new ColumnNotFoundException("Column '{$name}' could not be found in " . $this->getModelName());
+        return $cols[$name];
+    }
+
+    /**
+     * Returns an indexed array of column names for this object filtered by the tokens in constant EXPORT.
+     * @param $tokens String|Array|int the column list (comma delimited), array, token or filter to use, or NULL for all columns
+     * @return PDOColumn[] associative array of $columns and config data
+     * @throws \Exception if an invalid token was used
+     */
+    final function findColumns($tokens)
+    {
+        if (is_int($tokens)) {
+            $list = array();
+            foreach (static::loadAllColumns() as $col => $data)
+                if ($data->isFlag($tokens))
+                    $list[$col] = $data;
+            return $list;
+        }
+        if (!is_array($tokens)) {
+            if ($tokens[0] == ':') {
+                $tokens = explode(':', $tokens);
+                switch (strtolower($tokens[1])) {
+                    case ':none':
+                        return array();
+                    case ':index':
+                        return $this->findColumns(PDOColumn::FLAG_INDEX);
+                    case ':sindex':
+                        $list = array();
+                        foreach (static::loadAllColumns() as $col => $data)
+                            if ($data->isFlag(PDOColumn::FLAG_INDEX) && !$data->isFlag(PDOColumn::FLAG_NUMERIC))
+                                $list[$col] = $data;
+                        return $list;
+                    case ':primary':
+                        return $this->findColumns(PDOColumn::FLAG_PRIMARY);
+                    case ':exclude':
+                        if (empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
+                            return array();
+                        return array_diff_key(static::loadAllColumns(), array_flip($tokens));
+                    case ':include':
+                        if (empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
+                            return array();
+                        return array_intersect_key(static::loadAllColumns(), array_flip($tokens));
+                    default:
+                        throw new \Exception("Invalid Identifier: " . $tokens[1]);
+                }
+            }
+
+            if (!($tokens = explode(',', $tokens)))
+                return array();
+        }
+        $cols = static::loadAllColumns();
+        $ret = array();
+        foreach ($tokens as $token)
+            if (isset($cols[$token])) {
+                $ret[$token] = $cols[$token];
+            } else {
+                throw new \Exception("Column '{$token}' not found in " . $this->getModelName());
+            }
+        return $ret;
+        //return array_intersect_key($cols, array_flip($tokens));
+    }
+
+//
+//    /**
+//     * Validate a request of column values using compiled configuration
+//     * @param IRequest $Request the IRequest instance to validate
+//     * @throws ValidationException
+//     */
+//    static function validateRequest(IRequest $Request) {
+//        foreach($Request as $column=>$value)
+//            static::getColumn($column)
+//                ->validate($value);
+//    }
+
+    protected function insertRow(Array $row)
+    {
+        $this->insert(array_keys($row))
+            ->values(array_values($row));
+        Log::u(get_called_class(), "Created " . $this->getModelName());
+    }
+
+    /**
+     * Creates a new Model based on the provided row of column value pairs
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return void
+     * @throws ModelAlreadyExistsException
+     * @throws \Exception|\PDOException
+     * @throws ValidationException if a column fails to validate
+     */
+    final public function createFromArray($row)
+    {
+        if ($row instanceof IArrayObject)
+            $row = $row->getDataPath();
+
+        foreach (static::loadAllColumns() as $Column)
+            if ($Column->hasDefaultValue())
+                if (!isset($row[$Column->getName()]))
+                    $row[$Column->getName()] = $Column->getDefaultValue();
+
+        foreach ($row as $k => $v)
+            if ($v === null)
+                unset($row[$k]);
+        try {
+//            foreach($row as $column => $value) // No re-validation
+//                static::validateColumn($column, $value);
+            $this->insertRow($row);
+            return;
+        } catch (\PDOException $ex) {
+            if (stripos($ex->getMessage(), 'Duplicate') !== false) {
+                $err = "A Duplicate " . $this->getModelName() . " already exists";
+                if (Config::$Debug)
+                    $err .= ': ' . $ex->getMessage();
+                Log::u(get_called_class(), "Duplicate " . $this->getModelName() . " already exists");
+                throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
+            }
+            throw $ex;
+        }
+    }
+
+    /**
+     * Creates a new Model based on the provided row of column value pairs and returns a model instance
+     * Note: This model instance is NOT pulled from the database, but is instead filled with the row values.
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return PDOModel the new instance with filled values
+     * @throws ModelAlreadyExistsException
+     * @throws ValidationException if a column fails to validate
+     */
+    final public function createAndFill($row)
+    {
+        $this->createFromArray($row);
+        $Model = $this->getModelClass();
+        return $Model::unserialize($row);
+    }
+
+    /**
+     * Creates a new Model based on the provided row of column value pairs and returns a new instance
+     * @param array|mixed $row column value pairs to insert into new row
+     * @return PDOPrimaryKeyModel the created model instance
+     * @throws ModelAlreadyExistsException
+     * @throws ValidationException if a column fails to validate
+     */
+    final function createOrFill($row)
+    {
+        $Model = $this->search()
+            ->whereAll($row)
+            ->fetch();
+        if ($Model)
+            return $Model;
+        return $this->createAndFill($row);
+    }
+
+    // Database methods
+
+    /**
+     * Create a PDOModelSelect object for this table
+     * @param $_selectArgs array|mixed an array or series of varargs of columns to select
+     * @return PDOSelect
+     */
+    final function select($_selectArgs = NULL)
+    {
+        $args = func_num_args() > 1 ? func_get_args() : (Array)$_selectArgs;
+        return new PDOSelect(static::TABLE, static::getDB(), $args);
+    }
+
+    /**
+     * Applies a search to PDOSelect based on specified columns and values.
+     * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect instance to search in
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
+     * @param mixed $columns a string list (comma delimited) or array of columns to search for.
+     * Default is columns with PDOColumn::FLAG_SEARCH set
+     * @param int $limit the number of rows to return. Default is 1
+     * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
+     * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
+     * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
+     * @throws \Exception if no columns were found
+     */
+    final function selectByColumns($Select, $search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL)
+    {
+        if (!$Select instanceof PDOSelect)
+            $Select = $this->select($Select);
+
+        if (strcasecmp($logic, 'OR') === 0)
+            $Select->setFlag(PDOWhere::LOGIC_OR);
+
+        if (!is_array($search)) {
+
+            if ($columns instanceof IArrayObject)
+                $columns = $columns->getDataPath();
+            $columns = $this->findColumns($columns ? : PDOColumn::FLAG_SEARCH);
+            if (!$columns)
+                throw new \Exception("No SEARCH fields defined in " . $this->getModelName());
+            foreach ($columns as $name => $Column) {
+                if ($compare) $name .= " {$compare} ";
+                $Select->where($name, $search);
+            }
+
+        } else {
+            foreach ($search as $name => $value)
+                $Select->where($name, $value);
+        }
+
+        $Select->limit($limit);
+        return $Select;
+    }
+
+    /**
+     * Create a PDOInsert object for this table
+     * @param $_insertArgs array|mixed an array or series of varargs of columns to insert
+     * @return PDOInsert
+     */
+    final function insert($_insertArgs)
+    {
+        $DB = static::getDB();
+        $args = func_num_args() > 1 ? func_get_args() : array_keys($this->findColumns($_insertArgs));
+        return $DB->insert(static::TABLE, $args);
+    }
+
+    /**
+     * Create a PDOUpdate object for this table
+     * @param $_columnArgs array|mixed an array or series of varargs of columns to be updated
+     * @return \CPath\Framework\PDO\Query\PDOUpdate
+     */
+    final function update($_columnArgs)
+    {
+        $args = func_num_args() > 1 ? func_get_args() : array_keys($this->findColumns($_columnArgs));
+        return new PDOUpdate(static::TABLE, static::getDB(), $args);
+    }
+
+    /**
+     * Create a PDODelete object for this table
+     * @return PDODelete
+     */
+    final function delete()
+    {
+        return new PDODelete(static::TABLE, static::getDB());
+    }
+
+    /**
+     * Loads a model based on a search
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
+     * @param mixed $columns a string list (comma delimited) or array of columns to search for.
+     * Default is columns with PDOColumn::FLAG_SEARCH set
+     * @param boolean $throwIfNotFound if true, throws an exception if not found
+     * @param string $logic 'OR' or 'AND' logic between columns
+     * @return PDOModel the found model instance
+     * @throws ModelNotFoundException if a model entry was not found
+     */
+    final public function loadByColumns($search, $columns = NULL, $throwIfNotFound = true, $logic = 'OR')
+    {
+        $Model = $this->searchByColumns($search, $columns, 1, $logic)
+            ->fetch();
+        if (!$Model && $throwIfNotFound) {
+            throw new ModelNotFoundException($this->getModelName() . " '{$search}' was not found");
+        }
+        return $Model;
+    }
+
+    /**
+     * Creates a PDOModelSelect for searching models.
+     * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
+     */
+    final public function search()
+    {
+        return new PDOModelSelect(static::getDB(), $this);
+    }
+
+    /**
+     * Searches for Models based on specified columns and values.
+     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * Note: If an array is passed here, the $columns value is ignored.
+     * @param mixed $columns a string list (comma delimited) or array of columns to search for.
+     * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
+     * @param int $limit the number of rows to return. Default is 1
+     * @param string $logic 'OR' or 'AND' logic between columns. Default is 'OR'
+     * @param string|NULL $compare set WHERE logic for each column [=, >, LIKE, etc]. Default is '='
+     * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
+     * @throws \Exception if no columns were found
+     */
+    final public static function searchByColumns($search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL)
+    {
+        return static::selectByColumns(static::search(), $search, $columns, $limit, $logic, $compare);
+    }
+
+    /**
+     * Return an instance of the class for building purposes
+     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     */
+    static function createBuildableInstance()
+    {
+        $R = new \ReflectionClass(get_called_class());
+        if (!$R->isAbstract())
+            return new static;
+        return null;
+    }
+
+}

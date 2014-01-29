@@ -1,7 +1,6 @@
 <?php
 namespace CPath\Handlers\Views;
 
-use CPath\Actions\IActionManager;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Handlers\API\Fragments\APIDebugFormFragment;
@@ -75,15 +74,6 @@ class APIView extends AbstractAPIView {
      */
     protected function renderBodyFooterContent(IRequest $Request) {
         // TODO: Implement renderBodyFooterContent() method.
-    }
-
-    /**
-     * Add additional actions to this view Manager
-     * @param IActionManager $Manager
-     * @return void
-     */
-    protected function addActions(IActionManager $Manager) {
-        // TODO: Implement addActions() method.
     }
 
     /**

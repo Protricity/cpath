@@ -25,7 +25,7 @@ class APIViewRouteDELETE extends Route {
 
     /**
      * @param IAPI $API
-     * @return APIViewRoute
+     * @return APIViewRouteDELETE
      */
     static function fromAPI(IAPI $API) {
         $Route = static::fromHandler($API);

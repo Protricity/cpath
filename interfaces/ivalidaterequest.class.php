@@ -7,8 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-use CPath\Exceptions\ValidationException;
-
 interface IValidateRequest {
     /**
      * Validate and return an IRequest

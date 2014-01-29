@@ -7,11 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Builders\Installer;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Interfaces\IRequest;
 use CPath\Loaders\CPathLoader;
-use CPath\Misc\ConfigBuilder;
 use CPath\Request\CLI;
 use CPath\Request\Web;
 

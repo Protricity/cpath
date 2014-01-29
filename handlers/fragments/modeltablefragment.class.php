@@ -7,15 +7,15 @@ use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Describable\Describable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Model\DB\PDOModel;
+use CPath\Framework\PDO\Model\PDOModel;
 
 class ModelTableFragment implements IHandler{
 
     private $mModel, $mTemplate, $mTheme;
 
     /**
-     * @param PDOModel|Array $Model
-     * @param PDOModel $Template a PDOModel instance to use as a template
+     * @param \CPath\Framework\PDO\Model\PDOModel|Array $Model
+     * @param \CPath\Framework\PDO\Model\PDOModel $Template a PDOModel instance to use as a template
      * @param ITableTheme $Theme
      */
     public function __construct($Model, ITableTheme $Theme = null) {

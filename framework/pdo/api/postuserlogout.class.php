@@ -1,0 +1,83 @@
+<?php
+/**
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
+namespace CPath\Framework\PDO;
+
+
+use CPath\Base;
+use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Handlers\API;
+use CPath\Interfaces\IRequest;
+use CPath\Response\ExceptionResponse;
+use CPath\Response\IResponse;
+use CPath\Response\Response;
+
+interface IPostLogoutExecute {
+
+    /**
+     * Perform on successful API_Get execution
+     * @param PDOUserModel $User the logged out user account instance
+     * @param IRequest $Request
+     * @param \CPath\Response\IResponse $Response
+     * @return \CPath\Response\IResponse|null
+     */
+    function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
+}
+
+class API_PostUserLogout extends API_Base {
+    private $mUser, $mLoggedIn = false;
+
+    /**
+     * Construct an instance of this API
+     * @param PDOUserModel $User the user source object for this API
+     */
+    function __construct(PDOUserModel $User) {
+        if(!Base::isCLI() && $SessionUser = $User::loadBySession(false, false)) {
+            $User = $SessionUser;
+            $this->mLoggedIn = true;
+        }
+        $this->mUser = $User;
+        parent::__construct($this->mUser);
+    }
+
+    protected function setupFields() {
+        //$this->addField('password', new RequiredParam("Password"));
+        $this->generateFieldShorts();
+    }
+
+    /**
+     * Get the Object Description
+     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable() {
+        if($this->mLoggedIn)
+            return "Log out as " . $this->mUser;
+        return "Log out (Requires user session)";
+    }
+
+    /**
+     * Execute this API Endpoint with the entire request.
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
+     */
+    final protected function doExecute(IRequest $Request) {
+        $User = $this->mUser;
+        try {
+            if(!$User::logout())
+                return new Response("User was not logged in", false);
+            $Response = new Response("Logged out successfully", true);
+        } catch (SessionNotFoundException $ex) {
+            $Response = new ExceptionResponse($ex);
+        }
+
+        foreach($this->getHandlers() as $Handler)
+            if($Handler instanceof IPostLogoutExecute)
+                $Response = $Handler->onPostLogoutExecute($User, $Request, $Response) ?: $Response;
+
+        return $Response;
+    }
+}

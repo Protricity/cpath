@@ -7,7 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-use CPath\Exceptions\ValidationException;
+
+use CPath\Handlers\Api\Interfaces\ValidationException;
 
 interface IValidate {
     /**

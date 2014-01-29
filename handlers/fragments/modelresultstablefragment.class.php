@@ -11,9 +11,9 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Model\DB\PDOModel;
-use CPath\Model\DB\PDOSelectStats;
-use CPath\Model\DB\SearchResponse;
+use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\PDO\Query\PDOSelectStats;
+use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Request\Web;
 
 class ModelResultsTableFragment implements IHandler, IViewConfig{
@@ -41,7 +41,7 @@ class ModelResultsTableFragment implements IHandler, IViewConfig{
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
-     * @param SearchResponse $Response
+     * @param \CPath\Framework\PDO\Response\SearchResponse $Response
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */

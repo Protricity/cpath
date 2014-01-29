@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Interfaces\IRequest;
-use CPath\Model\DB\SearchResponse;
+use CPath\Framework\PDO\Response\SearchResponse;
 
 interface ISearchTheme {
 

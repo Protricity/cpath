@@ -1,7 +1,6 @@
 <?php
 namespace CPath\Handlers\Views;
 
-use CPath\Actions\IActionManager;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Handlers\API\Fragments\APIDebugFormFragment;
