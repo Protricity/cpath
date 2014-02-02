@@ -52,7 +52,7 @@ PHP;
         if (!$files)
             throw new UpgradeException("No Schemas found in " . $schemaFolder);
         $schemas = array();
-        foreach ($files as $i => $file) {
+        foreach ($files as $file) {
             if (in_array($file, array('.', '..')))
                 continue;
             if (!is_file($schemaFolder . '/' . $file))
@@ -107,23 +107,23 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @return \CPath\Framework\PDO\Builders\Models\BuildPDOTable[]
+     * @return \CPath\Framework\PDO\Builders\Tables\BuildPDOTable[]
      */
     protected abstract function getTables(\PDO $DB);
 
     /**
      * @param \PDO $DB
-     * @param \CPath\Framework\PDO\Builders\Models\BuildPDOTable $Table
+     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
      * @return void
      */
-    protected abstract function getColumns(\PDO $DB, Models\BuildPDOTable $Table);
+    protected abstract function getColumns(\PDO $DB, Tables\BuildPDOTable $Table);
 
     /**
      * @param \PDO $DB
-     * @param \CPath\Framework\PDO\Builders\Models\BuildPDOTable $Table
+     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
      * @return void
      */
-    protected abstract function getIndexes(\PDO $DB, Models\BuildPDOTable $Table);
+    protected abstract function getIndexes(\PDO $DB, Tables\BuildPDOTable $Table);
 
 
     protected abstract function getProcs(\PDO $DB);
@@ -131,7 +131,7 @@ PHP;
 
     public function createTable($name, $comment)
     {
-        $Table = new Models\BuildPDOTable($name, $comment);
+        $Table = new Tables\BuildPDOTable($name, $comment);
 
         if (!($DB = $this->mBuildDB))
             throw new \Exception("No DB Instance for table build");
@@ -145,17 +145,22 @@ PHP;
                 case 'u':
                 case 'user':
                     Log::v(__CLASS__, "Table identified as template 'User': " . $name);
-                    $Table = new Templates\BuildPDOUserTable($name, $comment);
+                    $Table = new Templates\User\BuildPDOUserTable($name, $comment);
                     break;
                 case 'us':
                 case 'usersession':
                     Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
-                    $Table = new Templates\BuildPDOUserSessionTable($name, $comment);
+                    $Table = new Templates\User\BuildPDOUserSessionTable($name, $comment);
+                    break;
+                case 'ur':
+                case 'userrole':
+                    Log::v(__CLASS__, "Table identified as template 'User Role': " . $name);
+                    $Table = new Templates\User\BuildPDOUserRoleTable($name, $comment);
                     break;
             }
         } elseif ($Table->Primary) {
             Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
-            $Table = new Models\BuildPDOPKTable($name, $comment);
+            $Table = new Tables\BuildPDOPKTable($name, $comment);
         } else {
             return $Table;
         }
@@ -238,7 +243,7 @@ PHP;
         Log::v(__CLASS__, "Found Tables (%s): " . implode(', ', $tableNames), count($tableNames));
 
         foreach ($tables as $Table) {
-            $Table->processArgs();
+            //$Table->processArgs();
 
             foreach ($Table->getColumns() as $Column) {
                 if ($Column->Flags & PDOColumn::FLAG_INDEX)
@@ -265,9 +270,9 @@ PHP;
 
             $PHPTable = new BuildPHPClass($Table->TableClassName);
             $PHPTable->Namespace = $tableNS;
-            $PHPTable->setExtend("CPath\\Model\\DB\\PDOTable");
+            //$PHPTable->setExtend("CPath\\Model\\DB\\PDOTable");
 
-            $Table->processModelPHP($PHPModel);
+            $Table->processPHP($PHPTable, $PHPModel);
 
             if (!$Table->Primary)
                 $noPrimary[] = $Table;
@@ -390,7 +395,7 @@ PHP;
 
         if ($noPrimary) {
             $t = array();
-            /** @var \CPath\Framework\PDO\Builders\Models\BuildPDOTable $Table */
+            /** @var \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table */
             foreach ($noPrimary as $Table)
                 $t[] = $Table->Name;
             Log::e(__CLASS__, "No PRIMARY key found for (" . count($noPrimary) . ") Table(s) '" . implode("', '", $t) . "'");

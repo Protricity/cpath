@@ -11,7 +11,7 @@ use CPath\Config;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Log;
 
-abstract class PDOPrimaryKeyModel extends PDOModel {
+abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyModel {
 
     private $mCommit = NULL;
 

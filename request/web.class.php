@@ -7,9 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Request;
 
-use CPath\Base;
 use CPath\Config;
-use CPath\Route\IRoute;
 use CPath\Log;
 use CPath\Model\FileRequestRoute;
 use CPath\Model\FileUpload;

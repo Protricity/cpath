@@ -9,7 +9,6 @@ namespace CPath\Handlers\Interfaces;
 
 
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
 
 interface IAttributes extends IHandler{
 

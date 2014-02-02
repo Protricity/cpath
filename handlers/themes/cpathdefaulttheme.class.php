@@ -2,19 +2,19 @@
 namespace CPath\Handlers\Themes;
 
 use CPath\Base;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
+use CPath\Framework\PDO\Query\PDOSelect;
+use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Describable\Describable;
-use CPath\Describable\IDescribable;
 use CPath\Handlers\Util\Attr;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Framework\PDO\Response\SearchResponse;
 
 
 class CPathDefaultTheme implements ITheme {

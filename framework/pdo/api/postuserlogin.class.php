@@ -9,13 +9,13 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
-use CPath\Framework\PDO\Templates\User\PDOUserTable;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
+use CPath\Framework\User\Session\ISessionManager;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredParam;
 use CPath\Interfaces\IRequest;
-use CPath\Framework\User\Session\ISessionManager;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 
@@ -37,7 +37,7 @@ class API_PostUserLogin extends API_Base {
 
     /**
      * Construct an instance of this API
-     * @param PDOUserTable $Table the PDOUserTable for this API
+     * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the PDOUserTable for this API
      */
     function __construct(PDOUserTable $Table) {
         parent::__construct($Table);

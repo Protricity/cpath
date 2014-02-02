@@ -11,8 +11,8 @@ use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
-use CPath\Response\IResponse;
 use CPath\Response\ExceptionResponse;
+use CPath\Response\IResponse;
 use CPath\Util;
 
 class APIResponseBoxFragment implements IViewConfig{

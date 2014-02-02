@@ -8,6 +8,7 @@
 namespace CPath\Framework\Task;
 
 use CPath\Type\Collection\AbstractCollection;
+use CPath\Type\Collection\IPredicate;
 
 class TaskList extends AbstractCollection {
 
@@ -26,31 +27,47 @@ class TaskList extends AbstractCollection {
      * @return TaskList return self
      */
     function byFlags($flags) {
-        return $this->where(function(ITask $Task) use ($flags) {
-            return $Task->processTaskState(ITask::EVENT_STATUS) & $flags ? true : false;
-        });
+        return $this->where(new TaskListHasAllFlagsPredicate($flags));
     }
 
     /**
-     * Filter the task list by flags using AND logic
+     * Filter the task list by flags using OR logic
      * @param int $flags - flags to filter by
      * @return TaskList return self
      */
     function byAnyFlag($flags) {
-        return $this->where(function(ITask $Task) use ($flags) {
-            return $Task->processTaskState(ITask::EVENT_STATUS) | $flags ? true : false;
-        });
+        return $this->where(new TaskListHasAnyFlagPredicate($flags));
     }
 
     /**
-     * Return a list of all items in the collection
-     * @return ITask[]
+     * Filter the item collection by an IPredicate
+     * @param IPredicate $Where
+     * @return TaskList return self
      */
-    function getAll() { return parent::getAll(); }
+    function where(IPredicate $Where) { return parent::where($Where); }
+}
 
-    /**
-     * Return a list of all items in the collection
-     * @return ITask[]
-     */
-    function getFiltered() { return parent::getFiltered(); }
+class TaskListHasAnyFlagPredicate implements IPredicate {
+    private $mFlags;
+    function __construct($flags) { $this->mFlags = $flags; }
+
+    function onPredicate($Object) {
+        if(!$Object instanceof ITask)
+            return false;
+
+        return $Object->processTaskState(ITask::EVENT_STATUS) | $this->mFlags ? true : false;
+    }
+}
+
+
+class TaskListHasAllFlagsPredicate implements IPredicate {
+    private $mFlags;
+    function __construct($flags) { $this->mFlags = $flags; }
+
+    function onPredicate($Object) {
+        if(!$Object instanceof ITask)
+            return false;
+
+        return $Object->processTaskState(ITask::EVENT_STATUS) & $this->mFlags ? true : false;
+    }
 }

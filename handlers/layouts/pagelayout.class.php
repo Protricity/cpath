@@ -4,7 +4,6 @@ namespace CPath\Handlers\Layouts;
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\View;
 use CPath\Interfaces\IRequest;
-use CPath\Misc\RenderIndents as RI;
 
 abstract class PageLayout extends View implements IRenderContent {
 

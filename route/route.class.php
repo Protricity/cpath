@@ -6,9 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Interfaces\IBuildable;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
+use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 
 /**

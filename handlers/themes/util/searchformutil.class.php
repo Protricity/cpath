@@ -8,15 +8,15 @@
 namespace CPath\Handlers\Themes\Util;
 
 use CPath\Base;
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
+use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Handlers\API\Fragments\APIDebugFormFragment;
 use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Describable\Describable;
-use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
-use CPath\Framework\PDO\Response\SearchResponse;
 
 class SearchFormUtil implements IDescribable, IViewConfig {
     private $mTheme, $mResponse, $mAPI, $mDescriptor, $mDescribable, $mForm, $mResponseBox;

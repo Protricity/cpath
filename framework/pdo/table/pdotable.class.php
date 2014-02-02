@@ -412,4 +412,9 @@ abstract class PDOTable implements IPDOTable
         return null;
     }
 
+    /**
+     * Return the full class name via get_called_class
+     * @return String the Class name
+     */
+    final static function cls() { return get_called_class(); }
 }

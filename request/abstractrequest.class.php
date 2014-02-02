@@ -10,7 +10,6 @@ namespace CPath\Request;
 use CPath\Config;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Route\IRoute;
 use CPath\LogException;
 use CPath\Model\ArrayObject;
 use CPath\Model\FileUpload;

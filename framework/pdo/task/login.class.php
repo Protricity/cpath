@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO;
 
 
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Task\ITask;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\API;

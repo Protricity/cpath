@@ -3,7 +3,6 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;

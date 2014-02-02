@@ -9,9 +9,11 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Base;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\IncorrectUsernameOrPasswordException;
-use CPath\Framework\User\Role\Common\AdminRole;
+use CPath\Framework\User\Predicates\IsAdmin;
+use CPath\Framework\User\Util\UserUtil;
 use CPath\Handlers\Api\Interfaces\APIException;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\API;
@@ -25,36 +27,37 @@ class API_PostUserPassword extends API_Base {
     const FIELD_OLD_PASSWORD = 'old_password';
     const FIELD_CONFIRM_PASSWORD = 'confirm_password';
 
-    private $mConfirm = false, $mLoggedIn = false, $mUser;
+    private $mConfirm = false, $mLoggedIn = false, $mTable, $mUser = null;
 
     /**
      * Construct an instance of this API
-     * @param PDOUserModel $User the user source object for this API
+     * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the user source object for this API
      */
-    function __construct(PDOUserModel $User) {
-        if(!Base::isCLI() && $SessionUser = $User::loadBySession(false, false)) {
-            $User = $SessionUser;
+    function __construct(PDOUserTable $Table) {
+        if(!Base::isCLI() && $SessionUser = $Table->loadBySession(false, false)) {
+            $Util = new UserUtil($SessionUser);
+            $this->mUser = $SessionUser;
             $this->mLoggedIn = true;
-            $this->mConfirm = !$SessionUser->hasRole(new AdminRole());
+            $this->mConfirm = !$Util->hasRole(new IsAdmin);
         }
-        $this->mUser = $User;
-        parent::__construct($this->mUser);
+        $this->mTable = $Table;
+        parent::__construct($this->mTable);
     }
 
     protected function setupFields() {
+        $T = $this->mTable;
         if(!$this->mLoggedIn)
             throw new APIException("User must be logged in to change password");
 
         /** @var PDOUserModel $User  */
-        $User = $this->mUser;
         $this->addField(self::FIELD_PASSWORD, new PasswordField("Password"));
         $THIS = $this;
-        if($User::PASSWORD_CONFIRM) {
+        if($T::PASSWORD_CONFIRM) {
             $this->addField(self::FIELD_CONFIRM_PASSWORD, new PasswordField("Confirm Password"));
-            $this->addValidation(new Validation(function(IRequest $Request) use ($User, $THIS) {
+            $this->addValidation(new Validation(function(IRequest $Request) use ($T, $THIS) {
                 $pass = $Request[$THIS::FIELD_PASSWORD];
                 $confirm = $Request->pluck($THIS::FIELD_CONFIRM_PASSWORD);
-                $User::confirmPassword($pass, $confirm);
+                $T->confirmPassword($pass, $confirm);
             }));
         }
 
@@ -82,7 +85,7 @@ class API_PostUserPassword extends API_Base {
      */
     function getDescribable() {
         if($this->mLoggedIn)
-            return "Change Account Password for " . $this->mUser;
+            return "Change Account Password for " . $this->mTable;
         return "Change Account Password (Requires user session)";
     }
 
@@ -92,9 +95,10 @@ class API_PostUserPassword extends API_Base {
      * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
-        $User = $this->mUser;
+        $T = $this->mTable;
         $pass = $Request[self::FIELD_PASSWORD];
-        $User->changePassword($pass);
-        return new Response("User password changed successfully", false, $User);
+        $SessionUser = $T->loadBySession(true, false);
+        $SessionUser->changePassword($pass);
+        return new Response("User password changed successfully", false, $SessionUser);
     }
 }

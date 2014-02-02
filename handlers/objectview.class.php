@@ -2,11 +2,9 @@
 namespace CPath\Handlers;
 
 use CPath\Config;
-use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Describable\Describable;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IRequest;
-use CPath\Misc\RenderIndents as RI;
 
 abstract class ObjectView extends View{
     const FIELD_TITLE = 'title';

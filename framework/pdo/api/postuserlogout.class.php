@@ -9,7 +9,9 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Base;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
+use CPath\Framework\User\Session\SessionNotFoundException;
 use CPath\Handlers\API;
 use CPath\Interfaces\IRequest;
 use CPath\Response\ExceptionResponse;
@@ -20,7 +22,7 @@ interface IPostLogoutExecute {
 
     /**
      * Perform on successful API_Get execution
-     * @param PDOUserModel $User the logged out user account instance
+     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User the logged out user account instance
      * @param IRequest $Request
      * @param \CPath\Response\IResponse $Response
      * @return \CPath\Response\IResponse|null
@@ -29,19 +31,18 @@ interface IPostLogoutExecute {
 }
 
 class API_PostUserLogout extends API_Base {
-    private $mUser, $mLoggedIn = false;
+    private $mTable, $mLoggedIn = false;
 
     /**
      * Construct an instance of this API
-     * @param PDOUserModel $User the user source object for this API
+     * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the user source object for this API
      */
-    function __construct(PDOUserModel $User) {
-        if(!Base::isCLI() && $SessionUser = $User::loadBySession(false, false)) {
-            $User = $SessionUser;
+    function __construct(PDOUserTable $Table) {
+        if(!Base::isCLI() && $SessionUser = $Table->loadBySession(false, false)) {
             $this->mLoggedIn = true;
         }
-        $this->mUser = $User;
-        parent::__construct($this->mUser);
+        $this->mTable = $Table;
+        parent::__construct($this->mTable);
     }
 
     protected function setupFields() {
@@ -55,7 +56,7 @@ class API_PostUserLogout extends API_Base {
      */
     function getDescribable() {
         if($this->mLoggedIn)
-            return "Log out as " . $this->mUser;
+            return "Log out as " . $this->mTable;
         return "Log out (Requires user session)";
     }
 
@@ -65,10 +66,10 @@ class API_PostUserLogout extends API_Base {
      * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
-        $User = $this->mUser;
+        $Session = $this->mTable->session()->loadBySession();
+        $User = $this->mTable->loadBySession(true, false);
         try {
-            if(!$User::logout())
-                return new Response("User was not logged in", false);
+            $Session->endSession();
             $Response = new Response("Logged out successfully", true);
         } catch (SessionNotFoundException $ex) {
             $Response = new ExceptionResponse($ex);

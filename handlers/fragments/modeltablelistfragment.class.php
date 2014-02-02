@@ -1,14 +1,11 @@
 <?php
 namespace CPath\Handlers\Fragments;
 
+use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
-use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Describable\Describable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Framework\PDO\Model\PDOModel;
-use CPath\Framework\PDO\Query\PDOSelect;
 
 class ModelTableListFragment implements IHandler{
 

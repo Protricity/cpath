@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
+use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Interfaces\IRequest;
-use CPath\Framework\PDO\Response\SearchResponse;
 
 interface ISearchTheme {
 

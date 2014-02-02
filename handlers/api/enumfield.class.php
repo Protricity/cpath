@@ -8,7 +8,6 @@
 namespace CPath\Handlers\Api;
 
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 

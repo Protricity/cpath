@@ -10,7 +10,6 @@ use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Compare\NotEqualException;
 use CPath\Response\IResponseCode;
-use CPath\Response\CodedException;
 
 /**
  * Class MissingRoute - a placeholder for missing routes

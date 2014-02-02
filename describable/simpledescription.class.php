@@ -9,7 +9,6 @@
 namespace CPath\Describable;
 
 use CPath\Helpers\Strings;
-use CPath\Describable\IDescribable;
 
 class SimpleDescription implements IDescribable {
     private $mTitle = null;

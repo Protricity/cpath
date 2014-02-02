@@ -13,7 +13,7 @@ use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\InvalidPermissionException;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Interfaces\IRequest;
 
 /**
@@ -27,7 +27,7 @@ class Policy_UserAccountViewer implements ISecurityPolicy {
 
     /**
      * Create a User Account security policy. This should only be used on PDOUserModels
-     * @param PDOUserModel $User an empty instance of the UserModel
+     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an empty instance of the UserModel
      * @param bool $readOtherUsers allow 'GET' and 'GET search' on other user accounts
      * @param bool $deleteOwn allow 'DELETE' on own user account
      */
@@ -72,7 +72,7 @@ class Policy_UserAccountViewer implements ISecurityPolicy {
 
     /**
      * Assert permission in default API calls 'POST, PATCH, and DELETE'
-     * @param PDOUserModel|PDOModel $User the User Model to assert access upon
+     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel|PDOModel $User the User Model to assert access upon
      * Note: during POST, $Model has no values
      * @param IRequest $Request
      * @param int $intent the read intent.
@@ -109,7 +109,7 @@ class Policy_UserAccountViewer implements ISecurityPolicy {
 
     /**
      * Return the user model instance
-     * @return PDOUserModel
+     * @return \CPath\Framework\PDO\Templates\User\Model\PDOUserModel
      */
     function getUserAccount() { return $this->mUser; }
 }

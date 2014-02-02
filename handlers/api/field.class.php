@@ -10,7 +10,6 @@ namespace CPath\Handlers\Api;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\RequiredFieldException;
 use CPath\Handlers\Api\Interfaces\ValidationException;
-use CPath\Describable\IDescribable;
 use CPath\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Validate;

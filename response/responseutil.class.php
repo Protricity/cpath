@@ -6,10 +6,10 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Response;
-use CPath\Util;
 use CPath\Base;
 use CPath\Config;
 use CPath\Log;
+use CPath\Util;
 
 final class ResponseUtil {
     private $mResponse;

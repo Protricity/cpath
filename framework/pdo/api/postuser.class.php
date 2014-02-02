@@ -12,15 +12,15 @@ use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAPIPostUserCallbacks;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Table\ModelAlreadyExistsException;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
-use CPath\Framework\PDO\Templates\User\PDOUserTable;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
+use CPath\Framework\User\IncorrectUsernameOrPasswordException;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Handlers\Api\Interfaces\InvalidAPIException;
 use CPath\Handlers\Api\PasswordField;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Validation;
-use CPath\Framework\User\IncorrectUsernameOrPasswordException;
 use CPath\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
@@ -32,7 +32,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
 
     /**
      * Construct an instance of the GET API
-     * @param PDOUserTable $Table the PDOTable for this API
+     * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the PDOTable for this API
      * PRIMARY key is already included
      */
     function __construct(PDOUserTable $Table) {
@@ -112,7 +112,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
      * @throws ModelAlreadyExistsException if the user already exists
      */
     final function onPostExecute(PDOModel $NewUser, IRequest $Request, IResponse $Response) {
-        /** @var PDOUserTable $T  */
+        /** @var \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $T  */
         $T = $this->getTable();
 
         $pass = $Request[$T::COLUMN_PASSWORD];

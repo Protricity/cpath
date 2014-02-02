@@ -7,8 +7,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
-use CPath\Framework\PDO\Builders\Models\BuildPDOColumn;
-use CPath\Framework\PDO\Builders\Models\BuildPDOTable;
+use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
+use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\DB\PGSQLDatabase;
 use CPath\Interfaces\IBuildable;
@@ -38,7 +38,7 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @return BuildPDOTable[]
+     * @return \CPath\Framework\PDO\Builders\Tables\BuildPDOTable[]
      */
     protected function getTables(\PDO $DB){
         $tables = array();
@@ -52,7 +52,7 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @param BuildPDOTable $Table
+     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
      * @return void
      */
     protected function getIndexes(\PDO $DB, BuildPDOTable $Table) {
@@ -68,7 +68,7 @@ group by column_name;") as $row ) {
 
     /**
      * @param \PDO $DB
-     * @param BuildPDOTable $Table
+     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
      * @return void
      */
     protected function getColumns(\PDO $DB, BuildPDOTable $Table) {

@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Table;
 
 use CPath\Framework\PDO\Columns\PDOColumn;
-use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Interfaces\IBuildable;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\IResponse;

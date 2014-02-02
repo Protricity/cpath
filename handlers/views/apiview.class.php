@@ -8,12 +8,11 @@ use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IRequest;
-use CPath\Response\IResponse;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
+use CPath\Response\IResponse;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
-use CPath\Route\RoutableSetWrapper;
 use CPath\Route\RouteUtil;
 
 class APIView extends AbstractAPIView {

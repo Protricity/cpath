@@ -7,14 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Scripts;
 use CPath\Base;
+use CPath\Describable\IDescribable;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Handlers\API\Interfaces\APIException;
 use CPath\Interfaces\IBuildable;
-use CPath\Describable\IDescribable;
-use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Response\IResponse;
 use CPath\Log;
 use CPath\Response\Response;
 

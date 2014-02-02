@@ -7,8 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Api;
 
-use CPath\Describable\IDescribable;
-
 /**
  * Class APIRquiredParam
  * @package CPath

@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
-use CPath\Constructable\IConstructable;
 use CPath\Compare\IComparable;
+use CPath\Constructable\IConstructable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Response\CodedException;

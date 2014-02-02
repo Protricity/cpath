@@ -1,9 +1,9 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
+use CPath\Describable\Describable;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Describable\Describable;
 use CPath\Interfaces\IRequest;
 
 abstract class NavBarErrorLayout extends NavBarLayout {

@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Session;
 
-use CPath\Framework\User\IUser;
+use CPath\Framework\User\Interfaces\IUser;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseAggregate;
@@ -17,7 +17,7 @@ interface ISessionManager {
     /**
      * Create a new Session for an IUser Instance
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
-     * @param IUser $User
+     * @param \CPath\Framework\User\Interfaces\IUser $User
      * @return ISession the new session
      */
     function createNewSession(IUser $User, $expireInSeconds=NULL);

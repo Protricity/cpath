@@ -7,12 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Describable\IDescribable;
 use CPath\Handlers\Api\Field;
 use CPath\Handlers\API;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
-use CPath\Describable\IDescribable;
-use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IRequest;
 use CPath\Response\Response;
 use CPath\Route\IRoutable;

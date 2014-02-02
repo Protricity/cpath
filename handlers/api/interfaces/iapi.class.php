@@ -12,7 +12,6 @@ use CPath\Describable\IDescribableAggregate;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\IRequest;
-use CPath\Route\IRoutable;
 use CPath\Interfaces\IViewConfig;
 use CPath\Model\MultiException;
 

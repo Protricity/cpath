@@ -10,12 +10,9 @@ namespace CPath\Framework\PDO;
 
 use CPath\Describable\IDescribable;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
-use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
-use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
-use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\Interfaces\IField;
 use CPath\Interfaces\IRequest;

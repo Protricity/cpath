@@ -2,6 +2,9 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Base;
+use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\PDO\Query\PDOSelectStats;
+use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -11,9 +14,6 @@ use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Framework\PDO\Model\PDOModel;
-use CPath\Framework\PDO\Query\PDOSelectStats;
-use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Request\Web;
 
 class ModelResultsTableFragment implements IHandler, IViewConfig{

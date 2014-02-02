@@ -8,7 +8,7 @@
 namespace CPath\Framework\User\Session;
 
 use CPath\Base;
-use CPath\Framework\User\IUser;
+use CPath\Framework\User\Interfaces\IUser;
 use CPath\Log;
 
 class SimpleSession implements ISessionManager {
@@ -60,7 +60,7 @@ class SimpleSession implements ISessionManager {
      * Create a new Session for an IUser Instance
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param IUser $User
-     * @return \CPath\Framework\User\ISessionManager the new session
+     * @return ISessionManager the new session
      */
     // TODO: allow required hardware id and kill session on mismatch
     function createNewSession(IUser $User, $expireInSeconds=NULL) {
@@ -107,4 +107,12 @@ class SimpleSession implements ISessionManager {
         }
         return $active;
     }
+
+    // Static
+
+    /**
+     * Return the full class name via get_called_class
+     * @return String the Class name
+     */
+    final static function cls() { return get_called_class(); }
 }

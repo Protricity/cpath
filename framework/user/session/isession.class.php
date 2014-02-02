@@ -7,10 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Session;
 
-use CPath\Response\ExceptionResponse;
-use CPath\Response\IResponse;
-use CPath\Response\IResponseAggregate;
-
 interface ISession {
 
     /**
@@ -20,10 +16,10 @@ interface ISession {
     function getUserID();
 
     /**
-     * Ent a user account
-     * @return boolean true if the session was destroyed
+     * End a user session
+     * @throws SessionNotFoundException if the session was not found
      */
-    function end();
+    function endSession();
 
 
 }

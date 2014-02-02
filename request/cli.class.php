@@ -9,11 +9,11 @@ namespace CPath\Request;
 
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
-use CPath\Route\IRoute;
 use CPath\Interfaces\IShortOptions;
 use CPath\Log;
 use CPath\LogException;
 use CPath\Model\FileUpload;
+use CPath\Route\IRoute;
 use CPath\Route\MissingRoute;
 use CPath\Route\Router;
 

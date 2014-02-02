@@ -7,7 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Task;
 
-interface ITask {
+use CPath\Serializer\ISerializable;
+use CPath\Type\Collection\ICollectionItem;
+
+interface ITask extends ICollectionItem, ISerializable {
 
     // Status
     const STATUS_ACTIVE         = 0x1;      // Task is in active state

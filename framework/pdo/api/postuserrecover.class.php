@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\PDO\Templates\User\PDOUserModel;
+use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Handlers\API;
 use CPath\Handlers\Api\RequiredField;
 use CPath\Interfaces\IRequest;

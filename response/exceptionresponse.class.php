@@ -12,7 +12,6 @@ use CPath\Interfaces\IHTML;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IText;
 use CPath\Interfaces\IXML;
-use CPath\Response\Response;
 use CPath\Util;
 
 

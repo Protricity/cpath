@@ -8,8 +8,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 use CPath\Builders\Tools\BuildCSharpClass;
-use CPath\Framework\PDO\Builders\Models\BuildPDOColumn;
-use CPath\Framework\PDO\Builders\Models\BuildPDOTable;
+use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
+use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
 use CPath\Framework\PDO\Columns\PDOColumn;
 
 class BuildCSharpTables {

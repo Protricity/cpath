@@ -10,7 +10,6 @@ namespace CPath;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
 use CPath\Interfaces\IRequest;
-use CPath\Route\IRoute;
 use CPath\Request\CLI;
 use CPath\Route\Router;
 

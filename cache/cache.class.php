@@ -7,10 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Cache;
 
-use CPath\Cache\APC;
-use CPath\Cache\File;
-use CPath\Cache\None;
-
 /**
  * Class Cache - Provides cache storage and retrieval
  * @package CPath
