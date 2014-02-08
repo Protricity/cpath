@@ -4,7 +4,7 @@ namespace CPath\Handlers\Layouts;
 use CPath\Describable\Describable;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class PageLayoutError extends PageLayout {
     private $mException;
@@ -15,7 +15,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Add additional <head> element fields for this View
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @return void
      */
     abstract protected function addHeadFields(IRequest $Request);
@@ -26,7 +26,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Set up <head> element fields for this View
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      */
     final protected function setupHeadFields(IRequest $Request) {
         $this->setTitle(Describable::get($this->mException)->getTitle());
@@ -35,7 +35,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Render the main view content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderViewContent(IRequest $Request)

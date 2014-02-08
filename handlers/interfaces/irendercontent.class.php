@@ -7,14 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Interfaces;
 
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IRenderContent {
 
     /**
      * Render the main view content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderViewContent(IRequest $Request);
+    function renderViewContent(\CPath\Framework\Request\Interfaces\IRequest $Request);
 }

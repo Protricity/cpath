@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\DB;
 use CPath\Framework\PDO\Query\PGSQLInsert;
+use CPath\Framework\PDO\Table\PDOTable;
 use PDO;
 
 abstract class PGSQLDatabase extends PDODatabase {
@@ -42,8 +43,8 @@ abstract class PGSQLDatabase extends PDODatabase {
         return $this;
     }
 
-    public function insert($tableName, $_fieldArgs) {
+    public function insert(PDOTable $Table, $_fieldArgs) {
         $args = is_array($_fieldArgs) ? $_fieldArgs : array_slice(func_get_args(), 1);
-        return new PGSQLInsert($tableName, $this, $args);
+        return new PGSQLInsert($Table, $this, $args);
     }
 }

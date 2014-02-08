@@ -4,7 +4,7 @@ namespace CPath\Handlers\Views;
 use CPath\Base;
 use CPath\Builders\RouteBuilder;
 use CPath\Config;
-use CPath\Handlers\Api\Interfaces\IAPI;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Handlers\InvalidRouteException;
 use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;

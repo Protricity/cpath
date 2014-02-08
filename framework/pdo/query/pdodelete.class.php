@@ -7,18 +7,21 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
+use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Log;
 use PDO;
 
 class PDODelete extends PDOWhere {
+
     /** @var \PDO */
     private $DB;
+
     /** @var \PDOStatement */
     private $stmt=NULL;
+
     private $limit=NULL;
-    public function __construct($table, \PDO $DB, $limit=NULL) {
-        parent::__construct($table);
-        $this->DB = $DB;
+    public function __construct(PDOTable $Table, $limit=NULL) {
+        parent::__construct($Table);
         $this->limit = $limit;
     }
 
@@ -39,7 +42,7 @@ class PDODelete extends PDOWhere {
     public function getSQL() {
         if(!$this->mWhere)
             throw new \Exception("method where() was not called");
-        $SQL = "DELETE FROM ".$this->mTable
+        $SQL = "DELETE FROM ".$this->getTable()
             .parent::getSQL()
             .($this->limit ? "\nLIMIT ".$this->limit : "");
 //        if(Config::$Debug)

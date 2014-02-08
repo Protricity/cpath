@@ -8,7 +8,7 @@
 namespace CPath\Handlers;
 
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class File implements IHandler{
     const BUILD_IGNORE = true;

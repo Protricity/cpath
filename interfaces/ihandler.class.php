@@ -8,10 +8,12 @@
 namespace CPath\Interfaces;
 
 
+use CPath\Framework\Request\Interfaces\IRequest;
+
 interface IHandler {
     /**
      * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
     function render(IRequest $Request);

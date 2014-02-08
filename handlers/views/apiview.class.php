@@ -3,11 +3,11 @@ namespace CPath\Handlers\Views;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Handlers\API\Fragments\APIDebugFormFragment;
 use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
-use CPath\Handlers\Api\Interfaces\IAPI;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Response\IResponse;
@@ -55,7 +55,7 @@ class APIView extends AbstractAPIView {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {

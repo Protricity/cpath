@@ -7,43 +7,37 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
-
-use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Task\AbstractTask;
 use CPath\Framework\Task\ITask;
-use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\Tasks\APITask;
-use CPath\Handlers\Themes\Interfaces\ITheme;
 
-class Task_Login extends APITask {
-    private $mUser;
-    function __construct(PDOUserModel $User, ITheme $Theme=null) {
-        parent::__construct($Theme);
-        $this->mUser = $User;
+class Task_Login extends AbstractTask {
+
+    private $mUserTable;
+    function __construct(IAPI $API) {
+        $this->mUserTable = $API;
     }
 
     /**
-     * @return IAPI
+     * Process the task status.
+     * Note: if ITask::STATUS_ACTIVE is not returned, the task will be flagged as inactive.
+     * @param int $eventFlags existing task flags
+     * @return int return new (or modified) flags
      */
-    protected function loadAPI() {
-        return new API_PostUserLogin($this->mUser);
+    protected function status($eventFlags) {
+        return $this
+            ->mUserTable
+            ->loadBySession(false, false)
+            ? 0
+            : ITask::STATUS_ACTIVE;
     }
 
-    function getUser() { return $this->mUser; }
-
     /**
-     * Return the task status flags.
-     * Note: if the flag for TASK_ACTIVE is not set, the task is generally seen as inactive or unavailable.
-     * @return int
+     * Start the task.
+     * @param int $eventFlags existing task flags
+     * @return int return new (or modified) flags
      */
-    function processTaskState()
-    {
-        $flags = 0;
-        $Model = $this->mUser;
-        if($User = $Model::loadBySession(false, false))
-            ;
-        else
-            $flags |= ITask::STATUS_ACTIVE;
-        return $flags;
+    protected function start($eventFlags) {
+        // TODO: Implement start() method.
     }
 }

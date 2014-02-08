@@ -8,15 +8,16 @@
 namespace CPath\Scripts;
 use CPath\Base;
 use CPath\Describable\IDescribable;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\API;
-use CPath\Handlers\API\Interfaces\APIException;
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Interfaces\APIException;
+use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
+use CPath\Response\IResponse;
 use CPath\Response\Response;
 
-class Install extends API {
+class Install extends AbstractAPI {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
     const ROUTE_METHOD = 'CLI';    // CLI only
@@ -29,7 +30,7 @@ class Install extends API {
      * @return void
      */
     protected function setupAPI() {
-        $this->addField('no-prompt:y', new Field("Use default values and skip prompts"));
+        $this->addField(new Field('no-prompt', "Use default values and skip prompts"), 'y');
     }
 
     public function isNoPrompt() { return $this->mNoPrompt; }
@@ -37,7 +38,7 @@ class Install extends API {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      * @throws APIException if no config file could be installed
      */
     protected function doExecute(IRequest $Request)

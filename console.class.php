@@ -9,8 +9,8 @@ namespace CPath;
 
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
-use CPath\Request\CLI;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Request\Types\CLI;
 use CPath\Route\Router;
 
 class Console implements IHandler { // Broke }, IBuildable {

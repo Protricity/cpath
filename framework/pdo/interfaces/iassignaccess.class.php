@@ -9,7 +9,7 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Table\InvalidPermissionException;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IAssignAccess {
 
@@ -23,5 +23,5 @@ interface IAssignAccess {
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */
-    function assignAccessID(IRequest $Request, $intent);
+    function assignAccessID(\CPath\Framework\Request\Interfaces\IRequest $Request, $intent);
 }

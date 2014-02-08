@@ -7,20 +7,32 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 
+use CPath\Framework\PDO\Table\PDOTable;
+
 abstract class PDOWhere {
     const LOGIC_OR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"
 
-    protected $mTable, $mAlias, $mLastAlias;
+    /** @var PDOTable */
+    private $mTable;
+
+    protected $mAlias, $mLastAlias;
     protected $mWhere=array(), $mValues=array(), $mChr=97;
     protected $mOrderBy, $mGroupBy;
     private $mLastCond = true;
     private $mJoins = array();
     protected $mFlags = 0;
 
-    public function __construct($table) {
-        $this->mTable = $table;
-        $this->mLastAlias = $this->mAlias = $this->getAlias($table);
+    /**
+     * Construct a new PDOWhere
+     * @param PDOTable $Table
+     */
+    public function __construct(PDOTable $Table) {
+        $this->mTable = $Table;
+        $this->mLastAlias = $this->mAlias = $this->getAlias($Table->getTableName());
     }
+
+    function getTable() { return $this->mTable; }
+    function getDB() { return $this->mTable->getDB(); }
 
     protected function getAlias($table) {
         if(($p = strpos($table, ' ')) !== false)

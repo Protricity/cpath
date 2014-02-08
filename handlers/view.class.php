@@ -5,7 +5,7 @@ use CPath\Base;
 use CPath\Config;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 

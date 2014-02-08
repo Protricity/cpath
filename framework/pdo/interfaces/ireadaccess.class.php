@@ -11,8 +11,7 @@ namespace CPath\Framework\PDO\Interfaces;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\InvalidPermissionException;
-use CPath\Framework\PDO\Table\PDOTable;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 
 interface IReadAccess {
@@ -34,10 +33,9 @@ interface IReadAccess {
     /**
      * Assert read permissions by Limiting API search queries endpoints such as GET, GET search, PATCH, and DELETE
      * @param PDOWhere $Select the query statement to limit.
-     * @param PDOTable $Table The table instance
      * @param IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
      * @return void
      */
-    function assertQueryReadAccess(PDOWhere $Select, PDOTable $Table, IRequest $Request, $intent);
+    function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent);
 }

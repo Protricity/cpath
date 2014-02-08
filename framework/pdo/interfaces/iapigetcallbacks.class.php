@@ -8,9 +8,9 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
+use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 
 interface IAPIGetCallbacks {

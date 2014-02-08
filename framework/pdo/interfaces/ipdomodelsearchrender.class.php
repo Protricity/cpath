@@ -9,7 +9,7 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Response\SearchResponse;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IPDOModelSearchRender {
 

@@ -7,11 +7,13 @@
  */
 namespace CPath\Framework\PDO\Builders\Templates\User;
 
-use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
-use CPath\Framework\PDO\Builders\Tables\AbstractBuildPDOPKTable;
 use CPath\Framework\PDO\Builders\Models\ArgumentNotFoundException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\AbstractBuildPDOPKTable;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
 use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Columns\Template\PDOSimpleColumnTemplate as SimpleColumn;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Session\SimpleSession;
@@ -31,10 +33,31 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
     protected static $mReceiptTables = array();
 
     /**
+     * Create a new BuildPDOUserSessionTable builder instance
+     * @param String $name the table name
+     * @param String $comment the table comment
+     * @param String|null $PDOTableClass the PDOTable class to use
+     * @param String|null $PDOModelClass the PDOModel class to use
+     */
+    public function __construct($name, $comment, $PDOTableClass=null, $PDOModelClass=null) {
+        parent::__construct($name, $comment,
+            $PDOTableClass ?: PDOUserTable::cls(),
+            $PDOModelClass ?: PDOUserModel::cls()
+        );
+        BuildPDOUserTable::addUserSessionTable($this);
+
+        $this->addColumnTemplate(new SimpleColumn('id'));
+        $this->addColumnTemplate(new SimpleColumn('user_name'));
+        $this->addColumnTemplate(new SimpleColumn('email'));
+        $this->addColumnTemplate(new SimpleColumn('password'));
+        $this->addColumnTemplate(new SimpleColumn('flags'));
+    }
+
+    /**
      * Process unrecognized table comment arguments
      * @param String $field the argument to process
      * @return void
-     * @throws ArgumentNotFoundException if the argument was not recognized
+     * @throws \InvalidArgumentException if the argument was not recognized
      */
     function processTableArg($field) {
         list($name, $arg) = array_pad(explode(':', $field, 2), 2, NULL);
@@ -64,18 +87,18 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
                 $this->Session_Class = $this->req($name, $arg);
                 break;
             default:
-                \CPath\Framework\PDO\Builders\Tables\parent::processTableArg($field);
+                throw new \InvalidArgumentException("User Argument not found: " . $field);
         }
     }
 
     /**
-     * Additional processing for PHP classes for a PDO Primary Key Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * Additional processing for PHP classes for a PDO Builder Template
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
+     * @throws \CPath\Exceptions\BuildException
      * @return void
      */
-    function processPKTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP) {
+    function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
         $TablePHP->setExtend(PDOUserTable::cls());
         $ModelPHP->setExtend(PDOUserModel::cls());
 

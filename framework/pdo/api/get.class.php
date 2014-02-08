@@ -8,19 +8,17 @@
 namespace CPath\Framework\PDO;
 
 
+use CPath\Framework\Api\Field\RequiredParam;
+use CPath\Framework\Api\Interfaces\InvalidAPIException;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
-use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 
 class API_Get extends API_Base {
@@ -78,7 +76,6 @@ class API_Get extends API_Base {
                 $fields = $Handler->prepareGetFields($fields) ?: $fields;
 
         $this->addFields($fields);
-        $this->generateFieldShorts();
     }
 
 
@@ -107,7 +104,7 @@ class API_Get extends API_Base {
             if($Handler instanceof IReadAccess)
                 $Handler->assertQueryReadAccess($Search, $T, $Request, IReadAccess::INTENT_GET);
 
-        /** @var PDOModel $GetModel  */
+        /** @var PDOPrimaryKeyModel $GetModel  */
         $GetModel = $Search->fetch();
         if(!$GetModel)
             throw new ModelNotFoundException($T->getModelName() . " '{$id}' was not found");
@@ -120,7 +117,7 @@ class API_Get extends API_Base {
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAPIGetCallbacks)
-                $Response = $Handler->onGetExecute($T, $Request, $Response) ?: $Response;
+                $Response = $Handler->onGetExecute($GetModel, $Request, $Response) ?: $Response;
 
         return $Response;
     }

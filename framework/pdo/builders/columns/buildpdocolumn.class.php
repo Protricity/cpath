@@ -7,8 +7,9 @@
  */
 namespace CPath\Framework\PDO\Builders\Columns;
 
-use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
 
 class BuildPDOColumn extends AbstractBuildPDOColumn
 {
@@ -22,10 +23,10 @@ class BuildPDOColumn extends AbstractBuildPDOColumn
 
     /**
      * Additional processing for PHP classes for a PDO Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
+     * @param BuildPHPTableClass $TablePHP
+     * @param BuildPHPModelClass $ModelPHP
      * @throws BuildException
      * @return void
      */
-    function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP) {}
+    function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP) {}
 }

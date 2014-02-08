@@ -7,18 +7,22 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Model\Helpers;
 
-use CPath\Builders\Tools\BuildPHPClass;
-use CPath\Exceptions\BuildException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
+use CPath\Framework\PDO\DB\PDODatabase;
 
 interface IPDOBuilder {
 
     /**
      * Process PHP classes for a PDO Builder
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * @param PDODatabase $DB
+     * @param BuildPDOTable $Table
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
+     * @throws \CPath\Exceptions\BuildException
      * @return void
      */
-    function processPHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP);
+    function processPHP(PDODatabase $DB, BuildPDOTable $Table, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel);
 }
 

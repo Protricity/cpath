@@ -4,7 +4,7 @@ namespace CPath\Handlers;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class ObjectView extends View{
     const FIELD_TITLE = 'title';

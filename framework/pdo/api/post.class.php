@@ -12,7 +12,7 @@ use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 

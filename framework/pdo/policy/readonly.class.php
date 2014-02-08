@@ -12,8 +12,7 @@ use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\InvalidPermissionException;
-use CPath\Handlers\API;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
  * Class Policy_Public implements a 'public' security policy that asserts no permissions

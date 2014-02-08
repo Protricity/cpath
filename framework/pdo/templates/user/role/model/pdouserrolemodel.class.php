@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Templates\User\Role\Model;
 
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Framework\PDO\Templates\User\Role\Table\PDOUserRoleTable;
 use CPath\Framework\User\Role\Interfaces\IRole;
 use CPath\Framework\User\Session\ISession;
 

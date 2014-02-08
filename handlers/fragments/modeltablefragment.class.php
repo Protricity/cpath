@@ -7,7 +7,7 @@ use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class ModelTableFragment implements IHandler{
 
@@ -36,7 +36,7 @@ class ModelTableFragment implements IHandler{
         if($Model instanceof PDOModel) {
             $caption = Describable::get($this->mTemplate)->getTitle();
             $data = $Model->exportData();
-            foreach($Model->loadAllColumns() as $name => $Column)
+            foreach($Model->table()->getColumns() as $name => $Column)
                 if(isset($data[$name]))
                     $export[$Column->getComment()] = $data[$name];
         } else {

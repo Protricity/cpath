@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface ITableTheme {
 
@@ -35,7 +35,7 @@ interface ITableTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $flags=0, IAttributes $Attr=null);
+    function renderTableRowStart(\CPath\Framework\Request\Interfaces\IRequest $Request, $flags=0, IAttributes $Attr=null);
 
     /**
      * Render the start of a table data element.
@@ -52,14 +52,14 @@ interface ITableTheme {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderTableDataEnd(IRequest $Request);
+    function renderTableDataEnd(\CPath\Framework\Request\Interfaces\IRequest $Request);
 
     /**
      * Render the end of a table row.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderTableRowEnd(IRequest $Request);
+    function renderTableRowEnd(\CPath\Framework\Request\Interfaces\IRequest $Request);
 
     /**
      * Render the end of a table.

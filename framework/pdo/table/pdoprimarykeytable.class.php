@@ -9,9 +9,9 @@ namespace CPath\Framework\PDO\Table;
 
 use CPath\Cache\Cache;
 use CPath\Config;
+use CPath\Framework\Api\Interfaces\ValidationException;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Log;
 
 abstract class PDOPrimaryKeyTable extends PDOTable {

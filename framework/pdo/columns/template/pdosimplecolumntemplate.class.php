@@ -7,19 +7,26 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Columns\Template;
 
-use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
 use CPath\Framework\PDO\Builders\Columns\ColumnArgumentNotFoundException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
+use CPath\Framework\PDO\Util\PDOStringUtil;
 
 class PDOSimpleColumnTemplate implements IPDOColumnTemplate {
 
-    private $mName, $mMatch, $mCode=null;
+    const PHP_GET = <<<'PHP'
+    function get%s() { $T = $this->table(); return $this->{$T::%s}; }
+PHP;
+
+    private $mName, $mMatch, $mCode=null, $mRequired=false;
 
     /** @var BuildPDOColumn[] */
     private $mColumns=array();
 
-    function __construct($name, $match=true) {
+    function __construct($name, $required=false, $match=true) {
+        $this->mRequired = $required;
         $this->mName = $name;
         $parts = explode('_', $name);
 
@@ -77,15 +84,22 @@ class PDOSimpleColumnTemplate implements IPDOColumnTemplate {
     function processColumnArg($arg) {}
 
     /**
-     * Final processing for PHP classes for this Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
+     * Additional processing for PHP classes for a PDO Builder Template
+     * @param BuildPHPTableClass $TablePHP
+     * @param BuildPHPModelClass $ModelPHP
      * @throws BuildException
      * @return void
      */
-    function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP) {
-        foreach($this->mColumns as $Column)
-            $Column->processTemplatePHP($TablePHP, $ModelPHP);
+    function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP) {
+        if($this->mRequired && sizeof($this->mColumns) === 0)
+            throw new BuildException("Template parameter required ({$TablePHP->Name}): " . $this->mName);
+
+        foreach($this->mColumns as $Column) {
+            $title = PDOStringUtil::toTitleCase($Column->Name);
+            $ModelPHP->addMethod('get'.$title, '', sprintf('$T = $this->table(); return $this->{$T::' . $title . '};', $title, 'COLUMN_'.strtoupper($title)));
+        }
+//        foreach($this->mColumns as $Column)
+//            $Column->processTemplatePHP($TablePHP, $ModelPHP);
     }
 
     /**

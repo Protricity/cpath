@@ -3,7 +3,7 @@ namespace CPath\Handlers\Layouts;
 
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\View;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class PageLayout extends View implements IRenderContent {
 
@@ -13,7 +13,7 @@ abstract class PageLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyHeaderContent(IRequest $Request);
@@ -21,7 +21,7 @@ abstract class PageLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyFooterContent(IRequest $Request);

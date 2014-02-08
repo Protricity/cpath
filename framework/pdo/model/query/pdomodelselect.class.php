@@ -19,23 +19,16 @@ use CPath\Framework\PDO\Table;
  * @package CPath\Framework\PDO
  */
 class PDOModelSelect extends PDOSelect {
-    private $mTable;
 
     /**
      * Create a new PDOModelSelect
-     * @param \PDO $DB the database instance
-     * @param \CPath\Framework\PDO\Table\PDOTable $Table A PDOTable instance to select with
+     * @param Table\PDOTable $Table A PDOTable instance to select with
      * @param ISelectDescriptor $Descriptor
+     * @internal param \PDO $DB the database instance
      */
-    public function __construct(\PDO $DB, Table\PDOTable $Table, ISelectDescriptor $Descriptor=null) {
-        $table = $Table::TABLE;
-        parent::__construct($table, $DB, array($table . '.*'), $Descriptor);
-        $this->mTable = $Table;
+    public function __construct(Table\PDOTable $Table, ISelectDescriptor $Descriptor=null) {
+        parent::__construct($Table, array($Table->getTableName() . '.*'), $Descriptor);
     }
-//
-//    public function select($field, $alias=NULL, $name=NULL) {
-//        throw new \BadFunctionCallException("select() is disabled for PDOModelSelect");
-//    }
 
     /**
      * Execute this query
@@ -43,7 +36,7 @@ class PDOModelSelect extends PDOSelect {
      */
     public function exec() {
         parent::exec();
-        $this->mStmt->setFetchMode(\PDO::FETCH_CLASS, $this->mTable->getModelClass());
+        $this->mStmt->setFetchMode(\PDO::FETCH_CLASS, $this->getTable()->getModelClass());
         return $this;
     }
 

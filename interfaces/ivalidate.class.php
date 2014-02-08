@@ -8,7 +8,7 @@
 namespace CPath\Interfaces;
 
 
-use CPath\Handlers\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Interfaces\ValidationException;
 
 interface IValidate {
     /**

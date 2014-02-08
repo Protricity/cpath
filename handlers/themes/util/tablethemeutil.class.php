@@ -10,7 +10,7 @@ namespace CPath\Handlers\Themes\Util;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\Attr;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 

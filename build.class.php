@@ -8,18 +8,18 @@
 namespace CPath;
 
 use CPath\Describable\IDescribable;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\API;
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\Response;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 use CPath\Route\Route;
 
-class Build extends API implements IRoutable {
+class Build extends AbstractAPI implements IRoutable {
 
     const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHOD = 'CLI';    // CLI only
@@ -34,14 +34,15 @@ class Build extends API implements IRoutable {
      * @return void
      */
     protected function setupAPI(){
-        $this->addField('v', new Field("Display verbose messages"));
-        $this->addField('s', new Field("Skip broken files"));
-        $this->generateFieldShorts();
+        $this->addField(new Field('v', "Display verbose messages"));
+        $this->addField( new Field('s', "Skip broken files"));
+        $this->addField(new Field('f', "Filter built files by wildcard *?"));
+        //$this->generateFieldShorts();
     }
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRoute instance for this render which contains the request and args
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRoute instance for this render which contains the request and args
      * @return Response the api call response with data, message, and status
      */
     final protected function doExecute(IRequest $Request) {
@@ -54,6 +55,8 @@ class Build extends API implements IRoutable {
             Log::setDefaultLevel(4);
         if(!empty($Request['s']))
             self::$mSkipBroken = true;
+        if(!empty($Request['f']))
+            self::$mFilter = $Request['f'];
 
         $Response = new Response(false, "Starting Build");
         $exCount = Build::build(true);
@@ -90,6 +93,7 @@ class Build extends API implements IRoutable {
     private static $mBuildConfig = NULL;
     private static $mForce = false;
     private static $mSkipBroken = false;
+    private static $mFilter = false;
     private static $mBrokenFiles = array();
 
     /**
@@ -339,6 +343,13 @@ class Build extends API implements IRoutable {
                 continue;
             //$name = substr($file, 0, strlen($file) - 10);
             //$class = $dirClass . '\\' . ucfirst($name);
+
+            if(self::$mFilter
+                && !fnmatch(self::$mFilter, $filePath, FNM_NOESCAPE)
+                && strpos($filePath, __DIR__) !== 0) {
+                Log::v2(__CLASS__, "Skipping filtered file (" . self::$mFilter . "): {$filePath}");
+                continue;
+            }
 
             if(self::$mBrokenFiles && in_array($filePath, self::$mBrokenFiles)) {
                 Log::v(__CLASS__, "Skipping broken file: {$filePath}");

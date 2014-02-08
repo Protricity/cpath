@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Util;
 
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class Attr implements IAttributes {
 
@@ -22,7 +22,7 @@ class Attr implements IAttributes {
 
     /**
      * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void|String always returns null
      */
     function render(IRequest $Request) {

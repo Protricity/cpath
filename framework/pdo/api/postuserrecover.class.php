@@ -9,10 +9,9 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Describable\IDescribable;
+use CPath\Framework\Api\Field\RequiredField;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\RequiredField;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 
 class API_PostUserRecover extends API_Base {

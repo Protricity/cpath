@@ -7,5 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 interface ILogListener {
-    function onLog(ILogEntry $log);
+    /**
+     * Add a log entry
+     * @param ILogEntry $Log
+     * @return void
+     */
+    function onLog(ILogEntry $Log);
 }

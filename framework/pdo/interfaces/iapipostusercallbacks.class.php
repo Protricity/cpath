@@ -8,10 +8,10 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
+use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Interfaces\InvalidAPIException;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 
 interface IAPIPostUserCallbacks {

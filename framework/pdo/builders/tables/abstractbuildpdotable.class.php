@@ -10,11 +10,14 @@ namespace CPath\Framework\PDO\Builders\Tables;
 use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
-use CPath\Framework\PDO\Columns\Template\IPDOColumnTemplate;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Columns\Template\IPDOColumnTemplate;
+use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Model\Helpers\IPDOBuilder;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Util\PDOStringUtil;
 
 class TableArgumentNotFoundException extends \Exception {
     public function __toString() {
@@ -48,12 +51,11 @@ abstract class AbstractBuildPDOTable implements IPDOBuilder
 
     /**
      * Additional processing for PHP classes for a PDO Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
      * @return void
      */
-    abstract function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP);
+    abstract function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel);
 
 
     /**
@@ -210,24 +212,122 @@ abstract class AbstractBuildPDOTable implements IPDOBuilder
 
     /**
      * Process PHP classes for a PDO Builder
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * @param PDODatabase $DB
+     * @param BuildPDOTable $Table
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
+     * @throws \CPath\Exceptions\BuildException
      * @return void
      */
-    function processPHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP) {
+    function processPHP(PDODatabase $DB, BuildPDOTable $Table, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
         //$this->processArgs();
 
         if ($this->mUnfound)
             throw new BuildException("Invalid Table Comment Token '" . implode('| ', $this->mUnfound) . "' in Table '{$this->Name}'");
 
-        $TablePHP->setExtend($this->mPDOTableClass);
-        $ModelPHP->setExtend($this->mPDOModelClass);
+
+        $PHPModel->addConst('MODEL_NAME', $Table->ModelName);
+        $PHPModel->addConst('TABLE_CLASS', $Table->TableClassName);
+
+
+        $PHPTable->setExtend($this->mPDOTableClass);
+        $PHPModel->setExtend($this->mPDOModelClass);
+
+        $this->processPHPTableConstructor($DB, $Table, $PHPTable);
+        $this->processPHPTableConstants($Table, $PHPTable);
+        $this->processPHPModelProperties($Table, $PHPModel);
+        $this->processPHPModelGetSet($Table, $PHPModel);
+
+        foreach($this->mColumns as $Column)
+            $Column->processTemplatePHP($PHPTable, $PHPModel);
 
         foreach($this->mColumnTemplates as $Template)
-            $Template->processTemplatePHP($TablePHP, $ModelPHP);
+            $Template->processTemplatePHP($PHPTable, $PHPModel);
     }
 
+    function processPHPTableConstructor(PDODatabase $DB, BuildPDOTable $Table, BuildPHPClass $PHPTable) {
+
+        $construct = 'parent::__construct(';
+
+        $i = 0;
+
+        foreach ($Table->getColumns() as $Column) {
+            //$cols[] = $Column->exportConstructor();
+            if ($i++) $construct .= ',';
+            $construct .= "\n\t\t\t" . $Column->exportConstructor();
+        }
+
+        $construct .= ');';
+
+        $PHPTable->addMethod('__construct', '', $construct);
+        $PHPTable->addUse('CPath\Framework\PDO\PDOColumn');
+
+        $PHPTable->addUse(get_class($DB), 'DB');
+        $PHPTable->addStaticMethod('getDB', '', " return DB::get(); ");
+
+//            foreach ($Table->getColumns() as $Column) {
+//                if ($i++) $construct .= ',';
+//                $construct .= "\n\t\t\tnew PDOColumn(";
+//                $construct .= var_export($Column->Name, true);
+//                $construct .= ',0x' . dechex($Column->Flags ? : 0);
+//
+//                if ($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
+//                    $construct .= ',' . ($Column->Filter ? : 0);
+//                if ($Column->Comment || $Column->Default || $Column->EnumValues)
+//                    $construct .= ',' . var_export($Column->Comment ? : '', true);
+//                if ($Column->Default || $Column->EnumValues)
+//                    $construct .= ',' . var_export($Column->Default ? : '', true);
+//                if ($Column->EnumValues) {
+//                    $a = '';
+//                    foreach ($Column->EnumValues as $e)
+//                        $a .= ($a ? ',' : '') . var_export($e, true);
+//                    $construct .= ',array(' . $a . ')';
+//                }
+//                $construct .= ")";
+//            }
+
+    }
+
+    function processPHPTableConstants(BuildPDOTable $Table, BuildPHPClass $PHPTable) {
+        $PHPTable->addConstCode();
+        $PHPTable->addConstCode("// Table Columns ");
+        foreach ($Table->getColumns() as $Column)
+            $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true), $Column->Name);
+
+        foreach ($Table->getColumns() as $Column)
+            if ($Column->EnumConstants) {
+                $PHPTable->addConstCode();
+                $PHPTable->addConstCode("// Column Enum Values for '" . $Column->Name . "'");
+                foreach ($Column->EnumValues as $enum)
+                    $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
+            }
+
+        $PHPTable->addConst('TABLE', $Table->Name);
+        $PHPTable->addConst('MODEL_CLASS', $Table->ModelClassName);
+        if ($Table->SearchWildCard)
+            $PHPTable->addConst('SEARCH_WILDCARD', true);
+        if ($Table->SearchLimit)
+            $PHPTable->addConst('SEARCH_LIMIT', $Table->SearchLimit);
+        if ($Table->SearchLimitMax)
+            $PHPTable->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
+        //if ($Table->AllowHandler)
+        //$PHPTable->addImplements('CPath\Interfaces\IBuildable');
+    }
+
+    function processPHPModelProperties(BuildPDOTable $Table, BuildPHPClass $PHPModel) {
+        foreach ($Table->getColumns() as $Column)
+            $PHPModel->addProperty($Column->Name);
+    }
+
+    function processPHPModelGetSet(BuildPDOTable $Table, BuildPHPClass $PHPModel) {
+        foreach ($Table->getColumns() as $Column) {
+            $ucName = PDOStringUtil::toTitleCase($Column->Name, true);
+            $PHPModel->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
+            if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $Table->Primary) // TODO: primary hack needs oop
+                $PHPModel->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
+            $PHPModel->addMethodCode();
+        }
+    }
 
     protected function req($name, $arg, $preg = NULL, $desc = NULL) {
         if (!$arg || ($preg && !preg_match($preg, $arg, $matches)))

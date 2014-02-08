@@ -7,8 +7,10 @@
  */
 namespace CPath\Framework\PDO\Builders\Columns;
 
-use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
+use CPath\Framework\Interfaces\Constructable\Constructable;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
 use CPath\Framework\PDO\Builders\Tables\TableArgumentNotFoundException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Columns\Template\IPDOColumnTemplate;
@@ -40,12 +42,12 @@ abstract class AbstractBuildPDOColumn
 
     /**
      * Additional processing for PHP classes for a PDO Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
+     * @param BuildPHPTableClass $TablePHP
+     * @param BuildPHPModelClass $ModelPHP
      * @throws BuildException
      * @return void
      */
-    abstract function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP);
+    abstract function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP);
 
     public function __construct($name, $comment) {
         $this->Name = $name;
@@ -152,6 +154,14 @@ abstract class AbstractBuildPDOColumn
             }
         }
         return '';
+    }
+
+    function buildColumn() {
+        return new PDOColumn($this->Name, $this->Flags, $this->Filter, $this->Comment, $this->Default, $this->EnumValues);
+    }
+
+    function exportConstructor() {
+        return Constructable::exportToPHPCode($this->buildColumn());
     }
 
     private function req($args, $preg = NULL, $desc = NULL)

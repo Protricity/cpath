@@ -7,9 +7,9 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace CPath\Misc;
-use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Interfaces\IRequest;
-use CPath\Request\CLI;
+use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Request\Types\CLI;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
@@ -57,7 +57,9 @@ class ApiTester {
     }
 
     /**
-     * @param $_cmd
+     * @param $args
+     * @param array $request
+     * @internal param $_cmd
      * @return \CPath\Response\IResponse
      */
     static function cmd($args, Array $request=NULL) {

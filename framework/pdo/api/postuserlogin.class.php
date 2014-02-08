@@ -9,13 +9,12 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Describable\IDescribable;
+use CPath\Framework\Api\Field\PasswordField;
+use CPath\Framework\Api\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Session\ISessionManager;
-use CPath\Handlers\Api\PasswordField;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 

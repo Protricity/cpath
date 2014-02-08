@@ -9,6 +9,7 @@ namespace CPath\Framework\PDO\Model;
 
 use CPath\Config;
 use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Serializer\ISerializable;
 use CPath\Util;
@@ -67,7 +68,7 @@ abstract class PDOModel implements IPDOModel {
     }
 
     /**
-     * @return \CPath\Response\IResponseAggregate
+     * @return IResponse
      */
     public function createResponse() {
         return new Response("Retrieved " . $this, true, $this);
@@ -80,7 +81,7 @@ abstract class PDOModel implements IPDOModel {
     function serialize()
     {
         $data = array();
-        foreach($this->table()->loadAllColumns() as $name => $Column)
+        foreach($this->table()->getColumns() as $name => $Column)
             $data[$name] = $this->$name;
         return $data;
     }

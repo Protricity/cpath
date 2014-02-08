@@ -6,7 +6,7 @@ use CPath\Describable\IDescribable;
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\View;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 abstract class NavBarLayout extends View implements IRenderContent {
@@ -30,7 +30,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyHeaderContent(IRequest $Request);
@@ -38,14 +38,14 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyFooterContent(IRequest $Request);
 
     /**
      * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderNavBarContent(IRequest $Request);
@@ -80,7 +80,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the view body
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
      * @return void
      */
     final function renderBody(IRequest $Request) {

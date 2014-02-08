@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Fragments;
 
 
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IRenderFragmentContent {
 

@@ -15,10 +15,11 @@ use CPath\Framework\PDO\Query\PDODelete;
 use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
+use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IDatabase;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
 use CPath\Route\IRoute;
 use CPath\Route\Route;
@@ -39,37 +40,41 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
 
 
     /**
-     * @param $tableName
+     * @param \CPath\Framework\PDO\Table\PDOTable $Table
      * @param $_selectArgs
+     * @param ISelectDescriptor $Descriptor
+     * @internal param $tableName
      * @return PDOSelect
      */
-    public function select($tableName, $_selectArgs, ISelectDescriptor $Descriptor=null) {
+    public function select(PDOTable $Table, $_selectArgs, ISelectDescriptor $Descriptor=null) {
         $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
-        $Select = new PDOSelect($tableName, $this, $args, $Descriptor);
+        $Select = new PDOSelect($Table, $this, $args, $Descriptor);
         if($Descriptor)
             $Select->setDescriptor($Descriptor);
         return $Select;
     }
 
     /**
-     * @param $tableName
+     * @param \CPath\Framework\PDO\Table\PDOTable $Table
      * @param $_fieldArgs
+     * @internal param $tableName
      * @return PDOInsert
      */
-    abstract public function insert($tableName, $_fieldArgs);
+    abstract public function insert(PDOTable $Table, $_fieldArgs);
 
     /**
-     * @param $tableName
+     * @param \CPath\Framework\PDO\Table\PDOTable $Table
      * @param $_selectArgs
+     * @internal param $tableName
      * @return PDOUpdate
      */
-    public function update($tableName, $_selectArgs) {
+    public function update(PDOTable $Table, $_selectArgs) {
         $args = is_array($_selectArgs) ? $_selectArgs : array_slice(func_get_args(), 1);
-        return new PDOUpdate($tableName, $this, $args);
+        return new PDOUpdate($Table, $args);
     }
 
-    public function delete($tableName) {
-        return new PDODelete($tableName, $this);
+    public function delete(PDOTable $Table) {
+        return new PDODelete($Table, $this);
     }
 
     public function __construct($prefix, $dsn, $username, $passwd, $options=NULL) {

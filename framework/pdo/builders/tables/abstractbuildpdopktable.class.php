@@ -7,8 +7,8 @@
  */
 namespace CPath\Framework\PDO\Builders\Tables;
 
-use CPath\Builders\Tools\BuildPHPClass;
-use CPath\Exceptions\BuildException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 
@@ -18,34 +18,27 @@ abstract class AbstractBuildPDOPKTable extends AbstractBuildPDOTable {
      * Create a new PDOPrimaryKeyTable builder instance
      * @param String $name the table name
      * @param String $comment the table comment
+     * @param String|null $PDOTableClass the PDOTable class to use
+     * @param String|null $PDOModelClass the PDOModel class to use
      */
-    public function __construct($name, $comment)
-    {
+    public function __construct($name, $comment, $PDOTableClass=null, $PDOModelClass=null) {
         parent::__construct($name, $comment,
-            PDOPrimaryKeyTable::cls(),
-            PDOPrimaryKeyModel::cls()
+            $PDOTableClass ?: PDOPrimaryKeyTable::cls(),
+            $PDOModelClass ?: PDOPrimaryKeyModel::cls()
         );
     }
 
     /**
-     * Additional processing for PHP classes for a PDO Primary Key Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * Process PHP classes for a PDO Builder
+     * @param PDODatabase $DB
+     * @param BuildPDOTable $Table
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
+     * @throws \CPath\Exceptions\BuildException
      * @return void
      */
-    abstract function processPKTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP);
-
-    /**
-     * Additional processing for PHP classes for a PDO Builder Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
-     * @return void
-     */
-    function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP)
-    {
-        $ModelPHP->setExtend(PDOPrimaryKeyModel::cls());
-        $TablePHP->setExtend(PDOPrimaryKeyTable::cls());
+    function processPHP(PDODatabase $DB, BuildPDOTable $Table, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
+        $PHPTable->addConst('PRIMARY', $Table->Primary);
+        parent::processPHP($DB, $Table, $PHPTable, $PHPModel);
     }
 }

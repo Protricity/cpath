@@ -8,7 +8,7 @@
 namespace CPath\Route;
 use CPath\Config;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
  * Class Route - a route entry
@@ -38,7 +38,7 @@ class RouteUtil implements IHandler{
 
     /**
      * Renders the route destination using an IRequest instance
-     * @param IRequest $Request the request to render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
      * @return void
      */
     function render(IRequest $Request) {

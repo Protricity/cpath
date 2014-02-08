@@ -11,11 +11,10 @@ namespace CPath\Framework\PDO;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\InvalidPermissionException;
-use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Util\UserUtil;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
  * Class Policy_AdminAccount implements an Admin-Only security policy
@@ -24,41 +23,41 @@ use CPath\Interfaces\IRequest;
 class Policy_AdminAccount extends Policy_UserAccountViewer {
 
     /** @var UserUtil  */
-    private $mUser;
+    private $mUserTable;
 
     /**
      * Create an 'admin only' security policy
      * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an instance of the current user session
      */
     public function __construct(PDOUserModel $User) {
-        $this->mUser = new UserUtil($User);
+        $this->mUserTable = new UserUtil($User);
     }
 
     /**
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
      * @param PDOModel $Model the User Model to assert access upon
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      * @return void
      */
     function assertReadAccess(PDOModel $Model, IRequest $Request, $intent) {
-        if(!$this->mUser->hasRole(new IsAdmin))
+        if(!$this->mUserTable->hasRole(new IsAdmin))
             throw new InvalidPermissionException("No permission to modify " . $Model);
     }
 
     /**
      * Assert read permissions by Limiting API search queries endpoints such as GET, GET search, PATCH, and DELETE
      * @param PDOWhere $Select the query statement to limit.
-     * @param PDOTable $Table The table instance
-     * @param IRequest $Request The api request to process and or validate validate
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
-     * @throws InvalidPermissionException
+     * @throws Table\InvalidPermissionException
+     * @internal param \CPath\Framework\PDO\Table\PDOTable $Table The table instance
      * @return void
      */
-    function assertQueryReadAccess(PDOWhere $Select, PDOTable $Table, IRequest $Request, $intent) {
-        if(!$this->mUser->hasRole(new IsAdmin))
+    function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {
+        if(!$this->mUserTable->hasRole(new IsAdmin))
             throw new InvalidPermissionException("No permission to query");
     }
 
@@ -73,7 +72,7 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
      * @throws InvalidPermissionException if the user account is not an Admin account
      */
     function assertWriteAccess(PDOModel $User, IRequest $Request, $intent) {
-        if(!$this->mUser->hasRole(new IsAdmin))
+        if(!$this->mUserTable->hasRole(new IsAdmin))
             throw new InvalidPermissionException("No permission to query");
     }
 
@@ -81,12 +80,12 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
      * Assign Access ID and assert permission in default POST API calls.
      * Typically this involves updating the $Request column (ex. user_id, owner_id) with the correct access identifier before the POST occurs.
      * Additionally, an InvalidPermissionException should be thrown if there is no permission to POST
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */
     function assignAccessID(IRequest $Request, $intent) {
-        if(!$this->mUser->hasRole(new IsAdmin))
+        if(!$this->mUserTable->hasRole(new IsAdmin))
             throw new InvalidPermissionException("No permission to query");
     }
 
@@ -94,5 +93,5 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
      * Return the user model instance
      * @return UserUtil
      */
-    function getUserAccount() { return $this->mUser; }
+    function getUserAccount() { return $this->mUserTable; }
 }

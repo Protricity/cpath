@@ -7,12 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Model\Query;
 
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
-use CPath\Handlers\Api\Interfaces\IAPI;
 
 class PDOModelSelectDescriptor implements ISelectDescriptor {
     private $mModel, $mAPI, $mQuery, $mStatsCache;

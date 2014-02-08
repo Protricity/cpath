@@ -7,19 +7,17 @@
  */
 namespace CPath\Framework\PDO\Builders\Tables;
 
-use CPath\Builders\Tools\BuildPHPClass;
-use CPath\Exceptions\BuildException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 
 class BuildPDOPKTable extends AbstractBuildPDOPKTable {
 
     /**
-     * Additional processing for PHP classes for a PDO Builder Primary Key Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
-     * @throws BuildException
+     * Additional processing for PHP classes for a PDO Builder Template
+     * @param BuildPHPTableClass $PHPTable
+     * @param BuildPHPModelClass $PHPModel
      * @return void
      */
-    function processPKTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP) {}
+    function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {}
 
     /**
      * Process unrecognized table comment arguments

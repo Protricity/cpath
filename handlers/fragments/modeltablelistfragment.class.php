@@ -5,7 +5,7 @@ use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class ModelTableListFragment implements IHandler{
 

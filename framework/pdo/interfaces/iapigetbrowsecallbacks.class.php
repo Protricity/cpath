@@ -9,7 +9,7 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IAPIGetBrowseCallbacks {
 

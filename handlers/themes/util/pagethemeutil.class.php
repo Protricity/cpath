@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Themes\Util;
 
 use CPath\Handlers\Themes\Interfaces\IPageTheme;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 

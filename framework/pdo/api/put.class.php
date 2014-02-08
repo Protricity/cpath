@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
+use CPath\Framework\Api\Interfaces\InvalidAPIException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
@@ -14,9 +15,9 @@ use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
+use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Table\PDOTable;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\Response;
 
 class API_Put extends API_Base {
@@ -41,7 +42,7 @@ class API_Put extends API_Base {
      * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
-        return "Create or update a ".$this->getTable()->modelName();
+        return "Create or update a ".$this->getTable()->getModelName();
     }
 
     /**
@@ -49,13 +50,11 @@ class API_Put extends API_Base {
      * @return void
      */
     final protected function setupFields() {
-        $Model = $this->getTable();
-
         $fields = array();
-        foreach($Model::findColumns($Model::INSERT ?: PDOColumn::FLAG_INSERT) as $Column)
+        foreach($this->getTable()->findColumns(PDOColumn::FLAG_INSERT) as $Column)
             $fields[$Column->getName()] = $Column->generateAPIField();
 
-        foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
+        foreach($this->getTable()->findColumns(PDOColumn::FLAG_UPDATE) as $Column)
             if(!isset($fields[$Column->getName()]))
                 $fields[$Column->getName()] = $Column->generateAPIField(false);
 
@@ -68,14 +67,14 @@ class API_Put extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render which contains the request and args
      * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
      * @throws InvalidAPIException if multiple duplicate rows were found
      */
     final protected function doExecute(IRequest $Request) {
-        $Model = $this->getTable();
+        $Table = $this->getTable();
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAssignAccess)
@@ -87,10 +86,10 @@ class API_Put extends API_Base {
                 $row = $Handler->preparePostInsert($row, $Request) ?: $row;
 
         try {
-            if($Model instanceof PDOPrimaryKeyModel) {
-                $NewModel = $Model::createAndLoad($row);
+            if($Table instanceof PDOPrimaryKeyTable) {
+                $NewModel = $Table->createAndLoad($row);
             } else {
-                $NewModel = $Model::createAndFill($row);
+                $NewModel = $Table->createAndFill($row);
             }
 
             $Response = new Response("Created " . $NewModel . " Successfully.", true, $NewModel);
@@ -100,7 +99,7 @@ class API_Put extends API_Base {
                     $Response = $Handler->onPostExecute($NewModel, $Request, $Response) ?: $Response;
         } catch (ModelAlreadyExistsException $ex) {
 
-            $Query = $Model::search();
+            $Query = $Table->search();
             foreach($this->mColumns as $columnName)
                 $Query->where($columnName, $row[$columnName]);
 
@@ -115,7 +114,7 @@ class API_Put extends API_Base {
                 if($Handler instanceof IWriteAccess)
                     $Handler->assertWriteAccess($FoundModel, $Request, IWriteAccess::INTENT_PATCH);
 
-            foreach($Model::findColumns($Model::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
+            foreach($Table->findColumns(PDOColumn::FLAG_UPDATE) as $Column)
                 if(isset($row[$Column->getName()]))
                     $FoundModel->updateColumn($Column->getName(), $row[$Column->getName()], false);
 

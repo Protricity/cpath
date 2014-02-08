@@ -18,15 +18,14 @@ use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Task_Login;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Task\ITaskCollection;
-use CPath\Framework\User\IncorrectUsernameOrPasswordException;
 use CPath\Framework\User\Interfaces\IUser;
-use CPath\Framework\User\PasswordsDoNotMatchException;
+use CPath\Framework\User\Role\Exceptions\AuthenticationException;
+use CPath\Framework\User\Role\Exceptions\PasswordMatchException;
 use CPath\Framework\User\Session\InvalidUserSessionException;
 use CPath\Framework\User\Session\ISessionManager;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Route\RoutableSet;
-
 
 /**
  * Class PDOUserTable
@@ -111,11 +110,11 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * Confirm two passwords match
      * @param $newPassword
      * @param $confirmPassword
-     * @throws PasswordsDoNotMatchException if passwords do not match
+     * @throws PasswordMatchException if passwords do not match
      */
     function confirmPassword($newPassword, $confirmPassword) {
         if(strcmp($newPassword, $confirmPassword) !== 0)
-            throw new PasswordsDoNotMatchException();
+            throw new PasswordMatchException();
     }
 
     /**
@@ -205,7 +204,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * @param String $password the password to log in with
      * @param int $expireInSeconds the amount of time in seconds before an account should expire or 0 for never
      * @param PDOUserModel $User the user instance loaded during login
-     * @throws IncorrectUsernameOrPasswordException
+     * @throws AuthenticationException
      * @return IResponse the login response
      */
     public function login($search, $password, $expireInSeconds=NULL, PDOUserModel &$User=NULL) {
@@ -216,7 +215,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
         ))->fetch();
 
         if(!$User)
-            throw new IncorrectUsernameOrPasswordException();
+            throw new AuthenticationException();
 
         $User->checkPassword($password);
         $Session = $this->session()->createNewSession($User, $expireInSeconds);

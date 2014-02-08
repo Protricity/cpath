@@ -8,6 +8,7 @@
 namespace CPath\Framework\PDO\Table;
 
 use CPath\Config;
+use CPath\Framework\Api\Interfaces\ValidationException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
@@ -17,7 +18,6 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Handlers\Api\Interfaces\ValidationException;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Log;
@@ -36,30 +36,37 @@ abstract class PDOTable implements IPDOTable
     const SEARCH_WILDCARD = false; // true or false
 
     // TODO: get rid of all these consts
-    const SEARCH = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const INSERT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const UPDATE = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const EXPORT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    const EXPORT_OBJECT = false; // Export as array by default.
+    //const SEARCH = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    //const INSERT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    //const UPDATE = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+    //const EXPORT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
+
+    const EXPORT_AS_OBJECT = false; // Export as array by default.
+
     //const EXPORT_SEARCH = NULL;    // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
     // TODO: get rid of all these consts
     const DEFAULT_FILTER = FILTER_SANITIZE_SPECIAL_CHARS;
 
     // Auto generate short names for all fields (for use in CLI)
-    const AUTO_SHORTS = false;
+    //const AUTO_SHORTS = false;
 
     // TODO: get rid of all these consts
     const SECURITY_DISABLED = false;
 
     const ROUTE_METHOD = null;
 
-    /**
-     * PDOTable Constructor parameters must be optional.
-     */
-    final function __construct()
-    {
+    /** @var PDOColumn[] */
+    private $mColumns = array();
 
+    /**
+     * Note: PDOTable Constructor parameters must be optional.
+     */
+    protected function __construct($_cols=null) {
+        /** @var PDOColumn $Column */
+        foreach(func_get_args() as $Column) {
+            $this->mColumns[$Column->getName()] = $Column;
+        }
     }
 
 //
@@ -85,21 +92,26 @@ abstract class PDOTable implements IPDOTable
 //    }
 
     /**
+     * Returns the table name
+     * @return string the model class name
+     */
+    public function getTableName() {
+        return static::TABLE;
+    }
+
+    /**
      * Returns the model class name
      * @return string|PDOModel the model class name
      */
-    public function getModelClass()
-    {
-        $class = static::MODEL_CLASS;
-        return $class;
+    public function getModelClass() {
+        return static::MODEL_CLASS;
     }
 
     /**
      * Returns the model name from comment or the class name
      * @return string the model name
      */
-    public function getModelName()
-    {
+    public function getModelName() {
         $class = $this->getModelClass();
         return $class::modelName();
     }
@@ -110,12 +122,18 @@ abstract class PDOTable implements IPDOTable
      * @return PDOColumn
      * @throws ColumnNotFoundException if the column was not found
      */
-    final function loadColumn($name)
-    {
-        $cols = static::loadAllColumns();
-        if (!isset($cols[$name]))
+    final function getColumn($name) {
+        if (!isset($this->mColumns[$name]))
             throw new ColumnNotFoundException("Column '{$name}' could not be found in " . $this->getModelName());
-        return $cols[$name];
+        return $this->mColumns[$name];
+    }
+
+    /**
+     * Return all table columns
+     * @return PDOColumn[]
+     */
+    final function getColumns() {
+        return $this->mColumns;
     }
 
     /**
@@ -124,11 +142,10 @@ abstract class PDOTable implements IPDOTable
      * @return PDOColumn[] associative array of $columns and config data
      * @throws \Exception if an invalid token was used
      */
-    final function findColumns($tokens)
-    {
+    final function findColumns($tokens) {
         if (is_int($tokens)) {
             $list = array();
-            foreach (static::loadAllColumns() as $col => $data)
+            foreach ($this->mColumns as $col => $data)
                 if ($data->isFlag($tokens))
                     $list[$col] = $data;
             return $list;
@@ -143,7 +160,7 @@ abstract class PDOTable implements IPDOTable
                         return $this->findColumns(PDOColumn::FLAG_INDEX);
                     case ':sindex':
                         $list = array();
-                        foreach (static::loadAllColumns() as $col => $data)
+                        foreach ($this->mColumns as $col => $data)
                             if ($data->isFlag(PDOColumn::FLAG_INDEX) && !$data->isFlag(PDOColumn::FLAG_NUMERIC))
                                 $list[$col] = $data;
                         return $list;
@@ -152,11 +169,11 @@ abstract class PDOTable implements IPDOTable
                     case ':exclude':
                         if (empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
                             return array();
-                        return array_diff_key(static::loadAllColumns(), array_flip($tokens));
+                        return array_diff_key($this->mColumns, array_flip($tokens));
                     case ':include':
                         if (empty($tokens[2]) || !($tokens = explode(',', $tokens[2])))
                             return array();
-                        return array_intersect_key(static::loadAllColumns(), array_flip($tokens));
+                        return array_intersect_key($this->mColumns, array_flip($tokens));
                     default:
                         throw new \Exception("Invalid Identifier: " . $tokens[1]);
                 }
@@ -165,7 +182,7 @@ abstract class PDOTable implements IPDOTable
             if (!($tokens = explode(',', $tokens)))
                 return array();
         }
-        $cols = static::loadAllColumns();
+        $cols = $this->mColumns;
         $ret = array();
         foreach ($tokens as $token)
             if (isset($cols[$token])) {
@@ -209,7 +226,7 @@ abstract class PDOTable implements IPDOTable
         if ($row instanceof IArrayObject)
             $row = $row->getDataPath();
 
-        foreach (static::loadAllColumns() as $Column)
+        foreach ($this->mColumns as $Column)
             if ($Column->hasDefaultValue())
                 if (!isset($row[$Column->getName()]))
                     $row[$Column->getName()] = $Column->getDefaultValue();
@@ -273,10 +290,9 @@ abstract class PDOTable implements IPDOTable
      * @param $_selectArgs array|mixed an array or series of varargs of columns to select
      * @return PDOSelect
      */
-    final function select($_selectArgs = NULL)
-    {
+    final function select($_selectArgs = NULL) {
         $args = func_num_args() > 1 ? func_get_args() : (Array)$_selectArgs;
-        return new PDOSelect(static::TABLE, static::getDB(), $args);
+        return new PDOSelect($this, $args);
     }
 
     /**
@@ -292,8 +308,7 @@ abstract class PDOTable implements IPDOTable
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if no columns were found
      */
-    final function selectByColumns($Select, $search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL)
-    {
+    final function selectByColumns($Select, $search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL) {
         if (!$Select instanceof PDOSelect)
             $Select = $this->select($Select);
 
@@ -326,11 +341,10 @@ abstract class PDOTable implements IPDOTable
      * @param $_insertArgs array|mixed an array or series of varargs of columns to insert
      * @return PDOInsert
      */
-    final function insert($_insertArgs)
-    {
+    final function insert($_insertArgs) {
         $DB = static::getDB();
         $args = func_num_args() > 1 ? func_get_args() : array_keys($this->findColumns($_insertArgs));
-        return $DB->insert(static::TABLE, $args);
+        return $DB->insert($this, $args);
     }
 
     /**
@@ -338,19 +352,17 @@ abstract class PDOTable implements IPDOTable
      * @param $_columnArgs array|mixed an array or series of varargs of columns to be updated
      * @return \CPath\Framework\PDO\Query\PDOUpdate
      */
-    final function update($_columnArgs)
-    {
+    final function update($_columnArgs) {
         $args = func_num_args() > 1 ? func_get_args() : array_keys($this->findColumns($_columnArgs));
-        return new PDOUpdate(static::TABLE, static::getDB(), $args);
+        return new PDOUpdate($this, $args);
     }
 
     /**
      * Create a PDODelete object for this table
      * @return PDODelete
      */
-    final function delete()
-    {
-        return new PDODelete(static::TABLE, static::getDB());
+    final function delete() {
+        return new PDODelete($this);
     }
 
     /**
@@ -364,8 +376,7 @@ abstract class PDOTable implements IPDOTable
      * @return PDOModel the found model instance
      * @throws ModelNotFoundException if a model entry was not found
      */
-    final public function loadByColumns($search, $columns = NULL, $throwIfNotFound = true, $logic = 'OR')
-    {
+    final public function loadByColumns($search, $columns = NULL, $throwIfNotFound = true, $logic = 'OR') {
         $Model = $this->searchByColumns($search, $columns, 1, $logic)
             ->fetch();
         if (!$Model && $throwIfNotFound) {
@@ -378,9 +389,12 @@ abstract class PDOTable implements IPDOTable
      * Creates a PDOModelSelect for searching models.
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      */
-    final public function search()
-    {
-        return new PDOModelSelect(static::getDB(), $this);
+    final public function search() {
+        return new PDOModelSelect($this);
+    }
+
+    final public function __toString() {
+        return $this->getTableName();
     }
 
     /**
@@ -395,10 +409,11 @@ abstract class PDOTable implements IPDOTable
      * @return PDOModelSelect - the select query. Use ->fetch() or foreach to return model instances
      * @throws \Exception if no columns were found
      */
-    final public static function searchByColumns($search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL)
-    {
-        return static::selectByColumns(static::search(), $search, $columns, $limit, $logic, $compare);
+    final public function searchByColumns($search, $columns = NULL, $limit = 1, $logic = 'OR', $compare = NULL) {
+        return $this->selectByColumns($this->search(), $search, $columns, $limit, $logic, $compare);
     }
+
+    // Statics
 
     /**
      * Return an instance of the class for building purposes

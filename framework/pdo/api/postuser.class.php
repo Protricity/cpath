@@ -8,20 +8,18 @@
 namespace CPath\Framework\PDO;
 
 
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Field\PasswordField;
+use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Validation\CallbackValidation;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAPIPostUserCallbacks;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Table\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\User\IncorrectUsernameOrPasswordException;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
-use CPath\Handlers\Api\PasswordField;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\Validation;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 
@@ -46,6 +44,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
      * @return IField[]|NULL return an array of prepared fields to use or NULL to ignore.
      * @throws InvalidAPIException
      */
+    // TODO: broken?
     final function preparePostFields(Array &$fields){
         /** @var PDOUserTable $T  */
         $T = $this->getTable();
@@ -56,19 +55,19 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
             if(!isset($fields[$T::COLUMN_PASSWORD]))
                 throw new InvalidAPIException("Column '" . $T::COLUMN_PASSWORD . "' does not exist in field list");
             $fields[$T::COLUMN_PASSWORD.'_confirm'] = new PasswordField("Confirm Password");
-            $this->addValidation(new Validation(function(IRequest $Request) use ($T) {
+            $this->addValidation(new CallbackValidation(function(IRequest $Request) use ($T) {
                 $confirm = $Request->pluck($T::COLUMN_PASSWORD.'_confirm');
                 $pass = $Request[$T::COLUMN_PASSWORD];
                 $T->confirmPassword($pass, $confirm);
             }));
         }
-        $fields[self::FIELD_LOGIN] = new Field("Log in after");
+        $fields[self::FIELD_LOGIN] = new Field(self::FIELD_LOGIN, "Log in after");
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAPIPostUserCallbacks)
                 $fields = $Handler->preparePostUserFields($fields) ?: $fields;
 
-        $this->generateFieldShorts();
+        //$this->generateFieldShorts();
     }
 
     /**
@@ -92,7 +91,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
             if($login) {
                 try {
                     $T->login($name, $pass);
-                } catch (IncorrectUsernameOrPasswordException $ex) {
+                } catch (IncorrectUsernameOrPasswordExceptio $ex) {
                     throw new ModelAlreadyExistsException("This user already exists, and the login failed");
                 }
                 throw new ModelAlreadyExistsException("This user already exists, but you were successfully logged in");

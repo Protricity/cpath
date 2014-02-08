@@ -11,8 +11,6 @@ use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\Task\ITask;
 use CPath\Framework\Task\Receipt\IReceipt;
 use CPath\Framework\Task\Receipt\SimpleReceipt;
-use CPath\Framework\User\IncorrectUsernameOrPasswordException;
-use CPath\Framework\User\PasswordsDoNotMatchException;
 
 
 /**

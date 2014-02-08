@@ -9,15 +9,14 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Describable\IDescribable;
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Field\Param;
+use CPath\Framework\Api\Field\RequiredParam;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\Api\Param;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\RequiredParam;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     private $mColumns;
@@ -29,12 +28,12 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     protected function setupFields() {
         $T = $this->getTable();
 
-        $this->mColumns = $T->findColumns($T::SEARCH ?: PDOColumn::FLAG_SEARCH);
+        $this->mColumns = $T->findColumns(PDOColumn::FLAG_SEARCH);
 
-        $this->addField('search', new RequiredParam("SEARCH for ".$T->getModelName()));
-        $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mColumns))."]"));
-        //$this->addField('limit', new Field("The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
-        $this->addField('logic', new Field("The search logic to use [AND, OR]. Default=OR"));
+        $this->addField(new RequiredParam('search', "SEARCH for ".$T->getModelName()));
+        $this->addField(new Param('search_by', "SEARCH by column. Allowed: [".implode(', ', array_keys($this->mColumns))."]"));
+        //$this->addField(new Field('limit', "The Number of rows to return. Max=".$Model::SEARCH_LIMIT_MAX));
+        $this->addField(new Field('logic', "The search logic to use [AND, OR]. Default=OR"));
 
         parent::setupFields();
     }
@@ -50,7 +49,7 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
 
     /**
      * Sends headers, executes the request, and renders an IResponse as HTML
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
     public function renderHTML(IRequest $Request) {
@@ -93,7 +92,7 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
         if($search_by && !isset($this->mColumns[$search_by]))
             throw new \Exception("Invalid search_by column: " . implode(', ', $this->mColumns));
 
-        $columns = $T->findColumns($search_by ?: $T::SEARCH ?: PDOColumn::FLAG_SEARCH);
+        $columns = $T->findColumns($search_by ?: PDOColumn::FLAG_SEARCH);
 
         if(!is_int($search)) {
             $columns2 = array();

@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table;
 
-use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Interfaces\IBuildable;
 use CPath\Response\ExceptionResponse;
 use CPath\Response\IResponse;
@@ -19,13 +18,6 @@ interface IPDOTable extends IBuildable
      * @return \CPath\Framework\PDO\DB\PDODatabase
      */
     static function getDB();
-
-
-    /**
-     * Return all columns for this table
-     * @return PDOColumn[]
-     */
-    static function loadAllColumns();
 
 }
 

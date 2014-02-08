@@ -7,17 +7,17 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
+use CPath\Framework\Api\Interfaces\InvalidAPIException;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
 use CPath\Framework\PDO\Interfaces\SecurityPolicyNotFoundException;
 use CPath\Framework\PDO\Table\PDOTable;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 
-abstract class API_Base extends API {
+abstract class API_Base extends AbstractAPI {
 
     private $mHandlers = array();
 
@@ -65,9 +65,9 @@ abstract class API_Base extends API {
      */
     final protected function setupAPI() {
         $this->setupFields();
-        $Table = $this->mTable;
-        if($Table::AUTO_SHORTS)
-            $this->generateFieldShorts();
+//        $Table = $this->mTable;
+//        if($Table::AUTO_SHORTS)
+//            $this->generateFieldShorts();
 
         $Policies = array();
         foreach($this->getHandlers() as $Handler)

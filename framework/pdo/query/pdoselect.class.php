@@ -8,15 +8,15 @@
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
+use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Log;
-use PDO;
 
 class PDOSelect extends PDOWhere implements \Iterator, \Countable {
 
     /** @var \PDOStatement */
     protected $mStmt=NULL;
 
-    private $mDB, $mSelect=array(), $mLimit=NULL, $mOffset=NULL;
+    private $mSelect=array(), $mLimit=NULL, $mOffset=NULL;
     private $mDistinct = false;
     private $mRow = null;
     private $mCurRow = 0;
@@ -24,9 +24,14 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     private $mParse = array();
     private $mDescriptor;
 
-    public function __construct($table, \PDO $DB, Array $select=array(), ISelectDescriptor $Descriptor=null) {
-        parent::__construct($table);
-        $this->mDB = $DB;
+    /**
+     * Construct a new PDOWhere
+     * @param PDOTable $Table
+     * @param Array $select
+     * @param \CPath\Framework\PDO\Interfaces\ISelectDescriptor $Descriptor
+     */
+    public function __construct(PDOTable $Table, Array $select=array(), ISelectDescriptor $Descriptor=null) {
+        parent::__construct($Table);
 
         if($Descriptor)
             $this->setDescriptor($Descriptor);
@@ -129,7 +134,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         $sql = $this->getStatSQL($sql);
         if(Config::$Debug)
             Log::v2(__CLASS__, $sql);
-        $stmt = $this->mDB
+        $stmt = $this->getDB()
             ->prepare($sql);
         $stmt->execute($this->mValues);
         return $stmt;
@@ -139,7 +144,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         $sql = $this->getSQL();
         if(Config::$Debug)
             Log::v2(__CLASS__, $sql);
-        $this->mStmt = $this->mDB
+        $this->mStmt = $this->getDB()
             ->prepare($sql);
         $this->mStmt->execute($this->mValues);
         $this->mCurRow=-1;
@@ -201,7 +206,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
         if($d === true) $d = 'DISTINCT ';
         elseif($d !== false) $d = 'DISTINCT ' . $d . ' ';
         return "SELECT " . $d . implode(', ', $this->mSelect)
-        ."\nFROM ".$this->mTable
+        ."\nFROM ".$this->getTable()
         .parent::getSQL()
         .($this->mLimit ? "\nLIMIT ".$this->mLimit : '')
         .($this->mOffset ? "\nOFFSET ".$this->mOffset : '');
@@ -209,7 +214,7 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
 
     private function getStatSQL($statSQL) {
         return "SELECT " . $statSQL
-        ."\nFROM ".$this->mTable
+        ."\nFROM ".$this->getTable()
         .parent::getSQL();
     }
 

@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface ISearchTheme {
 
@@ -20,5 +20,5 @@ interface ISearchTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSearchContent(IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL);
+    function renderSearchContent(\CPath\Framework\Request\Interfaces\IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL);
 }

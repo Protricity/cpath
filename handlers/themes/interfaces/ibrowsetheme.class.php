@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IBrowseTheme {
     /**
@@ -19,5 +19,5 @@ interface IBrowseTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderBrowseContent(IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL);
+    function renderBrowseContent(\CPath\Framework\Request\Interfaces\IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL);
 }

@@ -10,14 +10,15 @@ namespace CPath\Framework\PDO\Columns;
 
 use Aws\ElasticTranscoder\Exception\ValidationException;
 use CPath\Describable\IDescribable;
-use CPath\Handlers\Api\EnumField;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Handlers\Api\PasswordField;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Api\Field\EnumField;
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Field\PasswordField;
+use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Interfaces\Constructable\IConstructable;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Validate;
 
-class PDOColumn implements IDescribable {
+class PDOColumn implements IDescribable, IConstructable {
     const BUILD_IGNORE = true;
     
     const FLAG_NUMERIC =  0x000001;
@@ -31,7 +32,7 @@ class PDOColumn implements IDescribable {
     const FLAG_AUTOINC =  0x000080;
 
     const FLAG_REQUIRED = 0x000100;
-    const FLAG_OPTIONAL = 0x000200;
+    //const FLAG_OPTIONAL = 0x000200;
 
     const FLAG_INSERT =   0x001000;
     const FLAG_UPDATE =   0x002000;
@@ -123,7 +124,7 @@ class PDOColumn implements IDescribable {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails
@@ -143,24 +144,26 @@ class PDOColumn implements IDescribable {
 
     /**
      * Generate an IField for this column
-     * @param boolean|NULL $required if null, the column flag FLAG_REQUIRED determines the value
-     * @param boolean|NULL $param
      * @param boolean|NULL $comment
      * @param mixed $defaultValidation
+     * @param int $flags optional IField:: flags
+     * @internal param bool|NULL $required if null, the column flag FLAG_REQUIRED determines the value
+     * @internal param bool|NULL $param
      * @return IField
      */
-    function generateAPIField($required=NULL, $param=NULL, $comment=NULL, $defaultValidation=NULL) {
-        if($required === NULL)
-            $required = ($this->mFlags & PDOColumn::FLAG_REQUIRED) && !($this->mFlags & PDOColumn::FLAG_OPTIONAL);
+    function generateAPIField($comment=NULL, $defaultValidation=NULL, $flags=0) {
+        if($this->mFlags & PDOColumn::FLAG_REQUIRED)
+            $flags |= IField::IS_REQUIRED;
+
         if($this->mFilter)
             $defaultValidation = $this->mFilter;
 
         if($this->mEnum)
-            $Field = new EnumField($comment ?: $this->getComment(), $this->mEnum, $required, $param);
+            $Field = new EnumField($this->getName(), $comment ?: $this->getComment(), $defaultValidation, $flags, $this->mEnum);
         elseif($this->isFlag(self::FLAG_PASSWORD))
-            $Field = new PasswordField($comment ?: $this->getComment(), $defaultValidation, $required, $param);
+            $Field = new PasswordField($this->getName(), $comment ?: $this->getComment(), $defaultValidation, $flags);
         else
-            $Field = new Field($comment ?: $this->getComment(), $defaultValidation, $required, $param);
+            $Field = new Field($this->getName(), $comment ?: $this->getComment(), $defaultValidation, $flags);
 
         if($this->hasDefaultValue())
             $Field->setDefaultValue($this->getDefaultValue());
@@ -196,4 +199,20 @@ class PDOColumn implements IDescribable {
     function __toString() {
         return $this->mName;
     }
+
+    /**
+     * Exports constructor parameters for code generation
+     * @return Array constructor params for var_export
+     */
+    function exportConstructorArgs() {
+        return array(
+            $this->mName,
+            $this->mFlags,
+            $this->mFilter,
+            $this->mComment,
+            $this->mDefault,
+            $this->mEnum
+        );
+    }
 }
+

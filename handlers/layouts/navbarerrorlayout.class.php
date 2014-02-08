@@ -4,7 +4,7 @@ namespace CPath\Handlers\Layouts;
 use CPath\Describable\Describable;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class NavBarErrorLayout extends NavBarLayout {
 
@@ -23,14 +23,14 @@ abstract class NavBarErrorLayout extends NavBarLayout {
 
     /**
      * Add additional <head> element fields for this View
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @return void
      */
     abstract protected function addHeadFields(IRequest $Request);
 
     /**
      * Set up <head> element fields for this View
-     * @param IRequest $Request
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @return void
      */
     final protected function setupHeadFields(IRequest $Request) {

@@ -7,10 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Columns\Template;
 
-use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
 use CPath\Framework\PDO\Builders\Columns\ColumnArgumentNotFoundException;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
+use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;
 
 class PDOColumnTemplateException extends \Exception {}
 
@@ -31,6 +32,13 @@ interface IPDOColumnTemplate {
     function matchColumnArg($arg);
 
     /**
+     * Process the column according to the template or add it to a queue to be processed with ::processTemplatePHP()
+     * @param BuildPDOColumn $Column
+     * @return void
+     */
+    function addColumn(BuildPDOColumn $Column);
+
+    /**
      * Process unrecognized table comment arguments
      * @param String $arg the argument to process
      * @return void
@@ -39,19 +47,12 @@ interface IPDOColumnTemplate {
     function processColumnArg($arg);
 
     /**
-     * Final processing for PHP classes for this Template
-     * @param BuildPHPClass $TablePHP
-     * @param BuildPHPClass $ModelPHP
+     * Additional processing for PHP classes for a PDO Builder Template
+     * @param BuildPHPTableClass $TablePHP
+     * @param BuildPHPModelClass $ModelPHP
      * @throws BuildException
      * @return void
      */
-    function processTemplatePHP(BuildPHPClass $TablePHP, BuildPHPClass $ModelPHP);
-
-    /**
-     * Process the column according to the template or add it to a queue to be processed with ::process()
-     * @param BuildPDOColumn $Column
-     * @return void
-     */
-    function addColumn(BuildPDOColumn $Column);
+    function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP);
 }
 

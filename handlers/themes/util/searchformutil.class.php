@@ -15,7 +15,7 @@ use CPath\Handlers\API\Fragments\APIDebugFormFragment;
 use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 
 class SearchFormUtil implements IDescribable, IViewConfig {

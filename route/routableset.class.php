@@ -10,7 +10,7 @@ use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
 use Traversable;
 
@@ -236,7 +236,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
 
     /**
      * Renders the route destination using an IRequest instance
-     * @param IRequest $Request the request to render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */

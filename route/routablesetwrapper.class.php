@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class RoutableSetWrapper implements IRequest {
 

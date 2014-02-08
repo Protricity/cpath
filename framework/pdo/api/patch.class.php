@@ -8,13 +8,12 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Describable\IDescribable;
+use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\Interfaces\IField;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 
@@ -31,7 +30,7 @@ class API_Patch extends API_Get implements IAPIGetCallbacks {
         $T = $this->getTable();
 
         $defFilter = $T::DEFAULT_FILTER;
-        foreach($T->findColumns($T::UPDATE ?: PDOColumn::FLAG_UPDATE) as $Column)
+        foreach($T->findColumns(PDOColumn::FLAG_UPDATE) as $Column)
             /** @var PDOColumn $Column */
             if(!isset($fields[$Column->getName()]))
                 $fields[$Column->getName()] = $Column->generateAPIField(false, NULL, NULL, $defFilter);

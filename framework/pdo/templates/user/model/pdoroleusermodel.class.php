@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Templates\User\Model;
 
 use CPath\Framework\PDO\Templates\User\Role\Model\PDOUserRoleModel;
-use CPath\Framework\PDO\Templates\User\Role\Table\PDOUserRoleTable;
 use CPath\Framework\PDO\Templates\User\Table\PDORoleUserTable;
 use CPath\Framework\User\Interfaces\IRoleUser;
 use CPath\Framework\User\Role\Common\RoleList;

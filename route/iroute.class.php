@@ -8,9 +8,9 @@
 namespace CPath\Route;
 
 use CPath\Compare\IComparable;
-use CPath\Constructable\IConstructable;
+use CPath\Framework\Interfaces\Constructable\IConstructable;
 use CPath\Interfaces\IHandler;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\CodedException;
 
 
@@ -58,7 +58,7 @@ interface IRoute extends IConstructable, IComparable
     /**
      * Match the destination to the route and return an instance of the destination object
      * Note: this method should throw an exception if the requested route (method + path) didn't match
-     * @param IRequest $Request the request to render
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
      * @return IHandler
      * @throws InvalidRouteException if the requested route (method + path) didn't match
      */

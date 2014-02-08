@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Util;
 
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 class HTMLRenderUtil {

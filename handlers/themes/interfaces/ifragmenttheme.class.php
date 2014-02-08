@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Describable\IDescribable;
 use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IFragmentTheme {
 
@@ -20,12 +20,12 @@ interface IFragmentTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderFragmentStart(IRequest $Request, $Description=null, IAttributes $Attr=null);
+    function renderFragmentStart(\CPath\Framework\Request\Interfaces\IRequest $Request, $Description=null, IAttributes $Attr=null);
 
     /**
      * Render the end of a fragment.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderFragmentEnd(IRequest $Request);
+    function renderFragmentEnd(\CPath\Framework\Request\Interfaces\IRequest $Request);
 }

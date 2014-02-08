@@ -8,6 +8,8 @@
 namespace CPath\Framework\PDO;
 
 
+use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
@@ -19,10 +21,7 @@ use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOTable;
-use CPath\Handlers\Api\Field;
-use CPath\Handlers\Api\Interfaces\IAPI;
-use CPath\Handlers\API;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\IResponse;
 
 class API_GetBrowse extends API_Base {
@@ -50,8 +49,8 @@ class API_GetBrowse extends API_Base {
 //        $this->addField('search', new RequiredParam("SEARCH for ".$Model::modelName()));
 //        $this->addField('search_by', new Param("SEARCH by column. Allowed: [".implode(', ', array_keys($this->mColumns))."]"));
 //        $this->addField('logic', new Field("The search logic to use [AND, OR]. Default=OR"));
-        $this->addField('limit', new Field("The number of rows to return. Max=".$this->mLimitMax));
-        $this->addField('page', new Field("The page number to return"));
+        $this->addField(new Field('limit', "The number of rows to return. Max=".$this->mLimitMax));
+        $this->addField(new Field('page', "The page number to return"));
     }
 
 
@@ -81,10 +80,10 @@ class API_GetBrowse extends API_Base {
 
         /** @var PDOModelSelect $Search */
 
-        if($T::EXPORT_OBJECT) {
+        if($T::EXPORT_AS_OBJECT) {
             $Search = $T->search();
         } else {
-            $export = $T::EXPORT ?: PDOColumn::FLAG_EXPORT;
+            $export = PDOColumn::FLAG_EXPORT;
             $select = array_keys($T->findColumns($export));
             $Search = $T->select($select);
         }
@@ -165,7 +164,7 @@ class API_GetBrowseDescriptor implements ISelectDescriptor {
      * @return PDOColumn
      */
     function getColumn($columnName) {
-        return $this->mTable->loadColumn($columnName);
+        return $this->mTable->getColumn($columnName);
     }
 
     /**

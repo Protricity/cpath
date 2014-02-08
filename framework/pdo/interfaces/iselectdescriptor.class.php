@@ -8,8 +8,8 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\PDO\Columns\PDOColumn;
-use CPath\Handlers\Api\Interfaces\IAPI;
 
 
 interface ISelectDescriptor {

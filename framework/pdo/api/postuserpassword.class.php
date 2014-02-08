@@ -9,16 +9,15 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Base;
+use CPath\Framework\Api\Field\PasswordField;
+use CPath\Framework\Api\Interfaces\APIException;
+use CPath\Framework\Api\Validation\CallbackValidation;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\IncorrectUsernameOrPasswordException;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Util\UserUtil;
-use CPath\Handlers\Api\Interfaces\APIException;
-use CPath\Handlers\Api\PasswordField;
-use CPath\Handlers\API;
-use CPath\Handlers\Api\Validation;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Response\Response;
 
 class API_PostUserPassword extends API_Base {
@@ -54,7 +53,7 @@ class API_PostUserPassword extends API_Base {
         $THIS = $this;
         if($T::PASSWORD_CONFIRM) {
             $this->addField(self::FIELD_CONFIRM_PASSWORD, new PasswordField("Confirm Password"));
-            $this->addValidation(new Validation(function(IRequest $Request) use ($T, $THIS) {
+            $this->addValidation(new CallbackValidation(function(IRequest $Request) use ($T, $THIS) {
                 $pass = $Request[$THIS::FIELD_PASSWORD];
                 $confirm = $Request->pluck($THIS::FIELD_CONFIRM_PASSWORD);
                 $T->confirmPassword($pass, $confirm);
@@ -64,7 +63,7 @@ class API_PostUserPassword extends API_Base {
         if($this->mConfirm) {
             $confirm = $this->mConfirm;
             $this->addField(self::FIELD_OLD_PASSWORD, new PasswordField("Password"));
-            $this->addValidation(new Validation(function(IRequest $Request) use ($User, $THIS, $confirm) {
+            $this->addValidation(new CallbackValidation(function(IRequest $Request) use ($User, $THIS, $confirm) {
                 if($confirm) {
                     $old = $Request->pluck($THIS::FIELD_OLD_PASSWORD);
                     try {

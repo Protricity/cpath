@@ -13,6 +13,7 @@ use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\DB\PDODatabase;
+use CPath\Framework\PDO\Util\PDOStringUtil;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Log;
@@ -265,106 +266,95 @@ PHP;
             $modelClassFile = $modelPath . strtolower($Table->ModelClassName) . '.class.php';
             $tableClassFile = $tablePath . strtolower($Table->TableClassName) . '.class.php';
 
-            $PHPModel = new BuildPHPClass($Table->ModelClassName);
+            $PHPModel = new Models\BuildPHPModelClass($Table->ModelClassName);
             $PHPModel->Namespace = $modelNS;
 
-            $PHPTable = new BuildPHPClass($Table->TableClassName);
+            $PHPTable = new Tables\BuildPHPTableClass($Table->TableClassName);
             $PHPTable->Namespace = $tableNS;
             //$PHPTable->setExtend("CPath\\Model\\DB\\PDOTable");
 
-            $Table->processPHP($PHPTable, $PHPModel);
+            $Table->processPHP($DB, $Table, $PHPTable, $PHPModel);
 
             if (!$Table->Primary)
                 $noPrimary[] = $Table;
 
-            //$PHPModel->addUse(get_class($DB), 'DB');
-
-            //$PHPModel->addConst('TABLE', $Table->Name);
-            $PHPTable->addConst('TABLE', $Table->Name);
-
-            $PHPModel->addConst('MODEL_NAME', $Table->ModelName);
-
-            $PHPModel->addConst('TABLE_CLASS', $Table->TableClassName);
-            $PHPTable->addConst('MODEL_CLASS', $Table->ModelClassName);
-
             //$PHPModel->addConst('PRIMARY', $Table->Primary);
-            $PHPTable->addConst('PRIMARY', $Table->Primary);
-
-            $columns = "\n\t\tstatic \$columns = NULL;";
-            $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
-            $i = 0;
-            foreach ($Table->getColumns() as $Column) {
-                if ($i++) $columns .= ',';
-                $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
-                $columns .= var_export($Column->Name, true);
-                $columns .= ',0x' . dechex($Column->Flags ? : 0);
-
-                if ($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
-                    $columns .= ',' . ($Column->Filter ? : 0);
-                if ($Column->Comment || $Column->Default || $Column->EnumValues)
-                    $columns .= ',' . var_export($Column->Comment ? : '', true);
-                if ($Column->Default || $Column->EnumValues)
-                    $columns .= ',' . var_export($Column->Default ? : '', true);
-                if ($Column->EnumValues) {
-                    $a = '';
-                    foreach ($Column->EnumValues as $e)
-                        $a .= ($a ? ',' : '') . var_export($e, true);
-                    $columns .= ',array(' . $a . ')';
-                }
-                $columns .= ")";
-            }
-            $columns .= "\n\t\t);\n";
-
-            //$PHP->addStaticMethod('init', NULL, $columns, 'public', false);
-            //$PHP->addStaticMethod('getColumns', NULL, ' return self::$_columns; ', 'protected', false);
-            $PHPTable->addStaticMethod('loadAllColumns', NULL, $columns, '', false);
-            //$PHP->addStaticProperty('_columns', NULL, 'private');
-            $PHPTable->addUse('CPath\Framework\PDO\PDOColumn');
-
-            if ($Table->SearchWildCard)
-                $PHPTable->addConst('SEARCH_WILDCARD', true);
-            if ($Table->SearchLimit)
-                $PHPTable->addConst('SEARCH_LIMIT', $Table->SearchLimit);
-            if ($Table->SearchLimitMax)
-                $PHPTable->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
-            if ($Table->AllowHandler)
-                $PHPTable->addImplements('CPath\Interfaces\IBuildable');
+//
+//            $columns = "\n\t\tstatic \$columns = NULL;";
+//            $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
+//            $i = 0;
+//            foreach ($Table->getColumns() as $Column) {
+//                if ($i++) $columns .= ',';
+//                $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
+//                $columns .= var_export($Column->Name, true);
+//                $columns .= ',0x' . dechex($Column->Flags ? : 0);
+//
+//                if ($Column->Comment || $Column->Filter || $Column->Default || $Column->EnumValues)
+//                    $columns .= ',' . ($Column->Filter ? : 0);
+//                if ($Column->Comment || $Column->Default || $Column->EnumValues)
+//                    $columns .= ',' . var_export($Column->Comment ? : '', true);
+//                if ($Column->Default || $Column->EnumValues)
+//                    $columns .= ',' . var_export($Column->Default ? : '', true);
+//                if ($Column->EnumValues) {
+//                    $a = '';
+//                    foreach ($Column->EnumValues as $e)
+//                        $a .= ($a ? ',' : '') . var_export($e, true);
+//                    $columns .= ',array(' . $a . ')';
+//                }
+//                $columns .= ")";
+//            }
+//            $columns .= "\n\t\t);\n";
+//
+//            //$PHP->addStaticMethod('init', NULL, $columns, 'public', false);
+//            //$PHP->addStaticMethod('getColumns', NULL, ' return self::$_columns; ', 'protected', false);
+//            $PHPTable->addStaticMethod('loadAllColumns', NULL, $columns, '', false);
+//            //$PHP->addStaticProperty('_columns', NULL, 'private');
+//            $PHPTable->addUse('CPath\Framework\PDO\PDOColumn');
+//
+//            if ($Table->SearchWildCard)
+//                $PHPTable->addConst('SEARCH_WILDCARD', true);
+//            if ($Table->SearchLimit)
+//                $PHPTable->addConst('SEARCH_LIMIT', $Table->SearchLimit);
+//            if ($Table->SearchLimitMax)
+//                $PHPTable->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
+//            if ($Table->AllowHandler)
+//                $PHPTable->addImplements('CPath\Interfaces\IBuildable');
             //$PHP->addConst('BUILD_IGNORE', false);
 
             // Table
-
-            $PHPTable->addConstCode();
-            $PHPTable->addConstCode("// Table Columns ");
-            foreach ($Table->getColumns() as $Column)
-                $PHPTable->addConst($this->toTitleCase($Column->Name, true), $Column->Name);
-
-            foreach ($Table->getColumns() as $Column)
-                if ($Column->EnumConstants) {
-                    $PHPTable->addConstCode();
-                    $PHPTable->addConstCode("// Column Enum Values for '" . $Column->Name . "'");
-                    foreach ($Column->EnumValues as $enum)
-                        $PHPTable->addConst($this->toTitleCase($Column->Name, true) . '_Enum_' . $this->toTitleCase($enum, true), $enum);
-                }
-
-            if ($Table->Primary) // TODO: primary hack needs oop
-                $PHPModel->addStaticMethod('remove', $Table->ModelClassName . ' $' . $Table->ModelClassName, " parent::removeModel(\${$Table->ModelClassName}); ");
+//
+//            $PHPTable->addConstCode();
+//            $PHPTable->addConstCode("// Table Columns ");
+//            foreach ($Table->getColumns() as $Column)
+//                $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true), $Column->Name);
+//
+//            foreach ($Table->getColumns() as $Column)
+//                if ($Column->EnumConstants) {
+//                    $PHPTable->addConstCode();
+//                    $PHPTable->addConstCode("// Column Enum Values for '" . $Column->Name . "'");
+//                    foreach ($Column->EnumValues as $enum)
+//                        $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
+//                }
+//
+//            if ($Table->Primary) // TODO: primary hack needs oop
+//                $PHPModel->addStaticMethod('remove', $Table->ModelClassName . ' $' . $Table->ModelClassName, " parent::removeModel(\${$Table->ModelClassName}); ");
 
             // Models
+//
+//            foreach ($Table->getColumns() as $Column)
+//                $PHPModel->addProperty($Column->Name);
 
-            foreach ($Table->getColumns() as $Column)
-                $PHPModel->addProperty($Column->Name);
-
-            foreach ($Table->getColumns() as $Column) {
-                $ucName = $this->toTitleCase($Column->Name, true);
-                $PHPModel->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-                if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $Table->Primary) // TODO: primary hack needs oop
-                    $PHPModel->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
-                $PHPModel->addMethodCode();
-            }
-
-
-            $PHPTable->addUse(get_class($DB), 'DB');
-            $PHPTable->addStaticMethod('getDB', '', " return DB::get(); ");
+//            foreach ($Table->getColumns() as $Column) {
+//                $ucName = PDOStringUtil::toTitleCase($Column->Name, true);
+//                $PHPModel->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
+//                if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $Table->Primary) // TODO: primary hack needs oop
+//                    $PHPModel->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
+//                $PHPModel->addMethodCode();
+//            }
+//
+//
+//            $PHPTable->addUse(get_class($DB), 'DB');
+//            $PHPTable->addStaticMethod('getDB', '', " return DB::get(); ");
 
 
             //Log::v2(__CLASS__, "Writing file: " . $file);
@@ -440,7 +430,7 @@ PHP;
         return \$stmd;
 PHP;
 
-            $ucName = self::toTitleCase($name, true);
+            $ucName = PDOStringUtil::toTitleCase($name, true);
             $ucName[0] = strtolower($ucName[0]);
             $PHPProcs->addStaticMethod($ucName, $proc, $code);
             //$phpC .= self::getConst(strtoupper($name), $method);
@@ -467,20 +457,6 @@ PHP;
     {
         if ($subFolder) $subFolder .= '/';
         return dirname($Class->getFileName()) . '/' . $subFolder;
-    }
-
-
-    static function toTitleCase($field, $noSpace = false)
-    {
-        $field = preg_replace('/[^a-zA-Z0-9]/', ' ', $field);
-        $field = ucwords($field);
-        $words = explode(' ', $field);
-        foreach ($words as &$word) {
-            if (strlen($word) === 2)
-                $word = strtoupper($word);
-        }
-        if (!$noSpace) return implode(' ', $words);;
-        return implode('', $words);
     }
 
     static function createBuildableInstance()
