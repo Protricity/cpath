@@ -11,7 +11,7 @@ namespace CPath\Framework\PDO\Interfaces;
 use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IAPIGetCallbacks {
 

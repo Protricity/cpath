@@ -13,7 +13,7 @@ use CPath\Config;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Interfaces\Constructable\Constructable;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Log;
 
 /**
@@ -40,7 +40,7 @@ $routes = array(
 PHP;
 
     private $mRoutes = array();
-    /** @var IHandler */
+    /** @var IRender */
     private $mCurrentClass = NULL;
 
     /**

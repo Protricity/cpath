@@ -8,7 +8,7 @@
 namespace CPath\Framework\Api\Field;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
@@ -34,7 +34,7 @@ class EnumField extends Field {
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
-     * @throws ValidationException if validation fails
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if validation fails
      */
     function validate(IRequest $Request, $fieldName) {
         $value = parent::validate($Request, $fieldName);

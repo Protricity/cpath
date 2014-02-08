@@ -10,7 +10,7 @@ namespace CPath\Handlers;
 use CPath\Exceptions\BuildException;
 use CPath\Handlers\Views\HandlerSetView;
 use CPath\Interfaces\HandlerSetException;
-use CPath\Interfaces\IHandler;
+use CPath\Interfaces\IRender;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\IHandlerSetEvents;
 use CPath\Interfaces\IRequest;
@@ -31,7 +31,7 @@ class HandlerSet implements IHandlerSet {
     const ROUTE_METHODS = 'GET,POST,CLI';     // Default accepted methods are GET and POST
     const ROUTE_PATH = NULL;        // No custom route path. Path is based on namespace + class name
 
-    /** @var IHandler[] */
+    /** @var IRender[] */
     protected $mHandlers = array();
     protected $mSource;
 
@@ -40,14 +40,14 @@ class HandlerSet implements IHandlerSet {
     }
 
     /**
-     * Adds an IHandler to the set by route
+     * Adds an IRender to the set by route
      * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
-     * @param IHandler $Handler the IHandler instance to add to the set
+     * @param IRender $Handler the IRender instance to add to the set
      * @param bool $replace if true, replace any existing handlers
      * @return HandlerSet self
      * @throws HandlerSetException
      */
-    public function add($route, IHandler $Handler, $replace=false) {
+    public function add($route, IRender $Handler, $replace=false) {
         if(!$replace && isset($this->mHandlers[$route])) {
             throw new HandlerSetException("Route already exists: ".$route);
         } elseif($replace && !isset($this->mHandlers[$route])) {
@@ -58,9 +58,9 @@ class HandlerSet implements IHandlerSet {
     }
 
 //    /**
-//     * Adds an IHandler to the set by route
+//     * Adds an IRender to the set by route
 //     * @param String $route the route to the sub api i.e. POST (any POST), GET search (relative), GET /site/users/search (absolute)
-//     * @param String $className the IHandler instance to add to the set
+//     * @param String $className the IRender instance to add to the set
 //     * @param bool $replace if true, replace any existing handlers
 //     * @return HandlerSet self
 //     * @throws HandlerSetException
@@ -76,9 +76,9 @@ class HandlerSet implements IHandlerSet {
 //    }
 
     /**
-     * Returns an IHandler instance by route
+     * Returns an IRender instance by route
      * @param String $route the route associated with this handler
-     * @return IHandler
+     * @return IRender
      * @throws InvalidRouteException if the route is not found
      */
     public function get($route) {
@@ -91,7 +91,7 @@ class HandlerSet implements IHandlerSet {
     }
 
     /**
-     * Returns an IHandler instance by route
+     * Returns an IRender instance by route
      * @param String $route the route associated with this handler
      * @return HandlerSet self
      * @throws InvalidRouteException if the route is not found
@@ -156,9 +156,9 @@ class HandlerSet implements IHandlerSet {
 //    // Implement IHandlerAggregate
 //
 //    /**
-//     * Returns an IHandler instance based on the currently selected Handler
-//     * @param String $route an optional route to retrieve the IHandler instance from the specified route
-//     * @return IHandler $Handler an IHandler instance
+//     * Returns an IRender instance based on the currently selected Handler
+//     * @param String $route an optional route to retrieve the IRender instance from the specified route
+//     * @return IRender $Handler an IRender instance
 //     */
 //    function getAggregateHandler($route=NULL)
 //    {
@@ -179,7 +179,7 @@ class HandlerSet implements IHandlerSet {
     /**
      * Shortcut for getAPI($path)
      * @param mixed $route
-     * @return IHandler
+     * @return IRender
      */
     public function offsetGet($route) { return $this->get($route);}
     public function offsetSet($route, $value) { $this->add($route, $value); }

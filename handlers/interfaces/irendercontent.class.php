@@ -13,8 +13,8 @@ interface IRenderContent {
 
     /**
      * Render the main view content
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderViewContent(\CPath\Framework\Request\Interfaces\IRequest $Request);
+    function renderViewContent(IRequest $Request);
 }

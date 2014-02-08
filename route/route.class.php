@@ -9,7 +9,7 @@ namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 
 /**
  * Class Route - a route entry
@@ -26,7 +26,7 @@ class Route implements IRoute {
     /**
      * Constructs a new Route Entry
      * @param $routePrefix string the route prefix
-     * @param $destination string|IHandler the handler class for this route
+     * @param $destination string|\CPath\Framework\Render\Interfaces\IRender the handler class for this route
      * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
      */
     final function __construct($routePrefix, $destination, $_args=NULL) {
@@ -60,15 +60,15 @@ class Route implements IRoute {
     /**
      * Get a buildable instance of the route destination
      * @throws InvalidHandlerException
-     * @return IHandler
+     * @return \CPath\Framework\Render\Interfaces\IRender
      */
     function loadHandler() {
         /** @var IBuildable $dest */
         $dest = $this->getDestination();
         $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
 
-        if(!$Handler instanceof IHandler)
-            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+        if(!$Handler instanceof IRender)
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IRender");
 
         return $Handler;
     }
@@ -131,25 +131,25 @@ class Route implements IRoute {
     // Static
 
     /**
-     * Creates a new Route for an IHandler
-     * @param IHandler $Handler The class instance or class name
-     * @param String $method the route prefix method (GET, POST...) for this IHandler
-     * @param String $path a custom path for this IHandler
+     * Creates a new Route for an IRender
+     * @param IRender $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IRender
+     * @param String $path a custom path for this IRender
      * @return Route
      */
-    static final function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+    static final function fromHandler(IRender $Handler, $method='ANY', $path=NULL) {
         $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
         return new static($prefix, get_class($Handler));
     }
 
     /**
      * Gets the default public route path for this handler
-     * @param IHandler $Handler The class instance or class name
-     * @param String $method the route prefix method (GET, POST...) for this IHandler
-     * @param String $path a custom path for this IHandler
+     * @param \CPath\Framework\Render\Interfaces\IRender $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IRender
+     * @param String $path a custom path for this IRender
      * @return RoutableSet
      */
-    static final function getPrefixFromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+    static final function getPrefixFromHandler(IRender $Handler, $method='ANY', $path=NULL) {
         $cls = get_class($Handler);
         if(!$path)
             $path = str_replace('\\', '/', strtolower($cls));

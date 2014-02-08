@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Model;
-use CPath\Response\CodedException;
-use CPath\Response\IResponseCode;
+use CPath\Framework\Response\Exceptions\CodedException;
+use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Route\InvalidRouteException;
 use CPath\Route\IRoute;
 use CPath\Route\MissingRoute;

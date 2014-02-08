@@ -15,8 +15,7 @@ use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Session\ISessionManager;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IPostLoginExecute {
 
@@ -48,9 +47,9 @@ class API_PostUserLogin extends API_Base {
      * @return void
      */
     protected function setupFields() {
-        $this->addField('name', new RequiredParam("Username or Email Address"));
-        $this->addField('password', new PasswordField("Password"));
-        $this->generateFieldShorts();
+        $this->addField(new RequiredParam('name', "Username or Email Address"));
+        $this->addField(new PasswordField('password', "Password"));
+        //$this->generateFieldShorts();
     }
 
     /**
@@ -64,16 +63,18 @@ class API_PostUserLogin extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Framework\Response\IResponse|mixed the api call response with data, message, and status
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
         $Table = $this->mUserTable;
-        $Session = $Table->login($Request['name'], $Request['password'], NULL, $User);
-        $User = $Session->
-        $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
-            'user' => $User,
-            'session' => $Session,
-        ));
+        $Response = $Table->login($Request['name'], $Request['password'], NULL, $User);
+        $User = $Response['user'];
+        $Session = $Response['session'];
+//        $User = $Session->
+//        $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
+//            'user' => $User,
+//            'session' => $Session,
+//        ));
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IPostLogoutExecute)

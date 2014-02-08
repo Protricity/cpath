@@ -26,5 +26,5 @@ interface IWriteAccess {
      * Typically IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      */
-    function assertWriteAccess(PDOModel $Model, \CPath\Framework\Request\Interfaces\IRequest $Request, $intent);
+    function assertWriteAccess(PDOModel $Model, IRequest $Request, $intent);
 }

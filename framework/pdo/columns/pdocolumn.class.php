@@ -124,7 +124,7 @@ class PDOColumn implements IDescribable, IConstructable {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request instance
+     * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails

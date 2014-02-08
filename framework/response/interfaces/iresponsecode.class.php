@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response;
+namespace CPath\Framework\Response\Interfaces;
 
 interface IResponseCode {
     const STATUS_SUCCESS = 200;

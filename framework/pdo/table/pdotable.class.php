@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Table;
 
 use CPath\Config;
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
@@ -257,7 +257,7 @@ abstract class PDOTable implements IPDOTable
      * @param array|mixed $row column value pairs to insert into new row
      * @return PDOModel the new instance with filled values
      * @throws ModelAlreadyExistsException
-     * @throws ValidationException if a column fails to validate
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a column fails to validate
      */
     final public function createAndFill($row)
     {

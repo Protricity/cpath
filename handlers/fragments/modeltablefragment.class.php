@@ -6,10 +6,10 @@ use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class ModelTableFragment implements IHandler{
+class ModelTableFragment implements IRender{
 
     private $mModel, $mTemplate, $mTheme;
 

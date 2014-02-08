@@ -5,8 +5,14 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Interfaces;
+namespace CPath\Framework\Api\Util;
 
+use CPath\Framework\Api\Exceptions\FieldNotFoundException;
+use CPath\Framework\Api\Interfaces\FieldUtil;
+use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationExceptions;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
@@ -14,12 +20,12 @@ use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\ExceptionResponse;
-use CPath\Response\IResponse;
-use CPath\Response\IResponseAggregate;
-use CPath\Response\Response;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Interfaces\IResponseAggregate;
+use CPath\Framework\Response\Types\Response;
 
-class APIUtil implements IAPIUtil, ILogListener {
+class APIExecuteUtil implements IAPI, ILogListener {
     private $mAPI, $mLoggingEnabled = true, $mLogs = array(), $mMap = null;
 
     function __construct(IAPI $API) {
@@ -49,7 +55,7 @@ class APIUtil implements IAPIUtil, ILogListener {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse the api call response with data, message, and status
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the api call response with data, message, and status
      */
     final public function executeOrThrow(IRequest $Request) {
         $this->processRequest($Request);
@@ -65,8 +71,8 @@ class APIUtil implements IAPIUtil, ILogListener {
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse the api call response with data, message, and status
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the api call response with data, message, and status
      */
     final public function execute(IRequest $Request) {
         try {
@@ -88,7 +94,7 @@ class APIUtil implements IAPIUtil, ILogListener {
 
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return void
      * @throws ValidationExceptions if one or more Fields fail to validate
      */
@@ -182,7 +188,7 @@ class APIUtil implements IAPIUtil, ILogListener {
      * Get an API field by name
      * @param String $fieldName the field name
      * @return IField
-     * @throws FieldNotFound if the field was not found
+     * @throws \CPath\Framework\Api\Exceptions\FieldNotFoundException if the field was not found
      */
     public function getField($fieldName) {
         foreach($this->mAPI->getFields() as $Field) {
@@ -190,6 +196,6 @@ class APIUtil implements IAPIUtil, ILogListener {
                 return $Field;
         }
 
-        throw new FieldNotFound("Field '" . $fieldName . "' was not found");
+        throw new FieldNotFoundException("Field '" . $fieldName . "' was not found");
     }
 }

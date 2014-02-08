@@ -8,9 +8,9 @@
 namespace CPath\Handlers\Interfaces;
 
 
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 
-interface IAttributes extends IHandler{
+interface IAttributes extends IRender{
 
     /**
      * Add an attribute to the collection

@@ -10,9 +10,9 @@ namespace CPath\Misc;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLI;
-use CPath\Response\ExceptionResponse;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -28,7 +28,7 @@ class ApiTester {
 
     /**
      * @param array $request
-     * @return \CPath\Response\IResponse
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
      * @throws APIFailedException
      * @throws \Exception
      */
@@ -60,7 +60,7 @@ class ApiTester {
      * @param $args
      * @param array $request
      * @internal param $_cmd
-     * @return \CPath\Response\IResponse
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
      */
     static function cmd($args, Array $request=NULL) {
         return self::fromCMD($args, $request)->test();

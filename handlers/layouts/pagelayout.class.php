@@ -13,7 +13,7 @@ abstract class PageLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyHeaderContent(IRequest $Request);
@@ -21,7 +21,7 @@ abstract class PageLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyFooterContent(IRequest $Request);

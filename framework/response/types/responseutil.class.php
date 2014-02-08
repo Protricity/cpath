@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response;
+namespace CPath\Framework\Response\Types;
 use CPath\Base;
 use CPath\Config;
 use CPath\Log;
@@ -14,13 +14,13 @@ use CPath\Util;
 final class ResponseUtil {
     private $mResponse;
 
-    function __construct(IResponse $Response) {
+    function __construct(\CPath\Framework\Response\Interfaces\IResponse $Response) {
         $this->mResponse = $Response;
     }
 
     function toJSON(Array &$JSON) {
         $Response = $this->mResponse;
-        $JSON['status'] = $Response->getStatusCode() == \CPath\Response\IResponse::STATUS_SUCCESS;
+        $JSON['status'] = $Response->getStatusCode() == \CPath\Framework\Response\Interfaces\IResponse::STATUS_SUCCESS;
         $JSON['msg'] = $Response->getMessage();
         if($data = $Response->getDataPath()) {
             $JSON['response'] = array();
@@ -34,7 +34,7 @@ final class ResponseUtil {
 
     function toXML(\SimpleXMLElement $xml) {
         $Response = $this->mResponse;
-        $xml->addChild('status', $Response->getStatusCode() == \CPath\Response\IResponse::STATUS_SUCCESS ? 1 : 0);
+        $xml->addChild('status', $Response->getStatusCode() == \CPath\Framework\Response\Interfaces\IResponse::STATUS_SUCCESS ? 1 : 0);
         $xml->addChild('msg', $Response->getMessage());
         if($data = $Response->getDataPath())
             Util::toXML($data, $xml->addChild('response'));
@@ -87,7 +87,7 @@ final class ResponseUtil {
 
     // Static
 
-    static function get(IResponse $Response) {
+    static function get(\CPath\Framework\Response\Interfaces\IResponse $Response) {
         return new static($Response);
     }
 }

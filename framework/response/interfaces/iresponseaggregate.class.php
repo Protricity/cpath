@@ -5,11 +5,11 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response;
+namespace CPath\Framework\Response\Interfaces;
 
 interface IResponseAggregate {
     /**
-     * @return IResponse
+     * @return \CPath\Framework\Response\Interfaces\IResponse
      */
     function createResponse();
 }

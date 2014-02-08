@@ -13,8 +13,8 @@ use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 class API_Post extends API_Base {
 
@@ -47,9 +47,9 @@ class API_Post extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
         $T = $this->getTable();
 
         foreach($this->getHandlers() as $Handler)

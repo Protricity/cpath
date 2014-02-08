@@ -9,9 +9,9 @@ namespace CPath\Route;
 
 use CPath\Compare\IComparable;
 use CPath\Framework\Interfaces\Constructable\IConstructable;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\CodedException;
+use CPath\Framework\Response\Exceptions\CodedException;
 
 
 /** Thrown when a valid route could not find a corresponding handler */
@@ -51,15 +51,15 @@ interface IRoute extends IConstructable, IComparable
 
     /**
      * Load a buildable instance of the route destination
-     * @return IHandler
+     * @return \CPath\Framework\Render\Interfaces\IRender
      */
     function loadHandler();
 
     /**
      * Match the destination to the route and return an instance of the destination object
      * Note: this method should throw an exception if the requested route (method + path) didn't match
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
-     * @return IHandler
+     * @param IRequest $Request the request to render
+     * @return \CPath\Framework\Render\Interfaces\IRender
      * @throws InvalidRouteException if the requested route (method + path) didn't match
      */
     //function routeRequestToHandler(IRequest $Request);

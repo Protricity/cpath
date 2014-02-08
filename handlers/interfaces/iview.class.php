@@ -8,10 +8,10 @@
 namespace CPath\Handlers\Interfaces;
 
 
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-interface IView extends IHandler {
+interface IView extends \CPath\Framework\Render\Interfaces\IRender {
 
     /**
      * Render the html body
@@ -25,7 +25,7 @@ interface IView extends IHandler {
      * @param IRequest $Request
      * @return mixed
      */
-    function renderHead(\CPath\Framework\Request\Interfaces\IRequest $Request);
+    function renderHead(IRequest $Request);
 
     /**
      * Return the view theme or null if none exists

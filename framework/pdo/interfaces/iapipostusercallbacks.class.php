@@ -9,10 +9,10 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\Api\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IAPIPostUserCallbacks {
 
@@ -21,7 +21,7 @@ interface IAPIPostUserCallbacks {
      * Note: Leave empty if unused.
      * @param Array &$fields the existing API fields to modify
      * @return IField[]|NULL return an array of prepared fields to use or NULL to ignore.
-     * @throws InvalidAPIException
+     * @throws APIException
      */
     function preparePostUserFields(Array &$fields);
 
@@ -29,8 +29,8 @@ interface IAPIPostUserCallbacks {
      * Perform on successful API_Get execution
      * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $NewUser the returned model
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Framework\Response\IResponse $Response
+     * @return \CPath\Framework\Response\IResponse|null
      */
     function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, IResponse $Response);
 }

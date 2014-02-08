@@ -5,15 +5,15 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Interfaces;
+namespace CPath\Framework\Render\Interfaces;
 
 
 use CPath\Framework\Request\Interfaces\IRequest;
 
-interface IHandler {
+interface IRender {
     /**
      * Render this handler
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
     function render(IRequest $Request);

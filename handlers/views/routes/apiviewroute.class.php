@@ -11,7 +11,7 @@ class APIViewRouteDELETE extends Route {
 
     /**
      * Renders the route destination using an IRequest instance
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
+     * @param IRequest $Request the request to render
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */

@@ -10,7 +10,7 @@ namespace CPath\Framework\PDO\Model;
 use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Interfaces\IJSON;
 use CPath\Interfaces\IXML;
-use CPath\Response\IResponseAggregate;
+use CPath\Framework\Response\Interfaces\IResponseAggregate;
 use CPath\Serializer\ISerializable;
 
 interface IPDOModel extends IResponseAggregate, IJSON, IXML, ISerializable {

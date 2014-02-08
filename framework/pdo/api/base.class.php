@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
-use CPath\Framework\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
@@ -35,7 +35,7 @@ abstract class API_Base extends AbstractAPI {
     }
 
     /**
-     * Returns the route for this IHandler
+     * Returns the route for this IRender
      * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
      */
     function loadRoute() {
@@ -53,14 +53,14 @@ abstract class API_Base extends AbstractAPI {
     /**
      * Set up API fields. Replaces setupAPI()
      * @return void
-     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     * @throws APIException if no PRIMARY key column or alternative columns are available
      */
     abstract protected function setupFields();
 
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
-     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     * @throws APIException if no PRIMARY key column or alternative columns are available
      * @throws SecurityPolicyNotFoundException if no security policy was found and ::SECURITY_DISABLED was not set for the model
      */
     final protected function setupAPI() {

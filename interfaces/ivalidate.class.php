@@ -8,7 +8,7 @@
 namespace CPath\Interfaces;
 
 
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 
 interface IValidate {
     /**
@@ -18,7 +18,7 @@ interface IValidate {
      * @param int $filter the filter id to use
      * @param null|mixed $options additional filter options
      * @return mixed the value of the filtered variable
-     * @throws ValidationException when the input fails to validate
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException when the input fails to validate
      */
     function validateInput($variable, $filter, $options=NULL);
 }

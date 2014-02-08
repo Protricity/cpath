@@ -5,11 +5,12 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response;
+namespace CPath\Framework\Response\Types;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Compare\NotEqualException;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 

@@ -18,7 +18,7 @@ use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IDatabase;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
 use CPath\Route\IRoute;
@@ -26,7 +26,7 @@ use CPath\Route\Route;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
+abstract class PDODatabase extends \PDO implements IDataBase, IRender {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -141,7 +141,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
         return $this;
     }
 
-    // Implement IHandler
+    // Implement IRender
 
     function render(IRequest $Request) {
         if(!Base::isCLI() && !headers_sent())
@@ -180,7 +180,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IHandler {
     }
 
     /**
-     * Returns the route for this IHandler
+     * Returns the route for this IRender
      * @return IRoute
      */
     function loadRoute() {

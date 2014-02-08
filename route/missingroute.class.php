@@ -9,7 +9,7 @@ namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Compare\NotEqualException;
-use CPath\Response\IResponseCode;
+use CPath\Framework\Response\Interfaces\IResponseCode;
 
 /**
  * Class MissingRoute - a placeholder for missing routes

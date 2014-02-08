@@ -10,7 +10,7 @@ use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 use CPath\Route\RouteUtil;
@@ -55,7 +55,7 @@ class APIView extends AbstractAPIView {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {

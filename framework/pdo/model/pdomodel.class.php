@@ -9,8 +9,8 @@ namespace CPath\Framework\PDO\Model;
 
 use CPath\Config;
 use CPath\Framework\PDO\Columns\PDOColumn;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 use CPath\Serializer\ISerializable;
 use CPath\Util;
 
@@ -68,7 +68,7 @@ abstract class PDOModel implements IPDOModel {
     }
 
     /**
-     * @return IResponse
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
      */
     public function createResponse() {
         return new Response("Retrieved " . $this, true, $this);

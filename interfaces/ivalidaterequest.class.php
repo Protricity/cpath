@@ -12,7 +12,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 interface IValidateRequest {
     /**
      * Validate and return an IRequest
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to validate and modify
+     * @param IRequest $Request the request to validate and modify
      * @return void
      */
     function validateRequest(IRequest $Request);

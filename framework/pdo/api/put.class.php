@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
-use CPath\Framework\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
@@ -18,7 +18,8 @@ use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 class API_Put extends API_Base {
 
@@ -67,13 +68,13 @@ class API_Put extends API_Base {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
-     * @throws InvalidAPIException if multiple duplicate rows were found
+     * @throws \CPath\Framework\Api\Exceptions\APIException if multiple duplicate rows were found
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
         $Table = $this->getTable();
 
         foreach($this->getHandlers() as $Handler)
@@ -108,7 +109,7 @@ class API_Put extends API_Base {
                 throw new ModelNotFoundException("ERROR: Duplicate row couldn't be found. Adjust your search fields: " . implode(', ', $this->mColumns));
 
             if($Query->fetch())
-                throw new InvalidAPIException("ERROR: Multiple models found. Adjust your search fields: " . implode(', ', $this->mColumns));
+                throw new APIException("ERROR: Multiple models found. Adjust your search fields: " . implode(', ', $this->mColumns));
 
             foreach($this->getHandlers() as $Handler)
                 if($Handler instanceof IWriteAccess)

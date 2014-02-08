@@ -13,9 +13,9 @@ use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Session\SessionNotFoundException;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\ExceptionResponse;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 interface IPostLogoutExecute {
 
@@ -23,8 +23,8 @@ interface IPostLogoutExecute {
      * Perform on successful API_Get execution
      * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User the logged out user account instance
      * @param IRequest $Request
-     * @param \CPath\Response\IResponse $Response
-     * @return \CPath\Response\IResponse|null
+     * @param \CPath\Framework\Response\Interfaces\IResponse $Response
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|null
      */
     function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
 }
@@ -46,7 +46,7 @@ class API_PostUserLogout extends API_Base {
 
     protected function setupFields() {
         //$this->addField('password', new RequiredParam("Password"));
-        $this->generateFieldShorts();
+        //$this->generateFieldShorts();
     }
 
     /**
@@ -62,9 +62,9 @@ class API_PostUserLogout extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
         $Session = $this->mTable->session()->loadBySession();
         $User = $this->mTable->loadBySession(true, false);
         try {

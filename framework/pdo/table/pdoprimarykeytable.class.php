@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Table;
 
 use CPath\Cache\Cache;
 use CPath\Config;
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Log;
@@ -88,7 +88,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * @param array|mixed $row column value pairs to insert into new row
      * @return PDOPrimaryKeyModel the created model instance
      * @throws ModelAlreadyExistsException
-     * @throws ValidationException if a column fails to validate
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a column fails to validate
      */
     final function createAndLoad($row) {
         static::createFromArray($row);
@@ -100,7 +100,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * @param array|mixed $row column value pairs to insert into new row
      * @return PDOPrimaryKeyModel the created model instance
      * @throws ModelAlreadyExistsException
-     * @throws ValidationException if a column fails to validate
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a column fails to validate
      */
     final function createOrLoad($row) {
         $Model = static::search()

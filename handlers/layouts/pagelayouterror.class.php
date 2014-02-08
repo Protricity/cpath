@@ -15,7 +15,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Add additional <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @return void
      */
     abstract protected function addHeadFields(IRequest $Request);
@@ -26,7 +26,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Set up <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      */
     final protected function setupHeadFields(IRequest $Request) {
         $this->setTitle(Describable::get($this->mException)->getTitle());
@@ -35,7 +35,7 @@ abstract class PageLayoutError extends PageLayout {
 
     /**
      * Render the main view content
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderViewContent(IRequest $Request)

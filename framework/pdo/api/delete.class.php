@@ -15,8 +15,8 @@ use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 class API_Delete extends API_Get implements IAPIGetCallbacks {
 
@@ -51,8 +51,8 @@ class API_Delete extends API_Get implements IAPIGetCallbacks {
      * Perform on successful API_Get execution
      * @param PDOPrimaryKeyModel $Model the returned model
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Framework\Response\IResponse $Response
+     * @return \CPath\Framework\Response\IResponse|null
      */
     function onGetExecute(PDOPrimaryKeyModel $Model, IRequest $Request, IResponse $Response) {
 

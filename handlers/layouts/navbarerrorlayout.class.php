@@ -23,14 +23,14 @@ abstract class NavBarErrorLayout extends NavBarLayout {
 
     /**
      * Add additional <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @return void
      */
     abstract protected function addHeadFields(IRequest $Request);
 
     /**
      * Set up <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @return void
      */
     final protected function setupHeadFields(IRequest $Request) {

@@ -20,5 +20,5 @@ interface ISearchTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSearchContent(\CPath\Framework\Request\Interfaces\IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL);
+    function renderSearchContent(IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL);
 }

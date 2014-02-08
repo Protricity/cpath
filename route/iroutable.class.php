@@ -8,12 +8,12 @@
 namespace CPath\Route;
 
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 
-interface IRoutable extends IHandler, IBuildable {
+interface IRoutable extends IRender, IBuildable {
 
     /**
-     * Returns the route for this IHandler
+     * Returns the route for this IRender
      * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
      */
     function loadRoute();

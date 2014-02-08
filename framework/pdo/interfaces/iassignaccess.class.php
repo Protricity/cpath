@@ -23,5 +23,5 @@ interface IAssignAccess {
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */
-    function assignAccessID(\CPath\Framework\Request\Interfaces\IRequest $Request, $intent);
+    function assignAccessID(IRequest $Request, $intent);
 }

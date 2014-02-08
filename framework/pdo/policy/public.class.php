@@ -43,7 +43,7 @@ class Policy_Public implements ISecurityPolicy {
      * Assert permission in default API calls 'POST, PATCH, and DELETE'
      * @param PDOModel $Model the Model to assert access upon
      * Note: during POST, $Model has no values
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @param int $intent the read intent.
      * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
      * Note: during IWriteAccess::INTENT_POST, the instance $Model contains no data.
@@ -55,7 +55,7 @@ class Policy_Public implements ISecurityPolicy {
      * Assign Access ID and assert permission in default POST API calls.
      * Typically this involves updating the $Request column (ex. user_id, owner_id) with the correct access identifier before the POST occurs.
      * Additionally, an InvalidPermissionException should be thrown if there is no permission to POST
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */

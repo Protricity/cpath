@@ -10,9 +10,9 @@ use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Compare\NotEqualException;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Response\Response;
+use CPath\Framework\Response\Types\Response;
 
-class SearchResponse extends Response {
+class SearchResponse extends \CPath\Framework\Response\Types\Response {
     private $mQuery, $mTotal;
 
     /**
@@ -21,7 +21,7 @@ class SearchResponse extends Response {
      * @param PDOSelect $Query search query
      */
     function __construct($msg=NULL, PDOSelect $Query) {
-        parent::__construct($msg, true, $Query);
+        \CPath\Framework\Response\Types\parent::__construct($msg, true, $Query);
         $this->mQuery = $Query;
     }
 

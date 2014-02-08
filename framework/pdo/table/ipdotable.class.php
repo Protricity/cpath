@@ -8,9 +8,9 @@
 namespace CPath\Framework\PDO\Table;
 
 use CPath\Interfaces\IBuildable;
-use CPath\Response\ExceptionResponse;
-use CPath\Response\IResponse;
-use CPath\Response\IResponseAggregate;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Interfaces\IResponseAggregate;
 
 interface IPDOTable extends IBuildable
 {

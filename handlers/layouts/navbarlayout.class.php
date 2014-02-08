@@ -30,7 +30,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyHeaderContent(IRequest $Request);
@@ -38,14 +38,14 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderBodyFooterContent(IRequest $Request);
 
     /**
      * Render the navigation bar content
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     abstract protected function renderNavBarContent(IRequest $Request);
@@ -80,7 +80,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 
     /**
      * Render the view body
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     final function renderBody(IRequest $Request) {

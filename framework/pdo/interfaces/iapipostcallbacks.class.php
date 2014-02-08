@@ -11,7 +11,7 @@ namespace CPath\Framework\PDO\Interfaces;
 use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IAPIPostCallbacks {
 
@@ -28,8 +28,8 @@ interface IAPIPostCallbacks {
      * Note: Leave empty if unused.
      * @param PDOModel $NewModel the returned model
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse $Response
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|null
      */
     function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response);
 

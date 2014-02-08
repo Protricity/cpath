@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Interfaces;
 
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 class FieldUtil implements IFieldUtil {
@@ -39,7 +40,7 @@ class FieldUtil implements IFieldUtil {
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails
      */
-    function validate(\CPath\Framework\Request\Interfaces\IRequest $Request, $fieldName) {
+    function validate(IRequest $Request, $fieldName) {
         return $this->mField->validate($Request, $fieldName);
     }
 

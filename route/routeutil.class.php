@@ -7,14 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 use CPath\Config;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
  * Class Route - a route entry
  * @package CPath
  */
-class RouteUtil implements IHandler{
+class RouteUtil implements IRender{
 
     private $mRoute, $mMethod, $mPath;
 
@@ -38,7 +38,7 @@ class RouteUtil implements IHandler{
 
     /**
      * Renders the route destination using an IRequest instance
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
+     * @param IRequest $Request the request to render
      * @return void
      */
     function render(IRequest $Request) {

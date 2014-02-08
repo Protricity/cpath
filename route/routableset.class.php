@@ -9,7 +9,7 @@ namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Interfaces\IBuildable;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
 use Traversable;
@@ -36,7 +36,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
     /**
      * Constructs a new Route Entry
      * @param $routePrefix string the route prefix
-     * @param $destination string|IHandler the handler class for this route
+     * @param $destination string|IRender the handler class for this route
      * @param $_args string|array varargs list of strings for arguments or associative arrays for request fields
      */
     final function __construct($routePrefix, $destination, $_args=NULL) {
@@ -70,15 +70,15 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
     /**
      * Get a buildable instance of the route destination
      * @throws InvalidHandlerException
-     * @return IHandler
+     * @return \CPath\Framework\Render\Interfaces\IRender
      */
     function loadHandler() {
         /** @var IBuildable $dest */
         $dest = $this->getDestination();
         $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
 
-        if(!$Handler instanceof IHandler)
-            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+        if(!$Handler instanceof IRender)
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IRender");
 
         return $Handler;
     }
@@ -111,8 +111,8 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
         $dest = $this->getDestination();
         $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
 
-        if(!$Handler instanceof IHandler)
-            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IHandler");
+        if(!$Handler instanceof IRender)
+            throw new InvalidHandlerException("Destination '{$dest}' is not a valid IRender");
 
         if($Handler instanceof IRoutable) {
             $this->mUsedRoute = $Route = $Handler->loadRoute();
@@ -178,7 +178,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
         return $this->mRoutes;
     }
 
-    function add($prefix, IHandler $Handler, $replace=false) {
+    function add($prefix, IRender $Handler, $replace=false) {
         //$Route = $Handler->loadRoute();
         //if($prefix === null)
         //    $prefix = $Route->getPrefix(); // TODO: good idea?
@@ -236,7 +236,7 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
 
     /**
      * Renders the route destination using an IRequest instance
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the request to render
+     * @param IRequest $Request the request to render
      * @return void
      * @throws InvalidHandlerException if the destination handler was invalid
      */
@@ -310,13 +310,13 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
      * @param mixed $offset <p>
      * The offset to assign the value to.
      * </p>
-     * @param IHandler|IRoute $value <p>
+     * @param \CPath\Framework\Render\Interfaces\IRender|IRoute $value <p>
      * The value to set.
      * </p>
      * @return void
      */
     public function offsetSet($offset, $value) {
-        if($value instanceof IHandler)
+        if($value instanceof IRender)
             $this->add($offset, $value, false);
         else
             $this->addRoute($offset, $value, false);
@@ -338,25 +338,25 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
     // Static
 
     /**
-     * Creates a new RouteSet for an IHandler with multiple routes
-     * @param IHandler $Handler The class instance or class name
-     * @param String $method the route prefix method (GET, POST...) for this IHandler
-     * @param String $path a custom path for this IHandler
+     * Creates a new RouteSet for an IRender with multiple routes
+     * @param \CPath\Framework\Render\Interfaces\IRender $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IRender
+     * @param String $path a custom path for this IRender
      * @return RoutableSet
      */
-    static final function fromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+    static final function fromHandler(IRender $Handler, $method='ANY', $path=NULL) {
         $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
         return new static($prefix, get_class($Handler));
     }
 
     /**
      * Gets the default public route path for this handler
-     * @param IHandler $Handler The class instance or class name
-     * @param String $method the route prefix method (GET, POST...) for this IHandler
-     * @param String $path a custom path for this IHandler
+     * @param IRender $Handler The class instance or class name
+     * @param String $method the route prefix method (GET, POST...) for this IRender
+     * @param String $path a custom path for this IRender
      * @return RoutableSet
      */
-    static final function getPrefixFromHandler(IHandler $Handler, $method='ANY', $path=NULL) {
+    static final function getPrefixFromHandler(IRender $Handler, $method='ANY', $path=NULL) {
         $cls = get_class($Handler);
         if(!$path)
             $path = str_replace('\\', '/', strtolower($cls));

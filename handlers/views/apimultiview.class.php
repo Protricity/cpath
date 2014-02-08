@@ -11,7 +11,7 @@ use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
@@ -30,7 +30,7 @@ class APIMultiView extends AbstractAPIView {
 
     /**
      * @param RoutableSet $Routes
-     * @param IResponse $Response
+     * @param \CPath\Framework\Response\IResponse $Response
      * @param ITheme $Theme
      * @throws \InvalidArgumentException
      */
@@ -118,7 +118,7 @@ class APIMultiView extends AbstractAPIView {
 
     /**
      * Render the header
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {

@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class File implements IHandler{
+class File implements IRender{
     const BUILD_IGNORE = true;
 
     private $mFilePath;

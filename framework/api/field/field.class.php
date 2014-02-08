@@ -10,11 +10,10 @@ namespace CPath\Framework\Api\Field;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\RequiredFieldException;
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\RequiredFieldException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Interfaces;
-use CPath\Framework\CLI\Interfaces\IShortOption;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Validate;
@@ -25,14 +24,11 @@ use CPath\Validate;
  * @package CPath
  * Represents an 'optional' API Field
  */
-class Field implements IField, IHandler, IDescribableAggregate, IShortOption {
+class Field implements IField, IRender, IDescribableAggregate {
 
     const DEFAULT_FLAGS = 0;
 
     private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mFlags = 0, $mValue=null;
-
-    /** @var IShortOption[] */
-    private $mShortOptions = array();
 
     /**
      * Create a new API Field
@@ -65,7 +61,7 @@ class Field implements IField, IHandler, IDescribableAggregate, IShortOption {
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
-     * @throws ValidationException if validation fails
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if validation fails
      * @throws RequiredFieldException if a required field has no value
      */
     function validate(IRequest $Request, $fieldName) {
@@ -84,7 +80,7 @@ class Field implements IField, IHandler, IDescribableAggregate, IShortOption {
     /**
      * Test required field value
      * @param $value
-     * @throws Interfaces\RequiredFieldException
+     * @throws \CPath\Framework\Api\Exceptions\RequiredFieldException
      */
     protected function validateRequired($value) {
         if(!$value && $value !== '0')
@@ -164,23 +160,4 @@ class Field implements IField, IHandler, IDescribableAggregate, IShortOption {
      */
     function getFieldFlags() { return $this->mFlags; }
 
-    /**
-     * Get available short options for the object
-     * @param $shortOption
-     */
-    function addShortOption($shortOption) {
-        $this->mShortOptions[] = $shortOption;
-    }
-
-    /**
-     * @param $shortOption
-     * @return bool
-     */
-    function hasShortOption($shortOption)
-    {
-        foreach($this->mShortOptions as $Option)
-            if($Option->hasShortOption($shortOption))
-                return true;
-        return false;
-    }
 }

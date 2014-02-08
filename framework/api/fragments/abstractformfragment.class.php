@@ -8,11 +8,11 @@ use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 
-abstract class AbstractFormFragment implements IHandler, IViewConfig{
+abstract class AbstractFormFragment implements IRender, IViewConfig{
 
     private $mTheme;
 

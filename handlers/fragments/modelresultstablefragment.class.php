@@ -10,13 +10,13 @@ use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Interfaces\IHandler;
+use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Framework\Request\Types\Web;
 
-class ModelResultsTableFragment implements IHandler, IViewConfig{
+class ModelResultsTableFragment implements IRender, IViewConfig{
 
     private $mTheme;
 
@@ -40,7 +40,7 @@ class ModelResultsTableFragment implements IHandler, IViewConfig{
 
     /**
      * Render this handler
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @param \CPath\Framework\PDO\Response\SearchResponse $Response
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void

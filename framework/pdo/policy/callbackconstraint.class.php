@@ -94,7 +94,7 @@ class Policy_CallbackConstraint implements ISecurityPolicy {
      * Assign Access ID and assert permission in default POST API calls.
      * Typically this involves updating the $Request column (ex. user_id, owner_id) with the correct access identifier before the POST occurs.
      * Additionally, an InvalidPermissionException should be thrown if there is no permission to POST
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param IRequest $Request
      * @param int $intent the read intent. Typically IAssignAccess::INTENT_POST
      * @throws InvalidPermissionException if the user does not have permission to create this Model
      */

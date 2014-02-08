@@ -18,14 +18,14 @@ interface IPageTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderBodyStart(\CPath\Framework\Request\Interfaces\IRequest $Request, IAttributes $Attr=NULL);
+    function renderBodyStart(IRequest $Request, IAttributes $Attr=NULL);
 
     /**
      * Render the end of an html <body>.
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderBodyEnd(\CPath\Framework\Request\Interfaces\IRequest $Request);
+    function renderBodyEnd(IRequest $Request);
 
     /**
      * Render the start of an html body section.
@@ -37,11 +37,11 @@ interface IPageTheme {
 
     /**
      * Render the end of an html body section.
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @param String|Null $className optional class name for this section
      * @return void
      */
-    function renderSectionEnd(\CPath\Framework\Request\Interfaces\IRequest $Request, $className=NULL);
+    function renderSectionEnd(IRequest $Request, $className=NULL);
 
 
 }

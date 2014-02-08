@@ -19,7 +19,7 @@ interface IPDOModelRender {
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderModel(PDOModel $Model, \CPath\Framework\Request\Interfaces\IRequest $Request);
+    function renderModel(PDOModel $Model, IRequest $Request);
 
     /**
      * Render with no PDOModel instance

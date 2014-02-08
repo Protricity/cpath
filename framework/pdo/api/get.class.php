@@ -9,7 +9,9 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Framework\Api\Field\RequiredParam;
-use CPath\Framework\Api\Interfaces\InvalidAPIException;
+use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
@@ -18,10 +20,11 @@ use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 
-class API_Get extends API_Base {
+class API_Get extends API_Base implements IRenderHtml {
     private $mSearchColumns;
     private $mColumns;
     private $mIDField;
@@ -48,14 +51,14 @@ class API_Get extends API_Base {
     /**
      * Set up API fields. Lazy-loaded when fields are accessed
      * @return void
-     * @throws InvalidAPIException if no PRIMARY key column or alternative columns are available
+     * @throws \CPath\Framework\Api\Exceptions\APIException if no PRIMARY key column or alternative columns are available
      */
     final protected function setupFields() {
         $T = $this->getTable();
         $this->mColumns = $T->findColumns($this->mSearchColumns);
 
         if(!$this->mColumns)
-            throw new InvalidAPIException($T->getModelName()
+            throw new APIException($T->getModelName()
                 . " GET/PATCH/DELETE APIs must have a ::PRIMARY or ::COLUMN_ID column or provide at least one alternative column");
 
         $keys = array_keys($this->mColumns);
@@ -82,10 +85,10 @@ class API_Get extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return PDOPrimaryKeyModel|IResponse the found model which implements IResponseAggregate
+     * @return PDOPrimaryKeyModel|\CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the found model which implements IResponseAggregate
      * @throws ModelNotFoundException if the Model was not found
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
 
         $T = $this->getTable();
         $id = $Request->pluck($this->mIDField);
@@ -134,7 +137,8 @@ class API_Get extends API_Base {
             if($Handler instanceof IPDOModelRender)
             {
                 try {
-                    $Model = $this->executeOrThrow($Request)->getDataPath();
+                    $Util = new APIExecuteUtil($this);
+                    $Model = $Util->executeOrThrow($Request)->getDataPath();
                     $Handler->renderModel($Model, $Request);
                     return;
                 } catch (\Exception $ex) {
@@ -143,6 +147,7 @@ class API_Get extends API_Base {
                 }
             }
 
-        parent::renderHTML($Request);
+        $Util = new APIRenderUtil($this);
+        $Util->renderHTML($Request);
     }
 }

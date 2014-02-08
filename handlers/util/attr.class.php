@@ -22,7 +22,7 @@ class Attr implements IAttributes {
 
     /**
      * Render this handler
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest instance for this render
      * @return void|String always returns null
      */
     function render(IRequest $Request) {

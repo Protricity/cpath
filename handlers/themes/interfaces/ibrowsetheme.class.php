@@ -19,5 +19,5 @@ interface IBrowseTheme {
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderBrowseContent(\CPath\Framework\Request\Interfaces\IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL);
+    function renderBrowseContent(IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL);
 }

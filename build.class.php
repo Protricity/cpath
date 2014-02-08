@@ -13,7 +13,7 @@ use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\Response;
+use CPath\Framework\Response\Types\Response;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
@@ -42,10 +42,10 @@ class Build extends AbstractAPI implements IRoutable {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the IRoute instance for this render which contains the request and args
      * @return Response the api call response with data, message, and status
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
         static $built = false;
         if($built)
             return new Response(false, "Build can only occur once per execution. Skipping Build...");
@@ -76,7 +76,7 @@ class Build extends AbstractAPI implements IRoutable {
     }
 
     /**
-     * Returns the route for this IHandler
+     * Returns the route for this IRender
      * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
      */
     function loadRoute() {

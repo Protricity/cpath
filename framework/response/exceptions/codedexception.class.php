@@ -5,9 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response;
+namespace CPath\Framework\Response\Exceptions;
 
-class CodedException extends \Exception implements IResponseCode {
+
+class CodedException extends \Exception implements \CPath\Framework\Response\Interfaces\IResponseCode {
     const DEFAULT_CODE = 400;
 
     function __construct($message, $statusCode=null, $previous=null) {

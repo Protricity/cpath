@@ -9,7 +9,7 @@ namespace CPath\Framework\Api\Field;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Interfaces\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 use CPath\Model\FileUpload;
@@ -39,7 +39,7 @@ class FileUploadField extends Field {
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return FileUpload|Array an instance of the file upload data or an array of instances
-     * @throws ValidationException if validation fails
+     * @throws \CPath\Framework\Api\Exceptions\ValidationException if validation fails
      */
     function validate(IRequest $Request, $fieldName) {
         $File = $Request->getFileUpload($fieldName);

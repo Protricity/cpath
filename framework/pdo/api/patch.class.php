@@ -14,8 +14,8 @@ use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
-use CPath\Response\Response;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\Response;
 
 class API_Patch extends API_Get implements IAPIGetCallbacks {
 
@@ -48,8 +48,8 @@ class API_Patch extends API_Get implements IAPIGetCallbacks {
      * Perform on successful API_Get execution
      * @param PDOPrimaryKeyModel $UpdateModel the returned model
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|void
+     * @param \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse $Response
+     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|void
      */
     final function onGetExecute(PDOPrimaryKeyModel $UpdateModel, IRequest $Request, IResponse $Response) {
 

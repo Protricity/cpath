@@ -10,6 +10,8 @@ namespace CPath\Framework\PDO;
 
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
@@ -21,10 +23,11 @@ use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\SearchResponse;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Response\IResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
 
-class API_GetBrowse extends API_Base {
+class API_GetBrowse extends API_Base implements IRenderHtml {
 
     private $mLimit, $mLimitMax;
 
@@ -69,7 +72,7 @@ class API_GetBrowse extends API_Base {
      * @throws ModelNotFoundException if the Model was not found
      * @throws \Exception if no valid columns were found
      */
-    final protected function doExecute(IRequest $Request) {
+    final function execute(IRequest $Request) {
 
         $T = $this->getTable();
         $limit = $Request->pluck('limit');
@@ -119,8 +122,9 @@ class API_GetBrowse extends API_Base {
             if($Handler instanceof IPDOModelSearchRender)
             {
                 try {
+                    $Util = new APIExecuteUtil($this);
                     /** @var SearchResponse $Response */
-                    $Response = $this->executeOrThrow($Request);
+                    $Response = $Util->executeOrThrow($Request);
                     $Handler->renderSearch($Request, $Response);
                     return;
                 } catch (\Exception $ex) {
@@ -129,7 +133,8 @@ class API_GetBrowse extends API_Base {
                 }
             }
 
-        parent::renderHTML($Request);
+        $Util = new APIRenderUtil($this);
+        $Util->renderHTML($Request);
     }
 }
 
