@@ -13,9 +13,10 @@ use CPath\Framework\Request\Interfaces\IRequest;
 interface IRenderXML {
 
     /**
-     * Sends headers if necessary, executes the request, and renders an IResponse as XML
+     * Render request as xml
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param string $rootElementName Optional name of the root element
      * @return void
      */
-    function renderXML(IRequest $Request);
+    function renderXML(IRequest $Request, $rootElementName='root');
 }

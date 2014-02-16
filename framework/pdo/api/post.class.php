@@ -14,7 +14,7 @@ use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
 
 class API_Post extends API_Base {
 
@@ -47,7 +47,7 @@ class API_Post extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
         $T = $this->getTable();
@@ -67,7 +67,7 @@ class API_Post extends API_Base {
             $NewModel = $T->createAndFill($row);
         }
 
-        $Response = new Response("Created " . $NewModel . " Successfully.", true, $NewModel);
+        $Response = new DataResponse("Created " . $NewModel . " Successfully.", true, $NewModel);
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAPIPostCallbacks)

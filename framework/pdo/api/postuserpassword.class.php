@@ -9,16 +9,16 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Base;
-use CPath\Framework\Api\Field\PasswordField;
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Field\PasswordField;
 use CPath\Framework\Api\Validation\CallbackValidation;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\User\Predicates\IsAdmin;
-use CPath\Framework\User\Util\UserUtil;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\User\Predicates\IsAdmin;
+use CPath\Framework\User\Util\UserUtil;
 
 class API_PostUserPassword extends API_Base {
 
@@ -91,13 +91,13 @@ class API_PostUserPassword extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
+     * @return IResponse the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
         $T = $this->mTable;
         $pass = $Request[self::FIELD_PASSWORD];
         $SessionUser = $T->loadBySession(true, false);
         $SessionUser->changePassword($pass);
-        return new Response("User password changed successfully", false, $SessionUser);
+        return new DataResponse("User password changed successfully", false, $SessionUser);
     }
 }

@@ -118,11 +118,11 @@ abstract class AbstractBuildPDOColumn
                 case 'required':
                     $this->Flags |= PDOColumn::FLAG_REQUIRED;
                     break;
-                case 'o':
-                case 'optional':
-                    $this->Flags &= ~PDOColumn::FLAG_REQUIRED;
-                    $this->Flags |= PDOColumn::FLAG_OPTIONAL;
-                    break;
+//                case 'o':
+//                case 'optional':
+//                    $this->Flags &= ~PDOColumn::FLAG_REQUIRED;
+//                    $this->Flags |= PDOColumn::FLAG_OPTIONAL;
+//                    break;
                 case 'c':
                 case 'comment':
                     $this->Comment = $this->req($args);

@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table;
 
-use CPath\Interfaces\IBuildable;
-use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Interfaces\IBuildable;
 
 interface IPDOTable extends IBuildable
 {

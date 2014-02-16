@@ -12,7 +12,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IRender {
     /**
-     * Render this handler
+     * Render this request
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */

@@ -19,7 +19,7 @@ use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
 
 class API_Put extends API_Base {
 
@@ -69,7 +69,7 @@ class API_Put extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
      * @throws \CPath\Framework\Api\Exceptions\APIException if multiple duplicate rows were found
@@ -93,7 +93,7 @@ class API_Put extends API_Base {
                 $NewModel = $Table->createAndFill($row);
             }
 
-            $Response = new Response("Created " . $NewModel . " Successfully.", true, $NewModel);
+            $Response = new DataResponse("Created " . $NewModel . " Successfully.", true, $NewModel);
 
             foreach($this->getHandlers() as $Handler)
                 if($Handler instanceof IAPIPostCallbacks)
@@ -120,9 +120,9 @@ class API_Put extends API_Base {
                     $FoundModel->updateColumn($Column->getName(), $row[$Column->getName()], false);
 
             if($c = $FoundModel->commitColumns())
-                $Response = new Response("Found and updated " . $FoundModel . " ({$c}) Successfully.", true, $FoundModel);
+                $Response = new DataResponse("Found and updated " . $FoundModel . " ({$c}) Successfully.", true, $FoundModel);
             else
-                $Response = new Response("Found " . $FoundModel . " But no updates were made.", true, $FoundModel);
+                $Response = new DataResponse("Found " . $FoundModel . " But no updates were made.", true, $FoundModel);
         }
 
         return $Response;

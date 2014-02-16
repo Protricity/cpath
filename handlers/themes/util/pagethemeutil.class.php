@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Util;
 
-use CPath\Handlers\Themes\Interfaces\IPageTheme;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Handlers\Themes\Interfaces\IPageTheme;
 use CPath\Misc\RenderIndents as RI;
 
 

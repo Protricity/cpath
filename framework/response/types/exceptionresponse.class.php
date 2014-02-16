@@ -15,7 +15,7 @@ use CPath\Interfaces\IXML;
 use CPath\Util;
 
 
-class ExceptionResponse extends Response {
+class ExceptionResponse extends DataResponse {
     /** @var \Exception */
     private $mEx;
 

@@ -8,14 +8,14 @@
 namespace CPath\Scripts;
 use CPath\Base;
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Types\AbstractAPI;
-use CPath\Interfaces\IBuildable;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Log;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
+use CPath\Interfaces\IBuildable;
+use CPath\Log;
 
 class Install extends AbstractAPI {
 
@@ -38,10 +38,10 @@ class Install extends AbstractAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
-     * @throws \CPath\Framework\Api\Exceptions\APIException if no config file could be installed
+     * @return IResponse the api call response with data, message, and status
+     * @throws APIException if no config file could be installed
      */
-    protected function execute(IRequest $Request)
+    function execute(IRequest $Request)
     {
         Log::u(__CLASS__, "Installing Config File");
 
@@ -57,14 +57,14 @@ class Install extends AbstractAPI {
         if(file_exists($p = $path . 'config.default.php')) {
             if(!copy($p, $targetPath))
                 throw new APIException("Could not copy ($p) to ($targetPath)");
-            return new Response("Copied config from: " . $p);
+            return new DataResponse("Copied config from: " . $p);
         }
         Log::u(__CLASS__, "Default config file not found: " . $p);
 
         if(file_exists($p = __DIR__ . '/assets/config.default.php')) {
             if(!copy($p, $targetPath))
                 throw new APIException("Could not copy ($p) to ($targetPath)");
-            return new Response("Copied config from: " . $p);
+            return new DataResponse("Copied config from: " . $p);
         }
         Log::u(__CLASS__, "Default config file not found: " . $p);
 

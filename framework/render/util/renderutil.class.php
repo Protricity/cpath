@@ -67,10 +67,10 @@ class RenderUtil implements IRender {
             }
         }
 
-        if($T instanceof IRender) {
-            $T->render($Request);
-            return;
-        }
+//        if($T instanceof IRender) { // NO NO !
+//            $T->render($Request);
+//            return;
+//        }
 
         if($T instanceof IRenderText) {
             $T->renderText($Request);

@@ -3,11 +3,11 @@ namespace CPath\Handlers\Fragments;
 
 use CPath\Describable\Describable;
 use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Framework\Render\Interfaces\IRender;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 class ModelTableFragment implements IRender{
 

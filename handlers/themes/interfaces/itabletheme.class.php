@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Interfaces;
 
-use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Handlers\Interfaces\IAttributes;
 
 interface ITableTheme {
 

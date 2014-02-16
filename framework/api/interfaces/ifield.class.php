@@ -6,9 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Interfaces;
-use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 /**

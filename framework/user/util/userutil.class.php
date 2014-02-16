@@ -10,11 +10,11 @@ namespace CPath\Framework\User\Util;
 
 use CPath\Describable\Describable;
 use CPath\Framework\User\Interfaces\IUser;
+use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
+use CPath\Framework\User\Role\Exceptions\RoleException;
 use CPath\Framework\User\Role\Interfaces\IRole;
 use CPath\Framework\User\Role\Interfaces\IRoleCollection;
 use CPath\Framework\User\Role\Interfaces\IRoleProfile;
-use CPath\Framework\User\Role\InvalidRoleException;
-use CPath\Framework\User\Role\RoleException;
 
 class UserUtil implements IUserUtil {
     private $mUser;

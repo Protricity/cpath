@@ -11,11 +11,11 @@ use CPath\Base;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Task\ITask;
 use CPath\Handlers\API\Fragments\SimpleFormFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 
 abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {

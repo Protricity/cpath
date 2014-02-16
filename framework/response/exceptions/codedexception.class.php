@@ -16,7 +16,7 @@ class CodedException extends \Exception implements \CPath\Framework\Response\Int
     }
 
     /**
-     * Get the Response status code
+     * Get the DataResponse status code
      * @return int
      */
     function getStatusCode() {

@@ -28,8 +28,8 @@ interface IAPIPostCallbacks {
      * Note: Leave empty if unused.
      * @param PDOModel $NewModel the returned model
      * @param IRequest $Request
-     * @param \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse $Response
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|null
+     * @param IResponse $DataResponse
+     * @return IResponse|null
      */
     function onPostExecute(PDOModel $NewModel, IRequest $Request, IResponse $Response);
 

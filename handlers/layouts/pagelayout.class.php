@@ -1,9 +1,9 @@
 <?php
 namespace CPath\Handlers\Layouts;
 
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IRenderContent;
 use CPath\Handlers\View;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class PageLayout extends View implements IRenderContent {
 

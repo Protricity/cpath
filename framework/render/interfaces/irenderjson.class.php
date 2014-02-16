@@ -13,7 +13,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 interface IRenderJSON {
 
     /**
-     * Sends headers if necessary, executes the request, and renders an IResponse as JSON
+     * Render request as JSON
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */

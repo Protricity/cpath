@@ -9,9 +9,8 @@ namespace CPath\Framework\Api\Field;
 
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Exceptions\RequiredFieldException;
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Interfaces;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;

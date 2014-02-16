@@ -10,9 +10,9 @@ namespace CPath\Misc;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLI;
-use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\Response\Types\ExceptionResponse;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -28,7 +28,7 @@ class ApiTester {
 
     /**
      * @param array $request
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
+     * @return IResponse
      * @throws APIFailedException
      * @throws \Exception
      */
@@ -37,7 +37,7 @@ class ApiTester {
             $this->mRequest->merge($request);
         $Response = $this->mAPI->execute($this->mRequest);
         if(!($Response instanceof IResponse))
-            $Response = new Response(true, "API executed successfully", $Response);
+            $Response = new DataResponse(true, "API executed successfully", $Response);
         if($Response instanceof ExceptionResponse)
             throw $Response->getException();
         if($Response->getStatusCode() != IResponse::STATUS_SUCCESS)
@@ -60,7 +60,7 @@ class ApiTester {
      * @param $args
      * @param array $request
      * @internal param $_cmd
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
+     * @return IResponse
      */
     static function cmd($args, Array $request=NULL) {
         return self::fromCMD($args, $request)->test();

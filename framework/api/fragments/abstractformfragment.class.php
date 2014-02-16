@@ -3,13 +3,13 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Framework\Render\Interfaces\IRender;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 
 abstract class AbstractFormFragment implements IRender, IViewConfig{

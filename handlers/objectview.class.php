@@ -3,8 +3,8 @@ namespace CPath\Handlers;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 
 abstract class ObjectView extends View{
     const FIELD_TITLE = 'title';

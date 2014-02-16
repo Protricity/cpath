@@ -3,9 +3,9 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
 use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 class APIDebugFormFragment extends APIFormFragment{
 
@@ -24,7 +24,7 @@ class APIDebugFormFragment extends APIFormFragment{
         $Util->button('TEXT', 'form-button-submit-text');
         $Util->submit('POST', 'form-button-submit-post');
         $Util->button('Update URL', 'form-button-submit-post', array('onclick' => 'APIView.updateURL(this.form);'));
-        $Util->button('Response', 'form-button-submit-post', array('onclick' => 'jQuery(".apiview-response").toggle();'));
+        $Util->button('DataResponse', 'form-button-submit-post', array('onclick' => 'jQuery(".apiview-response").toggle();'));
         if(false) {
         ?>
         <input type="button" value="JSON" class="form-button-submit-json"/>

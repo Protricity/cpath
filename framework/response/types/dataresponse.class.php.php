@@ -14,7 +14,7 @@ use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 
-class Response extends ArrayObject implements IResponse, IComparable, IDescribable {
+class DataResponse extends ArrayObject implements IResponse, IComparable, IDescribable {
     private $mCode, $mData=array(), $mMessage, $mEnableLog = false;
     /** @var ILogEntry[] */
     private $mLogs=array();
@@ -68,6 +68,10 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
         return $this;
     }
 
+    function getData() {
+        return $this->mData;
+    }
+
     /**
      * Return a reference to this object's associative array
      * @return array the associative array
@@ -100,50 +104,17 @@ class Response extends ArrayObject implements IResponse, IComparable, IDescribab
         return $this->mLogs;
     }
 
-    function sendHeaders($mimeType=NULL) {
-        ResponseUtil::get($this)
-            ->sendHeaders($mimeType);
-    }
-
-    function toJSON(Array &$JSON) {
-        ResponseUtil::get($this)
-            ->toJSON($JSON);
-    }
-
-    function toXML(\SimpleXMLElement $xml) {
-        ResponseUtil::get($this)
-            ->toXML($xml);
-    }
-
-    /**
-     * Render Object as HTML
-     * @return void
-     */
-    function renderHtml() {
-        ResponseUtil::get($this)
-            ->renderHtml($this);
-    }
-
-    /**
-     * Render Object as Plain Text
-     * @return void
-     */
-    function renderText() {
-        ResponseUtil::get($this)
-            ->renderText($this);
-    }
-
     /**
      * Compare two instances of this object
-     * @param IComparable|Response $obj the object to compare against $this
+     * @param IComparable|DataResponse $obj the object to compare against $this
      * @param IComparator $C the IComparator instance
      * @throws NotEqualException if the objects were not equal
      * @return void
      */
     function compareTo(IComparable $obj, IComparator $C) {
-        $C->compareScalar($this->mCode, $obj->mCode, "Response Status");
-        $C->compareScalar($this->mMessage, $obj->mMessage, "Response Message");
-        $C->compare($this->mData, $obj->mData, "Response Data");
+        $C->compareScalar($this->mCode, $obj->mCode, "DataResponse Status");
+        $C->compareScalar($this->mMessage, $obj->mMessage, "DataResponse Message");
+        $C->compare($this->mData, $obj->mData, "DataResponse Data");
     }
 
     /**

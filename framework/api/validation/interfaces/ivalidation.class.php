@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Validation\Interfaces;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IValidation {

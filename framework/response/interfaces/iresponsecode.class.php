@@ -13,8 +13,11 @@ interface IResponseCode {
     const STATUS_NOT_FOUND = 404;
     const STATUS_CONFLICT = 409;
 
+    const JSON_CODE = 'code';
+
+
     /**
-     * Get the Response status code
+     * Get the DataResponse status code
      * @return int
      */
     function getStatusCode();

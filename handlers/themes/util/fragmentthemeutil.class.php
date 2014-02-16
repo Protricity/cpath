@@ -9,9 +9,9 @@ namespace CPath\Handlers\Themes\Util;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Fragments\IRenderFragmentContent;
 use CPath\Handlers\Themes\Interfaces\IFragmentTheme;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 

@@ -2,8 +2,8 @@
 namespace CPath\Handlers\Views\Routes;
 
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Handlers\Views\APIView;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Handlers\Views\APIView;
 use CPath\Route\InvalidHandlerException;
 use CPath\Route\Route;
 

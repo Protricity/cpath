@@ -8,7 +8,7 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\PDO\Response\SearchResponse;
+use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IPDOModelSearchRender {
@@ -16,10 +16,10 @@ interface IPDOModelSearchRender {
     /**
      * Render a PDOModel instance on successful API_Get execution
      * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Framework\PDO\Response\SearchResponse $Response
+     * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
      * @return void
      */
-    function renderSearch(IRequest $Request, SearchResponse $Response);
+    function renderSearch(IRequest $Request, PDOSearchResponse $Response);
 
     /**
      * Render with no PDOModel instance

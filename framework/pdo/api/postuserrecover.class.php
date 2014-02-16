@@ -51,6 +51,6 @@ class API_PostUserRecover extends API_Base {
      * @return IResponse|mixed the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
-        //return new Response("User password changed successfully", false, $User);
+        //return new DataResponse("User password changed successfully", false, $User);
     }
 }

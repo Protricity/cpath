@@ -8,8 +8,8 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -29,8 +29,8 @@ interface IAPIPostUserCallbacks {
      * Perform on successful API_Get execution
      * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $NewUser the returned model
      * @param IRequest $Request
-     * @param \CPath\Framework\Response\IResponse $Response
-     * @return \CPath\Framework\Response\IResponse|null
+     * @param IResponse $Response
+     * @return IResponse|null
      */
     function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, IResponse $Response);
 }

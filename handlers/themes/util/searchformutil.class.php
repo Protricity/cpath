@@ -10,18 +10,18 @@ namespace CPath\Handlers\Themes\Util;
 use CPath\Base;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Framework\PDO\Response\SearchResponse;
+use CPath\Framework\PDO\Response\PDOSearchResponse;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\API\Fragments\APIDebugFormFragment;
 use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 
 class SearchFormUtil implements IDescribable, IViewConfig {
     private $mTheme, $mResponse, $mAPI, $mDescriptor, $mDescribable, $mForm, $mResponseBox;
 
-    public function __construct(SearchResponse $Response, ITheme $Theme=null) {
+    public function __construct(PDOSearchResponse $Response, ITheme $Theme=null) {
         $Query = $Response->getQuery();
         $this->mDescriptor = $Query->getDescriptor();
         $this->mAPI = $this->mDescriptor->getAPI();

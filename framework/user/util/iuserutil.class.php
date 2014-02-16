@@ -8,8 +8,8 @@
 namespace CPath\Framework\User\Util;
 
 use CPath\Framework\User\Interfaces\IUser;
+use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
 use CPath\Framework\User\Role\Interfaces\IRoleProfile;
-use CPath\Framework\User\Role\InvalidRoleException;
 
 interface IUserUtil extends IUser {
 

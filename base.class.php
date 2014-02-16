@@ -7,11 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Interfaces\IAutoLoader;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Loaders\CPathLoader;
 use CPath\Framework\Request\Types\CLI;
 use CPath\Framework\Request\Types\Web;
+use CPath\Interfaces\IAutoLoader;
+use CPath\Loaders\CPathLoader;
 
 /**
  * Class Base
@@ -77,7 +77,7 @@ class Base {
 
     /**
      * Get the IRequest instance for this render
-     * @return \CPath\Framework\Request\IRequest
+     * @return IRequest
      */ // TODO: move to abstract class
     public static function getRequest() {
         static $Request = NULL;

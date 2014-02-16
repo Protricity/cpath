@@ -13,6 +13,7 @@ class PDOSelectStats extends PDOSelectLimitedStats {
     const PAGE_COUNT_DEFAULT = 25;
 
     private $total, $previousPage, $nextPage, $totalPages, $hasMore;
+//, $mPageIDs = null;
 
     function __construct($totalCount, $limit, $offset)
     {
@@ -65,7 +66,7 @@ class PDOSelectStats extends PDOSelectLimitedStats {
         $cur = $this->getCurPage();
 
         if($count) {
-            $this->pages = null;
+            //$this->mPageIDs = null;
         } else {
             $count = self::PAGE_COUNT_DEFAULT;
         }
@@ -109,7 +110,8 @@ class PDOSelectStats extends PDOSelectLimitedStats {
         //    $ids = $ids + array($this->nextPage => 'Next');
         //if($this->previousPage && !isset($ids[$this->previousPage]))
         //    $ids = array($this->previousPage => 'Previous') + $ids;
-        return $this->pages = $ids;
+        //return $this->mPageIDs = $ids;
+        return $ids;
     }
 
     /**

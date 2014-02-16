@@ -12,7 +12,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 interface IRenderHtml {
 
     /**
-     * Sends headers if necessary, executes the request, and renders an IResponse as html
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */

@@ -12,7 +12,6 @@ use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\Param;
 use CPath\Framework\Api\Field\RequiredParam;
-use CPath\Framework\Api\Util\APIExecuteUtil;
 use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
@@ -59,9 +58,10 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
             if($Handler instanceof IPDOModelSearchRender)
             {
                 try {
-                    $Util = new APIExecuteUtil($this);
-                    $Model = $Util->executeOrThrow($Request)->getDataPath();
-                    $Handler->renderSearch($Model, $Request);
+                    $Search = $this
+                        ->execute($Request)
+                        ->getQuery();
+                    $Handler->renderSearch($Request, $Search);
                     return;
                 } catch (\Exception $ex) {
                     $Handler->renderException($ex, $Request);

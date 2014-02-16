@@ -4,17 +4,17 @@ namespace CPath\Handlers\Fragments;
 use CPath\Base;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOSelectStats;
-use CPath\Framework\PDO\Response\SearchResponse;
+use CPath\Framework\PDO\Response\PDOSearchResponse;
+use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Request\Types\Web;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Framework\Render\Interfaces\IRender;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
-use CPath\Framework\Request\Types\Web;
 
 class ModelResultsTableFragment implements IRender, IViewConfig{
 
@@ -41,11 +41,11 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Framework\PDO\Response\SearchResponse $Response
+     * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function render(IRequest $Request, SearchResponse $Response = NULL, IAttributes $Attr=null)
+    function render(IRequest $Request, PDOSearchResponse $Response = NULL, IAttributes $Attr=null)
     {
         if(is_array($attr))     $attr = implode(' ', $attr);
 

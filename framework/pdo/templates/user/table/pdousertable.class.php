@@ -17,14 +17,14 @@ use CPath\Framework\PDO\API_PostUserPassword;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Task_Login;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Task\ITaskCollection;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
 use CPath\Framework\User\Role\Exceptions\PasswordMatchException;
 use CPath\Framework\User\Session\InvalidUserSessionException;
 use CPath\Framework\User\Session\ISessionManager;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
 use CPath\Route\RoutableSet;
 
 /**
@@ -205,7 +205,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * @param int $expireInSeconds the amount of time in seconds before an account should expire or 0 for never
      * @param PDOUserModel $User the user instance loaded during login
      * @throws AuthenticationException
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the login response
+     * @return IResponse the login response
      */
     public function login($search, $password, $expireInSeconds=NULL, PDOUserModel &$User=NULL) {
         /** @var PDOUserModel $User */
@@ -220,7 +220,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
         $User->checkPassword($password);
         $Session = $this->session()->createNewSession($User, $expireInSeconds);
 
-        $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
+        $Response = new DataResponse("Logged in as user '".$User->getUsername()."' successfully", true, array(
             'user' => $User,
             'session' => $Session,
         ));

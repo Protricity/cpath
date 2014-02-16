@@ -8,8 +8,6 @@
 namespace CPath\Interfaces;
 
 
-use CPath\Framework\Api\Exceptions\ValidationException;
-
 interface IValidate {
     /**
      * Validate input based on a filter type.

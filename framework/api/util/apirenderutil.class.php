@@ -11,18 +11,17 @@ use CPath\Base;
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Render\Interfaces\IRenderAll;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Render\Interfaces\IRenderJSON;
 use CPath\Framework\Render\Interfaces\IRenderText;
 use CPath\Framework\Render\Interfaces\IRenderXML;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Views\APIView;
-use CPath\Framework\Render\Interfaces\IRender;
-use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Util;
+use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Handlers\Views\APIView;
 
-class APIRenderUtil implements IAPI, IRender {
+class APIRenderUtil implements IAPI, IRenderAll {
     private $mAPI;
 
     function __construct(IAPI $API) {
@@ -39,7 +38,7 @@ class APIRenderUtil implements IAPI, IRender {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the api call response with data, message, and status
+     * @return IResponse the api call response with data, message, and status
      */
     final public function execute(IRequest $Request) {
         $Util = new APIExecuteUtil($this->getAPI());
@@ -71,38 +70,8 @@ class APIRenderUtil implements IAPI, IRender {
      * @return void
      */
     function render(IRequest $Request) {
-        foreach($Request->getMimeTypes() as $mimeType) {
-            switch($mimeType) {
-                case 'application/json':
-                    if($this->mAPI instanceof IRenderJSON)
-                        $this->mAPI->renderJSON($Request);
-                    else
-                        $this->renderJSON($Request);
-                    return;
-
-                case 'application/xml':
-                    if($this->mAPI instanceof IRenderXML)
-                        $this->mAPI->renderXML($Request);
-                    else
-                        $this->renderXML($Request);
-                    return;
-
-                case 'text/html':
-                    if($this->mAPI instanceof IRenderHtml)
-                        $this->mAPI->renderHTML($Request);
-                    else
-                        $this->renderHTML($Request);
-                    return;
-
-                case 'text/plain':
-                    if($this->mAPI instanceof IRenderText)
-                        $this->mAPI->renderText($Request);
-                    else
-                        $this->renderText($Request);
-                    return;
-            }
-        }
-        $this->renderDefault($Request);
+        $Util = new RenderUtil($this);
+        $Util->render($Request);
     }
 
 
@@ -112,13 +81,11 @@ class APIRenderUtil implements IAPI, IRender {
      * @return void
      */
     public function renderHTML(IRequest $Request) {
-        if(!headers_sent() && !Base::isCLI())
-            header("Content-Type: text/html");
-        $Response = null;
-
-        $Route = $Request->getRoute();
-        $Render = new APIView($this, $Route, $Response);
-        $Render->render($Request);
+//        if(!headers_sent() && !Base::isCLI())
+//            header("Content-Type: text/html");
+        $Response = $this->execute($Request);
+        $Util = new ResponseUtil($Response);
+        $Util->renderHtml($Request);
     }
 
     /**
@@ -127,38 +94,37 @@ class APIRenderUtil implements IAPI, IRender {
      * @return void
      */
     public function renderJSON(IRequest $Request) {
-        if(!headers_sent()) // && !Base::isCLI())
-            header("Content-Type: application/json");
+//        if(!headers_sent()) // && !Base::isCLI())
+//            header("Content-Type: application/json");
+
         $Response = $this->execute($Request);
-        $Response->sendHeaders();
-        try{
-            $JSON = Util::toJSON($Response);
-            echo json_encode($JSON);
-        } catch (\Exception $ex) {
-            $Response = new ExceptionResponse($ex);
-            $JSON = Util::toJSON($Response);
-            echo json_encode($JSON);
-        }
+        $Util = new ResponseUtil($Response);
+        $Util->renderJSON($Request);
     }
 
     /**
      * Sends headers, executes the request, and renders an IResponse as XML
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param string $rootElementName
      * @return void
      */
-    public function renderXML(IRequest $Request) {
-        if(!headers_sent()) // && !Base::isCLI())
-            header("Content-Type: text/xml");
+    public function renderXML(IRequest $Request, $rootElementName='root') {
         $Response = $this->execute($Request);
-        $Response->sendHeaders();
-        try{
-            $XML = Util::toXML($Response);
-            echo $XML->asXML();
-        } catch (\Exception $ex) {
-            $Response = new ExceptionResponse($ex);
-            $XML = Util::toXML($Response);
-            echo $XML->asXML();
-        }
+        $Util = new ResponseUtil($Response);
+        $Util->renderXML($Request);
+
+//        if(!headers_sent()) // && !Base::isCLI())
+////            header("Content-Type: text/xml");
+//        $Response = $this->execute($Request);
+//        $Response->sendHeaders();
+//        try{
+//            $XML = Util::toXML($Response);
+//            echo $XML->asXML();
+//        } catch (\Exception $ex) {
+//            $Response = new ExceptionResponse($ex);
+//            $XML = Util::toXML($Response);
+//            echo $XML->asXML();
+//        }
     }
 
     /**
@@ -168,8 +134,8 @@ class APIRenderUtil implements IAPI, IRender {
      */
     public function renderText(IRequest $Request) {
         $Response = $this->execute($Request);
-        $Response->sendHeaders('text/plain');
-        $Response->renderText();
+        $Util = new ResponseUtil($Response);
+        $Util->renderText($Request);
     }
 
     /**

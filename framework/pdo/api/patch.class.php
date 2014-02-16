@@ -15,7 +15,7 @@ use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
 
 class API_Patch extends API_Get implements IAPIGetCallbacks {
 
@@ -48,8 +48,8 @@ class API_Patch extends API_Get implements IAPIGetCallbacks {
      * Perform on successful API_Get execution
      * @param PDOPrimaryKeyModel $UpdateModel the returned model
      * @param IRequest $Request
-     * @param \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse $Response
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|void
+     * @param IResponse $Response
+     * @return IResponse|void
      */
     final function onGetExecute(PDOPrimaryKeyModel $UpdateModel, IRequest $Request, IResponse $Response) {
 
@@ -63,7 +63,7 @@ class API_Patch extends API_Get implements IAPIGetCallbacks {
 
         $c = $UpdateModel->commitColumns();
         if(!$c)
-            return new Response("No columns were updated for {$UpdateModel}.", true, $UpdateModel);
-        return new Response("Updated {$c} Field(s) for {$UpdateModel}.", true, $UpdateModel);
+            return new DataResponse("No columns were updated for {$UpdateModel}.", true, $UpdateModel);
+        return new DataResponse("Updated {$c} Field(s) for {$UpdateModel}.", true, $UpdateModel);
     }
 }

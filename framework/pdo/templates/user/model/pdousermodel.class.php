@@ -9,10 +9,10 @@ namespace CPath\Framework\PDO\Templates\User\Model;
 
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\User\IncorrectUsernameOrPasswordException;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Predicates\IsDebugger;
+use CPath\Framework\User\Role\Exceptions\AuthenticationException;
 use CPath\Framework\User\Session\ISessionManager;
 
 
@@ -79,7 +79,7 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
         $T = $this->table();
         $hash = $this->{$T::COLUMN_PASSWORD};
         if($T->hashPassword($password, $hash) == $hash)
-            throw new IncorrectUsernameOrPasswordException();
+            throw new AuthenticationException();
     }
 
     function changePassword($newPassword, $confirmPassword=NULL) {

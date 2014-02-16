@@ -8,9 +8,9 @@
 namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
-use CPath\Interfaces\IBuildable;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Interfaces\IBuildable;
 use CPath\Log;
 use Traversable;
 

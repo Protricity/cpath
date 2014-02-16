@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Session;
 
-use CPath\Framework\User\Interfaces\IUser;
-use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\User\Interfaces\IUser;
 
 interface ISessionManager {
 
@@ -54,7 +54,7 @@ class InvalidUserSessionException extends \Exception implements IResponseAggrega
     }
 
     /**
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse
+     * @return IResponse
      */
     function createResponse() {
         $Response = new ExceptionResponse($this);

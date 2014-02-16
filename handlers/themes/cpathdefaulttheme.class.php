@@ -5,7 +5,8 @@ use CPath\Base;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Framework\PDO\Response\SearchResponse;
+use CPath\Framework\PDO\Response\PDOSearchResponse;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
 use CPath\Handlers\Interfaces\IAttributes;
@@ -13,7 +14,6 @@ use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Util\Attr;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 
@@ -286,11 +286,11 @@ class CPathDefaultTheme implements ITheme {
     /**
      * Render the end of an html body section.
      * @param IRequest $Request the IRequest instance for this render
-     * @param SearchResponse $Response the SearchResponse instance for this query
+     * @param PDOSearchResponse $Response the PDOSearchResponse instance for this query
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderSearchContent(IRequest $Request, SearchResponse $Response, IAttributes $Attr = NULL) {
+    function renderSearchContent(IRequest $Request, PDOSearchResponse $Response, IAttributes $Attr = NULL) {
         $this->mMTLF->render($Request, $Response, $Attr);
     }
 }

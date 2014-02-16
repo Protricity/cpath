@@ -8,12 +8,12 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
 use CPath\Framework\PDO\Interfaces\SecurityPolicyNotFoundException;
 use CPath\Framework\PDO\Table\PDOTable;
-use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 

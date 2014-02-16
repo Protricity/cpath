@@ -9,7 +9,6 @@
 namespace CPath\Framework\Api\Validation;
 
 use CPath\Framework\Api\Validation\Interfaces\IValidation;
-use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 class CallbackValidation implements IValidation {

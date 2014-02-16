@@ -6,9 +6,9 @@
  * Time: 8:09 PM
  */
 namespace CPath\Framework\Api\Exceptions;
+use CPath\Describable\Describable;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Model\MultiException;
-use CPath\Describable\Describable;
 
 /**
  * Class ValidationExceptions

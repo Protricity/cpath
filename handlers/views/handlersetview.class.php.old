@@ -15,7 +15,7 @@ use CPath\Interfaces\IHandlerAggregate;
 use CPath\Interfaces\IHandlerSet;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
-use CPath\Interfaces\IRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
 use CPath\Misc\RenderIndents as RI;
 

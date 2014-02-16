@@ -25,7 +25,7 @@ interface IExecute {
      * Perform after successful API execution
      * Note: is not performed when exceptions are thrown or if the response status is not 200 (success)
      * @param IRequest $Request
-     * @param \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse $Response
+     * @param IResponse $DataResponse
      * @return void
      */
     function onAPIPostExecute(IRequest $Request, IResponse $Response);

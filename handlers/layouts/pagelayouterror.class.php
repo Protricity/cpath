@@ -2,9 +2,9 @@
 namespace CPath\Handlers\Layouts;
 
 use CPath\Describable\Describable;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 abstract class PageLayoutError extends PageLayout {
     private $mException;

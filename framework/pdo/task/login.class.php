@@ -7,15 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO;
 
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\Task\AbstractTask;
 use CPath\Framework\Task\ITask;
 
 class Task_Login extends AbstractTask {
 
     private $mUserTable;
-    function __construct(IAPI $API) {
-        $this->mUserTable = $API;
+    function __construct(PDOUserTable $UserTable) {
+        $this->mUserTable = $UserTable;
     }
 
     /**
@@ -39,5 +39,6 @@ class Task_Login extends AbstractTask {
      */
     protected function start($eventFlags) {
         // TODO: Implement start() method.
+        throw new \InvalidArgumentException("Not implemented");
     }
 }

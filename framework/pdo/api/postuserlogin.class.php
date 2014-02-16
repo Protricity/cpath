@@ -13,9 +13,9 @@ use CPath\Framework\Api\Field\PasswordField;
 use CPath\Framework\Api\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\User\Session\ISessionManager;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\User\Session\ISessionManager;
 
 interface IPostLoginExecute {
 
@@ -63,7 +63,7 @@ class API_PostUserLogin extends API_Base {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\IResponse|mixed the api call response with data, message, and status
+     * @return IResponse|mixed the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
         $Table = $this->mUserTable;
@@ -71,7 +71,7 @@ class API_PostUserLogin extends API_Base {
         $User = $Response['user'];
         $Session = $Response['session'];
 //        $User = $Session->
-//        $Response = new Response("Logged in as user '".$User->getUsername()."' successfully", true, array(
+//        $DataResponse = new DataResponse("Logged in as user '".$User->getUsername()."' successfully", true, array(
 //            'user' => $User,
 //            'session' => $Session,
 //        ));

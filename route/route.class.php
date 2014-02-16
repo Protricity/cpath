@@ -8,8 +8,8 @@
 namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
-use CPath\Interfaces\IBuildable;
 use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Interfaces\IBuildable;
 
 /**
  * Class Route - a route entry

@@ -9,7 +9,6 @@ namespace CPath\Route;
 
 use CPath\Compare\IComparable;
 use CPath\Framework\Interfaces\Constructable\IConstructable;
-use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 

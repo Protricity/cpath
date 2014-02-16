@@ -3,12 +3,12 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 class SimpleFormFragment extends AbstractFormFragment{
 

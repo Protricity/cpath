@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Util;
 
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\Attr;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Misc\RenderIndents as RI;
 
 

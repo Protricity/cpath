@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Builders\Templates\User;
 
 use CPath\Exceptions\BuildException;
-use CPath\Framework\PDO\Builders\Models\ArgumentNotFoundException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Builders\Tables\AbstractBuildPDOPKTable;
 use CPath\Framework\PDO\Builders\Tables\BuildPHPTableClass;

@@ -4,12 +4,12 @@ namespace CPath\Handlers\API\Fragments;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteUtil;
 

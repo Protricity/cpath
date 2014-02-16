@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO\Columns;
 
 
-use Aws\ElasticTranscoder\Exception\ValidationException;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Field\EnumField;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\PasswordField;

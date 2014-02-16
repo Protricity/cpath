@@ -9,7 +9,6 @@ namespace CPath\Framework\PDO\Table;
 
 use CPath\Cache\Cache;
 use CPath\Config;
-use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Log;

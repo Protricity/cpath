@@ -3,9 +3,9 @@ namespace CPath\Handlers;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Misc\RenderIndents as RI;
 

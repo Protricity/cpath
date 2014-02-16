@@ -8,22 +8,22 @@
 namespace CPath\Framework\Api\Util;
 
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
+use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Api\Exceptions\ValidationExceptions;
 use CPath\Framework\Api\Interfaces\FieldUtil;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Interfaces\IField;
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Exceptions\ValidationExceptions;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Interfaces\IResponseAggregate;
+use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Response\Types\ExceptionResponse;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseAggregate;
-use CPath\Framework\Response\Types\Response;
 
 class APIExecuteUtil implements IAPI, ILogListener {
     private $mAPI, $mLoggingEnabled = true, $mLogs = array(), $mMap = null;
@@ -55,16 +55,16 @@ class APIExecuteUtil implements IAPI, ILogListener {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the api call response with data, message, and status
+     * @return IResponse the api call response with data, message, and status
      */
-    final public function executeOrThrow(IRequest $Request) {
+    final public function execute(IRequest $Request) {
         $this->processRequest($Request);
         $Response = $this->mAPI->execute($Request);
 
         if($Response instanceof IResponseAggregate)
             $Response = $Response->createResponse();
         if(!($Response instanceof IResponse))
-            $Response = new Response(true, "API executed successfully", $Response);
+            $Response = new DataResponse(true, "API executed successfully", $Response);
         return $Response;
     }
 
@@ -72,11 +72,11 @@ class APIExecuteUtil implements IAPI, ILogListener {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the api call response with data, message, and status
+     * @return IResponse the api call response with data, message, and status
      */
-    final public function execute(IRequest $Request) {
+    final public function executeOrCatch(IRequest $Request) {
         try {
-            $Response = $this->executeOrThrow($Request);
+            $Response = $this->execute($Request);
             if($Response->getStatusCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
                 $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {

@@ -9,7 +9,6 @@ namespace CPath\Framework\Task;
 
 use CPath\Framework\Task\Exceptions\InvalidTaskStateException;
 use CPath\Framework\Task\Parameter\ITaskParameter;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 class TaskStateUtil implements ITaskUtil{
     /** @var ITask  */
@@ -88,7 +87,7 @@ class TaskStateUtil implements ITaskUtil{
             return $this
                 ->mTask
                 ->processTaskState($eventFlags);
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             return ITask::STATUS_ERROR;
         }
     }

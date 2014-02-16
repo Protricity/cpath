@@ -20,12 +20,11 @@ use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
-use CPath\Framework\PDO\Response\SearchResponse;
+use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOTable;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
 
 class API_GetBrowse extends API_Base implements IRenderHtml {
 
@@ -68,11 +67,14 @@ class API_GetBrowse extends API_Base implements IRenderHtml {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return IResponse|mixed the api call response with data, message, and status
+     * @return PDOSearchResponse the api call response with data, message, and status
      * @throws ModelNotFoundException if the Model was not found
      * @throws \Exception if no valid columns were found
      */
     final function execute(IRequest $Request) {
+
+        $Util = new APIExecuteUtil($this);
+        $Util->processRequest($Request);
 
         $T = $this->getTable();
         $limit = $Request->pluck('limit');
@@ -105,9 +107,7 @@ class API_GetBrowse extends API_Base implements IRenderHtml {
             if($Handler instanceof IReadAccess)
                 $Handler->assertQueryReadAccess($Search, $T, $Request, IReadAccess::INTENT_SEARCH);
 
-        $Stats = $Descriptor->execFullStats();
-        $c = $Stats->getTotal();
-        return new SearchResponse("Browsing ({$c}) " . $T->getModelName() . " results", $Search);
+        return new PDOSearchResponse($Search);
     }
 
 
@@ -122,9 +122,7 @@ class API_GetBrowse extends API_Base implements IRenderHtml {
             if($Handler instanceof IPDOModelSearchRender)
             {
                 try {
-                    $Util = new APIExecuteUtil($this);
-                    /** @var SearchResponse $Response */
-                    $Response = $Util->executeOrThrow($Request);
+                    $Response = $this->execute($Request);
                     $Handler->renderSearch($Request, $Response);
                     return;
                 } catch (\Exception $ex) {

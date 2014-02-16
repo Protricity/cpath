@@ -10,17 +10,17 @@ namespace CPath\Framework\Api\Types;
 
 use CPath\Base;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Util\APIExecuteUtil;
-use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Interfaces\IField;
-use CPath\Framework\Api\Validation\Interfaces\IValidation;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Exceptions\ValidationExceptions;
+use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Api\Validation\Interfaces\IValidation;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\OptionMissingException;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Views\APIView;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
 use CPath\Route\RoutableSet;
 
@@ -147,20 +147,20 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 //    public function renderHTML(IRequest $Request) {
 //        if(!headers_sent() && !Base::isCLI())
 //            header("Content-Type: text/html");
-//        $Response = null;
+//        $DataResponse = null;
 //        //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
-//        //    $Response = $this->execute($Request);
+//        //    $DataResponse = $this->execute($Request);
 //        //if($Request instanceof RoutableSetWrapper) {
 //        //    $RoutableSet = $Request->getRoutableSet();
-//         //   $Render = new APIMultiView($RoutableSet, $Response);
+//         //   $Render = new APIMultiView($RoutableSet, $DataResponse);
 //        //} else {
 //            $Route = $Request->getRoute();
-//            $Render = new APIView($this, $Route, $Response);
+//            $Render = new APIView($this, $Route, $DataResponse);
 //        //}
 //        $Render->render($Request);
-//        //$Response = $this->execute($Route);
-//        //$Response->sendHeaders();
-//        //$Response->renderHtml();
+//        //$DataResponse = $this->execute($Route);
+//        //$DataResponse->sendHeaders();
+//        //$DataResponse->renderHtml();
 //    }
 //
 //    /**
@@ -171,14 +171,14 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 //    public function renderJSON(IRequest $Request) {
 //        if(!headers_sent()) // && !Base::isCLI())
 //            header("Content-Type: application/json");
-//        $Response = $this->execute($Request);
-//        $Response->sendHeaders();
+//        $DataResponse = $this->execute($Request);
+//        $DataResponse->sendHeaders();
 //        try{
-//            $JSON = Util::toJSON($Response);
+//            $JSON = Util::toJSON($DataResponse);
 //            echo json_encode($JSON);
 //        } catch (\Exception $ex) {
-//            $Response = new ExceptionResponse($ex);
-//            $JSON = Util::toJSON($Response);
+//            $DataResponse = new ExceptionResponse($ex);
+//            $JSON = Util::toJSON($DataResponse);
 //            echo json_encode($JSON);
 //        }
 //    }
@@ -191,14 +191,14 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 //    public function renderXML(IRequest $Request) {
 //        if(!headers_sent()) // && !Base::isCLI())
 //            header("Content-Type: text/xml");
-//        $Response = $this->execute($Request);
-//        $Response->sendHeaders();
+//        $DataResponse = $this->execute($Request);
+//        $DataResponse->sendHeaders();
 //        try{
-//            $XML = Util::toXML($Response);
+//            $XML = Util::toXML($DataResponse);
 //            echo $XML->asXML();
 //        } catch (\Exception $ex) {
-//            $Response = new ExceptionResponse($ex);
-//            $XML = Util::toXML($Response);
+//            $DataResponse = new ExceptionResponse($ex);
+//            $XML = Util::toXML($DataResponse);
 //            echo $XML->asXML();
 //        }
 //    }
@@ -209,9 +209,9 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 //     * @return void
 //     */
 //    public function renderText(IRequest $Request) {
-//        $Response = $this->execute($Request);
-//        $Response->sendHeaders('text/plain');
-//        $Response->renderText();
+//        $DataResponse = $this->execute($Request);
+//        $DataResponse->sendHeaders('text/plain');
+//        $DataResponse->renderText();
 //    }
 //
 //    /**

@@ -8,9 +8,8 @@
 namespace CPath\Framework\PDO;
 
 
-use CPath\Framework\Api\Field\RequiredParam;
 use CPath\Framework\Api\Exceptions\APIException;
-use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Api\Field\RequiredParam;
 use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
@@ -18,11 +17,11 @@ use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOWhere;
+use CPath\Framework\PDO\Response\PDOModelResponse;
 use CPath\Framework\PDO\Table\ModelNotFoundException;
 use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
 
 class API_Get extends API_Base implements IRenderHtml {
     private $mSearchColumns;
@@ -85,7 +84,7 @@ class API_Get extends API_Base implements IRenderHtml {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @return PDOPrimaryKeyModel|\CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse the found model which implements IResponseAggregate
+     * @return PDOModelResponse the found model which implements IResponseAggregate
      * @throws ModelNotFoundException if the Model was not found
      */
     final function execute(IRequest $Request) {
@@ -116,7 +115,7 @@ class API_Get extends API_Base implements IRenderHtml {
             if($Handler instanceof IReadAccess)
                 $Handler->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
 
-        $Response = $GetModel->createResponse();
+        $Response = new PDOModelResponse($GetModel);
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IAPIGetCallbacks)
@@ -137,8 +136,9 @@ class API_Get extends API_Base implements IRenderHtml {
             if($Handler instanceof IPDOModelRender)
             {
                 try {
-                    $Util = new APIExecuteUtil($this);
-                    $Model = $Util->executeOrThrow($Request)->getDataPath();
+                    $Model = $this
+                        ->execute($Request)
+                        ->getModel();
                     $Handler->renderModel($Model, $Request);
                     return;
                 } catch (\Exception $ex) {

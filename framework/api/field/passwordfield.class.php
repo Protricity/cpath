@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Field;
 
-use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Model\FileUpload;

@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Interfaces\IBuildable;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLI;
+use CPath\Interfaces\IBuildable;
 use CPath\Route\Router;
 
 class Console implements IRender { // Broke }, IBuildable {

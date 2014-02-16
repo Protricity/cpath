@@ -252,7 +252,7 @@ PHP;
                 if (!($Column->Flags & PDOColumn::FLAG_NULL)
                     && !($Column->Flags & PDOColumn::FLAG_AUTOINC)
                     && !($Column->Flags & PDOColumn::FLAG_DEFAULT)
-                    && !($Column->Flags & PDOColumn::FLAG_OPTIONAL)
+                    //&& !($Column->Flags & PDOColumn::FLAG_OPTIONAL)
                 )
                     $Column->Flags |= PDOColumn::FLAG_REQUIRED;
             }

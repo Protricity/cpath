@@ -3,16 +3,16 @@ namespace CPath\Handlers\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Handlers\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IViewConfig;
-use CPath\Framework\Response\Types\ExceptionResponse;
-use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Util;
 
 class APIResponseBoxFragment implements IViewConfig{
@@ -42,7 +42,7 @@ class APIResponseBoxFragment implements IViewConfig{
 
         $Theme = $this->mTheme;
         $Theme->renderFragmentStart($Request, "Ajax Info", $Attr);
-        $Theme->renderFragmentStart($Request, "Response", Attr::get('response-content'));
+        $Theme->renderFragmentStart($Request, "DataResponse", Attr::get('response-content'));
         if($Response) {
             try{
                 $JSON = Util::toJSON($Response);
@@ -54,7 +54,7 @@ class APIResponseBoxFragment implements IViewConfig{
             }
         }
         $Theme->renderFragmentEnd($Request);
-        $Theme->renderFragmentStart($Request, "Response Headers", new Attr('response-headers'));
+        $Theme->renderFragmentStart($Request, "DataResponse Headers", new Attr('response-headers'));
         $Theme->renderFragmentEnd($Request);
         $Theme->renderFragmentStart($Request, "Request Headers", new Attr('request-headers'));
         $Theme->renderFragmentEnd($Request);

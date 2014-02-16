@@ -11,20 +11,20 @@ namespace CPath\Framework\PDO;
 use CPath\Base;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\User\Session\SessionNotFoundException;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\Response;
+use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Framework\User\Session\SessionNotFoundException;
 
 interface IPostLogoutExecute {
 
     /**
      * Perform on successful API_Get execution
-     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User the logged out user account instance
+     * @param PDOUserModel $User the logged out user account instance
      * @param IRequest $Request
-     * @param \CPath\Framework\Response\Interfaces\IResponse $Response
-     * @return \CPath\Framework\Response\\CPath\Framework\Response\Interfaces\IResponse|null
+     * @param IResponse $Response
+     * @return IResponse|null
      */
     function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
 }
@@ -69,7 +69,7 @@ class API_PostUserLogout extends API_Base {
         $User = $this->mTable->loadBySession(true, false);
         try {
             $Session->endSession();
-            $Response = new Response("Logged out successfully", true);
+            $Response = new DataResponse("Logged out successfully", true);
         } catch (SessionNotFoundException $ex) {
             $Response = new ExceptionResponse($ex);
         }

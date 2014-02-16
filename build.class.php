@@ -10,10 +10,10 @@ namespace CPath;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Response\Types\DataResponse;
 use CPath\Interfaces\IBuildable;
 use CPath\Interfaces\IBuilder;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Response\Types\Response;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
@@ -43,12 +43,12 @@ class Build extends AbstractAPI implements IRoutable {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRoute instance for this render which contains the request and args
-     * @return Response the api call response with data, message, and status
+     * @return DataResponse the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
         static $built = false;
         if($built)
-            return new Response(false, "Build can only occur once per execution. Skipping Build...");
+            return new DataResponse(false, "Build can only occur once per execution. Skipping Build...");
         $built = true;
 
         if(!empty($Request['v']))
@@ -58,7 +58,7 @@ class Build extends AbstractAPI implements IRoutable {
         if(!empty($Request['f']))
             self::$mFilter = $Request['f'];
 
-        $Response = new Response(false, "Starting Build");
+        $Response = new DataResponse(false, "Starting Build");
         $exCount = Build::build(true);
         if($exCount)
             return $Response

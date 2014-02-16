@@ -2,10 +2,10 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Handlers\Themes\CPathDefaultTheme;
-use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Handlers\Themes\CPathDefaultTheme;
+use CPath\Handlers\Themes\Interfaces\ITableTheme;
 
 class ModelTableListFragment implements IRender{
 
