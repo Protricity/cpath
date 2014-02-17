@@ -7,8 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Model;
 
+use CPath\Exceptions\NotImplementedException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\User\Session\ISession;
+use CPath\Framework\User\Session\ISessionManager;
+use CPath\Framework\User\Session\SessionNotFoundException;
 
 abstract class PDOUserSessionModel extends PDOPrimaryKeyModel implements ISession {
 
@@ -29,5 +32,14 @@ abstract class PDOUserSessionModel extends PDOPrimaryKeyModel implements ISessio
     function getUserID() {
         $T = $this->table();
         return $this->{$T::COLUMN_USER_ID};
+    }
+
+    /**
+     * End a user session
+     * @throws SessionNotFoundException if the session was not found
+     */
+    function endSession()
+    {
+        throw new NotImplementedException;
     }
 }

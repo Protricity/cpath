@@ -246,11 +246,11 @@ class Build extends AbstractAPI implements IRoutable {
                 continue;
             }
 
-            $newClassFile = dirname($classFile) . '//' . $className . '.php';
-            if(!file_exists($newClassFile)) {
+            $newClassFile = dirname($classFile) . '//' . basename($className) . '.php';
+            //if(!file_exists($newClassFile)) {
                 Log::v(__CLASS__, "Coppied class file to " . $newClassFile);
-                //copy($classFile, $newClassFile);
-            }
+                copy($classFile, $newClassFile);
+            //}
 
             if($Class->getConstant('BUILD_IGNORE')) {
             }
@@ -348,6 +348,9 @@ class Build extends AbstractAPI implements IRoutable {
             }
             if(strcasecmp(substr($file, -10), '.class.php') !== 0)
                 continue;
+
+            Log::v(__CLASS__, "Coppied class file to " . $filePath . '.old');
+            copy($filePath, $filePath . '.old');
 
             //$name = substr($file, 0, strlen($file) - 10);
             //$class = $dirClass . '\\' . ucfirst($name);
