@@ -125,7 +125,7 @@ PHP;
         $useClass = array();
         $i=0;
 
-        $defaultClass = get_class(new Route('', '')); // TODO: hack
+        //$defaultClass = get_class(new Route('', '')); // TODO: hack
         foreach($this->mRoutes as $Route) {
             $class = get_class($Route); // $defaultClass;
             if(!isset($useClass[$class]))

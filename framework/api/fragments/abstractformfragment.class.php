@@ -1,11 +1,12 @@
 <?php
-namespace CPath\Handlers\API\Fragments;
+namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
@@ -14,14 +15,18 @@ use CPath\Interfaces\IViewConfig;
 
 abstract class AbstractFormFragment implements IRender, IViewConfig{
 
-    private $mTheme;
+    private $mTheme, $mAPI;
 
     /**
+     * @param \CPath\Framework\Api\Interfaces\IAPI $API
      * @param ITableTheme $Theme
      */
-    public function __construct(ITableTheme $Theme = null) {
+    public function __construct(IAPI $API, ITableTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
+        $this->mAPI = $API;
     }
+
+    protected function getAPI() { return $this->mAPI; }
 
     /**
      * Provide head elements to any IView

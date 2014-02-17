@@ -8,7 +8,7 @@
 namespace CPath\Framework\Api\Exceptions;
 use CPath\Describable\Describable;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Model\MultiException;
+use CPath\Framework\Types\Exceptions\MultiException;
 
 /**
  * Class ValidationExceptions
@@ -22,7 +22,7 @@ class ValidationExceptions extends MultiException
         parent::__construct("Errors occurred in API '" . Describable::get($API)->getDescription() . "':\n");
     }
 
-    public function addFieldException($fieldName, \CPath\Framework\Api\Exceptions\ValidationException $ex)
+    public function addFieldException($fieldName, ValidationException $ex)
     {
         parent::add($ex->getFieldError($fieldName), $fieldName);
     }

@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Util;
+namespace CPath\Framework\Render\Util;
 
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Render\Interfaces\IRenderHtml;

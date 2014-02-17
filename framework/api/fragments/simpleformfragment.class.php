@@ -1,14 +1,16 @@
 <?php
-namespace CPath\Handlers\API\Fragments;
+namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Api\Interfaces\FieldUtil;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Handlers\Util\Attr;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
+use CPath\Route\IRoutable;
 
 class SimpleFormFragment extends AbstractFormFragment{
 
@@ -22,8 +24,8 @@ class SimpleFormFragment extends AbstractFormFragment{
     /**
      * Render this API Form
      * @param IRequest $Request the IRequest instance for this render
-     * @param String|Array|NULL $class element classes
-     * @param String|Array|NULL $attr element attributes
+     * @param IAttributes $Attr
+     * @throws \Exception
      * @return void
      */
     function renderForm(IRequest $Request, IAttributes $Attr=null) {
@@ -31,6 +33,8 @@ class SimpleFormFragment extends AbstractFormFragment{
 
         $API = $this->getAPI();
         $Fields = $API->getFields();
+        if(!$API instanceof IRoutable)
+            throw new \Exception("API Not routable");
         $Route = $API->loadRoute();
 
         $domainPath = Config::getDomainPath();
@@ -65,7 +69,9 @@ class SimpleFormFragment extends AbstractFormFragment{
             $Table->renderDataStart(    'table-field-input');
             if(isset($_GET[$name]))
                 $Field->setValue($_GET[$name]);
-            $Field->render($Request);
+
+            $RenderField = new FieldUtil($Field);
+            $RenderField->renderHtml($Request);
         }
 
         $Table->renderFooterStart();

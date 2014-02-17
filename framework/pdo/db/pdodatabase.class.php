@@ -15,7 +15,7 @@ use CPath\Framework\PDO\Query\PDODelete;
 use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IBuildable;
@@ -40,7 +40,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IRender {
 
 
     /**
-     * @param \CPath\Framework\PDO\Table\PDOTable $Table
+     * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table
      * @param $_selectArgs
      * @param ISelectDescriptor $Descriptor
      * @internal param $tableName
@@ -55,7 +55,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IRender {
     }
 
     /**
-     * @param \CPath\Framework\PDO\Table\PDOTable $Table
+     * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table
      * @param $_fieldArgs
      * @internal param $tableName
      * @return PDOInsert
@@ -63,7 +63,7 @@ abstract class PDODatabase extends \PDO implements IDataBase, IRender {
     abstract public function insert(PDOTable $Table, $_fieldArgs);
 
     /**
-     * @param \CPath\Framework\PDO\Table\PDOTable $Table
+     * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table
      * @param $_selectArgs
      * @internal param $tableName
      * @return PDOUpdate

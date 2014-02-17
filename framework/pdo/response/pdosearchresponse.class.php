@@ -30,7 +30,7 @@ class PDOSearchResponse extends AbstractResponse implements IMappable, IComparab
 
     /**
      * Return the PDOSelect query instance
-     * @return PDOSearchResponse
+     * @return PDOSelect
      */
     function getQuery() {
         return $this->mQuery;

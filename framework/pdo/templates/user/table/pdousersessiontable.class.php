@@ -9,8 +9,8 @@ namespace CPath\Framework\PDO\Templates\User\Table;
 
 
 use CPath\Base;
-use CPath\Framework\PDO\Table\ModelNotFoundException;
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserSessionModel;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Session\InvalidUserSessionException;
@@ -20,7 +20,7 @@ use CPath\Framework\User\Session\SessionNotActiveException;
 use CPath\Framework\User\Session\SessionNotFoundException;
 use CPath\Log;
 
-abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements \CPath\Framework\User\Session\ISessionManager {
+abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements ISessionManager {
 
     const COLUMN_KEY = NULL;
     const COLUMN_USER_ID = NULL;
@@ -40,7 +40,7 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements \CPath\
     /**
      * Loads a session instance from a session key
      * @param $key String the session key to search for
-     * @return \CPath\Framework\User\Session\ISessionManager the found user session
+     * @return ISessionManager the found user session
      * @throws SessionExpiredException if the session was active but expired or not found
      */
     function loadByKey($key) {
@@ -55,7 +55,7 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements \CPath\
 
     /**
      * Loads a session instance from the active
-     * @return \CPath\Framework\User\Session\ISessionManager|PDOUserSessionModel the found user session
+     * @return ISessionManager|PDOUserSessionModel the found user session
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found
      * @throws SessionNotFoundException if the session was not found

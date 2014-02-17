@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Log;
 
 class PDOSelect extends PDOWhere implements \Iterator, \Countable {

@@ -10,11 +10,14 @@ namespace CPath\Framework\Api\Field;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\RequiredFieldException;
-use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces;
-use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IRenderHtml;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Handlers\Util\HTMLRenderUtil;
+
 use CPath\Validate;
 
 
@@ -23,7 +26,7 @@ use CPath\Validate;
  * @package CPath
  * Represents an 'optional' API Field
  */
-class Field implements IField, IRender, IDescribableAggregate {
+class Field implements IField, IDescribableAggregate, IRenderHtml {
 
     const DEFAULT_FLAGS = 0;
 
@@ -110,7 +113,7 @@ class Field implements IField, IRender, IDescribableAggregate {
     /**
      * Internal function used to set the field name.
      * @param String $value
-     * @return IField
+     * @return \CPath\Framework\Api\Field\Interfaces\IField
      */
     function setValue($value) {
         $this->mValue = $value;
@@ -130,27 +133,34 @@ class Field implements IField, IRender, IDescribableAggregate {
 
 
     /**
-     * Render this input field as html
-     * @param IRequest $Request the IRequest instance for this render
-     * @param Array $attr optional array of attributes for the input field
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function render(IRequest $Request, Array $attr=array())
-    {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
+
         $value = $this->mValue ?: $Request[$this->getName()];
         if($value)
             $value = htmlspecialchars($value, ENT_QUOTES);
-        if(!isset($attr['name']))
-            $attr['name'] = $this->getName();
-        if(!isset($attr['value']))
-            $attr['value'] = $value;
-        if(!isset($attr['placeholder']))
-            $attr['placeholder'] = $this->getName() . ' value';
 
-        echo RI::ni(), "<input";
-        foreach($attr as $key=>$val)
-            echo " $key='$val'";
-        echo "/>";
+        if(!$Attr->has('name'))
+            $Attr->add('name', $this->getName());
+
+        if(!$Attr->has('value'))
+            $Attr->add('value', $value);
+
+        if(!$Attr->has('placeholder'))
+            $Attr->add('placeholder', $this->getName() . ' value');
+
+        $Util = new HTMLRenderUtil($Request);
+        $Util->render('input', $Attr);
+//        $Attr->render($Request);
+//        echo RI::ni(), "<input";
+//        foreach($attr as $key=>$val)
+//            echo " $key='$val'";
+//        echo "/>";
     }
 
     /**

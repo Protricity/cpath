@@ -7,11 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Model;
 
-use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Interfaces\IUser;
-use CPath\Framework\User\Predicates\IsAdmin;
-use CPath\Framework\User\Predicates\IsDebugger;
+
+
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
 use CPath\Framework\User\Session\ISessionManager;
 
@@ -99,25 +99,25 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
         return $this->getFlags() & IUser::FLAG_GUEST ? true : false;
     }
 
-    /**
-     * Returns true if the user is an admin
-     * @return boolean true if user is an admin
-     */
-    function isAdmin() {
-        return $this
-            ->loadUserRoles()
-            ->has(new IsAdmin());
-    }
-
-    /**
-     * Returns true if the user is viewing debug mode
-     * @return boolean true if user is viewing debug mode
-     */
-    function isDebug() {
-        return $this
-            ->loadUserRoles()
-            ->has(new IsDebugger());
-    }
+//    /**
+//     * Returns true if the user is an admin
+//     * @return boolean true if user is an admin
+//     */
+//    function isAdmin() {
+//        return $this
+//            ->loadUserRoles()
+//            ->has(new IsAdmin());
+//    }
+//
+//    /**
+//     * Returns true if the user is viewing debug mode
+//     * @return boolean true if user is viewing debug mode
+//     */
+//    function isDebug() {
+//        return $this
+//            ->loadUserRoles()
+//            ->has(new IsDebugger());
+//    }
 
 
     /**

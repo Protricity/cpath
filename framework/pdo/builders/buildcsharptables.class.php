@@ -8,9 +8,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 use CPath\Builders\Tools\BuildCSharpClass;
-use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
-use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
-use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
+use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\PDO\Util\PDOStringUtil;
 
 class BuildCSharpTables {
@@ -23,22 +23,22 @@ class BuildCSharpTables {
 
     /**
      * Builds C# class references for existing database tables
-     * @param BuildPDOTable $Table
+     * @param IPDOTableBuilder $Table
      * @param String $filePath build file path
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
-    public function build(BuildPDOTable $Table, $filePath) {
+    public function build(IPDOTableBuilder $Table, $filePath) {
 
         $skip = true;
-        $CS = new BuildCSharpClass($Table->ModelClassName, str_replace('\\', '.', $this->mNamespace ?: $Table->Namespace));
+        $CS = new BuildCSharpClass($Table->getModelClass(), str_replace('\\', '.', $this->mNamespace ?: $Table->getNamespace()));
 
         $CS->addUse('System');
         $CS->addUse('System.Collections.Generic');
         $CS->addUse('System.Linq');
         $CS->addUse('System.Runtime.Serialization');
 
-        $CS->addDataContractAttribute($Table->Name);
+        $CS->addDataContractAttribute($Table->getTableName());
 
         //$CS->addConst('PRIMARY', $Table->Primary);
 
@@ -51,23 +51,24 @@ class BuildCSharpTables {
         /** @var BuildPDOColumn[] $Columns */
         $Columns = array();
 
+        /** @var BuildPDOColumn $Column // TODO: remove comment */
         foreach($Table->getColumns() as $key => $Column)
-            if($Column->Flags & PDOColumn::FLAG_EXPORT)
+            if($Column->hasFlag(PDOColumn::FLAG_EXPORT))
                 $Columns[$key] = $Column;
 
         foreach($Columns as $Column)
-            if($Column->EnumConstants) {
+            if($Column->mEnumConstants) {
                 $CS->addConstCode();
-                $CS->addConstCode("// Column Enum Values for '" . $Column->Name ."'");
-                foreach($Column->EnumValues as $enum)
-                    $CS->addConst(PDOStringUtil::toTitleCase($Column->Name, true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
+                $CS->addConstCode("// Column Enum Values for '" . $Column->getName() ."'");
+                foreach($Column->mEnumValues as $enum)
+                    $CS->addConst(PDOStringUtil::toTitleCase($Column->getName(), true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
             }
 
         foreach($Columns as $Column) {
             $skip = false;
-            $CS->addPropertyCode("/// <summary>" . $Column->Comment . "</summary>");
-            $CS->addDataMemberAttribute($Column->Name);
-            $CS->addProperty(PDOStringUtil::toTitleCase($Column->Name, true), null, 'public');
+            $CS->addPropertyCode("/// <summary>" . $Column->getComment() . "</summary>");
+            $CS->addDataMemberAttribute($Column->getName());
+            $CS->addProperty(PDOStringUtil::toTitleCase($Column->getName(), true), null, 'public');
             $CS->addPropertyCode();
         }
 

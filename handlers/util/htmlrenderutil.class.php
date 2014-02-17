@@ -7,9 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Util;
 
+use CPath\Framework\Render\Util\Attr;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class HTMLRenderUtil {
     private $mRequest;

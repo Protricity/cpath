@@ -8,10 +8,10 @@
 namespace CPath\Handlers\Themes\Util;
 
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
-use CPath\Handlers\Util\Attr;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\Attr;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 
 class TableThemeUtil {

@@ -8,8 +8,8 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\PDO\Model\PDOModel;
-use CPath\Framework\PDO\Table\InvalidPermissionException;
+use CPath\Framework\PDO\InvalidPermissionException;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 

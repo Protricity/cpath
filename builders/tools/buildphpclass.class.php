@@ -14,8 +14,8 @@ class BuildPHPClass extends BuildClass {
     const CONST_PREFIX = "const ";
     const PROP_PREFIX = "$";
 
-    public function __construct($name) {
-        parent::__construct($name);
+    public function __construct($name, $namespace) {
+        parent::__construct($name, $namespace);
     }
 
     public function export($value) {
@@ -38,7 +38,7 @@ class BuildPHPClass extends BuildClass {
 
     public function buildStart($namespace, $uses, $extends, Array $implements) {
         $code = "<?php\n";
-        if($namespace) $code .= "namespace " . $this->Namespace . ";\n";
+        if($namespace) $code .= "namespace " . $this->getNamespace() . ";\n";
         $code .= "\n";
 
         if($extends) {
@@ -53,7 +53,7 @@ class BuildPHPClass extends BuildClass {
             $code .= "use {$u}" . (!is_int($as) ? ' as '.$as : '') . ";\n";
 
 
-        $code .= "class " . $this->Name;
+        $code .= "class " . $this->getName(false);
         $code .= $extends;
 
         foreach($implements as $i => $implement)

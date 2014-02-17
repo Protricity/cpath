@@ -13,7 +13,7 @@ use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
 use CPath\Framework\PDO\Interfaces\SecurityPolicyNotFoundException;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 
@@ -25,7 +25,7 @@ abstract class API_Base extends AbstractAPI {
 
     /**
      * Construct an instance of the GET API
-     * @param PDOTable|IReadAccess $Table the PDOTable for this API
+     * @param \CPath\Framework\PDO\Table\Types\PDOTable|IReadAccess $Table the PDOTable for this API
      * PRIMARY key is already included
      */
     function __construct(PDOTable $Table) {

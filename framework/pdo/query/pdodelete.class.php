@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Log;
 use PDO;
 

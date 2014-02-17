@@ -12,10 +12,11 @@ use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\Param;
 use CPath\Framework\Api\Field\RequiredParam;
-use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Query\PDOWhere;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
@@ -48,11 +49,12 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
     }
 
     /**
-     * Sends headers, executes the request, and renders an IResponse as HTML
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    public function renderHTML(IRequest $Request) {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IPDOModelSearchRender)
@@ -69,7 +71,7 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
                 }
             }
 
-        parent::renderHTML($Request);
+        parent::renderHTML($Request, $Attr);
     }
 
     /**
@@ -99,7 +101,7 @@ class API_GetSearch extends API_GetBrowse implements IAPIGetBrowseCallbacks {
         if(!is_int($search)) {
             $columns2 = array();
             foreach($columns as $name => $Column)
-                if(!$Column->isFlag(PDOColumn::FLAG_NUMERIC))
+                if(!$Column->hasFlag(PDOColumn::FLAG_NUMERIC))
                     $columns2[$name] = $Column;
             if($columns2)
                 $columns = $columns2;

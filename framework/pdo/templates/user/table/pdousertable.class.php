@@ -14,12 +14,12 @@ use CPath\Framework\PDO\API_PostUser;
 use CPath\Framework\PDO\API_PostUserLogin;
 use CPath\Framework\PDO\API_PostUserLogout;
 use CPath\Framework\PDO\API_PostUserPassword;
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
-use CPath\Framework\PDO\Task_Login;
+
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Framework\Task\ITaskCollection;
+
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
 use CPath\Framework\User\Role\Exceptions\PasswordMatchException;
@@ -85,13 +85,13 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
         return $Routes;
     }
 
-    /**
-     * Load all available actions from this object.
-     */
-    function loadDefaultTasks(ITaskCollection $Manager) {
-        parent::loadDefaultTasks($Manager);
-        $Manager->add(new Task_Login($this));
-    }
+//    /**
+//     * Load all available actions from this object.
+//     */
+//    function loadDefaultTasks(ITaskCollection $Manager) {
+//        \CPath\Framework\PDO\Table\Types\parent::loadDefaultTasks($Manager);
+//        $Manager->add(new Task_Login($this));
+//    }
 
     /**
      * Internal method inserts an associative array into the database.
@@ -103,7 +103,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
             $row[static::COLUMN_PASSWORD] = static::hashPassword($row[static::COLUMN_PASSWORD]);
         if(!isset($row[static::COLUMN_FLAGS]))
             $row[static::COLUMN_FLAGS] = 0;
-        parent::insertRow($row);
+        \CPath\Framework\PDO\Table\Types\parent::insertRow($row);
     }
 
     /**
@@ -220,7 +220,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
         $User->checkPassword($password);
         $Session = $this->session()->createNewSession($User, $expireInSeconds);
 
-        $Response = new DataResponse("Logged in as user '".$User->getUsername()."' successfully", true, array(
+        $Response = new DataResponse("Logged in as user '".$User->getName()."' successfully", true, array(
             'user' => $User,
             'session' => $Session,
         ));

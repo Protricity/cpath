@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 
 interface IBrowseTheme {
     /**

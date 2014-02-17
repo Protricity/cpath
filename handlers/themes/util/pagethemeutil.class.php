@@ -9,7 +9,7 @@ namespace CPath\Handlers\Themes\Util;
 
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\IPageTheme;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 
 class PageThemeUtil {

@@ -22,7 +22,7 @@ interface IUser {
      * Get Username
      * @return String
      */
-    function getUsername();
+    function getName();
 
     /**
      * Get User Email Address

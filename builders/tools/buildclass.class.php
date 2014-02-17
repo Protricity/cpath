@@ -14,10 +14,9 @@ abstract class BuildClass  {
     const CONST_PREFIX = null;
     const PROP_PREFIX = null;
 
-    public $Name,
-        $Namespace;
-
     private
+        $mName,
+        $mNamespace,
         $mExtends = NULL,
         $mImplements = array(),
         $mConsts = array(),
@@ -27,11 +26,15 @@ abstract class BuildClass  {
         $mMethods = array(),
         $mStaticMethods = array();
 
-    public function __construct($name) {
-        $this->Name = $name;
+    public function __construct($name, $namespace) {
+        $this->mName = $name;
+        $this->mNamespace = $namespace;
     }
 
     public abstract function export($value);
+
+    public function getName($withNamespace=true) { return $withNamespace ? $this->getNamespace() . '\\' . $this->mName : $this->mName; }
+    public function getNamespace() { return $this->mNamespace; }
 
     public function addConst($name, $value) {
         $this->mConsts[$name] = static::TAB . static::CONST_PREFIX . $name . " = ". $this->export($value).";\n";
@@ -84,6 +87,10 @@ abstract class BuildClass  {
         return $this;
     }
 
+    public function hasMethod($name) {
+        return !empty($this->mMethods[$name]) || !empty($this->mStaticMethods[$name]);
+    }
+
     public function addMethodCode($code = "", $static=false) {
         $code = static::TAB . $code . "\n";
         $static ? $this->mStaticMethods[] = $code : $this->mMethods[] = $code;
@@ -126,7 +133,7 @@ abstract class BuildClass  {
     public function build() {
         $t = static::TAB;
 
-        $code = $this->buildStart($this->Namespace, $this->mUse, $this->mExtends, $this->mImplements);
+        $code = $this->buildStart($this->mNamespace, $this->mUse, $this->mExtends, $this->mImplements);
 
         if($this->mConsts) {
             $code .= "\n{$t}// Constants\n";

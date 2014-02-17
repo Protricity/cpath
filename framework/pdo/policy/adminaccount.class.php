@@ -8,9 +8,8 @@
 namespace CPath\Framework\PDO;
 
 
-use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Framework\PDO\Table\InvalidPermissionException;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\User\Predicates\IsAdmin;
@@ -36,7 +35,7 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
     /**
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
-     * @param PDOModel $Model the User Model to assert access upon
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel $Model the User Model to assert access upon
      * @param IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
@@ -52,7 +51,7 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
      * @param PDOWhere $Select the query statement to limit.
      * @param IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
-     * @throws Table\InvalidPermissionException
+     * @throws InvalidPermissionException
      * @internal param \CPath\Framework\PDO\Table\PDOTable $Table The table instance
      * @return void
      */
@@ -63,7 +62,7 @@ class Policy_AdminAccount extends Policy_UserAccountViewer {
 
     /**
      * Assert permission in default API calls 'POST, PATCH, and DELETE'
-     * @param PDOModel $User the User Model to assert access upon
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel $User the User Model to assert access upon
      * Note: during POST, $Model has no values
      * @param IRequest $Request
      * @param int $intent the read intent.

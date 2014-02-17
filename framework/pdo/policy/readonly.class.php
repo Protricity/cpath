@@ -9,9 +9,8 @@ namespace CPath\Framework\PDO;
 
 
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
-use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Framework\PDO\Table\InvalidPermissionException;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
@@ -23,7 +22,7 @@ class Policy_ReadOnly implements ISecurityPolicy {
     /**
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
-     * @param PDOModel $Model the Model to assert access upon
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel $Model the Model to assert access upon
      * @param IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @return void

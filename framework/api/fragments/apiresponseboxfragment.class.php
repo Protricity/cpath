@@ -1,19 +1,17 @@
 <?php
-namespace CPath\Handlers\API\Fragments;
+namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\ExceptionResponse;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Handlers\Util\Attr;
-use CPath\Handlers\Util\HTMLRenderUtil;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Interfaces\IViewConfig;
-use CPath\Util;
 
 class APIResponseBoxFragment implements IViewConfig{
     private $mTheme;
@@ -34,7 +32,7 @@ class APIResponseBoxFragment implements IViewConfig{
 
     function renderResponseBox(IRequest $Request, IResponse $Response=null, IAttributes $Attr=null) {
         $Attr = Attr::get($Attr);
-        $Util = new HTMLRenderUtil($Request);
+        // = new HTMLRenderUtil($Request);
         //$Util->button('JSON', 'form-button-submit-json');
 
         $Attr->addClass('apiresponsebox-fragment');
@@ -44,14 +42,8 @@ class APIResponseBoxFragment implements IViewConfig{
         $Theme->renderFragmentStart($Request, "Ajax Info", $Attr);
         $Theme->renderFragmentStart($Request, "DataResponse", Attr::get('response-content'));
         if($Response) {
-            try{
-                $JSON = Util::toJSON($Response);
-                echo json_encode($JSON);
-            } catch (\Exception $ex) {
-                $Response = new ExceptionResponse($ex);
-                $JSON = Util::toJSON($Response);
-                echo json_encode($JSON);
-            }
+            $Util = new ResponseUtil($Response);
+            $Util->renderJSON($Request);
         }
         $Theme->renderFragmentEnd($Request);
         $Theme->renderFragmentStart($Request, "DataResponse Headers", new Attr('response-headers'));

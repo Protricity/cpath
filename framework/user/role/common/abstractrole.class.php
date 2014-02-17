@@ -8,7 +8,7 @@
 namespace CPath\Framework\User\Role\Common;
 
 use CPath\Framework\User\Role\Interfaces\IRole;
-use CPath\Serializer\ISerializable;
+
 
 abstract class AbstractRole implements IRole {
 
@@ -23,7 +23,7 @@ abstract class AbstractRole implements IRole {
     /**
      * Unserialize and instantiate an Object with the stored data
      * @param mixed $data the exported data
-     * @return ISerializable|AbstractRole
+     * @return \CPath\Framework\Data\Serialize\Interfaces\ISerializable|AbstractRole
      */
     static function unserialize($data) {
         $data = json_decode($data, true);

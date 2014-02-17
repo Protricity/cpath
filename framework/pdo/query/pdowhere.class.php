@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 
 abstract class PDOWhere {
     const LOGIC_OR = 0x1; // Default logic between WHERE elements to "OR" instead of "AND"

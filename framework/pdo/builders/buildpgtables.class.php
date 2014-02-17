@@ -7,10 +7,12 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
-use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
-use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
-use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\DB\PGSQLDatabase;
+use CPath\Framework\PDO\Table\Builders\BuildPDOTable;
+use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
+use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Interfaces\IBuildable;
 
 
@@ -38,9 +40,10 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @return \CPath\Framework\PDO\Builders\Tables\BuildPDOTable[]
+     * @param $namespace
+     * @return BuildPDOTable[]
      */
-    protected function getTables(\PDO $DB){
+    protected function getTables(\PDO $DB, $namespace) {
         $tables = array();
         foreach($DB->query("SELECT table_name, obj_description(table_name::regclass) as table_comment
         FROM information_schema.tables t
@@ -52,26 +55,27 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
+     * @param IPDOTableBuilder $Table
      * @return void
      */
-    protected function getIndexes(\PDO $DB, BuildPDOTable $Table) {
+    protected function getIndexes(\PDO $DB, IPDOTableBuilder $Table) {
         foreach($DB->query("select a.attname as column_name
 from pg_class t, pg_class i, pg_index ix, pg_attribute a
-where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '{$Table->Name}'
+where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '$Table'
 group by column_name;") as $row ) {
             $name = $row['column_name'];
-            $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOColumn::FLAG_INDEX;
+            /** @var IPDOColumnBuilder $Column */
+            $Column = $Table->getColumns()->get($name);
+            $Column->setFlag(PDOColumn::FLAG_INDEX);
         }
     }
 
     /**
      * @param \PDO $DB
-     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
+     * @param IPDOTableBuilder $Table
      * @return void
      */
-    protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
+    protected function getColumns(\PDO $DB, IPDOTableBuilder $Table) {
         $primaryCol = NULL;
         foreach($DB->query("SELECT DISTINCT ON (c.table_name, c.column_name) c.table_name, c.column_name, c.data_type, c.column_default, c.is_nullable, d.description as column_comment
         FROM information_schema.columns AS c
@@ -82,23 +86,28 @@ group by column_name;") as $row ) {
             inner join information_schema.columns c on (pgd.objsubid=c.ordinal_position
             and  c.table_schema=st.schemaname and c.table_name=st.relname)
         ) d on d.column_name = c.column_name
-        WHERE c.table_name = '{$Table->Name}';") as $row) {
+        WHERE c.table_name = '$Table';") as $row) {
 
             $name = $row['column_name'];
             //if($name == 'created')
             //    print_r($row);
 
             $Column = new BuildPDOColumn($name, $row['column_comment']);
+
             if(strcasecmp($row['is_nullable'], 'yes') === 0)
-                $Column->Flags |= PDOColumn::FLAG_NULL;
+                $Column->setFlag(PDOColumn::FLAG_NULL);
+
             if(stripos($row['data_type'], 'int') !== false)
-                $Column->Flags |= PDOColumn::FLAG_NUMERIC;
+                $Column->setFlag(PDOColumn::FLAG_NUMERIC);
+
             if(stripos($row['column_default'], 'nextval(') ===0)
-                $Column->Flags |= PDOColumn::FLAG_AUTOINC;
-            if(($Column->Flags & PDOColumn::FLAG_AUTOINC) && !$primaryCol) {
-                $Column->Flags |= PDOColumn::FLAG_PRIMARY;
+                $Column->setFlag(PDOColumn::FLAG_AUTOINC);
+
+            if(($Column->hasFlag(PDOColumn::FLAG_AUTOINC)) && !$primaryCol) {
+                $Column->setFlag(PDOColumn::FLAG_PRIMARY);
                 $primaryCol = $name;
             }
+
             $Table->addColumn($Column);
         }
     }

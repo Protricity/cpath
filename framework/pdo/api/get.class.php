@@ -14,12 +14,13 @@ use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
-use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Response\PDOModelResponse;
-use CPath\Framework\PDO\Table\ModelNotFoundException;
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
+use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
+use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
 
@@ -92,7 +93,7 @@ class API_Get extends API_Base implements IRenderHtml {
         $T = $this->getTable();
         $id = $Request->pluck($this->mIDField);
 
-        /** @var PDOModelSelect $Search  */
+        /** @var \CPath\Framework\PDO\Table\Model\Query\PDOModelSelect $Search  */
         $Search = $T->search();
         $Search->limit(1);
         $Search->whereSQL('(');
@@ -126,11 +127,12 @@ class API_Get extends API_Base implements IRenderHtml {
 
 
     /**
-     * Sends headers, executes the request, and renders an IResponse as HTML
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    public function renderHTML(IRequest $Request) {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null)  {
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IPDOModelRender)
@@ -148,6 +150,6 @@ class API_Get extends API_Base implements IRenderHtml {
             }
 
         $Util = new APIRenderUtil($this);
-        $Util->renderHTML($Request);
+        $Util->renderHTML($Request, $Attr);
     }
 }

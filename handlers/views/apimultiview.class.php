@@ -3,15 +3,15 @@ namespace CPath\Handlers\Views;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\API\Fragments\APIDebugFormFragment;
+use CPath\Framework\API\Fragments\APIFormFragment;
+use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Handlers\API\Fragments\APIDebugFormFragment;
-use CPath\Handlers\API\Fragments\APIFormFragment;
-use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
@@ -76,7 +76,8 @@ class APIMultiView extends AbstractAPIView {
         $this->mForm = new APIDebugFormFragment($this->mSelectedAPI, $this->getTheme());
         $this->mForm->addHeadElementsToView($this);
 
-        $this->mSelectedAPI->addHeadElementsToView($this);
+        if($this->mSelectedAPI instanceof IViewConfig)
+            $this->mSelectedAPI->addHeadElementsToView($this);
 
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($this);

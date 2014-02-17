@@ -8,9 +8,12 @@
 namespace CPath\Framework\Api\Interfaces;
 
 use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class FieldUtil implements IFieldUtil {
+class FieldUtil implements IField, IRenderHtml {
     private $mField;
 
     function __construct(IField $Field) {
@@ -18,7 +21,7 @@ class FieldUtil implements IFieldUtil {
     }
 
     /**
-     * @return IField
+     * @return \CPath\Framework\Api\Field\Interfaces\IField
      */
     public function getField() {
         return $this->mField;
@@ -48,7 +51,7 @@ class FieldUtil implements IFieldUtil {
     /**
      * Internal function used to set the field name.
      * @param String $value
-     * @return IField
+     * @return \CPath\Framework\Api\Field\Interfaces\IField
      */
     function setValue($value) {
         return $this->mField->setValue($value);
@@ -75,4 +78,20 @@ class FieldUtil implements IFieldUtil {
 
     function isRequired() { return $this->hasFlags(IField::IS_REQUIRED); }
     function isParam() { return $this->hasFlags(IField::IS_PARAMETER); }
+
+    /**
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
+     * @throws \Exception
+     * @return void
+     */
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+        if($this->mField instanceof IRenderHtml) {
+            $this->mField->renderHtml($Request);
+            return;
+        }
+
+        throw new \Exception("Field cannot be rendered");
+    }
 }

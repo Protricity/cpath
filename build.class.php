@@ -10,6 +10,7 @@ namespace CPath;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Interfaces\IBuildable;
@@ -245,6 +246,12 @@ class Build extends AbstractAPI implements IRoutable {
                 continue;
             }
 
+            $newClassFile = dirname($classFile) . '//' . $className . '.php';
+            if(!file_exists($newClassFile)) {
+                Log::v(__CLASS__, "Coppied class file to " . $newClassFile);
+                //copy($classFile, $newClassFile);
+            }
+
             if($Class->getConstant('BUILD_IGNORE')) {
             }
 //            if($Class->isAbstract()) {
@@ -341,6 +348,7 @@ class Build extends AbstractAPI implements IRoutable {
             }
             if(strcasecmp(substr($file, -10), '.class.php') !== 0)
                 continue;
+
             //$name = substr($file, 0, strlen($file) - 10);
             //$class = $dirClass . '\\' . ucfirst($name);
 
@@ -397,5 +405,16 @@ class Build extends AbstractAPI implements IRoutable {
      */
     static function createBuildableInstance() {
         return new static();
+    }
+
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request)
+    {
+        $Util = new APIRenderUtil($this);
+        $Util->render($Request);
     }
 }

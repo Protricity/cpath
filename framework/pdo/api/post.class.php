@@ -8,10 +8,10 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;

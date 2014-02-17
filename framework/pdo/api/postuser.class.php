@@ -10,13 +10,13 @@ namespace CPath\Framework\PDO;
 
 use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\Api\Field\Field;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Field\PasswordField;
-use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Validation\CallbackValidation;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAPIPostUserCallbacks;
-use CPath\Framework\PDO\Model\PDOModel;
-use CPath\Framework\PDO\Table\ModelAlreadyExistsException;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -105,7 +105,7 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
 
     /**
      * Perform on successful API_Get execution
-     * @param PDOModel|PDOUserModel $NewUser the new user account instance
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel|PDOUserModel $NewUser the new user account instance
      * @param IRequest $Request
      * @param IResponse $Response
      * @return IResponse|null
@@ -120,10 +120,10 @@ class API_PostUser extends API_Post implements IAPIPostCallbacks {
 
 
         if($login && $pass) {
-            $T->login($NewUser->getUsername(), $pass);
-            $Response = new DataResponse("Created and logged in user '".$NewUser->getUsername()."' successfully", true, $NewUser);
+            $T->login($NewUser->getName(), $pass);
+            $Response = new DataResponse("Created and logged in user '".$NewUser->getName()."' successfully", true, $NewUser);
         } else {
-            $Response = new DataResponse("Created user '".$NewUser->getUsername()."' successfully", true, $NewUser);
+            $Response = new DataResponse("Created user '".$NewUser->getName()."' successfully", true, $NewUser);
         }
 
         foreach($this->getHandlers() as $Handler)

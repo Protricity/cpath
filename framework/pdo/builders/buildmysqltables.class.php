@@ -8,10 +8,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 
-use CPath\Framework\PDO\Builders\Columns\BuildPDOColumn;
-use CPath\Framework\PDO\Builders\Tables\BuildPDOTable;
-use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\DB\MySQLDatabase;
+use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
+
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Interfaces\IBuildable;
 
 class BuildMySQLTables extends BuildPDOTables implements IBuildable {
@@ -38,9 +39,10 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @return BuildPDOTable[]
+     * @param $namespace
+     * @return IPDOTableBuilder[]
      */
-    protected function getTables(\PDO $DB){
+    protected function getTables(\PDO $DB, $namespace) {
         $tables = array();
         foreach($DB->query("SHOW TABLE STATUS") as $row) {
             $tables[$row['Name']] = $this->createTable($row['Name'], $row['Comment']);
@@ -50,43 +52,44 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @param BuildPDOTable $Table
+     * @param IPDOTableBuilder $Table
      * @return void
      */
-    protected function getIndexes(\PDO $DB, BuildPDOTable $Table) {
-        foreach($DB->query("SHOW KEYS FROM `{$Table->Name}`;") as $row) {
+    protected function getIndexes(\PDO $DB, IPDOTableBuilder $Table) {
+        foreach($DB->query("SHOW KEYS FROM $Table;") as $row) {
             $name = $row['Column_name'];
-            $Column = $Table->getColumn($name);
-            $Column->Flags |= PDOColumn::FLAG_INDEX;
+            /** @var \CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder $Column */
+            $Column = $Table->getColumns()->get($name);
+            $Column->setFlag(PDOColumn::FLAG_INDEX);
             if(stripos($row['Key_name'], 'PRIMARY') === 0)
-                $Column->Flags |= PDOColumn::FLAG_PRIMARY;
+                $Column->setFlag(PDOColumn::FLAG_PRIMARY);
         }
     }
 
     /**
      * @param \PDO $DB
-     * @param \CPath\Framework\PDO\Builders\Tables\BuildPDOTable $Table
+     * @param IPDOTableBuilder $Table
      * @return void
      */
-    protected function getColumns(\PDO $DB, BuildPDOTable $Table) {
-        foreach($DB->query("SHOW FULL COLUMNS FROM `{$Table->Name}`;") as $row) {
+    protected function getColumns(\PDO $DB, IPDOTableBuilder $Table) {
+        foreach($DB->query("SHOW FULL COLUMNS FROM $Table;") as $row) {
             $name = $row['Field'];
             $Column = new BuildPDOColumn($name, $row['Comment']);
             if($row['Null'] == 'YES')
-                $Column->Flags |= PDOColumn::FLAG_NULL;
+                $Column->mFlags |= PDOColumn::FLAG_NULL;
             if(preg_match('/^enum\((.*)\)$/', $row['Type'], $matches)) {
-                $Column->EnumValues = array();
+                $Column->mEnumValues = array();
                 foreach( explode(',', $matches[1]) as $value )
-                    $Column->EnumValues[] = trim( $value, "'" );
-                $Column->Flags |= PDOColumn::FLAG_ENUM;
+                    $Column->mEnumValues[] = trim( $value, "'" );
+                $Column->mFlags |= PDOColumn::FLAG_ENUM;
             } else {
                 if(stripos($row['Type'], 'int') !== false)
-                    $Column->Flags |= PDOColumn::FLAG_NUMERIC;
+                    $Column->mFlags |= PDOColumn::FLAG_NUMERIC;
             }
             if($row['Extra'] == 'auto_increment')
-                $Column->Flags |= PDOColumn::FLAG_AUTOINC;
+                $Column->mFlags |= PDOColumn::FLAG_AUTOINC;
             if($row['Default'] !== NULL)
-                $Column->Flags |= PDOColumn::FLAG_DEFAULT;
+                $Column->mFlags |= PDOColumn::FLAG_DEFAULT;
             $Table->addColumn($Column);
         }
     }

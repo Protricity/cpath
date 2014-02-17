@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Templates\User\Role\Table;
 
 
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\User\Role\Interfaces\IRole;
 use CPath\Framework\User\Role\Interfaces\IRoleCollection;
 

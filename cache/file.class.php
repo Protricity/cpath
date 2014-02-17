@@ -9,8 +9,8 @@ namespace CPath\Cache;
 
 
 use CPath\Config;
-use CPath\Serializer\ISerializable;
-use CPath\Serializer\Serializer;
+use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
+use CPath\Framework\Data\Serialize\Types\Serializer;
 
 /**
  * Class None - Placeholder class for when no cache is available

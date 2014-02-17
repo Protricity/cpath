@@ -1,14 +1,16 @@
 <?php
-namespace CPath\Handlers\API\Fragments;
+namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\Api\Interfaces\FieldUtil;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Handlers\Util\Attr;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteUtil;
@@ -75,7 +77,7 @@ class APIFormFragment extends AbstractFormFragment{
             $Table->renderTD('&nbsp;',      'table-field-description');
             $Table->renderTD('&nbsp;',      'table-field-input');
         } else foreach($Fields as $name=>$Field) {
-            $req = $Field->isRequired() ? 'yes' : '&nbsp;';
+            $req = $Field->getFieldFlags() & IField::IS_REQUIRED ? 'yes' : '&nbsp;';
             $desc = Describable::get($Field)->getDescription();;
 
             $Table->renderRowStart();
@@ -86,7 +88,9 @@ class APIFormFragment extends AbstractFormFragment{
             $Table->renderDataStart(    'table-field-input');
             if(isset($_GET[$name]))
                 $Field->setValue($_GET[$name]);
-            $Field->render($Request);
+
+            $RenderField = new FieldUtil($Field);
+            $RenderField->renderHtml($Request);
         }
 
         $Table->renderFooterStart();

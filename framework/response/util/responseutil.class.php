@@ -10,6 +10,7 @@ use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Data\Map\Types\CallbackMap;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderAll;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Render\Interfaces\IRenderText;
@@ -17,7 +18,7 @@ use CPath\Framework\Render\Interfaces\IRenderXML;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Log;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 final class ResponseUtil implements IRenderAll {
     private $mResponse;
@@ -123,12 +124,12 @@ final class ResponseUtil implements IRenderAll {
     }
 
     /**
-     * Sends headers if necessary, executes the request, and renders an IResponse as html
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request)
-    {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
         $Response = $this->mResponse;
         if($Response instanceof IRenderHtml) {
             $Response->renderHtml($Request);

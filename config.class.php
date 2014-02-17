@@ -54,7 +54,7 @@ class Config implements IConfig {
         if(__CLASS__ != get_called_class())
             throw new \Exception(__CLASS__ . "::install() may only be called from an non-inherited instance of " . __CLASS__);
         $path = dirname(__DIR__) . '/config.php';
-        $Builder = new Builder($this, $path, true);
+        //$Builder = new Builder($this, $path, true);
     }
 }
 Config::init();

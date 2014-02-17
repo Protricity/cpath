@@ -9,7 +9,6 @@
 include_once __DIR__.'/../base.class.php';
 
 use CPath\Framework\Request\Types\CLI;
-use CPath\Util;
 
 class UtilTest extends PHPUnit_Framework_TestCase {
 
@@ -28,13 +27,13 @@ class UtilTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals('/my/path', $CLI->getPath());
     }
 
-    public function testJSON() {
-        $json = Util::toJSON(array('key'=>'val','arr'=>array('key2'=>'val2')));
-        $this->assertTrue(is_array($json));
-    }
-
-    public function testXML() {
-        $XML = Util::toXML(array('key'=>'val','arr'=>array('key2'=>'val2')));
-        $this->assertTrue($XML instanceof \SimpleXMLElement);
-    }
+//    public function testJSON() {
+//        $json = Util::toJSON(array('key'=>'val','arr'=>array('key2'=>'val2')));
+//        $this->assertTrue(is_array($json));
+//    }
+//
+//    public function testXML() {
+//        $XML = Util::toXML(array('key'=>'val','arr'=>array('key2'=>'val2')));
+//        $this->assertTrue($XML instanceof \SimpleXMLElement);
+//    }
 }

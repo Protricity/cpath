@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Interfaces\IJSON;
-use CPath\Interfaces\IXML;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
 
-class PDOSelectLimitedStats implements IJSON, IXML {
+class PDOSelectLimitedStats implements IMappable {
 
     private $limit, $offset, $curPage;
 
@@ -46,24 +46,12 @@ class PDOSelectLimitedStats implements IJSON, IXML {
     }
 
     /**
-     * EXPORT Object to an associative array to be formatted into JSON
-     * @param Array $JSON the JSON array to modify
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
      * @return void
      */
-    function toJSON(Array &$JSON)
-    {
+    function mapData(IDataMap $Map) {
         foreach($this as $k=>$v)
-            $JSON[$k] = $v;
-    }
-
-    /**
-     * EXPORT Object to XML
-     * @param \SimpleXMLElement $xml the XML instance to modify
-     * @return void
-     */
-    function toXML(\SimpleXMLElement $xml)
-    {
-        foreach($this as $k=>$v)
-            $xml->addAttribute($k, $v);
+            $Map->mapDataToKey($k, $v);
     }
 }

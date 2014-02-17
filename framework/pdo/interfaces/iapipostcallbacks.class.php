@@ -8,8 +8,8 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\Api\Interfaces\IField;
-use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
@@ -19,7 +19,7 @@ interface IAPIPostCallbacks {
      * Add or modify fields of an API.
      * Note: Leave empty if unused.
      * @param Array &$fields the existing API fields to modify
-     * @return IField[]|NULL return an array of prepared fields to use or NULL to ignore.
+     * @return \CPath\Framework\Api\Field\\CPath\Framework\Api\Field\Interfaces\IField[]|NULL return an array of prepared fields to use or NULL to ignore.
      */
     function preparePostFields(Array &$fields);
 

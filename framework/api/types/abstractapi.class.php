@@ -12,8 +12,8 @@ use CPath\Base;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Exceptions\ValidationExceptions;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Interfaces\IField;
 use CPath\Framework\Api\Util\APIExecuteUtil;
 use CPath\Framework\Api\Validation\Interfaces\IValidation;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
@@ -39,7 +39,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
     const ROUTE_METHOD = 'POST';            // Default accepted method is POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
-    /** @var IField[] */
+    /** @var \CPath\Framework\Api\Field\IField[] */
     private $mColumns = array();
     /** @var IValidation[] */
     private $mValidations = array();
@@ -271,7 +271,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 
     /**
      * Add an array of API Fields
-     * @param IField[] $fields associative array of Fields.
+     * @param \CPath\Framework\Api\Field\IField[] $fields associative array of Fields.
      * The array key represents the Field name.
      * @return $this return the class instance
      */
@@ -284,7 +284,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 
     /**
      * Get all API Fields
-     * @return IField[]
+     * @return \CPath\Framework\Api\Field\Interfaces\IField[]
      */
     public function getFields() {
         $this->_setupFields();

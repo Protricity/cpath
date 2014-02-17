@@ -2,19 +2,20 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Base;
-use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Framework\Data\Map\Types\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\Web;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Interfaces\IViewConfig;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class ModelResultsTableFragment implements IRender, IViewConfig{
 
@@ -47,24 +48,23 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
      */
     function render(IRequest $Request, PDOSearchResponse $Response = NULL, IAttributes $Attr=null)
     {
-        if(is_array($attr))     $attr = implode(' ', $attr);
-
         $Table = new TableThemeUtil($Request, $this->mTheme);
 
         $Query = $Response->getQuery();
         $Stats = $Query->getDescriptor()->execFullStats();
-        $json = array();
-        $Stats->toJSON($json);
+        $json = ArrayMap::get($Stats);
         $json = json_encode($json);
-        $attr = "data-stats='{$json}'" . ($attr ? ' ' . $attr : '');
+        $Attr->add('data-stats', $json);
+        //$attr = "data-stats='{$json}'" . ($attr ? ' ' . $attr : '');
 
-        $Table->renderStart($Response, $class, $attr);
+        $Table->renderStart($Response, $Attr);
         $Table->renderHeaderStart();
 
         $row = $Query->fetch();
         if($row) {
-            if($row instanceof PDOModel)
-                $row = $row->exportData();
+            if($row instanceof IMappable)
+                $row = ArrayMap::get($row);
+
 
             if($Query->hasDescriptor()) {
                 $Descriptor = $Query->getDescriptor();
@@ -80,8 +80,8 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
                 foreach($row as $value)
                     $Table->renderTD($value);
                 $row = $Query->fetch();
-                if($row instanceof PDOModel)
-                    $row = $row->exportData();
+                if($row instanceof IMappable)
+                    $row = ArrayMap::get($row);
             }
         }
 
@@ -102,7 +102,7 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
             //echo RI::ni(), "<a href='". $url. $Stats->getURL($Stats->getTotalPages()). "' class='search-form-page-last'>Last</a>";
             echo RI::ni(),"<a", (($p = $Stats->getPreviousPage()) ? " href='". $url. $Stats->getURL($p). "'" : ''), " class='search-form-page search-form-page-previous'>Previous</a>";
                 echo RI::ni(), "<div class='search-form-pages'>";// data-template-url='" .  $url . $Stats->getURL('%PAGE%', '%LIMIT%') . "'>";
-                foreach($Stats->getPageIDs() as $i=>$id) {
+                foreach($Stats->getPageIDs() as $id) {
                     echo RI::ni(1), "<a href='", $url, $Stats->getURL($id), "' class='search-form-page'>{$id}</a>";
                 }
                 echo RI::ni(), "</div>";

@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Table;
 
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\Task\ITask;
 use CPath\Framework\Task\Receipt\IReceipt;
 use CPath\Framework\Task\Receipt\SimpleReceipt;

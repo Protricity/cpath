@@ -1,5 +1,5 @@
 <?php
-namespace CPath\Handlers\API\Fragments;
+namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
 use CPath\Framework\Api\Interfaces\IAPI;

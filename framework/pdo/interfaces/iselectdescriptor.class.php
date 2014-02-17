@@ -9,7 +9,9 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\PDO\Columns\PDOColumn;
+use CPath\Framework\PDO\Query\PDOSelectLimitedStats;
+use CPath\Framework\PDO\Query\PDOSelectStats;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 
 
 interface ISelectDescriptor {
@@ -28,13 +30,13 @@ interface ISelectDescriptor {
     function getAPI();
 
     /**
-     * @return \CPath\Framework\PDO\Query\PDOSelectLimitedStats
+     * @return PDOSelectLimitedStats
      */
     function getLimitedStats();
 
     /**
      * @param bool $allowCache
-     * @return \CPath\Framework\PDO\Query\PDOSelectStats
+     * @return PDOSelectStats
      */
     function execFullStats($allowCache=true);
 }

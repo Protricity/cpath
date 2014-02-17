@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\DB;
 use CPath\Framework\PDO\Query\PGSQLInsert;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use PDO;
 
 abstract class PGSQLDatabase extends PDODatabase {

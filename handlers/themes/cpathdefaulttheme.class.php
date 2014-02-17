@@ -9,12 +9,12 @@ use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Fragments\ModelResultsTableFragment;
 use CPath\Handlers\Fragments\ModelTableFragment;
-use CPath\Handlers\Interfaces\IAttributes;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Handlers\Util\Attr;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\Attr;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 
 
 class CPathDefaultTheme implements ITheme {

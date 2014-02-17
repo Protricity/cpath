@@ -9,8 +9,8 @@ namespace CPath\Framework\PDO;
 
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Task\AbstractTask;
 use CPath\Framework\Task\Exceptions\InvalidTaskStateException;
+use CPath\Framework\Task\Types\AbstractTask;
 
 class APITaskException extends \Exception {}
 

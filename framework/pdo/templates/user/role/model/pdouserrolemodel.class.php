@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Role\Model;
 
-use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\User\Role\Interfaces\IRole;
 use CPath\Framework\User\Session\ISession;
 

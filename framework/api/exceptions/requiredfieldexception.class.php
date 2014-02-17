@@ -11,7 +11,7 @@ namespace CPath\Framework\Api\Exceptions;
  * @package CPath
  * Throw when a required field is missing
  */
-class RequiredFieldException extends \CPath\Framework\Api\Exceptions\ValidationException
+class RequiredFieldException extends ValidationException
 {
     function __construct($msg = "Field '%s' is required")
     {

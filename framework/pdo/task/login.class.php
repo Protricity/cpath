@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\Task\AbstractTask;
 use CPath\Framework\Task\ITask;
+use CPath\Framework\Task\Types\AbstractTask;
 
 class Task_Login extends AbstractTask {
 

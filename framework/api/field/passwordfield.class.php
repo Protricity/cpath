@@ -8,6 +8,8 @@
 namespace CPath\Framework\Api\Field;
 
 use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Model\FileUpload;
 
@@ -29,13 +31,14 @@ class PasswordField extends RequiredField {
     }
 
     /**
-     * Render this input field as html
-     * @param IRequest $Request the IRequest instance for this render
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function render(IRequest $Request) {
-        parent::render($Request, array(
-            'type' => 'password',
-        ));
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+        $Attr = Attr::get($Attr);
+        $Attr->add('type', 'password');
+        parent::renderHTML($Request, $Attr);
     }
 }

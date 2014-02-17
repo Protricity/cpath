@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Interfaces;
+use CPath\Framework\Api\Field\Interfaces\IField;
 
 /**
  * Class Param

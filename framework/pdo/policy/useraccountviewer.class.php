@@ -10,9 +10,8 @@ namespace CPath\Framework\PDO;
 
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
-use CPath\Framework\PDO\Model\PDOModel;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Framework\PDO\Table\InvalidPermissionException;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\Request\Interfaces\IRequest;

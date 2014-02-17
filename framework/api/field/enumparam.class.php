@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Field;
 
-use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Api\Field\Interfaces\IField;
 
 class EnumParam extends EnumField  {
     protected function getDefaultFlags() { return parent::getDefaultFlags() | IField::IS_PARAMETER; }

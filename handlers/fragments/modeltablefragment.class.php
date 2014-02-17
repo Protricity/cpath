@@ -2,7 +2,8 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Describable\Describable;
-use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\Data\Map\Types\ArrayMap;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Render\Interfaces\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -11,14 +12,13 @@ use CPath\Handlers\Themes\Util\TableThemeUtil;
 
 class ModelTableFragment implements IRender{
 
-    private $mModel, $mTemplate, $mTheme;
+    private $mModel, $mTheme;
 
     /**
-     * @param \CPath\Framework\PDO\Model\PDOModel|Array $Model
-     * @param \CPath\Framework\PDO\Model\PDOModel $Template a PDOModel instance to use as a template
+     * @param PDOModel $Model
      * @param ITableTheme $Theme
      */
-    public function __construct($Model, ITableTheme $Theme = null) {
+    public function __construct(PDOModel $Model, ITableTheme $Theme = null) {
         $this->mModel = $Model;
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
@@ -31,18 +31,19 @@ class ModelTableFragment implements IRender{
     function render(IRequest $Request)
     {
         $Model = $this->mModel;
-        $export = array();
         $caption = null;
         if($Model instanceof PDOModel) {
-            $caption = Describable::get($this->mTemplate)->getTitle();
-            $data = $Model->exportData();
-            foreach($Model->table()->getColumns() as $name => $Column)
-                if(isset($data[$name]))
-                    $export[$Column->getComment()] = $data[$name];
+            $caption = Describable::get($Model)->getTitle();
+            $export = ArrayMap::get($Model);
+
+//            //  TODO: why?
+//            foreach($Model->table()->getColumns() as $name => $Column)
+//                if(isset($data[$name]))
+//                    $export[$Column->getComment()] = $data[$name];
         } else {
             $export = $Model;
         }
         $Util = new TableThemeUtil($Request, $this->mTheme);
-        $Util->renderKeyPairsTable($export, 'Column', 'Value', $caption);
+        $Util->renderKeyPairsTable($export, 'Column', 'Value', $caption); // TODO: direct render
     }
 }

@@ -17,8 +17,7 @@ class BuildCSharpClass extends BuildClass {
     private $mClassCode = array();
 
     public function __construct($name, $namespace) {
-        parent::__construct($name);
-        $this->Namespace = $namespace;
+        parent::__construct($name, $namespace);
     }
 
     public function addClassCode($code = "") {
@@ -50,12 +49,12 @@ class BuildCSharpClass extends BuildClass {
         foreach($uses as $as => $u)
             $code .= "using {$u}" . (!is_int($as) ? ' as '.$as : '') . ";\n";
 
-        if($namespace) $code .= "\nnamespace " . $this->Namespace . " {\n";
+        if($namespace) $code .= "\nnamespace " . $this->getNamespace() . " {\n";
         $code .= "\n";
 
         $code .= implode($this->mClassCode);
 
-        $code .= "\tclass " . $this->Name . ($extends ? " : " . $extends : "");
+        $code .= "\tclass " . $this->getName(false) . ($extends ? " : " . $extends : "");
         $code .= " {\n";
         return $code;
     }

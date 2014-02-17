@@ -27,4 +27,14 @@ class CallbackFilter implements IPredicate {
         $call = $this->mCallable;
         return $call($Item) ? true : false;
     }
+
+    /**
+     * Filter object by true or false
+     * @param mixed $Object
+     * @return bool
+     */
+    function onPredicate($Object) {
+        $call = $this->mCallable;
+        return $call($Object) ? true : false;
+    }
 }

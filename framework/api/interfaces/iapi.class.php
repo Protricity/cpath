@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Interfaces;
 
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 

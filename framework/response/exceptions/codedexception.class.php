@@ -8,7 +8,9 @@
 namespace CPath\Framework\Response\Exceptions;
 
 
-class CodedException extends \Exception implements \CPath\Framework\Response\Interfaces\IResponseCode {
+use CPath\Framework\Response\Interfaces\IResponseCode;
+
+class CodedException extends \Exception implements IResponseCode {
     const DEFAULT_CODE = 400;
 
     function __construct($message, $statusCode=null, $previous=null) {

@@ -8,9 +8,10 @@
 namespace CPath\Framework\Task\Receipt;
 
 use CPath\Framework\Task\ITask;
-use CPath\Serializer\ISerializable;
+use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
+use CPath\Framework\Task\Parameter\ITaskParameter;
 
-interface IReceipt extends ISerializable {
+interface IReceipt {
 
     // Event flags
     const EVENT_STATUS          = 0x1;      // Receipt status has been requested. No processing should occur
@@ -29,4 +30,9 @@ interface IReceipt extends ISerializable {
      * @throws ReceiptException
      */
     function processReceiptState($eventFlags);
+
+    /**
+     * @return ITaskParameter[]
+     */
+    function getParameters();
 }

@@ -8,15 +8,15 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Framework\Api\Exceptions\APIException;
-use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
-use CPath\Framework\PDO\Model\PDOPrimaryKeyModel;
-use CPath\Framework\PDO\Table\ModelAlreadyExistsException;
-use CPath\Framework\PDO\Table\ModelNotFoundException;
-use CPath\Framework\PDO\Table\PDOPrimaryKeyTable;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
+use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;

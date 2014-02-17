@@ -3,14 +3,14 @@ namespace CPath\Handlers\Views;
 
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\API\Fragments\APIDebugFormFragment;
+use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Handlers\API\Fragments\APIDebugFormFragment;
-use CPath\Handlers\API\Fragments\APIResponseBoxFragment;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
-use CPath\Misc\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 use CPath\Route\RouteUtil;
@@ -37,7 +37,8 @@ class APIView extends AbstractAPIView {
      * @param IRequest $Request
      */
     final protected function setupAPIHeadFields(IRequest $Request) {
-        $this->mAPI->addHeadElementsToView($this);
+        if($this->mAPI instanceof IViewConfig)
+            $this->mAPI->addHeadElementsToView($this);
         $this->mForm->addHeadElementsToView($this);
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($this);

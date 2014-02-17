@@ -12,17 +12,19 @@ use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
 use CPath\Framework\Api\Util\APIRenderUtil;
-use CPath\Framework\PDO\Columns\PDOColumn;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
-use CPath\Framework\PDO\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
-use CPath\Framework\PDO\Table\ModelNotFoundException;
-use CPath\Framework\PDO\Table\PDOTable;
+use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
+use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
+use CPath\Framework\PDO\Table\Types\PDOTable;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Request\Interfaces\IRequest;
 
@@ -112,11 +114,12 @@ class API_GetBrowse extends API_Base implements IRenderHtml {
 
 
     /**
-     * Sends headers, executes the request, and renders an IResponse as HTML
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    public function renderHTML(IRequest $Request) {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IPDOModelSearchRender)
@@ -132,7 +135,7 @@ class API_GetBrowse extends API_Base implements IRenderHtml {
             }
 
         $Util = new APIRenderUtil($this);
-        $Util->renderHTML($Request);
+        $Util->renderHTML($Request, $Attr);
     }
 }
 
@@ -164,7 +167,7 @@ class API_GetBrowseDescriptor implements ISelectDescriptor {
     /**
      * Return the column for a query row value
      * @param String $columnName the name of the column to be translated
-     * @return PDOColumn
+     * @return \CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn
      */
     function getColumn($columnName) {
         return $this->mTable->getColumn($columnName);

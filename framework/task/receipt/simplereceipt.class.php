@@ -8,16 +8,13 @@
 namespace CPath\Framework\Task\Receipt;
 
 use CPath\Framework\Task\ITask;
-use CPath\Serializer\ISerializable;
+use CPath\Framework\Task\Parameter\ITaskParameter;
+
 
 final class SimpleReceipt implements IReceipt {
 
     const PARAM_CLASS = 0;
     const PARAM_DATA = 1;
-
-    // Event flags
-    const EVENT_STATUS          = 0x1;      // Receipt status has been requested. No processing should occur
-    const EVENT_VALIDATE        = 0x10;     // Validate Receipt
 
     /** @var ITask */
     private $mTask;
@@ -44,41 +41,48 @@ final class SimpleReceipt implements IReceipt {
         // TODO: Implement processReceiptState() method.
     }
 
-    /**
-     * EXPORT Object to a simple data structure to be used in var_export($data, true)
-     * @return mixed
-     */
-    function serialize() {
-        $arr = array (
-            static::PARAM_CLASS => get_class($this->mTask),
-            static::PARAM_DATA => $this->mTask->serialize(),
-        );
-        return json_encode($arr);
-    }
+//    /**
+//     * EXPORT Object to a simple data structure to be used in var_export($data, true)
+//     * @return mixed
+//     */
+//    function serialize() {
+//        $arr = array (
+//            static::PARAM_CLASS => get_class($this->mTask),
+//            static::PARAM_DATA => $this->mTask->serialize(),
+//        );
+//        return json_encode($arr);
+//    }
+//
+//    /**
+//     * Unserialize and instantiate an Object with the stored data
+//     * @param mixed $data the exported data
+//     * @return \CPath\Framework\Data\Serialize\Interfaces\ISerializable|Object
+//     */
+//    static function unserialize($data) {
+//        $Task = static::unserializeToTask($data);
+//        $Inst = new static($Task);
+//        return $Inst;
+//    }
 
+//    /**
+//     * @param $data
+//     * @return ITask
+//     */
+//    protected static function unserializeToTask($data) {
+//        $arr = json_decode($data, JSON_OBJECT_AS_ARRAY);
+//        /** @var ITask $Class */
+//        $Class = $arr[0];
+//        $taskData = $arr[1];
+//
+//        /** @var ITask $Task */
+//        $Task = $Class::unserialize($taskData);
+//        return $Task;
+//    }
     /**
-     * Unserialize and instantiate an Object with the stored data
-     * @param mixed $data the exported data
-     * @return ISerializable|Object
+     * @return ITaskParameter[]
      */
-    static function unserialize($data) {
-        $Task = static::unserializeToTask($data);
-        $Inst = new static($Task);
-        return $Inst;
-    }
-
-    /**
-     * @param $data
-     * @return ITask
-     */
-    protected static function unserializeToTask($data) {
-        $arr = json_decode($data, JSON_OBJECT_AS_ARRAY);
-        /** @var ITask $Class */
-        $Class = $arr[0];
-        $taskData = $arr[1];
-
-        /** @var ITask $Task */
-        $Task = $Class::unserialize($taskData);
-        return $Task;
+    function getParameters()
+    {
+        // TODO: Implement getParameters() method.
     }
 }

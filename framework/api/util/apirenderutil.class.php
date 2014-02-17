@@ -7,19 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Util;
 
-use CPath\Base;
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Interfaces\IField;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderAll;
-use CPath\Framework\Render\Interfaces\IRenderHtml;
-use CPath\Framework\Render\Interfaces\IRenderJSON;
-use CPath\Framework\Render\Interfaces\IRenderText;
-use CPath\Framework\Render\Interfaces\IRenderXML;
+use CPath\Framework\Render\Util\RenderUtil;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
-use CPath\Handlers\Views\APIView;
 
 class APIRenderUtil implements IAPI, IRenderAll {
     private $mAPI;
@@ -76,16 +72,15 @@ class APIRenderUtil implements IAPI, IRenderAll {
 
 
     /**
-     * Sends headers, executes the request, and renders an IResponse as HTML
+     * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    public function renderHTML(IRequest $Request) {
-//        if(!headers_sent() && !Base::isCLI())
-//            header("Content-Type: text/html");
+    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
         $Response = $this->execute($Request);
         $Util = new ResponseUtil($Response);
-        $Util->renderHtml($Request);
+        $Util->renderHtml($Request, $Attr);
     }
 
     /**

@@ -38,7 +38,7 @@ class SimpleSession implements ISessionManager {
 
     /**
      * Loads a session instance from the active
-     * @return \CPath\Framework\User\\CPath\Framework\User\Session\ISessionManager the found user session
+     * @return ISessionManager the found user session
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found
      */

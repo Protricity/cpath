@@ -35,7 +35,7 @@ class UserUtil implements IUserUtil {
      * Get Username
      * @return String
      */
-    function getUsername() { return $this->mUser->getUsername(); }
+    function getName() { return $this->mUser->getName(); }
 
 
     /**

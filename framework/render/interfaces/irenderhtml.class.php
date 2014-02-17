@@ -14,7 +14,8 @@ interface IRenderHtml {
     /**
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request);
+    function renderHtml(IRequest $Request, IAttributes $Attr=null);
 }

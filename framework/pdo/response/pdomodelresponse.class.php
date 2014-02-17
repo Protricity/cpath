@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Describable\Describable;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\PDO\Model\PDOModel;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Response\Types\AbstractResponse;
 
 class PDOModelResponse extends AbstractResponse implements IMappable {
@@ -17,7 +17,7 @@ class PDOModelResponse extends AbstractResponse implements IMappable {
 
     /**
      * Create a new response
-     * @param PDOModel $Model model instance
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel $Model model instance
      * @param String|Null $message the response message
      */
     function __construct(PDOModel $Model, $message=NULL) {
