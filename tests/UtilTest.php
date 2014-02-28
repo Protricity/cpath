@@ -6,7 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 6/17/13
  * Time: 8:04 PM */
-include_once __DIR__.'/../base.class.php';
+include_once __DIR__.'/../Base.php';
 
 use CPath\Framework\Request\Types\CLI;
 
