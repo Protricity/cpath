@@ -4,11 +4,11 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Framework\Api\Interfaces\FieldUtil;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Util\Attr;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Framework\Render\Util\Attr;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Route\IRoutable;
 

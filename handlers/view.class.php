@@ -3,11 +3,11 @@ namespace CPath\Handlers;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 abstract class View implements IView, IViewConfig {
     const TAB = '    ';

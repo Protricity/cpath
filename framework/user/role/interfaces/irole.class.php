@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Role\Interfaces;
 
-use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
+use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
 use CPath\Type\Collection\ICollectionItem;
 
 interface IRole extends ICollectionItem, ISerializable {

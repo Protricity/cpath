@@ -9,14 +9,14 @@ namespace CPath\Framework\PDO\Table\Builders;
 
 use CPath\Builders\Tools\BuildPHPClass;
 use CPath\Exceptions\BuildException;
-use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
+use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Column\Template\Interfaces\IPDOColumnTemplate;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\PDO\Util\PDOStringUtil;
@@ -252,7 +252,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     /**
      * @param $name
-     * @return \CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn
+     * @return BuildPDOColumn
      * @throws BuildException if the column is not found
      */
     public function getColumn($name) {
@@ -300,6 +300,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
         $this->processPHPModelTableMethod($PHPModel, $PHPTable);
         $this->processPHPModelProperties($PHPModel);
         $this->processPHPModelGetSet($PHPModel);
+        $this->processTemplatePHP($PHPTable, $PHPModel);
 
         foreach ($this->mColumns as $Column)
             $Column->processTemplatePHP($PHPTable, $PHPModel);
@@ -310,18 +311,18 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     function processPHPTableMethods(PDODatabase $DB, BuildPHPClass $PHPTable) {
 
-        $construct = 'parent::__construct(';
+        $construct = "\t\tparent::__construct(";
 
         $i = 0;
 
         /** @var BuildPDOColumn $Column */
         foreach ($this->getColumns() as $Column) {
             //$cols[] = $Column->exportConstructor();
-            if ($i++) $construct .= ",\n\t\t\t";
-            $construct .= $Column->exportConstructor();
+            if ($i++) $construct .= ",";
+            $construct .= "\n\t\t\t" . $Column->exportConstructor();
         }
 
-        $construct .= ');';
+        $construct .= "\n\t\t);";
 
         $PHPTable->addUse(PDOColumn::cls());
 

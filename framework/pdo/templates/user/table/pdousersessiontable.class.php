@@ -36,7 +36,6 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements ISessio
     /** @var PDOUserSessionModel[] */
     private static $mSession = array();
 
-
     /**
      * Loads a session instance from a session key
      * @param $key String the session key to search for

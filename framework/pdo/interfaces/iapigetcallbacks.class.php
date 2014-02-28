@@ -8,7 +8,6 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;

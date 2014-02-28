@@ -8,10 +8,10 @@
 namespace CPath\Framework\PDO\Table\Column\Template\Interfaces;
 
 use CPath\Exceptions\BuildException;
-use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
-use CPath\Framework\PDO\Table\Column\Exceptions\ColumnArgumentNotFoundException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
+use CPath\Framework\PDO\Table\Column\Exceptions\ColumnArgumentNotFoundException;
 
 interface IPDOColumnTemplate
 {

@@ -13,7 +13,7 @@ abstract class AbstractCollection implements ICollection {
 
     private $mList = array();
 
-    final function __construct() {
+    final function __construct() { // For new static()
 
     }
 
@@ -21,21 +21,12 @@ abstract class AbstractCollection implements ICollection {
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable An instance of an object implementing <b>Iterator</b> or
+     * @return Traversable|ICollectionItem An instance of an object implementing <b>Iterator</b> or
      * <b>Traversable</b>
      */
     public function getIterator() {
         return new \ArrayIterator($this->mList);
     }
-
-    /**
-     * Return the number of filtered items or the number of items in the collection if no filters are applied
-     * @return int
-     */
-    function count() {
-        return count($this->mList);
-    }
-
     /**
      * Add an item to the collection
      * @param ICollectionItem $Item
@@ -44,6 +35,14 @@ abstract class AbstractCollection implements ICollection {
     protected function addItem(ICollectionItem $Item) {
         $this->mList[] = $Item;
         return $this;
+    }
+
+    /**
+     * Return an array of items
+     * @return ICollectionItem[]
+     */
+    public function getItems() {
+        return $this->mList;
     }
 
     /**
@@ -64,6 +63,28 @@ abstract class AbstractCollection implements ICollection {
             $Inst->addItem($Item);
 
         return $Inst;
+    }
+
+    /**
+     * Return the number of filtered items or the number of items in the collection if no filters are applied
+     * @param IPredicate $Where
+     * @return int
+     */
+    function count(IPredicate $Where=null) {
+        if($Where === null)
+            return count($this->mList);
+        $Results = $this->where($Where);
+        return $Results->count();
+    }
+
+
+    /**
+     * Filter the item collection by an IPredicate
+     * @param IPredicate $Where
+     * @return ICollection
+     */
+    function contains(IPredicate $Where) {
+        return $this->count($Where) > 0;
     }
 
 }

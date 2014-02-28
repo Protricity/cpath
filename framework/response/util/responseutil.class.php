@@ -15,10 +15,10 @@ use CPath\Framework\Render\Interfaces\IRenderAll;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Render\Interfaces\IRenderText;
 use CPath\Framework\Render\Interfaces\IRenderXML;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Log;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 final class ResponseUtil implements IRenderAll {
     private $mResponse;

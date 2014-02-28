@@ -21,6 +21,7 @@
 
     window.CPath.API = THIS = function(method, path, dataType) {
         path = path.split('?')[0]; // TODO: parse params
+        path = path.replace(THIS.getBaseURL(), ''); // TODO: whats the plan here?
         TRIGGERS = jQuery([this, THIS]);
         var onResponse = [], onException = [], pending=false;
         if(typeof dataType == "undefined")

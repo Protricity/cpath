@@ -75,5 +75,8 @@ class BuildPDOUserSessionTable extends BuildPDOPKTable {
      */
     function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
 
+//        $PHPModel->addUse($PHPTable->getName(true), 'Table');
+//        $PHPModel->addMethod('session', '', ' static $table=null; return $table ?: $table = new Table; ');
+//        $PHPModel->addMethodCode();
     }
 }

@@ -19,7 +19,6 @@ use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 
-
 abstract class AbstractBuildPDOColumn implements IPDOColumnBuilder
 {
     public $mName, $mComment, $mFlags = 0, $mEnumValues, $mFilter = NULL, $mDefault = NULL, $mEnumConstants = false;

@@ -17,7 +17,6 @@ use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Response\PDOModelResponse;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
-use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\Render\Interfaces\IAttributes;

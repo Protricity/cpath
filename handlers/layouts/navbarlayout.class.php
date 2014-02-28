@@ -3,11 +3,11 @@ namespace CPath\Handlers\Layouts;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Render\Util\Attr;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IRenderContent;
-use CPath\Framework\Render\Util\Attr;
 use CPath\Handlers\View;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 abstract class NavBarLayout extends View implements IRenderContent {
 

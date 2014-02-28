@@ -8,7 +8,6 @@
 namespace CPath\Framework\Task\Receipt;
 
 use CPath\Framework\Task\ITask;
-use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\Task\Parameter\ITaskParameter;
 
 interface IReceipt {

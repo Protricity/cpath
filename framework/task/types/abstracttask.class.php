@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Task\Types;
 
+use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\Task\Exceptions\InvalidTaskStateException;
 use CPath\Framework\Task\ITask;
 use CPath\Framework\Task\Parameter\ITaskParameter;
-use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 
 abstract class AbstractTask implements ITask, ISerializable {
 

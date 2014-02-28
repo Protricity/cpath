@@ -16,8 +16,8 @@ use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderHtml;
 use CPath\Framework\Render\Util\Attr;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Util\HTMLRenderUtil;
 
+use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Validate;
 
 

@@ -3,14 +3,14 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Render\Util\Attr;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
-use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
-use CPath\Framework\Render\Util\Attr;
 use CPath\Interfaces\IViewConfig;
 
 class APIResponseBoxFragment implements IViewConfig{

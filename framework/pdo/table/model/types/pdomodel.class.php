@@ -11,7 +11,6 @@ use CPath\Config;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
-use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 
 abstract class PDOModel implements IPDOModel {
     const MODEL_NAME = null;

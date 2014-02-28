@@ -6,16 +6,16 @@ use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Data\Map\Types\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
+use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRender;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\Web;
-use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Interfaces\IViewConfig;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class ModelResultsTableFragment implements IRender, IViewConfig{
 

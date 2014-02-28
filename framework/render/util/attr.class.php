@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Render\Util;
 
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Render\Interfaces\IAttributes;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class Attr implements IAttributes {
 

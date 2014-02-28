@@ -10,15 +10,9 @@ namespace CPath\Framework\PDO\Templates\User\Model;
 use CPath\Exceptions\NotImplementedException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\User\Session\ISession;
-use CPath\Framework\User\Session\ISessionManager;
 use CPath\Framework\User\Session\SessionNotFoundException;
 
 abstract class PDOUserSessionModel extends PDOPrimaryKeyModel implements ISession {
-
-    /**
-     * @return ISessionManager
-     */
-    abstract function session();
 
     /**
      * @return \CPath\Framework\PDO\Templates\User\Table\PDOUserSessionTable

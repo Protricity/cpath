@@ -7,12 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Builders\Interfaces;
 
-use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\DB\PDODatabase;
-
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Table\Interfaces\IPDOTable;
 
 interface IPDOTableBuilder extends IPDOTable {

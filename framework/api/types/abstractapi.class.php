@@ -39,7 +39,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
     const ROUTE_METHOD = 'POST';            // Default accepted method is POST
     const ROUTE_PATH = NULL;                // No custom route path. Path is based on namespace + class name
 
-    /** @var \CPath\Framework\Api\Field\IField[] */
+    /** @var IField[] */
     private $mColumns = array();
     /** @var IValidation[] */
     private $mValidations = array();
@@ -271,7 +271,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 
     /**
      * Add an array of API Fields
-     * @param \CPath\Framework\Api\Field\IField[] $fields associative array of Fields.
+     * @param IField[] $fields associative array of Fields.
      * The array key represents the Field name.
      * @return $this return the class instance
      */

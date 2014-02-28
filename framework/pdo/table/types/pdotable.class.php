@@ -14,16 +14,14 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Query\PDOWhere;
+use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnNotFoundException;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Interfaces\IPDOTable;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
-use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Interfaces\IArrayObject;
 use CPath\Interfaces\IBuildable;
 use CPath\Log;
@@ -71,9 +69,8 @@ abstract class PDOTable implements IPDOTable, IBuildable
     protected function __construct($_cols=null) {
         $this->mColumns = new PDOColumnCollection();
 
-        /** @var \CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn $Column */
         foreach(func_get_args() as $Column) {
-            $this->mColumns[$Column->getName()] = $Column;
+            $this->mColumns->add($Column);
         }
     }
 

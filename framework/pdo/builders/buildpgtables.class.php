@@ -7,10 +7,10 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
-use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\DB\PGSQLDatabase;
 use CPath\Framework\PDO\Table\Builders\BuildPDOTable;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
+use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Interfaces\IBuildable;

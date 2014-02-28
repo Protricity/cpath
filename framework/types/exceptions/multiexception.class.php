@@ -9,8 +9,8 @@ namespace CPath\Framework\Types\Exceptions;
 
 use CPath\Framework\Render\Interfaces\IAttributes;
 use CPath\Framework\Render\Interfaces\IRenderAll;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 class MultiException extends \Exception implements \Countable, IRenderAll {
     private $mEx = array();

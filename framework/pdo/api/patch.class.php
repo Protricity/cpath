@@ -8,11 +8,10 @@
 namespace CPath\Framework\PDO;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
-use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 
+use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\Request\Interfaces\IRequest;

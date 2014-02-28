@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Column\Collection\Types;
 
+use CPath\Framework\PDO\Table\Column\Collection\Interfaces\IPDOColumnCollection;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnNotFoundException;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
-use CPath\Framework\PDO\Table\Column\Collection\Interfaces\IPDOColumnCollection;
 use CPath\Type\Collection\AbstractCollection;
 
 class PDOColumnCollection extends AbstractCollection implements IPDOColumnCollection {

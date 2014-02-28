@@ -9,8 +9,8 @@ namespace CPath\Framework\Api\Field;
 
 use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Request\Interfaces\IRequest;
 
 
 class EnumField extends Field {

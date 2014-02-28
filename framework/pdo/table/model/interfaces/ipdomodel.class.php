@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Table\Model\Interfaces;
 
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 
 interface IPDOModel extends IMappable, ISerializable {
