@@ -7,47 +7,21 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Role\Common;
 
-use CPath\Framework\Data\Collection\Predicate\IPredicate;
+use CPath\Framework\Data\Collection\AbstractCollection;
 use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
 use CPath\Framework\User\Role\Interfaces\IRole;
 use CPath\Framework\User\Role\Interfaces\IRoleCollection;
 use CPath\Framework\User\Role\Interfaces\IRoleProfile;
-use CPath\Model\ArrayObject;
 
-class RoleList extends ArrayObject implements IRoleCollection {
-
-    /** @var IRole[] array  */
-    private $mList = array();
-
-    function __construct() {
-
-    }
-
-    /**
-     * Filter the item collection by an IPredicate
-     * @param \CPath\Framework\Data\Collection\Predicates\\CPath\Framework\Data\Collection\Predicate\IPredicate $Where
-     * @return IRoleCollection
-     */
-    function where(IPredicate $Where) {
-        $list = array();
-        foreach($this->mList as $Role)
-            if($Where->onPredicate($Role) === true)
-                $list[] = $Role;
-
-        $Inst = new RoleList();
-        foreach($list as $Role)
-            $Inst->add($Role);
-
-        return $Inst;
-    }
+class RoleList extends AbstractCollection implements IRoleCollection {
 
     /**
      * Add an IRole to the collection
      * @param IRole $Role
      * @return IRoleCollection return self
      */
-    function add(IRole $Role) {
-        $this->mList[] = $Role;
+    function addRole(IRole $Role) {
+        $this->addItem($Role);
     }
 
     /**
@@ -70,11 +44,4 @@ class RoleList extends ArrayObject implements IRoleCollection {
         $Profile->assert($List);
     }
 
-    /**
-     * Return a reference to this object's associative array
-     * @return array the associative array
-     */
-    protected function &getArray() {
-        return $this->mList;
-    }
 }

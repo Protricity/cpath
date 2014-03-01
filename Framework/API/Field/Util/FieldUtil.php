@@ -10,7 +10,6 @@ namespace CPath\Framework\Api\Interfaces;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 class FieldUtil implements IField, \CPath\Framework\Render\HTML\IRenderHTML {

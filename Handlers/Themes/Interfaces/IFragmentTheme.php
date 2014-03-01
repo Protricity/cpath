@@ -8,7 +8,6 @@
 namespace CPath\Handlers\Themes\Interfaces;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IFragmentTheme {

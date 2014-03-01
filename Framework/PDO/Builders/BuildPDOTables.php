@@ -8,9 +8,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 
-use CPath\Framework\Build\API\Build;
-use CPath\Framework\Build\Code\BuildPHPClass;
 use CPath\Exceptions\BuildException;
+use CPath\Framework\Build\API\Build;
+use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Build\IBuilder;
+use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Builders\Tables\BuildPDOPKTable;
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\BuildPDOTable;
@@ -20,9 +22,6 @@ use CPath\Framework\PDO\Table\Builders\Templates\User\BuildPDOUserRoleTable;
 use CPath\Framework\PDO\Table\Builders\Templates\User\BuildPDOUserSessionTable;
 use CPath\Framework\PDO\Table\Builders\Templates\User\BuildPDOUserTable;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
-use CPath\Framework\PDO\Util\PDOStringUtil;
-use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Build\IBuilder;
 use CPath\Log;
 
 abstract class BuildPDOTables implements IBuilder
@@ -118,7 +117,7 @@ PHP;
      * @param $namespace
      * @return IPDOTableBuilder[]
      */
-    protected abstract function getTables(\PDO $DB, $namespace);
+    protected abstract function getTables(\PDO $DB);
 
     /**
      * @param \PDO $DB
@@ -140,10 +139,11 @@ PHP;
 
     public function createTable($name, $comment)
     {
-        $Table = new BuildPDOTable($name, $comment);
 
         if (!($DB = $this->mBuildDB))
             throw new \Exception("No DB Instance for table build");
+
+        $Table = new BuildPDOTable($DB, $name, $comment);
 
         $this->getColumns($DB, $Table);
         $this->getIndexes($DB, $Table);
@@ -154,24 +154,24 @@ PHP;
                 case 'u':
                 case 'user':
                     Log::v(__CLASS__, "Table identified as template 'User': " . $name);
-                    $Table = new BuildPDOUserTable($name, $comment);
+                    $Table = new BuildPDOUserTable($DB, $name, $comment);
                     break;
                 case 'us':
                 case 'usersession':
                     Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
-                    $Table = new BuildPDOUserSessionTable($name, $comment);
+                    $Table = new BuildPDOUserSessionTable($DB, $name, $comment);
                     break;
                 case 'ur':
                 case 'userrole':
                     Log::v(__CLASS__, "Table identified as template 'User Role': " . $name);
-                    $Table = new BuildPDOUserRoleTable($name, $comment);
+                    $Table = new BuildPDOUserRoleTable($DB, $name, $comment);
                     break;
                 default:
                     throw new BuildException("Could not locate table template: " . $Table->getTemplateID());
             }
         } elseif ($Table->getColumns()->byFlags(IPDOColumn::FLAG_PRIMARY)->count() > 0) {
             Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
-            $Table = new Tables\BuildPDOPKTable($name, $comment);
+            $Table = new Tables\BuildPDOPKTable($DB, $name, $comment);
         } else {
             return $Table;
         }
@@ -179,6 +179,7 @@ PHP;
         $this->getColumns($DB, $Table); // Redo for new table
         $this->getIndexes($DB, $Table);
         $Table->init();
+
         return $Table;
     }
 
@@ -244,13 +245,12 @@ PHP;
 
         $tables = array();
         if (in_array($BUILD, array('ALL', 'MODEL')))
-            $tables = $this->getTables($DB, $modelNS);
+            $tables = $this->getTables($DB);
 
         $tableNames = array();
-        foreach ($tables as $Table) {
-            $Table->setNamespace($modelNS);
+        foreach ($tables as $Table)
             $tableNames[] = $Table->getTableName();
-        }
+
         Log::v(__CLASS__, "Found Tables (%s): " . implode(', ', $tableNames), count($tableNames));
 
         // Model
@@ -258,12 +258,12 @@ PHP;
         $noPrimary = array();
 
         foreach ($tables as $Table) {
-            $modelClassFile = $modelPath . ($Table->getModelClass()) . '.php';
-            $tableClassFile = $tablePath . ($Table->getTableClass()) . '.php';
+            $modelClassFile = $modelPath . basename($Table->getModelClass()) . '.php';
+            $tableClassFile = $tablePath . basename($Table->getTableClass()) . '.php';
 
-            $PHPModel = new Models\BuildPHPModelClass($Table->getModelClass(), $modelNS);
+            $PHPModel = new BuildPHPModelClass($Table->getModelClass(), $modelClassFile);
 
-            $PHPTable = new BuildPHPTableClass($Table->getTableClass(), $tableNS);
+            $PHPTable = new BuildPHPTableClass($Table->getTableClass(), $tableClassFile);
             //$PHPTable->setExtend("CPath\\Model\\DB\\PDOTable");
 
             $Table->processPHP($DB, $PHPTable, $PHPModel);
@@ -351,14 +351,16 @@ PHP;
 
 
             //Log::v2(__CLASS__, "Writing file: " . $file);
-            file_put_contents($modelClassFile, $PHPModel->build());
+            //file_put_contents($modelClassFile, $PHPModel->build());
+            $PHPModel->write();
             foreach ($oldFiles as $i => $f)
                 if ($modelPath . $f == $modelClassFile && !is_dir($modelPath . $f)) {
                     unset($oldFiles[$i]);
                     break;
                 }
 
-            file_put_contents($tableClassFile, $PHPTable->build());
+            $PHPTable->write();
+            //file_put_contents($tableClassFile, $PHPTable->build());
             foreach ($oldFiles as $i => $f)
                 if ($tablePath . $f == $tableClassFile && !is_dir($tablePath . $f)) {
                     unset($oldFiles[$i]);
@@ -395,44 +397,44 @@ PHP;
 
         // Stored Procedures
 
-        $procs = array();
-        if (in_array($BUILD, array('ALL', 'PROC')))
-            $procs = $this->getProcs($DB);
-
-        $PHPProcs = new BuildPHPClass('Procs', $procNS);
-        $PHPProcs->addUse(get_class($DB), 'DB');
-        $names = array();
-        foreach ($procs as $proc) {
-            $name = array_shift($proc);
-            if (isset($names[$name])) {
-                $name .= ++$names[$name];
-            } else {
-                $names[$name] = 1;
-            }
-            $method = $name . '(' . (!$proc ? '' : ('%s' . str_repeat(', %s', sizeof($proc) - 1))) . ')';
-            $PHPProcs->addConst(strtoupper($name), $method);
-
-            $sqlParams = $proc ? '?' . str_repeat(', ?', sizeof($proc) - 1) : '';
-            $codeParams = $proc ? '$' . implode(', $', $proc) : '';
-
-            $code = <<<PHP
-        static \$stmd = NULL;
-        if(!\$stmd) \$stmd = \$this->getDB()->prepare('SELECT $name({$sqlParams})');
-        \$stmd->execute(array({$codeParams}));
-        return \$stmd;
-PHP;
-
-            $ucName = PDOStringUtil::toTitleCase($name, true);
-            $ucName[0] = strtolower($ucName[0]);
-            $PHPProcs->addStaticMethod($ucName, $proc, $code);
-            //$phpC .= self::getConst(strtoupper($name), $method);
-        }
-
-        $PHPProcs->addMethod('getDB', '', " return DB::get(); ");
-        //$php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
-        //file_put_contents($procPath.'procs.class.php', $php);
-        file_put_contents($procPath . 'Procs.php', $PHPProcs->build());
-        Log::v(__CLASS__, "Built (" . sizeof($procs) . ") routine(s)");
+//        $procs = array();
+//        if (in_array($BUILD, array('ALL', 'PROC')))
+//            $procs = $this->getProcs($DB);
+//
+//        $PHPProcs = new BuildPHPClass('Procs', $procNS);
+//        $PHPProcs->addUse(get_class($DB), 'DB');
+//        $names = array();
+//        foreach ($procs as $proc) {
+//            $name = array_shift($proc);
+//            if (isset($names[$name])) {
+//                $name .= ++$names[$name];
+//            } else {
+//                $names[$name] = 1;
+//            }
+//            $method = $name . '(' . (!$proc ? '' : ('%s' . str_repeat(', %s', sizeof($proc) - 1))) . ')';
+//            $PHPProcs->addConst(strtoupper($name), $method);
+//
+//            $sqlParams = $proc ? '?' . str_repeat(', ?', sizeof($proc) - 1) : '';
+//            $codeParams = $proc ? '$' . implode(', $', $proc) : '';
+//
+//            $code = <<<PHP
+//        static \$stmd = NULL;
+//        if(!\$stmd) \$stmd = \$this->getDB()->prepare('SELECT $name({$sqlParams})');
+//        \$stmd->execute(array({$codeParams}));
+//        return \$stmd;
+//PHP;
+//
+//            $ucName = PDOStringUtil::toTitleCase($name, true);
+//            $ucName[0] = strtolower($ucName[0]);
+//            $PHPProcs->addStaticMethod($ucName, $proc, $code);
+//            //$phpC .= self::getConst(strtoupper($name), $method);
+//        }
+//
+//        $PHPProcs->addMethod('getDB', '', " return DB::get(); ");
+//        //$php = sprintf(self::TMPL_PROC_CLASS, $procNS, $phpC.$phpP);
+//        //file_put_contents($procPath.'procs.class.php', $php);
+//        file_put_contents($procPath . 'Procs.php', $PHPProcs->build());
+//        Log::v(__CLASS__, "Built (" . sizeof($procs) . ") routine(s)");
 
         return true;
     }

@@ -88,4 +88,16 @@ abstract class AbstractCollection implements ICollection {
         return $this->count($Where) > 0;
     }
 
+    /**
+     * @param Callable $callable
+     * @return mixed|array
+     */
+    function each($callable) {
+        $return = array();
+        foreach($this->getItems() as $Item) {
+            $return[] = $callable($Item);
+        }
+        return $return;
+    }
+
 }

@@ -41,7 +41,7 @@ class TaskList extends AbstractCollection {
 
     /**
      * Filter the item collection by an IPredicate
-     * @param \CPath\Framework\Data\Collection\Predicates\IPredicate $Where
+     * @param IPredicate $Where
      * @return TaskList return self
      */
     function where(IPredicate $Where) { return parent::where($Where); }

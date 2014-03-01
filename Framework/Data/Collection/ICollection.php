@@ -13,9 +13,28 @@ use CPath\Framework\Data\Collection\Predicate\IPredicate;
 interface ICollection extends \IteratorAggregate, \Countable {
 
     /**
+     * Return an array of items
+     * @return ICollectionItem[]
+     */
+    function getItems();
+
+    /**
      * Filter the item collection by an IPredicate
      * @param IPredicate $Where
      * @return ICollection
      */
     function where(IPredicate $Where);
+
+    /**
+     * Filter the item collection by an IPredicate
+     * @param IPredicate $Where
+     * @return ICollection
+     */
+    function contains(IPredicate $Where);
+
+    /**
+     * @param Callable $callable
+     * @return mixed|array
+     */
+    function each($callable);
 }

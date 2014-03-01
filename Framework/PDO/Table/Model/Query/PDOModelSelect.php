@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Table\Model\Query;
 
 use CPath\Config;
-
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Table;

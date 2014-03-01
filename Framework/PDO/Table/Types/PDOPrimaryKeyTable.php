@@ -180,10 +180,11 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
     private static $mLastModelID = NULL;
 
     /**
+     * // TODO: refactor less crappy?
      * Initialize this class
      */
-    final public static function init() {
+    final public static function __pk_init() {
         self::$mCache = Cache::get();
     }
 }
-PDOPrimaryKeyTable::init();
+PDOPrimaryKeyTable::__pk_init();

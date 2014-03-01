@@ -8,16 +8,17 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Build\Code;
 
-use CPath\Framework\Build\Code\AbstractBuildClass;
-
 class BuildPHPClass extends AbstractBuildClass {
 
     const TAB = "\t";
     const CONST_PREFIX = "const ";
     const PROP_PREFIX = "$";
 
-    public function __construct($name, $namespace) {
+    private $mFilePath;
+
+    public function __construct($name, $filePath, $namespace=null) {
         parent::__construct($name, $namespace);
+        $this->mFilePath = $filePath;
     }
 
     public function export($value) {
@@ -66,6 +67,15 @@ class BuildPHPClass extends AbstractBuildClass {
 
     public function buildEnd(&$code) {
         $code .= "}";
+    }
+
+    public function write($phpFilePath = null) {
+        if($phpFilePath === null)
+            $phpFilePath = $this->mFilePath;
+
+        $code = $this->build();
+
+        file_put_contents($phpFilePath, $code);
     }
 }
 

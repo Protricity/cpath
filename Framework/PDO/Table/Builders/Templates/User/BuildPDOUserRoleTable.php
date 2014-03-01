@@ -18,13 +18,14 @@ class BuildPDOUserRoleTable extends AbstractBuildPDOPKTable {
 
     /**
      * Create a new BuildPDOUserRoleTable builder instance
+     * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment
      * @param String|null $PDOTableClass the PDOTable class to use
      * @param String|null $PDOModelClass the PDOModel class to use
      */
-    public function __construct($name, $comment, $PDOTableClass=null, $PDOModelClass=null) {
-        parent::__construct($name, $comment,
+    public function __construct(\PDO $DB, $name, $comment, $PDOTableClass=null, $PDOModelClass=null) {
+        parent::__construct($DB, $name, $comment,
             $PDOTableClass ?: PDOUserRoleTable::cls(),
             $PDOModelClass ?: PDOUserRoleModel::cls()
         );

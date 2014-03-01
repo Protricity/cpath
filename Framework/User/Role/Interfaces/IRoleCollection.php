@@ -10,16 +10,15 @@ namespace CPath\Framework\User\Role\Interfaces;
 
 use CPath\Framework\Data\Collection\ICollection;
 use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
-use CPath\Interfaces\IArrayObject;
 
-interface IRoleCollection extends ICollection, IArrayObject {
+interface IRoleCollection extends ICollection {
 
     /**
      * Add an IRole to the collection
      * @param IRole $Task
      * @return IRoleCollection return self
      */
-    function add(IRole $Task);
+    function addRole(IRole $Task);
 
     /**
      * Assert a user role and return the result as a boolean

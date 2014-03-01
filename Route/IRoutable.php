@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Render\IRender;
 
 interface IRoutable extends IRender, IBuildable {
 

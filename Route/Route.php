@@ -9,7 +9,6 @@ namespace CPath\Route;
 use CPath\Compare\IComparable;
 use CPath\Compare\IComparator;
 use CPath\Framework\Render\IRender;
-use CPath\Framework\Build\IBuildable;
 
 /**
  * Class Route - a route entry

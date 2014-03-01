@@ -8,7 +8,6 @@
 namespace CPath\Handlers\Interfaces;
 
 
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IView extends \CPath\Framework\Render\IRender {

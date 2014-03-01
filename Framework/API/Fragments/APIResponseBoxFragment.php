@@ -3,8 +3,8 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Attribute\Attr;
+use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;

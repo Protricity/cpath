@@ -7,8 +7,8 @@
  */
 namespace CPath\Framework\PDO\Table\Builders;
 
-use CPath\Framework\Build\Code\BuildPHPClass;
 use CPath\Exceptions\BuildException;
+use CPath\Framework\Build\Code\BuildPHPClass;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException;
@@ -56,20 +56,23 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     /**
      * Create a new PDOTable builder instance
+     * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment
      * @param null $PDOTableClass the PDOTable class to use
      * @param null $PDOModelClass the PDOModel class to use
+     * @internal param $namespace
      */
-    public function __construct($name, $comment, $PDOTableClass = null, $PDOModelClass = null) {
+    public function __construct(\PDO $DB, $name, $comment, $PDOTableClass = null, $PDOModelClass = null) {
         $this->mColumns = new PDOColumnCollection();
 
         $this->mName = $name;
         $this->mTitle = ucwords(str_replace('_', ' ', $this->getTableName()));
         $this->mModelName = $this->getTableTitle();
 
-        $this->mModelClassName = str_replace(' ', '', $this->getTableTitle()) . 'Model';
-        $this->mTableClassName = str_replace(' ', '', $this->getTableTitle()) . 'Table';
+        $this->mNamespace = dirname(get_class($DB));
+        $this->mModelClassName = $this->mNamespace . '\\Model\\' . str_replace(' ', '', $this->getTableTitle()) . 'Model';
+        $this->mTableClassName = $this->mNamespace . '\\Table\\' . str_replace(' ', '', $this->getTableTitle()) . 'Table';
 
         $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace'), $comment);
         if (!$this->mComment)
@@ -104,8 +107,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
      * Returns the model class name
      * @return string the model class name
      */
-    function getTableClass()
-    {
+    function getTableClass() {
         return $this->mTableClassName;
     }
 
@@ -115,8 +117,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
         return $this;
     }
 
-    function getModelClass()
-    {
+    function getModelClass() {
         return $this->mModelClassName;
     }
 
@@ -126,6 +127,9 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
         return $this;
     }
 
+    function getNamespace() {
+        return $this->mNamespace;
+    }
 
     function getModelName()
     {
@@ -135,18 +139,6 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
     function setModelName($name)
     {
         $this->mModelName = $name;
-        return $this;
-    }
-
-
-    function getNamespace()
-    {
-        return $this->mNamespace;
-    }
-
-    function setNamespace($namespace)
-    {
-        $this->mNamespace = $namespace;
         return $this;
     }
 
@@ -289,7 +281,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
 
         $PHPModel->addConst('MODEL_NAME', $this->getModelName());
-        $PHPModel->addConst('TABLE_CLASS', $this->getTableClass());
+        //$PHPModel->addConst('TABLE_CLASS', $this->getTableClass());
 
 
         $PHPTable->setExtend($this->mPDOTableClass);
@@ -313,6 +305,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
         $construct = "\t\tparent::__construct(";
 
+
         $i = 0;
 
         /** @var BuildPDOColumn $Column */
@@ -324,17 +317,21 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
         $construct .= "\n\t\t);";
 
+        $PHPTable->addUse($this->getModelClass(), 'Model');
+        $construct .= "\n\t\t\$this->setModelClass(Model::cls());";
+
         $PHPTable->addUse(PDOColumn::cls());
 
-        $PHPTable->addMethod('__construct', '', $construct);
+        $PHPTable->addMethod('__construct', '', $construct, 'final');
 
         $PHPTable->addUse(get_class($DB), 'DB');
         $PHPTable->addMethod('getDB', '', " return DB::get(); ");
-
     }
 
     function processPHPTableConstants(BuildPHPClass $PHPTable) {
+        $PHPTable->addConst('TABLE', $this->getTableName());
         $PHPTable->addConstCode();
+
         $PHPTable->addConstCode("// Table Columns ");
         foreach ($this->getColumns() as $Column)
             $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->getName(), true), $Column->getName());
@@ -347,8 +344,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
                     $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->getName(), true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
             }
 
-        $PHPTable->addConst('TABLE', $this->getTableName());
-        $PHPTable->addConst('MODEL_CLASS', $this->getModelClass());
+        //$PHPTable->addConst('MODEL_CLASS', $this->getModelClass());
         if ($this->mSearchWildCard)
             $PHPTable->addConst('SEARCH_WILDCARD', true);
         if ($this->mSearchLimit)
@@ -365,7 +361,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
     }
 
     function processPHPModelTableMethod(BuildPHPClass $PHPModel, BuildPHPClass $PHPTable) {
-        $PHPModel->addUse($PHPTable->getName(true), 'Table');
+        $PHPModel->addUse($PHPTable->getName(), 'Table');
         $PHPModel->addMethod('table', '', ' static $table=null; return $table ?: $table = new Table; ');
         $PHPModel->addMethodCode();
     }

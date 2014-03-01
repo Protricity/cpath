@@ -18,7 +18,6 @@ use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Build\IBuildable;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 use CPath\Route\IRoute;

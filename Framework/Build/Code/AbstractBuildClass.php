@@ -26,7 +26,11 @@ abstract class AbstractBuildClass  {
         $mMethods = array(),
         $mStaticMethods = array();
 
-    public function __construct($name, $namespace) {
+    public function __construct($name, $namespace=null) {
+        if(!$namespace)
+            $namespace = dirname($name);
+        $name = basename($name);
+
         $this->mName = $name;
         $this->mNamespace = $namespace;
     }
@@ -68,7 +72,7 @@ abstract class AbstractBuildClass  {
         return $this->addProperty($name, $value, $visibility, true, $export);
     }
 
-    public function addMethod($name, $params, $content, $visibility='', $static=false) {
+    public function addMethod($name, $params, $content, $keywords='', $static=false) {
         if(is_array($params)) {
             $p = '';
             foreach($params as $param) {
@@ -78,11 +82,11 @@ abstract class AbstractBuildClass  {
             }
             $params = $p;
         }
-        if($visibility) $visibility .= ' ';
-        if($static) $visibility .= 'static ';
+        if($keywords) $keywords .= ' ';
+        if($static) $keywords .= 'static ';
         if(strpos($content, "\n") !== false)
             $content = "\n" . trim($content, "\n") . "\n" . static::TAB;
-        $php = static::TAB . "{$visibility}function {$name}({$params}) {{$content}}\n";
+        $php = static::TAB . "{$keywords}function {$name}({$params}) {{$content}}\n";
         $static ? $this->mStaticMethods[$name] = $php : $this->mMethods[$name] = $php;
         return $this;
     }

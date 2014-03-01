@@ -11,4 +11,7 @@ use CPath\Framework\Build\Code\BuildPHPClass;
 
 class BuildPHPModelClass extends BuildPHPClass
 {
+    public function __construct($name, $filePath, $namespace=null) {
+        parent::__construct($name, $filePath, $namespace);
+    }
 }

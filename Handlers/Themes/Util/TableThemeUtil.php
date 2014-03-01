@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Themes\Util;
 
-use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Attribute\Attr;
+use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;

@@ -8,12 +8,12 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 
-use CPath\Framework\PDO\DB\MySQLDatabase;
+use CPath\Framework\Build\IBuildable;
 
+use CPath\Framework\PDO\DB\MySQLDatabase;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\Build\IBuildable;
 
 class BuildMySQLTables extends BuildPDOTables implements IBuildable {
 
@@ -39,10 +39,9 @@ PHP;
 
     /**
      * @param \PDO $DB
-     * @param $namespace
      * @return IPDOTableBuilder[]
      */
-    protected function getTables(\PDO $DB, $namespace) {
+    protected function getTables(\PDO $DB) {
         $tables = array();
         foreach($DB->query("SHOW TABLE STATUS") as $row) {
             $tables[$row['Name']] = $this->createTable($row['Name'], $row['Comment']);

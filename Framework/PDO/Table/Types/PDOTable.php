@@ -9,6 +9,7 @@ namespace CPath\Framework\PDO\Table\Types;
 
 use CPath\Config;
 use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Build\IBuildable;
 use CPath\Framework\PDO\Query\PDODelete;
 use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
@@ -18,18 +19,19 @@ use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnNotFoundException;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\PDO\Table\Interfaces\IPDOTable;
+use CPath\Framework\PDO\Table\Extensions\IPDOTableExtensions;
+use CPath\Framework\PDO\Table\IPDOTable;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
+use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Interfaces\IArrayObject;
-use CPath\Framework\Build\IBuildable;
 use CPath\Log;
 
 abstract class PDOTable implements IPDOTable, IBuildable
 {
 
-    const MODEL_CLASS = null;
+    //const MODEL_CLASS = null;
     const TABLE = null;
 
     const COLUMN_ID = NULL; // Identifier column used in such endpoints as GET, PATCH, DELETE. Defaults to ::COLUMN_PRIMARY or ::COLUMN_ID
@@ -38,12 +40,6 @@ abstract class PDOTable implements IPDOTable, IBuildable
     const SEARCH_LIMIT_MAX = 100;
     const SEARCH_LIMIT = 25;
     const SEARCH_WILDCARD = false; // true or false
-
-    // TODO: get rid of all these consts
-    //const SEARCH = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    //const INSERT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    //const UPDATE = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
-    //const EXPORT = NULL; // ':None|:Index|:SIndex|:Primary|:Exclude:[column1,column2]|:Include:[column1,column2]';
 
     const EXPORT_AS_OBJECT = false; // Export as array by default.
 
@@ -61,17 +57,20 @@ abstract class PDOTable implements IPDOTable, IBuildable
     const ROUTE_METHOD = null;
 
     /** @var PDOColumnCollection|IPDOColumn[] */
-    private $mColumns;
+    private $mColumns, $mModelClass;
 
     /**
      * Note: PDOTable Constructor parameters must be optional.
      */
     protected function __construct($_cols=null) {
-        $this->mColumns = new PDOColumnCollection();
+        $Columns = $this->mColumns = new PDOColumnCollection();
 
         foreach(func_get_args() as $Column) {
-            $this->mColumns->add($Column);
+            $Columns->add($Column);
         }
+
+        if($this instanceof IPDOTableExtensions)
+            $this->initTable($Columns);
     }
 
 //
@@ -106,10 +105,18 @@ abstract class PDOTable implements IPDOTable, IBuildable
 
     /**
      * Returns the model class name
-     * @return string|\CPath\Framework\PDO\Table\Model\Types\PDOModel the model class name
+     * @return string|PDOModel the model class name
      */
     public function getModelClass() {
-        return static::MODEL_CLASS;
+        return $this->mModelClass;
+    }
+
+    /**
+     * Sets the model class for query instances
+     * @param String $class the PDOModel class to instantiate
+     */
+    public function setModelClass($class) {
+        $this->mModelClass = $class;
     }
 
     /**

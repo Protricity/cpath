@@ -8,7 +8,6 @@
  */
 namespace CPath\Config;
 
-use CPath\Builders;
 use CPath\Config;
 use CPath\Interfaces\IConfig;
 use CPath\Log;

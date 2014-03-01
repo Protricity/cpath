@@ -18,15 +18,17 @@ use CPath\Framework\PDO\Util\PDOStringUtil;
 abstract class AbstractBuildPDOPKTable extends AbstractBuildPDOTable {
 
     private $mPrimary;
+
     /**
      * Create a new PDOPrimaryKeyTable builder instance
      * @param String $name the table name
      * @param String $comment the table comment
+     * @param $namespace
      * @param String|null $PDOTableClass the PDOTable class to use
      * @param String|null $PDOModelClass the PDOModel class to use
      */
-    public function __construct($name, $comment, $PDOTableClass=null, $PDOModelClass=null) {
-        parent::__construct($name, $comment,
+    public function __construct($name, $comment, $namespace, $PDOTableClass=null, $PDOModelClass=null) {
+        parent::__construct($name, $comment, $namespace,
             $PDOTableClass ?: PDOPrimaryKeyTable::cls(),
             $PDOModelClass ?: PDOPrimaryKeyModel::cls()
         );

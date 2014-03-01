@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\PDO\Table\Interfaces;
+namespace CPath\Framework\PDO\Table;
 
 use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 

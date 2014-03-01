@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Framework\Build\API\Build;
 use CPath\Config;
+use CPath\Framework\Build\API\Build;
 
 /**
  * Class Router - finds routes to match paths and renders them

@@ -31,7 +31,7 @@ class BuildCSharpTables {
     public function build(IPDOTableBuilder $Table, $filePath) {
 
         $skip = true;
-        $CS = new BuildCSharpClass($Table->getModelClass(), str_replace('\\', '.', $this->mNamespace ?: $Table->getNamespace()));
+        $CS = new BuildCSharpClass(basename($Table->getModelClass()), str_replace('\\', '.', $this->mNamespace ?: $Table->getNamespace()));
 
         $CS->addUse('System');
         $CS->addUse('System.Collections.Generic');

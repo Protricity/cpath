@@ -8,8 +8,8 @@
 namespace CPath\Framework\Api\Field;
 
 use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Attribute\Attr;
+use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Model\FileUpload;
 

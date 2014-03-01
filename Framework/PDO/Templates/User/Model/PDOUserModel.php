@@ -7,9 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Model;
 
+
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
-
-
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;

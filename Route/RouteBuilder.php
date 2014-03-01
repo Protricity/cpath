@@ -11,9 +11,8 @@ use CPath\Base;
 use CPath\Compile;
 use CPath\Config;
 use CPath\Exceptions\BuildException;
-use CPath\Framework\Interfaces\Constructable\Constructable;
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Interfaces\Constructable\Constructable;
 use CPath\Log;
 
 /**
