@@ -21,6 +21,8 @@ class PGSQLInsert extends PDOInsert {
     }
 
     public function getInsertID() {
+        if(!$this->returning)
+            throw new \Exception("Insert ID was not previously requested");
         return $this->stmt->fetchColumn(0);
     }
 

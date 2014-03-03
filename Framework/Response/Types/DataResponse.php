@@ -6,10 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
-use CPath\Compare\IComparable;
-use CPath\Compare\IComparator;
-use CPath\Compare\NotEqualException;
+use CPath\Framework\Data\Compare\IComparable;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
@@ -105,16 +104,20 @@ class DataResponse extends ArrayObject implements IResponse, IComparable, IDescr
     }
 
     /**
-     * Compare two instances of this object
-     * @param IComparable|DataResponse $obj the object to compare against $this
-     * @param IComparator $C the IComparator instance
-     * @throws NotEqualException if the objects were not equal
-     * @return void
+     * Compare two objects
+     * @param IComparable $obj the object to compare against $this
+     * @return integer < 0 if $obj is less than $this; > 0 if $obj is greater than $this, and 0 if they are equal.
      */
-    function compareTo(IComparable $obj, IComparator $C) {
-        $C->compareScalar($this->mCode, $obj->mCode, "DataResponse Status");
-        $C->compareScalar($this->mMessage, $obj->mMessage, "DataResponse Message");
-        $C->compare($this->mData, $obj->mData, "DataResponse Data");
+    function compareTo(IComparable $obj)
+    {
+        if(!$obj instanceof DataResponse)
+            return 1;
+
+        $Util = new CompareUtil();
+        return
+            $Util->compareScalar($this->mCode, $obj->mCode)
+            + $Util->compareScalar($this->mMessage, $obj->mMessage)
+            + $Util->compare($this->mData, $obj->mData);
     }
 
     /**

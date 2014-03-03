@@ -9,8 +9,9 @@
 namespace CPath\Framework\Data\Collection;
 
 use CPath\Framework\Data\Collection\Predicate\IPredicate;
+use CPath\Framework\Data\Misc\ICloneable;
 
-interface ICollection extends \IteratorAggregate, \Countable {
+interface ICollection extends \IteratorAggregate, \Countable, ICloneable {
 
     /**
      * Return an array of items
@@ -26,11 +27,11 @@ interface ICollection extends \IteratorAggregate, \Countable {
     function where(IPredicate $Where);
 
     /**
-     * Filter the item collection by an IPredicate
-     * @param IPredicate $Where
-     * @return ICollection
+     * Checks for the existence of a item in the collection
+     * @param ICollectionItem $Item
+     * @return bool
      */
-    function contains(IPredicate $Where);
+    function contains(ICollectionItem $Item);
 
     /**
      * @param Callable $callable

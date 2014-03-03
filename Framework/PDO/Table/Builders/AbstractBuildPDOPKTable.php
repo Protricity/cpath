@@ -42,7 +42,7 @@ abstract class AbstractBuildPDOPKTable extends AbstractBuildPDOTable {
      * @return void
      */
     function processPHP(PDODatabase $DB, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
-        $PHPTable->addConst('PRIMARY', $this->getPrimaryKeyColumn());
+        $PHPTable->addConst('COLUMN_PRIMARY', $this->getPrimaryKeyColumn());
         parent::processPHP($DB, $PHPTable, $PHPModel);
     }
 

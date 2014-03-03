@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
-use CPath\Compare\IComparable;
-use CPath\Compare\IComparator;
+use CPath\Framework\Data\Compare\IComparable;
+use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Log;
@@ -251,15 +251,19 @@ class RoutableSet implements IRoute, \ArrayAccess, \IteratorAggregate {
     }
 
     /**
-     * Determine if two IRoute objects are equal
-     * @param \CPath\Compare\IComparable|IRoute $obj the object to compare against $this
-     * @param \CPath\Compare\IComparator $C the IComparator instance
-     * @return integer < 0 if $this is less than $obj; > 0 if $this is greater than $obj, and 0 if they are equal.
+     * Compare two objects
+     * @param IComparable $obj the object to compare against $this
+     * @return integer < 0 if $obj is less than $this; > 0 if $obj is greater than $this, and 0 if they are equal.
      */
-    function compareTo(IComparable $obj, IComparator $C)
+    function compareTo(IComparable $obj)
     {
-        $C->compareScalar($this->getPrefix(), $obj->getPrefix());
-        $C->compareScalar($this->getDestination(), $obj->getDestination());
+        if(!$obj instanceof RoutableSet)
+            return 1;
+
+        $Util = new CompareUtil();
+        return
+            $Util->compareScalar($this->getPrefix(), $obj->getPrefix())
+            + $Util->compareScalar($this->getDestination(), $obj->getDestination());
     }
 
     /**

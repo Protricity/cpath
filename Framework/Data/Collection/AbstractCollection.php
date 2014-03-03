@@ -8,11 +8,13 @@
 namespace CPath\Framework\Data\Collection;
 
 use CPath\Framework\Data\Collection\Predicate\IPredicate;
+use CPath\Framework\Data\Compare\IComparable;
+use CPath\Framework\Data\Misc\ICloneable;
 use Traversable;
 
 abstract class AbstractCollection implements ICollection {
 
-    private $mList = array();
+    private $mItems = array();
 
     final function __construct() { // For new static()
 
@@ -26,7 +28,7 @@ abstract class AbstractCollection implements ICollection {
      * <b>Traversable</b>
      */
     public function getIterator() {
-        return new \ArrayIterator($this->mList);
+        return new \ArrayIterator($this->mItems);
     }
     /**
      * Add an item to the collection
@@ -34,8 +36,23 @@ abstract class AbstractCollection implements ICollection {
      * @return AbstractCollection return self
      */
     protected function addItem(ICollectionItem $Item) {
-        $this->mList[] = $Item;
+        $this->mItems[] = $Item;
         return $this;
+    }
+
+
+    /**
+     * Remove an entry from the collection
+     * @param ICollectionItem $Item
+     * @return void
+     */
+    protected function removeItem(ICollectionItem $Item) {
+        foreach($this->mItems as $i => $Item2) {
+            if($Item === $Item2) {
+                unset($this->mItems[$i]);
+                return;
+            }
+        }
     }
 
     /**
@@ -43,7 +60,7 @@ abstract class AbstractCollection implements ICollection {
      * @return ICollectionItem[]
      */
     public function getItems() {
-        return $this->mList;
+        return $this->mItems;
     }
 
     /**
@@ -53,7 +70,7 @@ abstract class AbstractCollection implements ICollection {
      */
     function where(IPredicate $Where) {
         $list = array();
-        foreach($this->mList as $Item) {
+        foreach($this->mItems as $Item) {
             if($Where->onPredicate($Item) === true)
                 $list[] = $Item;
         }
@@ -73,20 +90,11 @@ abstract class AbstractCollection implements ICollection {
      */
     function count(IPredicate $Where=null) {
         if($Where === null)
-            return count($this->mList);
+            return count($this->mItems);
         $Results = $this->where($Where);
         return $Results->count();
     }
 
-
-    /**
-     * Filter the item collection by an IPredicate
-     * @param IPredicate $Where
-     * @return ICollection
-     */
-    function contains(IPredicate $Where) {
-        return $this->count($Where) > 0;
-    }
 
     /**
      * @param Callable $callable
@@ -100,4 +108,25 @@ abstract class AbstractCollection implements ICollection {
         return $return;
     }
 
+    /**
+     * Checks for the existence of a item in the collection
+     * @param ICollectionItem $Item
+     * @return bool
+     */
+    function contains(ICollectionItem $Item)
+    {
+        foreach($this->getItems() as $Item2)
+            if($Item === $Item2)
+                return true;
+
+        return false;
+    }
+
+    /**
+     * Implement ICloneable
+     */
+    function __clone()
+    {
+        //$this->mItems = clone $this->mItems;
+    }
 }

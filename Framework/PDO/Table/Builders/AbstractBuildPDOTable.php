@@ -303,7 +303,11 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     function processPHPTableMethods(PDODatabase $DB, BuildPHPClass $PHPTable) {
 
-        $construct = "\t\tparent::__construct(";
+
+        $PHPTable->addUse($this->getModelClass(), 'Model');
+        $construct = "\t\t\$this->setModelClass(Model::cls());";
+
+        $construct .= "\n\t\tparent::__construct(";
 
 
         $i = 0;
@@ -316,9 +320,6 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
         }
 
         $construct .= "\n\t\t);";
-
-        $PHPTable->addUse($this->getModelClass(), 'Model');
-        $construct .= "\n\t\t\$this->setModelClass(Model::cls());";
 
         $PHPTable->addUse(PDOColumn::cls());
 
@@ -357,7 +358,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     function processPHPModelProperties(BuildPHPClass $PHPModel) {
         foreach ($this->getColumns() as $Column)
-            $PHPModel->addProperty($Column->getName(), null, 'private');
+            $PHPModel->addProperty($Column->getName(), null, 'protected'); // Protected for db instances
     }
 
     function processPHPModelTableMethod(BuildPHPClass $PHPModel, BuildPHPClass $PHPTable) {

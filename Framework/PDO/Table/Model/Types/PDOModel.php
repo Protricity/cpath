@@ -22,7 +22,7 @@ abstract class PDOModel implements IPDOModel {
      * No queries should be attempted to load the model from the constructor.
      * Parameters may formatted and additional parameters added in the constructor
      */
-    final public function __construct() {
+    public function __construct() {
 
     }
 

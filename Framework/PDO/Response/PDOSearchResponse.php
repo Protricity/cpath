@@ -6,10 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
-use CPath\Compare\IComparable;
-use CPath\Compare\IComparator;
-use CPath\Compare\NotEqualException;
+use CPath\Framework\Data\Compare\IComparable;
 use CPath\Describable\Describable;
+use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Query\PDOSelect;
@@ -46,14 +45,20 @@ class PDOSearchResponse extends AbstractResponse implements IMappable, IComparab
 
 
     /**
-     * Compare two instances of this object
-     * @param IComparable|PDOSearchResponse $obj the object to compare against $this
-     * @param IComparator $C the IComparator instance
-     * @throws NotEqualException if the objects were not equal
-     * @return void
+     * Compare two objects
+     * @param IComparable $obj the object to compare against $this
+     * @return integer < 0 if $obj is less than $this; > 0 if $obj is greater than $this, and 0 if they are equal.
      */
-    function compareTo(IComparable $obj, IComparator $C) {
-        $C->compareScalar($this->mQuery->getSQL(), $obj->mQuery->getSQL(), "DataResponse Query");
+    function compareTo(IComparable $obj)
+    {
+        if(!$obj instanceof PDOSearchResponse)
+            return 1;
+
+        $Util = new CompareUtil();
+        return $Util->compareScalar(
+            $this->mQuery->getSQL(),
+            $obj->mQuery->getSQL()
+        );
     }
 
     /**

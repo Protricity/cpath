@@ -98,12 +98,12 @@ class CollectionUtil implements ICollectionUtil {
     }
 
     /**
-     * Filter the item collection by an IPredicate
-     * @param IPredicate $Where
-     * @return ICollection
+     * Checks for the existence of a item in the collection
+     * @param ICollectionItem $Item
+     * @return bool
      */
-    function contains(IPredicate $Where) {
-        return $this->mCollection->contains($Where);
+    function contains(ICollectionItem $Item) {
+        return $this->mCollection->contains($Item);
     }
 
     /**

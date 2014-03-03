@@ -194,14 +194,37 @@ abstract class PDOTable implements IPDOTable, IBuildable
             if (!($tokens = explode(',', $tokens)))
                 return array();
         }
-        $cols = $this->mColumns;
+
         $ret = array();
-        foreach ($tokens as $token)
-            if (isset($cols[$token])) {
-                $ret[$token] = $cols[$token];
-            } else {
-                throw new \Exception("Column '{$token}' not found in " . $this->getModelName());
+        foreach($tokens as $token) {
+            $found = false;
+            foreach($this->mColumns as $Column) {
+                $name = $Column->getName();
+                if($name == $token) {
+                    $ret[$name] = $Column;
+                    $found = true;
+                    break;
+                }
             }
+
+            if(!$found)
+                throw new \Exception("Column not found in " . $this->getModelName() . ": " . implode(', ', $tokens));
+        }
+
+//        $cols = $this->mColumns;
+//        $ret = array();
+//        foreach ($tokens as $token)
+//            $found = false;
+//            foreach($this->mColumns as $Column)
+//                if($Column->getName() == $token) {
+//                    $found = true;
+//                    break;
+//                }
+//            if (isset($cols[$token])) {
+//                $ret[$token] = $cols[$token];
+//            } else {
+//                throw new \Exception("Column '{$token}' not found in " . $this->getModelName());
+//            }
         return $ret;
         //return array_intersect_key($cols, array_flip($tokens));
     }
