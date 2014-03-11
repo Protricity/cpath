@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
-use CPath\Framework\Data\Compare\IComparable;
 use CPath\Describable\IDescribable;
+use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Interfaces\ILogEntry;

@@ -8,8 +8,6 @@
 namespace CPath\Framework\Data\Collection;
 
 use CPath\Framework\Data\Collection\Predicate\IPredicate;
-use CPath\Framework\Data\Compare\IComparable;
-use CPath\Framework\Data\Misc\ICloneable;
 use Traversable;
 
 abstract class AbstractCollection implements ICollection {

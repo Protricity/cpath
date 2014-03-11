@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\API;
 
 use CPath\Describable\IDescribable;
-
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;

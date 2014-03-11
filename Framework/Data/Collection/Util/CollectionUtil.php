@@ -113,4 +113,12 @@ class CollectionUtil implements ICollectionUtil {
     function each($callable) {
         return $this->mCollection->each($callable);
     }
+
+    /**
+     * Implement ICloneable
+     */
+    function __clone()
+    {
+        // TODO: Implement __clone() method.
+    }
 }

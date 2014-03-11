@@ -10,13 +10,13 @@ namespace CPath\Framework\PDO\Templates\User\Table;
 use CPath\Framework\PDO\API\GetAPI;
 use CPath\Framework\PDO\API\GetBrowseAPI;
 use CPath\Framework\PDO\API\GetSearchAPI;
-use CPath\Framework\PDO\API\PostUserAPI;
 
+use CPath\Framework\PDO\API\PostUserAPI;
 use CPath\Framework\PDO\API\PostUserLoginAPI;
 use CPath\Framework\PDO\API\PostUserLogoutAPI;
 use CPath\Framework\PDO\API\PostUserPasswordAPI;
-use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;

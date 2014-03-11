@@ -6,8 +6,8 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
-use CPath\Framework\Data\Compare\IComparable;
 use CPath\Describable\Describable;
+use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;

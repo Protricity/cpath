@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\Table\Builders\Interfaces;
 
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
-
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
