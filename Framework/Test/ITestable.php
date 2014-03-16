@@ -9,5 +9,6 @@ namespace CPath\Framework\Test;
 
 interface ITestable
 {
-    function runTest();
+    static function runTest();
 }
+

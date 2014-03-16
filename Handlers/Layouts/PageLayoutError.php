@@ -40,7 +40,7 @@ abstract class PageLayoutError extends PageLayout {
      */
     function renderViewContent(IRequest $Request)
     {
-        $Util = new TableThemeUtil($Request, $this->$this->getTheme());
+        $Util = new TableThemeUtil($Request, $this->getTheme());
         //$Theme->renderTableStart($Request, $this->mException->getMessage());
         $Util->renderTD($this->mException);
     }

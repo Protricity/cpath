@@ -13,9 +13,6 @@ use PDO;
 
 class PDODelete extends PDOWhere {
 
-    /** @var \PDO */
-    private $DB;
-
     /** @var \PDOStatement */
     private $stmt=NULL;
 
@@ -29,7 +26,7 @@ class PDODelete extends PDOWhere {
     public function execute() {
         if(!$this->stmt) {
             $sql = $this->getSQL();
-            $this->stmt = $this->DB->prepare($sql);
+            $this->stmt = $this->getDB()->prepare($sql);
             if(Config::$Debug)
                 Log::v2(__CLASS__, $sql);
         }
