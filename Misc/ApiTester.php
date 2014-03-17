@@ -9,7 +9,7 @@
 namespace CPath\Misc;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\CLI;
+use CPath\Framework\Request\Types\CLIRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Response\Types\ExceptionResponse;
@@ -46,7 +46,7 @@ class ApiTester {
     }
 
     static function fromCMD($args, Array $request=NULL) {
-        $Cli = CLI::fromArgs($args, $request);
+        $Cli = CLIRequest::fromArgs($args, $request);
         $Route = $Cli->findRoute();
         $Handler = $Route->loadHandler();
 

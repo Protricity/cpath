@@ -6,9 +6,11 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
 
-abstract class AbstractResponse implements IResponse {
+abstract class AbstractResponse implements IResponse, IMappable {
     private $mCode, $mMessage;
 
     /**
@@ -70,4 +72,14 @@ abstract class AbstractResponse implements IResponse {
         return $this;
     }
 
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map)
+    {
+        $Map->mapDataToKey(IResponse::JSON_CODE, $this->getStatusCode());
+        $Map->mapDataToKey(IResponse::JSON_MESSAGE, $this->getMessage());
+    }
 }

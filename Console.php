@@ -10,7 +10,7 @@ namespace CPath;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\CLI;
+use CPath\Framework\Request\Types\CLIRequest;
 use CPath\Route\Router;
 
 class Console implements IRender { // Broke }, IBuildable {
@@ -80,7 +80,7 @@ class Console implements IRender { // Broke }, IBuildable {
                     if($arg[0] != '/')
                         $arg = $ns . $arg;
                     $args[0] = $arg;
-                    $Cli = CLI::fromArgs($args);
+                    $Cli = CLIRequest::fromArgs($args);
                     try{
                         $Cli->findRoute()
                             ->loadHandler()

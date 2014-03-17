@@ -28,6 +28,8 @@ class APIFormFragment extends AbstractFormFragment{
         parent::__construct($Theme);
     }
 
+    protected function getAPI() { return $this->mAPI; }
+
     /**
      * Render this API Form
      * @param IRequest $Request the IRequest instance for this render

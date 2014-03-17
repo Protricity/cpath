@@ -9,11 +9,13 @@ namespace CPath\Framework\Response\Types;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 
-class DataResponse extends ArrayObject implements IResponse, IComparable, IDescribable {
+class DataResponse extends ArrayObject implements IResponse, IComparable, IDescribable, IMappable {
     private $mCode, $mData=array(), $mMessage, $mEnableLog = false;
     /** @var ILogEntry[] */
     private $mLogs=array();
@@ -134,6 +136,18 @@ class DataResponse extends ArrayObject implements IResponse, IComparable, IDescr
      */
     function getDescription() {
         return $this->getMessage();
+    }
+
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map)
+    {
+        $Map->mapDataToKey(IResponse::JSON_CODE, $this->getStatusCode());
+        $Map->mapDataToKey(IResponse::JSON_MESSAGE, $this->getMessage());
+        $Map->mapDataToKey(IResponse::JSON_DATA, $this->mData);
     }
 
     function __toString() {

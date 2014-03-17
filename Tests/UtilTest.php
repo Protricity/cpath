@@ -8,20 +8,20 @@
  * Time: 8:04 PM */
 include_once __DIR__.'/../Base.php';
 
-use CPath\Framework\Request\Types\CLI;
+use CPath\Framework\Request\Types\CLIRequest;
 
 class UtilTest extends PHPUnit_Framework_TestCase {
 
     public function testCLI()
     {
         $_SERVER['argv'] = array('index.php', 'GET', '/my/path');
-        $CLI = CLI::fromRequest(true, false);
+        $CLI = CLIRequest::fromRequest(true, false);
 
         $this->assertEquals('GET', $CLI->getMethod());
         $this->assertEquals('/my/path', $CLI->getPath());
 
         $_SERVER['argv'] = array('index.php', 'my', 'path');
-        $CLI = CLI::fromRequest(true, false);
+        $CLI = CLIRequest::fromRequest(true, false);
 
         $this->assertEquals('CLI', $CLI->getMethod());
         $this->assertEquals('/my/path', $CLI->getPath());

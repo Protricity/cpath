@@ -10,7 +10,7 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\Web;
+use CPath\Framework\Request\Types\WebRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
@@ -94,7 +94,7 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
         //$Stats = new PDOSelectStats(800, 35, 258);
         $Table->renderFooterStart();
         $url = substr($Request->getPath(), 1);
-        if($Request instanceof Web)
+        if($Request instanceof WebRequest)
             $url = $Request->getURL();
 
         $Table->renderTD(function() use ($Stats, $pageLinks, $url) {

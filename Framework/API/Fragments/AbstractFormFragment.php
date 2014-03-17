@@ -15,18 +15,15 @@ use CPath\Interfaces\IViewConfig;
 
 abstract class AbstractFormFragment implements IRender, IViewConfig{
 
-    private $mTheme, $mAPI;
+    private $mTheme;
 
     /**
-     * @param \CPath\Framework\Api\Interfaces\IAPI $API
      * @param ITableTheme $Theme
+     * @internal param \CPath\Framework\Api\Interfaces\IAPI $API
      */
-    public function __construct(IAPI $API, ITableTheme $Theme = null) {
+    public function __construct(ITableTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
-        $this->mAPI = $API;
     }
-
-    protected function getAPI() { return $this->mAPI; }
 
     /**
      * Provide head elements to any IView

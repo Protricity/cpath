@@ -17,23 +17,37 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
     private $mCommit = NULL;
 
     /**
-     * UPDATE column values for this Model
+     * INSERT or UPDATE column values for this Model.
+     * Note: if the primary key column value is null, INSERT will be used on the first commit, and UPDATE thereafter
      * @return int the number of columns updated
      * @throws \Exception if no primary key exists
      */
     function commitColumns() {
+
         /** @var PDOPrimaryKeyTable $Table */
         $Table = $this->table();
         $primary = $Table::COLUMN_PRIMARY;
         $id = $this->$primary;
+
         if(!$this->mCommit) {
-            Log::u(get_called_class(), "No Fields Updated for ".static::modelName()." '{$id}'");
+            Log::u(get_called_class(), "No Fields Updated for " . $this);
             return 0;
         }
 
-        $this->table()->update(array_keys($this->mCommit))
-            ->where($primary, $id)
-            ->values(array_values($this->mCommit));
+        if($id === null) {
+            // Insert the model
+            $this->$primary = $Table
+                ->insert(array_keys($this->mCommit))
+                ->requestInsertID($Table::COLUMN_PRIMARY)
+                ->values(array_values($this->mCommit))
+                ->getInsertID();
+        } else {
+            // Update the model
+            $Table->update(array_keys($this->mCommit))
+                ->where($primary, $id)
+                ->values(array_values($this->mCommit));
+        }
+
 
 //        $set = '';
 //        $DB = static::getDB();

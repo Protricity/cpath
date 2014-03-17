@@ -19,7 +19,7 @@ use CPath\Route\IRoute;
 use CPath\Route\MissingRoute;
 use CPath\Route\Router;
 
-class CLI extends AbstractRequest implements ILogListener, IOptionProcessor {
+class CLIRequest extends AbstractRequest implements ILogListener, IOptionProcessor {
 
     private
         $mShortRequests = array();
@@ -133,7 +133,7 @@ class CLI extends AbstractRequest implements ILogListener, IOptionProcessor {
     static function fromArgs($args, Array $request=NULL) {
         if(is_string($args))
             $args = explode(' ', $args);
-        $CLI = new CLI($args);
+        $CLI = new CLIRequest($args);
         if($request)
             $CLI->merge($request);
         return $CLI;
@@ -145,7 +145,7 @@ class CLI extends AbstractRequest implements ILogListener, IOptionProcessor {
             return $CLI;
         $args = $_SERVER['argv'];
         array_shift($args);
-        $CLI = new CLI($args);
+        $CLI = new CLIRequest($args);
         if($log)
             $CLI->setOutputLog(true);
         $CLI->mHeaders = function_exists('getallheaders')

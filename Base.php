@@ -8,8 +8,8 @@
 namespace CPath;
 
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\CLI;
-use CPath\Framework\Request\Types\Web;
+use CPath\Framework\Request\Types\CLIRequest;
+use CPath\Framework\Request\Types\WebRequest;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Loaders\CPathLoader;
 
@@ -84,9 +84,9 @@ class Base {
         if($Request) return $Request;
 
         if(!empty($_SERVER['argv'])) {
-            $Request = CLI::fromRequest();
+            $Request = CLIRequest::fromRequest();
         } else {
-            $Request = Web::fromRequest();
+            $Request = WebRequest::fromRequest();
         }
         return $Request;
     }
@@ -95,7 +95,7 @@ class Base {
         static $cli = NULL;
         return $cli !== NULL
             ? $cli
-            : $cli = self::getRequest() instanceof CLI;
+            : $cli = self::getRequest() instanceof CLIRequest;
     }
 
     static function getBasePath() {

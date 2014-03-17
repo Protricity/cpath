@@ -15,10 +15,11 @@ use CPath\Route\MissingRoute;
 use CPath\Route\Router;
 use CPath\Route\RouterAPC;
 
-class Web extends AbstractRequest {
+class WebRequest extends AbstractRequest {
 
     private
         $mMimeTypes,
+        $mRawQueryString = null,
         $mUploads = null;
 
     protected function __construct() {
@@ -43,7 +44,14 @@ class Web extends AbstractRequest {
         return
             ($absolute ? Config::getDomainPath() : '')
             . substr($this->getPath(), 1)
-            . ($withQuery ? '?' . http_build_query($this->mRequest) : '');
+            . ($withQuery ? '?' . $this->getRawQueryString() : '');
+    }
+
+    function getRawQueryString() {
+        if($this->mRawQueryString)
+            return $this->mRawQueryString;
+
+        return $this->mRawQueryString = http_build_query($this->mRequest);
     }
 
     /**
@@ -97,15 +105,17 @@ class Web extends AbstractRequest {
 
     /**
      * Return an instance of Web from the current request
-     * @return Web
+     * @return WebRequest
      * @throws \Exception
      */
     static function fromRequest() {
         static $Web = NULL;
         if($Web) return $Web;
-        $Web = new Web();
+        $Web = new WebRequest();
 
         $parse = parse_url($_SERVER['REQUEST_URI']);
+        $Web->mRawQueryString = $parse['query'];
+
         $Web->mMethod = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
         if($Web->mMethod == 'CLI' && !Config::$AllowCLIRequest)
             throw new \Exception("Web requests for CLI are disabled");
@@ -166,6 +176,7 @@ class Web extends AbstractRequest {
                 case 'PATCH':
                 case 'DELETE':
                     $input = file_get_contents('php://input');
+                    $Web->mRawQueryString = $input;
                     if($Web->getHeaders('Content-Type') === 'application/json') {
                         $Web->mRequest = json_decode($input , true);
                     } else {
