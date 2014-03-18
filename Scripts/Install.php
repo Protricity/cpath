@@ -14,7 +14,7 @@ use CPath\Framework\Api\Types\AbstractAPI;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Log;
 
 class Install extends AbstractAPI {
@@ -51,20 +51,22 @@ class Install extends AbstractAPI {
         }
 
         $path = Base::getBasePath();
-        $targetPath = $path . 'config.php';
+        $targetPath = $path . 'Config.php';
+
         if(file_exists($targetPath))
-            throw new APIException("Config file already exists: " . $targetPath);
-        if(file_exists($p = $path . 'config.default.php')) {
+            return new SimpleResponse("Config file already exists: " . $targetPath);
+
+        if(file_exists($p = $path . 'Config.default.php')) {
             if(!copy($p, $targetPath))
                 throw new APIException("Could not copy ($p) to ($targetPath)");
-            return new DataResponse("Copied config from: " . $p);
+            return new SimpleResponse("Copied config from: " . $p);
         }
         Log::u(__CLASS__, "Default config file not found: " . $p);
 
         if(file_exists($p = __DIR__ . '/assets/config.default.php')) {
             if(!copy($p, $targetPath))
                 throw new APIException("Could not copy ($p) to ($targetPath)");
-            return new DataResponse("Copied config from: " . $p);
+            return new SimpleResponse("Copied config from: " . $p);
         }
         Log::u(__CLASS__, "Default config file not found: " . $p);
 

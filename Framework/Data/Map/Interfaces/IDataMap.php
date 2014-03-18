@@ -12,15 +12,9 @@ interface IDataMap {
     /**
      * Map data to a key in the map
      * @param String $key
-     * @param mixed $data
+     * @param mixed|Callable $data
      * @param int $flags
      * @return void
      */
     function mapDataToKey($key, $data, $flags=0);
-
-//    /**
-//     * Returns an associative array of keys and data
-//     * @return Array associative array
-//     */
-//    function getMapData();
 }

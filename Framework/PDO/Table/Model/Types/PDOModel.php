@@ -11,11 +11,14 @@ use CPath\Config;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
+use CPath\Framework\PDO\Table\Types\PDOTable;
 
 abstract class PDOModel implements IPDOModel {
     const MODEL_NAME = null;
     const COLUMN_TITLE = NULL;   // Title column provides the column to use in a title
 
+    /** @var PDOTable */
+    private $mTable = null;
 
     /**
      * PDOModel Constructor parameters must be optional.
@@ -25,6 +28,17 @@ abstract class PDOModel implements IPDOModel {
     public function __construct() {
 
     }
+
+    // Methods
+
+    abstract protected function loadTable();
+
+    function setTable(PDOTable $Table) {
+        if($this->mTable)
+            throw new \InvalidArgumentException("Table may only be set once");
+        $this->mTable = $Table;
+    }
+    function table() { return $this->mTable ?: $this->mTable = $this->loadTable(); }
 
     /**
      * Get model value by column

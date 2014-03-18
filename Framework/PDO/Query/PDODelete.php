@@ -9,7 +9,6 @@ namespace CPath\Framework\PDO\Query;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Log;
-use PDO;
 
 class PDODelete extends PDOWhere {
 

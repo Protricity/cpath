@@ -363,7 +363,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
     function processPHPModelTableMethod(BuildPHPClass $PHPModel, BuildPHPClass $PHPTable) {
         $PHPModel->addUse($PHPTable->getName(), 'Table');
-        $PHPModel->addMethod('table', '', ' static $table=null; return $table ?: $table = new Table; ');
+        $PHPModel->addMethod('loadTable', '', ' return new Table; ', 'protected');
         $PHPModel->addMethodCode();
     }
 

@@ -22,7 +22,9 @@ abstract class PDOTaskReceiptModel extends PDOPrimaryKeyModel implements IReceip
     /**
      * @return PDOTaskReceiptTable
      */
-    abstract function table();
+    function table() {
+        return parent::table();
+    }
 
 
 //

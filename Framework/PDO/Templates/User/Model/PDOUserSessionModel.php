@@ -17,7 +17,9 @@ abstract class PDOUserSessionModel extends PDOPrimaryKeyModel implements ISessio
     /**
      * @return \CPath\Framework\PDO\Templates\User\Table\PDOUserSessionTable
      */
-    abstract function table();
+    function table() {
+        return parent::table();
+    }
 
     /**
      * Get the User PRIMARY Key ID associated with this Session

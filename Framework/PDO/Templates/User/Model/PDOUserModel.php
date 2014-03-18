@@ -36,11 +36,12 @@ abstract class PDOUserModel extends PDOPrimaryKeyModel implements IUser {
 //    public function getEmail() { return $this->{$T::COLUMN_EMAIL}; }
 //    public function setEmail($value, $commit=true) { return $this->updateColumn($T::COLUMN_EMAIL, $value, $commit, FILTER_VALIDATE_EMAIL); }
 
-
     /**
      * @return PDOUserTable
      */
-    abstract function table();
+    function table() {
+        return parent::table();
+    }
 
     /**
      * @return ISessionManager

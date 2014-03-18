@@ -3,7 +3,6 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
