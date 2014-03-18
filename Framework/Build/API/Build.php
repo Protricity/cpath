@@ -85,7 +85,7 @@ class Build extends AbstractAPI implements IRoutable {
      * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
      */
     function loadRoute() {
-        return Route::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
+        return $this->loadDefaultRouteSet();
     }
 
     // Statics

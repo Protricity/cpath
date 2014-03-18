@@ -11,13 +11,17 @@ use CPath\Describable\IDescribable;
 use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Log;
+use CPath\Route\IRoutable;
+use CPath\Route\IRoute;
+use CPath\Route\RoutableSet;
 
-class Install extends AbstractAPI {
+class Install extends AbstractAPI implements IRoutable {
 
     const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
     const ROUTE_METHOD = 'CLI';    // CLI only
@@ -80,8 +84,30 @@ class Install extends AbstractAPI {
     function getDescribable() { return "Installation script for CPath"; }
 
     /**
+     * Returns the route for this IRender
+     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
+     */
+    function loadRoute() {
+        return $this->loadDefaultRouteSet();
+    }
+
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request)
+    {
+        $Util = new APIRenderUtil($this);
+        $Util->render($Request);
+    }
+
+    /**
      * Return an instance of the class for building and other tasks
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
-    static function createBuildableInstance() {}
+    static function createBuildableInstance() {
+        return new static();
+    }
+
 }
