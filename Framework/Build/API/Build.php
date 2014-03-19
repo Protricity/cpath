@@ -22,7 +22,6 @@ use CPath\Log;
 use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
-use CPath\Route\Route;
 
 class Build extends AbstractAPI implements IRoutable {
 
@@ -40,7 +39,7 @@ class Build extends AbstractAPI implements IRoutable {
      */
     protected function setupAPI(){
         $this->addField(new Field('v', "Display verbose messages"));
-        $this->addField( new Field('s', "Skip broken files"));
+        $this->addField(new Field('s', "Skip broken files"));
         $this->addField(new Field('f', "Filter built files by wildcard *?"));
         //$this->generateFieldShorts();
     }

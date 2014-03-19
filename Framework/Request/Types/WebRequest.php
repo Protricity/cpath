@@ -114,7 +114,7 @@ class WebRequest extends AbstractRequest {
         $Web = new WebRequest();
 
         $parse = parse_url($_SERVER['REQUEST_URI']);
-        $Web->mRawQueryString = $parse['query'];
+        $Web->mRawQueryString = !empty($parse['query']) ? $parse['query'] : null;
 
         $Web->mMethod = isset($_SERVER["REQUEST_METHOD"]) ? strtoupper($_SERVER["REQUEST_METHOD"]) : 'GET';
         if($Web->mMethod == 'CLI' && !Config::$AllowCLIRequest)

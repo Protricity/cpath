@@ -128,7 +128,7 @@ PHP;
         foreach($this->mRoutes as $Route) {
             $class = get_class($Route); // $defaultClass;
             if(!isset($useClass[$class]))
-                $useClass[$class] = 'Route' . ($i++ ?: '');
+                $useClass[$class] = basename($class) . ($i++ ?: '');
             if(($l = strlen($Route->getPrefix())) > $max)
                 $max = $l;
         }

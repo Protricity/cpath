@@ -346,9 +346,11 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
      * @return RoutableSet a set of common routes for this API
      */
     protected function loadDefaultRouteSet() {
-        $Routes = RoutableSet::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
-        APIView::addRoutes($Routes, $this, static::ROUTE_API_VIEW_TOKEN);
         $methods = explode(',', static::ROUTE_METHOD);
+        $setMethod = 'ANY';
+        if(sizeof($methods) === 1)
+            $setMethod = $methods[0];
+        $Routes = RoutableSet::fromHandler($this, $setMethod, static::ROUTE_PATH);
         foreach($methods as $method)
             $Routes[$method] = $this;
         return $Routes;
