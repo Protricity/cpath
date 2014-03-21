@@ -50,7 +50,7 @@ interface IRequest extends IArrayObject {
      * @param bool $advance if true, the argument position advances forward 1
      * @return String argument
      */
-    function getNextArg($advance=true);
+    //function getNextArg($advance=true);
 
     /**
      * Returns a list of mimetypes accepted by this request

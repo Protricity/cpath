@@ -11,20 +11,15 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
-use CPath\Route\IRoute;
-use CPath\Route\RoutableSet;
-use CPath\Route\RouteUtil;
 
 class APIView extends AbstractAPIView {
 
     private $mAPI = null;
     private $mForm, $mResponseBox;
     private $mResponse = null;
-    private $mRoute;
 
-    public function __construct(IAPI $API, IRoute $Route=null, IResponse $Response=null, ITheme $Theme=null) {
+    public function __construct(IAPI $API, IResponse $Response=null, ITheme $Theme=null) {
         $this->mAPI = $API;
-        $this->mRoute = $Route;
         $this->mResponse = $Response;
 
         $this->mForm = new APIDebugFormFragment($this->mAPI);
@@ -61,8 +56,7 @@ class APIView extends AbstractAPIView {
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
         $API = $this->mAPI;
-        $Route = $this->mRoute ?: $Request->getRoute();
-        $route = $Route->getPrefix();
+        $route = $Request->getMethod() . ' ' . $Request->getPath();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
     }
@@ -82,21 +76,21 @@ class APIView extends AbstractAPIView {
      * @return void
      */
     protected function renderNavBarContent(IRequest $Request) {
-        $RouteSet = $Request->getRoute();
-        if($RouteSet instanceof RoutableSet) {
-            $Util = new RouteUtil($RouteSet);
-            $Routes = $RouteSet->getRoutes();
-
-            $ids = $this->getRoutableSetIDs($RouteSet);
-            foreach($ids as $i=>$prefix) {
-                /** @var IRoute $Route */
-                $Route = $Routes[$prefix];
-                $Handler = $Route->loadHandler();
-                if(!$Handler instanceof IAPI)
-                    continue;
-                $Describable = Describable::get($Handler);
-                $this->renderNavBarEntry($Util->buildPublicURL(true) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
-            }
-        }
+//        $RouteSet = $Request->getRoute();
+//        if($RouteSet instanceof RoutableSet) {
+//            $Util = new RouteUtil($RouteSet);
+//            $Routes = $RouteSet->getRoutes();
+//
+//            $ids = $this->getRoutableSetIDs($RouteSet);
+//            foreach($ids as $i=>$prefix) {
+//                /** @var IRoute $Route */
+//                $Route = $Routes[$prefix];
+//                $Handler = $Route->loadHandler();
+//                if(!$Handler instanceof IAPI)
+//                    continue;
+//                $Describable = Describable::get($Handler);
+//                $this->renderNavBarEntry($Util->buildPublicURL(true) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+//            }
+//        }
     }
 }

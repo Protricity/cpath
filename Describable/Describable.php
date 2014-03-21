@@ -31,7 +31,7 @@ final class Describable {
 
     /**
      * Get IDescribable instance of object or throw an exception
-     * @param Object $object the describable object
+     * @param mixed $object the describable object
      * @param bool $allowDefault if the object is not describable, use a default description instead, otherwise throw exception
      * @return IDescribable an instance of IDescribable. This may or may not be the original object
      * @throws IsNotDescribableException if the object does not implement IDescribable

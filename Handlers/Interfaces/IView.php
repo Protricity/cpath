@@ -8,9 +8,11 @@
 namespace CPath\Handlers\Interfaces;
 
 
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Route\Render\IDestination;
 
-interface IView extends \CPath\Framework\Render\IRender {
+interface IView extends IRender, IDestination {
 
     /**
      * Render the html body
@@ -31,13 +33,6 @@ interface IView extends \CPath\Framework\Render\IRender {
      * @return mixed
      */
     function getTheme();
-
-    /**
-     * Get the base path of the target class
-     * @param null $appendPath
-     * @return mixed
-     */
-    function getBasePath($appendPath=NULL);
 
     /**
      * Set the view title

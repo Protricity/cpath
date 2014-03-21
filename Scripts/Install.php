@@ -17,14 +17,14 @@ use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
 use CPath\Log;
 
-class Install implements IRender, IBuildable, IAPI {
+class Install implements IDestination, IBuildable, IAPI {
 
     const FIELD_NO_PROMPT = 'y';
 
@@ -53,9 +53,9 @@ class Install implements IRender, IBuildable, IAPI {
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function render(IRequest $Request) {
+    function renderDestination(IRequest $Request) {
         $Util = new APIRenderUtil($this);
-        $Util->render($Request);
+        $Util->renderDestination($Request);
     }
 
 
@@ -64,10 +64,11 @@ class Install implements IRender, IBuildable, IAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      * @throws APIException if no config file could be installed
      */
-    function execute(IRequest $Request)
+    function execute(IRequest $Request, $args)
     {
         Log::u(__CLASS__, "Installing Config File");
 

@@ -24,7 +24,7 @@ abstract class NavBarLayout extends View implements IRenderContent {
 //     */
 //    protected function setupHeadFields(IRequest $Request) {
 //        parent::setupHeadFields();
-//        //$basePath = Base::getClassPublicPath(__CLASS__, false);
+//        //$basePath = Base::getClassPublicPath(__CLASS__);
 //        //$this->addHeadStyleSheet($basePath . 'assets/navbarlayout.css');
 //    }
 

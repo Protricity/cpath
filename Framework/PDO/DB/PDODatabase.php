@@ -16,16 +16,14 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
-use CPath\Route\IRoute;
-use CPath\Route\Route;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDatabase, IRender {
+abstract class PDODatabase extends \PDO implements IDatabase, IDestination {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -36,7 +34,6 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRender {
     const ROUTE_PATH = NULL;       // No custom route path. Path is based on namespace + class name
 
     private $mPrefix;
-
 
     /**
      * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table
@@ -87,14 +84,6 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRender {
 
     public function getPrefix() { return $this->mPrefix; }
 
-    /**
-     * @return PDODatabase
-     * @throws NotConfiguredException
-     */
-    static function get()
-    {
-        throw new NotConfiguredException("Database helper ".get_called_class()."::get() is missing");
-    }
 
     abstract function getDBVersion();
     //abstract function insert($table, Array $pairs);
@@ -142,47 +131,40 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRender {
 
     // Implement IRender
 
-    function render(IRequest $Request) {
+    function renderDestination(IRequest $Request, $path, $args) {
         if(!Base::isCLI() && !headers_sent())
             header('text/plain');
         Log::u(__CLASS__, "DB Upgrader: ".get_class($this));
-        switch(strtolower($Request->getNextArg())) {
-            case 'upgrade':
-                $this->upgrade(false, $Request['force']);
-                break;
-            case 'reset':
-                $this->upgrade(true, $Request['force']);
-                break;
-            case 'rebuild':
-                $this->upgrade(true, $Request['force']);
-                $Build = new Build();
-                Log::u(__CLASS__, "Rebuilding Models...");
-                $Build->execute($Request);
-                break;
-            default:
-                Log::u(__CLASS__, "Use 'upgrade', 'reset', or 'rebuild' to upgrade database");
-                break;
+        if($args[0]) {
+            switch(strtolower($args[0])) {
+                case 'upgrade':
+                    $this->upgrade(false, $Request['force']);
+                    break;
+                case 'reset':
+                    $this->upgrade(true, $Request['force']);
+                    break;
+                case 'rebuild':
+                    $this->upgrade(true, $Request['force']);
+                    $Build = new Build();
+                    Log::u(__CLASS__, "Rebuilding Models...");
+                    $Build->execute($Request);
+                    break;
+                default:
+                    Log::u(__CLASS__, "Use 'upgrade', 'reset', or 'rebuild' to upgrade database");
+                    break;
+            }
         }
         Log::u(__CLASS__, "DB Upgrader Completed");
     }
 
     // Statics
 
-    // Implement IBuildable (sub class still needs to have "implements IBuildable")
-
     /**
-     * Return an instance of the class for building purposes
-     * @return \CPath\Framework\Build\IBuildable|NULL an instance of the class or NULL to ignore
+     * @return PDODatabase
+     * @throws NotConfiguredException
      */
-    static function createBuildableInstance() {
-        return static::get();
-    }
-
-    /**
-     * Returns the route for this IRender
-     * @return IRoute
-     */
-    function loadRoute() {
-        return Route::fromHandler($this, static::ROUTE_PATH, static::ROUTE_METHOD);
+    static function get()
+    {
+        throw new NotConfiguredException("Database helper ".get_called_class()."::get() is missing");
     }
 }

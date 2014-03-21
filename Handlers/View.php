@@ -18,11 +18,12 @@ abstract class View implements IView, IViewConfig {
     const RESPONSE_MIMETYPE = 'text/html';
 
     private $mHeadFields = array();
-    private $mTheme, $mBasePath;
+    private $mTheme;
+    private $mPath = null;
+    private $mArgs = array();
 
     public function __construct(ITheme $Theme) {
         $this->mTheme = $Theme;
-        $this->mBasePath = Config::getDomainPath();
 
         RI::si(null, static::TAB);
     }
@@ -34,13 +35,22 @@ abstract class View implements IView, IViewConfig {
      */
     abstract protected function setupHeadFields(IRequest $Request);
 
+    function getPath() { return $this->mPath; }
+    function getArgs() { return $this->mArgs; }
+
     /**
      * Set up <head> element fields for this View
      * @param IRequest $Request
      */
     final protected function setupHead(IRequest $Request) {
-        $basePath = Base::getClassPublicPath(__CLASS__, false);
-        $this->addHeadHTML("<base href='{$this->mBasePath}' />", true);
+        if($this->getPath()) {
+            $basePath = rtrim(Config::getDomainPath(), '/') . $this->getPath();
+            $this->addHeadHTML("<base href='{$basePath}' />", true);
+        }
+        //$this->addHeadHTML("<base href='{$this->mBasePath}' />", true); // TODO: don't use anymore!
+
+
+        $basePath = Base::getClassPublicPath(__CLASS__);
         $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
         $this->addHeadScript($basePath . 'assets/cpath.js', true);
 
@@ -66,6 +76,20 @@ abstract class View implements IView, IViewConfig {
             if(static::RESPONSE_MIMETYPE)
                 header("Content-Type: " . ($mimeType ?: static::RESPONSE_MIMETYPE));
         }
+    }
+
+    /**
+     * Render this route destination
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return String|void always returns void
+     */
+    function renderDestination(IRequest $Request, $path, $args)
+    {
+        $this->mPath = rtrim($path, '/') . '/';
+        $this->mArgs = $args;
+        $this->render($Request);
     }
 
     /**
@@ -108,11 +132,11 @@ abstract class View implements IView, IViewConfig {
         return $this->mTheme;
     }
 
-    function getBasePath($appendPath=NULL) {
-        if($appendPath)
-            return $this->mBasePath . '/' . $appendPath;
-        return $this->mBasePath;
-    }
+//    function getBasePath($appendPath=NULL) {
+//        if($appendPath)
+//            return $this->mBasePath . '/' . $appendPath;
+//        return $this->mBasePath;
+//    }
 
     function setTitle($title) {
         $this->mHeadFields['title'] = "<title>{$title}</title>";

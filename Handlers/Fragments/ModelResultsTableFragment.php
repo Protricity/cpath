@@ -34,7 +34,7 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath($this, false);
+        $basePath = Base::getClassPublicPath($this);
         $View->addHeadStyleSheet($basePath . 'assets/modelresultstablefragment.css', true);
         $View->addHeadScript($basePath . 'assets/modelresultstablefragment.js', true);
     }

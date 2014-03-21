@@ -10,7 +10,6 @@ namespace CPath\Framework\PDO\Builders;
 
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Build\API\Build;
-use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Builders\Tables\BuildPDOPKTable;
@@ -185,36 +184,33 @@ PHP;
 
     /**
      * Builds class references for existing database tables
-     * @param \CPath\Framework\Build\IBuildable $Buildable
+     * @param \CPath\Framework\PDO\DB\PDODatabase $DB
+     * @param $flags
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
-    public function buildClass(IBuildable $Buildable)
+    protected function buildClass(PDODatabase $DB, $flags=0)
     {
+        $this->mBuildDB = $DB;
 
-        if (!$Buildable instanceof PDODatabase)
-            return false;
-        $this->mBuildDB = $DB = $Buildable;
-
-        $BUILD = $Buildable::BUILD_DB;
-        if (!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
-            Log::v(__CLASS__, "(BUILD_DB = {$BUILD}) Skipping Build for " . get_class($Buildable));
-            return false;
-        }
+        $BUILD = $DB::BUILD_DB;
+//        if (!in_array($BUILD, array('ALL', 'MODEL', 'PROC'))) {
+//            Log::v(__CLASS__, "(BUILD_DB = {$BUILD}) Skipping Build for " . get_class($Buildable));
+//            return false;
+//        }
 
         $Class = new \ReflectionClass($DB);
 
         $tablePath = $this->getFolder($Class, 'Table');
-        $tableNS = $Class->getNamespaceName() . "\\Table";
+        //$tableNS = $Class->getNamespaceName() . "\\Table";
         $modelPath = $this->getFolder($Class, 'Model');
-        $modelNS = $Class->getNamespaceName() . "\\Model";
+        //$modelNS = $Class->getNamespaceName() . "\\Model";
         $procPath = $this->getFolder($Class, 'Procs');
-        $procNS = $Class->getNamespaceName() . "\\Procs";
+        //$procNS = $Class->getNamespaceName() . "\\Procs";
 
-        $Config =& Build::getConfig($Class->getName());
+        $Config =& Build::get()->getConfig($Class->getName());
         $schemaFolder = $this->getFolder($Class, 'Schema');
         $hash = 0;
-        $force = Build::force();
+        $force = Build::get()->force();
 
         $oldFiles = array();
         if (!file_exists($procPath)) {
@@ -369,7 +365,7 @@ PHP;
 
             // CSharp
 
-            $fileCSharp = $modelPath . 'csharp/' . ($Table->getModelClass()) . '.cs';
+            $fileCSharp = $modelPath . 'CSharp/' . ($Table->getModelClass()) . '.cs';
             if (!file_exists($dir = dirname($fileCSharp)))
                 mkdir($dir, null, true);
             $CBuilder = new BuildCSharpTables($DB::BUILD_DB_CSHARP_NAMESPACE);
@@ -451,11 +447,6 @@ PHP;
     {
         if ($subFolder) $subFolder .= '/';
         return dirname($Class->getFileName()) . '/' . $subFolder;
-    }
-
-    static function createBuildableInstance()
-    {
-        return new static;
     }
 }
 

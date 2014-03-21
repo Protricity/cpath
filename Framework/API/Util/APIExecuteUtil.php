@@ -11,7 +11,7 @@ use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Exceptions\ValidationExceptions;
 use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\FieldUtil;
+use CPath\Framework\Api\Field\Util\FieldUtil;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
@@ -54,12 +54,13 @@ class APIExecuteUtil implements IAPI, ILogListener {
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest instance for this render which contains the request
+     * @param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    final public function execute(IRequest $Request) {
-        $this->processRequest($Request);
-        $Response = $this->mAPI->execute($Request);
+    final public function execute(IRequest $Request, $args) {
+        $this->processRequest($Request, $args);
+        $Response = $this->mAPI->execute($Request, $args);
 
         if($Response instanceof IResponseAggregate)
             $Response = $Response->createResponse();
@@ -72,11 +73,12 @@ class APIExecuteUtil implements IAPI, ILogListener {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    final public function executeOrCatch(IRequest $Request) {
+    final public function executeOrCatch(IRequest $Request, $args) {
         try {
-            $Response = $this->execute($Request);
+            $Response = $this->execute($Request, $args);
             if($Response->getStatusCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
                 $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {
@@ -95,10 +97,11 @@ class APIExecuteUtil implements IAPI, ILogListener {
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param array $args
+     * @throws \CPath\Framework\Api\Exceptions\ValidationExceptions
      * @return void
-     * @throws ValidationExceptions if one or more Fields fail to validate
      */
-    function processRequest(IRequest $Request) {
+    function processRequest(IRequest $Request, Array &$args) {
         /** @var IField $Field */
         if($Request instanceof IOptionProcessor) {
             if($this->mAPI instanceof IOptionMap)
@@ -107,12 +110,12 @@ class APIExecuteUtil implements IAPI, ILogListener {
                 $Request->processMap($this->generateFieldShorts());
         }
 
-        if($arg = $Request->getNextArg()) {
+        if($args) {
             foreach($this->mAPI->getFields() as $name=>$Field) {
                 $FieldUtil = new FieldUtil($Field);
                 if($FieldUtil->isParam()) {
-                    $Request[$name] = $arg;
-                    if(!$arg = $Request->getNextArg())
+                    $Request[$name] = array_shift($args);
+                    if(!$args)
                         break;
                 }
             }

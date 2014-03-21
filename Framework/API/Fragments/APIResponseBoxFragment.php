@@ -25,7 +25,7 @@ class APIResponseBoxFragment implements IViewConfig{
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath($this, false);
+        $basePath = Base::getClassPublicPath($this);
         $View->addHeadStyleSheet($basePath . 'assets/apiresponseboxfragment.css', true);
         $View->addHeadScript($basePath . 'assets/apiresponseboxfragment.js', true);
     }

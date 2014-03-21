@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
@@ -17,7 +18,6 @@ class Routes implements IRoutable, IRender {
 
     /** @var IRouteMap */
     private $mRoutes;
-
 
     public function __construct() {
     }
@@ -47,12 +47,12 @@ class Routes implements IRoutable, IRender {
     /**
      * Return the handler as requested
      * @param IRequest $Request the IRequest instance for this render
-     * @return IRender found handler
+     * @return \CPath\Framework\Route\Render\IDestination found handler
      */
     function getHandlerFromRequest(IRequest $Request) {
-        $Render = new Routes_SelectorMap($Request);
-        $this->mapRoutes($Render);
-        return $Render->getDestination();
+        $Selector = new Routes_SelectorMap($Request);
+        $this->mapRoutes($Selector);
+        return $Selector->getDestination();
     }
 
     /**
@@ -67,44 +67,69 @@ class Routes implements IRoutable, IRender {
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico')))
             throw new CodedException("File request was passed to Script: ", IResponseCode::STATUS_NOT_FOUND);
 
-        $Destination = $this->getHandlerFromRequest($Request);
-        $Destination->render($Request);
+        $Selector = new Routes_SelectorMap($Request);
+        $this->mapRoutes($Selector);
+
+        $newPath = '';
+        $args = array();
+        /** @var IDestination $Destination */
+        $Selector->getMatchedData($Destination, $newPath, $args);
+        $Destination->renderDestination($Request, $newPath, $args);
     }
 }
 
-class Routes_LazyRender implements IRender {
+class Routes_LazyRender implements IDestination {
     private $mDestination;
     public function __construct($destination) {
         $this->mDestination = $destination;
     }
 
     function getInstance() {
-        /** @var IRender $Inst */
+        /** @var \CPath\Framework\Route\Render\IDestination $Inst */
         $Inst = $this->mDestination;
         $Inst = new $Inst;
         return $Inst;
     }
 
     /**
-     * Render this request
+     * Render this route destination
      * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function render(IRequest $Request)
-    {
+    function renderDestination(IRequest $Request, $path, $args) {
         $this->getInstance()
-            ->render($Request);
+            ->renderDestination($Request, $path, $args);
     }
 }
 
 class Routes_SelectorMap implements IRouteMap {
 
-    private $mRequest, $mDestination = null, $mDone = false;
+    private $mRequest;
+    private $mDestination = null;
+    private $mDone = false;
+    private $mMatchedPath = null;
+    private $mArgs = array();
 
     function __construct(IRequest $Request) {
         $this->mRequest = $Request;
     }
 
+    /**
+     * @param IDestination $Destination
+     * @param String $path
+     * @param array $args
+     */
+    function getMatchedData(&$Destination, &$path, Array &$args) {
+        $Destination = $this->mDestination;
+        $path = $this->mMatchedPath;
+        $args = $this->mArgs;
+    }
+
+    /**
+     * @return IDestination
+     */
     function getDestination() {
         return $this->mDestination;
     }
@@ -112,17 +137,21 @@ class Routes_SelectorMap implements IRouteMap {
     /**
      * Map data to a key in the map
      * @param String $prefix
-     * @param IRender $Destination
+     * @param IDestination $Destination
      * @return bool if true the mapping will discontinue
      */
-    function mapRoute($prefix, IRender $Destination)
+    function mapRoute($prefix, IDestination $Destination)
     {
         if($this->mDone)
             return false;
         list($method, $path) = explode(' ', $prefix, 2);
         if($method === 'ANY' || $method == $this->mRequest->getMethod()) {
-            if(strpos($this->mRequest->getPath(), $path) === 0) {
+            if(strpos($requestPath = $this->mRequest->getPath(), $path) === 0) {
+                $argPath = substr($requestPath, strlen($path));
+                $args = explode('/', trim($argPath, '/'));
                 $this->mDone = true;
+                $this->mMatchedPath = $path;
+                $this->mArgs = $args;
                 if($Destination instanceof Routes_LazyRender)
                     $Destination = $Destination->getInstance();
                 $this->mDestination = $Destination;

@@ -69,12 +69,13 @@ class PutAPI extends AbstractPDOAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
      * @throws \CPath\Framework\Api\Exceptions\APIException if multiple duplicate rows were found
      */
-    final function execute(IRequest $Request) {
+    final function execute(IRequest $Request, $args) {
         $Table = $this->getTable();
 
         foreach($this->getHandlers() as $Handler)

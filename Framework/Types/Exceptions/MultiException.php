@@ -46,7 +46,7 @@ class MultiException extends \Exception implements \Countable, IRenderAll {
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function render(IRequest $Request)
+    function renderDestination(IRequest $Request)
     {
         $this->renderHtml($Request);
     }

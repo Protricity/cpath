@@ -19,13 +19,13 @@ use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
 use CPath\Log;
 
-class Build implements IRender, IAPI, IBuildable {
+class Build implements IDestination, IAPI, IBuildable {
 
     //const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     //const ROUTE_METHOD = 'CLI';    // CLI only
@@ -49,9 +49,10 @@ class Build implements IRender, IAPI, IBuildable {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the request instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return DataResponse the api call response with data, message, and status
      */
-    final function execute(IRequest $Request) {
+    final function execute(IRequest $Request, $args) {
         static $built = false;
         if($built)
             return new DataResponse(false, "Build can only occur once per execution. Skipping Build...");
@@ -81,13 +82,13 @@ class Build implements IRender, IAPI, IBuildable {
         return "Build All classes";
     }
 
-    // Statics
-
     /** @var IBuilder[] $mBuilders */
-    private $mBuilders = array();
+    private static $mBuilders = array();
+
+
     private $mClassFiles = array();
 
-    /** @var \ReflectionClass[] $mBuilders */
+    /** @var \ReflectionClass[] */
     private $mClasses = array();
     private $mBuildConfig = NULL;
     private $mForce = false;
@@ -205,15 +206,15 @@ class Build implements IRender, IAPI, IBuildable {
         $this->commitConfig();
 
         $this->mForce = $force;
-        $this->mBuilders = array();
         $exCount = $this->findClassFiles(Base::getBasePath(), '');
         $this->findClasses();
         $exCount += $this->buildClasses();
         /** @var $Class \ReflectionClass */
         $this->setConfig(__CLASS__, 'lastFile', NULL, true);
         /** @var $Builder \CPath\Framework\Build\IBuilder */
-        foreach($this->mBuilders as $Builder)
+        foreach(self::$mBuilders as $Builder)
             $Builder->buildComplete();
+        self::$mBuilders = array();
 
         $v = ++ Compile::$BuildInc;
         Compile::commit();
@@ -295,7 +296,7 @@ class Build implements IRender, IAPI, IBuildable {
     private function buildClasses() {
         $exCount = 0;
         foreach($this->mClasses as $Class) {
-            $BuildMethod = $Class->getMethod('build');
+            $BuildMethod = $Class->getMethod('buildClass');
             if($BuildMethod->isAbstract()) {
                 Log::v2(__CLASS__, "Ignoring abstract method found in '{$Class->getName()}'");
                 continue;
@@ -434,16 +435,6 @@ class Build implements IRender, IAPI, IBuildable {
     }
 
 
-    /**
-     * Render this request
-     * @param IRequest $Request the IRequest instance for this render
-     * @return String|void always returns void
-     */
-    function render(IRequest $Request) {
-        $RenderUtil = new APIRenderUtil($this);
-        $RenderUtil->render($Request);
-    }
-
     // Statics
 
     /**
@@ -451,7 +442,7 @@ class Build implements IRender, IAPI, IBuildable {
      * @throws BuildException if an exception occurred
      */
     static function buildClass() {
-        RouteBuilder::buildRoute('CLI /build', new Build());
+        RouteBuilder::buildRoute('ANY /build', new Build());
     }
 
     static function get() {
@@ -460,7 +451,22 @@ class Build implements IRender, IAPI, IBuildable {
     }
 
     static function registerBuilder(IBuilder $Builder) {
-        $Inst = static::get();
-        $Inst->mBuilders[] = $Builder;
+        foreach(self::$mBuilders as $Builder2)
+            if($Builder2 === $Builder)
+                return;
+        self::$mBuilders[] = $Builder;
     }
+
+    /**
+     * Render this route destination
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return String|void always returns void
+     */
+    function renderDestination(IRequest $Request, $path, $args) {
+        $RenderUtil = new APIRenderUtil($this);
+        $RenderUtil->renderDestination($Request, $path, $args);
+    }
+
 }

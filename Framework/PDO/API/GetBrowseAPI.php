@@ -68,11 +68,12 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return PDOSearchResponse the api call response with data, message, and status
      * @throws ModelNotFoundException if the Model was not found
      * @throws \Exception if no valid columns were found
      */
-    final function execute(IRequest $Request)
+    final function execute(IRequest $Request, $args)
     {
 
         $Util = new APIExecuteUtil($this);

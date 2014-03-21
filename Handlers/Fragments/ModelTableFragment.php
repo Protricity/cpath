@@ -4,13 +4,13 @@ namespace CPath\Handlers\Fragments;
 use CPath\Describable\Describable;
 use CPath\Framework\Data\Map\Types\ArrayMap;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 
-class ModelTableFragment implements IRender{
+class ModelTableFragment implements IDestination{
 
     private $mModel, $mTheme;
 
@@ -28,7 +28,7 @@ class ModelTableFragment implements IRender{
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function render(IRequest $Request)
+    function renderDestination(IRequest $Request)
     {
         $Model = $this->mModel;
         $caption = null;

@@ -9,7 +9,6 @@ namespace CPath\Framework\PDO\Templates\User\Table;
 
 use CPath\Framework\PDO\API\GetAPI;
 use CPath\Framework\PDO\API\GetBrowseAPI;
-
 use CPath\Framework\PDO\API\GetSearchAPI;
 use CPath\Framework\PDO\API\PostUserAPI;
 use CPath\Framework\PDO\API\PostUserLoginAPI;

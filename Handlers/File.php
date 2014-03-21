@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class File implements IRender{
+class File implements IDestination{
     const BUILD_IGNORE = true;
 
     private $mFilePath;
@@ -19,7 +19,7 @@ class File implements IRender{
         $this->mFilePath = $filePath;
     }
 
-    public function render(IRequest $Request)
+    public function renderDestination(IRequest $Request)
     {
         include($this->mFilePath);
         return true;

@@ -5,14 +5,15 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Interfaces;
+namespace CPath\Framework\Api\Field\Util;
 
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class FieldUtil implements IField, \CPath\Framework\Render\HTML\IRenderHTML {
+class FieldUtil implements IField, IRenderHTML {
     private $mField;
 
     function __construct(IField $Field) {

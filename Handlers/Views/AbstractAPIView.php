@@ -3,8 +3,6 @@ namespace CPath\Handlers\Views;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Describable\Describable;
-use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -12,10 +10,6 @@ use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Log;
-use CPath\Route\IRoute;
-use CPath\Route\RoutableSet;
-use CPath\Route\RoutableSetWrapper;
-use CPath\Route\RouteUtil;
 
 abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
 
@@ -40,7 +34,7 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
      * @param IRequest $Request
      */
     final protected function setupHeadFields(IRequest $Request) {
-        $basePath = Base::getClassPublicPath($this, false);
+        $basePath = Base::getClassPublicPath($this);
         //$this->addHeadStyleSheet($basePath . 'assets/apiview.css');
         ///$this->addHeadScript($basePath . 'assets/apiview.js');
         $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
@@ -48,45 +42,45 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
         $this->setupAPIHeadFields($Request);
     }
 
-    protected function getRoutableSetIDs(RoutableSet $Routes) {
-        $ids = array();
-        $i = 1;
-        /** @var IRoute $Route */
-        foreach($Routes as $prefix => $Route) {
-            $Handler = $Route->loadHandler();
-            if($prefix[0] == '#')
-                continue;
-            if(!$Handler instanceof IAPI)
-                continue;
-            $ids[$i++] = $prefix;
-        }
-        return $ids;
-    }
+//    protected function getRoutableSetIDs(RoutableSet $Routes) {
+//        $ids = array();
+//        $i = 1;
+//        /** @var IRoute $Route */
+//        foreach($Routes as $prefix => $Route) {
+//            $Handler = $Route->loadHandler();
+//            if($prefix[0] == '#')
+//                continue;
+//            if(!$Handler instanceof IAPI)
+//                continue;
+//            $ids[$i++] = $prefix;
+//        }
+//        return $ids;
+//    }
 
 
-    /**
-     * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    protected function renderNavBarContent(IRequest $Request) {
-        if($Request instanceof RoutableSetWrapper) {
-            $Routes = $Request->getRoutableSet();
-            $Route = $Request->getRoute();
-            $Util = new RouteUtil($Route);
-
-            $ids = $this->getRoutableSetIDs($Routes);
-            foreach($ids as $i=>$prefix) {
-                /** @var IRoute $Route */
-                $Route = $Routes[$prefix];
-                $Handler = $Route->loadHandler();
-                if(!$Handler instanceof IAPI)
-                    continue;
-                $Describable = Describable::get($Handler);
-                $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
-            }
-        }
-    }
+//    /**
+//     * Render the navigation bar content
+//     * @param IRequest $Request the IRequest instance for this render
+//     * @return void
+//     */
+//    protected function renderNavBarContent(IRequest $Request) {
+//        if($Request instanceof RoutableSetWrapper) {
+//            $Routes = $Request->getRoutableSet();
+//            $Route = $Request->getRoute();
+//            $Util = new RouteUtil($Route);
+//
+//            $ids = $this->getRoutableSetIDs($Routes);
+//            foreach($ids as $i=>$prefix) {
+//                /** @var IRoute $Route */
+//                $Route = $Routes[$prefix];
+//                $Handler = $Route->loadHandler();
+//                if(!$Handler instanceof IAPI)
+//                    continue;
+//                $Describable = Describable::get($Handler);
+//                $this->renderNavBarEntry($Util->buildPublicURL(false) . '/' . $i . '#' . $Route->getPrefix(), $Describable);
+//            }
+//        }
+//    }
 
     // Static
 //

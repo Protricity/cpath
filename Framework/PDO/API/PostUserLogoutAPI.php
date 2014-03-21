@@ -67,9 +67,10 @@ class PostUserLogoutAPI extends AbstractPDOAPI
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return \CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
      */
-    final function execute(IRequest $Request)
+    final function execute(IRequest $Request, $args)
     {
         $Session = $this->mTable->session()->loadBySession();
         $User = $this->mTable->loadBySession(true, false);

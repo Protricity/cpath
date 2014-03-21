@@ -31,7 +31,7 @@ class Config implements IConfig {
     }
 
     static function getDomainPath() {
-        return self::$Domain ?: self::$Domain = Build::buildDomainPath();
+        return self::$Domain ?: self::$Domain = Build::get()->buildDomainPath();
     }
 
     static function getSiteName() {

@@ -8,13 +8,13 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 
-use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Build\API\Build;
 use CPath\Framework\PDO\DB\MySQLDatabase;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 
-class BuildMySQLTables extends BuildPDOTables implements IBuildable {
+class BuildMySQLTables extends BuildPDOTables {
 
     const TMPL_TABLE_CLASS = <<<PHP
 <?php
@@ -24,17 +24,6 @@ class %s extends MySQLTable {
 %s}
 PHP;
 
-    /**
-     * Builds class references for existing database tables
-     * @param \CPath\Framework\Build\IBuildable $Buildable
-     * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\Exceptions\BuildException when a build exception occurred
-     */
-    public function buildClass(IBuildable $Buildable) {
-        if(!$Buildable instanceof MySQLDatabase)
-            return false;
-        return parent::buildClass($Buildable);
-    }
 
     /**
      * @param \PDO $DB
@@ -107,5 +96,21 @@ PHP;
                 $procs[$sname][] = $row['parameter_name'];
         }
         return $procs;
+    }
+
+    // Static
+
+    /**
+     * @param MySQLDatabase $DB
+     * @param integer $flags
+     */
+    public static function buildTables(MySQLDatabase $DB, $flags=0) {
+        /** @var BuildPDOTables $Inst */
+        static $Inst = null;
+        if(!$Inst) {
+            $Inst = new static();
+            Build::registerBuilder($Inst);
+        }
+        $Inst->buildClass($DB, $flags);
     }
 }

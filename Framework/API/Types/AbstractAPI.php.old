@@ -60,7 +60,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
     function render(IRequest $Request)
     {
         $Util = new APIRenderUtil($this);
-        $Util->render($Request);
+        $Util->renderDestination($Request);
     }
 
     /**
@@ -69,7 +69,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath(__CLASS__, false);
+        $basePath = Base::getClassPublicPath(__CLASS__);
         $View->addHeadScript($basePath . 'assets/api.js', true);
         $View->addHeadStyleSheet($basePath . 'assets/api.css');
     }
@@ -117,7 +117,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 //     * @param IRequest $Request the IRequest instance for this render which contains the request and args
 //     * @return IResponse the api call response with data, message, and status
 //     */
-//    final public function execute(IRequest $Request) {
+//    final public function execute(IRequest $Request, $args) {
 //        $Util = $this->getUtil();
 //        if($this instanceof IExecute)
 //            $this->onAPIPreExecute($Request);

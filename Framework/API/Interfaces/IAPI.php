@@ -18,9 +18,10 @@ interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    function execute(IRequest $Request);
+    function execute(IRequest $Request, $args);
 
     /**
      * Get all API Fields

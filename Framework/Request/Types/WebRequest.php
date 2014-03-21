@@ -56,7 +56,7 @@ class WebRequest extends AbstractRequest {
                 $path .=  '/' . $arg;
 
         if($withDomain)
-            $path = Config::$Domain . $path;
+            $path = rtrim(Config::$Domain, '/') . $path;
 
         return $path;
     }

@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\Route\Map\Common;
 
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Route\Map\IRouteMap;
 use CPath\Framework\Route\Routable\IRoutable;
 
@@ -24,17 +24,19 @@ class CallbackRouteMap implements IRouteMap
     /**
      * Map data to a key in the map
      * @param String $prefix
-     * @param IRender $Destination
+     * @param IDestination $Destination
      * @return void
      */
-    function mapRoute($prefix, IRender $Destination)
+    function mapRoute($prefix, IDestination $Destination)
     {
-        list($method, $path) = explode(' ', $prefix, 2);
-
-        if(!$path)
+        if(strpos($prefix, ' ') !== false) {
+            list($method, $path) = explode(' ', $prefix, 2);
+            if($path[0] !== '/')
+                $path = '/' . str_replace('\\', '/', strtolower(dirname(get_class($this->mTarget)))) . '/' . $path;
+        } else {
+            $method = $prefix;
             $path = '/' . str_replace('\\', '/', strtolower(get_class($this->mTarget)));
-        elseif($path[0] !== '/')
-            $path = '/' . str_replace('\\', '/', strtolower(dirname(get_class($this->mTarget)))) . '/' . $path;
+        }
 
         $callback = $this->mCallback;
         $callback($method . ' ' . $path, $Destination);

@@ -84,10 +84,11 @@ class GetAPI extends AbstractPDOAPI implements IRenderHTML {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
      * @return PDOModelResponse the found model which implements IResponseAggregate
      * @throws ModelNotFoundException if the Model was not found
      */
-    final function execute(IRequest $Request) {
+    final function execute(IRequest $Request, $args) {
 
         $T = $this->getTable();
         $id = $Request->pluck($this->mIDField);

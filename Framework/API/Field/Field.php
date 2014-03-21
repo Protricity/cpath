@@ -8,7 +8,6 @@
 namespace CPath\Framework\Api\Field;
 
 use CPath\Describable\IDescribable;
-
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\RequiredFieldException;
 use CPath\Framework\Api\Field\Interfaces\IField;

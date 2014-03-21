@@ -12,7 +12,7 @@ use CPath\Config;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Build\API\Build;
 use CPath\Framework\Build\IBuilder;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Log;
 
 /**
@@ -25,8 +25,8 @@ use CPath\Log;
 class RouteBuilder implements IBuilder {
     const TMPL_ROUTES = <<<'PHP'
 <?php
+/** @var \CPath\Routes $Map */
 %s
-);
 PHP;
 
     const TMPL_CUSTOM_ROUTES = <<<'PHP'
@@ -35,7 +35,7 @@ PHP;
 );
 PHP;
 
-    /** @var IRender[] */
+    /** @var IDestination[] */
     private $mRoutes = array();
 
     protected function __construct() {
@@ -44,10 +44,10 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IRender $Destination
+     * @param IDestination $Destination
      * @throws \CPath\Exceptions\BuildException
      */
-    protected function addRoute($route, IRender $Destination) {
+    protected function addRoute($route, IDestination $Destination) {
         list($method, $path) = explode(' ', $route, 2);
         $class = get_class($Destination);
         if(!$path)
@@ -168,9 +168,9 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IRender $Destination
+     * @param IDestination $Destination
      */
-    public static function buildRoute($route, IRender $Destination) {
+    public static function buildRoute($route, IDestination $Destination) {
         static $Inst = null;
         if(!$Inst) {
             $Inst = new RouteBuilder();

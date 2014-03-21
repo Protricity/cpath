@@ -7,7 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
-use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Build\API\Build;
 use CPath\Framework\PDO\DB\PGSQLDatabase;
 use CPath\Framework\PDO\Table\Builders\BuildPDOTable;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
@@ -16,7 +16,7 @@ use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 
 
-class BuildPGTables extends BuildPDOTables implements IBuildable {
+class BuildPGTables extends BuildPDOTables {
 
     const TMPL_TABLE_CLASS = <<<PHP
 <?php
@@ -25,18 +25,6 @@ use CPath\Framework\PDO\PGSQLTable;
 class %s extends PGSQLTable {
 %s}
 PHP;
-
-    /**
-     * Builds class references for existing database tables
-     * @param \CPath\Framework\Build\IBuildable $Buildable
-     * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\Exceptions\BuildException when a build exception occurred
-     */
-    public function buildClass(IBuildable $Buildable) {
-        if(!$Buildable instanceof PGSQLDatabase)
-            return false;
-        return parent::buildClass($Buildable);
-    }
 
     /**
      * @param \PDO $DB
@@ -126,5 +114,21 @@ group by column_name;") as $row ) {
                 $procs[$sname][] = $row['parameter_name'];
         }
         return $procs;
+    }
+
+    // Static
+
+    /**
+     * @param PGSQLDatabase $DB
+     * @param integer $flags
+     */
+    public static function buildTables(PGSQLDatabase $DB, $flags=0) {
+        /** @var BuildPDOTables $Inst */
+        static $Inst = null;
+        if(!$Inst) {
+            $Inst = new static();
+            Build::registerBuilder($Inst);
+        }
+        $Inst->buildClass($DB, $flags);
     }
 }

@@ -44,7 +44,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
     function addHeadElementsToView(IView $View) {
         //parent::addHeadElementsToView($View);
 
-        $basePath = Base::getClassPublicPath($this, false);
+        $basePath = Base::getClassPublicPath($this);
         $View->addHeadStyleSheet($basePath . 'assets/apiactions.css', true);
         $View->addHeadScript($basePath . 'assets/apiactions.js', true);
 
@@ -64,7 +64,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
      * @param IRequest $Request
      * @return bool true if this action should execute. Return not true if this action does not apply
      */
-    function execute(IRequest $Request) {
+    function execute(IRequest $Request, $args) {
         return $this->getAPI()->execute($Request);
     }
 
@@ -74,7 +74,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
      * @return void
      */
     function renderFragmentContent(IRequest $Request) {
-        $this->getUtil()->render($Request, 'api-action'); // TODO: serialize?
+        $this->getUtil()->renderDestination($Request, 'api-action'); // TODO: serialize?
     }
 
 }

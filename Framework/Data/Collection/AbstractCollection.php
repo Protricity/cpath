@@ -15,12 +15,15 @@ abstract class AbstractCollection implements ICollection {
     private $mItems = array();
 
     /**
-     * @param ICollectionItem[] $Items
+     * @param ICollectionItem[] $Items array or varargs
      */
-    final function __construct(array $Items=null) { // For new static()
-        if($Items)
+    final function __construct($Items=null) { // For new static()
+        if($Items) {
+            if(!is_array($Items))
+                $Items = func_get_args();
             foreach($Items as $Item)
                 $this->addItem($Item);
+        }
     }
 
     /**

@@ -7,6 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Util;
 
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
@@ -15,12 +18,22 @@ use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Framework\Route\Render\IDestination;
 
-class APIRenderUtil implements IAPI, IRenderAll {
+class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggregate {
     private $mAPI;
 
     function __construct(IAPI $API) {
         $this->mAPI = $API;
+    }
+
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable()
+    {
+        return Describable::get($this->mAPI);
     }
 
     /**
@@ -35,7 +48,7 @@ class APIRenderUtil implements IAPI, IRenderAll {
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
      */
-    final public function execute(IRequest $Request) {
+    final public function execute(IRequest $Request, $args) {
         $Util = new APIExecuteUtil($this->getAPI());
         return $Util->execute($Request);
     }
@@ -59,6 +72,20 @@ class APIRenderUtil implements IAPI, IRenderAll {
         return $Util->getField($fieldName);
     }
 
+
+    /**
+     * Render this route destination
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return String|void always returns void
+     */
+    function renderDestination(IRequest $Request, $path, $args)
+    {
+        // TODO: Implement renderDestination() method.
+        $this->render($Request);
+    }
+
     /**
      * Render this API Call. The output format is based on the requested mimeType from the browser
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
@@ -67,7 +94,7 @@ class APIRenderUtil implements IAPI, IRenderAll {
     function render(IRequest $Request) {
         $Response = $this->execute($Request);
         $Util = new ResponseUtil($Response);
-        $Util->render($Request);
+        $Util->renderDestination($Request);
     }
 
 

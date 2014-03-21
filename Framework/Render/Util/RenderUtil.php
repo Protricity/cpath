@@ -8,7 +8,7 @@
 namespace CPath\Framework\Render\Util;
 
 use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\XML\IRenderXML;
@@ -18,7 +18,7 @@ use CPath\Framework\Route\Routable\IRoutable;
 
 class MissingRenderModeException extends \Exception {}
 
-class RenderUtil implements IRender {
+class RenderUtil implements IDestination {
     private $mTarget;
 
     function __construct($Target) {
@@ -35,10 +35,10 @@ class RenderUtil implements IRender {
      * @throws MissingRenderModeException
      * @return void
      */
-    function render(IRequest $Request) {
+    function renderDestination(IRequest $Request) {
         $Target = $this->mTarget;
         if($Target instanceof IRoutable) {
-            $Target->mapRoutes(new CallbackRouteMap($Target, function($prefix, IRender $Destination) use ($Request, &$Target) {
+            $Target->mapRoutes(new CallbackRouteMap($Target, function($prefix, IDestination $Destination) use ($Request, &$Target) {
                 list($method, $path) = explode(' ', $prefix, 2);
                 if($Request->getMethod() === $method || $method === 'ANY') {
                     if($Request->getPath() === $path) {

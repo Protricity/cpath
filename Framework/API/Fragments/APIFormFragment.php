@@ -4,16 +4,14 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\FieldUtil;
+use CPath\Framework\Api\Field\Util\FieldUtil;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Routable\IRoutable;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Handlers\Util\HTMLRenderUtil;
-use CPath\Route\RouteUtil;
 
 class APIFormFragment extends AbstractFormFragment{
 
@@ -41,25 +39,20 @@ class APIFormFragment extends AbstractFormFragment{
 
         $API = $this->mAPI;
         $Fields = $API->getFields();
-        if($API instanceof IRoutable)
-            $Route = $API->loadRoute();
-        else
-            $Route = $Request->getRoute();
 
-        $RouteUtil = new RouteUtil($Route);
-
-        $method = $RouteUtil->getMethod();
+        $method = $Request->getMethod();
+        $path = $Request->getPath();
         if($method == 'ANY') // TODO: Is this a hack?
             $method = 'GET';
         $num = 1;
-        $path = $RouteUtil->buildPublicURL(true);
+        $absPath = rtrim(Config::getDomainPath(), '/') . $path;
 
         $Util = new HTMLRenderUtil($Request);
 
         $Attr->addClass('api-form-fragment');
         $Attr->add('enctype', 'multipart/form-data');
         $Attr->add('method', $method);
-        $Attr->add('action', $path);
+        $Attr->add('action', $absPath);
 
         $Util->formOpen($Attr);
 

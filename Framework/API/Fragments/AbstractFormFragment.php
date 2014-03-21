@@ -30,7 +30,7 @@ abstract class AbstractFormFragment implements IRender, IViewConfig{
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath($this, false);
+        $basePath = Base::getClassPublicPath($this);
         $View->addHeadStyleSheet($basePath . 'assets/formfragment.css', true);
         $View->addHeadScript($basePath . 'assets/formfragment.js', true);
     }

@@ -34,7 +34,7 @@ class CPathDefaultTheme implements ITheme {
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath(__CLASS__, false);
+        $basePath = Base::getClassPublicPath(__CLASS__);
         $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css', true);
         $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js', true);
 
@@ -279,7 +279,7 @@ class CPathDefaultTheme implements ITheme {
     function renderBrowseContent(IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL) {
         foreach($Query as $data) {
             $MF = new ModelTableFragment($data, $this);
-            $MF->render($Request);
+            $MF->renderDestination($Request);
         }
     }
 
