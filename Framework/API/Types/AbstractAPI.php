@@ -15,12 +15,12 @@ use CPath\Framework\Api\Exceptions\ValidationExceptions;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Api\Validation\Interfaces\IValidation;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\OptionMissingException;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Views\APIView;
 use CPath\Interfaces\IViewConfig;
 use CPath\Route\RoutableSet;
 
@@ -50,6 +50,17 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
     private $mOption = array();
 
     public function __construct() {
+    }
+
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request)
+    {
+        $Util = new APIRenderUtil($this);
+        $Util->render($Request);
     }
 
     /**
@@ -350,7 +361,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
         $setMethod = 'ANY';
         if(sizeof($methods) === 1)
             $setMethod = $methods[0];
-        $Routes = RoutableSet::fromHandler($this, $setMethod, static::ROUTE_PATH);
+        $Routes = RoutableSet::fromHandler($this, static::ROUTE_PATH, $setMethod);
         foreach($methods as $method)
             $Routes[$method] = $this;
         return $Routes;

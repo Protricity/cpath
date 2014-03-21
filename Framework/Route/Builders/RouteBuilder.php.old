@@ -6,14 +6,19 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Route;
+namespace CPath\Framework\Route\Builders;
 use CPath\Base;
 use CPath\Compile;
 use CPath\Config;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Interfaces\Constructable\Constructable;
+use CPath\Framework\Route\Routable\IRoutable;
 use CPath\Log;
+use CPath\Route\IRoute;
+use CPath\Route\IRouteBuilder;
+use CPath\Route\Router;
+use CPath\Route\RouterAPC;
 
 /**
  * Class BuildHandlers
@@ -26,15 +31,12 @@ class RouteBuilder implements IRouteBuilder, IBuildable {
     const TMPL_ROUTES = <<<'PHP'
 <?php
 %s
-$routes = array(%s
 );
 PHP;
 
     const TMPL_CUSTOM_ROUTES = <<<'PHP'
 <?php
-use CPath\Route\Route;
-$routes = array(
-//  new Route('GET /path/to', 'My\Handler', array('my'=>'custom', 'request'=>'parameters')),
+// $Map->map('GET /path/to', 'My\Handler');
 );
 PHP;
 
@@ -49,7 +51,7 @@ PHP;
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
-    public function build(IBuildable $Buildable) {
+    public function buildClass(IBuildable $Buildable) {
         if(!$Buildable instanceof IRoutable)
             return false;
         $this->mCurrentClass = $Buildable;
@@ -137,6 +139,7 @@ PHP;
         $phpUse = '';
         foreach($useClass as $class=>$alias)
             $phpUse .= "\nuse " . $class . " as " . $alias . ";";
+
         $phpRoute = '';
         foreach($this->mRoutes as $Route) {
             $constName = $useClass[get_class($Route)]; // $useClass[$defaultClass]; // get_class($Route)];
@@ -146,7 +149,10 @@ PHP;
             //    $args .= ($i++ ? ', ' : '') . var_export($arg, true);
             //$phpRoute .= "\n\tnew " . $useClass[get_class($Route)] . '(' . $args . '),';
             $phpRoute .= "\n\t" . Constructable::exportToPHPCode($Route, $constName) . ',';
+
+            $phpRoute .= "\n\$Map->map('ANY /api/service/share/file', 'API\\Service\\Share\\FileRoute');";
         }
+
         $output = sprintf(self::TMPL_ROUTES, $phpUse, $phpRoute);
         $path = Config::getGenPath().'routes.gen.php';
         if(!is_dir(dirname($path)))
@@ -193,7 +199,7 @@ PHP;
         Log::v(__CLASS__, "Stored (%s) into APC Cache", sizeof($routes));
     }
 
-    public static function createBuildableInstance() {
+    public static function build() {
         return new static;
     }
 }

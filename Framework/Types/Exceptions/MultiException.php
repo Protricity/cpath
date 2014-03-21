@@ -8,7 +8,7 @@
 namespace CPath\Framework\Types\Exceptions;
 
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\Common\IRenderAll;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 

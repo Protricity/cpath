@@ -64,7 +64,7 @@ class Route implements IRoute {
     function loadHandler() {
         /** @var \CPath\Framework\Build\IBuildable $dest */
         $dest = $this->getDestination();
-        $Handler = $this->mHandlerInst ?: $dest::createBuildableInstance();
+        $Handler = $this->mHandlerInst ?: $dest::buildClass();
 
         if(!$Handler instanceof IRender)
             throw new InvalidHandlerException("Destination '{$dest}' is not a valid IRender");
@@ -137,23 +137,23 @@ class Route implements IRoute {
     /**
      * Creates a new Route for an IRender
      * @param IRender $Handler The class instance or class name
+     * @param String $path a custom path (relative or absolute) for this IRender
      * @param String $method the route prefix method (GET, POST...) for this IRender
-     * @param String $path a custom path for this IRender
      * @return Route
      */
-    static final function fromHandler(IRender $Handler, $method='ANY', $path=NULL) {
-        $prefix = RoutableSet::getPrefixFromHandler($Handler, $method, $path);
+    static final function fromHandler(IRender $Handler, $path=NULL, $method='ANY') {
+        $prefix = RoutableSet::getPrefixFromHandler($Handler, $path, $method);
         return new static($prefix, get_class($Handler));
     }
 
     /**
      * Gets the default public route path for this handler
      * @param \CPath\Framework\Render\IRender $Handler The class instance or class name
+     * @param String $path a custom path (relative or absolute) for this IRender
      * @param String $method the route prefix method (GET, POST...) for this IRender
-     * @param String $path a custom path for this IRender
      * @return RoutableSet
      */
-    static final function getPrefixFromHandler(IRender $Handler, $method='ANY', $path=NULL) {
+    static final function getPrefixFromHandler(IRender $Handler, $path=NULL, $method='ANY') {
         $cls = get_class($Handler);
         if(!$path)
             $path = str_replace('\\', '/', strtolower($cls));

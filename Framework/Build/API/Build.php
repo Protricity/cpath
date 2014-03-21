@@ -11,42 +11,44 @@ use CPath\Base;
 use CPath\Compile;
 use CPath\Config;
 use CPath\Describable\IDescribable;
+use CPath\Exceptions\BuildException;
+use CPath\Framework\Api\Field\Collection\FieldCollection;
 use CPath\Framework\Api\Field\Field;
-use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
+use CPath\Framework\Route\Builders\RouteBuilder;
 use CPath\Log;
-use CPath\Route\IRoutable;
-use CPath\Route\IRoute;
-use CPath\Route\RoutableSet;
 
-class Build extends AbstractAPI implements IRoutable {
+class Build implements IRender, IAPI, IBuildable {
 
-    const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
-    const ROUTE_METHOD = 'CLI';    // CLI only
-    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
-
+    //const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
+    //const ROUTE_METHOD = 'CLI';    // CLI only
+    //const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
 
     const ROUTE_IGNORE_FILES = '.buildignore';
     const ROUTE_IGNORE_DIR = '.git|.idea';
 
     /**
-     * Set up API fields. Lazy-loaded when fields are accessed
-     * @return void
+     * Get all API Fields
+     * @return IField[]|\CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection
      */
-    protected function setupAPI(){
-        $this->addField(new Field('v', "Display verbose messages"));
-        $this->addField(new Field('s', "Skip broken files"));
-        $this->addField(new Field('f', "Filter built files by wildcard *?"));
-        //$this->generateFieldShorts();
+    function getFields() {
+        return new FieldCollection(array(
+            new Field('v', "Display verbose messages"),
+            new Field('s', "Skip broken files"),
+            new Field('f', "Filter built files by wildcard *?"),
+        ));
     }
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRoute instance for this render which contains the request and args
+     * @param IRequest $Request the request instance for this render which contains the request and args
      * @return DataResponse the api call response with data, message, and status
      */
     final function execute(IRequest $Request) {
@@ -58,12 +60,12 @@ class Build extends AbstractAPI implements IRoutable {
         if(!empty($Request['v']))
             Log::setDefaultLevel(4);
         if(!empty($Request['s']))
-            self::$mSkipBroken = true;
+            $this->mSkipBroken = true;
         if(!empty($Request['f']))
-            self::$mFilter = $Request['f'];
+            $this->mFilter = $Request['f'];
 
         $Response = new DataResponse(false, "Starting Build");
-        $exCount = Build::build(true);
+        $exCount = Build::buildAll(true);
         if($exCount)
             return $Response
                 ->update(false, "Build Failed: {$exCount} Exception(s) Occurred");
@@ -79,32 +81,25 @@ class Build extends AbstractAPI implements IRoutable {
         return "Build All classes";
     }
 
-    /**
-     * Returns the route for this IRender
-     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
-     */
-    function loadRoute() {
-        return $this->loadDefaultRouteSet();
-    }
-
     // Statics
 
     /** @var IBuilder[] $mBuilders */
-    private static $mBuilders = array();
-    private static $mClassFiles = array();
+    private $mBuilders = array();
+    private $mClassFiles = array();
+
     /** @var \ReflectionClass[] $mBuilders */
-    private static $mClasses = array();
-    private static $mBuildConfig = NULL;
-    private static $mForce = false;
-    private static $mSkipBroken = false;
-    private static $mFilter = false;
-    private static $mBrokenFiles = array();
+    private $mClasses = array();
+    private $mBuildConfig = NULL;
+    private $mForce = false;
+    private $mSkipBroken = false;
+    private $mFilter = false;
+    private $mBrokenFiles = array();
 
     /**
      * Return the build config full path
      * @return string build config full path
      */
-    private static function getConfigPath() {
+    private function getConfigPath() {
         static $path = NULL;
         return $path ?: $path = Config::getGenPath().'build.gen.php';
     }
@@ -114,18 +109,18 @@ class Build extends AbstractAPI implements IRoutable {
      * @param null $class optional class to load data for
      * @return mixed build config data
      */
-    private static function &loadConfig($class=NULL) {
-        if(self::$mBuildConfig === NULL) {
-            $path = self::getConfigPath();
+    private function &loadConfig($class=NULL) {
+        if($this->mBuildConfig === NULL) {
+            $path = $this->getConfigPath();
             $config = array();
             if(file_exists($path))
                 include ($path);
-            self::$mBuildConfig = $config;
+            $this->mBuildConfig = $config;
         }
-        if(!$class) return self::$mBuildConfig;
+        if(!$class) return $this->mBuildConfig;
         if(is_object($class)) $class = get_class($class);
-        if(!isset(self::$mBuildConfig[$class])) self::$mBuildConfig[$class] = array();
-        return self::$mBuildConfig[$class];
+        if(!isset($this->mBuildConfig[$class])) $this->mBuildConfig[$class] = array();
+        return $this->mBuildConfig[$class];
     }
 
     /**
@@ -134,8 +129,8 @@ class Build extends AbstractAPI implements IRoutable {
      * @param null $key if provided, only return data for this key
      * @return mixed build config data
      */
-    public static function &getConfig($class, $key=NULL) {
-        $Config =& self::loadConfig($class);
+    public function &getConfig($class, $key=NULL) {
+        $Config =& $this->loadConfig($class);
         if($key) return $Config[$key];
         return $Config;
     }
@@ -147,20 +142,20 @@ class Build extends AbstractAPI implements IRoutable {
      * @param string $val data value
      * @param boolean $commit data value
      */
-    public static function setConfig($class, $key, $val, $commit=false) {
-        $Config =& self::loadConfig($class);
+    public function setConfig($class, $key, $val, $commit=false) {
+        $Config =& $this->loadConfig($class);
         $Config[$key] = $val;
         if($commit)
-            self::commitConfig();
+            $this->commitConfig();
     }
 
     /**
      * Commit the build config to the file
      */
-    public static function commitConfig() {
-        $config =& self::loadConfig();
+    public function commitConfig() {
+        $config =& $this->loadConfig();
         $php = "<?php\n\$config=".var_export($config, true).";";
-        $path = self::getConfigPath();
+        $path = $this->getConfigPath();
         if(!is_dir(dirname($path)))
             mkdir(dirname($path), NULL, true);
         file_put_contents($path, $php);
@@ -170,54 +165,54 @@ class Build extends AbstractAPI implements IRoutable {
      * Returns true if the current build should be forced
      * @return bool whether or not to force build
      */
-    public static function force() { return self::$mForce; }
+    public function force() { return $this->mForce; }
 
-    public static function buildDomainPath() {
+    public function buildDomainPath() {
         return 'http://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : gethostname()).'/';
     }
 
     /**
      * Build all classes
      */
-    public static function build($force=false) {
+    protected function buildAll($force=false) {
         Log::v(__CLASS__, "Starting Builds");
         if(!Config::$BuildEnabled) {
             Log::e(__CLASS__, "Building is not allowed. Config::\$BuildEnabled==false");
             return 0;
         }
 
-        self::$mBrokenFiles = self::getConfig(__CLASS__, 'brokenFiles') ?: array();
-        if(self::$mSkipBroken) {
-            if($lastFile = self::getConfig(__CLASS__, 'lastFile')) {
-                if(!in_array($lastFile, self::$mBrokenFiles)) {
-                    self::$mBrokenFiles[] = $lastFile;
-                    self::setConfig(__CLASS__, 'brokenFiles', self::$mBrokenFiles);
+        $this->mBrokenFiles = $this->getConfig(__CLASS__, 'brokenFiles') ?: array();
+        if($this->mSkipBroken) {
+            if($lastFile = $this->getConfig(__CLASS__, 'lastFile')) {
+                if(!in_array($lastFile, $this->mBrokenFiles)) {
+                    $this->mBrokenFiles[] = $lastFile;
+                    $this->setConfig(__CLASS__, 'brokenFiles', $this->mBrokenFiles);
                     Log::v(__CLASS__, "Adding broken file to skip list: {$lastFile}");
                 }
             }
-            if(self::$mBrokenFiles) {
-                Log::v(__CLASS__, "Skipping (%s) broken files(es)", sizeof(self::$mBrokenFiles));
-                foreach(self::$mBrokenFiles as $classFile)
+            if($this->mBrokenFiles) {
+                Log::v(__CLASS__, "Skipping (%s) broken files(es)", sizeof($this->mBrokenFiles));
+                foreach($this->mBrokenFiles as $classFile)
                     Log::v2(__CLASS__, "Skipping broken file: {$classFile}");
             }
         } else {
-            if(self::$mBrokenFiles) {
-                self::$mBrokenFiles = array();
-                self::setConfig(__CLASS__, 'brokenFiles', self::$mBrokenFiles);
-                Log::v(__CLASS__, "Clearing (%d) broken files(es)", sizeof(self::$mBrokenFiles));
+            if($this->mBrokenFiles) {
+                $this->mBrokenFiles = array();
+                $this->setConfig(__CLASS__, 'brokenFiles', $this->mBrokenFiles);
+                Log::v(__CLASS__, "Clearing (%d) broken files(es)", sizeof($this->mBrokenFiles));
             }
         }
-        self::commitConfig();
+        $this->commitConfig();
 
-        self::$mForce = $force;
-        self::$mBuilders = array();
-        $exCount = self::findClassFiles(Base::getBasePath(), '');
-        self::findClasses();
-        $exCount += self::buildClasses();
+        $this->mForce = $force;
+        $this->mBuilders = array();
+        $exCount = $this->findClassFiles(Base::getBasePath(), '');
+        $this->findClasses();
+        $exCount += $this->buildClasses();
         /** @var $Class \ReflectionClass */
-        self::setConfig(__CLASS__, 'lastFile', NULL, true);
+        $this->setConfig(__CLASS__, 'lastFile', NULL, true);
         /** @var $Builder \CPath\Framework\Build\IBuilder */
-        foreach(self::$mBuilders as $Builder)
+        foreach($this->mBuilders as $Builder)
             $Builder->buildComplete();
 
         $v = ++ Compile::$BuildInc;
@@ -229,16 +224,16 @@ class Build extends AbstractAPI implements IRoutable {
         return $exCount;
     }
 
-    private static function findClasses() {
+    private function findClasses() {
         $classes = array_merge(get_declared_classes(), get_declared_interfaces());
         foreach($classes as $className) {
             $Class = new \ReflectionClass($className);
             $classFile = $Class->getFileName();
-            if(!isset(self::$mClassFiles[$classFile])){
+            if(!isset($this->mClassFiles[$classFile])){
                 Log::v2(__CLASS__, "Skipping non-framework class '{$Class->getName()}' at {$classFile}");
                 continue;
             }
-            if(self::$mBrokenFiles && in_array($classFile, self::$mBrokenFiles)) {
+            if($this->mBrokenFiles && in_array($classFile, $this->mBrokenFiles)) {
                 Log::v2(__CLASS__, "Skipping broken class '{$Class->getName()}'");
                 continue;
             }
@@ -281,13 +276,13 @@ class Build extends AbstractAPI implements IRoutable {
                     Log::v2(__CLASS__, "Ignoring Class '{$className}' marked with BUILD_IGNORE===true");
                     continue;
                 } else {
-                    if($Class->implementsInterface($ns . "\\IBuilder")) {
-                        Log::v(__CLASS__, "Found Builder Class: {$className}");
-                        //call_user_func(array($Class->getName(), 'build'), $Class);
-                        static::$mBuilders[] = $Class->getMethod('createBuildableInstance')->invoke(null);
-                    }
+//                    if($Class->implementsInterface($ns . "\\IBuilder")) {
+//                        Log::v(__CLASS__, "Found Builder Class: {$className}");
+//                        //call_user_func(array($Class->getName(), 'build'), $Class);
+//                        static::$mBuilders[] = $Class->getMethod('createBuildableInstance')->invoke(null);
+//                    }
                     Log::v2(__CLASS__, "Found Class '{$Class->getName()}'");
-                    self::$mClasses[] = $Class;
+                    $this->mClasses[] = $Class;
                     continue;
                 }
             }
@@ -297,35 +292,37 @@ class Build extends AbstractAPI implements IRoutable {
         }
     }
 
-    private static function buildClasses() {
+    private function buildClasses() {
         $exCount = 0;
-        foreach(self::$mClasses as $Class) {
-            $Method = $Class->getMethod('createBuildableInstance');
-            if($Method->isAbstract()) {
+        foreach($this->mClasses as $Class) {
+            $BuildMethod = $Class->getMethod('build');
+            if($BuildMethod->isAbstract()) {
                 Log::v2(__CLASS__, "Ignoring abstract method found in '{$Class->getName()}'");
-                continue;
-            }
-            $Buildable = $Method->invoke(null);
-
-            if(!$Buildable) {
-                Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
-                self::$mClasses[] = $Class;
-                continue;
-            }
-
-            if(!$Buildable instanceof IBuildable){
-                Log::e(__CLASS__, "Buildable instance returned does not implement IBuildable for '{$Class->getName()}'");
-                $exCount++;
                 continue;
             }
 
             Log::v2(__CLASS__, "Building '{$Class->getName()}'");
-            foreach(self::$mBuilders as $Builder) try {
-                $Builder->build($Buildable);
+            try {
+                $BuildMethod->invoke(null);
             } catch (\Exception $ex) {
                 $exCount++;
-                Log::ex(get_class($Builder), $ex);
+                Log::ex($Class->getName(), $ex);
             }
+
+//            if(!$Buildable) {
+//                Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
+//                $this->mClasses[] = $Class;
+//                continue;
+//            }
+//
+//            if(!$Buildable instanceof IBuildable){
+//                Log::e(__CLASS__, "Buildable instance returned does not implement IBuildable for '{$Class->getName()}'");
+//                $exCount++;
+//                continue;
+//            }
+
+            //foreach($this->mBuilders as $Builder) try {
+            //    $Builder->buildClass($Buildable);
         }
         return $exCount;
     }
@@ -336,18 +333,18 @@ class Build extends AbstractAPI implements IRoutable {
      * @throws \Exception if a build fails
      * @return int The number of exceptions that occurred
      */
-    private static function findClassFiles($path, $dirClass) {
+    private function findClassFiles($path, $dirClass) {
         $exCount = 0;
         Log::v2(__CLASS__, "Scanning '{$path}'");
         $pathName = basename($path);
 
-        foreach(explode('|', self::ROUTE_IGNORE_DIR) as $dir)
+        foreach(explode('|', static::ROUTE_IGNORE_DIR) as $dir)
             if($dir == $pathName) {
                 Log::v2(__CLASS__, "Found '{$dir}'. Ignoring Directory '{$path}'");
                 return $exCount;
             }
 
-        foreach(explode('|', self::ROUTE_IGNORE_FILES) as $file)
+        foreach(explode('|', static::ROUTE_IGNORE_FILES) as $file)
             if(file_exists($path . '/' . $file)) {
                 Log::v2(__CLASS__, "Found File '{$file}'. Ignoring Directory '{$path}'");
                 return $exCount;
@@ -358,7 +355,7 @@ class Build extends AbstractAPI implements IRoutable {
                 continue;
             $filePath = realpath($path . '/' . $file);
             if(is_dir($filePath)) {
-                $exCount += self::findClassFiles($filePath, $dirClass .'\\'. ucfirst($file));
+                $exCount += $this->findClassFiles($filePath, $dirClass .'\\'. ucfirst($file));
                 continue;
             }
             if(substr($file, -4) !== '.php'){
@@ -372,19 +369,19 @@ class Build extends AbstractAPI implements IRoutable {
             //$name = substr($file, 0, strlen($file) - 10);
             //$class = $dirClass . '\\' . ucfirst($name);
 
-            if(self::$mFilter
-                && !fnmatch(self::$mFilter, $filePath, FNM_NOESCAPE)) {
+            if($this->mFilter
+                && !fnmatch($this->mFilter, $filePath, FNM_NOESCAPE)) {
                 //&& strpos($filePath, __DIR__) !== 0) {
-                Log::v2(__CLASS__, "Skipping filtered file (" . self::$mFilter . "): {$filePath}");
+                Log::v2(__CLASS__, "Skipping filtered file (" . $this->mFilter . "): {$filePath}");
                 continue;
             }
 
-            if(self::$mBrokenFiles && in_array($filePath, self::$mBrokenFiles)) {
+            if($this->mBrokenFiles && in_array($filePath, $this->mBrokenFiles)) {
                 Log::v(__CLASS__, "Skipping broken file: {$filePath}");
                 continue;
             }
 
-            self::setConfig(__CLASS__, 'lastFile', $filePath, true);
+            $this->setConfig(__CLASS__, 'lastFile', $filePath, true);
 
             // Content
 
@@ -406,13 +403,13 @@ class Build extends AbstractAPI implements IRoutable {
             try{
                 require_once($filePath);
             } catch (\Exception $ex) {
-                //self::setConfig(__CLASS__, 'lastFile', NULL, true);
+                //$this->setConfig(__CLASS__, 'lastFile', NULL, true);
                 $exCount++;
                 Log::ex("Exception occurred while loading {$filePath}", $ex);
                 continue;
             }
-            self::setConfig(__CLASS__, 'lastFile', NULL);
-            self::$mClassFiles[$filePath] = true;
+            $this->setConfig(__CLASS__, 'lastFile', NULL);
+            $this->mClassFiles[$filePath] = true;
             Log::v2(__CLASS__, "Found Class file: {$filePath}");
 //            $Class = new \ReflectionClass($class);
 //            if($Class === NULL) // TODO: can this be null?
@@ -436,22 +433,34 @@ class Build extends AbstractAPI implements IRoutable {
         return $exCount;
     }
 
-    /**
-     * Return an instance of the class for building purposes
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
-     */
-    static function createBuildableInstance() {
-        return new static();
-    }
 
     /**
      * Render this request
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function render(IRequest $Request)
-    {
-        $Util = new APIRenderUtil($this);
-        $Util->render($Request);
+    function render(IRequest $Request) {
+        $RenderUtil = new APIRenderUtil($this);
+        $RenderUtil->render($Request);
+    }
+
+    // Statics
+
+    /**
+     * Build this class
+     * @throws BuildException if an exception occurred
+     */
+    static function buildClass() {
+        RouteBuilder::buildRoute('CLI /build', new Build());
+    }
+
+    static function get() {
+        static $Inst = null;
+        return $Inst ?: $Inst = new Build();
+    }
+
+    static function registerBuilder(IBuilder $Builder) {
+        $Inst = static::get();
+        $Inst->mBuilders[] = $Builder;
     }
 }

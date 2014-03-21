@@ -10,9 +10,8 @@ namespace CPath\Framework\PDO\Routable;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
-use CPath\Route\IRoutable;
 
-interface IPDORoutable extends IRoutable, ISecurityPolicyAggregate, IPDOModelRender, IPDOModelSearchRender {
+interface IPDORoutable extends \CPath\Framework\Route\Routable\IRoutable, ISecurityPolicyAggregate, IPDOModelRender, IPDOModelSearchRender {
 
 }
 

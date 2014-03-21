@@ -454,7 +454,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
      * Return an instance of the class for building purposes
      * @return IBuildable|NULL an instance of the class or NULL to ignore
      */
-    static function createBuildableInstance()
+    static function buildClass()
     {
         $R = new \ReflectionClass(get_called_class());
         if (!$R->isAbstract())

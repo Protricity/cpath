@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Field\Interfaces;
 use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\Data\Collection\ICollectionItem;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 /**
@@ -14,7 +15,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
  * @package CPath
  * Represents an API Field
  */
-interface IField {
+interface IField extends ICollectionItem {
 
     // Status
     const IS_REQUIRED           = 0x1;      // Field is required

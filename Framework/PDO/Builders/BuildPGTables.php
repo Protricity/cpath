@@ -32,10 +32,10 @@ PHP;
      * @return boolean True if the class was built. False if it was ignored.
      * @throws \CPath\Exceptions\BuildException when a build exception occurred
      */
-    public function build(IBuildable $Buildable) {
+    public function buildClass(IBuildable $Buildable) {
         if(!$Buildable instanceof PGSQLDatabase)
             return false;
-        return parent::build($Buildable);
+        return parent::buildClass($Buildable);
     }
 
     /**

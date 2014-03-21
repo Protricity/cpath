@@ -5,10 +5,9 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Render\Common;
+namespace CPath\Framework\Render;
 
 use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\XML\IRenderXML;

@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 use CPath\Compile;
+use CPath\Framework\Route\Builders\RouteBuilder;
 use CPath\Log;
 
 /**

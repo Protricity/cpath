@@ -23,7 +23,7 @@ class NoRoutesFoundException extends CodedException {
 }
 class InvalidRouteException extends \Exception {}
 
-interface IRoute extends IConstructable, IComparable
+interface IRouteDELET extends IConstructable, IComparable
 {
 
     const METHODS = 'GET,POST,PUT,PATCH,DELETE,CLI';

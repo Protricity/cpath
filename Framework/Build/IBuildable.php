@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Build;
+use CPath\Exceptions\BuildException;
 
 /**
  * Class IBuildable
@@ -17,8 +18,8 @@ namespace CPath\Framework\Build;
 interface IBuildable {
 
     /**
-     * Return an instance of the class for building and other tasks
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     * Build this class
+     * @throws BuildException if an exception occurred
      */
-    static function createBuildableInstance();
+    static function buildClass();
 }

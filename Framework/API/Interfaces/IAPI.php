@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Interfaces;
 
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -23,7 +24,7 @@ interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?
 
     /**
      * Get all API Fields
-     * @return IField[]
+     * @return IField[]|IFieldCollection
      */
     function getFields();
 //

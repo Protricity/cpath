@@ -10,14 +10,12 @@ namespace CPath\Framework\Request\Types;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Interfaces\OptionMissingException;
+use CPath\Framework\Route\Routable\IRoutable;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 use CPath\Log;
 use CPath\LogException;
 use CPath\Model\FileUpload;
-use CPath\Route\IRoute;
-use CPath\Route\MissingRoute;
-use CPath\Route\Router;
 
 class CLIRequest extends AbstractRequest implements ILogListener, IOptionProcessor {
 
@@ -28,7 +26,7 @@ class CLIRequest extends AbstractRequest implements ILogListener, IOptionProcess
         if(!$args[0]) {
             $this->mMethod = 'CLI';
         } else {
-            if(preg_match('/^('.str_replace(',', '|', IRoute::METHODS).')(?: (.*))?$/i', $args[0], $matches)) {
+            if(preg_match('/^('.str_replace(',', '|', IRoutable::METHODS).')(?: (.*))?$/i', $args[0], $matches)) {
                 array_shift($args);
                 $this->mMethod = strtoupper($matches[1]);
                 if(!empty($matches[2]))
@@ -82,21 +80,21 @@ class CLIRequest extends AbstractRequest implements ILogListener, IOptionProcess
         $enable ? Log::addCallback($this) : Log::removeCallback($this);
     }
 
-    /**
-     * Attempt to find a Route
-     * @return \CPath\Route\IRoute the route instance found. MissingRoute is returned if no route was found
-     */
-    public function findRoute() {
-        $routePath = $this->mMethod . ' ' . $this->mPath;
-        //$routePathAny = 'ANY ' . $this->mPath;
-        $args = array();
-        $Route = Router::findRoute($routePath, $args)
-            //?: Router::findRoute($routePathAny, $args)
-            ?: new MissingRoute($routePath);
-        $this->mRoute = $Route;
-        $this->mArgs = $args;
-        return $Route;
-    }
+//    /**
+//     * Attempt to find a Route
+//     * @return \CPath\Route\IRoute the route instance found. MissingRoute is returned if no route was found
+//     */
+//    public function findRoute() {
+//        $routePath = $this->mMethod . ' ' . $this->mPath;
+//        //$routePathAny = 'ANY ' . $this->mPath;
+//        $args = array();
+//        $Route = Router::findRoute($routePath, $args)
+//            //?: Router::findRoute($routePathAny, $args)
+//            ?: new MissingRoute($routePath);
+//        $this->mRoute = $Route;
+//        $this->mArgs = $args;
+//        return $Route;
+//    }
 
     // Implement ILogListner
 

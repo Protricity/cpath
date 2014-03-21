@@ -8,8 +8,6 @@
 namespace CPath\Framework\Request\Interfaces;
 use CPath\Interfaces\IArrayObject;
 use CPath\Model\FileUpload;
-use CPath\Route\IRoute;
-
 
 interface IRequest extends IArrayObject {
 
@@ -31,7 +29,7 @@ interface IRequest extends IArrayObject {
      * @param bool $withDomain
      * @return string
      */
-    function getRequestURL($withArgs=true, $withDomain=false);
+    //function getRequestURL($withArgs=true, $withDomain=false);
 
     /**
      * Returns Request headers
@@ -59,17 +57,18 @@ interface IRequest extends IArrayObject {
      * @return Array
      */
     function getMimeTypes();
-    /**
-     * Get the IRoute instance for this request
-     * @return IRoute
-     */
-    function getRoute();
 
-    /**
-     * Attempt to find a Route
-     * @return IRoute the route instance found. MissingRoute is returned if no route was found
-     */
-    public function findRoute();
+//    /**
+//     * Get the IRoute instance for this request
+//     * @return IRoute
+//     */
+//    function getRoute();
+
+//    /**
+//     * Attempt to find a Route
+//     * @return IRoute the route instance found. MissingRoute is returned if no route was found
+//     */
+//    public function findRoute();
 
     /**
      * Merges an associative array into the current request

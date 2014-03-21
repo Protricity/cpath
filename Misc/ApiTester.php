@@ -13,6 +13,7 @@ use CPath\Framework\Request\Types\CLIRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Routes;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -47,8 +48,8 @@ class ApiTester {
 
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLIRequest::fromArgs($args, $request);
-        $Route = $Cli->findRoute();
-        $Handler = $Route->loadHandler();
+        $Routes = new Routes;
+        $Handler = $Routes->getHandlerFromRequest($Cli);
 
         if(!($Handler instanceof IAPI)) {
             throw new NotAnApiException(get_class($Handler) . " does not implement IAPI");

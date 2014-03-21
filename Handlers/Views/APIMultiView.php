@@ -10,9 +10,9 @@ use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Route\Routable\IRoutable;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
-use CPath\Route\IRoutable;
 use CPath\Route\IRoute;
 use CPath\Route\RoutableSet;
 use CPath\Route\RoutableSetWrapper;
@@ -29,12 +29,11 @@ class APIMultiView extends AbstractAPIView {
     private $mSelectedRoute;
 
     /**
-     * @param RoutableSet $Routes
+     * @param \CPath\Framework\Route\Routable\IRoutable|\CPath\Route\RoutableSet $Routes
      * @param IResponse $Response
      * @param ITheme $Theme
-     * @throws \InvalidArgumentException
      */
-    public function __construct(RoutableSet $Routes, IResponse $Response=null, ITheme $Theme=null) {
+    public function __construct(IRoutable $Routes, IResponse $Response=null, ITheme $Theme=null) {
         $this->mRoutes = $Routes;
         $this->mResponse = $Response;
 

@@ -13,6 +13,8 @@ use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\XML\IRenderXML;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Route\Map\Common\CallbackRouteMap;
+use CPath\Framework\Route\Routable\IRoutable;
 
 class MissingRenderModeException extends \Exception {}
 
@@ -34,33 +36,44 @@ class RenderUtil implements IRender {
      * @return void
      */
     function render(IRequest $Request) {
-        $T = $this->mTarget;
+        $Target = $this->mTarget;
+        if($Target instanceof IRoutable) {
+            $Target->mapRoutes(new CallbackRouteMap($Target, function($prefix, IRender $Destination) use ($Request, &$Target) {
+                list($method, $path) = explode(' ', $prefix, 2);
+                if($Request->getMethod() === $method || $method === 'ANY') {
+                    if($Request->getPath() === $path) {
+                        $Target = $Destination;
+                    }
+                }
+            }));
+        }
+
         foreach($Request->getMimeTypes() as $mimeType) {
             switch($mimeType) {
                 case 'application/json':
-                    if($T instanceof IRenderJSON) {
-                        $T->renderJSON($Request);
+                    if($Target instanceof IRenderJSON) {
+                        $Target->renderJSON($Request);
                         return;
                     }
                     break;
 
                 case 'application/xml':
-                    if($T instanceof IRenderXML) {
-                        $T->renderXML($Request);
+                    if($Target instanceof IRenderXML) {
+                        $Target->renderXML($Request);
                         return;
                     }
                     break;
 
                 case 'text/html':
-                    if($T instanceof IRenderHTML) {
-                        $T->renderHTML($Request);
+                    if($Target instanceof IRenderHTML) {
+                        $Target->renderHTML($Request);
                         return;
                     }
                     break;
 
                 case 'text/plain':
-                    if($T instanceof IRenderText) {
-                        $T->renderText($Request);
+                    if($Target instanceof IRenderText) {
+                        $Target->renderText($Request);
                         return;
                     }
                     break;
@@ -72,8 +85,8 @@ class RenderUtil implements IRender {
 //            return;
 //        }
 
-        if($T instanceof IRenderText) {
-            $T->renderText($Request);
+        if($Target instanceof IRenderText) {
+            $Target->renderText($Request);
             return;
         }
 

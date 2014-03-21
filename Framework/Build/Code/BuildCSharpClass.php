@@ -8,7 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Build\Code;
 
-class BuildCSharpClass extends AbstractBuildClass {
+class BuildCSharpClass extends AbstractBuildCodeClass {
 
     const TAB = "\t\t";
     const CONST_PREFIX = "const String ";

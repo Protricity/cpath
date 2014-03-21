@@ -8,7 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Build\Code;
 
-class BuildPHPClass extends AbstractBuildClass {
+class BuildPHPClass extends AbstractBuildCodeClass {
 
     const TAB = "\t";
     const CONST_PREFIX = "const ";

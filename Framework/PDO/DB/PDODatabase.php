@@ -25,7 +25,7 @@ use CPath\Route\Route;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDataBase, IRender {
+abstract class PDODatabase extends \PDO implements IDatabase, IRender {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -183,6 +183,6 @@ abstract class PDODatabase extends \PDO implements IDataBase, IRender {
      * @return IRoute
      */
     function loadRoute() {
-        return Route::fromHandler($this, static::ROUTE_METHOD, static::ROUTE_PATH);
+        return Route::fromHandler($this, static::ROUTE_PATH, static::ROUTE_METHOD);
     }
 }

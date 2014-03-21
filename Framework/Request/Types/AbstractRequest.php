@@ -27,9 +27,9 @@ abstract class AbstractRequest extends ArrayObject implements IRequest {
         $mArgs = array(),
         $mRequest = array();
 
-    /** @var \CPath\Route\IRoute */
-    protected
-        $mRoute = NULL;
+//    /** @var \CPath\Route\IRoute */
+//    protected
+//        $mRoute = NULL;
 
     protected function __construct() {
     }
@@ -43,23 +43,6 @@ abstract class AbstractRequest extends ArrayObject implements IRequest {
      */
     abstract function getFileUpload($_path=NULL);
 
-    /**
-     * Build a url from the request
-     * @param bool $withArgs
-     * @param bool $withDomain
-     * @return string
-     */
-    function getRequestURL($withArgs=true, $withDomain=false) {
-        list(, $path) = explode(' ', $this->mRoute->getPrefix());
-        if($withArgs)
-            foreach($this->mArgs as $arg)
-                $path .=  '/' . $arg;
-
-        if($withDomain)
-            $path = Config::$Domain . $path;
-
-        return $path;
-    }
 
     // Implement IRequest
 
@@ -110,13 +93,13 @@ abstract class AbstractRequest extends ArrayObject implements IRequest {
         return NULL;
     }
 
-    /**
-     * Get the IRoute instance for this request
-     * @return \CPath\Route\IRoute
-     */
-    function getRoute() {
-        return $this->mRoute;
-    }
+//    /**
+//     * Get the IRoute instance for this request
+//     * @return \CPath\Route\IRoute
+//     */
+//    function getRoute() {
+//        return $this->mRoute;
+//    }
 
 //    /**
 //     * Set the IRoute instance for this request

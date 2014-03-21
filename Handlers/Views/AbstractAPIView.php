@@ -89,18 +89,18 @@ abstract class AbstractAPIView extends NavBarLayout implements ILogListener {
     }
 
     // Static
-
-    /**
-     * Returns the default IHandlerSet collection for this PDOModel type.
-     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
-     * @param RoutableSet $Routes
-     * @param IAPI $API
-     * @param String $token
-     * @return RoutableSet a set of common routes for this PDOModel type
-     */
-    static function addRoutes(RoutableSet $Routes, IAPI $API, $token=':api') {
-        $Routes['GET ' . $token] = new static($API);
-        $Routes['POST ' . $token] = new static($API);
-        return $Routes;
-    }
+//
+//    /**
+//     * Returns the default IHandlerSet collection for this PDOModel type.
+//     * Note: if this method is called in a PDOModel thta does not implement IRoutable, a fatal error will occur
+//     * @param RoutableSet $Routes
+//     * @param IAPI $API
+//     * @param String $token
+//     * @return RoutableSet a set of common routes for this PDOModel type
+//     */
+//    static function addRoutes(RoutableSet $Routes, IAPI $API, $token=':api') {
+//        $Routes['GET ' . $token] = new static($API);
+//        $Routes['POST ' . $token] = new static($API);
+//        return $Routes;
+//    }
 }

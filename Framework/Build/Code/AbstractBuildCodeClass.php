@@ -8,7 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Build\Code;
 
-abstract class AbstractBuildClass  {
+abstract class AbstractBuildCodeClass {
 
     const TAB = null;
     const CONST_PREFIX = null;

@@ -9,11 +9,7 @@ namespace CPath\Framework\Request\Types;
 
 use CPath\Config;
 use CPath\Log;
-use CPath\Model\FileRequestRoute;
 use CPath\Model\FileUpload;
-use CPath\Route\MissingRoute;
-use CPath\Route\Router;
-use CPath\Route\RouterAPC;
 
 class WebRequest extends AbstractRequest {
 
@@ -46,6 +42,24 @@ class WebRequest extends AbstractRequest {
             . substr($this->getPath(), 1)
             . ($withQuery ? '?' . $this->getRawQueryString() : '');
     }
+    /**
+     * Build a url from the request
+     * @param bool $withArgs
+     * @param bool $withDomain
+     * @return string
+     */
+    function getRequestURL($withArgs=true, $withDomain=false) {
+        $path = $this->getPath();
+
+        if($withArgs)
+            foreach($this->mArgs as $arg)
+                $path .=  '/' . $arg;
+
+        if($withDomain)
+            $path = Config::$Domain . $path;
+
+        return $path;
+    }
 
     function getRawQueryString() {
         if($this->mRawQueryString)
@@ -54,31 +68,31 @@ class WebRequest extends AbstractRequest {
         return $this->mRawQueryString = http_build_query($this->mRequest);
     }
 
-    /**
-     * Attempt to find a Route
-     * @return \CPath\Route\IRoute the route instance found. MissingRoute is returned if no route was found
-     */
-    public function findRoute() {
-        $args = array();
-
-        $routePath = $this->mMethod . ' ' . $this->getPath();
-        //$routePathAny = 'ANY ' . $this->getPath();
-        if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
-            && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico'))) {
-            $Route = new FileRequestRoute($routePath);
-        } elseif(Config::$APCEnabled) {
-            $Route = RouterAPC::findRoute($routePath, $args);
-                //?: RouterAPC::findRoute($routePathAny, $args);
-        } else {
-            $Route = Router::findRoute($routePath, $args);
-                //?: Router::findRoute($routePathAny, $args);
-        }
-        if(!$Route)
-            $Route = new MissingRoute($routePath);
-        $this->mRoute = $Route;
-        $this->mArgs = $args;
-        return $Route;
-    }
+//    /**
+//     * Attempt to find a Route
+//     * @return \CPath\Route\IRoute the route instance found. MissingRoute is returned if no route was found
+//     */
+//    public function findRoute() {
+//        $args = array();
+//
+//        $routePath = $this->mMethod . ' ' . $this->getPath();
+//        //$routePathAny = 'ANY ' . $this->getPath();
+//        if(($ext = pathinfo($routePath, PATHINFO_EXTENSION))
+//            && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico'))) {
+//            $Route = new FileRequestRoute($routePath);
+//        } elseif(Config::$APCEnabled) {
+//            $Route = RouterAPC::findRoute($routePath, $args);
+//                //?: RouterAPC::findRoute($routePathAny, $args);
+//        } else {
+//            $Route = Router::findRoute($routePath, $args);
+//                //?: Router::findRoute($routePathAny, $args);
+//        }
+//        if(!$Route)
+//            $Route = new MissingRoute($routePath);
+//        $this->mRoute = $Route;
+//        $this->mArgs = $args;
+//        return $Route;
+//    }
 
     /**
      * Returns a file upload by name, or throw an exception

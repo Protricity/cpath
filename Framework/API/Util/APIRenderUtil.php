@@ -11,8 +11,7 @@ use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\Common\IRenderAll;
-use CPath\Framework\Render\Util\RenderUtil;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
@@ -66,7 +65,8 @@ class APIRenderUtil implements IAPI, IRenderAll {
      * @return void
      */
     function render(IRequest $Request) {
-        $Util = new RenderUtil($this);
+        $Response = $this->execute($Request);
+        $Util = new ResponseUtil($Response);
         $Util->render($Request);
     }
 

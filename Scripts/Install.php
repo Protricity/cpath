@@ -8,34 +8,56 @@
 namespace CPath\Scripts;
 use CPath\Base;
 use CPath\Describable\IDescribable;
+use CPath\Exceptions\BuildException;
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Field\Collection\FieldCollection;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Field;
-use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
+use CPath\Framework\Route\Builders\RouteBuilder;
 use CPath\Log;
-use CPath\Route\IRoutable;
-use CPath\Route\IRoute;
-use CPath\Route\RoutableSet;
 
-class Install extends AbstractAPI implements IRoutable {
+class Install implements IRender, IBuildable, IAPI {
 
-    const ROUTE_PATH = '/install';  // Allow manual install from command line: 'php index.php install'
-    const ROUTE_METHOD = 'CLI';    // CLI only
-    const ROUTE_API_VIEW_TOKEN = false;   // Add an APIView route entry for this API
+    const FIELD_NO_PROMPT = 'y';
 
     private $mNoPrompt = false;
 
+
     /**
-     * Set up API fields. Lazy-loaded when fields are accessed
-     * @return void
+     * Get all API Fields
+     * @return IField[]|IFieldCollection
      */
-    protected function setupAPI() {
-        $this->addField(new Field('no-prompt', "Use default values and skip prompts"), 'y');
+    function getFields() {
+        return new FieldCollection(array(
+            new Field(self::FIELD_NO_PROMPT, "Use default values and skip prompts"),
+        ));
     }
+
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable() { return "Installation script for CPath"; }
+
+
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request) {
+        $Util = new APIRenderUtil($this);
+        $Util->render($Request);
+    }
+
 
     public function isNoPrompt() { return $this->mNoPrompt; }
 
@@ -49,7 +71,7 @@ class Install extends AbstractAPI implements IRoutable {
     {
         Log::u(__CLASS__, "Installing Config File");
 
-        if($Request['no-prompt']) {
+        if($Request[self::FIELD_NO_PROMPT]) {
             $this->mNoPrompt = true;
             Log::u(__CLASS__, "Installing with defaults...");
         }
@@ -78,36 +100,10 @@ class Install extends AbstractAPI implements IRoutable {
     }
 
     /**
-     * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * Build this class
+     * @throws BuildException if an exception occurred
      */
-    function getDescribable() { return "Installation script for CPath"; }
-
-    /**
-     * Returns the route for this IRender
-     * @return IRoute|RoutableSet a new IRoute (typically a RouteableSet) instance
-     */
-    function loadRoute() {
-        return $this->loadDefaultRouteSet();
+    static function buildClass() {
+        RouteBuilder::buildRoute('CLI /install', new Install());
     }
-
-    /**
-     * Render this request
-     * @param IRequest $Request the IRequest instance for this render
-     * @return String|void always returns void
-     */
-    function render(IRequest $Request)
-    {
-        $Util = new APIRenderUtil($this);
-        $Util->render($Request);
-    }
-
-    /**
-     * Return an instance of the class for building and other tasks
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
-     */
-    static function createBuildableInstance() {
-        return new static();
-    }
-
 }

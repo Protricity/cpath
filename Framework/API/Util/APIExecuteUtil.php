@@ -120,7 +120,8 @@ class APIExecuteUtil implements IAPI, ILogListener {
 
         $FieldExceptions = new ValidationExceptions($this);
         $data = array();
-        foreach($this->mAPI->getFields() as $name=>$Field) {
+        foreach($this->mAPI->getFields() as $Field) {
+            $name = $Field->getName();
             try {
                 $value = $Field->validate($Request, $name);
                 $data[$name] = $value;
