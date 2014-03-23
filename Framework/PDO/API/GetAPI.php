@@ -10,7 +10,6 @@ namespace CPath\Framework\PDO\API;
 
 use CPath\Framework\Api\Exceptions\APIException;
 use CPath\Framework\Api\Field\RequiredParam;
-use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
@@ -110,7 +109,7 @@ class GetAPI extends AbstractPDOAPI implements IRenderHTML {
         /** @var PDOPrimaryKeyModel $GetModel  */
         $GetModel = $Search->fetch();
         if(!$GetModel)
-            throw new ModelNotFoundException($T->getModelName() . " '{$id}' was not found");
+            throw new ModelNotFoundException($T, $id);
 
         foreach($this->getHandlers() as $Handler)
             if($Handler instanceof IReadAccess)
@@ -129,7 +128,7 @@ class GetAPI extends AbstractPDOAPI implements IRenderHTML {
     /**
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Framework\Render\Attribute\IAttributes $Attr optional attributes for the input field
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
     function renderHtml(IRequest $Request, IAttributes $Attr=null)  {

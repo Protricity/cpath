@@ -333,8 +333,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
     /**
      * Applies a search to PDOSelect based on specified columns and values.
      * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect instance to search in
-     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
-     * Note: If an array is passed here, the $columns value is ignored.
+     * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is columns with PDOColumn::FLAG_SEARCH set
      * @param int $limit the number of rows to return. Default is 1
@@ -350,22 +349,22 @@ abstract class PDOTable implements IPDOTable, IBuildable
         if (strcasecmp($logic, 'OR') === 0)
             $Select->setFlag(PDOWhere::LOGIC_OR);
 
-        if (!is_array($search)) {
+//        if (!is_array($search)) {
 
-            if ($columns instanceof IArrayObject)
-                $columns = $columns->getDataPath();
-            $columns = $this->findColumns($columns ? : PDOColumn::FLAG_SEARCH);
-            if (!$columns)
-                throw new \Exception("No SEARCH fields defined in " . $this->getModelName());
-            foreach ($columns as $name => $Column) {
-                if ($compare) $name .= " {$compare} ";
-                $Select->where($name, $search);
-            }
-
-        } else {
-            foreach ($search as $name => $value)
-                $Select->where($name, $value);
+        if ($columns instanceof IArrayObject)
+            $columns = $columns->getDataPath();
+        $Columns = $this->findColumns($columns ? : PDOColumn::FLAG_SEARCH);
+        if (!$Columns)
+            throw new \Exception("No SEARCH fields defined in " . $this->getModelName());
+        foreach ($Columns as $name => $Column) {
+            if ($compare) $name .= " {$compare} ";
+            $Select->where($name, $search);
         }
+
+//        } else {
+//            foreach ($search as $name => $value)
+//                $Select->where($name, $value);
+//        }
 
         $Select->limit($limit);
         return $Select;
@@ -402,7 +401,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
 
     /**
      * Loads a model based on a search
-     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
+     * @param String $search the column value to search for
      * Note: If an array is passed here, the $columns value is ignored.
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is columns with PDOColumn::FLAG_SEARCH set
@@ -415,7 +414,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
         $Model = $this->searchByColumns($search, $columns, 1, $logic)
             ->fetch();
         if (!$Model && $throwIfNotFound) {
-            throw new ModelNotFoundException($this->getModelName() . " '{$search}' was not found");
+            throw new ModelNotFoundException($this, $search);
         }
         return $Model;
     }
@@ -434,8 +433,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
 
     /**
      * Searches for Models based on specified columns and values.
-     * @param String|Array $search the column value to search for or an associative array of column/value pairs to search for.
-     * Note: If an array is passed here, the $columns value is ignored.
+     * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is static::SEARCH or columns with PDOColumn::FLAG_SEARCH set
      * @param int $limit the number of rows to return. Default is 1

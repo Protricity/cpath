@@ -16,8 +16,8 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 

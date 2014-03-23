@@ -132,7 +132,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
             ->fetch();
         if(!$Model) {
             if($throwIfNotFound)
-                throw new ModelNotFoundException(static::getModelName() . " '{$id}' was not found");
+                throw new ModelNotFoundException($this, $id);
             return NULL;
         }
         if(static::CACHE_ENABLED)

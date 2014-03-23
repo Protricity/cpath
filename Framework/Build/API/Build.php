@@ -16,13 +16,13 @@ use CPath\Framework\Api\Field\Collection\FieldCollection;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
-use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
+use CPath\Framework\Route\Render\IDestination;
+use CPath\Handlers\Views\APIView;
 use CPath\Log;
 
 class Build implements IDestination, IAPI, IBuildable {
@@ -465,7 +465,7 @@ class Build implements IDestination, IAPI, IBuildable {
      * @return String|void always returns void
      */
     function renderDestination(IRequest $Request, $path, $args) {
-        $RenderUtil = new APIRenderUtil($this);
+        $RenderUtil = new APIView($this);
         $RenderUtil->renderDestination($Request, $path, $args);
     }
 

@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Templates\User\Model;
 
-use CPath\Exceptions\NotImplementedException;
+use CPath\Framework\Exception\Common\NotImplementedException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\User\Session\ISession;
 use CPath\Framework\User\Session\SessionNotFoundException;

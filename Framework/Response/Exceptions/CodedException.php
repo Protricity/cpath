@@ -16,12 +16,4 @@ class CodedException extends \Exception implements IResponseCode {
     function __construct($message, $statusCode=null, $previous=null) {
         parent::__construct($message, $statusCode ?: static::DEFAULT_CODE, $previous);
     }
-
-    /**
-     * Get the DataResponse status code
-     * @return int
-     */
-    function getStatusCode() {
-        return $this->getCode();
-    }
 }

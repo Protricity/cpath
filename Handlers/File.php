@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 
-use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Route\Render\IDestination;
 
 class File implements IDestination{
     const BUILD_IGNORE = true;

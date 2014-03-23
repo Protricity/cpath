@@ -6,6 +6,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
+use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -24,7 +25,7 @@ abstract class AbstractResponse implements IResponse, IMappable {
         $this->setMessage($msg);
     }
 
-    function getStatusCode() {
+    function getCode() {
         return $this->mCode;
     }
 
@@ -79,7 +80,7 @@ abstract class AbstractResponse implements IResponse, IMappable {
      */
     function mapData(IDataMap $Map)
     {
-        $Map->mapDataToKey(IResponse::JSON_CODE, $this->getStatusCode());
-        $Map->mapDataToKey(IResponse::JSON_MESSAGE, $this->getMessage());
+        $Map->mapKeyValue(IResponse::JSON_CODE, $this->getCode());
+        $Map->mapKeyValue(IResponse::JSON_MESSAGE, $this->getMessage());
     }
 }

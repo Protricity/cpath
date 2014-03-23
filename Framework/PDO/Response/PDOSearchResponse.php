@@ -9,6 +9,7 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Describable\Describable;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
+use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Query\PDOSelect;
@@ -67,7 +68,7 @@ class PDOSearchResponse extends AbstractResponse implements IMappable, IComparab
      * @return void
      */
     function mapData(IDataMap $Map) {
-        $Map->mapDataToKey('stats', $this->mQuery->getDescriptor()->execFullStats());
-        $Map->mapDataToKey('results', $this->mQuery);
+        $Map->mapKeyValue('stats', $this->mQuery->getDescriptor()->execFullStats());
+        $Map->mapKeyValue('results', $this->mQuery);
     }
 }

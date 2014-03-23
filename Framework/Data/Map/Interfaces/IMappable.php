@@ -7,6 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Map\Interfaces;
 
+use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
+
 interface IMappable {
 
     /**

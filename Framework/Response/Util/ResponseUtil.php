@@ -8,40 +8,67 @@
 namespace CPath\Framework\Response\Util;
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\Data\Map\Types\CallbackMap;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRenderAll;
+use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\JSON\Renderers\JSONRenderer;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
 use CPath\Framework\Render\XML\IRenderXML;
+use CPath\Framework\Render\XML\Renderers\XMLRenderer;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Log;
 
-final class ResponseUtil implements IRenderAll {
+final class ResponseUtil implements IMappable, IRender {
     private $mResponse;
+
+    private static $mSent = false;
 
     function __construct(IResponse $Response) {
         $this->mResponse = $Response;
     }
 
-    function sendHeaders($mimeType=NULL) {
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map)
+    {
         $Response = $this->mResponse;
-        if(Base::isCLI())
-            return;
-        if(headers_sent($file, $line)) {
-            Log::e("IResponseHelper", "Warning: Headers already sent by {$file}:{$line}");
-            return;
+        if($Response instanceof IMappable) {
+            $Response->mapData($Map);
+        } else {
+            $Map->mapKeyValue('message', $Response->getMessage());
+            $Map->mapKeyValue('code', $Response->getCode());
+
+            // TODO: remove Backwards compatability
+            $Map->mapKeyValue('msg', $Response->getMessage());
+            $Map->mapKeyValue('status', $Response->getCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false');
         }
-        $msg = $Response->getMessage();
-        //list($msg) = explode("\n", $msg);
-        $msg = preg_replace('/[^\w -]/', '', $msg);
-        header("HTTP/1.1 " . $Response->getStatusCode() . " " . $msg);
+    }
+
+    /**
+     * Send headers associated with this response
+     * @param null $mimeType
+     * @return bool true if headers were sent, false otherwise
+     */
+    function sendHeaders($mimeType=NULL) {
+        if(self::$mSent || Base::isCLI() || headers_sent())
+            return false;
+
+        $Response = $this->mResponse;
+        $msg = preg_replace('/[^\w -]/', '', $Response->getMessage());
+
+        header("HTTP/1.1 " . $Response->getCode() . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
         header('Access-Control-Allow-Origin: *');
+        self::$mSent = true;
+        return true;
     }
 
 //    function toString() {
@@ -58,42 +85,33 @@ final class ResponseUtil implements IRenderAll {
 //    }
 
     /**
-     * Render this handler
+     * Render this request
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request)
+    function render(IRequest $Request)
     {
-        $this->renderHtml($Request);
+        $Util = new RenderMimeSwitchUtility($this);
+        $Util->render($Request);
     }
 
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as JSON
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param bool $sendHeaders
      * @return void
      */
-    function renderJSON(IRequest $Request)
+    function renderJSON(IRequest $Request, $sendHeaders=false)
     {
+        if($sendHeaders)
+            $this->sendHeaders('application/json');
         $Response = $this->mResponse;
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request);
+        } elseif($Response instanceof IMappable) {
+            JSONRenderer::renderMap($Response);
         } else {
-            echo '{';
-            if($Response instanceof IMappable) {
-                $Response->mapData(new CallbackMap(function($key, $data, $flags) {
-                    if($flags ^ CallbackMap::IS_FIRST)
-                        echo ',';
-                    echo json_encode($key), ':', json_encode($data);
-                }));
-            } else {
-                echo "'", IResponse::JSON_CODE, "':", $Response->getStatusCode();
-                echo ",'", IResponse::JSON_MESSAGE, "':", json_encode($Response->getMessage());
-
-                // TODO: Backwards compatability
-                echo "'status':", $Response->getStatusCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false';
-                echo ",msg':", json_encode($Response->getMessage());
-            }
-            echo '}';
+            JSONRenderer::renderMap($this);
         }
     }
 
@@ -101,25 +119,20 @@ final class ResponseUtil implements IRenderAll {
      * Sends headers if necessary, executes the request, and renders an IResponse as XML
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
+     * @param bool $sendHeaders
      * @return void
      */
-    function renderXML(IRequest $Request, $rootElementName = 'root')
+    function renderXML(IRequest $Request, $rootElementName = 'root', $sendHeaders=false)
     {
+        if($sendHeaders)
+            $this->sendHeaders('application/xml');
         $Response = $this->mResponse;
         if($Response instanceof IRenderXML) {
-            $Response->renderXML($Request);
+            $Response->renderXML($Request, $rootElementName);
+        } elseif($Response instanceof IMappable) {
+            XMLRenderer::renderMap($Response);
         } else {
-            echo RI::ni(), "<", $rootElementName, ">";
-            if($Response instanceof IMappable) {
-                $Response->mapData(new CallbackMap(function($key, $data, $flags) {
-                    echo json_encode($key), ':', json_encode($data);
-                    echo RI::ni(), "<", $key, ">", htmlspecialchars($data), "</", $key, ">";
-                }));
-            } else {
-                echo RI::ni(), "<", IResponse::JSON_CODE, ">", $Response->getStatusCode(), "</", IResponse::JSON_CODE, ">";
-                echo RI::ni(), "<", IResponse::JSON_MESSAGE, ">", htmlspecialchars($Response->getMessage()), "</", IResponse::JSON_MESSAGE, ">";
-            }
-            echo RI::ni(), "</", $rootElementName, ">";
+            XMLRenderer::renderMap($this);
         }
     }
 
@@ -127,9 +140,12 @@ final class ResponseUtil implements IRenderAll {
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
+     * @param bool $sendHeaders
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+    function renderHtml(IRequest $Request, IAttributes $Attr=null, $sendHeaders=false) {
+        if($sendHeaders)
+            $this->sendHeaders('text/html');
         $Response = $this->mResponse;
         if($Response instanceof IRenderHTML) {
             $Response->renderHtml($Request);
@@ -145,14 +161,18 @@ final class ResponseUtil implements IRenderAll {
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as plain text
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param bool $sendHeaders
      * @return void
      */
-    function renderText(IRequest $Request) {
+    function renderText(IRequest $Request, $sendHeaders=false) {
+        if($sendHeaders)
+            $this->sendHeaders('text/plain');
+
         $Response = $this->mResponse;
         if($Response instanceof IRenderText) {
             $Response->renderText($Request);
         } else {
-            echo "Status:  ", $Response->getStatusCode(), "\n";
+            echo "Status:  ", $Response->getCode(), "\n";
             echo "Message: ", $Response->getMessage(), "\n";
             //print_r($Response->getDataPath()); // TODO: lol!
         }

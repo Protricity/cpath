@@ -10,9 +10,9 @@ namespace CPath\Framework\Render\Attribute;
 
 
 
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\HTML\IRenderHTML;
 
-interface IAttributes extends IRender{
+interface IAttributes extends IRenderHTML{
 
     /**
      * Add an attribute to the collection

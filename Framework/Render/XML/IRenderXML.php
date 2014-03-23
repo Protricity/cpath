@@ -16,7 +16,7 @@ interface IRenderXML {
      * Render request as xml
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
-     * @return void
+     * @return String|void always returns void
      */
     function renderXML(IRequest $Request, $rootElementName='root');
 }

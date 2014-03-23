@@ -10,28 +10,51 @@ namespace CPath\Framework\Data\Map\Types;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 
-class ArrayMap implements IDataMap {
-    private $mMap = array();
+class ArrayMap implements IDataMap, IMappable {
+    private $mMap = array(), $mIsAssoc = false;
 
-    /**
-     * Map data to a key in the map
-     * @param String $key
-     * @param mixed $data
-     * @param int $flags
-     * @return void
-     */
-    function mapDataToKey($key, $data, $flags = 0)
-    {
-        $this->mMap[$key] = $data;
+    public function __construct(Array $map=array()) {
+        if($map) {
+            $this->mMap = $map;
+            $this->mIsAssoc = true;
+        }
     }
 
     /**
      * Returns an associative array of keys and data
      * @return Array associative array
      */
-    function getMapData()
-    {
+    function getMapData() {
         return $this->mMap;
+    }
+
+    /**
+     * Map data to a key in the map
+     * @param String $key
+     * @param mixed $value
+     * @param int $flags
+     * @return void
+     */
+
+    function mapKeyValue($key, $value, $flags = 0) {
+        $this->mIsAssoc = true;
+        $this->mMap[$key] = $value;
+    }
+
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map) {
+        if($this->mIsAssoc) {
+            foreach($this->mMap as $key => $data)
+                $Map->mapKeyValue($key, $data);
+
+        } else {
+            foreach($this->mMap as $data)
+                $Map->mapArrayValue($data);
+        }
     }
 
     // Static
@@ -40,5 +63,36 @@ class ArrayMap implements IDataMap {
         $Inst = new ArrayMap();
         $Mappable->mapData($Inst);
         return $Inst->mMap;
+    }
+
+    /**
+     * Map an object to this array
+     * @param IMappable $Mappable
+     * @return void
+     */
+    function mapArrayObject(IMappable $Mappable)
+    {
+        // TODO: Implement mapArrayObject() method.
+    }
+
+    /**
+     * Add a value to the array
+     * @param mixed $value
+     * @return void
+     */
+    function mapArrayValue($value)
+    {
+        // TODO: Implement mapArrayValue() method.
+    }
+
+    /**
+     * Map data to subsection
+     * @param $subsectionKey
+     * @param IMappable $Mappable
+     * @return void
+     */
+    function mapSubsection($subsectionKey, IMappable $Mappable)
+    {
+        // TODO: Implement mapSubsection() method.
     }
 }

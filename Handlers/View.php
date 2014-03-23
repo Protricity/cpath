@@ -3,9 +3,12 @@ namespace CPath\Handlers;
 
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
+use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
@@ -22,8 +25,8 @@ abstract class View implements IView, IViewConfig {
     private $mPath = null;
     private $mArgs = array();
 
-    public function __construct(ITheme $Theme) {
-        $this->mTheme = $Theme;
+    public function __construct(ITheme $Theme=null) {
+        $this->mTheme = $Theme ?: CPathDefaultTheme::get();
 
         RI::si(null, static::TAB);
     }
@@ -47,12 +50,10 @@ abstract class View implements IView, IViewConfig {
             $basePath = rtrim(Config::getDomainPath(), '/') . $this->getPath();
             $this->addHeadHTML("<base href='{$basePath}' />", true);
         }
-        //$this->addHeadHTML("<base href='{$this->mBasePath}' />", true); // TODO: don't use anymore!
-
 
         $basePath = Base::getClassPublicPath(__CLASS__);
-        $this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
-        $this->addHeadScript($basePath . 'assets/cpath.js', true);
+        //$this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
+        //$this->addHeadScript($basePath . 'assets/cpath.js', true);
 
         $this->setupHeadFields($Request);
 
@@ -85,19 +86,24 @@ abstract class View implements IView, IViewConfig {
      * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request, $path, $args)
+    final function renderDestination(IRequest $Request, $path, $args)
     {
         $this->mPath = rtrim($path, '/') . '/';
         $this->mArgs = $args;
-        $this->render($Request);
+
+        // Util allows selective rendering based on request mime type
+        $Util = new RenderMimeSwitchUtility($this);
+        $Util->render($Request);
     }
 
     /**
-     * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    final function render(IRequest $Request) {
+    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    {
         $this->setupHead($Request);
         $this->getTheme()->addHeadElementsToView($this);
 
@@ -105,7 +111,7 @@ abstract class View implements IView, IViewConfig {
         $this->renderHtmlTagStart();
         RI::ai(1);
         $this->renderHead($Request);
-        $this->renderBody($Request);
+        $this->renderBody($Request, $Attr);
         RI::ai(-1);
         $this->renderHtmlTagEnd();
     }

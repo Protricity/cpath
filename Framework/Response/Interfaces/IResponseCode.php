@@ -17,8 +17,8 @@ interface IResponseCode {
 
 
     /**
-     * Get the DataResponse status code
+     * Get the request status code
      * @return int
      */
-    function getStatusCode();
+    function getCode();
 }

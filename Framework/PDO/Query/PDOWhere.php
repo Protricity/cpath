@@ -96,7 +96,7 @@ abstract class PDOWhere {
         $field = $this->getAliasedField($field, $alias);
 
         if(is_array($value)) {
-            if(!$value)
+            if(!$value || !current($value))
                 throw new \InvalidArgumentException("An empty array was passed to Column '{$field}'");
             $this->mValues = array_merge($this->mValues, $value);
             $field .= ' in (?' . str_repeat(', ?', sizeof($this->mValues) - 1) . ')';

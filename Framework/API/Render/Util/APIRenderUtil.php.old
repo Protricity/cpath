@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Util;
+namespace CPath\Framework\Api\Render\Util;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
@@ -13,15 +13,19 @@ use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\Api\Util\APIExecuteUtil;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\IRenderAll;
+use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 use CPath\Framework\Route\Render\IDestination;
+use CPath\Handlers\Views\APIView;
 
-class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggregate {
+class APIRenderUtil implements IAPI, IRender, IDestination, IDescribableAggregate {
     private $mAPI;
+    private $mArgs = array();
 
     function __construct(IAPI $API) {
         $this->mAPI = $API;
@@ -31,8 +35,7 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * Get the Object Description
      * @return IDescribable|String a describable Object, or string describing this object
      */
-    function getDescribable()
-    {
+    function getDescribable() {
         return Describable::get($this->mAPI);
     }
 
@@ -46,11 +49,12 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args
      * @return IResponse the api call response with data, message, and status
      */
     final public function execute(IRequest $Request, $args) {
         $Util = new APIExecuteUtil($this->getAPI());
-        return $Util->execute($Request);
+        return $Util->execute($Request, $args);
     }
 
     /**
@@ -80,9 +84,8 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request, $path, $args)
-    {
-        // TODO: Implement renderDestination() method.
+    function renderDestination(IRequest $Request, $path, $args) {
+        $this->mArgs = $args;
         $this->render($Request);
     }
 
@@ -92,9 +95,12 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * @return void
      */
     function render(IRequest $Request) {
-        $Response = $this->execute($Request);
-        $Util = new ResponseUtil($Response);
-        $Util->renderDestination($Request);
+//        $Response = $this
+//            ->getAPI()
+//            ->execute($Request, $this->mArgs);
+//        $Util = new ResponseUtil($Response);
+        $Util = new RenderMimeSwitchUtility($this);
+        $Util->render($Request);
     }
 
 
@@ -105,21 +111,58 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * @return void
      */
     function renderHtml(IRequest $Request, IAttributes $Attr=null) {
-        $Response = $this->execute($Request);
-        $Util = new ResponseUtil($Response);
-        $Util->renderHtml($Request, $Attr);
+        $ExecUtil = new APIExecuteUtil($this->getAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
+        $Render = new APIView($this->getAPI(), $Response);
+        $Render->render($Request);
+//
+//        $Response = $this
+//            ->getAPI()
+//            ->execute($Request, $this->mArgs);
+//        $Util = new ResponseUtil($Response);
+//        $Util->renderHtml($Request, $Attr);
+
+
+//        if(!headers_sent() && !Base::isCLI())
+//            header("Content-Type: text/html");
+//        $DataResponse = null;
+//
+//        $Render = new APIView($this, $Route, $DataResponse);
+//        //}
+//        $Render->render($Request);
     }
 
+//    /**
+//     * Sends headers, executes the request, and renders an IResponse as HTML
+//     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+//     * @return void
+//     */
+//    public function renderHTML(IRequest $Request) {
+//        if(!headers_sent() && !Base::isCLI())
+//            header("Content-Type: text/html");
+//        $DataResponse = null;
+//        //if(strcasecmp($Request->getMethod(), 'get') !== 0) //TODO: did we decide how to handle posts from a browser?
+//        //    $DataResponse = $this->execute($Request);
+//        //if($Request instanceof RoutableSetWrapper) {
+//        //    $RoutableSet = $Request->getRoutableSet();
+//         //   $Render = new APIMultiView($RoutableSet, $DataResponse);
+//        //} else {
+//            $Route = $Request->getRoute();
+//            $Render = new APIView($this, $Route, $DataResponse);
+//        //}
+//        $Render->render($Request);
+//        //$DataResponse = $this->execute($Route);
+//        //$DataResponse->sendHeaders();
+//        //$DataResponse->renderHtml();
+//    }
     /**
      * Sends headers, executes the request, and renders an IResponse as JSON
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return void
      */
     public function renderJSON(IRequest $Request) {
-//        if(!headers_sent()) // && !Base::isCLI())
-//            header("Content-Type: application/json");
-
-        $Response = $this->execute($Request);
+        $ExecUtil = new APIExecuteUtil($this->getAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $Util = new ResponseUtil($Response);
         $Util->renderJSON($Request);
     }
@@ -131,10 +174,10 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * @return void
      */
     public function renderXML(IRequest $Request, $rootElementName='root') {
-        $Response = $this->execute($Request);
+        $ExecUtil = new APIExecuteUtil($this->getAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $Util = new ResponseUtil($Response);
-        $Util->renderXML($Request);
-
+        $Util->renderXML($Request, $rootElementName);
 //        if(!headers_sent()) // && !Base::isCLI())
 ////            header("Content-Type: text/xml");
 //        $Response = $this->execute($Request);
@@ -155,7 +198,8 @@ class APIRenderUtil implements IAPI, IRenderAll, IDestination, IDescribableAggre
      * @return void
      */
     public function renderText(IRequest $Request) {
-        $Response = $this->execute($Request);
+        $ExecUtil = new APIExecuteUtil($this->getAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $Util = new ResponseUtil($Response);
         $Util->renderText($Request);
     }

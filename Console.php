@@ -8,9 +8,9 @@
 namespace CPath;
 
 use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLIRequest;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Route\Router;
 
 class Console implements IDestination { // Broke }, IBuildable {

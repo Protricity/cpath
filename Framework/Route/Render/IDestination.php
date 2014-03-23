@@ -9,6 +9,7 @@ namespace CPath\Framework\Route\Render;
 
 
 use CPath\Framework\Request\Interfaces\IRequest;
+use String;
 
 interface IDestination {
     /**

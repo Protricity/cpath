@@ -15,7 +15,7 @@ interface IRenderText {
     /**
      * Render request as plain text
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @return void
+     * @return String|void always returns void
      */
     function renderText(IRequest $Request);
 }

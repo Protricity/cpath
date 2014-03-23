@@ -7,6 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Api\Util;
 
+use CPath\Describable\Describable;
+use CPath\Describable\IDescribable;
+use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Exceptions\ValidationExceptions;
@@ -25,11 +28,20 @@ use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
 
-class APIExecuteUtil implements IAPI, ILogListener {
+class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     private $mAPI, $mLoggingEnabled = true, $mLogs = array(), $mMap = null;
 
     function __construct(IAPI $API) {
         $this->mAPI = $API;
+    }
+
+    /**
+     * Get the Object Description
+     * @return IDescribable|String a describable Object, or string describing this object
+     */
+    function getDescribable()
+    {
+        return Describable::get($this->mAPI);
     }
 
     /**
@@ -79,7 +91,7 @@ class APIExecuteUtil implements IAPI, ILogListener {
     final public function executeOrCatch(IRequest $Request, $args) {
         try {
             $Response = $this->execute($Request, $args);
-            if($Response->getStatusCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
+            if($Response->getCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
                 $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {
             if($ex instanceof IResponseAggregate)

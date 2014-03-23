@@ -8,11 +8,10 @@
 namespace CPath\Handlers\Interfaces;
 
 
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Render\IDestination;
 
-interface IView extends IRender, IDestination {
+interface IView extends IRenderHTML {
 
     /**
      * Render the html body

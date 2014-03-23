@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
+use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 
 class PDOSelectStats extends PDOSelectLimitedStats {
@@ -124,7 +125,7 @@ class PDOSelectStats extends PDOSelectLimitedStats {
         parent::mapData($Map);
 
         foreach($this as $k=>$v)
-            $Map->mapDataToKey($k, $v);
+            $Map->mapKeyValue($k, $v);
 
         $pages = array();
         foreach($this->getPageIDs() as $k=>$v) {
@@ -134,6 +135,6 @@ class PDOSelectStats extends PDOSelectLimitedStats {
 //            $child = $xml->addChild('page', $v);
 //            $child->addAttribute('id', $k);
         }
-        $Map->mapDataToKey('pages', $pages);
+        $Map->mapKeyValue('pages', $pages);
     }
 }

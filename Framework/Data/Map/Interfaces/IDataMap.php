@@ -1,20 +1,17 @@
 <?php
 /**
- * Project: CleverPath Framework
- * IDE: JetBrains PhpStorm
- * Author: Ari Asulin
- * Email: ari.asulin@gmail.com
- * Date: 4/06/11 */
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 3/23/14
+ * Time: 12:05 PM
+ */
 namespace CPath\Framework\Data\Map\Interfaces;
 
-interface IDataMap {
+use CPath\Framework\Data\Map\Collection\Interfaces\ICollectionMap;
+use CPath\Framework\Data\Map\Tree\Interfaces\IAssociativeTree;
 
-    /**
-     * Map data to a key in the map
-     * @param String $key
-     * @param mixed|Callable $data
-     * @param int $flags
-     * @return void
-     */
-    function mapDataToKey($key, $data, $flags=0);
+interface IDataMap extends IAssociativeTree, ICollectionMap
+{
+
 }
+

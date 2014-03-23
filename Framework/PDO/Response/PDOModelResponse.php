@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
 use CPath\Describable\Describable;
+use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
@@ -47,6 +48,6 @@ class PDOModelResponse extends AbstractResponse implements IMappable {
      * @return void
      */
     function mapData(IDataMap $Map) {
-        $Map->mapDataToKey('model', $this->mModel);
+        $Map->mapKeyValue('model', $this->mModel);
     }
 }

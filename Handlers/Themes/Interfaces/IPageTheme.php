@@ -30,7 +30,7 @@ interface IPageTheme {
     /**
      * Render the start of an html body section.
      * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     function renderSectionStart(IRequest $Request, IAttributes $Attr=NULL);

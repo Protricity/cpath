@@ -27,8 +27,6 @@ use CPath\Validate;
  */
 class Field implements IField, IDescribableAggregate, IRenderHTML {
 
-    const DEFAULT_FLAGS = 0;
-
     private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mFlags = 0, $mValue=null;
 
     /**
@@ -44,8 +42,6 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
         $this->mValidation = $validation;
         $this->mFlags = $flags;
     }
-
-    protected function getDefaultFlags() { return 0; }
 
     public function setDefaultValue($value) {
         $this->mDefaultValue = $value;
@@ -134,7 +130,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
     /**
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Framework\Render\Attribute\IAttributes $Attr optional attributes for the input field
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
     function renderHtml(IRequest $Request, IAttributes $Attr=null) {

@@ -19,12 +19,15 @@ class Attr implements IAttributes {
         $this->addHTML($html);
     }
 
+
     /**
-     * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void|String always returns null
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr unused
+     * @return void
      */
-    function render(IRequest $Request) {
+    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    {
         if($this->mHTML)
             echo ' ', $this->mHTML;
         foreach($this->mAttr as $name => $value)

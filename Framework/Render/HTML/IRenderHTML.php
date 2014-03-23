@@ -15,8 +15,8 @@ interface IRenderHTML {
     /**
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Framework\Render\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return void
+     * @param IAttributes $Attr optional attributes for the input field
+     * @return String|void always returns void
      */
     function renderHtml(IRequest $Request, IAttributes $Attr=null);
 }

@@ -23,8 +23,6 @@ class RequiredField extends Field {
      * @param int $flags
      */
     public function __construct($name, $Description=NULL, $validation=0, $flags=0) {
-        parent::__construct($name, $Description, $validation, $flags);
+        parent::__construct($name, $Description, $validation, $flags | Interfaces\IField::IS_REQUIRED);
     }
-
-    protected function getDefaultFlags() { return parent::getDefaultFlags() | Interfaces\IField::IS_REQUIRED; }
 }

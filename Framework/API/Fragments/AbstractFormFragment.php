@@ -4,7 +4,7 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -12,7 +12,7 @@ use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;
 use CPath\Interfaces\IViewConfig;
 
-abstract class AbstractFormFragment implements IRender, IViewConfig{
+abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
 
     private $mTheme;
 
@@ -31,14 +31,23 @@ abstract class AbstractFormFragment implements IRender, IViewConfig{
      */
     function addHeadElementsToView(IView $View) {
         $basePath = Base::getClassPublicPath($this);
-        $View->addHeadStyleSheet($basePath . 'assets/formfragment.css', true);
-        $View->addHeadScript($basePath . 'assets/formfragment.js', true);
+
+        $View->addHeadScript($basePath . 'assets/jquery.min.js');
+
+        $View->addHeadScript($basePath . 'assets/cpath.js');
+
+        $View->addHeadStyleSheet($basePath . 'assets/api.css');
+        $View->addHeadScript($basePath . 'assets/api.js');
+
+        $View->addHeadScript($basePath . 'assets/form.js');
+        $View->addHeadStyleSheet($basePath . 'assets/formfragment.css');
+        $View->addHeadScript($basePath . 'assets/formfragment.js');
     }
 
     /**
      * Render this API Form
      * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     abstract function renderForm(IRequest $Request, IAttributes $Attr=NULL);
@@ -46,12 +55,12 @@ abstract class AbstractFormFragment implements IRender, IViewConfig{
     public function getTheme() { return $this->mTheme; }
 
     /**
-     * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function render(IRequest $Request, IAttributes $Attr=null)
+    function renderHtml(IRequest $Request, IAttributes $Attr = null)
     {
         $this->renderForm($Request, $Attr);
     }

@@ -136,6 +136,6 @@ class HTMLRenderUtil {
     private function renderElementContent($nodeType, $Attr=null) {
         echo $nodeType;
         if($Attr)
-            Attr::get($Attr)->render($this->mRequest);
+            Attr::get($Attr)->renderHtml($this->mRequest, $Attr);
     }
 }

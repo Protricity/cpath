@@ -55,7 +55,7 @@ class CPathDefaultTheme implements ITheme {
         if($this->mIsException)
             $Attr->addClass('error');
 
-        echo RI::ni(), "<div", $Attr->render($Request), ">";
+        echo RI::ni(), "<div", $Attr->renderHtml($Request, $Attr), ">";
         echo RI::ai(1);
         if($Description) {
             echo RI::ni(), "<h4 class='fragment-title'>", Describable::get($Description)->getTitle(), "</h4>";
@@ -91,7 +91,7 @@ class CPathDefaultTheme implements ITheme {
         if($this->mIsException)
             $Attr->addClass('error');
 
-        echo RI::ni(), "<table", $Attr->render($Request), ">";
+        echo RI::ni(), "<table", $Attr->renderHtml($Request, $Attr), ">";
         if($captionText)
             echo RI::ni(1), "<caption><em>{$captionText}</em></caption>";
         RI::ai(1);
@@ -126,7 +126,7 @@ class CPathDefaultTheme implements ITheme {
         }
         $this->mRowBody = $body;
 
-        echo RI::ni(), "<tr", $Attr->render($Request), ">";
+        echo RI::ni(), "<tr", $Attr->renderHtml($Request, $Attr), ">";
         RI::ai(1);
     }
 
@@ -149,7 +149,7 @@ class CPathDefaultTheme implements ITheme {
             $this->mLastDataElm = 'th';
         else
             $this->mLastDataElm = 'td';
-        echo '<', $this->mLastDataElm, $Attr->render($Request), ">";
+        echo '<', $this->mLastDataElm, $Attr->renderHtml($Request, $Attr), ">";
 
         RI::ai(1);
     }
@@ -212,7 +212,7 @@ class CPathDefaultTheme implements ITheme {
             $Attr->addClass('error');
 
         echo RI::ni(), "<body class='narrow'>";
-        echo RI::ni(1), "<div", $Attr->render($Request), ">";
+        echo RI::ni(1), "<div", $Attr->renderHtml($Request, $Attr), ">";
         RI::ai(2);
     }
 
@@ -242,7 +242,7 @@ class CPathDefaultTheme implements ITheme {
         if($this->mIsException)
             $Attr->addClass('error');
 
-        echo '<div', $Attr->render($Request), '>';
+        echo '<div', $Attr->renderHtml($Request, $Attr), '>';
 
         RI::ai(1);
     }
@@ -291,7 +291,7 @@ class CPathDefaultTheme implements ITheme {
      * @return void
      */
     function renderSearchContent(IRequest $Request, PDOSearchResponse $Response, IAttributes $Attr = NULL) {
-        $this->mMTLF->render($Request, $Response, $Attr);
+        $this->mMTLF->renderHtml($Request, $Attr, $Response);
     }
 }
 

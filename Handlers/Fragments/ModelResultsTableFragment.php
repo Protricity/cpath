@@ -7,7 +7,7 @@ use CPath\Framework\Data\Map\Types\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\WebRequest;
@@ -17,7 +17,7 @@ use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 use CPath\Interfaces\IViewConfig;
 
-class ModelResultsTableFragment implements IRender, IViewConfig{
+class ModelResultsTableFragment implements IRenderHTML, IViewConfig{
 
     private $mTheme;
 
@@ -42,11 +42,11 @@ class ModelResultsTableFragment implements IRender, IViewConfig{
     /**
      * Render this handler
      * @param IRequest $Request the IRequest instance for this render
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function render(IRequest $Request, PDOSearchResponse $Response = NULL, IAttributes $Attr=null)
+    function renderHtml(IRequest $Request, IAttributes $Attr=null, PDOSearchResponse $Response = NULL)
     {
         $Table = new TableThemeUtil($Request, $this->mTheme);
 

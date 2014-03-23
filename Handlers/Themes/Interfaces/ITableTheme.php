@@ -32,7 +32,7 @@ interface ITableTheme {
      * Render the start of a table row.
      * @param IRequest $Request the IRequest instance for this render
      * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER, FLAG_ROW_FIRST_DATA_IS_LABEL
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     function renderTableRowStart(IRequest $Request, $flags=0, IAttributes $Attr=null);
@@ -42,7 +42,7 @@ interface ITableTheme {
      * @param IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
      * @param int $flags ::FLAG_DATA_IS_LABEL
-     * @param \CPath\Framework\Render\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     function renderTableDataStart(IRequest $Request, $span=0, $flags=0, IAttributes $Attr=null);

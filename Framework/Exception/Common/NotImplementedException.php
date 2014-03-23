@@ -6,7 +6,7 @@
  * Time: 10:39 AM
  * To change this template use File | Settings | File Templates.
  */
-namespace CPath\Exceptions;
+namespace CPath\Framework\Exception\Common;
 
 /**
  * Class BuildException
@@ -15,3 +15,4 @@ namespace CPath\Exceptions;
  */
 class NotImplementedException extends \Exception {
 }
+

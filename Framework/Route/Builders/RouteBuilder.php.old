@@ -40,7 +40,7 @@ PHP;
 );
 PHP;
 
-    private $mRoutes = array();
+    private $mAPIs = array();
     /** @var \CPath\Framework\Render\IRender */
     private $mCurrentClass = NULL;
 
@@ -90,33 +90,33 @@ PHP;
      * @throws BuildException
      */
     function addRoute(IRoute $Route, $replace=false) {
-        if(!$replace && isset($this->mRoutes[$Route->getPrefix()])) {
+        if(!$replace && isset($this->mAPIs[$Route->getPrefix()])) {
             throw new BuildException("Route Prefix already exists: ".$Route->getPrefix());
         }
-        $this->mRoutes[$Route->getPrefix()] = $Route;
+        $this->mAPIs[$Route->getPrefix()] = $Route;
     }
 
     /**
      * @return IRoute[] array of IRoute instances
      */
     function getRoutes() {
-        return array_values($this->mRoutes);
+        return array_values($this->mAPIs);
     }
 
     /**
      * Checks to see if any routes were built, and builds them into [gen]/routes.php
      */
     public function buildComplete() {
-        if(!$this->mRoutes)
+        if(!$this->mAPIs)
             return;
         /** @var \CPath\Route\IRoute $Route */
         foreach($this->getCustomRoutes() as $Route)
             $this->addRoute($Route);
 
-//        foreach($this->mRoutes as &$route)
+//        foreach($this->mAPIs as &$route)
 //            if($route['match'][strlen($route['match'])-1] != '/')
 //                $route['match'] .= '/';
-        usort($this->mRoutes, function (IRoute $a, IRoute $b){
+        usort($this->mAPIs, function (IRoute $a, IRoute $b){
             $b = $b->getPrefix();
             $a = $a->getPrefix();
             return (substr_count($b, '/')-substr_count($a, '/'));
@@ -127,7 +127,7 @@ PHP;
         $i=0;
 
         //$defaultClass = get_class(new Route('', '')); // TODO: hack
-        foreach($this->mRoutes as $Route) {
+        foreach($this->mAPIs as $Route) {
             $class = get_class($Route); // $defaultClass;
             if(!isset($useClass[$class]))
                 $useClass[$class] = basename($class) . ($i++ ?: '');
@@ -141,7 +141,7 @@ PHP;
             $phpUse .= "\nuse " . $class . " as " . $alias . ";";
 
         $phpRoute = '';
-        foreach($this->mRoutes as $Route) {
+        foreach($this->mAPIs as $Route) {
             $constName = $useClass[get_class($Route)]; // $useClass[$defaultClass]; // get_class($Route)];
             //$args = '';
             //$i=0;
@@ -158,7 +158,7 @@ PHP;
         if(!is_dir(dirname($path)))
             mkdir(dirname($path), NULL, true);
         file_put_contents($path, $output);
-        Log::v(__CLASS__, count($this->mRoutes) . " Route(s) rebuilt.");
+        Log::v(__CLASS__, count($this->mAPIs) . " Route(s) rebuilt.");
 
         if(Config::$APCEnabled)
             self::rebuildAPCCache();
@@ -166,7 +166,7 @@ PHP;
         Compile::$RouteMax = $max;
         Compile::commit();
 
-        $this->mRoutes = array();
+        $this->mAPIs = array();
     }
 
     // Statics

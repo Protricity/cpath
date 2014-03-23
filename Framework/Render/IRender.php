@@ -8,14 +8,17 @@
 namespace CPath\Framework\Render;
 
 
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Render\HTML\IRenderHTML;
+use CPath\Framework\Render\JSON\IRenderJSON;
+use CPath\Framework\Render\Text\IRenderText;
+use CPath\Framework\Render\XML\IRenderXML;
 
-interface IRender {
-    /**
-     * Render this request
-     * @param IRequest $Request the IRequest instance for this render
-     * @return String|void always returns void
-     */
-    function render(IRequest $Request);
+interface IRender extends IRenderHTML, IRenderText, IRenderXML, IRenderJSON {
+//    /**
+//     * Render this request
+//     * @param IRequest $Request the IRequest instance for this render
+//     * @return String|void always returns void
+//     */
+//    function render(IRequest $Request);
 }
 

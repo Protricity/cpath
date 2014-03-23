@@ -6,15 +6,14 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
-use CPath\Framework\Route\Render\IDestination;
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Framework\Route\Map\IRouteMap;
+use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Route\Routable\IRoutable;
 
-class Routes implements IRoutable, IRender {
+class Routes implements IRoutable {
 
     /** @var IRouteMap */
     private $mRoutes;
@@ -72,9 +71,18 @@ class Routes implements IRoutable, IRender {
 
         $newPath = '';
         $args = array();
-        /** @var IDestination $Destination */
         $Selector->getMatchedData($Destination, $newPath, $args);
-        $Destination->renderDestination($Request, $newPath, $args);
+
+//        if ($Destination instanceof IRoutable) {
+//            // TODO: retreat from using IRoutable
+//
+//            $RouteUtil = new RouteUtil($Destination);
+//            $RouteUtil->renderDestination($Request, $newPath, $args);
+//
+//        } else
+        if ($Destination instanceof IDestination) {
+            $Destination->renderDestination($Request, $newPath, $args);
+        }
     }
 }
 

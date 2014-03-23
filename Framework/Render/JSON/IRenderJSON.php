@@ -15,7 +15,8 @@ interface IRenderJSON {
     /**
      * Render request as JSON
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @return void
+     * @return String|void always returns void
      */
     function renderJSON(IRequest $Request);
 }
+

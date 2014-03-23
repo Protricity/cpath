@@ -7,15 +7,16 @@ use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IRenderContent;
+use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Handlers\View;
 
 abstract class NavBarLayout extends View implements IRenderContent {
 
     private $navBarStarted=false;
 
-//    public function __construct($Target, ITheme $Theme=NULL) {
-//        parent::__construct($Target, $Theme);
-//    }
+    public function __construct(ITheme $Theme=NULL) {
+        parent::__construct($Theme);
+    }
 
 //
 //    /**

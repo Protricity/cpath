@@ -107,7 +107,8 @@ class PutAPI extends AbstractPDOAPI {
 
             /** @var PDOPrimaryKeyModel $FoundModel */
             if(!$FoundModel = $Query->fetch())
-                throw new ModelNotFoundException("ERROR: Duplicate row couldn't be found. Adjust your search fields: " . implode(', ', $this->mColumns));
+                throw new ModelNotFoundException($Table, $this->mColumns);
+                //throw new ModelNotFoundException("ERROR: Duplicate row couldn't be found. Adjust your search fields: " . implode(', ', $this->mColumns));
 
             if($Query->fetch())
                 throw new APIException("ERROR: Multiple models found. Adjust your search fields: " . implode(', ', $this->mColumns));

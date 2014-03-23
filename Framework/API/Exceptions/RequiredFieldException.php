@@ -15,6 +15,6 @@ class RequiredFieldException extends ValidationException
 {
     function __construct($msg = "Field '%s' is required")
     {
-        \CPath\Framework\Api\Exceptions\parent::__construct($msg);
+        parent::__construct($msg);
     }
 }

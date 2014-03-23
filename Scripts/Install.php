@@ -15,13 +15,13 @@ use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Util\APIRenderUtil;
 use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Route\Render\IDestination;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
+use CPath\Framework\Route\Render\IDestination;
+use CPath\Handlers\Views\APIView;
 use CPath\Log;
 
 class Install implements IDestination, IBuildable, IAPI {
@@ -49,13 +49,15 @@ class Install implements IDestination, IBuildable, IAPI {
 
 
     /**
-     * Render this request
+     * Render this route destination
      * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request) {
-        $Util = new APIRenderUtil($this);
-        $Util->renderDestination($Request);
+    function renderDestination(IRequest $Request, $path, $args) {
+        $Util = new APIView($this);
+        $Util->renderDestination($Request, $path, $args);
     }
 
 
@@ -107,4 +109,5 @@ class Install implements IDestination, IBuildable, IAPI {
     static function buildClass() {
         RouteBuilder::buildRoute('CLI /install', new Install());
     }
+
 }
