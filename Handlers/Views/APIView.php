@@ -9,7 +9,7 @@ use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -25,6 +25,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
     private $mAPI = null;
     private $mForm, $mResponseBox;
     private $mResponse = null;
+    private $mArgs = array();
 
     public function __construct(IAPI $API, IResponse $Response=null, ITheme $Theme=null) {
         parent::__construct($Theme ?: CPathDefaultTheme::get());
@@ -34,6 +35,17 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
 
         $this->mForm = new APIDebugFormFragment($this->mAPI);
         $this->mResponseBox = new APIResponseBoxFragment($this->getTheme());
+    }
+    /**
+     * Return an instance of IRender
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return IRender return the renderer instance
+     */
+    function getRenderer(IRequest $Request, $path, $args) {
+        $this->mArgs = $args;
+        return parent::getRenderer($Request, $path, $args);
     }
 
     /**
@@ -115,7 +127,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderJSON(IRequest $Request)
     {
-        $Response = $this->execute($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
     }
@@ -127,7 +139,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderText(IRequest $Request)
     {
-        $Response = $this->execute($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
     }
@@ -140,7 +152,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $Response = $this->execute($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
     }

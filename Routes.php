@@ -6,11 +6,12 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+
 use CPath\Framework\Render\IRender;
-use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Framework\Route\Exceptions\RouteNotFoundException;
 use CPath\Framework\Route\Map\IRouteMap;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Route\Routable\IRoutable;
@@ -57,39 +58,44 @@ class Routes implements IRoutable {
     }
 
     /**
-     * Render this request
-     * @param IRequest $Request the IRequest instance for this render
+     * Route request to an IRender destination
+     * @param IRequest $Request
+     * @param Framework\Route\Routable\IRoutable $Routable
      * @throws Framework\Response\Exceptions\CodedException
-     * @return String|void always returns void
+     * @return IRender
      */
-    function render(IRequest $Request) {
+    function routeRequest(IRequest $Request, IRoutable $Routable) {
         $path = $Request->getPath();
         if(($ext = pathinfo($path, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico')))
             throw new CodedException("File request was passed to Script: ", IResponseCode::STATUS_NOT_FOUND);
 
         $Selector = new Routes_SelectorMap($Request);
-        $this->mapRoutes($Selector);
+        $Routable->mapRoutes($Selector);
 
         $newPath = '';
         $args = array();
         $Selector->getMatchedData($Destination, $newPath, $args);
 
-//        if ($Destination instanceof IRoutable) {
-//            // TODO: retreat from using IRoutable
-//
-//            $RouteUtil = new RouteUtil($Destination);
-//            $RouteUtil->renderDestination($Request, $newPath, $args);
-//
-//        } else
         if ($Destination instanceof IRenderAggregate)
             $Destination = $Destination->getRenderer($Request, $newPath, $args);
 
-        if($Destination instanceof IRender) {
-            $Destination->render($Request);
-        } else {
-            throw new \Exception("No route");
-        }
+        if($Destination instanceof IRender)
+            return $Destination;
+
+        throw new RouteNotFoundException("Route was not found: " . $path);
+    }
+
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @throws Framework\Response\Exceptions\CodedException
+     * @throws \Exception
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request) {
+        $this->routeRequest($Request, $this)
+            ->render($Request);
     }
 }
 
@@ -160,8 +166,9 @@ class Routes_SelectorMap implements IRouteMap {
         if($this->mDone)
             return false;
         list($method, $path) = explode(' ', $prefix, 2);
+        $requestPath = $this->mRequest->getPath();
         if($method === 'ANY' || $method == $this->mRequest->getMethod()) {
-            if(strpos($requestPath = $this->mRequest->getPath(), $path) === 0) {
+            if(strpos($requestPath, $path) === 0) {
                 $argPath = substr($requestPath, strlen($path));
                 $args = explode('/', trim($argPath, '/'));
                 $this->mDone = true;
@@ -177,6 +184,7 @@ class Routes_SelectorMap implements IRouteMap {
 
         return false;
     }
+
 
     function tryRenderDefault() {
         throw new \Exception("Route not found: " . $this->mRequest->getMethod() . ' ' . $this->mRequest->getPath());

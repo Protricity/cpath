@@ -8,17 +8,26 @@
 namespace CPath;
 
 use CPath\Framework\Build\IBuildable;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLIRequest;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Route\Router;
+use String;
 
 class Console implements IRenderAggregate { // Broke }, IBuildable {
 
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
 
-    function getRenderer(IRequest $Request)
+    /**
+     * Return an instance of IRender
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return IRender return the renderer instance
+     */
+    function getRenderer(IRequest $Request, $path, $args)
     {
         $routes = array();
         foreach(Router::getRoutes() as $Route){
@@ -99,4 +108,5 @@ class Console implements IRenderAggregate { // Broke }, IBuildable {
     static function createBuildableInstance() {
         return new static();
     }
+
 }

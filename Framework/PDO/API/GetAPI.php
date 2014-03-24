@@ -9,7 +9,10 @@ namespace CPath\Framework\PDO\API;
 
 
 use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Field\RequiredParam;
+use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
@@ -22,10 +25,12 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class GetAPI extends AbstractPDOAPI implements IRenderHTML {
+class GetAPI implements IAPI, IRenderHTML {
     private $mSearchColumns;
     private $mColumns;
     private $mIDField;
+
+    private $mTable;
 
     /**
      * Construct an instance of the GET API
@@ -34,8 +39,12 @@ class GetAPI extends AbstractPDOAPI implements IRenderHTML {
      * PRIMARY key is already included
      */
     function __construct(PDOPrimaryKeyTable $Table, $searchColumns=NULL) {
-        parent::__construct($Table);
+        $this->mTable = $Table;
         $this->mSearchColumns = $searchColumns ?: $Table::COLUMN_ID ?: $Table::COLUMN_PRIMARY;
+    }
+
+    function getTable() {
+        return $this->mTable;
     }
 
     /**
@@ -46,12 +55,14 @@ class GetAPI extends AbstractPDOAPI implements IRenderHTML {
         return "Get information about this " . $this->getTable()->getModelName();
     }
 
+
     /**
-     * Set up API fields. Lazy-loaded when fields are accessed
-     * @return void
-     * @throws \CPath\Framework\Api\Exceptions\APIException if no PRIMARY key column or alternative columns are available
+     * Get all API Fields
+     * @throws \CPath\Framework\Api\Exceptions\APIException
+     * @return IField[]|IFieldCollection
      */
-    final protected function setupFields() {
+    final function getFields()
+    {
         $T = $this->getTable();
         $this->mColumns = $T->findColumns($this->mSearchColumns);
 

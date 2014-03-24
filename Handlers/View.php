@@ -23,8 +23,6 @@ abstract class View implements IView, IViewConfig {
     private $mHeadFields = array();
     private $mTheme;
     private $mPath = null;
-    private $mArgs = array();
-    private $mMethod = null;
 
     public function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
@@ -40,9 +38,6 @@ abstract class View implements IView, IViewConfig {
     abstract protected function setupHeadFields(IRequest $Request);
 
     function getPath() { return $this->mPath; }
-    function getArgs() { return $this->mArgs; }
-    protected function getMethod() { return $this->mMethod; }
-    function setArgs($args) { $this->mArgs = $args; }
 
     /**
      * Set up <head> element fields for this View
@@ -93,8 +88,6 @@ abstract class View implements IView, IViewConfig {
     function getRenderer(IRequest $Request, $path, $args)
     {
         $this->mPath = rtrim($path, '/') . '/';
-        $this->mArgs = $args;
-        $this->mMethod = $Request->getMethod();
 
         // Util allows selective rendering based on request mime type
         return new RenderMimeSwitchUtility($this); // TODO: bad idea?

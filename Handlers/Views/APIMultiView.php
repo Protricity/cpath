@@ -11,16 +11,22 @@ use CPath\Framework\API\Fragments\APIFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\Data\Wrapper\IWrapper;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Framework\Route\Exceptions\RouteNotFoundException;
+use CPath\Framework\Route\Map\IRouteMap;
+use CPath\Framework\Route\Routable\IRoutable;
 use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
+use CPath\Routes;
 
-class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
+class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     /** @var APIFormFragment */
     private $mForm;
     private $mResponseBox;
@@ -29,12 +35,17 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
     /** @var IAPI[]  */
     private $mAPIs = array();
 
+    private $mArgs = array();
+    private $mTargetClass;
+
     /**
+     * @param \CPath\Handlers\Themes\Interfaces\ITheme $Target
      * @param ITheme $Theme
      */
-    public function __construct(ITheme $Theme=null) {
+    public function __construct($Target, ITheme $Theme=null) {
         parent::__construct($Theme);
-        $this->mResponseBox = new APIResponseBoxFragment($this->getTheme());
+        $this->mTargetClass = get_class($Target);
+        $this->mResponseBox = new APIResponseBoxFragment($Theme);
     }
 
 
@@ -42,39 +53,58 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
         $this->mAPIs[$prefix] = $API;
     }
 
-    private function getHandlerFromRequest() {
-        if($this->mSelectedAPI)
-            return $this->mSelectedAPI;
+
+    /**
+     * Return an instance of IRender
+     * @param IRequest $Request the IRequest instance for this render
+     * @param String $path the matched request path for this destination
+     * @param String[] $args the arguments appended to the path
+     * @return IRender return the renderer instance
+     */
+    function getRenderer(IRequest $Request, $path, $args)
+    {
+        $Renderer = parent::getRenderer($Request, $path, $args);
+
+        $Routes = new Routes();
+        try {
+            $this->mSelectedAPI = $Routes->routeRequest($Request, $this);
+
+            if($this->mSelectedAPI instanceof IWrapper)
+                $this->mSelectedAPI = $this->mSelectedAPI->getWrappedObject();
+
+            return $Renderer;
+        } catch (RouteNotFoundException $ex) {
+
+        }
 
         $prefixes = array_keys($this->mAPIs);
-        $args = $this->getArgs();
-        $path = $this->getPath();
-        $method = $this->getMethod();
-        foreach($this->mAPIs as $prefix => $API) {
-            list($m, $p) = explode(' ', $prefix);
-            if($m === 'ANY' || $m == $this->getMethod()) {
-                if(strpos($requestPath = $path, $p) === 0) {
-                    $argPath = substr($requestPath, strlen($path));
-                    $this->setArgs(explode('/', trim($argPath, '/')));
-                    return $this->mSelectedAPI = $API;
-                }
-            }
-        }
-
+        $args = $this->mArgs;
         if(!empty($args[0])) {
             if(is_numeric($args[0]) && isset($prefixes[intval($args[0])]))
-                $Renderer = $this->mAPIs[$prefixes[$args[0]]];
+                $this->mSelectedAPI = $this->mAPIs[$prefixes[$args[0]]];
             elseif(isset($this->mAPIs[$args[0]]))
-                $Renderer = $this->mAPIs[$args[0]];
+                $this->mSelectedAPI = $this->mAPIs[$args[0]];
             else
-                $Renderer = $this->mAPIs[$prefixes[0]];
+                $this->mSelectedAPI = $this->mAPIs[$prefixes[0]];
         }
-            else
-                $Renderer = $this->mAPIs[$prefixes[0]];
+        else
+            $this->mSelectedAPI = $this->mAPIs[$prefixes[0]];
 
-        return $this->mSelectedAPI = $Renderer;
+        if($this->mSelectedAPI instanceof IWrapper)
+            $this->mSelectedAPI = $this->mSelectedAPI->getWrappedObject();
+
+        return $Renderer;
     }
 
+    /**
+     * @return IAPI
+     * @throws \InvalidArgumentException
+     */
+    public function getSelectedAPI() {
+        if(!$this->mSelectedAPI)
+            throw new \InvalidArgumentException("API has not been selected");
+        return $this->mSelectedAPI;
+    }
 
     /**
      * Set up <head> element fields for this View
@@ -84,7 +114,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      */
     protected function setupHeadFields(IRequest $Request)
     {
-        $API = $this->getHandlerFromRequest();
+        $API = $this->getSelectedAPI();
 
         if(!$API instanceof IAPI) {
             throw new \InvalidArgumentException(get_class($API) . " does not implement IAPI");
@@ -136,7 +166,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
-        $API = $this->getHandlerFromRequest();
+        $API = $this->getSelectedAPI();
         $route = $Request->getMethod() . ' ' . $Request->getPath();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
@@ -159,8 +189,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderJSON(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
     }
@@ -172,8 +202,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderText(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
     }
@@ -186,8 +216,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
     }
@@ -199,7 +229,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      * @return IResponse the api call response with data, message, and status
      */
     function execute(IRequest $Request, $args) {
-        return $this->getHandlerFromRequest()
+        return $this->getSelectedAPI()
             ->execute($Request, $args);
     }
 
@@ -208,7 +238,26 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
      * @return IField[]|IFieldCollection
      */
     function getFields() {
-        return $this->getHandlerFromRequest()
+        return $this->getSelectedAPI()
             ->getFields();
+    }
+
+    /**
+     * Returns the route for this IRender
+     * @param IRouteMap $Map
+     */
+    function mapRoutes(IRouteMap $Map) {
+        foreach($this->mAPIs as $prefix => $API) {
+            if(strpos($prefix, ' ') !== false) {
+                list($method, $path) = explode(' ', $prefix, 2);
+                if($path[0] !== '/')
+                    $path = '/' . str_replace('\\', '/', strtolower(dirname($this->mTargetClass))) . '/' . $path;
+            } else {
+                $method = $prefix;
+                $path = '/' . str_replace('\\', '/', strtolower($this->mTargetClass));
+            }
+            $prefix = $method . ' ' . $path;
+            $Map->mapRoute($prefix, new APIView($API));
+        }
     }
 }

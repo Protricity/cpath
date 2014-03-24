@@ -13,3 +13,4 @@ use CPath\Framework\Response\Interfaces\IResponse;
 class ModelAlreadyExistsException extends CodedException {
     const DEFAULT_CODE = IResponse::STATUS_CONFLICT;
 }
+
