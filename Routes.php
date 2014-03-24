@@ -87,6 +87,8 @@ class Routes implements IRoutable {
 
         if($Destination instanceof IRender) {
             $Destination->render($Request);
+        } else {
+            throw new \Exception("No route");
         }
     }
 }

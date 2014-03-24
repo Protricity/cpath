@@ -11,6 +11,7 @@ use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Exceptions\MissingRenderModeException;
 use CPath\Framework\Render\HTML\IRenderHTML;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
@@ -19,7 +20,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 
-class RenderMimeSwitchUtility implements IRenderAll, IWrapper {
+class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
     private $mTarget;
 
     /**
