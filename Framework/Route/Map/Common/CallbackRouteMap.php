@@ -8,7 +8,7 @@
 namespace CPath\Framework\Route\Map\Common;
 
 use CPath\Framework\Route\Map\IRouteMap;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Route\Routable\IRoutable;
 
 class CallbackRouteMap implements IRouteMap
@@ -24,10 +24,10 @@ class CallbackRouteMap implements IRouteMap
     /**
      * Map data to a key in the map
      * @param String $prefix
-     * @param IDestination $Destination
+     * @param \CPath\Framework\Render\IRenderAggregate $Destination
      * @return void
      */
-    function mapRoute($prefix, IDestination $Destination)
+    function mapRoute($prefix, IRenderAggregate $Destination)
     {
         if(strpos($prefix, ' ') !== false) {
             list($method, $path) = explode(' ', $prefix, 2);

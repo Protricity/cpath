@@ -8,15 +8,12 @@
 namespace CPath\Framework\Response\Types;
 
 use CPath\Config;
-use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\Data\Map\Tree\Interfaces\IAssociativeTree;
-use CPath\Framework\Data\Map\Types\ArrayMap;
-use CPath\Framework\Exception\Util\ExceptionUtil;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Framework\Response\Util\ResponseUtil;
 
 
 class ExceptionResponse implements IResponse, IMappable {
@@ -34,11 +31,9 @@ class ExceptionResponse implements IResponse, IMappable {
      * @param IDataMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
-    {
-        $Map->mapKeyValue(IResponse::JSON_CODE, $this->getCode());
-        $Map->mapKeyValue(IResponse::JSON_MESSAGE, $this->getMessage());
-        $Map->mapSubsection('error', new ExceptionUtil($this->mEx));
+    function mapData(IDataMap $Map) {
+        $Util = new ResponseUtil($this);
+        $Util->mapData($Map);
     }
 
     /**
@@ -61,46 +56,4 @@ class ExceptionResponse implements IResponse, IMappable {
         return $this->mEx;
     }
 
-//    function toJSON(Array &$JSON) {
-//        parent::toJSON($JSON);
-//        if($this->mEx instanceof IJSON)
-//            Util::toJSON($this->mEx, $JSON);
-//        if(Config::$Debug) {
-//            $ex = $this->mEx->getPrevious() ?: $this->mEx;
-//            $trace = $ex->getTraceAsString();
-//            $JSON['_debug_trace'] = $trace; //current(explode("\n", $trace));
-//        }
-//    }
-//
-//    function toXML(\SimpleXMLElement $xml)
-//    {
-//        parent::toXML($xml);
-//        if($this->mEx instanceof IXML)
-//            Util::toXML($this->mEx, $xml);
-//        if(Config::$Debug) {
-//            $ex = $this->mEx->getPrevious() ?: $this->mEx;
-//            $trace = $ex->getTraceAsString();
-//            $xml->addChild('_debug_trace', current(explode("\n", $trace)));
-//        }
-//    }
-//
-//    function renderText() {
-//        parent::renderText();
-//        if($this->mEx instanceof IText)
-//            $this->mEx->renderText();
-//        if(Config::$Debug) {
-//            $ex = $this->mEx->getPrevious() ?: $this->mEx;
-//            $trace = $ex->getTraceAsString();
-//            echo "Trace: ", current(explode("\n", $trace));
-//        }
-//    }
-//
-//    function renderHtml() {
-//        parent::renderHtml();
-//        if($this->mEx instanceof IHTML)
-//            $this->mEx->renderHtml();
-//        if(Config::$Debug) {
-//            throw $this->mEx->getPrevious() ?: $this->mEx;
-//        }
-//    }
 }

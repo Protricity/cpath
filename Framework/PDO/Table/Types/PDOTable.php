@@ -356,8 +356,10 @@ abstract class PDOTable implements IPDOTable, IBuildable
         $Columns = $this->findColumns($columns ? : PDOColumn::FLAG_SEARCH);
         if (!$Columns)
             throw new \Exception("No SEARCH fields defined in " . $this->getModelName());
-        foreach ($Columns as $name => $Column) {
-            if ($compare) $name .= " {$compare} ";
+        foreach ($Columns as $Column) {
+            $name = $Column->getName();
+            if ($compare)
+                $name .= " {$compare} ";
             $Select->where($name, $search);
         }
 

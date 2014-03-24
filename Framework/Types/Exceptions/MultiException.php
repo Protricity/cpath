@@ -7,16 +7,19 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Types\Exceptions;
 
+use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\Exception\Util\ExceptionUtil;
+use CPath\Framework\Response\Types\ExceptionResponse;
 
 class MultiException extends \Exception implements \Countable, IMappable {
     /** @var \Exception[]  */
     private $mEx = array();
 
-    public function add(\Exception $ex) {
-        if($ex instanceof \Exception)
+    public function add(\Exception $ex, $fieldName=null) {
+        if($ex instanceof ValidationException)
+            $ex = $ex->getFieldError($fieldName); // TODO: fix
+        else if($ex instanceof \Exception)
             $ex = $ex->getMessage();
         $this->message = ($this->message ? $this->message."\n" : "") . $ex;
         $this->mEx[] = $ex;
@@ -29,7 +32,7 @@ class MultiException extends \Exception implements \Countable, IMappable {
      */
     function mapData(IDataMap $Map) {
         foreach($this->mEx as $ex)
-            $Map->mapArrayObject(new ExceptionUtil($ex));
+            $Map->mapArrayObject(new ExceptionResponse($ex));
     }
 
     public function count() {

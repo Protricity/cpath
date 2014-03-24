@@ -59,6 +59,11 @@ abstract class AbstractRequest extends ArrayObject implements IRequest {
     function getPath() { return $this->mPath; }
 
     /**
+     * @return Array
+     */
+    function getArgs() { return $this->mArgs; }
+
+    /**
      * Returns Request headers
      * @param String|Null $key the header key to return or all headers if null
      * @return mixed

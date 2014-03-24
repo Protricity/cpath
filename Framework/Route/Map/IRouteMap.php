@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Route\Map;
 
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Route\IRoute;
 
 interface IRouteMap {
@@ -15,9 +15,9 @@ interface IRouteMap {
     /**
      * Map data to a key in the map
      * @param String $prefix
-     * @param \CPath\Framework\Route\Render\IDestination $Destination
+     * @param \CPath\Framework\Render\IRenderAggregate $Destination
      * @return bool if true the mapping will discontinue
      */
-    function mapRoute($prefix, IDestination $Destination);
+    function mapRoute($prefix, IRenderAggregate $Destination);
 }
 

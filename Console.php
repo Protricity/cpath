@@ -10,15 +10,15 @@ namespace CPath;
 use CPath\Framework\Build\IBuildable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Types\CLIRequest;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Route\Router;
 
-class Console implements IDestination { // Broke }, IBuildable {
+class Console implements IRenderAggregate { // Broke }, IBuildable {
 
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
 
-    function renderDestination(IRequest $Request)
+    function getRenderer(IRequest $Request)
     {
         $routes = array();
         foreach(Router::getRoutes() as $Route){

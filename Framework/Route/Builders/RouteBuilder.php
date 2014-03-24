@@ -12,7 +12,7 @@ use CPath\Config;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Build\API\Build;
 use CPath\Framework\Build\IBuilder;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Log;
 
 /**
@@ -35,7 +35,7 @@ PHP;
 );
 PHP;
 
-    /** @var IDestination[] */
+    /** @var IRenderAggregate[] */
     private $mRoutes = array();
 
     protected function __construct() {
@@ -44,10 +44,10 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IDestination $Destination
+     * @param IRenderAggregate $Destination
      * @throws \CPath\Exceptions\BuildException
      */
-    protected function addRoute($route, IDestination $Destination) {
+    protected function addRoute($route, IRenderAggregate $Destination) {
         list($method, $path) = explode(' ', $route, 2);
         $class = get_class($Destination);
         if(!$path)
@@ -168,9 +168,9 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IDestination $Destination
+     * @param IRenderAggregate $Destination
      */
-    public static function buildRoute($route, IDestination $Destination) {
+    public static function buildRoute($route, IRenderAggregate $Destination) {
         static $Inst = null;
         if(!$Inst) {
             $Inst = new RouteBuilder();

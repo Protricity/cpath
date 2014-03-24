@@ -9,14 +9,14 @@ namespace CPath\Framework\Render\Common;
 
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\JSON\Renderers\HTMLRenderer;
 use CPath\Framework\Render\JSON\Renderers\JSONRenderer;
 use CPath\Framework\Render\JSON\Renderers\TextRenderer;
 use CPath\Framework\Render\XML\Renderers\XMLRenderer;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class MapRenderer implements IRender
+class MapRenderer implements IRenderAll
 {
     private $mMap;
 
@@ -60,10 +60,11 @@ class MapRenderer implements IRender
      * Render request as xml
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
+     * @param bool $declaration
      * @return String|void always returns void
      */
-    function renderXML(IRequest $Request, $rootElementName = 'root')
+    function renderXML(IRequest $Request, $rootElementName = 'root', $declaration=true)
     {
-        XMLRenderer::renderMap($this->mMap, $rootElementName);
+        XMLRenderer::renderMap($this->mMap, $rootElementName, $declaration);
     }
 }

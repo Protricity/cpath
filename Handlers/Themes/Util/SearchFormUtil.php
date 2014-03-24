@@ -55,7 +55,7 @@ class SearchFormUtil implements IDescribable, IViewConfig {
 
     public function renderForm(IRequest $Request) {
         $this->mTheme->renderFragmentStart($Request, $this, 'search-form-util');
-            $this->mForm->renderDestination($Request);
+            $this->mForm->renderHtml($Request);
             $this->mTheme->renderSearchContent($Request, $this->mResponse, 'search-content');
             $this->mResponseBox->renderResponseBox($Request);
         $this->mTheme->renderFragmentEnd($Request);

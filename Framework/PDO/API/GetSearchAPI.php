@@ -100,9 +100,9 @@ class GetSearchAPI extends GetBrowseAPI implements IAPIGetBrowseCallbacks {
 
         if(!is_int($search)) {
             $columns2 = array();
-            foreach($columns as $name => $Column)
+            foreach($columns as $Column)
                 if(!$Column->hasFlag(PDOColumn::FLAG_NUMERIC))
-                    $columns2[$name] = $Column;
+                    $columns2[$Column->getName()] = $Column;
             if($columns2)
                 $columns = $columns2;
         }

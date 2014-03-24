@@ -20,11 +20,11 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Views\APIView;
 use CPath\Log;
 
-class Install implements IDestination, IBuildable, IAPI {
+class Install implements IRenderAggregate, IBuildable, IAPI {
 
     const FIELD_NO_PROMPT = 'y';
 
@@ -55,9 +55,9 @@ class Install implements IDestination, IBuildable, IAPI {
      * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request, $path, $args) {
         $Util = new APIView($this);
-        $Util->renderDestination($Request, $path, $args);
+        return $Util->getRenderer($Request, $path, $args);
     }
 
 

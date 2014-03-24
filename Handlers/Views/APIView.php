@@ -4,11 +4,13 @@ namespace CPath\Handlers\Views;
 use CPath\Base;
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -18,7 +20,7 @@ use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
-class APIView extends NavBarLayout implements IRender {
+class APIView extends NavBarLayout implements IRenderAll, IAPI {
 
     private $mAPI = null;
     private $mForm, $mResponseBox;
@@ -113,8 +115,7 @@ class APIView extends NavBarLayout implements IRender {
      */
     function renderJSON(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->mAPI);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
     }
@@ -126,8 +127,7 @@ class APIView extends NavBarLayout implements IRender {
      */
     function renderText(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->mAPI);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
     }
@@ -140,9 +140,26 @@ class APIView extends NavBarLayout implements IRender {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $ExecUtil = new APIExecuteUtil($this->mAPI);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
+        $Response = $this->execute($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
+    }
+
+    /**
+     * Execute this API Endpoint with the entire request.
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
+     * @return IResponse the api call response with data, message, and status
+     */
+    function execute(IRequest $Request, $args) {
+        return $this->mAPI->execute($Request, $args);
+    }
+
+    /**
+     * Get all API Fields
+     * @return IField[]|IFieldCollection
+     */
+    function getFields() {
+        return $this->mAPI->getFields();
     }
 }

@@ -2,15 +2,16 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Describable\Describable;
-use CPath\Framework\Data\Map\Types\ArrayMap;
+use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;
 
-class ModelTableFragment implements IDestination{
+class ModelTableFragment implements IRender{
 
     private $mModel, $mTheme;
 
@@ -28,7 +29,7 @@ class ModelTableFragment implements IDestination{
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderDestination(IRequest $Request)
+    function render(IRequest $Request)
     {
         $Model = $this->mModel;
         $caption = null;
@@ -37,7 +38,7 @@ class ModelTableFragment implements IDestination{
             $export = ArrayMap::get($Model);
 
 //            //  TODO: why?
-//            foreach($Model->table()->getColumns() as $name => $Column)
+//            foreach($Model->table()->getColumns() as $Column)
 //                if(isset($data[$name]))
 //                    $export[$Column->getComment()] = $data[$name];
         } else {

@@ -17,13 +17,13 @@ use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDatabase, IDestination {
+abstract class PDODatabase extends \PDO implements IDatabase, IRenderAggregate {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -131,12 +131,13 @@ abstract class PDODatabase extends \PDO implements IDatabase, IDestination {
 
     // Implement IRender
 
-    function renderDestination(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request, $path, $args) {
         if(!Base::isCLI() && !headers_sent())
             header('text/plain');
         Log::u(__CLASS__, "DB Upgrader: ".get_class($this));
         if($args[0]) {
-            switch(strtolower($args[0])) {
+            $arg = array_shift($args);
+            switch(strtolower($arg)) {
                 case 'upgrade':
                     $this->upgrade(false, $Request['force']);
                     break;
@@ -147,7 +148,7 @@ abstract class PDODatabase extends \PDO implements IDatabase, IDestination {
                     $this->upgrade(true, $Request['force']);
                     $Build = new Build();
                     Log::u(__CLASS__, "Rebuilding Models...");
-                    $Build->execute($Request);
+                    $Build->execute($Request, $args);
                     break;
                 default:
                     Log::u(__CLASS__, "Use 'upgrade', 'reset', or 'rebuild' to upgrade database");

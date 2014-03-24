@@ -72,8 +72,7 @@ abstract class ArrayObject implements IArrayObject {
      * The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset) {
-        $data = &$this->getArray();
-        return isset($data[$offset]);
+        return array_key_exists($offset, $this->getArray());
     }
 
     /**

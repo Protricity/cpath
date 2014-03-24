@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers;
 
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Render\IDestination;
 
-class File implements IDestination{
+class File implements IRender{
     const BUILD_IGNORE = true;
 
     private $mFilePath;
@@ -19,9 +19,13 @@ class File implements IDestination{
         $this->mFilePath = $filePath;
     }
 
-    public function renderDestination(IRequest $Request)
+    /**
+     * Render this handler
+     * @param IRequest $Request the IRequest instance for this render
+     * @return void
+     */
+    function render(IRequest $Request)
     {
         include($this->mFilePath);
-        return true;
     }
 }

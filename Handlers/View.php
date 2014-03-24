@@ -1,9 +1,9 @@
 <?php
 namespace CPath\Handlers;
 
-use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -24,6 +24,7 @@ abstract class View implements IView, IViewConfig {
     private $mTheme;
     private $mPath = null;
     private $mArgs = array();
+    private $mMethod = null;
 
     public function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
@@ -40,6 +41,8 @@ abstract class View implements IView, IViewConfig {
 
     function getPath() { return $this->mPath; }
     function getArgs() { return $this->mArgs; }
+    protected function getMethod() { return $this->mMethod; }
+    function setArgs($args) { $this->mArgs = $args; }
 
     /**
      * Set up <head> element fields for this View
@@ -51,7 +54,7 @@ abstract class View implements IView, IViewConfig {
             $this->addHeadHTML("<base href='{$basePath}' />", true);
         }
 
-        $basePath = Base::getClassPublicPath(__CLASS__);
+        //$basePath = Base::getClassPublicPath(__CLASS__);
         //$this->addHeadScript('https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js', true);
         //$this->addHeadScript($basePath . 'assets/cpath.js', true);
 
@@ -79,21 +82,22 @@ abstract class View implements IView, IViewConfig {
         }
     }
 
+
     /**
-     * Render this route destination
+     * Return an instance of IRender
      * @param IRequest $Request the IRequest instance for this render
      * @param String $path the matched request path for this destination
      * @param String[] $args the arguments appended to the path
-     * @return String|void always returns void
+     * @return IRender return the renderer instance
      */
-    final function renderDestination(IRequest $Request, $path, $args)
+    function getRenderer(IRequest $Request, $path, $args)
     {
         $this->mPath = rtrim($path, '/') . '/';
         $this->mArgs = $args;
+        $this->mMethod = $Request->getMethod();
 
         // Util allows selective rendering based on request mime type
-        $Util = new RenderMimeSwitchUtility($this);
-        $Util->render($Request);
+        return new RenderMimeSwitchUtility($this); // TODO: bad idea?
     }
 
     /**

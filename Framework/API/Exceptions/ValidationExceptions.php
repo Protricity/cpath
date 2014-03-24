@@ -24,6 +24,6 @@ class ValidationExceptions extends MultiException
 
     public function addFieldException($fieldName, ValidationException $ex)
     {
-        parent::add($ex->getFieldError($fieldName), $fieldName);
+        parent::add($ex, $fieldName);
     }
 }

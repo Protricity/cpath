@@ -8,11 +8,13 @@
 namespace CPath\Framework\PDO\Table\Model\Types;
 
 use CPath\Config;
+use CPath\Describable\Describable;
 use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\PDO\Table\Types\PDOTable;
+use CPath\Framework\Response\Interfaces\IResponseCode;
 
 abstract class PDOModel implements IPDOModel {
     const MODEL_NAME = null;
@@ -39,6 +41,10 @@ abstract class PDOModel implements IPDOModel {
             throw new \InvalidArgumentException("Table may only be set once");
         $this->mTable = $Table;
     }
+
+    /**
+     * @return PDOTable
+     */
     function table() { return $this->mTable ?: $this->mTable = $this->loadTable(); }
 
     /**
@@ -86,9 +92,11 @@ abstract class PDOModel implements IPDOModel {
      * @return void
      */
     function mapData(IDataMap $Map) {
-        foreach($this->table()->getColumns() as $name => $Column)
-            if($Column->hasFlag(IPDOColumn::FLAG_EXPORT))
+        foreach($this->table()->getColumns() as $Column)
+            if($Column->hasFlag(IPDOColumn::FLAG_EXPORT)) {
+                $name = $Column->getName();
                 $Map->mapKeyValue($name, $this->$name);
+            }
     }
 
     /**
@@ -98,9 +106,27 @@ abstract class PDOModel implements IPDOModel {
     function serialize()
     {
         $data = array();
-        foreach($this->table()->getColumns() as $name => $Column)
+        foreach($this->table()->getColumns() as $Column) {
+            $name = $Column->getName();
             $data[$name] = $this->$name;
+        }
         return $data;
+    }
+
+    /**
+     * Get the IResponse Message
+     * @return String
+     */
+    function getMessage() {
+        return Describable::get($this)->getTitle();
+    }
+
+    /**
+     * Get the request status code
+     * @return int
+     */
+    function getCode() {
+        return IResponseCode::STATUS_SUCCESS;
     }
 
     function __toString() {
@@ -145,4 +171,5 @@ abstract class PDOModel implements IPDOModel {
      * @return String the Class name
      */
     final static function cls() { return get_called_class(); }
+
 }

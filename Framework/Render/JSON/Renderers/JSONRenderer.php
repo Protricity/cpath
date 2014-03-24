@@ -14,7 +14,7 @@ class JSONRenderer implements IDataMap
 {
     const DELIMIT = ', ';
 
-    private $mStarted = false, $mNextDelim=null;
+    private $mStarted = false, $mNextDelim=null, $mIsArray = false;
     private $mCount = 0;
 
 
@@ -23,21 +23,28 @@ class JSONRenderer implements IDataMap
     }
 
     function __destruct() {
-        if($this->mStarted)
-            $this->stop();
+        $this->flush();
     }
 
-    public function start() {
-        if($this->mStarted)
-            throw new \InvalidArgumentException(__CLASS__ . " was already started");
-        echo '{';
-        $this->mStarted = true;
+    private function tryStart($isArray) {
+        if(!$this->mStarted) {
+            $this->mStarted = true;
+            $this->mIsArray = $isArray;
+            echo $isArray ? '[' : '{';
+        }
     }
 
-    public function stop() {
-        if(!$this->mStarted)
-            throw new \InvalidArgumentException(__CLASS__ . " was not started");
-        echo '}';
+    public function flush() {
+        if(!$this->mStarted) {
+            echo '{}';
+            $this->mStarted = false;
+            return;
+            //throw new \InvalidArgumentException(__CLASS__ . " was not started");
+        }
+        if($this->mIsArray)
+            echo ']';
+        else
+            echo '}';
         $this->mStarted = false;
     }
 
@@ -46,12 +53,16 @@ class JSONRenderer implements IDataMap
      * @param String $key
      * @param mixed|Callable $value
      * @param int $flags
+     * @throws \InvalidArgumentException
      * @return void
      */
     function mapKeyValue($key, $value, $flags = 0)
     {
-        if(!$this->mStarted)
-            $this->start();
+        $this->tryStart(false);
+        if($this->mIsArray) {
+            throw new \InvalidArgumentException(__CLASS__ . " could not map subsection to an array");
+        }
+
         if($this->mNextDelim)
             echo $this->mNextDelim;
         echo json_encode($key), ':', json_encode($value);
@@ -62,45 +73,56 @@ class JSONRenderer implements IDataMap
      * Map data to subsection
      * @param $subsectionKey
      * @param IMappable $Mappable
+     * @throws \InvalidArgumentException
      * @return void
      */
     function mapSubsection($subsectionKey, IMappable $Mappable)
     {
-        if(!$this->mStarted)
-            $this->start();
+        $this->tryStart(false);
+        if($this->mIsArray) {
+            throw new \InvalidArgumentException(__CLASS__ . " could not map subsection to an array");
+        }
+
         if($this->mNextDelim)
             echo $this->mNextDelim;
-        echo json_encode($subsectionKey), ':{';
+        echo json_encode($subsectionKey), ':';
         $this->mNextDelim = null;
 
-        $c = $this->mCount; $this->mCount = 0;
-        $Mappable->mapData($this);
-        $this->mCount = $c;
+        JSONRenderer::renderMap($Mappable);
 
-        echo '}';
         $this->mNextDelim = self::DELIMIT;
     }
 
     /**
      * Map an object to this array
      * @param IMappable $Mappable
+     * @throws \InvalidArgumentException
      * @return void
      */
     function mapArrayObject(IMappable $Mappable)
     {
+        $this->tryStart(true);
+        if(!$this->mIsArray) {
+            throw new \InvalidArgumentException(__CLASS__ . " could not array value to an object");
+        }
         if($this->mCount)
             echo self::DELIMIT;
-        $Mappable->mapData($this);
+        JSONRenderer::renderMap($Mappable);
         $this->mCount++;
     }
 
     /**
      * Add a value to the array
      * @param mixed $value
+     * @throws \InvalidArgumentException
      * @return void
      */
     function mapArrayValue($value)
     {
+        $this->tryStart(true);
+        if(!$this->mIsArray) {
+            throw new \InvalidArgumentException(__CLASS__ . " could not array value to an object");
+        }
         if($this->mCount)
             echo self::DELIMIT;
         echo json_encode($value);
@@ -111,8 +133,6 @@ class JSONRenderer implements IDataMap
 
     static function renderMap(IMappable $Map) {
         $Renderer = new JSONRenderer();
-        $Renderer->start();
         $Map->mapData($Renderer);
-        $Renderer->stop();
     }
 }

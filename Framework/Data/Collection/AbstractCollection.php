@@ -15,7 +15,7 @@ abstract class AbstractCollection implements ICollection {
     private $mItems = array();
 
     /**
-     * @param ICollectionItem[] $Items array or varargs
+     * @param ICollectionItem|ICollectionItem[] $Items array or varargs
      */
     final function __construct($Items=null) { // For new static()
         if($Items) {

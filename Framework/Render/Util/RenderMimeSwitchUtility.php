@@ -7,11 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Render\Util;
 
+use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Exceptions\MissingRenderModeException;
-use CPath\Framework\Render\Exceptions\RenderException;
 use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\XML\IRenderXML;
@@ -19,17 +19,17 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 
-class RenderMimeSwitchUtility implements IRender {
+class RenderMimeSwitchUtility implements IRenderAll, IWrapper {
     private $mTarget;
 
     /**
-     * @param mixed $Target
+     * @param mixed $RenderTarget
      */
-    function __construct($Target) {
-        $this->mTarget = $Target;
+    function __construct($RenderTarget) {
+        $this->mTarget = $RenderTarget;
     }
 
-    public function getTarget() {
+    function getWrappedObject() {
         return $this->mTarget;
     }
 
@@ -169,5 +169,4 @@ class RenderMimeSwitchUtility implements IRender {
             $Util->renderXML($Request, $rootElementName);
         }
     }
-
 }

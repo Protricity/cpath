@@ -6,11 +6,13 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath;
+use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Framework\Route\Map\IRouteMap;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Route\Routable\IRoutable;
 
 class Routes implements IRoutable {
@@ -46,7 +48,7 @@ class Routes implements IRoutable {
     /**
      * Return the handler as requested
      * @param IRequest $Request the IRequest instance for this render
-     * @return \CPath\Framework\Route\Render\IDestination found handler
+     * @return \CPath\Framework\Render\IRenderAggregate found handler
      */
     function getHandlerFromRequest(IRequest $Request) {
         $Selector = new Routes_SelectorMap($Request);
@@ -80,35 +82,38 @@ class Routes implements IRoutable {
 //            $RouteUtil->renderDestination($Request, $newPath, $args);
 //
 //        } else
-        if ($Destination instanceof IDestination) {
-            $Destination->renderDestination($Request, $newPath, $args);
+        if ($Destination instanceof IRenderAggregate)
+            $Destination = $Destination->getRenderer($Request, $newPath, $args);
+
+        if($Destination instanceof IRender) {
+            $Destination->render($Request);
         }
     }
 }
 
-class Routes_LazyRender implements IDestination {
+class Routes_LazyRender implements IRenderAggregate {
     private $mDestination;
     public function __construct($destination) {
         $this->mDestination = $destination;
     }
 
     function getInstance() {
-        /** @var \CPath\Framework\Route\Render\IDestination $Inst */
+        /** @var \CPath\Framework\Render\IRenderAggregate $Inst */
         $Inst = $this->mDestination;
         $Inst = new $Inst;
         return $Inst;
     }
 
     /**
-     * Render this route destination
+     * Return an instance of IRender
      * @param IRequest $Request the IRequest instance for this render
      * @param String $path the matched request path for this destination
      * @param String[] $args the arguments appended to the path
-     * @return String|void always returns void
+     * @return IRender return the renderer instance
      */
-    function renderDestination(IRequest $Request, $path, $args) {
-        $this->getInstance()
-            ->renderDestination($Request, $path, $args);
+    function getRenderer(IRequest $Request, $path, $args) {
+        return $this->getInstance()
+            ->getRenderer($Request, $path, $args);
     }
 }
 
@@ -125,7 +130,7 @@ class Routes_SelectorMap implements IRouteMap {
     }
 
     /**
-     * @param IDestination $Destination
+     * @param IRenderAggregate $Destination
      * @param String $path
      * @param array $args
      */
@@ -136,7 +141,7 @@ class Routes_SelectorMap implements IRouteMap {
     }
 
     /**
-     * @return IDestination
+     * @return IRenderAggregate
      */
     function getDestination() {
         return $this->mDestination;
@@ -145,10 +150,10 @@ class Routes_SelectorMap implements IRouteMap {
     /**
      * Map data to a key in the map
      * @param String $prefix
-     * @param IDestination $Destination
+     * @param IRenderAggregate $Destination
      * @return bool if true the mapping will discontinue
      */
-    function mapRoute($prefix, IDestination $Destination)
+    function mapRoute($prefix, IRenderAggregate $Destination)
     {
         if($this->mDone)
             return false;

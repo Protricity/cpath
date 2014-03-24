@@ -22,19 +22,28 @@ class Tester implements ITester
     function assert($condition, $label = null)
     {
         if(!$condition)
-            throw new TestException(($label ? $label . ' - ' : '') . "Assertion failed");
+            $this->fail(null, $label);
     }
 
     /**
      * @param mixed $expected
      * @param mixed $actual
-     * @param String $label
+     * @param String $label optional label for thrown exception
      * @return void
      * @throws TestException
      */
     function assertEquals($expected, $actual, $label = null)
     {
         if($expected !== $actual)
-            throw new TestException(($label ? $label . ' - ' : '') . "Assertion failed: {$expected} !== {$actual}");
+            $this->fail("{$expected} !== {$actual}", $label);
+    }
+
+    /**
+     * @param $reason
+     * @param String $label optional label for thrown exception
+     * @throws TestException
+     */
+    function fail($reason, $label = null) {
+        throw new TestException(($label ? $label . ' - ' : '') . "Assertion failed: " . $reason);
     }
 }

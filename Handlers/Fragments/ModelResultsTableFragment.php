@@ -3,7 +3,7 @@ namespace CPath\Handlers\Fragments;
 
 use CPath\Base;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\Data\Map\Types\ArrayMap;
+use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Attribute\IAttributes;

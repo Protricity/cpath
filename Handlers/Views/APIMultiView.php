@@ -4,20 +4,23 @@ namespace CPath\Handlers\Views;
 use CPath\Base;
 use CPath\Config;
 use CPath\Describable\Describable;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 use CPath\Handlers\Layouts\NavBarLayout;
 use CPath\Handlers\Themes\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
-class APIMultiView extends NavBarLayout implements IRender {
+class APIMultiView extends NavBarLayout implements IRenderAll, IAPI {
     /** @var APIFormFragment */
     private $mForm;
     private $mResponseBox;
@@ -45,13 +48,29 @@ class APIMultiView extends NavBarLayout implements IRender {
 
         $prefixes = array_keys($this->mAPIs);
         $args = $this->getArgs();
+        $path = $this->getPath();
+        $method = $this->getMethod();
+        foreach($this->mAPIs as $prefix => $API) {
+            list($m, $p) = explode(' ', $prefix);
+            if($m === 'ANY' || $m == $this->getMethod()) {
+                if(strpos($requestPath = $path, $p) === 0) {
+                    $argPath = substr($requestPath, strlen($path));
+                    $this->setArgs(explode('/', trim($argPath, '/')));
+                    return $this->mSelectedAPI = $API;
+                }
+            }
+        }
 
-        if(is_numeric($args[0]) && isset($prefixes[intval($args[0])]))
-            $Renderer = $this->mAPIs[$prefixes[$args[0]]];
-        elseif(isset($this->mAPIs[$args[0]]))
-            $Renderer = $this->mAPIs[$args[0]];
-        else
-            $Renderer = $this->mAPIs[$prefixes[0]];
+        if(!empty($args[0])) {
+            if(is_numeric($args[0]) && isset($prefixes[intval($args[0])]))
+                $Renderer = $this->mAPIs[$prefixes[$args[0]]];
+            elseif(isset($this->mAPIs[$args[0]]))
+                $Renderer = $this->mAPIs[$args[0]];
+            else
+                $Renderer = $this->mAPIs[$prefixes[0]];
+        }
+            else
+                $Renderer = $this->mAPIs[$prefixes[0]];
 
         return $this->mSelectedAPI = $Renderer;
     }
@@ -65,7 +84,7 @@ class APIMultiView extends NavBarLayout implements IRender {
      */
     protected function setupHeadFields(IRequest $Request)
     {
-        $API = $this->getHandlerFromRequest($Request);
+        $API = $this->getHandlerFromRequest();
 
         if(!$API instanceof IAPI) {
             throw new \InvalidArgumentException(get_class($API) . " does not implement IAPI");
@@ -117,7 +136,7 @@ class APIMultiView extends NavBarLayout implements IRender {
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
-        $API = $this->getHandlerFromRequest($Request);
+        $API = $this->getHandlerFromRequest();
         $route = $Request->getMethod() . ' ' . $Request->getPath();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
@@ -140,7 +159,7 @@ class APIMultiView extends NavBarLayout implements IRender {
      */
     function renderJSON(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest($Request));
+        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
         $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
@@ -153,7 +172,7 @@ class APIMultiView extends NavBarLayout implements IRender {
      */
     function renderText(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest($Request));
+        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
         $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
@@ -167,9 +186,29 @@ class APIMultiView extends NavBarLayout implements IRender {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest($Request));
+        $ExecUtil = new APIExecuteUtil($this->getHandlerFromRequest());
         $Response = $ExecUtil->executeOrCatch($Request, $this->getArgs());
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
+    }
+
+    /**
+     * Execute this API Endpoint with the entire request.
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param Array $args additional arguments for this execution
+     * @return IResponse the api call response with data, message, and status
+     */
+    function execute(IRequest $Request, $args) {
+        return $this->getHandlerFromRequest()
+            ->execute($Request, $args);
+    }
+
+    /**
+     * Get all API Fields
+     * @return IField[]|IFieldCollection
+     */
+    function getFields() {
+        return $this->getHandlerFromRequest()
+            ->getFields();
     }
 }

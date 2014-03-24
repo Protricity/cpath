@@ -16,11 +16,11 @@ class BuildTest extends PHPUnit_Framework_TestCase {
 
     public function testBuild()
     {
-        $Response = Test::cmd('CLI /build -1v');
+        //$Response = Test::cmd('CLI /build -1v');
     }
     public function testInstall()
     {
-        $Response = Test::cmd('CLI /install');
+        //$Response = Test::cmd('CLI /install');
     }
 
 }

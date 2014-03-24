@@ -10,6 +10,10 @@ use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Data\Collection\AbstractCollection;
 
+/**
+ * Class FieldCollection
+ * @package CPath\Framework\Api\Field\Collection
+ */
 class FieldCollection extends AbstractCollection implements IFieldCollection {
 
     /**

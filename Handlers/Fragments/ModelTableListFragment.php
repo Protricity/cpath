@@ -2,12 +2,13 @@
 namespace CPath\Handlers\Fragments;
 
 use CPath\Framework\PDO\Query\PDOSelect;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 
-class ModelTableListFragment implements IDestination{
+class ModelTableListFragment implements IRender {
 
     private $mQuery, $mTheme;
 
@@ -25,11 +26,11 @@ class ModelTableListFragment implements IDestination{
      * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderDestination(IRequest $Request)
+    function render(IRequest $Request)
     {
         foreach($this->mQuery as $data) {
             $MF = new ModelTableFragment($data, $this->mTheme);
-            $MF->renderDestination($Request);
+            $MF->render($Request);
         }
     }
 }

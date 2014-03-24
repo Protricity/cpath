@@ -66,11 +66,13 @@
 
                     switch(ajax.dataType) {
                         case 'json':
-                            response = new CPath.API.JSONSearchResponse(jQuery.parseJSON(content));
+                            var jsonContent = jQuery.parseJSON(content);
+                            response = new CPath.API.JSONSearchResponse(jsonContent);
                             TRIGGERS.trigger( "response-json", [response, jqXHR]);
                             break;
                         case 'xml':
-                            response = new CPath.API.XMLSearchResponse(jQuery.parseXML(content));
+                            var xmlContent = jQuery.parseXML(content);
+                            response = new CPath.API.XMLSearchResponse(xmlContent);
                             TRIGGERS.trigger( "response-xml", [response, jqXHR]);
                             break;
                         default :
@@ -142,8 +144,9 @@
         this.base = THIS.Response;
         this.base(data);
         var context = this;
-        this.getStatus = function() { return data.status; };
-        this.getMessage = function() { return data.msg; };
+        this.getCode = function() { return data.code; };
+        this.getStatus = function() { return data.code == 200; };
+        this.getMessage = function() { return data.message; };
         this.getResponse = function() { return data.response; };
     };
 
@@ -153,8 +156,9 @@
         this.base(data);
         var dom = jQuery(data).children('root');
         this.getDOM = function() { return dom; };
-        this.getStatus = function() { return dom.children('status').val(); };
-        this.getMessage = function() { return dom.children('msg').val(); };
+        this.getCode = function() { return dom.children('code').val(); };
+        this.getStatus = function() { return dom.children('code').val() == 200; };
+        this.getMessage = function() { return dom.children('message').val(); };
         this.getResponse = function() { return dom.children('response'); };
     };
 

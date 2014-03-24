@@ -21,11 +21,11 @@ use CPath\Framework\Build\IBuilder;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Framework\Route\Render\IDestination;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Views\APIView;
 use CPath\Log;
 
-class Build implements IDestination, IAPI, IBuildable {
+class Build implements IRenderAggregate, IAPI, IBuildable {
 
     //const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     //const ROUTE_METHOD = 'CLI';    // CLI only
@@ -464,9 +464,9 @@ class Build implements IDestination, IAPI, IBuildable {
      * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function renderDestination(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request, $path, $args) {
         $RenderUtil = new APIView($this);
-        $RenderUtil->renderDestination($Request, $path, $args);
+        return $RenderUtil->getRenderer($Request, $path, $args);
     }
 
 }

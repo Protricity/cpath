@@ -9,8 +9,9 @@ namespace CPath\Framework\PDO\Table\Model\Interfaces;
 
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
+use CPath\Framework\Response\Interfaces\IResponse;
 
-interface IPDOModel extends IMappable, ISerializable {
+interface IPDOModel extends IMappable, ISerializable, IResponse {
 
     /**
      * @return \CPath\Framework\PDO\Table\Types\PDOTable

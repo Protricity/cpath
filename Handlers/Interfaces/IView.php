@@ -9,9 +9,10 @@ namespace CPath\Handlers\Interfaces;
 
 
 use CPath\Framework\Render\HTML\IRenderHTML;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-interface IView extends IRenderHTML {
+interface IView extends IRenderAggregate {
 
     /**
      * Render the html body

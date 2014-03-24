@@ -279,7 +279,7 @@ class CPathDefaultTheme implements ITheme {
     function renderBrowseContent(IRequest $Request, PDOSelect $Query, IAttributes $Attr = NULL) {
         foreach($Query as $data) {
             $MF = new ModelTableFragment($data, $this);
-            $MF->renderDestination($Request);
+            $MF->getRenderer($Request);
         }
     }
 

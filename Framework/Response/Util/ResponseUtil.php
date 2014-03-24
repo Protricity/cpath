@@ -12,7 +12,7 @@ use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\JSON\Renderers\JSONRenderer;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\Util\RenderIndents as RI;
@@ -22,7 +22,7 @@ use CPath\Framework\Render\XML\Renderers\XMLRenderer;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
-final class ResponseUtil implements IMappable, IRender {
+final class ResponseUtil implements IMappable, IRenderAll {
     private $mResponse;
 
     private static $mSent = false;
@@ -46,7 +46,7 @@ final class ResponseUtil implements IMappable, IRender {
             $Map->mapKeyValue('code', $Response->getCode());
 
             // TODO: remove Backwards compatability
-            $Map->mapKeyValue('msg', $Response->getMessage());
+            //$Map->mapKeyValue('msg', $Response->getMessage());
             $Map->mapKeyValue('status', $Response->getCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false');
         }
     }
@@ -130,9 +130,9 @@ final class ResponseUtil implements IMappable, IRender {
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $rootElementName);
         } elseif($Response instanceof IMappable) {
-            XMLRenderer::renderMap($Response);
+            XMLRenderer::renderMap($Response, $rootElementName, true);
         } else {
-            XMLRenderer::renderMap($this);
+            XMLRenderer::renderMap($this, $rootElementName, true);
         }
     }
 
