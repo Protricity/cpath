@@ -52,13 +52,11 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
     /**
      * Render this route destination
      * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function getRenderer(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request) {
         $Util = new APIView($this);
-        return $Util->getRenderer($Request, $path, $args);
+        return $Util->getRenderer($Request);
     }
 
 
