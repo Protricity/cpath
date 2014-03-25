@@ -53,7 +53,7 @@ PHP;
             $oldVersion = $DB->getDBVersion();
         $curVersion = $DB::VERSION;
         $Class = new \ReflectionClass($DB);
-        $schemaFolder = $this->getFolder($Class, 'schema');
+        $schemaFolder = $this->getFolder($Class, 'Schema');
         $files = scandir($schemaFolder);
         if (!$files)
             throw new UpgradeException("No Schemas found in " . $schemaFolder);
