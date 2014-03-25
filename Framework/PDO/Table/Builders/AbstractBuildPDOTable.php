@@ -14,7 +14,6 @@ use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException;
 use CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
-use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Column\Template\Interfaces\IPDOColumnTemplate;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
@@ -26,7 +25,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
     private $mName, $mTitle, $mModelName, $mModelClassName, $mTableClassName, $mComment, $mNamespace,
         $mSearchWildCard, $mSearchLimit, $mSearchLimitMax, $mAllowHandler = false, $mTemplateID;
 
-    /** @var \CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection|BuildPDOColumn[] */
+    /** @var BuildPDOColumn[] */
     private $mColumns;
 
     protected $mUnfound = array(); // TODO: private?
@@ -64,7 +63,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
      * @internal param $namespace
      */
     public function __construct(\PDO $DB, $name, $comment, $PDOTableClass = null, $PDOModelClass = null) {
-        $this->mColumns = new PDOColumnCollection();
+        $this->mColumns = array();
 
         $this->mName = $name;
         $this->mTitle = ucwords(str_replace('_', ' ', $this->getTableName()));
@@ -236,7 +235,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
     }
 
     /**
-     * @return \CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection|BuildPDOColumn[]
+     * @return BuildPDOColumn[]
      */
     public function getColumns() {
         return $this->mColumns;
@@ -248,13 +247,14 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
      * @throws BuildException if the column is not found
      */
     public function getColumn($name) {
-        if (!$this->mColumns->has($name))
+        if (!isset($this->mColumns[$name])) {
             throw new BuildException("Column '{$name}' not found" . print_r($this, true));
-        return $this->mColumns->get($name);
+        }
+        return $this->mColumns[$name];
     }
 
     public function addColumn(BuildPDOColumn $Column) {
-        $this->mColumns->add($Column);
+        $this->mColumns[$Column->getName()] = $Column;
     }
 
     /**

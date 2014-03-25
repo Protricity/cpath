@@ -148,6 +148,12 @@ PHP;
         $this->getIndexes($DB, $Table);
         $Table->init();
 
+        $Columns = $Table->getColumns();
+        $isPrimary = false;
+        foreach($Columns as $Column)
+            if($Column->hasFlag(IPDOColumn::FLAG_PRIMARY))
+                $isPrimary = true;
+
         if ($Table->getTemplateID()) {
             switch (strtolower($Table->getTemplateID())) {
                 case 'u':
@@ -168,7 +174,7 @@ PHP;
                 default:
                     throw new BuildException("Could not locate table template: " . $Table->getTemplateID());
             }
-        } elseif ($Table->getColumns()->byFlags(IPDOColumn::FLAG_PRIMARY)->count() > 0) {
+        } elseif ($isPrimary) {
             Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
             $Table = new Tables\BuildPDOPKTable($DB, $name, $comment);
         } else {

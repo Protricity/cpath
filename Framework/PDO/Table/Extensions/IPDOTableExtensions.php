@@ -7,15 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Extensions;
 
-use CPath\Framework\PDO\Table\Column\Collection\Types\PDOColumnCollection;
 use CPath\Framework\PDO\Table\Column;
 use CPath\Framework\PDO\Table\IPDOTable;
+use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 
 interface IPDOTableExtensions extends IPDOTable
 {
     /**
      * Initialize the table/columns
-     * @param Column\Collection\Types\PDOColumnCollection $Columns
+     * @param PDOColumn[] $Columns
      */
-    function initTable(PDOColumnCollection $Columns);
+    function initTable($Columns);
 }

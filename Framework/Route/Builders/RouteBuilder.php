@@ -13,6 +13,7 @@ use CPath\Config;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Build\API\Build;
 use CPath\Framework\Build\IBuilder;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Log;
 
@@ -36,7 +37,7 @@ PHP;
 );
 PHP;
 
-    /** @var IRenderAggregate[] */
+    /** @var IRenderAggregate[]|IRender[] */
     private $mRoutes = array();
 
     protected function __construct() {
@@ -45,16 +46,16 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IRenderAggregate $Destination
+     * @param IRenderAggregate|IRender $Destination
      * @throws \CPath\Exceptions\BuildException
      */
-    protected function addRoute($route, IRenderAggregate $Destination) {
+    protected function addRoute($route, $Destination) {
         list($method, $path) = explode(' ', $route, 2);
         $class = get_class($Destination);
         if(!$path)
-            $path = '/' . strtolower(Base::getClassPath($class, false));
+            $path = strtolower(Base::getClassPath($class, false));
         if($path[0] !== '/')
-            $path = '/' . strtolower(Base::getClassPath($class, false)) . '/' . $path;
+            $path = strtolower(Base::getClassPath($class, false)) . $path;
         $route = $method . ' ' . $path;
 
         if(isset($this->mRoutes[$route]))
@@ -93,7 +94,7 @@ PHP;
 
         $max = 0;
 
-        foreach($this->mRoutes as $route => $Buildable) {
+        foreach($this->mRoutes as $route => $Destination) {
             list(, $path) = explode(' ', $route, 2);
 
             if(($l = strlen($path) > $max))
@@ -107,9 +108,9 @@ PHP;
 
         $phpRoute = '';
         $c=0;
-        foreach($this->mRoutes as $route => $Buildable) {
+        foreach($this->mRoutes as $route => $Destination) {
             list($method, $path) = explode(' ', $route, 2);
-            $class = get_class($Buildable);
+            $class = get_class($Destination);
 
             if($c > 0)
                 $phpRoute .= ' ||';
@@ -169,9 +170,9 @@ PHP;
 
     /**
      * @param String $route '[METHOD] [PATH]'
-     * @param IRenderAggregate $Destination
+     * @param IRenderAggregate|IRender $Destination
      */
-    public static function buildRoute($route, IRenderAggregate $Destination) {
+    public static function buildRoute($route, $Destination) {
         static $Inst = null;
         if(!$Inst) {
             $Inst = new RouteBuilder();

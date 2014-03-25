@@ -52,8 +52,9 @@ from pg_class t, pg_class i, pg_index ix, pg_attribute a
 where t.oid = ix.indrelid and i.oid = ix.indexrelid and a.attrelid = t.oid and a.attnum = ANY(ix.indkey) and t.relkind = 'r' and t.relname = '$Table'
 group by column_name;") as $row ) {
             $name = $row['column_name'];
+            $Columns = $Table->getColumns();
             /** @var IPDOColumnBuilder $Column */
-            $Column = $Table->getColumns()->get($name);
+            $Column = $Columns[$name];
             $Column->setFlag(PDOColumn::FLAG_INDEX);
         }
     }
@@ -73,7 +74,7 @@ group by column_name;") as $row ) {
             inner join pg_catalog.pg_description pgd on (pgd.objoid=st.relid)
             inner join information_schema.columns c on (pgd.objsubid=c.ordinal_position
             and  c.table_schema=st.schemaname and c.table_name=st.relname)
-        ) d on d.column_name = c.column_name
+        ) d on d.column_name = c.column_name AND d.table_name = c.table_name
         WHERE c.table_name = '$Table';") as $row) {
 
             $name = $row['column_name'];
