@@ -171,7 +171,6 @@ abstract class View implements IView, IViewConfig {
     }
 
     function addHeadStyleSheet($href, $replace=false) {
-        $basePath = rtrim(Config::getDomainPath(), '/') . $this->getPath();
-        $this->addHeadHTML("<link rel='stylesheet' href='{$basePath}{$href}' />", $replace);
+        $this->addHeadHTML("<link rel='stylesheet' href='{$href}' />", $replace);
     }
 }
