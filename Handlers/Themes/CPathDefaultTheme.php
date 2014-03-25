@@ -34,7 +34,7 @@ class CPathDefaultTheme implements ITheme {
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPath(__CLASS__);
+        $basePath = Base::getClassPath(__CLASS__, true);
         $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulttheme.css', true);
         $View->addHeadScript($basePath . 'assets/cpathdefaulttheme.js', true);
 

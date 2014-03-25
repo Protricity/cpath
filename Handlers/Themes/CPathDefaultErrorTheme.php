@@ -15,7 +15,7 @@ class CPathDefaultErrorTheme extends CPathDefaultTheme {
     function addHeadElementsToView(IView $View)
     {
         parent::addHeadElementsToView($View);
-        $basePath = Base::getClassPath(__CLASS__);
+        $basePath = Base::getClassPath(__CLASS__, true);
         $View->addHeadStyleSheet($basePath . 'assets/cpathdefaulterrortheme.css');
     }
 }
