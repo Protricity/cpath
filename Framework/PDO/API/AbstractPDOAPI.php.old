@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Framework\Api\Exceptions\APIException;
-use CPath\Framework\Api\Types\AbstractAPI;
+use CPath\Framework\API\Exceptions\APIException;
+use CPath\Framework\API\Types\AbstractAPI;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;

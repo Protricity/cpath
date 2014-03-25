@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Column\Interfaces;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\API\Exceptions\ValidationException;
+use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\Data\Collection\ICollectionItem;
 use CPath\Framework\Request\Interfaces\IRequest;
 

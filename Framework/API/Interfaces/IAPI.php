@@ -5,10 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Interfaces;
+namespace CPath\Framework\API\Interfaces;
 
-use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
-use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 

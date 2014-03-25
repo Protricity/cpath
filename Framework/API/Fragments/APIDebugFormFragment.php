@@ -2,7 +2,7 @@
 namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Util\HTMLRenderUtil;

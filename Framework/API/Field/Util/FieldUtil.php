@@ -5,10 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field\Util;
+namespace CPath\Framework\API\Field\Util;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\API\Exceptions\ValidationException;
+use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -21,7 +21,7 @@ class FieldUtil implements IField, IRenderHTML {
     }
 
     /**
-     * @return \CPath\Framework\Api\Field\Interfaces\IField
+     * @return \CPath\Framework\API\Field\Interfaces\IField
      */
     public function getField() {
         return $this->mField;
@@ -51,7 +51,7 @@ class FieldUtil implements IField, IRenderHTML {
     /**
      * Internal function used to set the field name.
      * @param String $value
-     * @return \CPath\Framework\Api\Field\Interfaces\IField
+     * @return \CPath\Framework\API\Field\Interfaces\IField
      */
     function setValue($value) {
         return $this->mField->setValue($value);

@@ -5,7 +5,7 @@
  * Date: 2/7/14
  * Time: 8:08 PM
  */
-namespace CPath\Framework\Api\Exceptions;
+namespace CPath\Framework\API\Exceptions;
 /**
  * Class RequiredFieldException
  * @package CPath

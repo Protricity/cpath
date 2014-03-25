@@ -5,17 +5,17 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Util;
+namespace CPath\Framework\API\Util;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Exceptions\ValidationExceptions;
-use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Field\Util\FieldUtil;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationExceptions;
+use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Field\Util\FieldUtil;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
@@ -110,7 +110,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @param array $args
-     * @throws \CPath\Framework\Api\Exceptions\ValidationExceptions
+     * @throws \CPath\Framework\API\Exceptions\ValidationExceptions
      * @return void
      */
     function processRequest(IRequest $Request, Array &$args) {
@@ -206,7 +206,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 //     * Get an API field by name
 //     * @param String $fieldName the field name
 //     * @return IField
-//     * @throws \CPath\Framework\Api\Exceptions\FieldNotFoundException if the field was not found
+//     * @throws \CPath\Framework\API\Exceptions\FieldNotFoundException if the field was not found
 //     */
 //    public function getField($fieldName) {
 //        foreach($this->mAPI->getFields() as $Field) {

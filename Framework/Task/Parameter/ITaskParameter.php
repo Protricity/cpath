@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Task\Parameter;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationException;
 
 interface ITaskParameter {
 

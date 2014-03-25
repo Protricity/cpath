@@ -18,7 +18,7 @@ abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
 
     /**
      * @param ITableTheme $Theme
-     * @internal param \CPath\Framework\Api\Interfaces\IAPI $API
+     * @internal param \CPath\Framework\API\Interfaces\IAPI $API
      */
     public function __construct(ITableTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();

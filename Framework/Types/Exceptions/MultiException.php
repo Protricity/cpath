@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Types\Exceptions;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Types\ExceptionResponse;

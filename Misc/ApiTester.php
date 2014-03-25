@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 namespace CPath\Misc;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Request\Common\CLIRequest;

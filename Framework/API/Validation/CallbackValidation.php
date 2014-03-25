@@ -6,9 +6,9 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Validation;
+namespace CPath\Framework\API\Validation;
 
-use CPath\Framework\Api\Validation\Interfaces\IValidation;
+use CPath\Framework\API\Validation\Interfaces\IValidation;
 use CPath\Framework\Request\Interfaces\IRequest;
 
 class CallbackValidation implements IValidation {
@@ -24,7 +24,7 @@ class CallbackValidation implements IValidation {
     /**
      * Validate and return request
      * @param IRequest $Request the pending request to validate
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a validation exception occurred
+     * @throws \CPath\Framework\API\Exceptions\ValidationException if a validation exception occurred
      */
     function validate(IRequest $Request) {
         $call = $this->mCallback;

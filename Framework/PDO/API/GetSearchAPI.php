@@ -9,9 +9,9 @@ namespace CPath\Framework\PDO\API;
 
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Field\Field;
-use CPath\Framework\Api\Field\Param;
-use CPath\Framework\Api\Field\RequiredParam;
+use CPath\Framework\API\Field\Field;
+use CPath\Framework\API\Field\Param;
+use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Query\PDOWhere;

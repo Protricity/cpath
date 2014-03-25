@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field\Collection\Interfaces;
+namespace CPath\Framework\API\Field\Collection\Interfaces;
 use CPath\Framework\Data\Collection\ICollection;
 
 /**

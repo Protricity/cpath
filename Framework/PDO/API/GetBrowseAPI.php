@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Framework\Api\Field\Field;
-use CPath\Framework\Api\Render\Util\APIRenderUtil;
-use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\API\Field\Field;
+use CPath\Framework\API\Render\Util\APIRenderUtil;
+use CPath\Framework\API\Util\APIExecuteUtil;
 use CPath\Framework\PDO\API_GetBrowseDescriptor;
 use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
@@ -142,7 +142,7 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
 namespace CPath\Framework\PDO;
 
 
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;

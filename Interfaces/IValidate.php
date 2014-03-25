@@ -16,7 +16,7 @@ interface IValidate {
      * @param int $filter the filter id to use
      * @param null|mixed $options additional filter options
      * @return mixed the value of the filtered variable
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException when the input fails to validate
+     * @throws \CPath\Framework\API\Exceptions\ValidationException when the input fails to validate
      */
     function validateInput($variable, $filter, $options=NULL);
 }

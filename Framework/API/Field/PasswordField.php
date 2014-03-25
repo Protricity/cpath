@@ -5,9 +5,9 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field;
+namespace CPath\Framework\API\Field;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;

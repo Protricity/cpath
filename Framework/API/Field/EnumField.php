@@ -5,10 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field;
+namespace CPath\Framework\API\Field;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 
@@ -34,7 +34,7 @@ class EnumField extends Field {
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException if validation fails
+     * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails
      */
     function validate(IRequest $Request, $fieldName) {
         $value = parent::validate($Request, $fieldName);

@@ -8,11 +8,11 @@
 namespace CPath\Framework\PDO\API;
 
 
-use CPath\Framework\Api\Exceptions\APIException;
-use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Field\RequiredParam;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Exceptions\APIException;
+use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Field\RequiredParam;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
@@ -59,7 +59,7 @@ class GetAPI implements IAPI, IRenderHTML {
     /**
      * Get all API Fields
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @throws \CPath\Framework\Api\Exceptions\APIException
+     * @throws \CPath\Framework\API\Exceptions\APIException
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {

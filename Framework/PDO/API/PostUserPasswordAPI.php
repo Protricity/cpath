@@ -9,9 +9,9 @@ namespace CPath\Framework\PDO\API;
 
 
 use CPath\Base;
-use CPath\Framework\Api\Exceptions\APIException;
-use CPath\Framework\Api\Field\PasswordField;
-use CPath\Framework\Api\Validation\CallbackValidation;
+use CPath\Framework\API\Exceptions\APIException;
+use CPath\Framework\API\Field\PasswordField;
+use CPath\Framework\API\Validation\CallbackValidation;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\Request\Interfaces\IRequest;

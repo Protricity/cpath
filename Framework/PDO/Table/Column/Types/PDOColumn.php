@@ -9,11 +9,11 @@ namespace CPath\Framework\PDO\Table\Column\Types;
 
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Field\EnumField;
-use CPath\Framework\Api\Field\Field;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Field\PasswordField;
+use CPath\Framework\API\Exceptions\ValidationException;
+use CPath\Framework\API\Field\EnumField;
+use CPath\Framework\API\Field\Field;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Field\PasswordField;
 use CPath\Framework\Interfaces\Constructable\IConstructable;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\Request\Interfaces\IRequest;

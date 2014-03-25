@@ -89,7 +89,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * @param array|mixed $row column value pairs to insert into new row
      * @return PDOPrimaryKeyModel the created model instance
      * @throws ModelAlreadyExistsException
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a column fails to validate
+     * @throws \CPath\Framework\API\Exceptions\ValidationException if a column fails to validate
      */
     final function createAndLoad($row) {
         static::createFromArray($row);
@@ -101,7 +101,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * @param array|mixed $row column value pairs to insert into new row
      * @return PDOPrimaryKeyModel the created model instance
      * @throws ModelAlreadyExistsException
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException if a column fails to validate
+     * @throws \CPath\Framework\API\Exceptions\ValidationException if a column fails to validate
      */
     final function createOrLoad($row) {
         $Model = static::search()

@@ -3,9 +3,9 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Field\Util\FieldUtil;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Field\Util\FieldUtil;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;

@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\API;
 
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;

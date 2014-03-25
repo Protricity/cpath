@@ -8,7 +8,7 @@
  */
 namespace CPath\Framework\PDO\Interfaces;
 
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\PDO\Query\PDOSelectLimitedStats;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;

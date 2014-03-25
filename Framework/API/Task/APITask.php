@@ -5,13 +5,13 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Tasks;
+namespace CPath\Framework\API\Tasks;
 
 use CPath\Base;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\API\Fragments\SimpleFormFragment;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Task\ITask;
 use CPath\Handlers\Interfaces\IView;

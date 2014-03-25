@@ -5,15 +5,15 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Render\Util;
+namespace CPath\Framework\API\Render\Util;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Exceptions\FieldNotFoundException;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Util\APIExecuteUtil;
+use CPath\Framework\API\Exceptions\FieldNotFoundException;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Interfaces\IAPI;
+use CPath\Framework\API\Util\APIExecuteUtil;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\Util\RenderMimeSwitchUtility;

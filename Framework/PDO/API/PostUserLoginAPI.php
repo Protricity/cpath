@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO\API;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Api\Field\PasswordField;
-use CPath\Framework\Api\Field\RequiredParam;
+use CPath\Framework\API\Field\PasswordField;
+use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Framework\Request\Interfaces\IRequest;

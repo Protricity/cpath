@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Framework\Api\Exceptions\APIException;
+use CPath\Framework\API\Exceptions\APIException;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
@@ -73,7 +73,7 @@ class PutAPI extends AbstractPDOAPI {
      * @return IResponse|mixed the api call response with data, message, and status
      * @throws ModelNotFoundException if a duplicate row couldn't be found.
      * Warning: If this happens, there is an issue with this PDOModel's or this API's configuration
-     * @throws \CPath\Framework\Api\Exceptions\APIException if multiple duplicate rows were found
+     * @throws \CPath\Framework\API\Exceptions\APIException if multiple duplicate rows were found
      */
     final function execute(IRequest $Request, $args) {
         $Table = $this->getTable();

@@ -5,8 +5,8 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field\Interfaces;
-use CPath\Framework\Api\Exceptions\ValidationException;
+namespace CPath\Framework\API\Field\Interfaces;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Data\Collection\ICollectionItem;
 use CPath\Framework\Request\Interfaces\IRequest;
 

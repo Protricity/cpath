@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Framework\Api\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Interfaces\IValidate;
 
 /**

@@ -5,13 +5,13 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field;
+namespace CPath\Framework\API\Field;
 
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Exceptions\RequiredFieldException;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Interfaces;
+use CPath\Framework\API\Exceptions\RequiredFieldException;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Interfaces;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
@@ -58,7 +58,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
      * @param IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
-     * @throws \CPath\Framework\Api\Exceptions\ValidationException if validation fails
+     * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails
      * @throws RequiredFieldException if a required field has no value
      */
     function validate(IRequest $Request, $fieldName) {
@@ -77,7 +77,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
     /**
      * Test required field value
      * @param $value
-     * @throws \CPath\Framework\Api\Exceptions\RequiredFieldException
+     * @throws \CPath\Framework\API\Exceptions\RequiredFieldException
      */
     protected function validateRequired($value) {
         if(!$value && $value !== '0')
@@ -108,7 +108,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
     /**
      * Internal function used to set the field name.
      * @param String $value
-     * @return \CPath\Framework\Api\Field\Interfaces\IField
+     * @return \CPath\Framework\API\Field\Interfaces\IField
      */
     function setValue($value) {
         $this->mValue = $value;

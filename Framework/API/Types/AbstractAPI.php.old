@@ -6,17 +6,17 @@
  * Email: ari.asulin@gmail.com Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Types;
+namespace CPath\Framework\API\Types;
 
 use CPath\Base;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Exceptions\ValidationException;
-use CPath\Framework\Api\Exceptions\ValidationExceptions;
-use CPath\Framework\Api\Field\Interfaces\IField;
-use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Api\Util\APIExecuteUtil;
-use CPath\Framework\Api\Util\APIRenderUtil;
-use CPath\Framework\Api\Validation\Interfaces\IValidation;
+use CPath\Framework\API\Exceptions\ValidationException;
+use CPath\Framework\API\Exceptions\ValidationExceptions;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Interfaces\IAPI;
+use CPath\Framework\API\Util\APIExecuteUtil;
+use CPath\Framework\API\Util\APIRenderUtil;
+use CPath\Framework\API\Validation\Interfaces\IValidation;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\OptionMissingException;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -295,7 +295,7 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
 
     /**
      * Get all API Fields
-     * @return \CPath\Framework\Api\Field\Interfaces\IField[]
+     * @return \CPath\Framework\API\Field\Interfaces\IField[]
      */
     public function getFields() {
         $this->_setupFields();

@@ -5,9 +5,9 @@
  * Date: 2/7/14
  * Time: 8:09 PM
  */
-namespace CPath\Framework\Api\Exceptions;
+namespace CPath\Framework\API\Exceptions;
 use CPath\Describable\Describable;
-use CPath\Framework\Api\Interfaces\IAPI;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Types\Exceptions\MultiException;
 
 /**

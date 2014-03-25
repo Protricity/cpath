@@ -5,14 +5,14 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Field\Collection;
-use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
-use CPath\Framework\Api\Field\Interfaces\IField;
+namespace CPath\Framework\API\Field\Collection;
+use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\Data\Collection\AbstractCollection;
 
 /**
  * Class FieldCollection
- * @package CPath\Framework\Api\Field\Collection
+ * @package CPath\Framework\API\Field\Collection
  */
 class FieldCollection extends AbstractCollection implements IFieldCollection {
 

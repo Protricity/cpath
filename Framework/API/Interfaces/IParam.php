@@ -5,8 +5,8 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Api\Interfaces;
-use CPath\Framework\Api\Field\Interfaces\IField;
+namespace CPath\Framework\API\Interfaces;
+use CPath\Framework\API\Field\Interfaces\IField;
 
 /**
  * Class Param
