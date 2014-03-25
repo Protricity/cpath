@@ -6,7 +6,6 @@ use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 use CPath\Handlers\Themes\Util\TableThemeUtil;

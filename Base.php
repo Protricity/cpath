@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Framework\Request\Common\WebRequest;
+use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Loaders\CPathLoader;
 

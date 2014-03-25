@@ -7,8 +7,8 @@
  */
 namespace CPath\Framework\Route\Map\Common;
 
-use CPath\Framework\Route\Map\IRouteMap;
 use CPath\Framework\Render\IRenderAggregate;
+use CPath\Framework\Route\Map\IRouteMap;
 use CPath\Framework\Route\Routable\IRoutable;
 
 class CallbackRouteMap implements IRouteMap

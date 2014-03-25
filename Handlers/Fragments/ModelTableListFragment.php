@@ -4,7 +4,6 @@ namespace CPath\Handlers\Fragments;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\IRenderAggregate;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;
 

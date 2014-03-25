@@ -9,7 +9,6 @@ namespace CPath\Framework\PDO\Table\Model\Types;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;

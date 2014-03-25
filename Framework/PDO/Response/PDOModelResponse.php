@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
 use CPath\Describable\Describable;
-use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;

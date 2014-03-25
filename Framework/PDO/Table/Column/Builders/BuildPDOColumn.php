@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO\Table\Column\Builders;
 
 use CPath\Exceptions\BuildException;
-use CPath\Framework\Exception\Common\NotImplementedException;
 use CPath\Framework\Api\Field\Interfaces\IField;
+use CPath\Framework\Exception\Common\NotImplementedException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnArgumentNotFoundException;

@@ -8,13 +8,13 @@
 namespace CPath;
 
 use CPath\Framework\Render\IRender;
+use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Request\Common\RequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Framework\Route\Exceptions\RouteNotFoundException;
 use CPath\Framework\Route\Map\IRouteMap;
-use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Route\Routable\IRoutable;
 
 class Routes implements IRoutable {

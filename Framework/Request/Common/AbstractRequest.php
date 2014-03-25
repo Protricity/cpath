@@ -8,7 +8,6 @@
 namespace CPath\Framework\Request\Common;
 
 use CPath\Config;
-use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\ILogEntry;
 use CPath\LogException;

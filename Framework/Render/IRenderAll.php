@@ -11,7 +11,6 @@ use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\XML\IRenderXML;
-use CPath\Framework\Request\Interfaces\IRequest;
 
 interface IRenderAll extends IRenderHTML, IRenderText, IRenderXML, IRenderJSON
 {

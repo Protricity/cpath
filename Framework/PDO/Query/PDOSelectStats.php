@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 
 class PDOSelectStats extends PDOSelectLimitedStats {

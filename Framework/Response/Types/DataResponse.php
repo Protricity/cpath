@@ -9,7 +9,6 @@ namespace CPath\Framework\Response\Types;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
-use CPath\Framework\Data\Map\Associative\Interfaces\IAssociativeMap;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
