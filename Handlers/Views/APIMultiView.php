@@ -121,7 +121,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($this);
 
-        $basePath = Base::getClassPublicPath($this);
+        $basePath = Base::getClassPath($this, true);
         $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
     }
 
@@ -246,11 +246,12 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
         foreach($this->mAPIs as $prefix => $API) {
             if(strpos($prefix, ' ') !== false) {
                 list($method, $path) = explode(' ', $prefix, 2);
-                if($path[0] !== '/')
-                    $path = '/' . str_replace('\\', '/', strtolower(dirname($this->mTargetClass))) . '/' . $path;
+                if($path[0] !== '/') {
+                    $path = Base::getClassPath($this->mTargetClass, false) . '/' . $path;
+                }
             } else {
                 $method = $prefix;
-                $path = '/' . str_replace('\\', '/', strtolower($this->mTargetClass));
+                $path = Base::getClassPath($this->mTargetClass, false);
             }
             $prefix = $method . ' ' . $path;
             $Map->mapRoute($prefix, new APIView($API));

@@ -30,7 +30,7 @@ abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
      * @param IView $View
      */
     function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPublicPath($this);
+        $basePath = Base::getClassPath($this, true);
 
         $View->addHeadScript($basePath . 'assets/jquery.min.js');
 

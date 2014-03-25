@@ -44,7 +44,7 @@ class SearchFormUtil implements IDescribable, IViewConfig {
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($View);
 
-        $basePath = Base::getClassPublicPath($this);
+        $basePath = Base::getClassPath($this, true);
         $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css', true);
         $View->addHeadScript($basePath . 'assets/searchformutil.js', true);
     }

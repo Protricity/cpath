@@ -67,11 +67,11 @@ class Base {
      * @param $withDomain boolean true if the full domain path should be returned
      * @return string the public path
      */
-    public static function getClassPublicPath($Class, $withDomain=true) {
+    public static function getClassPath($Class, $withDomain=false) {
         if(is_object($Class))
             $Class = get_class($Class);
         return ($withDomain ? Config::getDomainPath() : '')
-            .dirname(str_replace('\\', '/', strtolower($Class))).'/';
+            . '/' . trim(dirname(str_replace('\\', '/', strtolower($Class))), '/');
     }
 
     /**

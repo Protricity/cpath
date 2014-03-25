@@ -44,7 +44,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
     function addHeadElementsToView(IView $View) {
         //parent::addHeadElementsToView($View);
 
-        $basePath = Base::getClassPublicPath($this);
+        $basePath = Base::getClassPath($this, true);
         $View->addHeadStyleSheet($basePath . 'assets/apiactions.css', true);
         $View->addHeadScript($basePath . 'assets/apiactions.js', true);
 

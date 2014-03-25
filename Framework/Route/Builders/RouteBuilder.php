@@ -7,6 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\Route\Builders;
+use CPath\Base;
 use CPath\Compile;
 use CPath\Config;
 use CPath\Exceptions\BuildException;
@@ -51,9 +52,9 @@ PHP;
         list($method, $path) = explode(' ', $route, 2);
         $class = get_class($Destination);
         if(!$path)
-            $path = '/' . str_replace('\\', '/', strtolower($class));
+            $path = '/' . Base::getClassPath($class, false);
         if($path[0] !== '/')
-            $path = '/' . str_replace('\\', '/', strtolower(dirname($class))) . '/' . $path;
+            $path = '/' . Base::getClassPath($class, false) . '/' . $path;
         $route = $method . ' ' . $path;
 
         if(isset($this->mRoutes[$route]))

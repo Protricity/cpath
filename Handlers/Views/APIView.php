@@ -58,7 +58,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($this);
 
-        $basePath = Base::getClassPublicPath($this);
+        $basePath = Base::getClassPath($this, true);
         $this->addHeadScript($basePath . 'assets/vkbeautify.min.js');
     }
 
