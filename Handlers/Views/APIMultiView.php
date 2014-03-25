@@ -247,7 +247,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
             if(strpos($prefix, ' ') !== false) {
                 list($method, $path) = explode(' ', $prefix, 2);
                 if($path[0] !== '/') {
-                    $path = Base::getClassPath($this->mTargetClass, false) . '/' . $path;
+                    $path = Base::getClassPath($this->mTargetClass, false) . $path;
                 }
             } else {
                 $method = $prefix;
