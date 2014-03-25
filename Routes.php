@@ -170,12 +170,15 @@ class Routes_SelectorMap implements IRouteMap {
                 $argPath = trim($argPath, '/');
                 $args = !$argPath ? array() : explode('/', $argPath);
                 $this->mDone = true;
-                $this->mMatchedPrefix = $method . ' ' . $path;
+                $this->mMatchedPrefix = $prefix;
                 $this->mArgs = $args;
                 if($Destination instanceof Routes_LazyRender)
                     $Destination = $Destination->getInstance();
                 $this->mDestination = $Destination;
                 //$Destination->render($this->mRequest);
+
+                $prefix2 = $this->mRequest->getMethod() . ' ' . $this->mRequest->getPath();
+                Log::u(__CLASS__, "Matched [{$prefix2}] to [{$prefix}]");
                 return true;
             }
         }
