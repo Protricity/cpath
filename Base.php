@@ -71,7 +71,7 @@ class Base {
         if(is_object($Class))
             $Class = get_class($Class);
         return ($withDomain ? Config::getDomainPath() : '/')
-            . trim(dirname(str_replace('\\', '/', strtolower($Class))), '/') . '/';
+            . trim(dirname(str_replace('\\', '/', $Class)), '/') . '/';
     }
 
     /**
