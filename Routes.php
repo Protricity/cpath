@@ -48,17 +48,6 @@ class Routes implements IRoutable {
     }
 
     /**
-     * Return the handler as requested
-     * @param IRequest $Request the IRequest instance for this render
-     * @return \CPath\Framework\Render\IRenderAggregate found handler
-     */
-    function getHandlerFromRequest(IRequest $Request) {
-        $Selector = new Routes_SelectorMap($Request);
-        $this->mapRoutes($Selector);
-        return $Selector->getDestination();
-    }
-
-    /**
      * Route request to an IRender destination
      * @param IRequest $Request Request is passed by reference and updated with a RequestWrapper
      * @param Framework\Route\Routable\IRoutable $Routable
@@ -75,19 +64,22 @@ class Routes implements IRoutable {
         $Selector = new Routes_SelectorMap($Request);
         $Routable->mapRoutes($Selector);
 
-        $newPath = '';
+        $newPrefix = '';
         $args = array();
-        $Selector->getMatchedData($Destination, $newPath, $args);
+        $Selector->getMatchedData($Destination, $newPrefix, $args);
 
-        $Request = new RequestWrapper($Request, $newPath, $args);
+        if(!$Destination)
+            throw new RouteNotFoundException("Route was not found: " . $path);
+
+        $Request = new RequestWrapper($Request, $newPrefix, $args);
 
         if ($Destination instanceof IRenderAggregate)
             $Destination = $Destination->getRenderer($Request);
 
-        if($Destination instanceof IRender)
-            return $Destination;
+        if (!$Destination instanceof IRender)
+            throw new RouteNotFoundException("Route does not implement IRender: " . get_class($Destination));
 
-        throw new RouteNotFoundException("Route was not found: " . $path);
+        return $Destination;
     }
 
     /**
@@ -132,7 +124,7 @@ class Routes_SelectorMap implements IRouteMap {
     private $mRequest;
     private $mDestination = null;
     private $mDone = false;
-    private $mMatchedPath = null;
+    private $mMatchedPrefix = null;
     private $mArgs = array();
 
     function __construct(IRequest $Request) {
@@ -141,13 +133,15 @@ class Routes_SelectorMap implements IRouteMap {
 
     /**
      * @param IRenderAggregate $Destination
-     * @param String $path
+     * @param $prefix
      * @param array $args
+     * @internal param String $path
+     * @internal param String $method
      */
-    function getMatchedData(&$Destination, &$path, Array &$args) {
+    function getMatchedData(&$Destination, &$prefix, Array &$args) {
         $Destination = $this->mDestination;
-        $path = $this->mMatchedPath;
         $args = $this->mArgs;
+        $prefix = $this->mMatchedPrefix;
     }
 
     /**
@@ -171,10 +165,12 @@ class Routes_SelectorMap implements IRouteMap {
         $requestPath = $this->mRequest->getPath();
         if($method === 'ANY' || $method == $this->mRequest->getMethod()) {
             if(strpos($requestPath, $path) === 0) {
+                //$method = $this->mRequest->getMethod();
                 $argPath = substr($requestPath, strlen($path));
-                $args = explode('/', trim($argPath, '/'));
+                $argPath = trim($argPath, '/');
+                $args = !$argPath ? array() : explode('/', $argPath);
                 $this->mDone = true;
-                $this->mMatchedPath = $path;
+                $this->mMatchedPrefix = $method . ' ' . $path;
                 $this->mArgs = $args;
                 if($Destination instanceof Routes_LazyRender)
                     $Destination = $Destination->getInstance();

@@ -65,7 +65,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
         parent::render($Request);
     }
 
-    private function selectAPI(IRequest $Request) {
+    private function selectAPI(IRequest &$Request) {
         try {
             $Routes = new Routes();
             return $Routes->routeRequest($Request, $this);

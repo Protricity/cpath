@@ -52,18 +52,18 @@ class ApiTester {
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLIRequest::fromArgs($args, $request);
         $Routes = new Routes;
-        $Handler = $Routes->getHandlerFromRequest($Cli);
+        $Renderer = $Routes->routeRequest($Cli, $Routes);
 
-        if($Handler instanceof IRenderAggregate)
-            $Handler = $Handler->getRenderer($Cli, $Cli->getPath(), $Cli->getArgs());
+//        if($Renderer instanceof IRenderAggregate)
+//            $Renderer = $Renderer->getRenderer($Cli);
 
-        if($Handler instanceof IWrapper)
-            $Handler = $Handler->getWrappedObject();
+        if($Renderer instanceof IWrapper)
+            $Renderer = $Renderer->getWrappedObject();
 
-        if(!$Handler instanceof IAPI)
-            throw new NotAnApiException(get_class($Handler) . " does not implement IAPI");
+        if(!$Renderer instanceof IAPI)
+            throw new NotAnApiException(get_class($Renderer) . " does not implement IAPI");
 
-        return new static($Handler, $Cli);
+        return new static($Renderer, $Cli);
     }
 
     /**

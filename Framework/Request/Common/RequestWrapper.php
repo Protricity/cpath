@@ -14,10 +14,13 @@ use CPath\Framework\Request\Interfaces\IRequest;
 class RequestWrapper implements IRequest, IWrapper
 {
     private $mRequest;
-    private $mPath, $mArgs;
-    public function __construct(IRequest $Request, $newPath=null, $newArgs=null) {
+    private $mPath, $mArgs, $mMethod;
+
+    public function __construct(IRequest $Request, $newPrefix=null, $newArgs=null) {
+        list($newMethod, $newPath) = explode(' ', $newPrefix, 2);
         $newPath = rtrim($newPath, '/') . '/';
         $this->mPath = $newPath;
+        $this->mMethod = $newMethod;
         $this->mArgs = $newArgs;
         $this->mRequest = $Request;
     }
@@ -46,16 +49,26 @@ class RequestWrapper implements IRequest, IWrapper
         return $this->mRequest->getDataPath($_path);
     }
 
+    function getMatchedPath() {
+        return $this->mPath;
+    }
+
     function getPath() {
-        return $this->mPath ?: $this->mRequest->getPath();
+        return $this->mRequest->getPath();
+        //return $this->mPath ?: $this->mRequest->getPath();
     }
 
     function getArgs() {
         return $this->mArgs ?: $this->mRequest->getArgs();
     }
 
+    function getMatchedMethod() {
+        return $this->mMethod;
+    }
+
     function getMethod() {
         return $this->mRequest->getMethod();
+        //return $this->mMethod ?: $this->mRequest->getMethod(); // TODO: shouldn't change
     }
 
     function getHeaders($key = NULL) {
