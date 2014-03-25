@@ -62,7 +62,7 @@ class Base {
     }
 
     /**
-     * Returns the public path for a Class
+     * Returns the lower-case public path for a Class Namespace
      * @param $Class String|Object the class name or instance
      * @param $withDomain boolean true if the full domain path should be returned
      * @return string the public path
@@ -71,7 +71,7 @@ class Base {
         if(is_object($Class))
             $Class = get_class($Class);
         return ($withDomain ? Config::getDomainPath() : '/')
-            . trim(dirname(str_replace('\\', '/', $Class)), '/') . '/';
+            . trim(dirname(str_replace('\\', '/', ($Class))), '/') . '/';
     }
 
     /**

@@ -52,9 +52,9 @@ PHP;
         list($method, $path) = explode(' ', $route, 2);
         $class = get_class($Destination);
         if(!$path)
-            $path = '/' . Base::getClassPath($class, false);
+            $path = '/' . strtolower(Base::getClassPath($class, false));
         if($path[0] !== '/')
-            $path = '/' . Base::getClassPath($class, false) . '/' . $path;
+            $path = '/' . strtolower(Base::getClassPath($class, false)) . '/' . $path;
         $route = $method . ' ' . $path;
 
         if(isset($this->mRoutes[$route]))
