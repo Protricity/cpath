@@ -273,7 +273,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
         try {
 //            foreach($row as $column => $value) // No re-validation
 //                static::validateColumn($column, $value);
-            Log::u(get_called_class(), "Insert Row: " . print_r($row, true));
+           // Log::u(get_called_class(), "Insert Row: " . print_r($row, true));
             $this->insertRow($row);
             return;
         } catch (\PDOException $ex) {
