@@ -183,6 +183,8 @@ class Routes_SelectorMap implements IRouteMap {
             }
         }
 
+        $prefix2 = $this->mRequest->getMethod() . ' ' . $this->mRequest->getPath();
+        Log::u(__CLASS__, "Could NOT Matched [{$prefix2}] to [{$prefix}]");
         return false;
     }
 
