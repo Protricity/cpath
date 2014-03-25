@@ -46,7 +46,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
     const COLUMN_FLAGS = NULL;
 
     /** Enable cache for user accounts by default */
-    const CACHE_ENABLED = true;
+    //const CACHE_ENABLED = true;
 
     /** Confirm Password by default */
     const PASSWORD_CONFIRM = true;

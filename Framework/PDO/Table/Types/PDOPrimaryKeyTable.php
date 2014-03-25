@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Types;
 
-use CPath\Cache\Cache;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
@@ -18,7 +17,7 @@ use CPath\Log;
 abstract class PDOPrimaryKeyTable extends PDOTable {
     const COLUMN_PRIMARY = null;
 
-    const CACHE_ENABLED = false;
+    //const CACHE_ENABLED = false;
     const CACHE_TTL = 300;
 //
 //    /**
@@ -124,9 +123,9 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * @throws \Exception if the model does not contain primary keys
      */
     final function loadByPrimaryKey($id, $throwIfNotFound=true) {
-        if(static::CACHE_ENABLED
-            && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
-            return $Model;
+//        if(static::CACHE_ENABLED
+//            && $Model = static::$mCache->fetch(get_called_class() . ':id:' . $id))
+//            return $Model;
         $Model = static::search()
             ->where(static::COLUMN_PRIMARY, $id)
             ->fetch();
@@ -135,8 +134,8 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
                 throw new ModelNotFoundException($this, $id);
             return NULL;
         }
-        if(static::CACHE_ENABLED)
-            static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
+//        if(static::CACHE_ENABLED)
+//            static::$mCache->store(get_called_class() . ':id:' . $id, $Model);
         return $Model;
     }
 
@@ -155,8 +154,8 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
             ->getDeletedRows();
         if(!$c)
             throw new \Exception("Unable to delete ".static::getModelName()." '{$id}'");
-        if(static::CACHE_ENABLED)
-            static::$mCache->remove(get_called_class() . ':id:' . $id);
+//        if(static::CACHE_ENABLED)
+//            static::$mCache->remove(get_called_class() . ':id:' . $id);
     }
 
     /**
@@ -173,18 +172,15 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
 
     // Statics
 
-    /**
-     * @var Cache
-     */
-    protected static $mCache = NULL;
+    //protected static $mCache = NULL;
     private static $mLastModelID = NULL;
 
-    /**
-     * // TODO: refactor less crappy?
-     * Initialize this class
-     */
-    final public static function __pk_init() {
-        self::$mCache = Cache::get();
-    }
+//    /**
+//     * // TODO: refactor less crappy?
+//     * Initialize this class
+//     */
+//    final public static function __pk_init() {
+//        self::$mCache = Cache::get();
+//    }
 }
-PDOPrimaryKeyTable::__pk_init();
+//PDOPrimaryKeyTable::__pk_init();

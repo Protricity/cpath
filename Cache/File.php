@@ -30,7 +30,7 @@ class File extends Cache {
         if(!$this->mPath) {
             $this->mPath = Config::getGenPath().'cache/';
             if(!file_exists($this->mPath))
-                if(!mkdir($this->mPath, NULL, true))
+                if(!mkdir($this->mPath, 0777, true))
                     $this->mEnabled = false;
             elseif(!is_dir($this->mPath))
                 $this->mEnabled = false;

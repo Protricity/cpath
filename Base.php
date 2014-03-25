@@ -70,8 +70,8 @@ class Base {
     public static function getClassPath($Class, $withDomain=false) {
         if(is_object($Class))
             $Class = get_class($Class);
-        return ($withDomain ? Config::getDomainPath() : '')
-            . '/' . trim(dirname(str_replace('\\', '/', strtolower($Class))), '/');
+        return ($withDomain ? Config::getDomainPath() : '/')
+            . trim(dirname(str_replace('\\', '/', strtolower($Class))), '/') . '/';
     }
 
     /**

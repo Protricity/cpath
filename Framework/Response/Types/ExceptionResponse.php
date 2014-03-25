@@ -16,7 +16,7 @@ use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Framework\Response\Util\ResponseUtil;
 
 
-class ExceptionResponse implements IResponse, IMappable {
+class ExceptionResponse implements IResponse {
     /** @var \Exception */
     private $mEx, $mCode;
     public function __construct(\Exception $ex) {
@@ -26,15 +26,15 @@ class ExceptionResponse implements IResponse, IMappable {
             $this->mCode = $ex->getCode();
     }
 
-    /**
-     * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
-     * @return void
-     */
-    function mapData(IDataMap $Map) {
-        $Util = new ResponseUtil($this);
-        $Util->mapData($Map);
-    }
+//    /**
+//     * Map data to a data map
+//     * @param IDataMap $Map the map instance to add data to
+//     * @return void
+//     */
+//    function mapData(IDataMap $Map) {
+//        $Util = new ResponseUtil($this);
+//        $Util->mapData($Map);
+//    }
 
     /**
      * Get the IResponse Message
