@@ -9,7 +9,6 @@ use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -36,17 +35,15 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
         $this->mForm = new APIDebugFormFragment($this->mAPI);
         $this->mResponseBox = new APIResponseBoxFragment($this->getTheme());
     }
-    /**
-     * Return an instance of IRender
-     * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
-     * @return IRender return the renderer instance
-     */
-    function getRenderer(IRequest $Request, $path, $args) {
-        $this->mArgs = $args;
-        return parent::getRenderer($Request, $path, $args);
-    }
+//    /**
+//     * Return an instance of IRender
+//     * @param IRequest $Request the IRequest instance for this render
+//     * @return IRender return the renderer instance
+//     */
+//    function getRenderer(IRequest $Request) {
+//        $this->mArgs = $Request->getArgs();
+//        return parent::getRenderer($Request, $path, $args);
+//    }
 
     /**
      * Set up <head> element fields for this View
@@ -169,9 +166,10 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
 
     /**
      * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
-    function getFields() {
-        return $this->mAPI->getFields();
+    function getFields(IRequest $Request) {
+        return $this->mAPI->getFields($Request);
     }
 }

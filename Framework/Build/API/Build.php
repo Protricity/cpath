@@ -13,6 +13,7 @@ use CPath\Config;
 use CPath\Describable\IDescribable;
 use CPath\Exceptions\BuildException;
 use CPath\Framework\Api\Field\Collection\FieldCollection;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Field;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Interfaces\IAPI;
@@ -36,9 +37,10 @@ class Build implements IRenderAggregate, IAPI, IBuildable {
 
     /**
      * Get all API Fields
-     * @return IField[]|\CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return IField[]|IFieldCollection
      */
-    function getFields() {
+    function getFields(IRequest $Request) {
         return new FieldCollection(array(
             new Field('v', "Display verbose messages"),
             new Field('s', "Skip broken files"),
@@ -460,13 +462,11 @@ class Build implements IRenderAggregate, IAPI, IBuildable {
     /**
      * Render this route destination
      * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
      * @return String|void always returns void
      */
-    function getRenderer(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request) {
         $RenderUtil = new APIView($this);
-        return $RenderUtil->getRenderer($Request, $path, $args);
+        return $RenderUtil->getRenderer($Request);
     }
 
 }

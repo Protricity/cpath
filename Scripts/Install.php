@@ -33,9 +33,10 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
 
     /**
      * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
-    function getFields() {
+    function getFields(IRequest $Request) {
         return new FieldCollection(array(
             new Field(self::FIELD_NO_PROMPT, "Use default values and skip prompts"),
         ));

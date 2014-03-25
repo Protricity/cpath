@@ -10,9 +10,9 @@ namespace CPath\Framework\Api\Util;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
-use CPath\Framework\Api\Exceptions\FieldNotFoundException;
 use CPath\Framework\Api\Exceptions\ValidationException;
 use CPath\Framework\Api\Exceptions\ValidationExceptions;
+use CPath\Framework\Api\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\Api\Field\Interfaces\IField;
 use CPath\Framework\Api\Field\Util\FieldUtil;
 use CPath\Framework\Api\Interfaces\IAPI;
@@ -119,11 +119,11 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
             if($this->mAPI instanceof IOptionMap)
                 $Request->processMap($this->mAPI);
             else
-                $Request->processMap($this->generateFieldShorts());
+                $Request->processMap($this->generateFieldShorts($Request));
         }
 
         if($args) {
-            foreach($this->mAPI->getFields() as $name=>$Field) {
+            foreach($this->mAPI->getFields($Request) as $name=>$Field) {
                 $FieldUtil = new FieldUtil($Field);
                 if($FieldUtil->isParam()) {
                     $Request[$name] = array_shift($args);
@@ -135,7 +135,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
         $FieldExceptions = new ValidationExceptions($this);
         $data = array();
-        foreach($this->mAPI->getFields() as $Field) {
+        foreach($this->mAPI->getFields($Request) as $Field) {
             $name = $Field->getName();
             try {
                 $value = $Field->validate($Request, $name);
@@ -152,13 +152,14 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     }
 
     /**
-     * Generates short names for all fields that have no short names and returns a list.
-     * @return IOptionMap an associative array of short names
+     * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return IField[]|IFieldCollection
      */
-    private function generateFieldShorts() {
+    private function generateFieldShorts(IRequest $Request) {
         $Map = new OptionMap();
 
-        foreach($this->getFields() as $Field)
+        foreach($this->getFields($Request) as $Field)
             $Map->addShortByField($Field->getName());
 
         return $Map;
@@ -194,24 +195,25 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Get all API Fields
-     * @return IField[]
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @return IField[]|IFieldCollection
      */
-    function getFields() {
-        return $this->mAPI->getFields();
+    function getFields(IRequest $Request) {
+        return $this->mAPI->getFields($Request);
     }
 
-    /**
-     * Get an API field by name
-     * @param String $fieldName the field name
-     * @return IField
-     * @throws \CPath\Framework\Api\Exceptions\FieldNotFoundException if the field was not found
-     */
-    public function getField($fieldName) {
-        foreach($this->mAPI->getFields() as $Field) {
-            if($Field->getName() == $fieldName)
-                return $Field;
-        }
-
-        throw new FieldNotFoundException("Field '" . $fieldName . "' was not found");
-    }
+//    /**
+//     * Get an API field by name
+//     * @param String $fieldName the field name
+//     * @return IField
+//     * @throws \CPath\Framework\Api\Exceptions\FieldNotFoundException if the field was not found
+//     */
+//    public function getField($fieldName) {
+//        foreach($this->mAPI->getFields() as $Field) {
+//            if($Field->getName() == $fieldName)
+//                return $Field;
+//        }
+//
+//        throw new FieldNotFoundException("Field '" . $fieldName . "' was not found");
+//    }
 }

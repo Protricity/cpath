@@ -25,9 +25,10 @@ interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?
 
     /**
      * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
-    function getFields();
+    function getFields(IRequest $Request);
 //
 //    /**
 //     * Process a request. Validates each Field. Provides optional Field formatting

@@ -5,7 +5,7 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Request\Types;
+namespace CPath\Framework\Request\Common;
 
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;

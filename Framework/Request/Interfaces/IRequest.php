@@ -18,6 +18,11 @@ interface IRequest extends IArrayObject {
     function getPath();
 
     /**
+     * @return Array
+     */
+    function getArgs();
+
+    /**
      * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
      * @return String the method
      */

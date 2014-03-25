@@ -58,11 +58,11 @@ class GetAPI implements IAPI, IRenderHTML {
 
     /**
      * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @throws \CPath\Framework\Api\Exceptions\APIException
      * @return IField[]|IFieldCollection
      */
-    final function getFields()
-    {
+    function getFields(IRequest $Request) {
         $T = $this->getTable();
         $this->mColumns = $T->findColumns($this->mSearchColumns);
 

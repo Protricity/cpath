@@ -8,7 +8,7 @@
  * Time: 8:04 PM */
 include_once __DIR__.'/../Base.php';
 
-use CPath\Framework\Request\Types\CLIRequest;
+use CPath\Framework\Request\Common\CLIRequest;
 
 class UtilTest extends PHPUnit_Framework_TestCase {
 

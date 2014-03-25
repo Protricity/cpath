@@ -8,8 +8,8 @@
 namespace CPath;
 
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\CLIRequest;
-use CPath\Framework\Request\Types\WebRequest;
+use CPath\Framework\Request\Common\CLIRequest;
+use CPath\Framework\Request\Common\WebRequest;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Loaders\CPathLoader;
 

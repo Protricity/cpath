@@ -5,9 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Request\Types;
+namespace CPath\Framework\Request\Common;
 
 use CPath\Config;
+use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Interfaces\ILogEntry;
 use CPath\LogException;

@@ -38,7 +38,7 @@ class APIFormFragment extends AbstractFormFragment{
         $Attr = Attr::get($Attr);
 
         $API = $this->mAPI;
-        $Fields = $API->getFields();
+        $Fields = $API->getFields($Request);
 
         $method = $Request->getMethod();
         $path = $Request->getPath();

@@ -80,17 +80,22 @@ abstract class View implements IView, IViewConfig {
 
     /**
      * Return an instance of IRender
-     * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
+     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
      * @return IRender return the renderer instance
      */
-    function getRenderer(IRequest $Request, $path, $args)
-    {
-        $this->mPath = rtrim($path, '/') . '/';
+    function getRenderer(IRequest $Request) {
+        return $this;
+    }
 
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request) {
         // Util allows selective rendering based on request mime type
-        return new RenderMimeSwitchUtility($this); // TODO: bad idea?
+        $Util = new RenderMimeSwitchUtility($this);
+        $Util->render($Request);
     }
 
     /**
@@ -131,6 +136,9 @@ abstract class View implements IView, IViewConfig {
         echo RI::ni(), '</html>';
     }
 
+    /**
+     * @return ITheme
+     */
     function getTheme() {
         return $this->mTheme;
     }

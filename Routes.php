@@ -8,6 +8,7 @@
 namespace CPath;
 
 use CPath\Framework\Render\IRender;
+use CPath\Framework\Request\Common\RequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
@@ -59,12 +60,13 @@ class Routes implements IRoutable {
 
     /**
      * Route request to an IRender destination
-     * @param IRequest $Request
+     * @param IRequest $Request Request is passed by reference and updated with a RequestWrapper
      * @param Framework\Route\Routable\IRoutable $Routable
      * @throws Framework\Response\Exceptions\CodedException
+     * @throws Framework\Route\Exceptions\RouteNotFoundException
      * @return IRender
      */
-    function routeRequest(IRequest $Request, IRoutable $Routable) {
+    function routeRequest(IRequest &$Request, IRoutable $Routable) {
         $path = $Request->getPath();
         if(($ext = pathinfo($path, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico')))
@@ -77,8 +79,10 @@ class Routes implements IRoutable {
         $args = array();
         $Selector->getMatchedData($Destination, $newPath, $args);
 
+        $Request = new RequestWrapper($Request, $newPath, $args);
+
         if ($Destination instanceof IRenderAggregate)
-            $Destination = $Destination->getRenderer($Request, $newPath, $args);
+            $Destination = $Destination->getRenderer($Request);
 
         if($Destination instanceof IRender)
             return $Destination;
@@ -115,13 +119,11 @@ class Routes_LazyRender implements IRenderAggregate {
     /**
      * Return an instance of IRender
      * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
      * @return IRender return the renderer instance
      */
-    function getRenderer(IRequest $Request, $path, $args) {
+    function getRenderer(IRequest $Request) {
         return $this->getInstance()
-            ->getRenderer($Request, $path, $args);
+            ->getRenderer($Request);
     }
 }
 

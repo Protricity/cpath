@@ -11,7 +11,7 @@ use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\CLIRequest;
+use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Response\Types\ExceptionResponse;

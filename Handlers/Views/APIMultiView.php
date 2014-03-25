@@ -12,7 +12,6 @@ use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\Api\Interfaces\IAPI;
 use CPath\Framework\Api\Util\APIExecuteUtil;
 use CPath\Framework\Data\Wrapper\IWrapper;
-use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
@@ -39,7 +38,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     private $mTargetClass;
 
     /**
-     * @param \CPath\Handlers\Themes\Interfaces\ITheme $Target
+     * @param mixed $Target
      * @param ITheme $Theme
      */
     public function __construct($Target, ITheme $Theme=null) {
@@ -53,26 +52,23 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
         $this->mAPIs[$prefix] = $API;
     }
 
-
     /**
-     * Return an instance of IRender
+     * Render this request
      * @param IRequest $Request the IRequest instance for this render
-     * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
-     * @return IRender return the renderer instance
+     * @return String|void always returns void
      */
-    function getRenderer(IRequest $Request, $path, $args)
-    {
-        $Renderer = parent::getRenderer($Request, $path, $args);
+    function render(IRequest $Request) {
+        $API = $this->selectAPI($Request);
+        if($API instanceof IWrapper)
+            $API = $API->getWrappedObject();
+        $this->mSelectedAPI = $API;
+        parent::render($Request);
+    }
 
-        $Routes = new Routes();
+    private function selectAPI(IRequest $Request) {
         try {
-            $this->mSelectedAPI = $Routes->routeRequest($Request, $this);
-
-            if($this->mSelectedAPI instanceof IWrapper)
-                $this->mSelectedAPI = $this->mSelectedAPI->getWrappedObject();
-
-            return $Renderer;
+            $Routes = new Routes();
+            return $Routes->routeRequest($Request, $this);
         } catch (RouteNotFoundException $ex) {
 
         }
@@ -81,30 +77,25 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
         $args = $this->mArgs;
         if(!empty($args[0])) {
             if(is_numeric($args[0]) && isset($prefixes[intval($args[0])]))
-                $this->mSelectedAPI = $this->mAPIs[$prefixes[$args[0]]];
+                return $this->mAPIs[$prefixes[$args[0]]];
             elseif(isset($this->mAPIs[$args[0]]))
-                $this->mSelectedAPI = $this->mAPIs[$args[0]];
+                return $this->mAPIs[$args[0]];
             else
-                $this->mSelectedAPI = $this->mAPIs[$prefixes[0]];
+                return $this->mAPIs[$prefixes[0]];
         }
         else
-            $this->mSelectedAPI = $this->mAPIs[$prefixes[0]];
-
-        if($this->mSelectedAPI instanceof IWrapper)
-            $this->mSelectedAPI = $this->mSelectedAPI->getWrappedObject();
-
-        return $Renderer;
+            return $this->mAPIs[$prefixes[0]];
     }
-
-    /**
-     * @return IAPI
-     * @throws \InvalidArgumentException
-     */
-    public function getSelectedAPI() {
-        if(!$this->mSelectedAPI)
-            throw new \InvalidArgumentException("API has not been selected");
-        return $this->mSelectedAPI;
-    }
+//
+//    /**
+//     * @return IAPI
+//     * @throws \InvalidArgumentException
+//     */
+//    public function getSelectedAPI() {
+//        if(!$this->mSelectedAPI)
+//            throw new \InvalidArgumentException("API has not been selected");
+//        return $this->mSelectedAPI;
+//    }
 
     /**
      * Set up <head> element fields for this View
@@ -114,7 +105,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      */
     protected function setupHeadFields(IRequest $Request)
     {
-        $API = $this->getSelectedAPI();
+        $API = $this->selectAPI($Request);
+        $this->mSelectedAPI = $API;
 
         if(!$API instanceof IAPI) {
             throw new \InvalidArgumentException(get_class($API) . " does not implement IAPI");
@@ -166,7 +158,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
-        $API = $this->getSelectedAPI();
+        $API = $this->selectAPI($Request);
         $route = $Request->getMethod() . ' ' . $Request->getPath();
         echo RI::ni(), "<h1>{$route}</h1>";
         echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
@@ -189,7 +181,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      */
     function renderJSON(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $API = $this->selectAPI($Request);
+        $ExecUtil = new APIExecuteUtil($API);
         $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
@@ -202,7 +195,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      */
     function renderText(IRequest $Request)
     {
-        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $API = $this->selectAPI($Request);
+        $ExecUtil = new APIExecuteUtil($API);
         $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
@@ -216,7 +210,8 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $ExecUtil = new APIExecuteUtil($this->getSelectedAPI());
+        $API = $this->selectAPI($Request);
+        $ExecUtil = new APIExecuteUtil($API);
         $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
@@ -229,17 +224,18 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      * @return IResponse the api call response with data, message, and status
      */
     function execute(IRequest $Request, $args) {
-        return $this->getSelectedAPI()
-            ->execute($Request, $args);
+        $API = $this->selectAPI($Request);
+        return $API->execute($Request, $args);
     }
 
     /**
      * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
-    function getFields() {
-        return $this->getSelectedAPI()
-            ->getFields();
+    function getFields(IRequest $Request) {
+        $API = $this->selectAPI($this->mSelectedAPI);
+        return $API->getFields($Request);
     }
 
     /**

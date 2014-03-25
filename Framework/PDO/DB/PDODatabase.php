@@ -6,7 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\DB;
-use CPath\Base;
 use CPath\Framework\Build\API\Build;
 use CPath\Framework\PDO\Builders\BuildPGTables;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
@@ -16,6 +15,7 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
+use CPath\Framework\Render\IRender;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Interfaces\IDatabase;
@@ -23,7 +23,7 @@ use CPath\Log;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDatabase, IRenderAggregate {
+abstract class PDODatabase extends \PDO implements IDatabase, IRender {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -131,10 +131,14 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRenderAggregate {
 
     // Implement IRender
 
-    function getRenderer(IRequest $Request, $path, $args) {
-        if(!Base::isCLI() && !headers_sent())
-            header('text/plain');
-        Log::u(__CLASS__, "DB Upgrader: ".get_class($this));
+    /**
+     * Render this request
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    function render(IRequest $Request)
+    {
+        $args = $Request->getArgs();
         if($args[0]) {
             $arg = array_shift($args);
             switch(strtolower($arg)) {

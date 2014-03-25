@@ -10,7 +10,7 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Request\Types\WebRequest;
+use CPath\Framework\Request\Common\WebRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
 use CPath\Handlers\Themes\Interfaces\ITableTheme;

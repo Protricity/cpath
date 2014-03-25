@@ -261,7 +261,12 @@ class CPathDefaultTheme implements ITheme {
 
     // Static
 
+    /**
+     * @return ITheme
+     */
     static function get() { return new static; }
+
+
     static function getError() {
         /** @var CPathDefaultTheme $inst */
         $inst = new static;
