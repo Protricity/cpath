@@ -245,7 +245,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
     {
         $this->insert(array_keys($row))
             ->values(array_values($row));
-        Log::u(get_called_class(), "Created " . $this->getModelName());
+        Log::v(get_called_class(), "Created " . $this->getModelName());
     }
 
     /**
@@ -262,16 +262,18 @@ abstract class PDOTable implements IPDOTable, IBuildable
             $row = $row->getDataPath();
 
         foreach ($this->mColumns as $Column)
-            if ($Column->getDefaultValue())
+            if ($Column->getDefaultValue() !== null)
                 if (!isset($row[$Column->getName()]))
                     $row[$Column->getName()] = $Column->getDefaultValue();
 
         foreach ($row as $k => $v)
             if ($v === null)
                 unset($row[$k]);
+
         try {
 //            foreach($row as $column => $value) // No re-validation
 //                static::validateColumn($column, $value);
+            Log::u(get_called_class(), "Insert Row: " . print_r($row, true));
             $this->insertRow($row);
             return;
         } catch (\PDOException $ex) {
@@ -279,7 +281,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
                 $err = "A Duplicate " . $this->getModelName() . " already exists";
                 if (Config::$Debug)
                     $err .= ': ' . $ex->getMessage();
-                Log::u(get_called_class(), "Duplicate " . $this->getModelName() . " already exists");
+                Log::v(get_called_class(), "Duplicate " . $this->getModelName() . " already exists");
                 throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);
             }
             throw $ex;

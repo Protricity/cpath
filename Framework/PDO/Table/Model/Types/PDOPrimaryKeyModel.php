@@ -30,7 +30,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
         $id = $this->$primary;
 
         if(!$this->mCommit) {
-            Log::u(get_called_class(), "No Fields Updated for " . $this);
+            Log::v(get_called_class(), "No Fields Updated for " . $this);
             return 0;
         }
 
@@ -58,7 +58,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
 //            ."\n WHERE ".static::PRIMARY." = ".$DB->quote($id);
 //        $DB->exec($SQL);
 
-        Log::u(get_called_class(), "Updated " . $this);
+        Log::v(get_called_class(), "Updated " . $this);
         $c = sizeof($this->mCommit);
         $this->mCommit = NULL;
         //if(static::CACHE_ENABLED)
