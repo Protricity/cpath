@@ -41,11 +41,13 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
                 ->requestInsertID($Table::COLUMN_PRIMARY)
                 ->values(array_values($this->mCommit))
                 ->getInsertID();
+            Log::v(get_called_class(), "Created " . $this);
         } else {
             // Update the model
             $Table->update(array_keys($this->mCommit))
                 ->where($primary, $id)
                 ->values(array_values($this->mCommit));
+            Log::v(get_called_class(), "Updated " . $this);
         }
 
 
@@ -58,7 +60,6 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
 //            ."\n WHERE ".static::PRIMARY." = ".$DB->quote($id);
 //        $DB->exec($SQL);
 
-        Log::v(get_called_class(), "Updated " . $this);
         $c = sizeof($this->mCommit);
         $this->mCommit = NULL;
         //if(static::CACHE_ENABLED)

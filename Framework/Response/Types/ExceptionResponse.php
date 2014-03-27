@@ -8,12 +8,9 @@
 namespace CPath\Framework\Response\Types;
 
 use CPath\Config;
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
-use CPath\Framework\Response\Util\ResponseUtil;
 
 
 class ExceptionResponse implements IResponse {

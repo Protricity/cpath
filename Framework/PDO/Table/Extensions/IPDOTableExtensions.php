@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO\Table\Extensions;
 
 use CPath\Framework\PDO\Table\Column;
-use CPath\Framework\PDO\Table\IPDOTable;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\PDO\Table\IPDOTable;
 
 interface IPDOTableExtensions extends IPDOTable
 {
