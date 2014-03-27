@@ -9,6 +9,7 @@ namespace CPath\Framework\Render\JSON\Renderers;
 
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Log;
 
 class JSONRenderer implements IDataMap
 {
@@ -16,6 +17,7 @@ class JSONRenderer implements IDataMap
 
     private $mStarted = false, $mNextDelim=null, $mIsArray = false;
     private $mCount = 0;
+    private $mKeyList = array();
 
 
     public function __construct() {
@@ -62,6 +64,11 @@ class JSONRenderer implements IDataMap
         if($this->mIsArray) {
             throw new \InvalidArgumentException(__CLASS__ . " could not map subsection to an array");
         }
+
+        if(in_array($key, $this->mKeyList)) {
+            throw new \InvalidArgumentException(__CLASS__ . ": duplicate key detected: {$key}");
+        }
+        $this->mKeyList[] = $key;
 
         if($this->mNextDelim)
             echo $this->mNextDelim;
