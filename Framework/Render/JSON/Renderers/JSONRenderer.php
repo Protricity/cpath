@@ -66,7 +66,9 @@ class JSONRenderer implements IDataMap
         }
 
         if(in_array($key, $this->mKeyList)) {
-            throw new \InvalidArgumentException(__CLASS__ . ": duplicate key detected: {$key}");
+            $ex = new \InvalidArgumentException(__CLASS__ . ": duplicate key detected: {$key}");
+            //throw new \InvalidArgumentException(__CLASS__ . ": duplicate key detected: {$key}");
+            Log::ex(__CLASS__, $ex);
         }
         $this->mKeyList[] = $key;
 

@@ -46,7 +46,7 @@ final class ResponseUtil implements IMappable, IRenderAll {
             $Map->mapKeyValue('code', $Response->getCode());
 
             // TODO: remove Backwards compatability
-            //$Map->mapKeyValue('msg', $Response->getMessage());
+            $Map->mapKeyValue('msg', $Response->getMessage());
             $Map->mapKeyValue('status', $Response->getCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false');
         }
     }
