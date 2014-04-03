@@ -36,7 +36,7 @@ final class ResponseUtil implements IMappable, IRenderAll {
     /**
      * Map data to a data map
      * @param IDataMap $Map the map instance to add data to
-     * @param null $dataObject
+     * @param mixed $dataObject
      * @return void
      */
     function mapData(IDataMap $Map, $dataObject=null)

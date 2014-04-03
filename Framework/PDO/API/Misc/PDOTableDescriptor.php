@@ -9,18 +9,40 @@
 namespace CPath\Framework\PDO\API\Misc;
 
 use CPath\Framework\API\Interfaces\IAPI;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 
-class PDOTableDescriptor implements ISelectDescriptor {
+class PDOTableDescriptor implements ISelectDescriptor, IMappable {
     private $mTable, $mAPI, $mQuery, $mStatsCache;
 
     function __construct(PDOTable $Table, PDOSelect $Query, IAPI $API) {
         $this->mTable = $Table;
         $this->mQuery = $Query;
         $this->mAPI = $API;
+    }
+
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map)
+    {
+        $Stats = $this->execFullStats();
+        $Map->mapKeyValue('page', $Stats->getCurPage());
+        $Map->mapKeyValue('previous', $Stats->getPreviousPage());
+        $Map->mapKeyValue('next', $Stats->getNextPage());
+        $Map->mapKeyValue('offset', $Stats->getOffset());
+        $Map->mapKeyValue('limit', $Stats->getLimit());
+        $Map->mapKeyValue('total', $Stats->getTotal());
+        $Map->mapKeyValue('total_pages', $Stats->getTotalPages());
+        $Map->mapKeyValue('has_more', $Stats->getHasMore());
+        $Map->mapKeyValue('page_ids', $Stats->getPageIDs());
+        $Map->mapKeyValue('url', $Stats->getURL());
     }
 
     public function getLimitedStats() {
@@ -54,4 +76,5 @@ class PDOTableDescriptor implements ISelectDescriptor {
     function getAPI() {
         return $this->mAPI;
     }
+
 }

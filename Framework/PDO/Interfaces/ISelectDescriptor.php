@@ -16,6 +16,8 @@ use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 
 interface ISelectDescriptor {
 
+    const JSON_STATS = 'stats';
+
     /**
      * Return the column for a query row value
      * @param String $columnName the name of the column to be translated
