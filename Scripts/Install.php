@@ -65,11 +65,11 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
+     * @throws \CPath\Framework\API\Exceptions\APIException
+     * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
-     * @throws APIException if no config file could be installed
      */
-    function execute(IRequest $Request, $args)
+    function execute(IRequest $Request)
     {
         Log::u(__CLASS__, "Installing Config File");
 

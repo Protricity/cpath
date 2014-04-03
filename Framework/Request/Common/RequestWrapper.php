@@ -14,13 +14,14 @@ use CPath\Framework\Request\Interfaces\IRequest;
 class RequestWrapper implements IRequest, IWrapper
 {
     private $mRequest;
-    private $mPath, $mArgs, $mMethod;
+    private $mPath=null, $mArgs, $mMethod;
 
-    public function __construct(IRequest $Request, $newPrefix=null, $newArgs=null) {
-        list($newMethod, $newPath) = explode(' ', $newPrefix, 2);
-        $newPath = rtrim($newPath, '/') . '/';
-        $this->mPath = $newPath;
-        $this->mMethod = $newMethod;
+    public function __construct(IRequest $Request, $newArgs=null, $newPrefix=null) {
+        if($newPrefix) {
+            list($newMethod, $newPath) = explode(' ', $newPrefix, 2);
+            $this->mPath = rtrim($newPath, '/') . '/';
+            $this->mMethod = $newMethod;
+        }
         $this->mArgs = $newArgs;
         $this->mRequest = $Request;
     }
@@ -50,7 +51,7 @@ class RequestWrapper implements IRequest, IWrapper
     }
 
     function getMatchedPath() {
-        return $this->mPath;
+        return $this->mPath ?: $this->mRequest->getPath();
     }
 
     function getPath() {
@@ -59,7 +60,7 @@ class RequestWrapper implements IRequest, IWrapper
     }
 
     function getArgs() {
-        return $this->mArgs ?: $this->mRequest->getArgs();
+        return $this->mArgs !== null ? $this->mArgs : $this->mRequest->getArgs(); // Yes here, no for path
     }
 
     function getMatchedMethod() {
@@ -104,7 +105,7 @@ class RequestWrapper implements IRequest, IWrapper
     }
 
     static function fromRequest($newPath=null, $newArgs=null) {
-        return new RequestWrapper(Base::getRequest(), $newPath, $newArgs);
+        return new RequestWrapper(Base::getRequest(), $newArgs, $newPath);
     }
 
     public function count() {

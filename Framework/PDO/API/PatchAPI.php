@@ -8,32 +8,50 @@
 namespace CPath\Framework\PDO\API;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
+use CPath\Framework\API\Exceptions\APIException;
+use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
+use CPath\Framework\API\Field\Interfaces\IField;
+use CPath\Framework\API\Field\RequiredParam;
+use CPath\Framework\API\Interfaces\IAPI;
+use CPath\Framework\API\Util\APIExecuteUtil;
+use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
+use CPath\Framework\PDO\Query\PDOWhere;
+use CPath\Framework\PDO\Response\PDOModelResponse;
 use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
+use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
+use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Types\DataResponse;
 
-class PatchAPI extends GetAPI implements IAPIGetCallbacks {
+class PatchAPI implements IAPI {
+    private $mSearchColumns;
+    private $mColumns;
+    private $mIDField;
+
+    private $mTable;
+    private $mPolicy;
 
     /**
-     * Add or modify fields of an API.
-     * Note: Leave empty if unused.
-     * @param Array &$fields the existing API fields to modify
-     * @return \CPath\Framework\API\Field\\CPath\Framework\API\Field\Interfaces\IField[]|NULL return an array of prepared fields to use or NULL to ignore.
+     * Construct an instance of the GET API
+     * @param PDOPrimaryKeyTable $Table the table instance
+     * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
+     * Note: PRIMARY key is already included
+     * @param IWriteAccess $SecurityPolicy
      */
-    function prepareGetFields(Array &$fields)
-    {
-        $T = $this->getTable();
+    function __construct(PDOPrimaryKeyTable $Table, $searchColumns=NULL, IWriteAccess $SecurityPolicy=null) {
+        $this->mTable = $Table;
+        $this->mSearchColumns = $searchColumns ?: $Table::COLUMN_ID ?: $Table::COLUMN_PRIMARY;
+        $this->mPolicy = $SecurityPolicy;
+    }
 
-        $defFilter = $T::DEFAULT_FILTER;
-        foreach($T->findColumns(PDOColumn::FLAG_UPDATE) as $Column)
-            /** @var IPDOColumnBuilder $Column */
-            if(!isset($fields[$Column->getName()]))
-                $fields[$Column->getName()] = $Column->generateAPIField(false, NULL, NULL, $defFilter);
+    /**
+     * @return IReadAccess|PDOPrimaryKeyTable
+     */
+    function getTable() {
+        return $this->mTable;
     }
 
     /**
@@ -44,26 +62,94 @@ class PatchAPI extends GetAPI implements IAPIGetCallbacks {
         return "Update a ".$this->getTable()->getModelName();
     }
 
-    /**
-     * Perform on successful GetAPI execution
-     * @param PDOPrimaryKeyModel $UpdateModel the returned model
-     * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|void
-     */
-    final function onGetExecute(PDOPrimaryKeyModel $UpdateModel, IRequest $Request, IResponse $Response) {
 
-        foreach($this->getHandlers() as $Handler)
-            if($Handler instanceof IWriteAccess)
-                $Handler->assertWriteAccess($UpdateModel, $Request, IWriteAccess::INTENT_PATCH);
+    /**
+     * Get all API Fields
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @throws \CPath\Framework\API\Exceptions\APIException
+     * @return IField[]|IFieldCollection
+     */
+    function getFields(IRequest $Request) {
+        $T = $this->getTable();
+        $this->mColumns = $T->findColumns($this->mSearchColumns);
+
+        if(!$this->mColumns)
+            throw new APIException($T->getModelName()
+                . __CLASS__ . " APIs must have a ::PRIMARY or ::COLUMN_ID column or provide at least one alternative column");
+
+        $keys = array_keys($this->mColumns);
+        if(sizeof($keys) > 1) {
+            foreach( $keys as $i => &$key)
+                if($i)
+                    $key = ($i == sizeof($keys) - 1 ? ' or ' : ', ') . $key;
+            $this->mIDField = 'id';
+        } else {
+            $this->mIDField = $keys[0];
+        }
+
+        $Fields = array (
+            $this->mIDField => new RequiredParam($this->mIDField, $T->getModelName() . ' ' . implode('', $keys)),
+        );
+
+        foreach($T->findColumns(PDOColumn::FLAG_UPDATE) as $Column)
+            /** @var IPDOColumnBuilder $Column */
+            if(!isset($fields[$Column->getName()]))
+                $Fields[$Column->getName()] = $Column->generateAPIField();
+
+        return $Fields;
+    }
+
+
+    /**
+     * Execute this API Endpoint with the entire request.
+     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @throws \CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException
+     * @throws \CPath\Framework\API\Exceptions\APIException
+     * @return IResponse the api call response with data, message, and status
+     */
+    function execute(IRequest $Request)
+    {
+        $Util = new APIExecuteUtil($this);
+        $Util->processRequest($Request);
+
+        $T = $this->getTable();
+        $id = $Request->pluck($this->mIDField);
+
+        $Search = $T->search();
+        $Search->limit(1);
+        $Search->whereSQL('(');
+        $Search->setFlag(PDOWhere::LOGIC_OR);
+        /** @var PDOColumn $Column */
+        foreach($this->mColumns as $name => $Column) {
+            if($Column->hasFlag(PDOColumn::FLAG_NUMERIC) && !is_numeric($id))
+                throw new APIException("Search value was non-numeric on numeric column '" . $name . "'");
+            $Search->where($name, $id);
+        }
+        $Search->unsetFlag(PDOWhere::LOGIC_OR);
+        $Search->whereSQL(')');
+
+        if($this->mPolicy instanceof IReadAccess)
+            $this->mPolicy->assertQueryReadAccess($Search, $T, $Request, IReadAccess::INTENT_GET);
+
+        /** @var PDOPrimaryKeyModel $PatchModel  */
+        $PatchModel = $Search->fetch();
+        if(!$PatchModel)
+            throw new ModelNotFoundException($T, $id);
+
+        if($this->mPolicy instanceof IReadAccess)
+            $this->mPolicy->assertReadAccess($PatchModel, $Request, IReadAccess::INTENT_GET);
+
+        if($this->mPolicy)
+            $this->mPolicy->assertWriteAccess($PatchModel, $Request, IWriteAccess::INTENT_PATCH);
 
         foreach($Request as $column => $value)
             if($value !== NULL)
-                $UpdateModel->updateColumn($column, $value, false);
+                $PatchModel->updateColumn($column, $value, false);
 
-        $c = $UpdateModel->commitColumns();
+        $c = $PatchModel->commitColumns();
+
         if(!$c)
-            return new DataResponse("No columns were updated for {$UpdateModel}.", true, $UpdateModel);
-        return new DataResponse("Updated {$c} Field(s) for {$UpdateModel}.", true, $UpdateModel);
+            return new PDOModelResponse($PatchModel, "No columns were updated for {$PatchModel}.");
+        return new PDOModelResponse($PatchModel, "Updated {$c} Field(s) for {$PatchModel}.");
     }
 }

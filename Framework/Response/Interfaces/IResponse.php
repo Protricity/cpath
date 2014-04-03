@@ -12,7 +12,7 @@ use CPath\Config;
 interface IResponse extends IResponseCode
 {
     const JSON_MESSAGE = 'message';
-    const JSON_DATA = 'data';
+    const JSON_RESPONSE = 'response';
 
     /**
      * Get the IResponse Message

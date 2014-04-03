@@ -6,26 +6,27 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
-use CPath\Describable\Describable;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Framework\Response\Types\AbstractResponse;
+use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Framework\Response\Util\ResponseUtil;
 
-class PDOSearchResponse extends AbstractResponse implements IMappable, IComparable {
+class PDOSearchResponse implements IResponse, IMappable {
     private $mQuery;
 
-    /**
-     * Create a new response
-     * @param PDOSelect $Query search query
-     * @param String|Null $message the response message
-     */
-    function __construct(PDOSelect $Query, $message=null) {
-        parent::__construct($message, true);
+    private $mMessage, $mCode;
+
+    function __construct(PDOSelect $Query, $message = null, $code = null)
+    {
         $this->mQuery = $Query;
+        $this->mMessage = $message;
+        $this->mCode = $code;
     }
+
 
     /**
      * Return the PDOSelect query instance
@@ -34,15 +35,6 @@ class PDOSearchResponse extends AbstractResponse implements IMappable, IComparab
     function getQuery() {
         return $this->mQuery;
     }
-
-    /**
-     * @return String
-     * @override
-     */
-    function getMessage() {
-        return parent::getMessage() ?: Describable::get($this->mQuery)->getTitle();
-    }
-
 
     /**
      * Compare two objects
@@ -66,8 +58,27 @@ class PDOSearchResponse extends AbstractResponse implements IMappable, IComparab
      * @param IDataMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
-        $Map->mapKeyValue('stats', $this->mQuery->getDescriptor()->execFullStats());
-        $Map->mapKeyValue('results', $this->mQuery);
+    function mapData(IDataMap $Map)
+    {
+        $Util = new ResponseUtil($this);
+        $Util->mapData($Map, $this->mQuery);
+    }
+
+    /**
+     * Get the IResponse Message
+     * @return String
+     */
+    function getMessage()
+    {
+        return $this->mMessage ?: get_class($this->mQuery);
+    }
+
+    /**
+     * Get the request status code
+     * @return int
+     */
+    function getCode()
+    {
+        return $this->mCode ?: IResponseCode::STATUS_SUCCESS;
     }
 }

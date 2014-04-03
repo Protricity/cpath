@@ -8,11 +8,13 @@
 namespace CPath\Framework\Response\Util;
 use CPath\Base;
 use CPath\Config;
+use CPath\Framework\Data\Map\Common\MappableCallback;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\IRenderAll;
+use CPath\Framework\Render\JSON\IRenderJSON;
 use CPath\Framework\Render\JSON\Renderers\JSONRenderer;
 use CPath\Framework\Render\Text\IRenderText;
 use CPath\Framework\Render\Util\RenderIndents as RI;
@@ -34,20 +36,27 @@ final class ResponseUtil implements IMappable, IRenderAll {
     /**
      * Map data to a data map
      * @param IDataMap $Map the map instance to add data to
+     * @param null $dataObject
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapData(IDataMap $Map, $dataObject=null)
     {
         $Response = $this->mResponse;
-        if($Response instanceof IMappable) {
-            $Response->mapData($Map);
-        } else {
-            $Map->mapKeyValue('message', $Response->getMessage());
-            $Map->mapKeyValue('code', $Response->getCode());
 
-            // TODO: remove Backwards compatability
-            $Map->mapKeyValue('msg', $Response->getMessage());
-            $Map->mapKeyValue('status', $Response->getCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false');
+        $Map->mapKeyValue(IResponse::JSON_MESSAGE, $Response->getMessage());
+        $Map->mapKeyValue(IResponse::JSON_CODE, $Response->getCode());
+
+        // TODO: remove Backwards compatability
+        $Map->mapKeyValue('msg', $Response->getMessage());
+        $Map->mapKeyValue('status', $Response->getCode() == IResponse::STATUS_SUCCESS ? 'true' : 'false');
+
+        if($dataObject !== null) {
+            if($dataObject instanceof IMappable)
+                $Map->mapSubsection(IResponse::JSON_RESPONSE, new MappableCallback( function(IDataMap $Map) use ($dataObject) {
+                    $dataObject->mapData($Map);
+                }));
+            else
+                $Map->mapKeyValue(IResponse::JSON_RESPONSE, $dataObject);
         }
     }
 
@@ -62,8 +71,11 @@ final class ResponseUtil implements IMappable, IRenderAll {
 
         $Response = $this->mResponse;
         $msg = preg_replace('/[^\w -]/', '', $Response->getMessage());
+        $code = $Response->getCode();
+        if(!$code || !is_numeric($code))
+            throw new \InvalidArgumentException("Invalid Status Code: {$code}");
 
-        header("HTTP/1.1 " . $Response->getCode() . " " . $msg);
+        header("HTTP/1.1 " . $code . " " . $msg);
         if($mimeType !== NULL)
             header("Content-Type: $mimeType");
         header('Access-Control-Allow-Origin: *');
@@ -106,8 +118,8 @@ final class ResponseUtil implements IMappable, IRenderAll {
         if($sendHeaders)
             $this->sendHeaders('application/json');
         $Response = $this->mResponse;
-        if($Response instanceof IRenderXML) {
-            $Response->renderXML($Request);
+        if($Response instanceof IRenderJSON) {
+            $Response->renderJSON($Request);
         } elseif($Response instanceof IMappable) {
             JSONRenderer::renderMap($Response);
         } else {

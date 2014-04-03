@@ -14,6 +14,7 @@ use CPath\Framework\API\Util\APIExecuteUtil;
 use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Request\Common\RequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
@@ -29,7 +30,6 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     /** @var APIFormFragment */
     private $mForm;
     private $mResponseBox;
-    private $mSelectedAPI;
 
     /** @var IAPI[]  */
     private $mAPIs = array();
@@ -58,33 +58,42 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      * @return String|void always returns void
      */
     function render(IRequest $Request) {
-        $API = $this->selectAPI($Request);
-        if($API instanceof IWrapper)
-            $API = $API->getWrappedObject();
-        $this->mSelectedAPI = $API;
         parent::render($Request);
     }
 
     private function selectAPI(IRequest &$Request) {
         try {
             $Routes = new Routes();
-            return $Routes->routeRequest($Request, $this);
+            $Render = $Routes->routeRequest($Request, $this);
+
+            if($Render instanceof IWrapper)
+                $Render = $Render->getWrappedObject();
+            return $Render;
         } catch (RouteNotFoundException $ex) {
 
         }
-
+        $args = $Request->getArgs();
         $prefixes = array_keys($this->mAPIs);
-        $args = $this->mArgs;
-        if(!empty($args[0])) {
-            if(is_numeric($args[0]) && isset($prefixes[intval($args[0])]))
-                return $this->mAPIs[$prefixes[$args[0]]];
-            elseif(isset($this->mAPIs[$args[0]]))
-                return $this->mAPIs[$args[0]];
-            else
+        if(isset($args[0]) && $args[0] !== '') {
+            if(is_numeric($args[0]) && isset($prefixes[intval($args[0])])) {
+                $arg = array_shift($args);
+                $API = $this->mAPIs[$prefixes[$arg]];
+                $Request = new RequestWrapper($Request, $args);
+                return $API;
+            } elseif (isset($this->mAPIs[$args[0]])) {
+                $arg = array_shift($args);
+                $API = $this->mAPIs[$arg];
+                $Request = new RequestWrapper($Request, $args);
+                return $API;
+            } else {
                 return $this->mAPIs[$prefixes[0]];
+            }
+
         }
-        else
-            return $this->mAPIs[$prefixes[0]];
+
+        throw new RouteNotFoundException("Could not match API: " . $Request->getMethod() . " " . $Request->getPath());
+//        else
+//            return $this->mAPIs[$prefixes[0]];
     }
 //
 //    /**
@@ -105,18 +114,22 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      */
     protected function setupHeadFields(IRequest $Request)
     {
-        $API = $this->selectAPI($Request);
-        $this->mSelectedAPI = $API;
+        try {
+            $API = $this->selectAPI($Request);
 
-        if(!$API instanceof IAPI) {
-            throw new \InvalidArgumentException(get_class($API) . " does not implement IAPI");
+            if(!$API instanceof IAPI) {
+                throw new \InvalidArgumentException(get_class($API) . " does not implement IAPI");
+            }
+
+            $this->mForm = new APIDebugFormFragment($API, $this->getTheme());
+
+            if($API instanceof IViewConfig)
+                $API->addHeadElementsToView($this);
+        } catch (RouteNotFoundException $ex) {
+            $this->mForm = new APIFormFragment($this, $this->getTheme());
         }
 
-        $this->mForm = new APIDebugFormFragment($API, $this->getTheme());
         $this->mForm->addHeadElementsToView($this);
-
-        if($API instanceof IViewConfig)
-            $API->addHeadElementsToView($this);
 
         if($this->mResponseBox instanceof IViewConfig)
             $this->mResponseBox->addHeadElementsToView($this);
@@ -158,10 +171,16 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
-        $API = $this->selectAPI($Request);
+
         $route = $Request->getMethod() . ' ' . $Request->getPath();
         echo RI::ni(), "<h1>{$route}</h1>";
-        echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
+
+        try {
+            $API = $this->selectAPI($Request);
+            echo RI::ni(), "<h2>", Describable::get($API)->getDescription(), "</h2>";
+        } catch (RouteNotFoundException $ex) {
+
+        }
     }
 
     /**
@@ -183,7 +202,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     {
         $API = $this->selectAPI($Request);
         $ExecUtil = new APIExecuteUtil($API);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
+        $Response = $ExecUtil->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
     }
@@ -197,7 +216,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     {
         $API = $this->selectAPI($Request);
         $ExecUtil = new APIExecuteUtil($API);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
+        $Response = $ExecUtil->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
     }
@@ -212,7 +231,7 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     {
         $API = $this->selectAPI($Request);
         $ExecUtil = new APIExecuteUtil($API);
-        $Response = $ExecUtil->executeOrCatch($Request, $this->mArgs);
+        $Response = $ExecUtil->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
     }
@@ -220,12 +239,12 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
+     * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    function execute(IRequest $Request, $args) {
+    function execute(IRequest $Request) {
         $API = $this->selectAPI($Request);
-        return $API->execute($Request, $args);
+        return $API->execute($Request);
     }
 
     /**
@@ -234,8 +253,12 @@ class APIMultiView extends NavBarLayout implements IRenderAll, IAPI, IRoutable {
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {
-        $API = $this->selectAPI($this->mSelectedAPI);
-        return $API->getFields($Request);
+        try {
+            $API = $this->selectAPI($Request);
+            return $API->getFields($Request);
+        } catch (RouteNotFoundException $ex) {
+            return array();
+        }
     }
 
     /**

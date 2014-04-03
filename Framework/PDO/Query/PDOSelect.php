@@ -7,11 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
+use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Log;
 
-class PDOSelect extends PDOWhere implements \Iterator, \Countable {
+class PDOSelect extends PDOWhere implements IMappable, \Iterator, \Countable {
 
     /** @var \PDOStatement */
     protected $mStmt=NULL;
@@ -282,5 +284,17 @@ class PDOSelect extends PDOWhere implements \Iterator, \Countable {
     public function count() {
         if(!$this->mStmt) $this->exec();
         return $this->mStmt->rowCount();
+    }
+
+    /**
+     * Map data to a data map
+     * @param IDataMap $Map the map instance to add data to
+     * @return void
+     */
+    function mapData(IDataMap $Map)
+    {
+        while($data = $this->fetch()) {
+            $Map->mapArrayObject($data);
+        }
     }
 }

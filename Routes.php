@@ -71,7 +71,7 @@ class Routes implements IRoutable {
         if(!$Destination)
             throw new RouteNotFoundException("Route was not found: " . $path);
 
-        $Request = new RequestWrapper($Request, $newPrefix, $args);
+        $Request = new RequestWrapper($Request, $args, $newPrefix);
 
         if ($Destination instanceof IRenderAggregate)
             $Destination = $Destination->getRenderer($Request);
@@ -168,7 +168,7 @@ class Routes_SelectorMap implements IRouteMap {
                 //$method = $this->mRequest->getMethod();
                 $argPath = substr($requestPath, strlen($path));
                 $argPath = trim($argPath, '/');
-                $args = !$argPath ? array() : explode('/', $argPath);
+                $args = explode('/', $argPath);
                 $this->mDone = true;
                 $this->mMatchedPrefix = $prefix;
                 $this->mArgs = $args;

@@ -30,15 +30,14 @@ class ApiTester {
 
     /**
      * @param array $request
-     * @param array $args
      * @throws \Exception
      * @throws APIFailedException
      * @return IResponse
      */
-    public function test(Array $request=NULL, Array $args=array()) {
+    public function test(Array $request=NULL) {
         if($request)
             $this->mRequest->merge($request);
-        $Response = $this->mAPI->execute($this->mRequest, $args);
+        $Response = $this->mAPI->execute($this->mRequest);
         if(!($Response instanceof IResponse))
             $Response = new DataResponse(true, "API executed successfully", $Response);
         if($Response instanceof ExceptionResponse)

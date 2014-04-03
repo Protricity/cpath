@@ -67,12 +67,12 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
      * @param IRequest $Request the IRequest instance for this render which contains the request
-     * @param Array $args additional arguments for this execution
+     * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    final public function execute(IRequest $Request, $args) {
-        $this->processRequest($Request, $args);
-        $Response = $this->mAPI->execute($Request, $args);
+    final public function execute(IRequest $Request) {
+        $this->processRequest($Request);
+        $Response = $this->mAPI->execute($Request);
 
         if($Response instanceof IResponseAggregate)
             $Response = $Response->createResponse();
@@ -85,12 +85,11 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    final public function executeOrCatch(IRequest $Request, $args) {
+    final public function executeOrCatch(IRequest $Request) {
         try {
-            $Response = $this->execute($Request, $args);
+            $Response = $this->execute($Request);
             if($Response->getCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
                 $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {
@@ -109,11 +108,10 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param array $args
      * @throws \CPath\Framework\API\Exceptions\ValidationExceptions
      * @return void
      */
-    function processRequest(IRequest $Request, Array &$args) {
+    function processRequest(IRequest $Request) {
         /** @var IField $Field */
         if($Request instanceof IOptionProcessor) {
             if($this->mAPI instanceof IOptionMap)
@@ -122,15 +120,16 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
                 $Request->processMap($this->generateFieldShorts($Request));
         }
 
-        if($args) {
-            foreach($this->mAPI->getFields($Request) as $name=>$Field) {
-                $FieldUtil = new FieldUtil($Field);
-                if($FieldUtil->isParam()) {
-                    $Request[$name] = array_shift($args);
-                    if(!$args)
-                        break;
+        if($args = $Request->getArgs()) {
+            if($args[0])
+                foreach($this->mAPI->getFields($Request) as $Field) {
+                    $FieldUtil = new FieldUtil($Field);
+                    if($FieldUtil->isParam()) {
+                        $Request[$Field->getName()] = array_shift($args);
+                        if(!$args)
+                            break;
+                    }
                 }
-            }
         }
 
         $FieldExceptions = new ValidationExceptions($this);

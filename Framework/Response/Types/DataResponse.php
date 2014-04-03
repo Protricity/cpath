@@ -12,6 +12,7 @@ use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Framework\Response\Util\ResponseUtil;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 
@@ -145,9 +146,11 @@ class DataResponse extends ArrayObject implements IResponse, IComparable, IDescr
      */
     function mapData(IDataMap $Map)
     {
-        $Map->mapKeyValue(IResponse::JSON_CODE, $this->getCode());
-        $Map->mapKeyValue(IResponse::JSON_MESSAGE, $this->getMessage());
-        $Map->mapKeyValue(IResponse::JSON_DATA, $this->mData);
+        $Util = new ResponseUtil($this);
+        $Util->mapData($Map);
+        //$Map->mapKeyValue(IResponse::JSON_CODE, $this->getCode());
+        //$Map->mapKeyValue(IResponse::JSON_MESSAGE, $this->getMessage());
+        $Map->mapKeyValue(IResponse::JSON_RESPONSE, $this->mData);
     }
 
     function __toString() {

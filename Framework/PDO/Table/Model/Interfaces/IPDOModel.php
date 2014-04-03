@@ -11,7 +11,7 @@ use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\Response\Interfaces\IResponse;
 
-interface IPDOModel extends IMappable, ISerializable, IResponse {
+interface IPDOModel extends IMappable, ISerializable {
 
     /**
      * @return \CPath\Framework\PDO\Table\Types\PDOTable

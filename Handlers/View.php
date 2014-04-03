@@ -6,6 +6,7 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
+use CPath\Framework\Request\Common\RequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Handlers\Interfaces\IView;
 use CPath\Handlers\Themes\CPathDefaultTheme;
@@ -22,7 +23,6 @@ abstract class View implements IView, IViewConfig {
 
     private $mHeadFields = array();
     private $mTheme;
-    private $mPath = null;
 
     public function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
@@ -37,15 +37,16 @@ abstract class View implements IView, IViewConfig {
      */
     abstract protected function setupHeadFields(IRequest $Request);
 
-    function getPath() { return $this->mPath; }
-
     /**
      * Set up <head> element fields for this View
      * @param IRequest $Request
      */
     final protected function setupHead(IRequest $Request) {
-        if($this->getPath()) {
-            $basePath = rtrim(Config::getDomainPath(), '/') . $this->getPath();
+        if($Request->getPath()) {
+            $path = $Request->getPath();
+            if($Request instanceof RequestWrapper)
+                $path = $Request->getMatchedPath();
+            $basePath = rtrim(Config::getDomainPath(), '/') . rtrim($path, '/') . '/';
             $this->addHeadHTML("<base href='{$basePath}' />", true);
         }
 

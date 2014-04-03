@@ -25,7 +25,7 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class GetAPI implements IAPI, IRenderHTML {
+class GetAPI implements IAPI {
     private $mSearchColumns;
     private $mColumns;
     private $mIDField;
@@ -94,16 +94,14 @@ class GetAPI implements IAPI, IRenderHTML {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
-     * @return PDOModelResponse the found model which implements IResponseAggregate
-     * @throws ModelNotFoundException if the Model was not found
+     * @throws \CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException
+     * @internal param Array $args additional arguments for this execution
+     * @return PDOPrimaryKeyModel the found model which implements IResponseAggregate
      */
-    final function execute(IRequest $Request, $args) {
-
+    final function execute(IRequest $Request) {
         $T = $this->getTable();
         $id = $Request->pluck($this->mIDField);
 
-        /** @var \CPath\Framework\PDO\Table\Model\Query\PDOModelSelect $Search  */
         $Search = $T->search();
         $Search->limit(1);
         $Search->whereSQL('(');
@@ -113,26 +111,15 @@ class GetAPI implements IAPI, IRenderHTML {
         $Search->unsetFlag(PDOWhere::LOGIC_OR);
         $Search->whereSQL(')');
 
-        foreach($this->getHandlers() as $Handler)
-            if($Handler instanceof IReadAccess)
-                $Handler->assertQueryReadAccess($Search, $T, $Request, IReadAccess::INTENT_GET);
+        if($this->mPolicy)
+            $this->mPolicy->assertQueryReadAccess($Search, $T, $Request, IReadAccess::INTENT_GET);
 
         /** @var PDOPrimaryKeyModel $GetModel  */
         $GetModel = $Search->fetch();
         if(!$GetModel)
             throw new ModelNotFoundException($T, $id);
 
-        foreach($this->getHandlers() as $Handler)
-            if($Handler instanceof IReadAccess)
-                $Handler->assertReadAccess($GetModel, $Request, IReadAccess::INTENT_GET);
-
-        $Response = new PDOModelResponse($GetModel);
-
-        foreach($this->getHandlers() as $Handler)
-            if($Handler instanceof IAPIGetCallbacks)
-                $Response = $Handler->onGetExecute($GetModel, $Request, $Response) ?: $Response;
-
-        return $Response;
+        return $GetModel;
     }
 
 

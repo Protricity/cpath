@@ -112,22 +112,6 @@ abstract class PDOModel implements IPDOModel {
         return $data;
     }
 
-    /**
-     * Get the IResponse Message
-     * @return String
-     */
-    function getMessage() {
-        return Describable::get($this)->getTitle();
-    }
-
-    /**
-     * Get the request status code
-     * @return int
-     */
-    function getCode() {
-        return IResponseCode::STATUS_SUCCESS;
-    }
-
     function __toString() {
         if($id = static::COLUMN_TITLE)
             return static::modelName() . " '" . $this->$id . "'";

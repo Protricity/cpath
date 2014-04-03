@@ -91,7 +91,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);
             $Util = new ResponseUtil($ErrorResponse);
-            $Util->renderHtml($Request, true);
+            $Util->renderHtml($Request, null, true);
         }
     }
 

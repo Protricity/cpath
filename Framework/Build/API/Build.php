@@ -51,10 +51,10 @@ class Build implements IRenderAggregate, IAPI, IBuildable {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the request instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
+     * @internal param Array $args additional arguments for this execution
      * @return DataResponse the api call response with data, message, and status
      */
-    final function execute(IRequest $Request, $args) {
+    final function execute(IRequest $Request) {
         static $built = false;
         if($built)
             return new DataResponse(false, "Build can only occur once per execution. Skipping Build...");

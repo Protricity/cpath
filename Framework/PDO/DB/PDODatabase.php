@@ -151,7 +151,7 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRender {
                     $this->upgrade(true, $Request['force']);
                     $Build = new Build();
                     Log::u(__CLASS__, "Rebuilding Models...");
-                    $Build->execute($Request, $args);
+                    $Build->execute($Request);
                     break;
                 default:
                     Log::u(__CLASS__, "Use 'upgrade', 'reset', or 'rebuild' to upgrade database");

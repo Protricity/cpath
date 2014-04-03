@@ -124,7 +124,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderJSON(IRequest $Request)
     {
-        $Response = $this->execute($Request, $this->mArgs);
+        $Response = $this->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderJSON($Request, true);
     }
@@ -136,7 +136,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderText(IRequest $Request)
     {
-        $Response = $this->execute($Request, $this->mArgs);
+        $Response = $this->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderText($Request, true);
     }
@@ -149,7 +149,7 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
      */
     function renderXML(IRequest $Request, $rootElementName = 'root')
     {
-        $Response = $this->execute($Request, $this->mArgs);
+        $Response = $this->execute($Request);
         $ResponseUtil = new ResponseUtil($Response);
         $ResponseUtil->renderXML($Request, $rootElementName, true);
     }
@@ -157,11 +157,11 @@ class APIView extends NavBarLayout implements IRenderAll, IAPI {
     /**
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
-     * @param Array $args additional arguments for this execution
+     * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
-    function execute(IRequest $Request, $args) {
-        return $this->mAPI->execute($Request, $args);
+    function execute(IRequest $Request) {
+        return $this->mAPI->execute($Request);
     }
 
     /**
