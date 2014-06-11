@@ -6,10 +6,10 @@ use CPath\Config;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Themes\CPathDefaultTheme;
-use CPath\Handlers\Themes\Interfaces\ITableTheme;
-use CPath\Handlers\Util\HTMLRenderUtil;
+use CPath\Framework\View\IView;
+use CPath\Framework\View\Theme\CPathDefaultTheme;
+use CPath\Framework\View\Theme\Interfaces\ITableTheme;
+use CPath\Framework\View\Util\HTMLRenderUtil;
 use CPath\Interfaces\IViewConfig;
 
 abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{

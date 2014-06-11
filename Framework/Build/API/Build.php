@@ -23,7 +23,7 @@ use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Handlers\Views\APIView;
+use CPath\Framework\View\API\APIView;
 use CPath\Log;
 
 class Build implements IRenderAggregate, IAPI, IBuildable {

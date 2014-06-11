@@ -8,9 +8,9 @@ use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
-use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Themes\CPathDefaultTheme;
-use CPath\Handlers\Themes\Interfaces\ITheme;
+use CPath\Framework\View\IView;
+use CPath\Framework\View\Theme\CPathDefaultTheme;
+use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
 class APIResponseBoxFragment implements IViewConfig{

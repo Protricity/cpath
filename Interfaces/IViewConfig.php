@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Interfaces;
 
-use CPath\Handlers\Interfaces\IView;
+use CPath\Framework\View\IView;
 
 interface IViewConfig{
 

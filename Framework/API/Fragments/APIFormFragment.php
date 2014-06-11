@@ -9,9 +9,9 @@ use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Handlers\Themes\Interfaces\ITableTheme;
-use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Handlers\Util\HTMLRenderUtil;
+use CPath\Framework\View\Theme\Interfaces\ITableTheme;
+use CPath\Framework\View\Theme\Util\TableThemeUtil;
+use CPath\Framework\View\Util\HTMLRenderUtil;
 
 class APIFormFragment extends AbstractFormFragment{
 
@@ -19,7 +19,7 @@ class APIFormFragment extends AbstractFormFragment{
 
     /**
      * @param IAPI $API
-     * @param ITableTheme $Theme
+     * @param \CPath\Framework\View\Theme\Interfaces\ITableTheme $Theme
      */
     public function __construct(IAPI $API, ITableTheme $Theme = null) {
         $this->mAPI = $API;

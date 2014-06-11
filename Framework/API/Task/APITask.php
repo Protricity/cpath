@@ -14,8 +14,8 @@ use CPath\Framework\API\Fragments\SimpleFormFragment;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Task\ITask;
-use CPath\Handlers\Interfaces\IView;
-use CPath\Handlers\Themes\Interfaces\ITheme;
+use CPath\Framework\View\IView;
+use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
 abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {

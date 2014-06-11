@@ -7,10 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath;
 use CPath\Framework\Build\API\Build;
+use CPath\Framework\View\Templates\CLI\CLIErrorView;
 use CPath\Interfaces\IConfig;
 
 class Config implements IConfig {
     static $GenPath = 'gen';
+    static $Paths = array(
+        'ANY /' => 'CPath\Framework\View\Templates\CLI\CLIErrorView',
+    );
 
     static $Domain = NULL;
     static $SiteName = NULL;

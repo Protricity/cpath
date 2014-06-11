@@ -8,14 +8,14 @@ use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Route\Routable\IRoutable;
-use CPath\Handlers\Themes\Interfaces\ITableTheme;
-use CPath\Handlers\Themes\Util\TableThemeUtil;
-use CPath\Handlers\Util\HTMLRenderUtil;
+use CPath\Framework\View\Theme\Interfaces\ITableTheme;
+use CPath\Framework\View\Theme\Util\TableThemeUtil;
+use CPath\Framework\View\Util\HTMLRenderUtil;
 
 class SimpleFormFragment extends AbstractFormFragment{
 
     /**
-     * @param ITableTheme $Theme
+     * @param \CPath\Framework\View\Theme\Interfaces\ITableTheme $Theme
      */
     public function __construct(ITableTheme $Theme = null) {
         parent::__construct($Theme);

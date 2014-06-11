@@ -7,11 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Collection\Predicate\Common;
 
-class InversePredicate implements \CPath\Framework\Data\Collection\Predicate\IPredicate {
+use CPath\Framework\Data\Collection\Predicate\IPredicate;
+
+class InversePredicate implements IPredicate {
 
     private $mPredicate;
 
-    function __construct(\CPath\Framework\Data\Collection\Predicate\IPredicate $Predicate) {
+    function __construct(IPredicate $Predicate) {
         $this->mPredicate = $Predicate;
     }
 

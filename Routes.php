@@ -34,7 +34,13 @@ class Routes implements IRoutable {
         $this->mRoutes = $Map;
         $Map = $this;
         $path = Config::getGenPath().'routes.gen.php';
-        include $path;
+        $ret = (include $path);
+        if(!$ret) {
+            foreach(Config::$Paths as $path => $destination) {
+                if($Map->map($path, $destination))
+                    break;
+            }
+        }
     }
 
     /**
