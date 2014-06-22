@@ -47,6 +47,8 @@ class SearchFormUtil implements IDescribable, IViewConfig {
         $basePath = Base::getClassPath($this, true);
         $View->addHeadStyleSheet($basePath . 'assets/searchformutil.css', true);
         $View->addHeadScript($basePath . 'assets/searchformutil.js', true);
+
+        collect views and render the html at once! duh??
     }
 
     function getQuery() {

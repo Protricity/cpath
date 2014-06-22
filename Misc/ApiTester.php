@@ -8,7 +8,6 @@
  */
 namespace CPath\Misc;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -55,8 +54,8 @@ class ApiTester {
 //        if($Renderer instanceof IRenderAggregate)
 //            $Renderer = $Renderer->getRenderer($Cli);
 
-        if($Renderer instanceof IWrapper)
-            $Renderer = $Renderer->getWrappedObject();
+        //if($Renderer instanceof IWrapper)
+        //    $Renderer = $Renderer->getWrappedObject();
 
         if(!$Renderer instanceof IAPI)
             throw new NotAnApiException(get_class($Renderer) . " does not implement IAPI");

@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Render\Util;
 
-use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\Exceptions\MissingRenderModeException;
 use CPath\Framework\Render\HTML\IRenderHTML;
@@ -20,7 +19,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 
-class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
+class RenderMimeSwitchUtility implements IRenderAll, IRender {
     private $mTarget;
 
     /**
@@ -30,7 +29,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
         $this->mTarget = $RenderTarget;
     }
 
-    function getWrappedObject() {
+    function getRenderTarget() {
         return $this->mTarget;
     }
 
@@ -66,7 +65,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
         }
 
         $types = implode(', ', $Request->getMimeTypes());
-        throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getWrappedObject()));
+        throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
     }
 
     /**
@@ -86,7 +85,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
                 return;
             }
             $types = implode(', ', $Request->getMimeTypes());
-            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getWrappedObject()));
+            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
 
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);
@@ -111,7 +110,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
                 return;
             }
             $types = implode(', ', $Request->getMimeTypes());
-            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getWrappedObject()));
+            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
 
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);
@@ -136,7 +135,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
                 return;
             }
             $types = implode(', ', $Request->getMimeTypes());
-            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getWrappedObject()));
+            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
 
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);
@@ -162,7 +161,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender, IWrapper {
                 return;
             }
             $types = implode(', ', $Request->getMimeTypes());
-            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getWrappedObject()));
+            throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
 
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);

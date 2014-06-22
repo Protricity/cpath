@@ -1,5 +1,5 @@
 <?php
-namespace CPath\Framework\View\Layouts;
+namespace CPath\Framework\View\Layout;
 
 use CPath\Base;
 use CPath\Framework\Render\Attribute\Attr;
@@ -54,6 +54,8 @@ abstract class AbstractViewLayout extends AbstractView {
         $this->getTheme()->renderBodyStart($Request);
 
         $this->renderBodyHeader($Request);
+
+        // Body Section
 
         $this->getTheme()->renderSectionStart($Request, Attr::get('body'));
         $this->renderBodyContent($Request, $Attr);

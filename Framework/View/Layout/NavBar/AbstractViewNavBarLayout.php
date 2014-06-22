@@ -1,14 +1,16 @@
 <?php
-namespace CPath\Framework\View\Layouts;
+namespace CPath\Framework\View\Layout\NavBar;
 
 use CPath\Base;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\View\Layout\AbstractViewLayout;
 use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-abstract class AbstractViewWithNavBarLayout extends AbstractViewLayout {
+
+abstract class AbstractViewNavBarLayout extends AbstractViewLayout {
 
     private $navBarStarted=false;
 

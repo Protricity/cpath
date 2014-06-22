@@ -3,18 +3,20 @@ namespace CPath\Framework\View\Common;
 
 use CPath\Config;
 use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAggregate;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Render\Util\RenderMimeSwitchUtility;
-use CPath\Framework\Request\Common\RequestWrapper;
+use CPath\Framework\Request\Common\ModifiedRequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Framework\View\IRenderContainer;
 use CPath\Framework\View\IView;
 use CPath\Framework\View\Theme\CPathDefaultTheme;
 use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
-abstract class AbstractView implements IView, IViewConfig, IRenderAggregate {
+abstract class AbstractView implements IView, IRenderContainer { //}, IRenderAggregate {
     const TAB = '    ';
     const TAB_START = 0;
 
@@ -25,10 +27,10 @@ abstract class AbstractView implements IView, IViewConfig, IRenderAggregate {
     private $mHeadFields = array();
     private $mTheme;
 
+    private $mRenders = array();
+
     public function __construct(ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
-
-        RI::si(null, static::TAB);
     }
 
     /**
@@ -69,7 +71,7 @@ abstract class AbstractView implements IView, IViewConfig, IRenderAggregate {
     final protected function addBaseElementToView(IRequest $Request, $path=null) {
         if(!$path && $Request->getPath()) {
             $path = $Request->getPath();
-            if($Request instanceof RequestWrapper)
+            if($Request instanceof ModifiedRequestWrapper)
                 $path = $Request->getMatchedPath();
         }
         if($path) {
@@ -99,33 +101,34 @@ abstract class AbstractView implements IView, IViewConfig, IRenderAggregate {
 
 
     /**
-     * Return an instance of IRender
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
-     * @return IRender return the renderer instance
+     * @param IRenderHTML $Renderer
+     * @return mixed
      */
-    function getRenderer(IRequest $Request) {
-        return $this;
+    function addRenderItem(IRenderHTML $Renderer)
+    {
+        $this->mRenders[] = $Renderer;
     }
 
+//    /**
+//     * Return an instance of IRender
+//     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+//     * @return IRender return the renderer instance
+//     */
+//    function getRenderer(IRequest $Request) {
+//        return $this;
+//    }
+
     /**
-     * Render this request
+     * Render this request and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
     function render(IRequest $Request) {
         // Util allows selective rendering based on request mime type
-        $Util = new RenderMimeSwitchUtility($this);
-        $Util->render($Request);
-    }
+//        $Util = new RenderMimeSwitchUtility($this);
+//        $Util->render($Request);
 
-    /**
-     * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
-     * @return void
-     */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
-    {
+
         $this->setupHead($Request);
         $this->getTheme()->addHeadElementsToView($this);
 
@@ -133,9 +136,36 @@ abstract class AbstractView implements IView, IViewConfig, IRenderAggregate {
         $this->renderHtmlTagStart();
         RI::ai(1);
         $this->renderHead($Request);
-        $this->renderBody($Request, $Attr);
+        todo
+
+
+        //$this->renderBody($Request, $Attr);
         RI::ai(-1);
         $this->renderHtmlTagEnd();
+
+    }
+
+    /**
+     * Render the view body html
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
+     * @return void
+     */
+    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    {
+//        $this->setupHead($Request);
+//        $this->getTheme()->addHeadElementsToView($this);
+//
+//        $this->sendHeaders();
+//        $this->renderHtmlTagStart();
+//        RI::ai(1);
+//        $this->renderHead($Request);
+//        todo
+//
+//
+//        //$this->renderBody($Request, $Attr);
+//        RI::ai(-1);
+//        $this->renderHtmlTagEnd();
     }
 
     function renderHead() {

@@ -9,7 +9,7 @@ namespace CPath;
 
 use CPath\Framework\Render\IRender;
 use CPath\Framework\Render\IRenderAggregate;
-use CPath\Framework\Request\Common\RequestWrapper;
+use CPath\Framework\Request\Common\ModifiedRequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Exceptions\CodedException;
 use CPath\Framework\Response\Interfaces\IResponseCode;
@@ -68,16 +68,22 @@ class Routes implements IRoutable {
             throw new CodedException("File request was passed to Script: ", IResponseCode::STATUS_NOT_FOUND);
 
         $Selector = new Routes_SelectorMap($Request);
-        $Routable->mapRoutes($Selector);
-
         $newPrefix = '';
         $args = array();
-        $Selector->getMatchedData($Destination, $newPrefix, $args);
 
-        if(!$Destination)
-            throw new RouteNotFoundException("Route was not found: " . $path);
+        try {
+            $Routable->mapRoutes($Selector);
+            $Selector->getMatchedData($Destination, $newPrefix, $args);
 
-        $Request = new RequestWrapper($Request, $args, $newPrefix);
+            if(!$Destination)
+                throw new RouteNotFoundException("Route was not found: " . $path);
+
+        } catch (\Exception $ex) {
+
+            $Request = new ExceptionRequest($Request);
+
+        }
+        $Request = new ModifiedRequestWrapper($Request, $args, $newPrefix);
 
         if ($Destination instanceof IRenderAggregate)
             $Destination = $Destination->getRenderer($Request);

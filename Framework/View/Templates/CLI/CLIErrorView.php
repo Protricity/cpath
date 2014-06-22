@@ -4,13 +4,13 @@ namespace CPath\Framework\View\Templates\CLI;
 use API\Themes\DefaultTheme;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\Templates\Layouts\NavBar\AbstractErrorNavBarLayout;
+use CPath\Framework\View\Layout\NavBar\Common\ErrorViewNavBarLayout;
 use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Framework\View\Theme\Interfaces\IThemeAggregate;
 
-class CLIErrorView extends AbstractErrorNavBarLayout {
+class CLIErrorView extends ErrorViewNavBarLayout {
     public function __construct(\Exception $Exception, PDOTable $Table, ITheme $Theme=null) {
         if(!$Theme) {
             if($Table instanceof IThemeAggregate)
@@ -21,17 +21,6 @@ class CLIErrorView extends AbstractErrorNavBarLayout {
         parent::__construct($Exception, $Theme);
     }
 
-    /**
-     * Add additional <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
-     * @return void
-     */
-    protected function addHeadFields(IRequest $Request)
-    {
-        // TODO: Implement addHeadFields() method.
-    }
-
-
     protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
         /** @var \Exception $Exception */
         $Exception = $this->getException();
@@ -39,36 +28,13 @@ class CLIErrorView extends AbstractErrorNavBarLayout {
     }
 
     /**
-     * Render the navigation bar content
+     * Render the main view content
      * @param IRequest $Request the IRequest instance for this render
+     * @param IAttributes $Attr
      * @return void
      */
-    protected function renderNavBarContent(IRequest $Request)
+    protected function renderBodyContent(IRequest $Request, IAttributes $Attr = null)
     {
-        echo 'navbar';
+        // TODO: Implement renderBodyContent() method.
     }
-
-    /**
-     * Render the header
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    final protected function renderBodyHeaderContent(IRequest $Request)
-    {
-        echo RI::ni(), "Error: ", Config::getSiteName();
-    }
-
-    /**
-     * Render the header
-     * @param IRequest $Request the IRequest instance for this render
-     * @return void
-     */
-    final protected function renderBodyFooterContent(IRequest $Request)
-    {
-        //echo RI::ni(), Config::getSiteName();
-    }
-
-    // Static
-
-    static function cls() { return __CLASS__; }
 }

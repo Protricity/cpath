@@ -133,6 +133,6 @@ abstract class AbstractCollection implements ICollection {
      */
     function __clone()
     {
-        //$this->mItems = clone $this->mItems;
+        //$this->mRenders = clone $this->mRenders;
     }
 }

@@ -11,18 +11,15 @@ use CPath\Framework\API\Fragments\APIFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\API\Util\APIExecuteUtil;
-use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Framework\Request\Common\RequestWrapper;
+use CPath\Framework\Request\Common\ModifiedRequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
 use CPath\Framework\Route\Exceptions\RouteNotFoundException;
 use CPath\Framework\Route\Map\IRouteMap;
 use CPath\Framework\Route\Routable\IRoutable;
-use CPath\Framework\View\API\APIView;
-use CPath\Framework\View\Templates\Layouts\NavBar\AbstractNavBarLayout;
 use CPath\Framework\View\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 use CPath\Routes;
@@ -79,12 +76,12 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
             if(is_numeric($args[0]) && isset($prefixes[intval($args[0])])) {
                 $arg = array_shift($args);
                 $API = $this->mAPIs[$prefixes[$arg]];
-                $Request = new RequestWrapper($Request, $args);
+                $Request = new ModifiedRequestWrapper($Request, $args);
                 return $API;
             } elseif (isset($this->mAPIs[$args[0]])) {
                 $arg = array_shift($args);
                 $API = $this->mAPIs[$arg];
-                $Request = new RequestWrapper($Request, $args);
+                $Request = new ModifiedRequestWrapper($Request, $args);
                 return $API;
             } else {
                 return $this->mAPIs[$prefixes[0]];

@@ -29,51 +29,17 @@ interface IRequest extends IArrayObject {
     function getMethod();
 
     /**
-     * Build a url from the request
-     * @param bool $withArgs
-     * @param bool $withDomain
-     * @return string
-     */
-    //function getRequestURL($withArgs=true, $withDomain=false);
-
-    /**
      * Returns Request headers
      * @param String|Null $key the header key to return or all headers if null
      * @return mixed
      */
     function getHeaders($key=NULL);
-//
-//    /**
-//     * Add an argument to the arg list
-//     * @param String $arg the argument value toa dd
-//     * @return void
-//     */
-//    function addArg($arg);
-
-    /**
-     * Return the next argument for this request
-     * @param bool $advance if true, the argument position advances forward 1
-     * @return String argument
-     */
-    //function getNextArg($advance=true);
 
     /**
      * Returns a list of mimetypes accepted by this request
      * @return Array
      */
     function getMimeTypes();
-
-//    /**
-//     * Get the IRoute instance for this request
-//     * @return IRoute
-//     */
-//    function getRoute();
-
-//    /**
-//     * Attempt to find a Route
-//     * @return IRoute the route instance found. MissingRoute is returned if no route was found
-//     */
-//    public function findRoute();
 
     /**
      * Merges an associative array into the current request
@@ -103,5 +69,5 @@ interface IRequest extends IArrayObject {
 
     // Statics
 
-    static function fromRequest();
+    //static function fromRequest(); // TODO: ugly
 }

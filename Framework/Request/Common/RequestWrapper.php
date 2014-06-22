@@ -2,81 +2,77 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 3/24/14
- * Time: 4:06 PM
+ * Date: 6/14/14
+ * Time: 10:27 AM
  */
 namespace CPath\Framework\Request\Common;
 
-use CPath\Base;
-use CPath\Framework\Data\Wrapper\IWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
 
-class RequestWrapper implements IRequest, IWrapper
+abstract class RequestWrapper implements IRequest
 {
+    /** @var IRequest */
     private $mRequest;
-    private $mPath=null, $mArgs, $mMethod;
 
-    public function __construct(IRequest $Request, $newArgs=null, $newPrefix=null) {
-        if($newPrefix) {
-            list($newMethod, $newPath) = explode(' ', $newPrefix, 2);
-            $this->mPath = rtrim($newPath, '/') . '/';
-            $this->mMethod = $newMethod;
-        }
-        $this->mArgs = $newArgs;
+    public function __construct(IRequest $Request)
+    {
         $this->mRequest = $Request;
     }
 
-    public function getIterator() {
+    public function getIterator()
+    {
         return $this->mRequest->getIterator();
     }
 
-    public function offsetGet($offset){
+    public function offsetGet($offset)
+    {
         return $this->mRequest->offsetGet($offset);
     }
 
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return $this->mRequest->offsetExists($offset);
     }
 
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         $this->mRequest->offsetSet($offset, $value);
     }
 
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         $this->mRequest->offsetUnset($offset);
     }
 
-    function &getDataPath($_path = NULL) {
+    function &getDataPath($_path = NULL)
+    {
         return $this->mRequest->getDataPath($_path);
     }
 
-    function getMatchedPath() {
-        return $this->mPath ?: $this->mRequest->getPath();
-    }
-
-    function getPath() {
+    function getPath()
+    {
         return $this->mRequest->getPath();
         //return $this->mPath ?: $this->mRequest->getPath();
     }
 
-    function getArgs() {
-        return $this->mArgs !== null ? $this->mArgs : $this->mRequest->getArgs(); // Yes here, no for path
+    function getArgs()
+    {
+        return $this->mRequest->getArgs();
     }
 
-    function getMatchedMethod() {
-        return $this->mMethod;
-    }
-
-    function getMethod() {
+    function getMethod()
+    {
         return $this->mRequest->getMethod();
         //return $this->mMethod ?: $this->mRequest->getMethod(); // TODO: shouldn't change
     }
 
-    function getHeaders($key = NULL) {
+    function getHeaders($key = NULL)
+    {
         return $this->mRequest->getHeaders($key);
     }
 
-    function getMimeTypes() {
+    function getMimeTypes()
+    {
         return $this->mRequest->getMimeTypes();
     }
 
@@ -87,28 +83,30 @@ class RequestWrapper implements IRequest, IWrapper
      * @return mixed the data array or targeted data specified by path
      * @throws \InvalidArgumentException if the data path doesn't exist
      */
-    function pluck($_path) {
+    function pluck($_path)
+    {
         return $this->mRequest->pluck($_path);
     }
 
-    function merge(Array $request, $replace = false) {
+    function merge(Array $request, $replace = false)
+    {
         $this->mRequest->merge($request, $replace);
     }
 
 
-    function getFileUpload($_path = NULL) {
+    function getFileUpload($_path = NULL)
+    {
         return $this->mRequest->getMimeTypes();
     }
 
-    function getWrappedObject() {
+    function getOriginalRequest()
+    {
         return $this->mRequest;
     }
 
-    static function fromRequest($newPath=null, $newArgs=null) {
-        return new RequestWrapper(Base::getRequest(), $newArgs, $newPath);
-    }
-
-    public function count() {
+    public function count()
+    {
         return $this->mRequest->count();
     }
+
 }
