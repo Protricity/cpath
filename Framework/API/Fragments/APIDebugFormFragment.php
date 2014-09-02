@@ -4,8 +4,8 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Config;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\Theme\Interfaces\ITableTheme;
-use CPath\Framework\View\Util\HTMLRenderUtil;
+use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
+use CPath\Framework\Render\Util\HTMLRenderUtil;
 
 class APIDebugFormFragment extends APIFormFragment{
 

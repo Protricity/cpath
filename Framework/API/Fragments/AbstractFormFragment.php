@@ -4,15 +4,17 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Framework\Render\Header\Interfaces\IHeaderWriter;
+use CPath\Framework\Render\Header\Interfaces\ISupportHeaders;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\IView;
-use CPath\Framework\View\Theme\CPathDefaultTheme;
-use CPath\Framework\View\Theme\Interfaces\ITableTheme;
-use CPath\Framework\View\Util\HTMLRenderUtil;
+use CPath\Framework\View\IContainerDEL;
+use CPath\Framework\Render\Theme\CPathDefaultTheme;
+use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
+use CPath\Framework\Render\Util\HTMLRenderUtil;
 use CPath\Interfaces\IViewConfig;
 
-abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
+abstract class AbstractFormFragment implements IRenderHTML, ISupportHeaders{
 
     private $mTheme;
 
@@ -25,23 +27,23 @@ abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
     }
 
     /**
-     * Provide head elements to any IView
-     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
-     * @param IView $View
+     * Write all support headers used by this IView instance
+     * @param \CPath\Framework\Render\Header\Interfaces\IHeaderWriter $Head the writer instance to use
+     * @return String|void always returns void
      */
-    function addHeadElementsToView(IView $View) {
+    function writeHeaders(IHeaderWriter $Head) {
         $basePath = Base::getClassPath($this, true);
 
-        $View->addHeadScript($basePath . 'assets/jquery.min.js');
+        $Head->writeScript($basePath . 'assets/jquery.min.js');
 
-        $View->addHeadScript($basePath . 'assets/cpath.js');
+        $Head->writeScript($basePath . 'assets/cpath.js');
 
-        $View->addHeadStyleSheet($basePath . 'assets/api.css');
-        $View->addHeadScript($basePath . 'assets/api.js');
+        $Head->writeStyleSheet($basePath . 'assets/api.css');
+        $Head->writeScript($basePath . 'assets/api.js');
 
-        $View->addHeadScript($basePath . 'assets/form.js');
-        $View->addHeadStyleSheet($basePath . 'assets/formfragment.css');
-        $View->addHeadScript($basePath . 'assets/formfragment.js');
+        $Head->writeScript($basePath . 'assets/form.js');
+        $Head->writeStyleSheet($basePath . 'assets/formfragment.css');
+        $Head->writeScript($basePath . 'assets/formfragment.js');
     }
 
     /**
@@ -60,7 +62,7 @@ abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         $this->renderForm($Request, $Attr);
     }
@@ -69,4 +71,5 @@ abstract class AbstractFormFragment implements IRenderHTML, IViewConfig{
         $Util = new HTMLRenderUtil($Request);
         $Util->button('Submit', 'form-button-submit');
     }
+
 }

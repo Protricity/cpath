@@ -36,7 +36,7 @@ class PasswordField extends RequiredField {
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
         $Attr = Attr::get($Attr);
         $Attr->add('type', 'password');
         parent::renderHTML($Request, $Attr);

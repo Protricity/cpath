@@ -13,10 +13,10 @@ use CPath\Framework\Request\Interfaces\IRequest;
 interface IRenderHTML {
 
     /**
-     * Render request as html and sends headers as necessary
+     * Render request as html
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr=null);
+    function renderHTML(IRequest $Request, IAttributes $Attr=null);
 }

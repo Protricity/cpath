@@ -5,32 +5,44 @@ use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Framework\Render\Header\Interfaces\IHeaderWriter;
+use CPath\Framework\Render\Header\Interfaces\ISupportHeaders;
+use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Util\ResponseUtil;
-use CPath\Framework\View\IView;
-use CPath\Framework\View\Theme\CPathDefaultTheme;
-use CPath\Framework\View\Theme\Interfaces\ITheme;
+use CPath\Framework\View\IContainerDEL;
+use CPath\Framework\Render\Theme\CPathDefaultTheme;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
-class APIResponseBoxFragment implements IViewConfig{
+class APIResponseBoxFragment implements IRenderHTML, ISupportHeaders{
     private $mTheme;
+    private $mResponse;
 
-    function __construct(ITheme $Theme=null) {
+    function __construct(IResponse $Response=null, ITheme $Theme=null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
-    }
-    /**
-     * Provide head elements to any IView
-     * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
-     * @param IView $View
-     */
-    function addHeadElementsToView(IView $View) {
-        $basePath = Base::getClassPath($this, true);
-        $View->addHeadStyleSheet($basePath . 'assets/apiresponseboxfragment.css', true);
-        $View->addHeadScript($basePath . 'assets/apiresponseboxfragment.js', true);
+        $this->mResponse = $Response;
     }
 
-    function renderResponseBox(IRequest $Request, IResponse $Response=null, IAttributes $Attr=null) {
+    /**
+     * Write all support headers used by this IView instance
+     * @param \CPath\Framework\Render\Header\Interfaces\IHeaderWriter $Head the writer instance to use
+     * @return String|void always returns void
+     */
+    function writeHeaders(IHeaderWriter $Head) {
+        $basePath = Base::getClassPath($this, true);
+        $Head->writeStyleSheet($basePath . 'assets/apiresponseboxfragment.css', true);
+        $Head->writeScript($basePath . 'assets/apiresponseboxfragment.js', true);
+    }
+
+    /**
+     * Render request as html
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
+     * @return String|void always returns void
+     */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
         $Attr = Attr::get($Attr);
         // = new HTMLRenderUtil($Request);
         //$Util->button('JSON', 'form-button-submit-json');
@@ -41,8 +53,8 @@ class APIResponseBoxFragment implements IViewConfig{
         $Theme = $this->mTheme;
         $Theme->renderFragmentStart($Request, "Ajax Info", $Attr);
         $Theme->renderFragmentStart($Request, "DataResponse", Attr::get('response-content'));
-        if($Response) {
-            $Util = new ResponseUtil($Response);
+        if($this->mResponse) {
+            $Util = new ResponseUtil($this->mResponse);
             $Util->renderJSON($Request);
         }
         $Theme->renderFragmentEnd($Request);

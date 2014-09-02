@@ -86,9 +86,9 @@ class FieldUtil implements IField, IRenderHTML {
      * @throws \Exception
      * @return void
      */
-    function renderHtml(IRequest $Request, \CPath\Framework\Render\Attribute\IAttributes $Attr=null) {
+    function renderHTML(IRequest $Request, \CPath\Framework\Render\Attribute\IAttributes $Attr=null) {
         if($this->mField instanceof \CPath\Framework\Render\HTML\IRenderHTML) {
-            $this->mField->renderHtml($Request);
+            $this->mField->renderHTML($Request);
             return;
         }
 

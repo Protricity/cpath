@@ -7,8 +7,8 @@ use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\View\Templates\Layouts\NavBar\AbstractErrorNavBarLayout;
-use CPath\Framework\View\Theme\Interfaces\ITheme;
-use CPath\Framework\View\Theme\Interfaces\IThemeAggregate;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Framework\Render\Theme\Interfaces\IThemeAggregate;
 
 class ErrorView extends AbstractErrorNavBarLayout {
     public function __construct(\Exception $Exception, PDOTable $Table, ITheme $Theme=null) {

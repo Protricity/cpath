@@ -26,7 +26,7 @@ class Attr implements IAttributes {
      * @param IAttributes $Attr unused
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         if($this->mHTML)
             echo ' ', $this->mHTML;

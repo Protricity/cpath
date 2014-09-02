@@ -14,8 +14,8 @@ use CPath\Framework\API\Fragments\SimpleFormFragment;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Task\ITask;
-use CPath\Framework\View\IView;
-use CPath\Framework\View\Theme\Interfaces\ITheme;
+use CPath\Framework\View\IContainerDEL;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
 abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
@@ -39,14 +39,14 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
     /**
      * Provide head elements to any IView
      * Note: If an IView encounters this object, it should attempt to add support scripts to it's header by using this method
-     * @param IView $View
+     * @param IContainerDEL $View
      */
-    function addHeadElementsToView(IView $View) {
+    function addHeadElementsToView(IContainerDEL $View) {
         //parent::addHeadElementsToView($View);
 
         $basePath = Base::getClassPath($this, true);
-        $View->addHeadStyleSheet($basePath . 'assets/apiactions.css', true);
-        $View->addHeadScript($basePath . 'assets/apiactions.js', true);
+        $Head->writeStyleSheet($basePath . 'assets/apiactions.css', true);
+        $Head->writeScript($basePath . 'assets/apiactions.js', true);
 
         $this->getUtil()->addHeadElementsToView($View);
     }

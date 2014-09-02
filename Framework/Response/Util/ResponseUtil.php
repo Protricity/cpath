@@ -155,12 +155,12 @@ final class ResponseUtil implements IMappable, IRenderAll {
      * @param bool $sendHeaders
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr=null, $sendHeaders=false) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null, $sendHeaders=false) {
         if($sendHeaders)
             $this->sendHeaders('text/html');
         $Response = $this->mResponse;
         if($Response instanceof IRenderHTML) {
-            $Response->renderHtml($Request);
+            $Response->renderHTML($Request);
         } else {
             echo RI::ni(), "<pre>";
             RI::ni(1);

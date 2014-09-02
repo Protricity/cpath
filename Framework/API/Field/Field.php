@@ -16,7 +16,7 @@ use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Render\HTML\IRenderHTML;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\Util\HTMLRenderUtil;
+use CPath\Framework\Render\Util\HTMLRenderUtil;
 use CPath\Validate;
 
 
@@ -133,7 +133,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr=null) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
         $Attr = Attr::get($Attr);
 
         $value = $this->mValue ?: $Request[$this->getName()];

@@ -7,8 +7,8 @@ use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\View\Layout\NavBar\Common\ErrorViewNavBarLayout;
-use CPath\Framework\View\Theme\Interfaces\ITheme;
-use CPath\Framework\View\Theme\Interfaces\IThemeAggregate;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Framework\Render\Theme\Interfaces\IThemeAggregate;
 
 class CLIErrorView extends ErrorViewNavBarLayout {
     public function __construct(\Exception $Exception, PDOTable $Table, ITheme $Theme=null) {
@@ -21,10 +21,10 @@ class CLIErrorView extends ErrorViewNavBarLayout {
         parent::__construct($Exception, $Theme);
     }
 
-    protected function sendHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
+    protected function sendHTTPHeaders($message=NULL, $code=NULL, $mimeType=NULL) {
         /** @var \Exception $Exception */
         $Exception = $this->getException();
-        parent::sendHeaders($message ?: $Exception->getMessage(), $code ?: 400, $mimeType);
+        parent::sendHTTPHeaders($message ?: $Exception->getMessage(), $code ?: 400, $mimeType);
     }
 
     /**

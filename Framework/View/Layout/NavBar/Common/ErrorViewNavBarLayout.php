@@ -12,12 +12,12 @@ use CPath\Describable\Describable;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Common\ExceptionRequestWrapper;
 use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\Layout\NavBar\AbstractViewNavBarLayout;
-use CPath\Framework\View\Theme\Interfaces\ITheme;
-use CPath\Framework\View\Theme\Util\TableThemeUtil;
+use CPath\Framework\View\Layout\NavBar\AbstractNavBarLayout;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Framework\Render\Theme\Util\TableThemeUtil;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class ErrorViewNavBarLayout extends AbstractViewNavBarLayout
+class ErrorViewNavBarLayout extends AbstractNavBarLayout
 {
     private $mException;
 

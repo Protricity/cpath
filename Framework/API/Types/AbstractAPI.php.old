@@ -70,8 +70,8 @@ abstract class AbstractAPI implements IAPI, IViewConfig, IDescribableAggregate, 
      */
     function addHeadElementsToView(IView $View) {
         $basePath = Base::getClassPublicPath(__CLASS__);
-        $View->addHeadScript($basePath . 'assets/api.js', true);
-        $View->addHeadStyleSheet($basePath . 'assets/api.css');
+        $Head->writeScript($basePath . 'assets/api.js', true);
+        $Head->writeStyleSheet($basePath . 'assets/api.css');
     }
 
     /**

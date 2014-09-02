@@ -128,7 +128,7 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
 
         foreach ($this->getHandlers() as $Handler)

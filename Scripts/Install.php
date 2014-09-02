@@ -21,7 +21,7 @@ use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Framework\View\API\APIView;
+use CPath\Framework\Render\Layout\Common\API\APIView;
 use CPath\Log;
 
 class Install implements IRenderAggregate, IBuildable, IAPI {

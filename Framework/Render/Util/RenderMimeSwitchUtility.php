@@ -55,7 +55,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender {
                     return;
 
                 case 'text/html':
-                    $this->renderHtml($Request);
+                    $this->renderHTML($Request);
                     return;
 
                 case 'text/plain':
@@ -74,7 +74,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender {
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         if(!headers_sent())
             header("Content-Type: text/html");
@@ -90,7 +90,7 @@ class RenderMimeSwitchUtility implements IRenderAll, IRender {
         } catch (\Exception $ex) {
             $ErrorResponse = new ExceptionResponse($ex);
             $Util = new ResponseUtil($ErrorResponse);
-            $Util->renderHtml($Request, null, true);
+            $Util->renderHTML($Request, null, true);
         }
     }
 

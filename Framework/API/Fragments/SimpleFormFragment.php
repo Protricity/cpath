@@ -8,14 +8,14 @@ use CPath\Framework\Render\Attribute\Attr;
 use CPath\Framework\Render\Attribute\IAttributes;
 use CPath\Framework\Request\Interfaces\IRequest;
 use CPath\Framework\Route\Routable\IRoutable;
-use CPath\Framework\View\Theme\Interfaces\ITableTheme;
-use CPath\Framework\View\Theme\Util\TableThemeUtil;
-use CPath\Framework\View\Util\HTMLRenderUtil;
+use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
+use CPath\Framework\Render\Theme\Util\TableThemeUtil;
+use CPath\Framework\Render\Util\HTMLRenderUtil;
 
 class SimpleFormFragment extends AbstractFormFragment{
 
     /**
-     * @param \CPath\Framework\View\Theme\Interfaces\ITableTheme $Theme
+     * @param \CPath\Framework\Render\Theme\Interfaces\ITableTheme $Theme
      */
     public function __construct(ITableTheme $Theme = null) {
         parent::__construct($Theme);
@@ -71,7 +71,7 @@ class SimpleFormFragment extends AbstractFormFragment{
                 $Field->setValue($_GET[$name]);
 
             $RenderField = new FieldUtil($Field);
-            $RenderField->renderHtml($Request);
+            $RenderField->renderHTML($Request);
         }
 
         $Table->renderFooterStart();

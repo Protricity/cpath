@@ -31,7 +31,7 @@ class MapRenderer implements IRenderAll
      * @param IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHtml(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         HTMLRenderer::renderMap($this->mMap);
     }
