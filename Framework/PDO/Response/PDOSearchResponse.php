@@ -15,7 +15,7 @@ use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
-use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Handlers\Response\ResponseUtil;
 
 class PDOSearchResponse implements IResponse, IMappable {
     private $mQuery;

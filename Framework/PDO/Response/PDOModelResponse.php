@@ -12,7 +12,7 @@ use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
-use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Handlers\Response\ResponseUtil;
 
 class PDOModelResponse implements IPDOModel, IResponse
 {

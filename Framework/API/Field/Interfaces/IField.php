@@ -8,7 +8,7 @@
 namespace CPath\Framework\API\Field\Interfaces;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Data\Collection\ICollectionItem;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 /**
  * Class IField

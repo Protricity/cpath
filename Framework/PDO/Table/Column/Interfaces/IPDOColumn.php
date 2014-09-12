@@ -10,7 +10,7 @@ namespace CPath\Framework\PDO\Table\Column\Interfaces;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\Data\Collection\ICollectionItem;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 interface IPDOColumn extends ICollectionItem {
 
@@ -74,7 +74,7 @@ interface IPDOColumn extends ICollectionItem {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails

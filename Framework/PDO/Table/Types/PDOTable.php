@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Table\Types;
 
 use CPath\Config;
 use CPath\Framework\API\Exceptions\ValidationException;
-use CPath\Framework\Build\IBuildable;
+use CPath\Build\IBuildable;
 use CPath\Framework\PDO\Query\PDODelete;
 use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
@@ -454,7 +454,7 @@ abstract class PDOTable implements IPDOTable, IBuildable
 
     /**
      * Return an instance of the class for building purposes
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     * @return \CPath\Build\IBuildable|NULL an instance of the class or NULL to ignore
      */
     static function buildClass()
     {

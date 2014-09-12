@@ -1,0 +1,20 @@
+<?php
+/**
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
+namespace CPath\Render\HTML\Theme\Interfaces;
+
+use CPath\Render\HTML\Container\IContainerHTML;
+
+interface IPageTheme {
+
+
+    /**
+     * Create Page layout and return layout instance
+     * @return IContainerHTML the page content
+     */
+    function createPageLayout();
+}

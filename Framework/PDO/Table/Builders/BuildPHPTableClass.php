@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Table\Builders;
 
-use CPath\Framework\Build\Code\BuildPHPClass;
+use CPath\Build\Code\BuildPHPClass;
 
 class BuildPHPTableClass extends BuildPHPClass
 {

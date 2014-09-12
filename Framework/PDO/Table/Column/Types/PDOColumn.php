@@ -16,7 +16,7 @@ use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Field\PasswordField;
 use CPath\Framework\Interfaces\Constructable\IConstructable;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Validate;
 
 class PDOColumn implements IPDOColumn, IDescribable, IConstructable {
@@ -105,7 +105,7 @@ class PDOColumn implements IPDOColumn, IDescribable, IConstructable {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws ValidationException if validation fails

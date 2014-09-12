@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Builders\Models;
 
-use CPath\Framework\Build\Code\BuildPHPClass;
+use CPath\Build\Code\BuildPHPClass;
 
 class BuildPHPModelClass extends BuildPHPClass
 {

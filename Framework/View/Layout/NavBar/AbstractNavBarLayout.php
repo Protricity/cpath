@@ -4,15 +4,15 @@ namespace CPath\Framework\View\Layout\NavBar;
 use CPath\Base;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\Layout\AbstractLayout;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
 
-abstract class AbstractNavBarLayout extends AbstractLayout {
+abstract class AbstractNavBarLayout extends ContentLayout {
 
     private $navBarStarted=false;
 

@@ -1,0 +1,17 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/5/14
+ * Time: 3:55 PM
+ */
+namespace CPath\Templates\HTML;
+
+use CPath\Render\HTML\IContainerHTML;
+use CPath\Request\IRequestHandler;
+use CPath\Request\IRequest;
+
+interface IResponseTemplate extends IContainerHTML
+{
+
+}

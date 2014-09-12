@@ -17,13 +17,13 @@ class UtilTest extends PHPUnit_Framework_TestCase {
         $_SERVER['argv'] = array('index.php', 'GET', '/my/path');
         $CLI = CLIRequest::fromRequest(true, false);
 
-        $this->assertEquals('GET', $CLI->getMethod());
+        $this->assertEquals('GET', $CLI->getMethodName());
         $this->assertEquals('/my/path', $CLI->getPath());
 
         $_SERVER['argv'] = array('index.php', 'my', 'path');
         $CLI = CLIRequest::fromRequest(true, false);
 
-        $this->assertEquals('CLI', $CLI->getMethod());
+        $this->assertEquals('CLI', $CLI->getMethodName());
         $this->assertEquals('/my/path', $CLI->getPath());
     }
 

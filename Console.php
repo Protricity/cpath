@@ -7,25 +7,25 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Render\IRender;
-use CPath\Framework\Render\IRenderAggregate;
+use CPath\Build\IBuildable;
+use CPath\Request\IRequestHandler;
+use CPath\Request\IRequestHandlerAggregate;
 use CPath\Framework\Request\Common\CLIRequest;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Route\Router;
 use String;
 
-class Console implements IRenderAggregate { // Broke }, IBuildable {
+class Console implements IRequestHandlerAggregate { // Broke }, IBuildable {
 
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
 
     /**
      * Return an instance of IRender
-     * @param IRequest $Request the IRequest instance for this render
-     * @return IRender return the renderer instance
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @return \CPath\Request\IRequestHandler return the renderer instance
      */
-    function getRenderer(IRequest $Request)
+    function getHandler(IRequest $Request)
     {
         $routes = array();
         foreach(Router::getRoutes() as $Route){
@@ -101,7 +101,7 @@ class Console implements IRenderAggregate { // Broke }, IBuildable {
 
     /**
      * Return an instance of the class for building purposes
-     * @return IBuildable|NULL an instance of the class or NULL to ignore
+     * @return \CPath\Build\IBuildable|NULL an instance of the class or NULL to ignore
      */
     static function createBuildableInstance() {
         return new static();

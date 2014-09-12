@@ -6,12 +6,12 @@ use CPath\Describable\Describable;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Field\Util\FieldUtil;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Render\Attribute\Attr;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
-use CPath\Framework\Render\Theme\Util\TableThemeUtil;
-use CPath\Framework\Render\Util\HTMLRenderUtil;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
+use CPath\Render\HTML\Theme\ITableTheme;
+use CPath\Render\HTML\Theme\Util\TableThemeUtil;
+use CPath\Render\HTML\HTMLRenderUtil;
 
 class APIFormFragment extends AbstractFormFragment{
 
@@ -19,7 +19,7 @@ class APIFormFragment extends AbstractFormFragment{
 
     /**
      * @param IAPI $API
-     * @param \CPath\Framework\Render\Theme\Interfaces\ITableTheme $Theme
+     * @param \CPath\Render\HTML\Theme\ITableTheme $Theme
      */
     public function __construct(IAPI $API, ITableTheme $Theme = null) {
         $this->mAPI = $API;
@@ -30,8 +30,8 @@ class APIFormFragment extends AbstractFormFragment{
 
     /**
      * Render this API Form
-     * @param IRequest $Request the IRequest instance for this render
-     * @param IAttributes|NULL $Attr optional attributes to add to the content
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     function renderForm(IRequest $Request, IAttributes $Attr=NULL) {
@@ -40,7 +40,7 @@ class APIFormFragment extends AbstractFormFragment{
         $API = $this->mAPI;
         $Fields = $API->getFields($Request);
 
-        $method = $Request->getMethod();
+        $method = $Request->getMethodName();
         $path = $Request->getPath();
         if($method == 'ANY') // TODO: Is this a hack?
             $method = 'GET';

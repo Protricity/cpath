@@ -12,7 +12,7 @@ use CPath\Framework\PDO\Interfaces\ISecurityPolicy;
 use CPath\Framework\PDO\InvalidPermissionException;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 /**
  * Class PublicPolicy implements a 'public' security policy that asserts no permissions
@@ -24,7 +24,7 @@ class ReadOnlyPolicy implements ISecurityPolicy {
      * Assert permission in default API calls such as GET, GET search, PATCH, and DELETE
      * Overwrite to enforce permission across API calls
      * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel $Model the Model to assert access upon
-     * @param IRequest $Request
+     * @param \CPath\Request\IRequest $Request
      * @param int $intent the read intent. Typically IReadAccess::INTENT_GET or IReadAccess::INTENT_SEARCH
      * @return void
      */
@@ -33,7 +33,7 @@ class ReadOnlyPolicy implements ISecurityPolicy {
     /**
      * Assert read permissions by Limiting API search queries endpoints such as GET, GET search, PATCH, and DELETE
      * @param PDOWhere $Select the query statement to limit.
-     * @param IRequest $Request The api request to process and or validate validate
+     * @param \CPath\Request\IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
      * @return void
      */

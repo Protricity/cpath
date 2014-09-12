@@ -9,9 +9,9 @@ namespace CPath\Framework\API\Field\Util;
 
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\API\Field\Interfaces\IField;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
 
 class FieldUtil implements IField, IRenderHTML {
     private $mField;
@@ -81,13 +81,13 @@ class FieldUtil implements IField, IRenderHTML {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @throws \Exception
      * @return void
      */
-    function renderHTML(IRequest $Request, \CPath\Framework\Render\Attribute\IAttributes $Attr=null) {
-        if($this->mField instanceof \CPath\Framework\Render\HTML\IRenderHTML) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
+        if($this->mField instanceof IRenderHTML) {
             $this->mField->renderHTML($Request);
             return;
         }

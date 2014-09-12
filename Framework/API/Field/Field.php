@@ -12,11 +12,11 @@ use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\API\Exceptions\RequiredFieldException;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Interfaces;
-use CPath\Framework\Render\Attribute\Attr;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\Util\HTMLRenderUtil;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Validate;
 
 
@@ -55,7 +55,7 @@ class Field implements IField, IDescribableAggregate, IRenderHTML {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails

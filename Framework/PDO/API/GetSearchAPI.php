@@ -25,8 +25,8 @@ use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
 class GetSearchAPI implements IAPI {
@@ -89,7 +89,7 @@ class GetSearchAPI implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @throws \Exception
      * @return PDOSelect the api call response with data, message, and status
      */

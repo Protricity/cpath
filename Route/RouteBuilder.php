@@ -1,0 +1,107 @@
+<?php
+/**
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
+namespace CPath\Route;
+use CPath\Build\MethodDocBlock;
+use CPath\Build\MethodEditor;
+use CPath\Config;
+use CPath\Build\IBuildRequest;
+use CPath\Request\CLI\CommandString;
+
+class RouteBuilder {
+
+    const BUILD_KEY = 'build';
+    const BUILD_ARG = 'routes';
+    const BUILD_DISABLED = 'disabled';
+    const FUNC_FORMAT = "\t\t\t\$Map->route('%s', '%s')";
+    const KEY_FORMAT = "\t\t\t// @group %s";
+
+    private $mGroupKey;
+    private $mRoutes = array();
+    private $mMethod;
+
+    /**
+     * @param IBuildRequest $Request the build instance for this session
+     * @param IRoutable $Routable instance of class file to be built/modified
+     * @param String|null $groupKey optional group key for added routes
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(IBuildRequest $Request, IRoutable $Routable, $groupKey=null) {
+        $Class = new \ReflectionClass(get_class($Routable));
+
+        foreach($Class->getMethods() as $Method) {
+            $DocBlock = new MethodDocBlock($Method);
+            if($DocBlock->hasTag(self::BUILD_KEY)) {
+                $args = $DocBlock->getNextTagArgs(self::BUILD_KEY);
+                if(isset($args[0]) && $args[0] !== self::KEY_FORMAT) {
+                    if(isset($args[self::BUILD_DISABLED]) && $args[self::BUILD_DISABLED])
+                        continue;
+                    if($this->mMethod)
+                        throw new \InvalidArgumentException("Only one method per class may auto-generate route code in " . get_class($Routable));
+                    $this->mMethod = $Method;
+                }
+            }
+
+        }
+
+        if(!$this->mMethod)
+            throw new \InvalidArgumentException("No @" . self::BUILD_KEY . " doctags found in " . get_class($Routable));
+
+        if(!$groupKey) {
+            $backtrace = debug_backtrace();
+            $groupKey = $backtrace[1]['file'] . ':' . $backtrace[1]['line'];
+        }
+        $this->mGroupKey = $groupKey;
+
+        $Editor = new MethodEditor($this->mMethod);
+
+        if($Request->hasFlag($Request::IS_SESSION_BUILD)) {
+
+        } else {
+            $methodSource = $Editor->getMethodSource();
+            $curKey = '';
+            foreach(explode("\n", $methodSource) as $line) {
+                $prefix = $target = '';
+
+                if(sscanf($line, self::FUNC_FORMAT, $prefix, $target) === 2) {
+                    if(!isset($this->mRoutes[$curKey]))
+                        $this->mRoutes[$curKey] = array();
+                    $this->mRoutes[$curKey][$prefix] = $target;
+
+                } else if(sscanf($line, self::KEY_FORMAT, $key) === 1) {
+                    $curKey = $key;
+
+                } else {
+                    // todo: unrecognized line
+
+                }
+            }
+            unset($this->mRoutes[$this->mGroupKey]);
+        }
+    }
+
+    public function writeRoute($prefix, $target) {
+        $this->mRoutes[$this->mGroupKey][$prefix] = $target;
+
+        $src = "\t\treturn";
+        $i=0;
+        foreach($this->mRoutes as $groupKey => $routes) {
+            $src .= "\n" . sprintf(self::KEY_FORMAT, $groupKey);
+            foreach($routes as $prefix => $target) {
+                if($i++ >= 1)
+                    $src .= " ||";
+                $src .= "\n" . sprintf(self::FUNC_FORMAT, $prefix, $target);
+            }
+        }
+        $src .= ";";
+
+        $Editor = new MethodEditor($this->mMethod);
+        return $Editor->replaceMethodSource($src);
+    }
+}
+

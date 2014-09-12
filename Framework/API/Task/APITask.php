@@ -12,7 +12,7 @@ use CPath\Describable\IDescribable;
 use CPath\Describable\IDescribableAggregate;
 use CPath\Framework\API\Fragments\SimpleFormFragment;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Task\ITask;
 use CPath\Framework\View\IContainerDEL;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
@@ -70,7 +70,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
 
     /**
      * Render the fragment content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderFragmentContent(IRequest $Request) {

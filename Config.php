@@ -8,12 +8,13 @@
 namespace CPath;
 use CPath\Framework\Build\API\Build;
 use CPath\Interfaces\IConfig;
+use CPath\Request\RequestSelector;
 
 class Config implements IConfig {
     static $GenPath = 'gen';
-    static $Paths = array(
-        'ANY /' => 'CPath\Framework\View\Templates\CLI\CLIErrorView',
-    );
+//    static $Paths = array(
+//        'ANY /' => 'CPath\Framework\View\Templates\CLI\CLIErrorView',
+//    );
 
     static $Domain = NULL;
     static $SiteName = NULL;
@@ -25,9 +26,19 @@ class Config implements IConfig {
     static $ValidationUsername = array();
     static $ValidationPassword = array();
 
-    static $AllowCLIRequest = false;
+    //static $AllowCLIRequest = false;
 
     static $ProfileEnable = false;
+
+    /**
+     * Choose session request instance.
+     * Note: Override to replace method
+     * @return Request\IRequest
+     */
+    static function chooseRequest() {
+        $Chooser = new RequestSelector();
+        return $Chooser->getRequest();
+    }
 
     static function getGenPath() {
         return Base::getBasePath() . self::$GenPath . '/';

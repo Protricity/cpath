@@ -8,7 +8,7 @@
 namespace CPath\Framework\View;
 
 
-use CPath\Framework\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\IRenderHTML;
 
 interface IView extends IRenderHTML {
 

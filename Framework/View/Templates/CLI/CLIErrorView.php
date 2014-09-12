@@ -4,8 +4,8 @@ namespace CPath\Framework\View\Templates\CLI;
 use API\Themes\DefaultTheme;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 use CPath\Framework\View\Layout\NavBar\Common\ErrorViewNavBarLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Theme\Interfaces\IThemeAggregate;
@@ -30,7 +30,7 @@ class CLIErrorView extends ErrorViewNavBarLayout {
     /**
      * Render the main view content
      * @param IRequest $Request the IRequest instance for this render
-     * @param IAttributes $Attr
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
      * @return void
      */
     protected function renderBodyContent(IRequest $Request, IAttributes $Attr = null)

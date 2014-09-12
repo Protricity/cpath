@@ -11,7 +11,7 @@ namespace CPath\Framework\PDO\Interfaces;
 use CPath\Framework\PDO\InvalidPermissionException;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 
 interface IReadAccess {

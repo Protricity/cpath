@@ -1,0 +1,145 @@
+<?php
+/**
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
+namespace CPath\Handlers\Wrapper;
+
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\Exceptions\MissingRenderModeException;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequestHandler;
+use CPath\Render\JSON\IRenderJSON;
+use CPath\Render\Text\IRenderText;
+use CPath\Render\XML\IRenderXML;
+use CPath\Request\IRequest;
+
+class MimeTypeSwitchWrapper implements IRequestHandler { //}, IRenderHTML, IRenderXML, IRenderJSON, IRenderText {
+    private $mTarget;
+
+    /**
+     * @param IRenderHTML|\CPath\Render\XML\IRenderXML|IRenderJSON|\CPath\Render\Text\IRenderText $RenderTarget
+     */
+    function __construct($RenderTarget) {
+        $this->mTarget = $RenderTarget;
+    }
+
+    function getRenderTarget() {
+        return $this->mTarget;
+    }
+
+    function renderOrThrow(IRequest $Request) {
+        $this->handleRequest($Request);
+    }
+
+    /**
+     * Render this request
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @throws \CPath\Render\Exceptions\MissingRenderModeException
+     * @return String|void always returns void
+     */
+    function handleRequest(IRequest $Request) {
+        foreach($Request->getMimeTypes() as $mimeType) {
+            switch($mimeType) {
+                case 'application/json':
+                    $this->renderJSON($Request);
+                    return;
+
+                case 'application/xml':
+                    $this->renderXML($Request);
+                    return;
+
+                case 'text/html':
+                    $this->renderHTML($Request);
+                    return;
+
+                case 'text/plain':
+                    $this->renderText($Request);
+                    return;
+            }
+        }
+
+        $types = implode(', ', $Request->getMimeTypes());
+        throw new \CPath\Render\Exceptions\MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
+    }
+
+    /**
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
+     * @throws \CPath\Render\Exceptions\MissingRenderModeException
+     * @return void
+     */
+    protected function renderHTML(IRequest $Request, IAttributes $Attr = null)
+    {
+        if(!headers_sent())
+            header("Content-Type: text/html");
+        $Target = $this->mTarget;
+        if($Target instanceof IRenderHTML) {
+            $Target->renderHTML($Request, $Attr);
+            return;
+        }
+        $types = implode(', ', $Request->getMimeTypes());
+        throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
+    }
+
+    /**
+     * Render request as JSON
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @throws \CPath\Render\Exceptions\MissingRenderModeException
+     * @return void
+     */
+    protected function renderJSON(IRequest $Request)
+    {
+        if(!headers_sent())
+            header("Content-Type: application/json");
+        $Target = $this->mTarget;
+        if($Target instanceof IRenderJSON) {
+            $Target->renderJSON($Request);
+            return;
+        }
+        $types = implode(', ', $Request->getMimeTypes());
+        throw new \CPath\Render\Exceptions\MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
+    }
+
+    /**
+     * Render request as plain text
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @throws \CPath\Render\Exceptions\MissingRenderModeException
+     * @return void
+     */
+    protected function renderText(IRequest $Request)
+    {
+        if(!headers_sent())
+            header("Content-Type: text/plain");
+        $Target = $this->mTarget;
+        if($Target instanceof IRenderText) {
+            $Target->renderText($Request);
+            return;
+        }
+        $types = implode(', ', $Request->getMimeTypes());
+        throw new \CPath\Render\Exceptions\MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
+    }
+
+    /**
+     * Render request as xml
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param string $rootElementName Optional name of the root element
+     * @throws \CPath\Render\Exceptions\MissingRenderModeException
+     * @return void
+     */
+    protected function renderXML(IRequest $Request, $rootElementName = 'root')
+    {
+        if(!headers_sent())
+            header("Content-Type: application/xml");
+        $Target = $this->mTarget;
+        if($Target instanceof IRenderXML) {
+            $Target->renderXML($Request, $rootElementName);
+            return;
+        }
+        $types = implode(', ', $Request->getMimeTypes());
+        throw new MissingRenderModeException("Render mode could not be determined for [{$types}]: " . get_class($this->getRenderTarget()));
+    }
+}

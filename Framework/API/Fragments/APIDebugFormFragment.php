@@ -3,15 +3,15 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Config;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
-use CPath\Framework\Render\Util\HTMLRenderUtil;
+use CPath\Request\IRequest;
+use CPath\Render\HTML\Theme\ITableTheme;
+use CPath\Render\HTML\HTMLRenderUtil;
 
 class APIDebugFormFragment extends APIFormFragment{
 
     /**
      * @param IAPI $API
-     * @param ITableTheme $Theme
+     * @param \CPath\Render\HTML\Theme\Interfaces\\CPath\Render\HTML\Theme\Table\\CPath\Render\HTML\Theme\ITableTheme $Theme
      */
     public function __construct(IAPI $API, ITableTheme $Theme = null) {
         parent::__construct($API, $Theme);

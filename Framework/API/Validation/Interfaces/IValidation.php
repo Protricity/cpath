@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\API\Validation\Interfaces;
 
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 interface IValidation {
     /**

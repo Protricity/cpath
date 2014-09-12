@@ -9,7 +9,7 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Response\PDOSearchResponse;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 interface IPDOModelSearchRender {
 
@@ -24,7 +24,7 @@ interface IPDOModelSearchRender {
     /**
      * Render with no PDOModel instance
      * @param \Exception $Exception the exception to render
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderException(\Exception $Exception, IRequest $Request);

@@ -4,18 +4,18 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Framework\API\Field\Util\FieldUtil;
-use CPath\Framework\Render\Attribute\Attr;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Route\Routable\IRoutable;
-use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
-use CPath\Framework\Render\Theme\Util\TableThemeUtil;
-use CPath\Framework\Render\Util\HTMLRenderUtil;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
+use CPath\Route\IRoutable;
+use CPath\Render\HTML\Theme\ITableTheme;
+use CPath\Render\HTML\Theme\Util\TableThemeUtil;
+use CPath\Render\HTML\HTMLRenderUtil;
 
 class SimpleFormFragment extends AbstractFormFragment{
 
     /**
-     * @param \CPath\Framework\Render\Theme\Interfaces\ITableTheme $Theme
+     * @param \CPath\Render\HTML\Theme\ITableTheme $Theme
      */
     public function __construct(ITableTheme $Theme = null) {
         parent::__construct($Theme);

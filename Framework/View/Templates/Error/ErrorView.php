@@ -5,7 +5,7 @@ use API\Themes\DefaultTheme;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\View\Templates\Layouts\NavBar\AbstractErrorNavBarLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Theme\Interfaces\IThemeAggregate;
@@ -23,7 +23,7 @@ class ErrorView extends AbstractErrorNavBarLayout {
 
     /**
      * Add additional <head> element fields for this View
-     * @param \CPath\Framework\Request\Interfaces\IRequest $Request
+     * @param \CPath\Request\IRequest $Request
      * @return void
      */
     protected function addHeadFields(IRequest $Request)
@@ -40,7 +40,7 @@ class ErrorView extends AbstractErrorNavBarLayout {
 
     /**
      * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     protected function renderNavBarContent(IRequest $Request)
@@ -50,7 +50,7 @@ class ErrorView extends AbstractErrorNavBarLayout {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     final protected function renderBodyHeaderContent(IRequest $Request)
@@ -60,7 +60,7 @@ class ErrorView extends AbstractErrorNavBarLayout {
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     final protected function renderBodyFooterContent(IRequest $Request)

@@ -7,9 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath;
 
+use CPath\Backend\CPathBackendRoutes;
 use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Framework\Request\Common\WebRequest;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Loaders\CPathLoader;
 
@@ -56,8 +57,8 @@ class Base {
 
     /** Attempt to route a web request to it's destination */
     public static function render() {
-        $Request = self::getRequest();
-        $Routes = new Routes;
+        $Request = Config::chooseRequest();
+        $Routes = new CPathBackendRoutes;
         $Routes->render($Request);
     }
 
@@ -67,41 +68,41 @@ class Base {
      * @param $withDomain boolean true if the full domain path should be returned
      * @return string the public path
      */
-    public static function getClassPath($Class, $withDomain=false) {
-        if(is_object($Class))
-            $Class = get_class($Class);
-        return ($withDomain ? Config::getDomainPath() : '/')
-            . trim(dirname(str_replace('\\', '/', ($Class))), '/') . '/';
-    }
+//    public static function getClassPath($Class, $withDomain=false) {
+//        if(is_object($Class))
+//            $Class = get_class($Class);
+//        return ($withDomain ? Config::getDomainPath() : '/')
+//            . trim(dirname(str_replace('\\', '/', ($Class))), '/') . '/';
+//    }
 
-    /**
-     * Get the IRequest instance for this render
-     * @return IRequest
-     */ // TODO: move to abstract class
-    public static function getRequest() {
-        static $Request = NULL;
-        if($Request) return $Request;
-
-        if(!empty($_SERVER['argv'])) {
-            $Request = CLIRequest::fromRequest();
-        } else {
-            $Request = WebRequest::fromRequest();
-        }
-        return $Request;
-    }
-
-    public static function isCLI() {
-        static $cli = NULL;
-        return $cli !== NULL
-            ? $cli
-            : $cli = self::getRequest() instanceof CLIRequest;
-    }
+//    /**
+//     * Get the IRequest instance for this render
+//     * @return \CPath\Request\IRequest
+//     */
+//    public static function getRequest() {
+//        static $Request = NULL;
+//        if($Request)
+//            return $Request;
+//
+//        $Request = Config::chooseRequest();
+//        return $Request;
+//    }
+//
+//    public static function isCLI() {
+//        static $cli = NULL;
+//        return $cli !== NULL
+//            ? $cli
+//            : $cli = self::getRequest() instanceof CLIRequest;
+//    }
 
     static function getBasePath() {
         return self::$mBasePath;
     }
 
 }
+
+// Static class initializes on include
+Base::init();
 
 // Static class initializes on include
 Base::init();

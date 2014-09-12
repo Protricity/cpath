@@ -3,53 +3,48 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\Header\Interfaces\IHeaderWriter;
-use CPath\Framework\Render\Header\Interfaces\ISupportHeaders;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\View\IContainerDEL;
-use CPath\Framework\Render\Theme\CPathDefaultTheme;
-use CPath\Framework\Render\Theme\Interfaces\ITableTheme;
-use CPath\Framework\Render\Util\HTMLRenderUtil;
-use CPath\Interfaces\IViewConfig;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\Theme\IFragmentTheme;
+use CPath\Request\IRequest;
+use CPath\Templates\Themes\CPathDefaultTheme;
+use CPath\Render\HTML\HTMLRenderUtil;
 
 abstract class AbstractFormFragment implements IRenderHTML, ISupportHeaders{
 
     private $mTheme;
 
     /**
-     * @param ITableTheme $Theme
-     * @internal param \CPath\Framework\API\Interfaces\IAPI $API
+     * @param \CPath\Render\HTML\Theme\Interfaces\\CPath\Render\HTML\Theme\Fragment\\CPath\Render\HTML\Theme\IFragmentTheme $Theme
      */
-    public function __construct(ITableTheme $Theme = null) {
+    public function __construct(IFragmentTheme $Theme = null) {
         $this->mTheme = $Theme ?: CPathDefaultTheme::get();
     }
 
     /**
      * Write all support headers used by this IView instance
-     * @param \CPath\Framework\Render\Header\Interfaces\IHeaderWriter $Head the writer instance to use
+     * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
      * @return String|void always returns void
      */
     function writeHeaders(IHeaderWriter $Head) {
-        $basePath = Base::getClassPath($this, true);
+        $Head->writeScript(__NAMESPACE__ . '/assets/jquery.min.js');
 
-        $Head->writeScript($basePath . 'assets/jquery.min.js');
+        $Head->writeScript(__NAMESPACE__ . '/assets/cpath.js');
 
-        $Head->writeScript($basePath . 'assets/cpath.js');
+        $Head->writeStyleSheet(__NAMESPACE__ . '/assets/api.css');
+        $Head->writeScript(__NAMESPACE__ . '/assets/api.js');
 
-        $Head->writeStyleSheet($basePath . 'assets/api.css');
-        $Head->writeScript($basePath . 'assets/api.js');
-
-        $Head->writeScript($basePath . 'assets/form.js');
-        $Head->writeStyleSheet($basePath . 'assets/formfragment.css');
-        $Head->writeScript($basePath . 'assets/formfragment.js');
+        $Head->writeScript(__NAMESPACE__ . '/assets/form.js');
+        $Head->writeStyleSheet(__NAMESPACE__ . '/assets/formfragment.css');
+        $Head->writeScript(__NAMESPACE__ . '/assets/formfragment.js');
     }
 
     /**
      * Render this API Form
-     * @param IRequest $Request the IRequest instance for this render
-     * @param IAttributes|NULL $Attr optional attributes to add to the content
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
     abstract function renderForm(IRequest $Request, IAttributes $Attr=NULL);
@@ -58,8 +53,8 @@ abstract class AbstractFormFragment implements IRenderHTML, ISupportHeaders{
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null)

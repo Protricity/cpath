@@ -9,12 +9,12 @@ namespace CPath\Framework\View\Layout\NavBar\Common;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Request\Common\ExceptionRequestWrapper;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\View\Layout\NavBar\AbstractNavBarLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
-use CPath\Framework\Render\Theme\Util\TableThemeUtil;
+use CPath\Render\HTML\Theme\Util\TableThemeUtil;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class ErrorViewNavBarLayout extends AbstractNavBarLayout
@@ -62,7 +62,7 @@ class ErrorViewNavBarLayout extends AbstractNavBarLayout
     /**
      * Render the main view content
      * @param IRequest $Request the IRequest instance for this render
-     * @param IAttributes $Attr
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
      * @return void
      */
     protected function renderBodyContent(IRequest $Request, IAttributes $Attr = null)

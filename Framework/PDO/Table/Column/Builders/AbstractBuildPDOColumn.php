@@ -16,7 +16,7 @@ use CPath\Framework\PDO\Table\Column\Builders\Interfaces\IPDOColumnBuilder;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnArgumentNotFoundException;
 use CPath\Framework\PDO\Table\Column\Template\Interfaces\IPDOColumnTemplate;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 
 abstract class AbstractBuildPDOColumn implements IPDOColumnBuilder
@@ -228,7 +228,7 @@ abstract class AbstractBuildPDOColumn implements IPDOColumnBuilder
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @throws \Exception
      * @return mixed the formatted input field that passed validation

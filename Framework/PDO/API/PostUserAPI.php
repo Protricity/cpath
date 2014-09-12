@@ -19,7 +19,7 @@ use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
@@ -75,7 +75,7 @@ class PostUserAPI extends PostAPI implements IAPIPostCallbacks {
      * Modify the PostAPI IRequest and/or return a row of fields to use in PDOModel::createFromArray
      * Note: Leave empty if unused.
      * @param Array &$row an associative array of key/value pairs
-     * @param IRequest $Request
+     * @param \CPath\Request\IRequest $Request
      * @return Array|null a row of key/value pairs to insert into the database
      * @throws ModelAlreadyExistsException if the account already exists
      * Note: a log in may occur if field 'login' == true and the password is correct

@@ -15,14 +15,14 @@ use CPath\Framework\PDO\Query\PDOInsert;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOUpdate;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Render\IRender;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequestHandler;
+use CPath\Request\IRequest;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDatabase, IRender {
+abstract class PDODatabase extends \PDO implements IDatabase, IRequestHandler {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;
@@ -132,10 +132,10 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRender {
 
     /**
      * Render this request
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function render(IRequest $Request)
+    function handleRequest(IRequest $Request)
     {
         $args = $Request->getArgs();
         if($args[0]) {

@@ -15,16 +15,16 @@ use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Field;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Build\IBuildable;
-use CPath\Framework\Render\IRenderAggregate;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Build\IBuildable;
+use CPath\Request\IRequestHandlerAggregate;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\SimpleResponse;
-use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Framework\Render\Layout\Common\API\APIView;
+use CPath\Route\RouteBuilder;
+use CPath\Framework\Render\Layout\API\APILayout;
 use CPath\Log;
 
-class Install implements IRenderAggregate, IBuildable, IAPI {
+class Install implements IRequestHandlerAggregate, IBuildable, IAPI {
 
     const FIELD_NO_PROMPT = 'y';
 
@@ -33,7 +33,7 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {
@@ -51,11 +51,11 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
 
     /**
      * Render this route destination
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function getRenderer(IRequest $Request) {
-        $Util = new APIView($this);
+    function getHandler(IRequest $Request) {
+        $Util = new APILayout($this);
         return $Util->getRenderer($Request);
     }
 
@@ -64,7 +64,7 @@ class Install implements IRenderAggregate, IBuildable, IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @throws \CPath\Framework\API\Exceptions\APIException
      * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status

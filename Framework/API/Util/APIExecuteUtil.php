@@ -19,7 +19,7 @@ use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
 use CPath\Framework\Response\Types\DataResponse;

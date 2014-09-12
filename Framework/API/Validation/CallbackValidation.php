@@ -9,7 +9,7 @@
 namespace CPath\Framework\API\Validation;
 
 use CPath\Framework\API\Validation\Interfaces\IValidation;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 class CallbackValidation implements IValidation {
     protected $mCallback;
@@ -23,7 +23,7 @@ class CallbackValidation implements IValidation {
 
     /**
      * Validate and return request
-     * @param IRequest $Request the pending request to validate
+     * @param \CPath\Request\IRequest $Request the pending request to validate
      * @throws \CPath\Framework\API\Exceptions\ValidationException if a validation exception occurred
      */
     function validate(IRequest $Request) {

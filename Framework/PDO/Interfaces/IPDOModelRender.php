@@ -9,14 +9,14 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 interface IPDOModelRender {
 
     /**
      * Render a PDOModel instance on successful GetAPI execution
      * @param PDOModel $Model the model instance to render
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderModel(PDOModel $Model, IRequest $Request);
@@ -24,7 +24,7 @@ interface IPDOModelRender {
     /**
      * Render with no PDOModel instance
      * @param \Exception $Exception the exception to render
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
     function renderException(\Exception $Exception, IRequest $Request);

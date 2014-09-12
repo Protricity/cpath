@@ -12,7 +12,7 @@ use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Interfaces\IDataMap;
 use CPath\Framework\Data\Map\Interfaces\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Util\ResponseUtil;
+use CPath\Handlers\Response\ResponseUtil;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 

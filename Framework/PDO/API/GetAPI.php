@@ -21,9 +21,9 @@ use CPath\Framework\PDO\Response\PDOModelResponse;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
 
 class GetAPI implements IAPI {
     private $mSearchColumns;
@@ -93,7 +93,7 @@ class GetAPI implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @throws \CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException
      * @internal param Array $args additional arguments for this execution
      * @return PDOPrimaryKeyModel the found model which implements IResponseAggregate
@@ -125,8 +125,8 @@ class GetAPI implements IAPI {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
     function renderHtml(IRequest $Request, IAttributes $Attr=null)  {

@@ -9,7 +9,7 @@ namespace CPath\Framework\API\Interfaces;
 
 use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Interfaces\IField;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
 

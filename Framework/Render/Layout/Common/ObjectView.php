@@ -4,16 +4,16 @@ namespace CPath\Framework\Render\Layout\Common;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Render\HTML\IRenderHTML;
-use CPath\Framework\Request\Interfaces\IRequest;
-use CPath\Framework\Render\Page\AbstractPage;
-use CPath\Framework\Render\Header\Interfaces\IHeaderWriter;
-use CPath\Framework\Render\Layout\AbstractLayout;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Render\HTML\Page\ContentPage;
+use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class ObjectView extends AbstractPage implements IDescribable {
+class ObjectView extends ContentPage implements IDescribable {
     const FIELD_TITLE = 'title';
     private $mTarget;
     private $mDescription;

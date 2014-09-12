@@ -11,7 +11,8 @@ use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 use CPath\Model\FileUpload;
 
 /**
@@ -36,7 +37,7 @@ class FileUploadField extends Field {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request instance
      * @param String $fieldName the field name
      * @return FileUpload|Array an instance of the file upload data or an array of instances
      * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails
@@ -57,11 +58,12 @@ class FileUploadField extends Field {
     }
 
     /**
-     * Render this input field as html
-     * @param IRequest $Request the IRequest instance for this render
+     * Render request as html and sends headers as necessary
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function render(IRequest $Request) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
         echo RI::ni(), "<input type='file' name='{$this->getName()}' accept='{$this->mMimeWildCard}' placeholder='Enter value for {$this->getName()}' />";
     }
 }

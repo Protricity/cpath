@@ -1,0 +1,15 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/8/14
+ * Time: 5:45 PM
+ */
+namespace CPath\Build;
+
+use CPath\Build\IBuildRequest;
+
+interface IBuildRequestListener
+{
+    function onCommit(IBuildRequest $Request);
+}

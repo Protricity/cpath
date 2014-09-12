@@ -12,7 +12,7 @@ use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 
@@ -46,7 +46,7 @@ class PostAPI extends AbstractPDOAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return IResponse|mixed the api call response with data, message, and status
      */

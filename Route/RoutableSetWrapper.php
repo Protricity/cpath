@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 
 class RoutableSetWrapper implements IRequest {
 
@@ -34,7 +34,7 @@ class RoutableSetWrapper implements IRequest {
     function count() { return $this->mReq->count(); }
     function &getDataPath($_path = NULL) { return $this->mReq->getDataPath($_path); }
     function getPath() { return $this->mReq->getPath(); }
-    function getMethod() { return $this->mReq->getMethod(); }
+    function getMethodName() { return $this->mReq->getMethodName(); }
     function getRequestURL($withArgs = true, $withDomain = false) { return $this->mReq->getRequestURL($withArgs, $withDomain); }
     function getHeaders($key = NULL) { return $this->mReq->getHeaders($key); }
     function getNextArg($advance = true) { return $this->mReq->getNextArg($advance); }

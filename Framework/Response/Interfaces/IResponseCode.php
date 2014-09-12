@@ -13,7 +13,7 @@ interface IResponseCode {
     const STATUS_NOT_FOUND = 404;
     const STATUS_CONFLICT = 409;
 
-    const JSON_CODE = 'code';
+    const STR_CODE = 'code';
 
 
     /**

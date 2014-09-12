@@ -17,16 +17,17 @@ use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Field;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Framework\Build\IBuildable;
+use CPath\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
-use CPath\Framework\Render\IRenderAggregate;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequestHandler;
+use CPath\Request\IRequestHandlerAggregate;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Framework\Route\Builders\RouteBuilder;
-use CPath\Framework\Render\Layout\Common\API\APIView;
+use CPath\Route\RouteBuilder;
+use CPath\Framework\Render\Layout\API\APILayout;
 use CPath\Log;
 
-class Build implements IRenderAggregate, IAPI, IBuildable {
+class Build implements IRequestHandlerAggregate, IAPI, IBuildable {
 
     //const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     //const ROUTE_METHOD = 'CLI';    // CLI only
@@ -464,8 +465,8 @@ class Build implements IRenderAggregate, IAPI, IBuildable {
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function getRenderer(IRequest $Request) {
-        $RenderUtil = new APIView($this);
+    function getHandler(IRequest $Request) {
+        $RenderUtil = new APILayout($this);
         return $RenderUtil->getRenderer($Request);
     }
 

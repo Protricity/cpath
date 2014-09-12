@@ -8,9 +8,9 @@
 namespace CPath\Framework\API\Field;
 
 use CPath\Framework\API\Exceptions\ValidationException;
-use CPath\Framework\Render\Attribute\Attr;
-use CPath\Framework\Render\Attribute\IAttributes;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 use CPath\Model\FileUpload;
 
 /**
@@ -33,7 +33,7 @@ class PasswordField extends RequiredField {
     /**
      * Render request as html and sends headers as necessary
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr=null) {

@@ -8,13 +8,13 @@
 namespace CPath\Framework\Render\Common;
 
 use CPath\Framework\Data\Map\Interfaces\IMappable;
-use CPath\Framework\Render\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\IRenderAll;
-use CPath\Framework\Render\JSON\Renderers\HTMLRenderer;
-use CPath\Framework\Render\JSON\Renderers\JSONRenderer;
-use CPath\Framework\Render\JSON\Renderers\TextRenderer;
-use CPath\Framework\Render\XML\Renderers\XMLRenderer;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Render\HTML\HTMLMapUtil;
+use CPath\Render\JSON\JSONMapUtil;
+use CPath\Render\Text\TextRenderer;
+use CPath\Render\XML\XMLRenderer;
+use CPath\Request\IRequest;
 
 class MapRenderer implements IRenderAll
 {
@@ -27,13 +27,13 @@ class MapRenderer implements IRenderAll
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
-        HTMLRenderer::renderMap($this->mMap);
+        HTMLMapUtil::renderMap($this->mMap);
     }
 
     /**
@@ -43,12 +43,12 @@ class MapRenderer implements IRenderAll
      */
     function renderJSON(IRequest $Request)
     {
-        JSONRenderer::renderMap($this->mMap);
+        JSONMapUtil::renderMap($this->mMap);
     }
 
     /**
      * Render request as plain text
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     function renderText(IRequest $Request)

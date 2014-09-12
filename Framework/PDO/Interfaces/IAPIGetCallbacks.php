@@ -9,7 +9,7 @@
 namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IAPIGetCallbacks {
@@ -25,7 +25,7 @@ interface IAPIGetCallbacks {
     /**
      * Perform on successful GetAPI execution
      * @param PDOPrimaryKeyModel $Model the returned model
-     * @param IRequest $Request
+     * @param \CPath\Request\IRequest $Request
      * @param IResponse $Response
      * @return IResponse|null
      */

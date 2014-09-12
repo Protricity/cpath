@@ -8,7 +8,7 @@
  */
 namespace CPath\Interfaces;
 
-use CPath\Framework\Request\Interfaces\IRequest;
+use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
 interface IExecute {
@@ -24,7 +24,7 @@ interface IExecute {
     /**
      * Perform after successful API execution
      * Note: is not performed when exceptions are thrown or if the response status is not 200 (success)
-     * @param IRequest $Request
+     * @param \CPath\Request\IRequest $Request
      * @param IResponse $DataResponse
      * @return void
      */

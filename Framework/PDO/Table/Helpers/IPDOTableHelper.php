@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Helpers;
 
-use CPath\Framework\Build\Code\BuildPHPClass;
+use CPath\Build\Code\BuildPHPClass;
 
 interface IPDOTableHelper {
 
