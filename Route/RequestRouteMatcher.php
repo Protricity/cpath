@@ -7,7 +7,7 @@
  */
 namespace CPath\Route;
 
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 
 final class RequestRouteMatcher implements IRouteMap
 {
@@ -26,7 +26,7 @@ final class RequestRouteMatcher implements IRouteMap
     }
 
     /**
-     * @return String|Callable|IRequestHandler
+     * @return String|Callable|IStaticRequestHandler
      * @throws \InvalidArgumentException
      */
     function getTarget() {

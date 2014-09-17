@@ -35,7 +35,7 @@ class APIFormFragment extends AbstractFormFragment{
      * @return void
      */
     function renderForm(IRequest $Request, IAttributes $Attr=NULL) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         $API = $this->mAPI;
         $Fields = $API->getFields($Request);
@@ -57,7 +57,7 @@ class APIFormFragment extends AbstractFormFragment{
         $Util->formOpen($Attr);
 
         $Table = new TableThemeUtil($Request, $this->getTheme());
-        $Table->renderStart(Describable::get($API)->getDescription(), Attr::get('apiview-table'));
+        $Table->renderStart(Describable::get($API)->getDescription(), Attr::fromClass('apiview-table'));
         $Table->renderHeaderStart();
         $Table->renderTD('#',           'table-field-num');
         $Table->renderTD('Req\'d',      'table-field-required');

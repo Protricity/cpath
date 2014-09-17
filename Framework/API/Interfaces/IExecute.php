@@ -11,7 +11,7 @@ namespace CPath\Interfaces;
 use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
-interface IExecute {
+interface IExecute123 {
 
     /**
      * Perform on API creation

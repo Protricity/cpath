@@ -21,51 +21,45 @@ interface ITableTheme {
 
     /**
      * Render the start of a table.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @param String|NULL $captionText text that should appear in the table caption
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableStart(IRequest $Request, $captionText = NULL, IAttributes $Attr=null);
+    function renderTableStart($captionText = NULL, IAttributes $Attr=null);
 
     /**
      * Render the start of a table row.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER, FLAG_ROW_FIRST_DATA_IS_LABEL
-     * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+     * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableRowStart(IRequest $Request, $flags=0, IAttributes $Attr=null);
+    function renderTableRowStart($flags=0, IAttributes $Attr=null);
 
     /**
      * Render the start of a table data element.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @param int $span set span attribute
      * @param int $flags ::FLAG_DATA_IS_LABEL
      * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
-    function renderTableDataStart(IRequest $Request, $span=0, $flags=0, IAttributes $Attr=null);
+    function renderTableDataStart($span=0, $flags=0, IAttributes $Attr=null);
 
     /**
      * Render the end of a table data element.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderTableDataEnd(IRequest $Request);
+    function renderTableDataEnd();
 
     /**
      * Render the end of a table row.
-     * @param IRequest $Request the IRequest instance for this render
      * @return void
      */
-    function renderTableRowEnd(IRequest $Request);
+    function renderTableRowEnd();
 
     /**
      * Render the end of a table.
-     * @param IRequest $Request the IRequest instance for this render
      * @param String|NULL $footerText text that should appear in the footer
      * @return void
      */
-    function renderTableEnd(IRequest $Request, $footerText=NULL);
+    function renderTableEnd($footerText=NULL);
 }

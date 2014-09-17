@@ -9,8 +9,8 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Common\MappableCallback;
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -72,7 +72,7 @@ class PDOSearchResponse implements IResponse, IMappable {
                         $Descriptor->mapData($Map);
                     }));
                 else
-                    $Map->mapKeyValue(IResponse::JSON_RESPONSE, $Descriptor);
+                    $Map->mapNamedValue(IResponse::JSON_RESPONSE, $Descriptor);
             }
         }
     }

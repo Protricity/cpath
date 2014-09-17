@@ -72,12 +72,12 @@ PHP;
     }
 
     /**
-     * Return the profile file full path
+     * Return the .profile file full path
      * @return string build config full path
      */
     private static function getConfigPath() {
         static $path = NULL;
-        return $path ?: $path = Config::getGenPath().'profile.gen.php';
+        return $path ?: $path = Config::getGenPath().'.profile.gen.php';
     }
 
     static function profileClass($name) {

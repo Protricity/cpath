@@ -7,13 +7,13 @@
  */
 namespace CPath\Framework\Render\Common;
 
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IMappable;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Render\HTML\HTMLMapUtil;
-use CPath\Render\JSON\JSONMapUtil;
-use CPath\Render\Text\TextRenderer;
-use CPath\Render\XML\XMLRenderer;
+use CPath\Render\JSON\JSONRenderMap;
+use CPath\Render\Text\TextRenderMap;
+use CPath\Render\XML\XMLRenderMap;
 use CPath\Request\IRequest;
 
 class MapRenderer implements IRenderAll
@@ -43,7 +43,9 @@ class MapRenderer implements IRenderAll
      */
     function renderJSON(IRequest $Request)
     {
-        JSONMapUtil::renderMap($this->mMap);
+        JSONRenderMap::renderMap($this->mMap);
+        $Renderer = new TextRenderMap();
+        $this->mMap->mapData($Renderer);
     }
 
     /**
@@ -51,9 +53,9 @@ class MapRenderer implements IRenderAll
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @return String|void always returns void
      */
-    function renderText(IRequest $Request)
-    {
-        TextRenderer::renderMap($this->mMap);
+    function renderText(IRequest $Request) {
+        $Renderer = new TextRenderMap();
+        $this->mMap->mapData($Renderer);
     }
 
     /**
@@ -63,8 +65,8 @@ class MapRenderer implements IRenderAll
      * @param bool $declaration
      * @return String|void always returns void
      */
-    function renderXML(IRequest $Request, $rootElementName = 'root', $declaration=true)
-    {
-        XMLRenderer::renderMap($this->mMap, $rootElementName, $declaration);
+    function renderXML(IRequest $Request, $rootElementName = 'root', $declaration=true) {
+        $Renderer = new XMLRenderMap($rootElementName, $declaration);
+        $this->mMap->mapData($Renderer);
     }
 }

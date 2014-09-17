@@ -11,11 +11,13 @@ use CPath\Build\BuildRequest;
 use CPath\Build\File;
 use CPath\Build\IBuildRequest;
 use CPath\Build\IBuildable;
+use CPath\Build\MethodDocBlock;
+use CPath\Request\CLI\CommandString;
 use CPath\Request\IRequest;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Route\RouteBuilder;
 
-class BuildRequestHandler implements IRequestHandler, IBuildable
+class BuildRequestHandler implements IStaticRequestHandler, IBuildable
 {
 
     /**
@@ -23,14 +25,14 @@ class BuildRequestHandler implements IRequestHandler, IBuildable
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function handleRequest(IRequest $Request) {
+    function handleStaticRequest(IRequest $Request) {
         $flags = 0;
 
-        $test = $Request->prompt('t,test', "Skip commit? (Test mode)", false);
+        $test = $Request->prompt("Skip commit? (Test mode)", 't,test', false);
         if ($test && !in_array($test, array('n', 'N', '0')))
             $flags |= IBuildRequest::TEST_MODE;
 
-        $skipPrompt = $Request->prompt('f,defaults', "Use Defaults? (Skip prompt)", false);
+        $skipPrompt = $Request->prompt("Use Defaults? (Skip prompt)", 'f,defaults', false);
         if ($skipPrompt && !in_array($skipPrompt, array('n', 'N', '0')))
             $flags |= IBuildRequest::USE_DEFAULTS;
 
@@ -65,7 +67,16 @@ class BuildRequestHandler implements IRequestHandler, IBuildable
             if (class_exists($class, true)) {
                 $Class = new \ReflectionClass($class);
                 if ($Class->implementsInterface('\CPath\Build\IBuildRequestHandler')) {
-                    $Method = $Class->getMethod('handleBuildRequest');
+                    $Method = $Class->getMethod('handleStaticBuild');
+                    $MethodDoc = new MethodDocBlock($Method);
+                    if($Tag = $MethodDoc->getNextTag('build')) {
+                        $args = CommandString::parseArgs($Tag->getArgString());
+                        $disabled = isset($args['disable']) && $args['disable'];
+                        if($disabled) {
+                            continue;
+                            // TODO
+                        }
+                    }
                     $Method->invoke(null, $Request);
                 } else {
                     // TODO
@@ -83,7 +94,7 @@ class BuildRequestHandler implements IRequestHandler, IBuildable
      * @param IBuildRequest $Request the build request instance for this build session
      * @return String|void always returns void
      */
-    static function handleBuild(IBuildRequest $Request) {
+    static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new CPathBackendRoutes());
         $Builder->writeRoute('CLI /build', __CLASS__);
     }

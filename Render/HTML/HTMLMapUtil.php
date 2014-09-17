@@ -7,8 +7,8 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class HTMLMapUtil implements IDataMap

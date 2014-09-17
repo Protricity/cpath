@@ -11,7 +11,8 @@ use CPath\Framework\PDO\Query\SQLiteInsert;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use PDO;
 
-abstract class SQLiteDatabase extends PDODatabase {
+
+abstract class SQLiteDatabase2 extends PDODatabase {
     const FUNC_FORMAT = "SELECT %s"; // TODO: remove?
     const VERSION_TABLE_NAME = "__cpath_getversion";
 

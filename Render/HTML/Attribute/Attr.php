@@ -8,104 +8,136 @@
 namespace CPath\Render\HTML\Attribute;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute;
 use CPath\Request\IRequest;
 
 class Attr implements IAttributes {
+    private $mContent = array();
 
-    private $mAttr = array(), $mClasses = array(), $mStyles = array();
-
-    function __construct($classes=null, $styles=null) {
-        if($classes !== null)
-            $this->addClass($classes);
-        if($styles !== null)
-            $this->addStyle($styles);
+    function __construct($htmlAttr=null) {
+        if($htmlAttr)
+            $this->addHTML($htmlAttr);
     }
 
     /**
-     * Render attribute content
-     * @param IRequest $Request
-     * @return void
+     * Render request as html
+     * @return String|void always returns void
      */
-    function render(IRequest $Request) {
-        foreach($this->mAttr as $name => $value)
-            echo " ", $name, "='", $value, "'";
-        if($this->mClasses)
-            echo ' class=\'' . implode(' ', $this->mClasses) . '\'';
-        if($this->mStyles)
-            echo ' style=\'' . implode('; ', $this->mStyles) . '\'';
+    function render() {
+        foreach($this->mContent as $key => $value) {
+            switch($key) {
+                case 'class':
+                    echo ' class=\'' . implode(' ', array_keys($value)) . '\'';
+                    break;
+                case 'style':
+                    foreach($value as $key2 => $value2)
+                        echo " ", $key2, ": ", $value2, ";";
+                    break;
+                default:
+                    echo " ", $key, "='", $value, "'";
+            }
+        }
     }
 
     /**
      * Add an attribute to the collection
-     * @param String|Null $key the attribute name. If null is provided, the attribute is not added
-     * @param String|Null $value the attribute value. If null is provided,
-     * @param bool $replace should any existing value be replaced
-     * @return \CPath\Render\HTML\Attribute\IAttributes returns self
+     * @param String $key the attribute name. If null is provided, the attribute is not added
+     * @param String|null $value the attribute value. If null is provided,
      * @throws \InvalidArgumentException if $replace == false and the attribute exists
      * or $replace == true and the attribute does not exist
      */
-    function add($key=null, $value = null, $replace=false) {
-        if($key == null)
-            return $this;
-        if(isset($this->mAttr[$key])) {
-            if(!$replace)
-                throw new \InvalidArgumentException("Attribute '$key' already exists");
-        } else {
-            if($replace)
-                throw new \InvalidArgumentException("Attribute '$key' does not exist");
+    function add($key, $value = null) {
+        switch(strtolower($key)) {
+            case 'class':
+                $this->addClass($value);
+                break;
+
+            case 'style':
+                $this->addStyle($value);
+                break;
+
+            default:
+                $this->mContent[$key] = $value;
         }
-        $this->mAttr[$key] = $value;
-        return $this;
     }
 
     /**
-     * Returns true if the attribute element name exists
-     * @param $key
-     * @return mixed
+     * Add attributes
+     * @param $htmlAttr
      */
-    function has($key) {
-        return !empty($this->mAttr[$key]);
+    function addHTML($htmlAttr) {
+        if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
+            foreach($matches[1] as $name) {
+                $this->add($name, $matches[2]) ;
+            }
+        }
     }
 
     /**
      * Add a css class to the collection
-     * @param String|Null $class one or multiple css classes. If null is provided, the class is not added
-     * @return \CPath\Render\HTML\Attribute\IAttributes returns self
+     * @param String $classList one or multiple css classes
      */
-    function addClass($class=null) {
-        if($class)
-            $this->mClasses[] = $class;
-        return $this;
+    function addClass($classList) {
+        foreach(preg_split('/\s+/', $classList) as $class)
+            $this->mContent['class'][$class] = true;
     }
 
     /**
      * Add a css style to the collection
-     * @param String|Null $style one or multiple css styles. If null is provided, the style is not added
-     * @return \CPath\Render\HTML\Attribute\IAttributes returns self
+     * @param String $styleList one or multiple css styles
      */
-    function addStyle($style=null) {
-        if($style)
-            $this->mStyles[] = $style;
-        return $this;
+    function addStyle($styleList) {
+        if(!isset($this->mContent['style']))
+            $this->mContent['style'] = array();
+        if(preg_match_all('/(\w+):\s+([\w\s,]+);?/', $styleList, $matches)) {
+            foreach($matches[1] as $name) {
+                $this->mContent['style'][$name] = $matches[2][$name];
+            }
+        }
     }
 
     // Static
 
     /**
-     * @param null|String|\CPath\Render\HTML\Attribute\IAttributes $class a css class or instance of IAttributes
+     * Parse attributes from string and return the class instance
+     * @param $attrString|IAttributes
+     * @param null|IAttributes|String $_htmlAttr [vararg]
      * @return \CPath\Render\HTML\Attribute\IAttributes
      */
-    static function get($class=null) {
-        if($class instanceof IAttributes)
-            return $class;
-        return new Attr($class);
+    static function parse($htmlAttr, $_htmlAttr=null) {
+        $Attr = new Attr();
+        foreach(func_get_args() as $arg)
+            if($arg)
+                $Attr->addHTML($arg);
+        return $Attr;
     }
 
     /**
-     * @param String|null $style
-     * @return Attr
+     * Add a css class to the collection
+     * @param String $classList one or multiple css classes
+     * @param null|String $_classList [vararg]
+     * @return \CPath\Render\HTML\Attribute\IAttributes
      */
-    static function style($style=null) {
-        return new Attr(null, $style);
+    static function fromClass($classList, $_classList=null) {
+        $Attr = new Attr();
+        foreach(func_get_args() as $arg)
+            if($arg)
+                $Attr->addClass($arg);
+        return $Attr;
     }
+
+    /**
+     * Add a css style to the collection
+     * @param String $styleList one or multiple css styles
+     * @param null|String $_styleList [vararg]
+     * @return \CPath\Render\HTML\Attribute\IAttributes
+     */
+    static function fromStyle($styleList, $_styleList=null) {
+        $Attr = new Attr();
+        foreach(func_get_args() as $arg)
+            if($arg)
+                $Attr->addStyle($arg);
+        return $Attr;
+    }
+
 }

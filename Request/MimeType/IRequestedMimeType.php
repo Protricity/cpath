@@ -7,6 +7,8 @@
  */
 namespace CPath\Request\MimeType;
 
+use CPath\Framework\Response\Interfaces\IResponse;
+
 interface IRequestedMimeType
 {
     /**
@@ -14,4 +16,11 @@ interface IRequestedMimeType
      * @return String
      */
     function getMimeTypeName();
+
+    /**
+     * Send response headers for this mime type
+     * @param IResponse $Response
+     * @return void
+     */
+    function sendHeaders(IResponse $Response);
 }

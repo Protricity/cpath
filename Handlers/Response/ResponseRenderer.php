@@ -7,18 +7,18 @@
  */
 namespace CPath\Handlers\Response;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLResponseBody;
 use CPath\Render\HTML\IContainerHTML;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\JSON\JSONMapUtil;
+use CPath\Render\JSON\JSONRenderMap;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLRenderer;
-use CPath\Request\IRequestHandler;
+use CPath\Render\XML\XMLRenderMap;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Handlers\HTML\Layouts\ThreeSectionLayout;
@@ -45,11 +45,11 @@ final class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IR
 
     /**
      * Render request as html
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Handlers\Response\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null) {
         $Response = $this->mResponse;
         $Util = new ResponseUtil($Response, $this->mTemplate);
         $Util->renderHTML($Request);

@@ -55,7 +55,7 @@ final class UnknownRequest implements IRequest
      * @throws \Exception
      * @return string|null the field parameter or null
      */
-    function prompt($name, $description)
+    function getParam($name, $description)
     {
         throw new \Exception("Unknown Request: " . $this->mMethod);
     }

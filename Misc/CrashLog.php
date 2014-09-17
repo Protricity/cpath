@@ -115,7 +115,7 @@ class CrashLog {
     }
 
     /**
-     * Return the profile file full path
+     * Return the .profile file full path
      * @return string build config full path
      */
     private function getConfigPath() {

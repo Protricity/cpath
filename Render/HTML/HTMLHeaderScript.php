@@ -30,11 +30,11 @@ class HTMLHeaderScript implements IRenderHTML, ISupportHeaders
 
     /**
      * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\HTML\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null) {
         // No render for Headers
     }
 

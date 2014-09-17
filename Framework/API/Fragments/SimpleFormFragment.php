@@ -29,7 +29,7 @@ class SimpleFormFragment extends AbstractFormFragment{
      * @return void
      */
     function renderForm(IRequest $Request, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         $API = $this->getAPI();
         $Fields = $API->getFields();

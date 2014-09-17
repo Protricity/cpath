@@ -15,13 +15,15 @@ use CPath\Render\HTML\Theme\ITableTheme;
 
 
 class TableThemeUtil {
-    private $mTheme, $mRequest, $mLastElm='none', $mRowFlags=0, $mColNum=0, $mColMax=0;
+    private $mTheme, $mLastElm='none', $mRowFlags=0, $mColNum=0, $mColMax=0;
 
-    public function __construct(IRequest $Request, ITableTheme $Theme) {
-        $this->mRequest = $Request;
+    public function __construct(ITableTheme $Theme) {
         $this->mTheme = $Theme;
     }
 
+    public function getTheme() {
+        return $this->mTheme;
+    }
     /**
      * @param String|Callable $content
      * @param String|IAttributes|Null $Attr optional attributes for this element
@@ -114,7 +116,7 @@ class TableThemeUtil {
      * @return void
      */
     function renderStart($captionText = NULL, $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
         switch($this->mLastElm) {
             case 'table':
                 $this->renderEnd();
@@ -130,7 +132,7 @@ class TableThemeUtil {
                 break;
             case 'none': break;
         }
-        $this->mTheme->renderTableStart($this->mRequest, $captionText, $Attr);
+        $this->mTheme->renderTableStart($captionText, $Attr);
         $this->mLastElm = 'table';
     }
 
@@ -141,7 +143,7 @@ class TableThemeUtil {
      * @return void
      */
     function renderRowStart($flags = 0, $Attr = null) {
-        $Attr = \CPath\Render\HTML\Attribute\Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
         switch($this->mLastElm) {
             case 'table': break;
             case 'tr':
@@ -159,7 +161,7 @@ class TableThemeUtil {
         if($this->mColNum > $this->mColMax)
             $this->mColMax = $this->mColNum;
         $this->mColNum = 0;
-        $this->mTheme->renderTableRowStart($this->mRequest, $flags, $Attr);
+        $this->mTheme->renderTableRowStart($flags, $Attr);
         $this->mLastElm = 'tr';
     }
 
@@ -171,7 +173,7 @@ class TableThemeUtil {
      * @return void
      */
     function renderDataStart($Attr=null, $span = 0, $flags = 0) {
-        $Attr = \CPath\Render\HTML\Attribute\Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
         switch($this->mLastElm) {
             case 'table':
                 $this->renderRowStart();
@@ -194,7 +196,7 @@ class TableThemeUtil {
                     break;
             }
         $this->mColNum++;
-        $this->mTheme->renderTableDataStart($this->mRequest, $span, $flags | $this->mRowFlags, $Attr);
+        $this->mTheme->renderTableDataStart($span, $flags | $this->mRowFlags, $Attr);
         $this->mLastElm = 'td';
     }
 
@@ -218,7 +220,7 @@ class TableThemeUtil {
                 $this->renderDataStart();
                 break;
         }
-        $this->mTheme->renderTableDataEnd($this->mRequest);
+        $this->mTheme->renderTableDataEnd();
         $this->mLastElm = 'tr';
     }
 
@@ -240,7 +242,7 @@ class TableThemeUtil {
                 $this->renderRowStart();
                 break;
         }
-        $this->mTheme->renderTableRowEnd($this->mRequest);
+        $this->mTheme->renderTableRowEnd();
         $this->mRowFlags = 0;
         $this->mLastElm = 'table';
     }
@@ -266,7 +268,7 @@ class TableThemeUtil {
                 $this->renderStart();
                 break;
         }
-        $this->mTheme->renderTableEnd($this->mRequest, $footerText);
+        $this->mTheme->renderTableEnd($footerText);
         $this->mLastElm = 'none';
     }
 

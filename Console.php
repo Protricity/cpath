@@ -8,7 +8,7 @@
 namespace CPath;
 
 use CPath\Build\IBuildable;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequestHandlerAggregate;
 use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Request\IRequest;
@@ -23,7 +23,7 @@ class Console implements IRequestHandlerAggregate { // Broke }, IBuildable {
     /**
      * Return an instance of IRender
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render
-     * @return \CPath\Request\IRequestHandler return the renderer instance
+     * @return \CPath\Request\IStaticRequestHandler return the renderer instance
      */
     function getHandler(IRequest $Request)
     {

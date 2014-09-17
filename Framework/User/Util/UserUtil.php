@@ -57,7 +57,7 @@ class UserUtil implements IUserUtil {
 
     /**
      * Assert a user role and return the result as a boolean
-     * @param IRoleProfile $Profile the role profile to assert
+     * @param IRoleProfile $Profile the role .profile to assert
      * @return bool true if the role exists and the assertion passed
      */
     function hasRole(IRoleProfile $Profile) {
@@ -75,7 +75,7 @@ class UserUtil implements IUserUtil {
 
     /**
      * Assert a user role or throw an InvalidRoleException
-     * @param IRoleProfile $Profile the role profile to assert
+     * @param IRoleProfile $Profile the role .profile to assert
      * @throws InvalidRoleException if the user role assertion fails
      */
     function assertRole(IRoleProfile $Profile) {
@@ -87,6 +87,6 @@ class UserUtil implements IUserUtil {
             }
         }
 
-        throw new InvalidRoleException("Role profile not found: " . Describable::get($Profile)->getTitle());
+        throw new InvalidRoleException("Role .profile not found: " . Describable::get($Profile)->getTitle());
     }
 }

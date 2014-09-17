@@ -9,8 +9,10 @@ namespace CPath\Request\Exceptions;
 
 class RequestParameterException extends \Exception
 {
+    private $mParamName;
     public function __construct($msg, $paramName, $description=null) {
         parent::__construct($msg);
+        $this->mParamName = $paramName;
     }
 }
 

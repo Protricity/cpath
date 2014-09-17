@@ -26,7 +26,7 @@ class IsDebugger implements IRoleProfile {
     }
 
     /**
-     * Assert Role profile using found roles
+     * Assert Role .profile using found roles
      * @param \CPath\Framework\User\Role\Interfaces\IRoleCollection $FoundRoles
      * @throws NotDeveloperException if the user role assertion fails
      */

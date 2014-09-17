@@ -8,17 +8,16 @@
 namespace CPath\Data\Schema;
 
 use CPath\Build\ClassDocBlock;
-use CPath\Build\DocTag;
 use CPath\Build\PropertyDocBlock;
 use CPath\Request\CLI\CommandString;
 
 class TableSchema implements IReadableSchema
 {
     const TABLE_TAG = 'table';
-    const NAME_TAG = 'name';
     const COLUMN_TAG = 'column';
     const INDEX_TAG = 'index';
-    const COMMENT_TAG = 'comment';
+    const PRIMARY_TAG = 'primary';
+    const UNIQUE_TAG = 'unique';
 
     private $mClass;
 
@@ -31,89 +30,74 @@ class TableSchema implements IReadableSchema
 
     public function writeSchema(IWritableSchema $DB) {
         $ClassDoc = new ClassDocBlock($this->mClass);
-        $tableName = dirname(get_class($this));
-        $tableComment = $ClassDoc->getComment(true);
+        $tableName = null;
         $tableTagValue = null;
-        $tableArgs = array();
 
         foreach($ClassDoc->getAllTags() as $Tag) {
             switch($Tag->getName()) {
                 case self::TABLE_TAG:
-                    $tableArgs = CommandString::parseArgs($Tag->getArgString());
-                    if(!empty($tableArgs['name']))
-                        $tableName = $tableArgs['name'];
-                    if(!empty($tableArgs['comment']))
-                        $tableComment = $tableArgs['comment'];
+                    $args = CommandString::parseArgs($Tag->getArgString());
+                    $tableName = isset($args['name'])         ? $args['name']       : null;
+                    $tableComment = isset($args['comment'])   ? $args['comment']    : $ClassDoc->getComment(true);
 
-                    break;
-                case self::NAME_TAG:
-                    $tableName = $Tag->getNextArg();
-                    break;
-                case self::COMMENT_TAG:
-                    $tableComment = $Tag->getNextArg();
+                    if(!$tableName && !empty($args[0]))
+                        $tableName = array_shift($args);
+
+                    $argString = '';
+                    for($i=0; isset($args[$i]); $i++)
+                        $argString .= ($argString ? ' ' : '') . $args[$i];
+
+                    $DB->writeTable($tableName, $argString, $tableComment);
                     break;
             }
         }
 
-        $argString = '';
-        for($i=0; isset($tableArgs[$i]); $i++)
-            $argString .= ($argString ? ' ' : '') . $tableArgs[$i];
-
-        $DB->writeTable($tableName, $argString, $tableComment);
 
         $Class = new \ReflectionClass($this->mClass);
         foreach($Class->getProperties() as $Property) {
             $PropertyDoc = new PropertyDocBlock($Property);
             if($PropertyDoc->hasTag(self::COLUMN_TAG)) {
-                $columnName = $Property->getName();
-                $columnArgs = array();
-                $columnComment = $PropertyDoc->getComment(true);
 
-                /** @var DocTag[] $indexTags */
-                $indexTags = array();
-
+                $columnName = null;
                 foreach($PropertyDoc->getAllTags() as $Tag) {
                     switch($Tag->getName()) {
                         case self::COLUMN_TAG:
-                            $columnArgs = CommandString::parseArgs($Tag->getArgString());
-                            if(!empty($columnArgs['name']))
-                                $columnName = $columnArgs['name'];
-                            if(!empty($columnArgs['comment']))
-                                $columnComment = $columnArgs['comment'];
+                            $args = CommandString::parseArgs($Tag->getArgString());
+                            $columnName = isset($args['name'])        ? $args['name']       : $Property->getName();
+                            $columnComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
 
+                            $argString = '';
+                            for($i=0; isset($args[$i]); $i++)
+                                $argString .= ($argString ? ' ' : '') . $args[$i];
+
+                            $DB->writeColumn($columnName, $argString, $columnComment);
                             break;
+
+                        case self::PRIMARY_TAG:
+                        case self::UNIQUE_TAG:
                         case self::INDEX_TAG:
-                            $indexTags[] = $Tag;
+                            $args = CommandString::parseArgs($Tag->getArgString());
+
+                            switch($Tag->getName()) {
+                                case self::PRIMARY_TAG:
+                                    $args[] = 'PRIMARY KEY';
+                                    break;
+                                case self::UNIQUE_TAG:
+                                    $args[] = 'UNIQUE';
+                                    break;
+                            }
+
+                            $indexName = isset($args['name'])        ? $args['name']       : $tableName . '_' . ($columnName ?: $Property->getName()) . '_index';
+                            $indexComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
+                            $columnList = isset($args['columns'])    ? $args['columns']    : $Property->getName();
+
+                            $argString = '';
+                            for($i=0; isset($args[$i]); $i++)
+                                $argString .= ($argString ? ' ' : '') . $args[$i];
+
+                            $DB->writeIndex($indexName, $columnList, $argString, $indexComment);
                             break;
                     }
-                }
-
-                $argString = '';
-                for($i=0; isset($columnArgs[$i]); $i++)
-                    $argString .= ($argString ? ' ' : '') . $columnArgs[$i];
-
-                $DB->writeColumn($columnName, $argString, $columnComment);
-
-                foreach($indexTags as $Tag) {
-                    $indexArgs = CommandString::parseArgs($Tag->getArgString());
-                    $indexName = $tableName . '_' . $columnName . '_index';
-                    $indexComment = null;
-                    $columnList = $columnName;
-
-                    if(!empty($indexArgs['name']))
-                        $indexName = $indexArgs['name'];
-
-                    if(!empty($indexArgs['comment']))
-                        $indexComment = $indexArgs['comment'];
-
-                    if(!empty($indexArgs['columns']))
-                        $columnList = $indexArgs['columns'];
-
-                    $argString = '';
-                    for($i=0; isset($indexArgs[$i]); $i++)
-                        $argString .= ($argString ? ' ' : '') . $indexArgs[$i];
-
-                    $DB->writeIndex($indexName, $columnList, $argString, $indexComment);
                 }
             }
         }

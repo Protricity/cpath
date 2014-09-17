@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\Response\Interfaces\IResponse;
 
 final class SimpleResponse implements IResponse, IMappable {
@@ -79,7 +79,7 @@ final class SimpleResponse implements IResponse, IMappable {
      * @return void
      */
     function mapData(IDataMap $Map) {
-        $Map->mapKeyValue(IResponse::STR_CODE, $this->getCode());
-        $Map->mapKeyValue(IResponse::STR_MESSAGE, $this->getMessage());
+        $Map->mapNamedValue(IResponse::STR_CODE, $this->getCode());
+        $Map->mapNamedValue(IResponse::STR_MESSAGE, $this->getMessage());
     }
 }

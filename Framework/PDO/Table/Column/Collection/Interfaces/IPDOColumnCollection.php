@@ -28,7 +28,7 @@ interface IPDOColumnCollection extends ICollection
 //
 //    /**
 //     * Calls ->assert on all roles in the collection
-//     * @param IRoleProfile|null $Profile optional profile to assert
+//     * @param IRoleProfile|null $Profile optional .profile to assert
 //     * @throws InvalidRoleException if the user role assertion fails
 //     * @return void
 //     */

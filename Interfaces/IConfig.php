@@ -8,5 +8,4 @@
 namespace CPath\Interfaces;
 
 interface IConfig {
-    function install();
 }

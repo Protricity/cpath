@@ -42,12 +42,12 @@ class APIResponseBoxFragment implements IRenderHTML, ISupportHeaders{
 
     /**
      * Render request as html
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Framework\API\Fragments\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Attr = Attr::get($Attr);
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null) {
+        $Attr = Attr::fromClass($Attr);
         // = new HTMLRenderUtil($Request);
         //$Util->button('JSON', 'form-button-submit-json');
 
@@ -56,7 +56,7 @@ class APIResponseBoxFragment implements IRenderHTML, ISupportHeaders{
 
         $Theme = $this->mTheme;
         $Theme->renderFragmentStart($Request, "Ajax Info", $Attr);
-        $Theme->renderFragmentStart($Request, "DataResponse", Attr::get('response-content'));
+        $Theme->renderFragmentStart($Request, "DataResponse", Attr::fromClass('response-content'));
         if($this->mResponse) {
             $Util = new ResponseUtil($this->mResponse);
             $Util->renderJSON($Request);

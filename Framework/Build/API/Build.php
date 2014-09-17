@@ -19,7 +19,7 @@ use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Build\IBuildable;
 use CPath\Framework\Build\IBuilder;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequestHandlerAggregate;
 use CPath\Request\IRequest;
 use CPath\Framework\Response\Types\DataResponse;

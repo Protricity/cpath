@@ -8,8 +8,8 @@
 namespace CPath\Framework\Types\Exceptions;
 
 use CPath\Framework\API\Exceptions\ValidationException;
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\Response\Types\ExceptionResponse;
 
 class MultiException extends \Exception implements \Countable, IMappable {

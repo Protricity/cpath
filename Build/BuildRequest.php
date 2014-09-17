@@ -7,8 +7,9 @@
  */
 namespace CPath\Build;
 
+use CPath\Describable\IDescribable;
 use CPath\Request\Exceptions\RequestParameterException;
-use CPath\Request\IPromptRequest;
+use CPath\Request\Executable\IPrompt;
 
 class BuildRequest implements IBuildRequest
 {
@@ -18,7 +19,7 @@ class BuildRequest implements IBuildRequest
     private $mFlags;
     private $mID;
 
-    function __construct(IPromptRequest $Request, $flags = null) {
+    function __construct(IPrompt $Request, $flags = null) {
         $this->mRequest = $Request;
         $this->mFlags = $flags;
         $this->mID = ++self::$COUNT;
@@ -29,15 +30,18 @@ class BuildRequest implements IBuildRequest
     }
 
     /**
-     * Get a parameter value by name
-     * @param string $name the parameter name
-     * @param string|null $description optional description for this parameter
-     * @param string|null $defaultValue optional default value if prompt fails
-     * @return string the parameter value
-     * @throws RequestParameterException if a prompt failed to produce a result
+     * Get or prompt for a value from the request.
+     * @param string|IDescribable $description description for this prompt
+     * @param string|int|null $key [optional] the parameter key or index
+     * @param string|null $defaultValue [optional] default value if prompt fails
+     * @return mixed the parameter value
+     * @throws \CPath\Request\Exceptions\RequestParameterException if a prompt failed to produce a result
+     * Example:
+     * $name = $Request->prompt('Please enter your name');          // Gets name from next arg if available
+     * $name = $Request->prompt('Please enter your name', 'name');  // Gets name from ['name'] if set
      */
-    function prompt($name, $description = null, $defaultValue = null) {
-        return $this->mRequest->prompt($name, $description, $defaultValue);
+    function prompt($description, $key = null, $defaultValue = null) {
+        return $this->mRequest->prompt($description, $key, $defaultValue);
     }
 
     /**

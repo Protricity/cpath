@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Model\Interfaces;
 
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\Response\Interfaces\IResponse;
 

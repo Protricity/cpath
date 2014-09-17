@@ -15,7 +15,7 @@ use CPath\Framework\User\Role\Exceptions\InvalidRoleException;
 interface IRoleProfile extends IPredicate {
 
     /**
-     * Assert Role profile using found roles
+     * Assert Role .profile using found roles
      * @param IRoleCollection $FoundRoles
      * @throws InvalidRoleException if the user role assertion fails
      */

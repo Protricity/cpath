@@ -8,9 +8,9 @@
 namespace CPath\Build;
 
 use CPath\Request\IFlaggedRequest;
-use CPath\Request\IPromptRequest;
+use CPath\Request\Executable\IPrompt;
 
-interface IBuildRequest extends IPromptRequest, IFlaggedRequest
+interface IBuildRequest extends IPrompt, IFlaggedRequest
 {
     const IS_SESSION_BUILD = 0x1;
     const USE_DEFAULTS = 0x2;

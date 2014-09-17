@@ -8,22 +8,71 @@
 namespace CPath\Request\Web;
 
 use CPath\Request\IRequest;
+use CPath\Request\Web\GETMethod;
+use CPath\Request\IRequestMethod;
+use CPath\Request\Web\POSTMethod;
 use CPath\Request\MimeType;
-use CPath\Request\Exceptions\RequestParameterException;
 
-abstract class AbstractWebRequest implements IRequest
+class WebRequest implements IRequest
 {
-
     private $mMimeTypes = null;
     private $mPath = null;
     private $mHeaders = null;
+    private $mMethod;
+    private $mFields = null;
+
+    public function __construct(IRequestMethod $Method=null) {
+        $this->mMethod = $Method;
+    }
+
+    /**
+     * Get the Request Method Instance (GET, POST, PUT, PATCH, DELETE, or CLI)
+     * @return \CPath\Request\IRequestMethod
+     */
+    function getMethod() {
+        if($this->mMethod)
+            return $this->mMethod;
+
+        if($_SERVER["REQUEST_METHOD"] === 'GET')
+            return $this->mMethod = new GETMethod(explode('/', trim($this->mPath, '/')));
+
+        return $this->mMethod = new POSTMethod($_SERVER["REQUEST_METHOD"], explode('/', trim($this->mPath, '/')));
+    }
+
+    /**
+     * Prompt for a value from the request.
+     * @param string $name the parameter name
+     * @param string|null $defaultValue [optional] default value if prompt fails
+     * @return mixed the parameter value
+     * @throws \CPath\Request\Exceptions\RequestParameterException if a prompt failed to produce a result
+     * Example:
+     * $name = $Request->prompt('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
+     */
+    function getFieldValue($name, $defaultValue=null) {
+        $values = $this->getAllFormFieldValues();
+        return !empty($values[$name]) ? $values[$name] : $defaultValue;
+    }
+
+
+    function getAllFormFieldValues() {
+        if ($this->mFields !== null)
+            return $this->mFields;
+
+        if ($this->getHeader('Content-Type') === 'application/json') {
+            $input = file_get_contents('php://input');
+            $this->mFields = json_decode($input, true);
+            return $this->mFields;
+        }
+
+        $this->mFields = $_POST;
+        return $this->mFields;
+    }
 
     /**
      * Get the route path
      * @return String the route path starting with '/'
      */
-    function getPath()
-    {
+    function getPath() {
         if ($this->mPath)
             return $this->mPath;
 
@@ -37,29 +86,10 @@ abstract class AbstractWebRequest implements IRequest
     }
 
     /**
-     * Get a parameter value by name
-     * @param string $name the parameter name
-     * @param string|null $description optional description for this parameter
-     * @param string|null $defaultValue optional default value if prompt fails
-     * @return string the parameter value
-     * @throws RequestParameterException if a prompt failed to produce a result
-     */
-    function prompt($name, $description=null, $defaultValue=null) {
-        if(!empty($_GET[$name]))
-            return $_GET[$name];
-
-        if($defaultValue !== null)
-            return $defaultValue;
-
-        throw new RequestParameterException("GET parameter '" . $name . "' not set", $name, $description);
-    }
-
-    /**
      * Get the requested Mime types
      * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getMimeTypes()
-    {
+    function getMimeTypes() {
         if ($this->mMimeTypes)
             return $this->mMimeTypes;
 
@@ -82,18 +112,18 @@ abstract class AbstractWebRequest implements IRequest
                 case 'text/javascript':
                 case 'text/x-javascript':
                 case 'text/x-json':
-                    $types[] = new MimeType\JSONMimeType($type);
+                    $types[] = new \CPath\Render\JSON\JSONMimeType($type);
                     break;
                 case 'application/xml':
                 case 'text/xml':
-                    $types[] = new MimeType\XMLMimeType($type);
+                    $types[] = new \CPath\Render\XML\XMLMimeType($type);
                     break;
                 case 'text/html':
                 case 'application/xhtml+xml':
-                    $types[] = new MimeType\HTMLMimeType($type);
+                    $types[] = new \CPath\Render\HTML\HTMLMimeType($type);
                     break;
                 case 'text/plain':
-                    $types[] = new MimeType\TextMimeType($type);
+                    $types[] = new \CPath\Render\Text\TextMimeType($type);
                     break;
                 default:
                     $types[] = new MimeType\UnknownMimeType($type);
@@ -105,8 +135,7 @@ abstract class AbstractWebRequest implements IRequest
     }
 
 
-    function getAllHeaders()
-    {
+    function getAllHeaders() {
         if ($this->mHeaders !== null)
             return $this->mHeaders;
 
@@ -122,8 +151,7 @@ abstract class AbstractWebRequest implements IRequest
         return $this->mHeaders;
     }
 
-    function getHeader($name)
-    {
+    function getHeader($name) {
         $headers = $this->getAllHeaders();
         return $headers[$name];
     }

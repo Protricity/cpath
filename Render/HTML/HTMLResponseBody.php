@@ -28,28 +28,15 @@ class HTMLResponseBody implements IContainerHTML
                 $this->addContent($arg);
     }
 
-//    //** todo? right place for this? */
-//    protected function sendHeaders($message = NULL, $code = NULL, $mimeType = NULL)
-//    {
-//        if (!headers_sent()) {
-//            $message = $message ? preg_replace('/[^\w -]/', '', $message) : static::RESPONSE_MESSAGE;
-//            header("HTTP/1.1 " . ($code ? : static::RESPONSE_CODE) . " " . $message);
-//            if (static::RESPONSE_MIMETYPE)
-//                header("Content-Type: " . ($mimeType ? : static::RESPONSE_MIMETYPE));
-//        }
-//    }
-
     /**
      * Render the view body html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Render\HTML\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null)
     {
         RI::si(static::TAB_START, static::TAB);
-
-        // $this->sendHeaders();
 
         echo RI::ni(), '<html>';
         RI::ai(1);

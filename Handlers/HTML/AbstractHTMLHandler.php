@@ -12,19 +12,19 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Framework\Response\Types\SimpleResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\Exceptions\MissingRenderModeException;
-use CPath\Request\MimeType\HTMLMimeType;
-use CPath\Request\MimeType\JSONMimeType;
-use CPath\Request\MimeType\TextMimeType;
-use CPath\Request\MimeType\XMLMimeType;
+use CPath\Render\HTML\HTMLMimeType;
+use CPath\Render\JSON\JSONMimeType;
+use CPath\Render\Text\TextMimeType;
+use CPath\Render\XML\XMLMimeType;
 
-abstract class AbstractHTMLHandler implements IRequestHandler, IRenderHTML, IResponse
+abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML, IResponse
 {
     const TAB = '    ';
     const TAB_START = 0;
@@ -49,7 +49,7 @@ abstract class AbstractHTMLHandler implements IRequestHandler, IRenderHTML, IRes
      * @throws \CPath\Render\Exceptions\MissingRenderModeException
      * @return String|void always returns void
      */
-    function handleRequest(IRequest $Request) {
+    function handleStaticRequest(IRequest $Request) {
 
         foreach ($Request->getMimeTypes() as $MimeType) {
             if($MimeType instanceof HTMLMimeType)

@@ -32,12 +32,12 @@ class PasswordField extends RequiredField {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Framework\API\Field\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr=null) {
+        $Attr = Attr::fromClass($Attr);
         $Attr->add('type', 'password');
         parent::renderHTML($Request, $Attr);
     }

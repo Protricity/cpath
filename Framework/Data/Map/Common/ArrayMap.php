@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Map\Common;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 
 class ArrayMap implements IDataMap, IMappable {
     private $mMap = array(), $mIsAssoc = false;
@@ -49,7 +49,7 @@ class ArrayMap implements IDataMap, IMappable {
     function mapData(IDataMap $Map) {
         if($this->mIsAssoc) {
             foreach($this->mMap as $key => $data)
-                $Map->mapKeyValue($key, $data);
+                $Map->mapNamedValue($key, $data);
 
         } else {
             foreach($this->mMap as $data)
@@ -88,7 +88,7 @@ class ArrayMap implements IDataMap, IMappable {
     /**
      * Map data to subsection
      * @param $subsectionKey
-     * @param IMappable $Mappable
+     * @param \CPath\Data\Map\IMappable $Mappable
      * @return void
      */
     function mapSubsection($subsectionKey, IMappable $Mappable)

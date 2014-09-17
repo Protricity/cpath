@@ -7,32 +7,42 @@
  * Date: 4/06/11 */
 namespace CPath\Render\HTML;
 
+use CPath\Data\Map\IDataMap;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Request\IRequest;
 
 class HTMLRenderUtil {
-    private $mRequest;
 
-    public function __construct(IRequest $Request) {
-        $this->mRequest = $Request;
+    /**
+     * @param $nodeType
+     * @param null|string|IAttributes $attr optional attributes for this element
+     * @return null|String always returns null
+     */
+    private function renderElementContent($nodeType, $attr=null) {
+        echo $nodeType;
+        
+        if(is_string($attr)) {
+            echo RI::ni(), $attr;
+        } elseif($attr instanceof IAttributes) {
+            $attr->render();
+        }
     }
 
     /**
      * @param $nodeType
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function render($nodeType, $Attr=null) {
-        echo RI::ni(), "<", $this->renderElementContent($nodeType, $Attr), "/>";
+    function render($nodeType, $attr=null) {
+        echo RI::ni(), "<", $this->renderElementContent($nodeType, $attr), "/>";
     }
 
     /**
      * @param $nodeType
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function open($nodeType, $Attr=null) {
-        echo RI::ni(), "<", $this->renderElementContent($nodeType, $Attr), ">";
+    function open($nodeType, $attr=null) {
+        echo RI::ni(), "<", $this->renderElementContent($nodeType, $attr), ">";
         RI::ai(1);
     }
 
@@ -42,10 +52,10 @@ class HTMLRenderUtil {
     }
 
     /**
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function formOpen($Attr=NULL) {
-        $this->open('form', $Attr);
+    function formOpen($attr=NULL) {
+        $this->open('form', $attr);
     }
 
     function formClose() {
@@ -55,87 +65,29 @@ class HTMLRenderUtil {
     /**
      * @param $value
      * @param $type
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function input($value, $type='button', $Attr=NULL) {
-        $Attr = Attr::get($Attr);
-        $Attr->add('type', $type);
-        $Attr->add('value', $value);
-        $this->render('input', $Attr);
+    function input($value, $type='button', $attr=NULL) {
+        $attr = Attr::parse($attr);
+        $attr->add('type', $type);
+        $attr->add('value', $value);
+        $this->render('input', $attr);
     }
 
     /**
      * @param $value
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function button($value, $Attr=NULL) {
-        $this->input($value, 'button', $Attr);
+    function button($value, $attr=NULL) {
+        $this->input($value, 'button', $attr);
     }
 
     /**
      * @param $value
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
+     * @param null|string|IAttributes $attr optional attributes for this element
      */
-    function submit($value, $Attr=NULL) {
-        $this->input($value, 'submit', $Attr);
+    function submit($value, $attr=NULL) {
+        $this->input($value, 'submit', $attr);
     }
 
-
-
-    /**
-     * @param $class
-     * @param null $additionalClass
-     * @return String
-     */
-    function getClass($class, $additionalClass=null) {
-        $class = $this->getClassString($class);
-        if($additionalClass)
-            $class = ($class ? $class . ' ' : '') . $this->getClassString($additionalClass);
-        return $class;
-    }
-
-    /**
-     * @param $attr
-     * @param null $additionalAttr
-     * @return String
-     */
-    function getAttr($attr, $additionalAttr=null) {
-        $attr = $this->getAttrString($attr);
-        if($additionalAttr)
-            $attr = ($attr ? $attr . ' ' : '') . $this->getAttrString($additionalAttr);
-        return $attr;
-    }
-
-
-    private function getAttrString($attr) {
-        if(is_array($attr)) {
-            if(key($attr) !== 0) {
-                $attr2 = '';
-                foreach($attr as $k=>$v)
-                    $attr2 .= ($attr2 ? ' ' : '') . $k . "='" . htmlspecialchars($v, ENT_QUOTES, 'UTF-8') . "'";
-                $attr = $attr2;
-            } else {
-                $attr = implode(' ', $attr);
-            }
-        }
-
-        return $attr;
-    }
-
-    private function getClassString($class) {
-        if(is_array($class))
-            $class = implode(' ', $class);
-        return $class;
-    }
-
-    /**
-     * @param $nodeType
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes|Null $Attr optional attributes for this element
-     * @return null|String always returns null
-     */
-    private function renderElementContent($nodeType, $Attr=null) {
-        echo $nodeType;
-        if($Attr)
-            Attr::get($Attr)->renderHTML($this->mRequest, $Attr);
-    }
 }

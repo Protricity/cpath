@@ -8,7 +8,7 @@
 namespace CPath\Templates\HTML;
 
 use CPath\Render\HTML\IContainerHTML;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 
 interface IResponseTemplate extends IContainerHTML

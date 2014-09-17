@@ -7,11 +7,11 @@
  */
 namespace CPath\Request;
 
-interface IRequestHandler {
+interface IStaticRequestHandler {
     /**
      * Handle this request and render any content
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function handleRequest(IRequest $Request);
+    static function handleStaticRequest(IRequest $Request);
 }

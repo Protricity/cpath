@@ -125,7 +125,7 @@ class File extends Cache {
     }
 
     /**
-     * Return the profile file full path
+     * Return the .profile file full path
      * @param String $name the key name to search for
      * @return string build config full path
      */

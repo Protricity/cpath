@@ -31,6 +31,7 @@ class MethodEditor
             $lines[] = $line;
         }
 
+        fclose($handle);
         return $lines;
     }
 

@@ -26,7 +26,7 @@ class IsAdmin implements IRoleProfile {
     }
 
     /**
-     * Assert Role profile using found roles
+     * Assert Role .profile using found roles
      * @param IRoleCollection $FoundRoles
      * @throws NotAdminException if the user role assertion fails
      */

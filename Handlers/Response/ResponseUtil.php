@@ -9,8 +9,8 @@ namespace CPath\Handlers\Response;
 use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Data\Map\Common\MappableCallback;
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLContent;
 use CPath\Render\HTML\HTMLElement;
@@ -18,12 +18,12 @@ use CPath\Render\HTML\IContainerHTML;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\JSON\JSONMapUtil;
+use CPath\Render\JSON\JSONRenderMap;
 use CPath\Render\Text\IRenderText;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Handlers\Wrapper\MimeTypeSwitchWrapper;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLRenderer;
+use CPath\Render\XML\XMLRenderMap;
 use CPath\Request\IRequest;
 use CPath\Framework\Response\Interfaces\IResponse;
 
@@ -57,8 +57,8 @@ final class ResponseUtil implements IMappable, IRenderHTML, IRenderXML, IRenderJ
     function mapData(IDataMap $Map) {
         $Response = $this->mResponse;
 
-        $Map->mapKeyValue(IResponse::STR_MESSAGE, $Response->getMessage());
-        $Map->mapKeyValue(IResponse::STR_CODE, $Response->getCode());
+        $Map->mapNamedValue(IResponse::STR_MESSAGE, $Response->getMessage());
+        $Map->mapNamedValue(IResponse::STR_CODE, $Response->getCode());
     }
 
     /**
@@ -73,9 +73,13 @@ final class ResponseUtil implements IMappable, IRenderHTML, IRenderXML, IRenderJ
         if($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
         } elseif($Response instanceof IMappable) {
-            JSONMapUtil::renderMap($Response);
+            $Renderer = new JSONRenderMap();
+            $Response->mapData($Renderer);
+
         } else {
-            JSONMapUtil::renderMap($this);
+            $Renderer = new JSONRenderMap();
+            $this->mapData($Renderer);
+
         }
     }
 
@@ -92,19 +96,22 @@ final class ResponseUtil implements IMappable, IRenderHTML, IRenderXML, IRenderJ
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $rootElementName);
         } elseif($Response instanceof IMappable) {
-            XMLRenderer::renderMap($Response, $rootElementName, true);
+            $Renderer = new XMLRenderMap($rootElementName, true);
+            $Response->mapData($Renderer);
+
         } else {
-            XMLRenderer::renderMap($this, $rootElementName, true);
+            $Renderer = new XMLRenderMap($rootElementName, true);
+            $this->mapData($Renderer);
         }
     }
 
     /**
      * Render request as html and sends headers as necessary
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Handlers\Response\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr=null) {
         //$this->sendHeaders('text/html');
 
         $Response = $this->mResponse;

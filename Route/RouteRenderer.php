@@ -7,10 +7,11 @@
  */
 namespace CPath\Route;
 
+use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
-use CPath\Request\IRequestHandler;
+use CPath\Request\IStaticRequestHandler;
 
-final class RequestRenderer implements IRouteMap
+final class RouteRenderer implements IRouteMap
 {
     private $mRequest;
 
@@ -26,34 +27,37 @@ final class RequestRenderer implements IRouteMap
     /**
      * Maps a route prefix to a target class or instance, and performs a render
      * @param String $prefix route prefix i.e. GET /my/path
-     * @param String|mixed $target the route target or instance
+     * @param String|IStaticRequestHandler $target the route target or instance
      * @throws \Exception
      * @return bool if true the rendering has occurred
      */
-    function route($prefix, $target)
-    {
+    function route($prefix, $target) {
         list($method, $path) = explode(' ', $prefix, 2);
         if ($method === 'ANY' || $method == $this->mRequest->getMethodName()) {
             if (strpos($this->mRequest->getPath(), $path) === 0) {
-                if (is_string($target)) {
-                    if (is_callable($target)) {
-                        $target($this->mRequest);
-                        return true;
-                    } else {
-                        $target = new $target;
-                    }
-                }
 
                 if($target instanceof IRoutable) {
                     return $target->mapRoutes($this);
                 }
 
-                if ($target instanceof IRequestHandler) {
-                    $target->handleRequest($this->mRequest);
+                if($this->mRequest instanceof IPrompt) {
+                    foreach(explode('/', trim($path, '/')) as $pathArg) {
+                        // Consume arg
+                        $arg = $this->mRequest->prompt("Internal error consuming request path after match");
+                        if($arg !== $pathArg)
+                            throw new \Exception("Internal error consuming request. '$arg' != '$pathArg'");
+                    }
+                }
+
+                if (is_callable($target)) {
+                    $target($this->mRequest);
                     return true;
                 }
 
-                throw new \Exception("Class '" . get_class($target) . "' does not implement IRequestHandler");
+                $target::handleStaticRequest($this->mRequest);
+                return true;
+
+                //throw new \Exception("Class '" . get_class($target) . "' does not implement IRequestHandler");
             }
         }
 

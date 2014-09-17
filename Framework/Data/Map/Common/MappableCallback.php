@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Map\Common;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 
 class MappableCallback implements IMappable {
     const IS_FIRST = 0x01;

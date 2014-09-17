@@ -14,47 +14,28 @@ interface IAttributes {
 
     /**
      * Add an attribute to the collection
-     * @param String|Null $key the attribute name. If null is provided, the attribute is not added
-     * @param String|Null $value the attribute value
-     * @param bool $replace should any existing value be replaced
-     * @return IAttributes returns self
+     * @param String $key the attribute name. If null is provided, the attribute is not added
+     * @param String|null $value the attribute value
      * @throws \InvalidArgumentException if $replace == false and the attribute exists
      * or $replace == true and the attribute does not exist
      */
-    function add($key=null, $value = null, $replace=false);
-
-    /**
-     * Returns true if the attribute element name exists
-     * @param $key
-     * @return mixed
-     */
-    function has($key);
-
-//    /**
-//     * Add html to the attribute content
-//     * @param String|Null $html the attribute html content
-//     * @return IAttributes returns self
-//     */
-//    function addHTML($html=null);
+    function add($key, $value = null);
 
     /**
      * Add a css class to the collection
-     * @param String|Null $class one or multiple css classes. If null is provided, the class is not added
-     * @return IAttributes returns self
+     * @param String $class one or multiple css classes. If null is provided, the class is not added
      */
-    function addClass($class=null);
+    function addClass($class);
 
     /**
      * Add a css style to the collection
-     * @param String|Null $style one or multiple css styles. If null is provided, the style is not added
-     * @return IAttributes returns self
+     * @param String $style one or multiple css styles. If null is provided, the style is not added
      */
-    function addStyle($style=null);
+    function addStyle($style);
 
     /**
-     * Render attribute content
-     * @param IRequest $Request
-     * @return void
+     * Render html attributes
+     * @return String|void always returns void
      */
-    function render(IRequest $Request);
+    function render();
 }

@@ -3,7 +3,7 @@ namespace CPath\Framework\Render\Fragment\Table;
 
 use CPath\Base;
 use CPath\Framework\Data\Map\Common\ArrayMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IMappable;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -40,12 +40,12 @@ class ModelResultsTableFragment implements IRenderHTML, ISupportHeaders{
 
     /**
      * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
+     * @param \CPath\Framework\Render\Fragment\Table\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
      * @return void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null, PDOSearchResponse $Response = NULL)
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr=null, PDOSearchResponse $Response = NULL)
     {
         $Table = new TableThemeUtil($Request, $this->mTheme);
 

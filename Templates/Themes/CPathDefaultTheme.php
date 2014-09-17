@@ -27,11 +27,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
 
     private $mRowBody = null, $mIsException = false, $mLastDataElm = null;
 
-    /** @var  ModelResultsTableFragment */
-    private $mMTLF;
-
-    protected function __construct() {
-        $this->mMTLF = new ModelResultsTableFragment($this);
+    public function __construct() {
     }
 
     /**
@@ -55,7 +51,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderFragmentStart(IRequest $Request, $Description=null, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         $Attr->addClass('fragment');
         if($this->mIsException)
@@ -90,7 +86,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderTableStart(IRequest $Request, $captionText = NULL, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         $Attr->addClass('table');
 
@@ -112,7 +108,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderTableRowStart(IRequest $Request, $flags=0, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         if($flags & ITableTheme::FLAG_ROW_IS_HEADER)
                 $body = 'thead';
@@ -145,7 +141,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderTableDataStart(IRequest $Request, $span=0, $flags=0, IAttributes $Attr=null) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         if($span)
             $Attr->add('colspan', $span);
@@ -210,7 +206,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderBodyStart(IRequest $Request, IAttributes $Attr=NULL) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         $Attr->addClass('page');
 
@@ -241,7 +237,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISup
      * @return void
      */
     function renderSectionStart(IRequest $Request, IAttributes $Attr=NULL) {
-        $Attr = Attr::get($Attr);
+        $Attr = Attr::fromClass($Attr);
 
         echo RI::ni();
 

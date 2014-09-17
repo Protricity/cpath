@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Response;
 
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
+use CPath\Data\Map\IDataMap;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\Response\Interfaces\IResponse;

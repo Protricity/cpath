@@ -23,11 +23,11 @@ class IndexHandler extends AbstractHTMLHandler
 
     /**
      * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Handlers\Common\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null) {
         // TODO: Implement renderHTML() method.
     }
 }

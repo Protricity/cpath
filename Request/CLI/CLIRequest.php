@@ -8,36 +8,25 @@
 namespace CPath\Request\CLI;
 
 use CPath\Request\IRequest;
-use CPath\Request\MimeType\TextMimeType;
-use CPath\Request\Exceptions\RequestParameterException;
+use CPath\Render\Text\TextMimeType;
+use CPath\Request\IRequestMethod;
 
 final class CLIRequest implements IRequest
 {
     private $mPath;
-    private $mCommandLine;
+    private $mMethod;
 
-    public function __construct(Array $argv) {
-        array_unshift($argv, $path);
-        $this->mCommandLine = new CommandString($argv);
-        $this->mPath = $path;
+    public function __construct(IRequestMethod $Method=null) {
+        $this->mMethod = $Method ?: new CLIMethod();
+        $this->mPath = $Method->prompt("Enter Request Path");
     }
 
     /**
-     * Get the requested Mime types
-     * @return \CPath\Request\MimeType\IRequestedMimeType[]
+     * Get the Request Method Instance (GET, POST, PUT, PATCH, DELETE, or CLI)
+     * @return \CPath\Request\IRequestMethod
      */
-    function getMimeTypes() {
-        static $types = null;
-        return $types ?: $types
-            = array(new TextMimeType('text/plain'));
-    }
-
-    /**
-     * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
-     * @return String
-     */
-    function getMethodName() {
-        return 'CLI';
+    function getMethod() {
+        return $this->mMethod;
     }
 
     /**
@@ -49,32 +38,12 @@ final class CLIRequest implements IRequest
     }
 
     /**
-     * Return the next non-parameter argument in sequence or null if none remain
-     * @return String|null
+     * Get the requested Mime types for rendering purposes
+     * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getNextArg() {
-        return $this->mCommandLine->getNextArg();
-    }
-
-    /**
-     * Get a parameter value by name
-     * @param string $name the parameter name
-     * @param string|null $description optional description for this parameter
-     * @param string|null $defaultValue optional default value if prompt fails
-     * @return string the parameter value
-     * @throws RequestParameterException if a prompt failed to produce a result
-     */
-    function prompt($name, $description = null, $defaultValue = null) {
-        if($this->mCommandLine->hasOption($name))
-            return $this->mCommandLine->hasOption($name);
-
-        $line = readline($description); // readline_add_history
-        if($line)
-            return $line;
-
-        if($defaultValue !== null)
-            return $defaultValue;
-
-        throw new RequestParameterException("GET parameter '" . $name . "' not set", $name, $description);
+    function getMimeTypes() {
+        return array(
+            new TextMimeType(),
+        );
     }
 }

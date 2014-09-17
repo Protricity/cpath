@@ -7,11 +7,10 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\ISupportHeaders;
-use CPath\Render\HTML\IContainerHTML;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Request\IRequest;
 
@@ -24,12 +23,12 @@ class HTMLElement implements IContainerHTML, ISupportHeaders
 
     /**
      * @param string $elmType
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
+     * @param String|\CPath\Render\HTML\Attribute\IAttributes $attr
      * @param IRenderHTML|string $_content varargs for content (strings allowed)
      */
-    public function __construct($elmType = 'div', IAttributes $Attr = null, $_content = null) {
+    public function __construct($elmType = 'div', $attr = null, $_content = null) {
         $this->mElmType = $elmType;
-        $this->mAttr = $Attr;
+        $this->mAttr = $attr instanceof IAttributes ? $attr : Attr::parse($attr);
         for($i=2;;$i++)
             if($Content = func_get_arg($i))
                 if($Content instanceof IRenderHTML)
@@ -49,16 +48,16 @@ class HTMLElement implements IContainerHTML, ISupportHeaders
 
     /**
      * Render request as html
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         if(!$this->mContent) {
-            echo RI::ni(), "<", $this->mElmType, $Attr->renderHTML($Request, $Attr), "/>";
+            echo RI::ni(), "<", $this->mElmType, $Attr->render(), "/>";
         } else {
-            echo RI::ni(), "<", $this->mElmType, $Attr->renderHTML($Request, $Attr), ">";
+            echo RI::ni(), "<", $this->mElmType, $Attr->render(), ">";
             RI::ai(1);
 
             foreach($this->mContent as $Content)

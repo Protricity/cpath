@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Framework\Data\Map\Interfaces\IDataMap;
-use CPath\Framework\Data\Map\Interfaces\IMappable;
+use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IMappable;
 
 class PDOSelectLimitedStats implements IMappable {
 
@@ -52,6 +52,6 @@ class PDOSelectLimitedStats implements IMappable {
      */
     function mapData(IDataMap $Map) {
         foreach($this as $k=>$v)
-            $Map->mapKeyValue($k, $v);
+            $Map->mapNamedValue($k, $v);
     }
 }
