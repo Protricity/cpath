@@ -7,13 +7,12 @@
  * Date: 4/06/11 */
 namespace CPath\Data\Map;
 
-
-interface IMappable {
+interface IMappableKeys {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map);
+    function mapKeys(IKeyMap $Map);
 }

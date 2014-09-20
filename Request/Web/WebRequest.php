@@ -8,21 +8,81 @@
 namespace CPath\Request\Web;
 
 use CPath\Request\IRequest;
-use CPath\Request\Web\GETMethod;
 use CPath\Request\IRequestMethod;
-use CPath\Request\Web\POSTMethod;
 use CPath\Request\MimeType;
 
 class WebRequest implements IRequest
 {
     private $mMimeTypes = null;
-    private $mPath = null;
-    private $mHeaders = null;
+    /** @var IRequestMethod */
     private $mMethod;
-    private $mFields = null;
+    private $mPath;
+    private $mArgs=array();
 
-    public function __construct(IRequestMethod $Method=null) {
-        $this->mMethod = $Method;
+    public function __construct() {
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+
+        $root = dirname($_SERVER['SCRIPT_NAME']);
+
+        if (stripos($path, $root) === 0)
+            $path = substr($path, strlen($root));
+        $this->mPath = $path;
+
+        $method = $_SERVER["REQUEST_METHOD"];
+        if($method === 'GET')
+            return $this->mMethod = new GETMethod();
+
+        return $this->mMethod = new POSTMethod($method);
+    }
+
+    /**
+     * Matches a route prefix to this request
+     * @param $routePrefix '[method] [path]'
+     * @return bool true if the route matched
+     */
+    function match($routePrefix) {
+        list($routeMethod, $path) = explode(' ', $routePrefix, 2);
+
+        $requestMethod = $this->mMethod->getMethodName();
+
+        // /user/abc123/
+        // /user/:id/
+        if ($routeMethod !== 'ANY' && $routeMethod !== $requestMethod)
+            return false;
+
+        if(($p = strpos($path, ':')) !== false) {
+            $routeArgs = explode('/', trim($path, '/'));
+            $i=0;
+            foreach(explode('/', trim($this->getPath(), '/')) as $requestPathArg) {
+                if(!isset($routeArgs[$i]))
+                    return false;
+
+                $routeArg = $routeArgs[$i++];
+
+                if($routeArg[0] == ':') {
+                    $this->mArgs[substr($routeArg, 1)] = $requestPathArg;
+
+                } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
+                    return false;
+
+                }
+            }
+
+            if(isset($routeArgs[$i])) // TODO: extra route return false?
+                return false;
+
+            if($this->mMethod->getMethodName() === 'GET')
+                return $this->mMethod = new GETMethod($this->mArgs);
+
+            return $this->mMethod = new POSTMethod($this->mMethod->getMethodName(), $this->mArgs);
+
+        } else {
+            if (strcasecmp($this->getPath(), $path) !== 0)
+                return false;
+
+        }
+
+        return true;
     }
 
     /**
@@ -30,42 +90,7 @@ class WebRequest implements IRequest
      * @return \CPath\Request\IRequestMethod
      */
     function getMethod() {
-        if($this->mMethod)
-            return $this->mMethod;
-
-        if($_SERVER["REQUEST_METHOD"] === 'GET')
-            return $this->mMethod = new GETMethod(explode('/', trim($this->mPath, '/')));
-
-        return $this->mMethod = new POSTMethod($_SERVER["REQUEST_METHOD"], explode('/', trim($this->mPath, '/')));
-    }
-
-    /**
-     * Prompt for a value from the request.
-     * @param string $name the parameter name
-     * @param string|null $defaultValue [optional] default value if prompt fails
-     * @return mixed the parameter value
-     * @throws \CPath\Request\Exceptions\RequestParameterException if a prompt failed to produce a result
-     * Example:
-     * $name = $Request->prompt('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
-     */
-    function getFieldValue($name, $defaultValue=null) {
-        $values = $this->getAllFormFieldValues();
-        return !empty($values[$name]) ? $values[$name] : $defaultValue;
-    }
-
-
-    function getAllFormFieldValues() {
-        if ($this->mFields !== null)
-            return $this->mFields;
-
-        if ($this->getHeader('Content-Type') === 'application/json') {
-            $input = file_get_contents('php://input');
-            $this->mFields = json_decode($input, true);
-            return $this->mFields;
-        }
-
-        $this->mFields = $_POST;
-        return $this->mFields;
+        return $this->mMethod;
     }
 
     /**
@@ -73,15 +98,6 @@ class WebRequest implements IRequest
      * @return String the route path starting with '/'
      */
     function getPath() {
-        if ($this->mPath)
-            return $this->mPath;
-
-        $root = dirname($_SERVER['SCRIPT_NAME']);
-        $path = parse_url($_SERVER['REQUEST_URI'], 'path');
-
-        if (stripos($path, $root) === 0)
-            $path = substr($path, strlen($root));
-        $this->mPath = $path;
         return $this->mPath;
     }
 
@@ -134,25 +150,27 @@ class WebRequest implements IRequest
         return $this->mMimeTypes;
     }
 
+    // Static
+    private static $mHeaders = null;
 
-    function getAllHeaders() {
-        if ($this->mHeaders !== null)
-            return $this->mHeaders;
+    static function getAllHeaders() {
+        if (self::$mHeaders !== null)
+            return self::$mHeaders;
 
         if (function_exists('getallheaders'))
-            return $this->mHeaders = getallheaders();
+            return self::$mHeaders = getallheaders();
 
         foreach ($_SERVER as $name => $value) {
             if (in_array(substr($name, 0, 5), array('CONTE', 'HTTP_'))) {
                 $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
-                $this->mHeaders[$name] = $value;
+                self::$mHeaders[$name] = $value;
             }
         }
-        return $this->mHeaders;
+        return self::$mHeaders;
     }
 
-    function getHeader($name) {
-        $headers = $this->getAllHeaders();
+    static function getHeader($name) {
+        $headers = self::getAllHeaders();
         return $headers[$name];
     }
 

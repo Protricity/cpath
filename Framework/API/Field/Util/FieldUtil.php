@@ -81,12 +81,12 @@ class FieldUtil implements IField, IRenderHTML {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param \CPath\Framework\API\Field\Util\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @throws \Exception
      * @return void
      */
-    function renderHTML(IRenderRequest $Request, IAttributes $Attr=null) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
         if($this->mField instanceof IRenderHTML) {
             $this->mField->renderHTML($Request);
             return;

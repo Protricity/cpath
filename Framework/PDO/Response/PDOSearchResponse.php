@@ -9,15 +9,15 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\Data\Map\Common\MappableCallback;
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseCode;
 use CPath\Handlers\Response\ResponseUtil;
 
-class PDOSearchResponse implements IResponse, IMappable {
+class PDOSearchResponse implements IResponse, IMappableKeys {
     private $mQuery;
 
     private $mMessage, $mCode;
@@ -57,22 +57,22 @@ class PDOSearchResponse implements IResponse, IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapKeys(IKeyMap $Map)
     {
         $Util = new ResponseUtil($this);
-        $Util->mapData($Map, $this->mQuery);
+        $Util->mapKeys($Map, $this->mQuery);
         if( $this->mQuery->hasDescriptor()) {
             $Descriptor = $this->mQuery->getDescriptor();
             if($Descriptor !== null) {
-                if($Descriptor instanceof IMappable)
-                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new MappableCallback( function(IDataMap $Map) use ($Descriptor) {
-                        $Descriptor->mapData($Map);
+                if($Descriptor instanceof IMappableKeys)
+                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new MappableCallback( function(IKeyMap $Map) use ($Descriptor) {
+                        $Descriptor->mapKeys($Map);
                     }));
                 else
-                    $Map->mapNamedValue(IResponse::JSON_RESPONSE, $Descriptor);
+                    $Map->map(IResponse::JSON_RESPONSE, $Descriptor);
             }
         }
     }

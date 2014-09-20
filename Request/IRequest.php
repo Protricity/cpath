@@ -7,10 +7,6 @@
  */
 namespace CPath\Request;
 
-use CPath\Describable\IDescribable;
-use CPath\Request\Exceptions\RequestParameterException;
-use CPath\Request\Executable\IPrompt;
-
 interface IRequest
 {
     /**
@@ -22,7 +18,7 @@ interface IRequest
 
     /**
      * Get the Request Method Instance (GET, POST, PUT, PATCH, DELETE, or CLI)
-     * @return \CPath\Request\Method\IRequestMethod
+     * @return IRequestMethod
      */
     function getMethod();
 
@@ -31,17 +27,12 @@ interface IRequest
      * @return String the route path starting with '/'
      */
     function getPath();
-//
-//    /**
-//     * Prompt for a value from the request.
-//     * @param string $name the parameter name
-//     * @param string|IDescribable|null $description [optional] description for this prompt
-//     * @param string|null $defaultValue [optional] default value if prompt fails
-//     * @return mixed the parameter value
-//     * @throws \CPath\Request\Exceptions\RequestParameterException if a prompt failed to produce a result
-//     * Example:
-//     * $name = $Request->prompt('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
-//     */
-//    function getParam($name, $description = null, $defaultValue = null);
+
+    /**
+     * Matches a route prefix to this request and updates the method args with any extra path
+     * @param $routePrefix '[method] [path]'
+     * @return bool true if the route matched
+     */
+    function match($routePrefix);
 }
 

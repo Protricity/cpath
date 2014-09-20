@@ -14,12 +14,11 @@ use CPath\Request\IRequestMethod;
 
 class CLIMethod implements IRequestMethod
 {
-    private $mCommandLine;
+    private $mArgs;
+    private $mArgPos = 0;
 
-    public function __construct(Array $argv=null) {
-        if($argv === null)
-            $argv = $_SERVER['argv'];
-        $this->mCommandLine = new CommandString($argv);
+    public function __construct(Array $args=array()) {
+        $this->mArgs = $args;
     }
 
     /**
@@ -40,9 +39,9 @@ class CLIMethod implements IRequestMethod
      * Example:
      * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
      */
-    function promptField($name, $description = null, $defaultValue = null) {
-        if($this->mCommandLine->hasOption($name))
-            return $this->mCommandLine->getOption($name);
+    function prompt($name, $description = null, $defaultValue = null) {
+        if(isset($this->mArgs[$name]))
+            return $this->mArgs[$name];
 
         $line = readline($description); // readline_add_history
         if($line)
@@ -54,25 +53,4 @@ class CLIMethod implements IRequestMethod
         throw new RequestParameterException("GET parameter '" . $name . "' not set", $name, $description);
     }
 
-    /**
-     * Prompt for an argument value from the request.
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @param string|null $defaultValue [optional] default value if prompt fails
-     * @return mixed the parameter value
-     * @throws \CPath\Request\Exceptions\RequestArgumentException if a prompt failed to produce a result
-     */
-    function prompt($description, $defaultValue = null) {
-        $arg = $this->mCommandLine->getNextArg();
-        if($arg !== null)
-            return $arg;
-
-        $line = readline($description); // readline_add_history
-        if($line)
-            return $line;
-
-        if($defaultValue !== null)
-            return $defaultValue;
-
-        throw new RequestArgumentException("GET argument not set", $description);
-    }
 }

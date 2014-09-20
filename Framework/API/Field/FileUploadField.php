@@ -59,11 +59,11 @@ class FileUploadField extends Field {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param \CPath\Framework\API\Field\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRenderRequest $Request, IAttributes $Attr=null) {
+    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
         echo RI::ni(), "<input type='file' name='{$this->getName()}' accept='{$this->mMimeWildCard}' placeholder='Enter value for {$this->getName()}' />";
     }
 }

@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class HTMLMapUtil implements IDataMap
+class HTMLMapUtil implements IKeyMap
 {
     private $mStarted = false;
 
@@ -53,28 +53,28 @@ class HTMLMapUtil implements IDataMap
     /**
      * Map data to subsection
      * @param $subsectionKey
-     * @param IMappable $Mappable
+     * @param IMappableKeys $Mappable
      * @return void
      */
-    function mapSubsection($subsectionKey, IMappable $Mappable)
+    function mapSubsection($subsectionKey, IMappableKeys $Mappable)
     {
         if(!$this->mStarted)
             $this->start();
 
         echo RI::ni(), "{$subsectionKey}: ";
         RI::i(1);
-        $Mappable->mapData($this);
+        $Mappable->mapKeys($this);
         RI::i(-1);
     }
 
     /**
      * Map an object to this array
-     * @param IMappable $Mappable
+     * @param IMappableKeys $Mappable
      * @return void
      */
-    function mapArrayObject(IMappable $Mappable)
+    function mapArrayObject(IMappableKeys $Mappable)
     {
-        $Mappable->mapData($this);
+        $Mappable->mapKeys($this);
     }
 
     /**
@@ -89,10 +89,10 @@ class HTMLMapUtil implements IDataMap
 
     // Static
 
-    static function renderMap(IMappable $Map) {
+    static function renderMap(IMappableKeys $Map) {
         $Renderer = new HTMLMapUtil();
         $Renderer->start();
-        $Map->mapData($Renderer);
+        $Map->mapKeys($Renderer);
         $Renderer->stop();
     }
 }

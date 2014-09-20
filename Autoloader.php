@@ -32,7 +32,7 @@ class Autoloader
                 if(is_callable($path))
                     $path = $path($name);
                 else
-                    $path = $path . substr($name, sizeof($prefix)) . '.php';
+                    $path = $path . substr($name, strlen($prefix) + 1) . '.php';
                 include($path);
                 return;
             }

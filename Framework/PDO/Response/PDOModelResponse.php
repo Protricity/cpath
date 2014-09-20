@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Response;
 
-use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IKeyMap;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\Response\Interfaces\IResponse;
@@ -30,13 +30,13 @@ class PDOModelResponse implements IPDOModel, IResponse
     }
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapKeys(IKeyMap $Map)
     {
         $Util = new ResponseUtil($this);
-        $Util->mapData($Map, $this->mModel);
+        $Util->mapKeys($Map, $this->mModel);
     }
 
     /**

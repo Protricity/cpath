@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 
-class PDOSelectLimitedStats implements IMappable {
+class PDOSelectLimitedStats implements IMappableKeys {
 
     private $limit, $offset, $curPage;
 
@@ -47,11 +47,11 @@ class PDOSelectLimitedStats implements IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
+    function mapKeys(IKeyMap $Map) {
         foreach($this as $k=>$v)
-            $Map->mapNamedValue($k, $v);
+            $Map->map($k, $v);
     }
 }

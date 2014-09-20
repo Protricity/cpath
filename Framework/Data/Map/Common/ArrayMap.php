@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Map\Common;
 
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 
-class ArrayMap implements IDataMap, IMappable {
+class ArrayMap implements IKeyMap, IMappableKeys {
     private $mMap = array(), $mIsAssoc = false;
 
     public function __construct(Array $map=array()) {
@@ -43,13 +43,13 @@ class ArrayMap implements IDataMap, IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
+    function mapKeys(IKeyMap $Map) {
         if($this->mIsAssoc) {
             foreach($this->mMap as $key => $data)
-                $Map->mapNamedValue($key, $data);
+                $Map->map($key, $data);
 
         } else {
             foreach($this->mMap as $data)
@@ -59,18 +59,18 @@ class ArrayMap implements IDataMap, IMappable {
 
     // Static
 
-    static function get(IMappable $Mappable) {
+    static function get(IMappableKeys $Mappable) {
         $Inst = new ArrayMap();
-        $Mappable->mapData($Inst);
+        $Mappable->mapKeys($Inst);
         return $Inst->mMap;
     }
 
     /**
      * Map an object to this array
-     * @param IMappable $Mappable
+     * @param IMappableKeys $Mappable
      * @return void
      */
-    function mapArrayObject(IMappable $Mappable)
+    function mapArrayObject(IMappableKeys $Mappable)
     {
         // TODO: Implement mapArrayObject() method.
     }
@@ -88,10 +88,10 @@ class ArrayMap implements IDataMap, IMappable {
     /**
      * Map data to subsection
      * @param $subsectionKey
-     * @param \CPath\Data\Map\IMappable $Mappable
+     * @param \CPath\Data\Map\IMappableKeys $Mappable
      * @return void
      */
-    function mapSubsection($subsectionKey, IMappable $Mappable)
+    function mapSubsection($subsectionKey, IMappableKeys $Mappable)
     {
         // TODO: Implement mapSubsection() method.
     }

@@ -9,9 +9,12 @@ namespace CPath\Backend;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
+use CPath\Request\CLI\CLIRequest;
 use CPath\Request\IRequest;
 use CPath\Request\IStaticRequestHandler;
+use CPath\Request\Web\WebRequest;
 use CPath\Route\RouteBuilder;
+use CPath\Route\RouteRenderer;
 
 class BackendIndexHandler implements IStaticRequestHandler, IBuildable
 {
@@ -20,9 +23,8 @@ class BackendIndexHandler implements IStaticRequestHandler, IBuildable
      * @param IRequest $Request the IRequest instance for this render
      * @return String|void always returns void
      */
-    function handleStaticRequest(IRequest $Request)
-    {
-        // TODO: Implement handleRequest() method.
+    static function handleStaticRequest(IRequest $Request) {
+        echo 'backend';
     }
 
     // Static
@@ -34,7 +36,7 @@ class BackendIndexHandler implements IStaticRequestHandler, IBuildable
      */
     static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new CPathBackendRoutes());
-        $Builder->writeRoute('GET /CPath/', __CLASS__);
+        $Builder->writeRoute('ANY /cpath/', __CLASS__);
     }
 
     static function cls() {

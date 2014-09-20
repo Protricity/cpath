@@ -18,7 +18,7 @@ class RouteBuilder {
     const BUILD_KEY = 'build';
     const BUILD_ARG = 'routes';
     const BUILD_DISABLED = 'disabled';
-    const FUNC_FORMAT = "\t\t\t\$Map->route('%s', '%s')";
+    const FUNC_FORMAT = "\t\t\t\$Map->route('%s', %s)";
     const KEY_FORMAT = "\t\t\t// @group %s";
 
     private $mGroupKey;
@@ -66,12 +66,12 @@ class RouteBuilder {
             $methodSource = $Editor->getMethodSource();
             $curKey = '';
             foreach(explode("\n", $methodSource) as $line) {
-                $prefix = $target = '';
+                $prefix = $argList = '';
 
-                if(sscanf($line, self::FUNC_FORMAT, $prefix, $target) === 2) {
+                if(sscanf($line, self::FUNC_FORMAT, $prefix, $argList) === 1) {
                     if(!isset($this->mRoutes[$curKey]))
                         $this->mRoutes[$curKey] = array();
-                    $this->mRoutes[$curKey][$prefix] = $target;
+                    $this->mRoutes[$curKey][$prefix] = $argList;
 
                 } else if(sscanf($line, self::KEY_FORMAT, $key) === 1) {
                     $curKey = $key;
@@ -85,17 +85,21 @@ class RouteBuilder {
         }
     }
 
-    public function writeRoute($prefix, $target) {
-        $this->mRoutes[$this->mGroupKey][$prefix] = $target;
+    public function writeRoute($prefix, $target, $_arg=null) {
+        $argList = '';
+        for($i=1; $i<func_num_args(); $i++)
+            $argList .= ($argList ? ', ' : '') . var_export(func_get_arg($i));
+
+        $this->mRoutes[$this->mGroupKey][$prefix] = $argList;
 
         $src = "\t\treturn";
         $i=0;
         foreach($this->mRoutes as $groupKey => $routes) {
             $src .= "\n" . sprintf(self::KEY_FORMAT, $groupKey);
-            foreach($routes as $prefix => $target) {
+            foreach($routes as $prefix => $argList) {
                 if($i++ >= 1)
                     $src .= " ||";
-                $src .= "\n" . sprintf(self::FUNC_FORMAT, $prefix, $target);
+                $src .= "\n" . sprintf(self::FUNC_FORMAT, $prefix, $argList);
             }
         }
         $src .= ";";

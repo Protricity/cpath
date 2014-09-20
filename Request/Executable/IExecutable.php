@@ -13,8 +13,8 @@ interface IExecutable
 {
     /**
      * Execute a command and return a response. Does not render
-     * @param IPrompt $Request the request to execute
+     * @param IPrompt $Prompt the request prompt
      * @return IResponse the execution response
      */
-    function execute(IPrompt $Request);
+    function execute(IPrompt $Prompt);
 }

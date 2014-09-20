@@ -14,24 +14,9 @@ use CPath\Request\IRequestMethod;
 
 class GETMethod implements IRequestMethod
 {
-    private $mArgs;
-    private $mArgPos = 0;
-    public function __construct(Array $args=array()) {
-        $this->mArgs = $args;
-    }
-
-    /**
-     * Prompt for an argument value from the request.
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @param string|null $defaultValue [optional] default value if prompt fails
-     * @throws \CPath\Request\Exceptions\RequestArgumentException
-     * @return mixed the parameter value
-     */
-    function prompt($description, $defaultValue = null) {
-        if(isset($this->mArgs[$this->mArgPos]))
-            return $this->mArgs[$this->mArgPos++];
-
-        throw new RequestArgumentException($this->getMethodName() . "GET path argument required", $description);
+    private $mParams;
+    public function __construct(Array $pathParams=array()) {
+        $this->mParams = $pathParams;
     }
 
     /**
@@ -44,7 +29,7 @@ class GETMethod implements IRequestMethod
      * Example:
      * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
      */
-    function promptField($name, $description = null, $defaultValue = null) {
+    function prompt($name, $description = null, $defaultValue = null) {
         if (!empty($_GET[$name]))
             return $_GET[$name];
 
@@ -60,5 +45,15 @@ class GETMethod implements IRequestMethod
      */
     function getMethodName() {
         return 'GET';
+    }
+
+    /**
+     * Add a path parameter i.e. /:id/
+     * @param $name
+     * @param $value
+     * @return void
+     */
+    function addPathParameter($name, $value) {
+        $this->mParams[$name] = $value;
     }
 }

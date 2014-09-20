@@ -12,35 +12,40 @@ use CPath\Build\File;
 use CPath\Build\IBuildRequest;
 use CPath\Build\IBuildable;
 use CPath\Build\MethodDocBlock;
+use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Request\CLI\CommandString;
+use CPath\Request\Executable\IExecutable;
+use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Request\IStaticRequestHandler;
+use CPath\Response\ResponseRenderer;
 use CPath\Route\RouteBuilder;
 
-class BuildRequestHandler implements IStaticRequestHandler, IBuildable
+class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecutable
 {
 
     /**
-     * Handle this request and render any content
-     * @param IRequest $Request the IRequest instance for this render
-     * @return String|void always returns void
+     * Execute a command and return a response. Does not render
+     * @param IPrompt $Prompt the request prompt
+     * @return IResponse the execution response
      */
-    function handleStaticRequest(IRequest $Request) {
+    function execute(IPrompt $Prompt) {
         $flags = 0;
 
-        $test = $Request->prompt("Skip commit? (Test mode)", 't,test', false);
+        $test = $Prompt->prompt("Skip commit? (Test mode)", 't,test', false);
         if ($test && !in_array($test, array('n', 'N', '0')))
             $flags |= IBuildRequest::TEST_MODE;
 
-        $skipPrompt = $Request->prompt("Use Defaults? (Skip prompt)", 'f,defaults', false);
+        $skipPrompt = $Prompt->prompt("Use Defaults? (Skip prompt)", 'f,defaults', false);
         if ($skipPrompt && !in_array($skipPrompt, array('n', 'N', '0')))
             $flags |= IBuildRequest::USE_DEFAULTS;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;
 
-        $BuildRequest = new BuildRequest($Request, $flags);
+        $BuildRequest = new BuildRequest($Prompt, $flags);
         $this->buildAllFiles($BuildRequest);
     }
+
 
     /**
      * Handle this request and render any content
@@ -88,6 +93,18 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable
     }
 
     // Static
+
+    /**
+     * Handle this request and render any content
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    static function handleStaticRequest(IRequest $Request) {
+        $Inst = new BuildRequestHandler();
+        $Response = $Inst->execute($Request->getMethod());
+        $Handler = new ResponseRenderer($Response);
+        $Handler->render($Request);
+    }
 
     /**
      * Handle this request and render any content

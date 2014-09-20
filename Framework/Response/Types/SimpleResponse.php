@@ -7,11 +7,11 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Response\Types;
 
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Response\Interfaces\IResponse;
 
-final class SimpleResponse implements IResponse, IMappable {
+final class SimpleResponse implements IResponse, IMappableKeys {
     private $mCode, $mMessage;
 
     /**
@@ -75,11 +75,11 @@ final class SimpleResponse implements IResponse, IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
-        $Map->mapNamedValue(IResponse::STR_CODE, $this->getCode());
-        $Map->mapNamedValue(IResponse::STR_MESSAGE, $this->getMessage());
+    function mapKeys(IKeyMap $Map) {
+        $Map->map(IResponse::STR_CODE, $this->getCode());
+        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
     }
 }

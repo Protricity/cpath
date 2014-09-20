@@ -7,9 +7,10 @@
  */
 namespace CPath\Route;
 
-use CPath\Request\Executable\IPrompt;
+use CPath\Framework\Response\Types\ExceptionResponse;
 use CPath\Request\IRequest;
 use CPath\Request\IStaticRequestHandler;
+use CPath\Request\Common\ExceptionRequest;
 
 final class RouteRenderer implements IRouteMap
 {
@@ -28,39 +29,35 @@ final class RouteRenderer implements IRouteMap
      * Maps a route prefix to a target class or instance, and performs a render
      * @param String $prefix route prefix i.e. GET /my/path
      * @param String|IStaticRequestHandler $target the route target or instance
-     * @throws \Exception
+     * @param null $_arg Additional varargs will be sent to the Request Handler
      * @return bool if true the rendering has occurred
      */
-    function route($prefix, $target) {
-        list($method, $path) = explode(' ', $prefix, 2);
-        if ($method === 'ANY' || $method == $this->mRequest->getMethodName()) {
-            if (strpos($this->mRequest->getPath(), $path) === 0) {
+    function route($prefix, $target, $_arg=null) {
 
-                if($target instanceof IRoutable) {
-                    return $target->mapRoutes($this);
-                }
-
-                if($this->mRequest instanceof IPrompt) {
-                    foreach(explode('/', trim($path, '/')) as $pathArg) {
-                        // Consume arg
-                        $arg = $this->mRequest->prompt("Internal error consuming request path after match");
-                        if($arg !== $pathArg)
-                            throw new \Exception("Internal error consuming request. '$arg' != '$pathArg'");
-                    }
-                }
-
-                if (is_callable($target)) {
-                    $target($this->mRequest);
-                    return true;
-                }
-
-                $target::handleStaticRequest($this->mRequest);
-                return true;
-
-                //throw new \Exception("Class '" . get_class($target) . "' does not implement IRequestHandler");
+        if($this->mRequest->match($prefix)) {
+            if($target instanceof IRoutable) {
+                return $target->mapRoutes($this);
             }
-        }
 
+            if (is_callable($target)) {
+                $target($this->mRequest);
+                return true;
+            }
+
+            $args = array($this->mRequest);
+            for($i=2; $i<func_num_args(); $i++)
+                $args[] = func_get_arg($i);
+
+            try{
+                call_user_func_array(array($target, 'handleStaticRequest'), $args);
+
+            } catch (\Exception $ex) {
+                $this->mRequest = new ExceptionRequest($ex, $this->mRequest);
+                return false;
+
+            }
+            return true;
+        }
         return false;
     }
 }

@@ -18,6 +18,9 @@ use CPath\Request\IRequest;
 
 class HTMLResponseBody implements IContainerHTML
 {
+    const DOCTYPE = '<!DOCTYPE html>';
+    const TAB = '  ';
+    const TAB_START = 0;
 
     /** @var IRenderHTML[] */
     private $mContent=array();
@@ -30,13 +33,14 @@ class HTMLResponseBody implements IContainerHTML
 
     /**
      * Render the view body html
-     * @param \CPath\Render\HTML\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null)
+    function renderHTML(IRequest $Request, IAttributes $Attr = null)
     {
         RI::si(static::TAB_START, static::TAB);
+        echo self::DOCTYPE;
 
         echo RI::ni(), '<html>';
         RI::ai(1);
@@ -68,8 +72,7 @@ class HTMLResponseBody implements IContainerHTML
      * @param \CPath\Request\IRequest $Request
      * @return WriteOnceHeaderRenderer the writer instance used
      */
-    protected function renderHTMLHeaders(IRequest $Request)
-    {
+    protected function renderHTMLHeaders(IRequest $Request) {
         $Writer = new WriteOnceHeaderRenderer();
 
         if ($this instanceof IDescribable) {

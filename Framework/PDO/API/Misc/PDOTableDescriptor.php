@@ -9,14 +9,14 @@
 namespace CPath\Framework\PDO\API\Misc;
 
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 
-class PDOTableDescriptor implements ISelectDescriptor, IMappable {
+class PDOTableDescriptor implements ISelectDescriptor, IMappableKeys {
     private $mTable, $mAPI, $mQuery, $mStatsCache;
 
     function __construct(PDOTable $Table, PDOSelect $Query, IAPI $API) {
@@ -27,22 +27,22 @@ class PDOTableDescriptor implements ISelectDescriptor, IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapKeys(IKeyMap $Map)
     {
         $Stats = $this->execFullStats();
-        $Map->mapNamedValue('page', $Stats->getCurPage());
-        $Map->mapNamedValue('previous', $Stats->getPreviousPage());
-        $Map->mapNamedValue('next', $Stats->getNextPage());
-        $Map->mapNamedValue('offset', $Stats->getOffset());
-        $Map->mapNamedValue('limit', $Stats->getLimit());
-        $Map->mapNamedValue('total', $Stats->getTotal());
-        $Map->mapNamedValue('total_pages', $Stats->getTotalPages());
-        $Map->mapNamedValue('has_more', $Stats->getHasMore());
-        $Map->mapNamedValue('page_ids', $Stats->getPageIDs());
-        $Map->mapNamedValue('url', $Stats->getURL());
+        $Map->map('page', $Stats->getCurPage());
+        $Map->map('previous', $Stats->getPreviousPage());
+        $Map->map('next', $Stats->getNextPage());
+        $Map->map('offset', $Stats->getOffset());
+        $Map->map('limit', $Stats->getLimit());
+        $Map->map('total', $Stats->getTotal());
+        $Map->map('total_pages', $Stats->getTotalPages());
+        $Map->map('has_more', $Stats->getHasMore());
+        $Map->map('page_ids', $Stats->getPageIDs());
+        $Map->map('url', $Stats->getURL());
     }
 
     public function getLimitedStats() {

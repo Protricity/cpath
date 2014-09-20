@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Table\Model\Types;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Data\Map\IDataMap;
+use CPath\Data\Map\IKeyMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\PDO\Table\Types\PDOTable;
@@ -87,14 +87,14 @@ abstract class PDOModel implements IPDOModel {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
+    function mapKeys(IKeyMap $Map) {
         foreach($this->table()->getColumns() as $Column)
             if($Column->hasFlag(IPDOColumn::FLAG_EXPORT)) {
                 $name = $Column->getName();
-                $Map->mapNamedValue($name, $this->$name);
+                $Map->map($name, $this->$name);
             }
     }
 

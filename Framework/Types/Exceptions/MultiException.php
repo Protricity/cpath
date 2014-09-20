@@ -8,11 +8,11 @@
 namespace CPath\Framework\Types\Exceptions;
 
 use CPath\Framework\API\Exceptions\ValidationException;
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Response\Types\ExceptionResponse;
 
-class MultiException extends \Exception implements \Countable, IMappable {
+class MultiException extends \Exception implements \Countable, IMappableKeys {
     /** @var \Exception[]  */
     private $mEx = array();
 
@@ -27,10 +27,10 @@ class MultiException extends \Exception implements \Countable, IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map) {
+    function mapKeys(IKeyMap $Map) {
         foreach($this->mEx as $ex)
             $Map->mapArrayObject(new ExceptionResponse($ex));
     }

@@ -9,14 +9,14 @@ namespace CPath\Framework\Response\Types;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Response\Interfaces\IResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;
 
-class DataResponse extends ArrayObject implements IResponse, IComparable, IDescribable, IMappable {
+class DataResponse extends ArrayObject implements IResponse, IComparable, IDescribable, IMappableKeys {
     private $mCode, $mData=array(), $mMessage, $mEnableLog = false;
     /** @var ILogEntry[] */
     private $mLogs=array();
@@ -141,16 +141,16 @@ class DataResponse extends ArrayObject implements IResponse, IComparable, IDescr
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapKeys(IKeyMap $Map)
     {
         $Util = new ResponseUtil($this);
-        $Util->mapData($Map);
+        $Util->mapKeys($Map);
         //$Map->mapNamedValue(IResponse::JSON_CODE, $this->getCode());
         //$Map->mapNamedValue(IResponse::JSON_MESSAGE, $this->getMessage());
-        $Map->mapNamedValue(IResponse::JSON_RESPONSE, $this->mData);
+        $Map->map(IResponse::JSON_RESPONSE, $this->mData);
     }
 
     function __toString() {

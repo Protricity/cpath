@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Data\Map\Common;
 
-use CPath\Data\Map\IDataMap;
-use CPath\Data\Map\IMappable;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 
-class MappableCallback implements IMappable {
+class MappableCallback implements IMappableKeys {
     const IS_FIRST = 0x01;
 
     private $mCallback, $mCount=0;
@@ -38,10 +38,10 @@ class MappableCallback implements IMappable {
 
     /**
      * Map data to a data map
-     * @param IDataMap $Map the map instance to add data to
+     * @param IKeyMap $Map the map instance to add data to
      * @return void
      */
-    function mapData(IDataMap $Map)
+    function mapKeys(IKeyMap $Map)
     {
         $call = $this->mCallback;
         $call($Map);

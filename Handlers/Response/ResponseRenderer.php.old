@@ -49,7 +49,7 @@ final class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IR
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRenderRequest $Request, IAttributes $Attr = null) {
+    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
         $Response = $this->mResponse;
         $Util = new ResponseUtil($Response, $this->mTemplate);
         $Util->renderHTML($Request);
