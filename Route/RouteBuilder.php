@@ -9,7 +9,6 @@
 namespace CPath\Route;
 use CPath\Build\Editor\PHP\PHPMethodEditor;
 use CPath\Build\MethodDocBlock;
-use CPath\Build\MethodEditor;
 use CPath\Config;
 use CPath\Build\IBuildRequest;
 use CPath\Request\CLI\CommandString;
@@ -62,7 +61,7 @@ class RouteBuilder {
         }
         $this->mGroupKey = $groupKey;
 
-        $Editor = new MethodEditor($this->mMethod);
+        $Editor = PHPMethodEditor::fromMethod($this->mMethod);
 
 
         $methodSource = $Editor->getMethodSource();

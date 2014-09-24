@@ -38,23 +38,37 @@ class PHPFileEditor implements IPHPWritableSource
                     if (!$token = $Scanner->scan(T_STRING))
                         throw new \Exception("Namespace string could not be determined");
                     $namespace = $token[1];
+
+                    while ($token = $Scanner->next()) {
+                        if(is_array($token))
+                            switch($token[0]) {
+                                case T_NS_SEPARATOR:
+                                case T_STRING:
+                                    $namespace .= $token[1];
+                                    break;
+                                default:
+                                    break 2;
+                            }
+                    }
                     break;
 
                 case T_CLASS:
                     $start = $Scanner->getPos();
                     $openTags = 0;
-                    while ($next = $Scanner->scan(T_OPEN_TAG, T_CLOSE_TAG)) {
-                        switch ($next[0]) {
-                            case T_OPEN_TAG:
+                    while ($next = $Scanner->scan('{', '}')) {
+                        $token = is_array($next) ? $next[0] : $next;
+                        switch ($token) {
+                            case '{':
                                 $openTags++;
                                 break;
-                            case T_CLOSE_TAG:
+                            case '}':
                                 $openTags--;
+
+                                if($openTags > 0)
+                                    break;
+
                                 $finish = $Scanner->getPos();
-
-                                if (!($ClassChunk = $Scanner->createChunk($start, $finish)))
-                                    throw new \Exception("Could not determine Class brackets");
-
+                                $ClassChunk = $Scanner->createChunk($start - 1, $finish);
                                 $ClassEditor = new PHPClassEditor($ClassChunk, $namespace);
                                 $this->mClasses[$ClassEditor->getClassName()] = $ClassEditor;
                                 break;
@@ -75,8 +89,8 @@ class PHPFileEditor implements IPHPWritableSource
         return array_values($this->mClasses);
     }
 
-    function write()
-    {
-        // TODO: Implement write() method.
+    function write() {
+        $newSRC = $this->mScanner->getSourceString();
+        $result = file_put_contents($this->mPath, $newSRC);
     }
 }

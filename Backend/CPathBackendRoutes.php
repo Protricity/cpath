@@ -46,8 +46,7 @@ class CPathBackendRoutes implements IRoutable
      * @build routes --disable 0
      * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
      */
-    function mapRoutes(IRouteMap $Map) {
-		return
+    function mapRoutes(IRouteMap $Map) {		return
 			// @group _last
 			$Map->route('ANY /', '404') ||
 			// @group CPath\Backend\TestRequestHandler
@@ -56,6 +55,5 @@ class CPathBackendRoutes implements IRoutable
 			$Map->route('CLI /cpath/build', 'CPath\\Backend\\BuildRequestHandler') ||
 			$Map->route('CLI /cpath/test', 'CPath\\Backend\\TestRequestHandler') ||
 			// @group CPath\Backend\BackendIndexHandler
-			$Map->route('ANY /cpath/', 'CPath\\Backend\\BackendIndexHandler');
-	}
+			$Map->route('ANY /cpath/', 'CPath\\Backend\\BackendIndexHandler');}
 }

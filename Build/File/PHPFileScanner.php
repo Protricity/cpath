@@ -38,10 +38,10 @@ class PHPFileScanner
         if (isset($this->mTokens[$this->mPos])) {
             $next = $this->mTokens[$this->mPos++];
             switch($next[0]) {
-                case T_OPEN_TAG:
+                case '{':
                     $this->mOpen = true;
                     break;
-                case T_CLOSE_TAG:
+                case '}':
                     $this->mOpen = false;
                     break;
             }
@@ -126,7 +126,8 @@ class PHPFileScanner
             } elseif ($token[0] === T_FUNCTION) {
                 $value = $readStr();
                 $results[T_CLASS][$className][T_FUNCTION] = $value;
-                $Callbacks->foundClassMethod($className, $value, $tokens);
+                if($Callbacks)
+                    $Callbacks->foundClassMethod($className, $value, $tokens);
 
             } elseif ($token[0] === T_CLASS) {
                 if ($value = $readStr()) {
@@ -138,7 +139,8 @@ class PHPFileScanner
                             T_CLASS => $value,
                             T_NAMESPACE => $namespace,
                         );
-                    $Callbacks->foundClass($className, $tokens);
+                    if($Callbacks)
+                        $Callbacks->foundClass($className, $tokens);
                 }
 
             } elseif ($token[0] === T_NAMESPACE) {

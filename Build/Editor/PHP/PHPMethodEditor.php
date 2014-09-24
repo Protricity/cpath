@@ -37,8 +37,13 @@ class PHPMethodEditor implements ITestable
     }
 
     public function replaceMethodSource($newBody) {
-        $tokens = array(PHPTokenScanner::T_SCANNER_STRING, $newBody);
+        $tokens = array();
+        $tokens[] = array(PHPTokenScanner::T_SCANNER_STRING, $newBody);
         $this->mSource->replaceTokens($tokens);
+    }
+
+    public function getMethodSource() {
+        return $this->mSource->getSourceString();
     }
 
     public function write() {
@@ -47,7 +52,7 @@ class PHPMethodEditor implements ITestable
     // Static
 
     static function fromMethod(\ReflectionMethod $Method) {
-        return self::fromMethodName($Method->getName(), $Method->getDeclaringClass());
+        return self::fromMethodName($Method->getDeclaringClass()->getName(), $Method->getName());
     }
 
     /**
@@ -78,18 +83,16 @@ class PHPMethodEditor implements ITestable
         $SRC3 = $SRC1.$SRC2."\n\t\techo 'im maybe working #%s';";
 
         $Editor = self::fromMethodName(__CLASS__, 'testReplaceSrc');
-        for($i=0; $i<=6; $i++) {
-            $Editor->replaceMethodSource(sprintf($SRC1, $i));
-            $Editor->replaceMethodSource(sprintf($SRC2, $i));
-            $Editor->replaceMethodSource(sprintf($SRC3, $i, $i, $i));
+        for($i=0; $i<=rand(3,23); $i++) {
+            $Editor->replaceMethodSource(sprintf($SRC3, $i, $i, $i) . "\n\t");
+            $Editor->write();
         }
     }
 
-    private function testReplaceSrc() {
-
-        echo 'im working #6';
-        echo 'im not working #6';
-        echo 'im maybe working #6';
-    }
+    public function testReplaceSrc() {
+		echo 'im working #9';
+		echo 'im not working #9';
+		echo 'im maybe working #9';
+	}
 
 }

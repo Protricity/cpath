@@ -9,10 +9,6 @@ namespace CPath\Build\Editor\PHP;
 
 use CPath\Build\Editor;
 
-interface IPHPWritableSource {
-    function write();
-}
-
 class PHPTokenScanner implements IPHPWritableSource
 {
     const T_SCANNER_INSTANCE = 4321;
@@ -30,23 +26,23 @@ class PHPTokenScanner implements IPHPWritableSource
         $this->mSource->write();
     }
 
-    public function getPos()
-    {
+    public function getPos() {
         return $this->mPos;
     }
 
-    public function next()
-    {
+    public function next() {
         if (isset($this->mTokens[$this->mPos]))
             return $this->mTokens[$this->mPos++];
         return null;
     }
 
-    public function scan($scanTokens)
-    {
+    public function scan($scanTokens) {
+        if(!is_array($scanTokens))
+            $scanTokens = func_get_args();
         $pos = $this->mPos;
         while ($next = $this->next()) {
-            if (is_array($next) && in_array($next[0], func_get_args()))
+            $token = is_array($next) ? $next[0] : $next;
+            if (in_array($token, $scanTokens))
                 return $next;
         }
         $this->mPos = $pos;
@@ -57,31 +53,32 @@ class PHPTokenScanner implements IPHPWritableSource
      * Create a source chunk and return the instance
      * @param $start
      * @param $finish
-     * @return PHPTokenScanner
+     * @return array
      */
-    public function getTokens($start = 0, $finish = null)
-    {
+    public function getTokens($start = 0, $finish = null) {
         $chunkTokens = array();
-        foreach ($this->mTokens as $i => $token) {
-            if ($i < $start)
-                continue;
-            if ($finish && $i >= $finish)
-                break;
-            $chunkTokens[] = $token;
+        for($i=$start; $i<$finish; $i++) {
+            $chunkTokens[] = $this->mTokens[$i];
         }
         return $chunkTokens;
     }
 
     public function replaceTokens(Array $newTokens, $start=0, $finish=null) {
-        $results = $newTokens;
-        foreach ($this->mTokens as $i => $token) {
-            if ($i < $start) {
-                array_unshift($results, $token);
-            } elseif ($finish && $i >= $finish) {
-                $results[] = $token;
-            }
+        $tokens = array();
+
+        for($i=0;$i<$start; $i++)
+            $tokens[] = $this->mTokens[$i];
+
+        foreach($newTokens as $token)
+            $tokens[] = $token;
+
+        if($finish) {
+            $c = sizeof($this->mTokens);
+            for($i=$finish; $i<$c; $i++)
+                $tokens[] = $this->mTokens[$i];
         }
-        $this->mTokens = $results;
+
+        $this->mTokens = $tokens;
     }
 
     /**
@@ -90,29 +87,17 @@ class PHPTokenScanner implements IPHPWritableSource
      * @param $finish
      * @return PHPTokenScanner
      */
-    public function createChunk($start, $finish)
-    {
+    public function createChunk($start, $finish) {
+        $chunkTokens = $this->getTokens($start, $finish);
+        $Chunk = new PHPTokenScanner($chunkTokens, $this);
         $newTokens = array();
-        $chunkTokens = array();
-        $Chunk = null;
-        foreach ($this->mTokens as $i => $token) {
-            if ($i > $start && $i <= $finish) {
-                $chunkTokens[] = $token;
-
-            } else {
-                if (sizeof($chunkTokens)) {
-                    $Chunk = new PHPTokenScanner($chunkTokens, $this);
-                    $newTokens[] = array(self::T_SCANNER_INSTANCE, $Chunk);
-                }
-                $newTokens[] = $token;
-            }
-        }
-        $this->mPos = $finish;
+        $newTokens[] = array(self::T_SCANNER_INSTANCE, $Chunk);
+        $this->replaceTokens($newTokens, $start, $finish);
+        $this->mPos = $start + sizeof($newTokens);
         return $Chunk;
     }
 
-    public function reset()
-    {
+    public function reset() {
         $this->mPos = 0;
     }
 
@@ -120,8 +105,7 @@ class PHPTokenScanner implements IPHPWritableSource
      * Generate a string based on tokens
      * @return String
      */
-    function getSourceString()
-    {
+    function getSourceString() {
         $src = '';
         foreach ($this->mTokens as $token)
             if ($token instanceof Editor\PHP\PHPTokenScanner)
