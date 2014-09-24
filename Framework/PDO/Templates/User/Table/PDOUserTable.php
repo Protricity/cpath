@@ -16,7 +16,7 @@ use CPath\Framework\PDO\API\PostUserLogoutAPI;
 use CPath\Framework\PDO\API\PostUserPasswordAPI;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
@@ -203,7 +203,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * @param int $expireInSeconds the amount of time in seconds before an account should expire or 0 for never
      * @param PDOUserModel $User the user instance loaded during login
      * @throws AuthenticationException
-     * @return IResponse the login response
+     * @return \CPath\Response\IResponse the login response
      */
     public function login($search, $password, $expireInSeconds=NULL, PDOUserModel &$User=NULL) {
         /** @var PDOUserModel $User */

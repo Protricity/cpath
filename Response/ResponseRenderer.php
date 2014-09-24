@@ -9,9 +9,8 @@ namespace CPath\Response;
 
 use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IMappableSequence;
-use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLKeyMapRenderer;
@@ -22,18 +21,14 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONKeyMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
-use CPath\Render\JSON\JSONRenderMap;
 use CPath\Render\JSON\JSONSequenceMapRenderer;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\Text\TextKeyMapRenderer;
 use CPath\Render\Text\TextMimeType;
-use CPath\Render\Text\TextRenderMap;
 use CPath\Render\Text\TextSequenceMapRenderer;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLKeyMapRenderer;
 use CPath\Render\XML\XMLMimeType;
-use CPath\Render\XML\XMLRenderMap;
-use CPath\Render\XML\XMLSequenceMapRenderer;
 use CPath\Request\IRequest;
 
 class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText
@@ -47,19 +42,24 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
         $this->mHTMLRender->addContent($this);
     }
 
-    function render(IRequest $Request) {
+    function render(IRequest $Request, $sendHeaders=true) {
+        $Response = $this->mResponse;
+        $MimeType = $Request->getMimeType();
 
-        foreach($Request->getMimeTypes() as $MimeType) {
-            if($MimeType instanceof HTMLMimeType)
-                $this->mHTMLRender->renderHTML($Request);
-            elseif($MimeType instanceof XMLMimeType)
-                $this->renderXML($Request);
-            elseif($MimeType instanceof JSONMimeType)
-                $this->renderJSON($Request);
-            elseif($MimeType instanceof TextMimeType)
-                $this->renderText($Request);
-            else continue;
-            break;
+        if($sendHeaders)
+            $MimeType->sendHeaders($Response->getCode(), $Response->getMessage());
+
+        if($MimeType instanceof HTMLMimeType) {
+            $this->mHTMLRender->renderHTML($Request);
+
+        } elseif($MimeType instanceof XMLMimeType) {
+            $this->renderXML($Request);
+
+        } elseif($MimeType instanceof JSONMimeType) {
+            $this->renderJSON($Request);
+
+        } elseif($MimeType instanceof TextMimeType) {
+            $this->renderText($Request);
         }
     }
 
@@ -72,9 +72,6 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
         $Response = $this->mResponse;
-
-        $MimeType = new HTMLMimeType();
-        $MimeType->sendHeaders($Response);
 
         if ($Response instanceof IRenderHTML) {
             $Response->renderHTML($Request);
@@ -103,9 +100,6 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
     function renderJSON(IRequest $Request) {
         $Response = $this->mResponse;
 
-        $MimeType = new JSONMimeType();
-        $MimeType->sendHeaders($Response);
-
         if ($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
 
@@ -132,9 +126,6 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      */
     function renderText(IRequest $Request) {
         $Response = $this->mResponse;
-
-        $MimeType = new TextMimeType();
-        $MimeType->sendHeaders($Response);
 
         if ($Response instanceof IRenderText) {
             $Response->renderText($Request);
@@ -163,9 +154,6 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      */
     function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
         $Response = $this->mResponse;
-
-        $MimeType = new TextMimeType();
-        $MimeType->sendHeaders($Response);
 
         if ($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $declaration);

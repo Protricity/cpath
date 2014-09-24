@@ -14,9 +14,12 @@ abstract class AbstractFileIterator implements File\Iterator\IFileIterator
     private $mFoundFiles = array();
     private $mFoundDirs = array();
 
-    public function __construct($rootPath)
+    public function __construct($paths)
     {
-        $this->mFoundDirs[] = realpath($rootPath);
+        foreach((array)$paths as $path) {
+            $path = rtrim(str_replace('\\', '/', $path), '/');
+            $this->mFoundDirs[] = $path;
+        }
     }
 
     /**
@@ -26,8 +29,7 @@ abstract class AbstractFileIterator implements File\Iterator\IFileIterator
      */
     abstract protected function filter($filePath, $isDir);
 
-    private function scan($dir)
-    {
+    private function scan($dir) {
         foreach (scandir($dir) as $fileName) {
             if (in_array($fileName, array('.', '..')))
                 continue;
@@ -38,7 +40,9 @@ abstract class AbstractFileIterator implements File\Iterator\IFileIterator
                 continue;
 
             if ($isDir) {
-                $this->mFoundDirs[] = $filePath;
+                // Check for duplicates
+                if(!in_array($filePath, $this->mFoundDirs))
+                    $this->mFoundDirs[] = $filePath;
                 continue;
             }
 
@@ -50,8 +54,7 @@ abstract class AbstractFileIterator implements File\Iterator\IFileIterator
      * Return the next file in the sequence or null if no more files are available
      * @return String|null the full file path or null
      */
-    function getNextFile()
-    {
+    function getNextFile() {
         if ($this->mFoundFiles) {
             return array_pop($this->mFoundFiles);
         }

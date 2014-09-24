@@ -38,7 +38,7 @@ class RoutableSetWrapper implements IRequest {
     function getRequestURL($withArgs = true, $withDomain = false) { return $this->mReq->getRequestURL($withArgs, $withDomain); }
     function getHeaders($key = NULL) { return $this->mReq->getHeaders($key); }
     function getNextArg($advance = true) { return $this->mReq->getNextArg($advance); }
-    function getMimeTypes() { return $this->mReq->getMimeTypes(); }
+    function getMimeType() { return $this->mReq->getMimeType(); }
     function merge(Array $request, $replace = false) { $this->mReq->merge($request, $replace); }
     function pluck($_path=NULL) { return $this->mReq->pluck($_path); } // TODO: fix
     function getFileUpload($_path=NULL) { return $this->mReq->getFileUpload($_path); } // TODO: fix

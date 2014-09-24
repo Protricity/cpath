@@ -7,7 +7,7 @@
  */
 namespace CPath\Request\MimeType;
 
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 final class UnknownMimeType implements IRequestedMimeType
 {
@@ -21,22 +21,24 @@ final class UnknownMimeType implements IRequestedMimeType
      * Get the Mime type as a string
      * @return String
      */
-    function getMimeTypeName() {
+    function getName() {
         return $this->mTypeName;
     }
 
 
     /**
      * Send response headers for this mime type
-     * @param IResponse $Response
+     * @param \CPath\Response\IResponse|int $code
+     * @param string $message
      * @throws \Exception
+     * @internal param \CPath\Request\MimeType\IRequest $Request
      * @return void
      */
-    function sendHeaders(IResponse $Response) {
+    function sendHeaders($code = 200, $message = 'OK') {
         if (headers_sent())
             throw new \Exception("Headers were already sent");
 
-        header("HTTP/1.1 " . $Response->getCode() . " " . preg_replace('/[^\w -]/', '', $Response->getMessage()));
+        header("HTTP/1.1 " . $code->getCode() . " " . preg_replace('/[^\w -]/', '', $code->getMessage()));
         header("Content-Type: " . $this->mTypeName);
 
         header('Access-Control-Allow-Origin: *');

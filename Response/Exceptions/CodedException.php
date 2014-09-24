@@ -5,10 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Response\Exceptions;
+namespace CPath\Response\Exceptions;
 
 
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponseCode;
 
 class CodedException extends \Exception implements IResponseCode {
     const DEFAULT_CODE = 400;

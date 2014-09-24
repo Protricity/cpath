@@ -7,20 +7,26 @@
  */
 namespace CPath\Request\MimeType;
 
-use CPath\Framework\Response\Interfaces\IResponse;
-
 interface IRequestedMimeType
 {
     /**
      * Get the Mime type as a string
      * @return String
      */
-    function getMimeTypeName();
+    function getName();
+
+    /**
+     * Get next available mimetype or null if no more mimetypes were requested
+     * @return IRequestedMimeType
+     */
+    function getNextMimeType();
 
     /**
      * Send response headers for this mime type
-     * @param IResponse $Response
-     * @return void
+     * @param int $code HTTP response code
+     * @param String $message response message
+     * @internal param \CPath\Request\IRequest $Request
+     * @return bool returns true if the headers were sent, false otherwise
      */
-    function sendHeaders(IResponse $Response);
+    function sendHeaders($code = 200, $message = 'OK');
 }

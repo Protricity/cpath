@@ -1,0 +1,108 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/16/14
+ * Time: 10:29 PM
+ */
+namespace CPath\Request\CLI;
+
+use CPath\Describable\IDescribable;
+use CPath\Request\Executable\IPrompt;
+use CPath\Request\IRequestMethod;
+use CPath\Request\Log\ILogListener;
+use CPath\Request\Validation\PromptException;
+
+class CLIMethod implements IRequestMethod, ILogListener, IPrompt
+{
+    const FIELD_VERBOSE = 'v';
+    private $mVerbose = false;
+    /** @var ILogListener[] */
+    private $mLogs = array();
+    private $mArgs;
+
+    public function __construct() {
+
+        if($args === null && isset($_SERVER['argv'])) {
+            $args = $_SERVER['argv'];
+            $file = array_shift($args);
+        }
+    }
+
+    /**
+     * Get the Request Method (CLI)
+     * @return String
+     */
+    function getMethodName() {
+        return 'CLI';
+    }
+
+    /**
+     * Prompt for a value from the request.
+     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @return mixed the parameter value
+     * @throws PromptException if prompt fails to produce a result
+     * Example:
+     * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
+     */
+    function prompt($description) {
+        if (PHP_OS == 'WINNT') {
+            echo $description;
+            $line = stream_get_line(STDIN, 0, "\n");
+        } else {
+            $line = readline($description);
+        }
+        return $line;
+    }
+
+    /**
+     * Get a request value if it exists
+     * @param string $argName the parameter name
+     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @return mixed the parameter value or null
+     */
+    function getValue($argName, $description=null) {
+
+        if(isset($this->mArgs[$argName]))
+            return $this->mArgs[$argName];
+
+        return null;
+    }
+
+    /**
+     * Add a log entry
+     * @param String $msg The log message
+     * @param int $flags [optional] log flags
+     * @return void
+     */
+    function log($msg, $flags = 0) {
+        foreach($this->mLogs as $Log)
+            $Log->log($msg, $flags);
+        if($this->mVerbose || !($flags & ILogListener::VERBOSE))
+            echo $msg . "\n";
+    }
+
+    /**
+     * Log an exception instance
+     * @param \Exception $ex The log message
+     * @param int $flags [optional] log flags
+     * @return void
+     */
+    function logEx(\Exception $ex, $flags = 0) {
+        foreach($this->mLogs as $Log)
+            $Log->logEx($ex, $flags);
+
+        if($this->mVerbose || !($flags & ILogListener::VERBOSE))
+            echo $ex . "\n";
+    }
+
+    /**
+     * Add a log listener callback
+     * @param ILogListener $Listener
+     * @return void
+     */
+    function addLogListener(ILogListener $Listener) {
+        $this->mLogs[] = $Listener;
+    }
+}
+

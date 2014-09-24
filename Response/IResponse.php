@@ -5,9 +5,10 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Response\Interfaces;
+namespace CPath\Response;
 
 use CPath\Config;
+use CPath\Response\IResponseCode;
 
 interface IResponse extends IResponseCode
 {

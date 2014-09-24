@@ -9,7 +9,7 @@
 namespace CPath\Interfaces;
 
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 interface IExecute123 {
 
@@ -25,7 +25,7 @@ interface IExecute123 {
      * Perform after successful API execution
      * Note: is not performed when exceptions are thrown or if the response status is not 200 (success)
      * @param \CPath\Request\IRequest $Request
-     * @param IResponse $DataResponse
+     * @param \CPath\Response\IResponse $DataResponse
      * @return void
      */
     function onAPIPostExecute(IRequest $Request, IResponse $Response);

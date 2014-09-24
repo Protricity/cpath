@@ -9,7 +9,7 @@ use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\ISupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Framework\View\IContainerDEL;
 use CPath\Templates\Themes\CPathDefaultTheme;

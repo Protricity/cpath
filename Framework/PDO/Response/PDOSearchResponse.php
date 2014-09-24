@@ -13,8 +13,8 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
 use CPath\Handlers\Response\ResponseUtil;
 
 class PDOSearchResponse implements IResponse, IMappableKeys {

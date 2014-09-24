@@ -7,8 +7,8 @@
  */
 namespace CPath\Route;
 
-use CPath\Framework\Response\Exceptions\CodedException;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\Exceptions\CodedException;
+use CPath\Response\IResponseCode;
 
 class RouteNotFoundException extends CodedException
 {

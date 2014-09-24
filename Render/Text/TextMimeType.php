@@ -7,38 +7,60 @@
  */
 namespace CPath\Render\Text;
 
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
+use CPath\Request\Exceptions\RequestArgumentException;
+use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\MimeType\MimeType;
 
-final class TextMimeType implements IRequestedMimeType
+class TextMimeType extends MimeType implements ILogListener
 {
-    private $mTypeName;
-
-    public function __construct($typeName='text/plain') {
-        $this->mTypeName = $typeName;
+    private $mFlags;
+    public function __construct($logFlags=0, $typeName='text/plain', IRequestedMimeType $nextMimeType=null) {
+        $this->mFlags = $logFlags;
+        parent::__construct($typeName, $nextMimeType);
     }
 
     /**
-     * Get the Mime type as a string
-     * @return String
-     */
-    function getMimeTypeName() {
-        return $this->mTypeName;
-    }
-
-    /**
-     * Send response headers for this mime type
-     * @param IResponse $Response
-     * @throws \Exception
+     * Add a log entry
+     * @param String $msg The log message
+     * @param int $flags [optional] log flags
      * @return void
      */
-    function sendHeaders(IResponse $Response) {
-        if (headers_sent())
-            throw new \Exception("Headers were already sent");
+    function log($msg, $flags = 0) {
+        if(!$this->headersSent())
+            $this->sendHeaders(); // TODO: Sending 200 here by default
 
-        header("HTTP/1.1 " . $Response->getCode() . " " . preg_replace('/[^\w -]/', '', $Response->getMessage()));
-        header("Content-Type: " . $this->mTypeName);
+        if (!($flags & ~$this->mFlags)) {
+            echo $msg . "\n";
+            flush();
+        }
+    }
 
-        header('Access-Control-Allow-Origin: *');
+    /**
+     * Log an exception instance
+     * @param \Exception $ex The log message
+     * @param int $flags [optional] log flags
+     * @return void
+     */
+    function logEx(\Exception $ex, $flags = 0) {
+        if(!$this->headersSent())
+            $this->sendHeaders(); // TODO: Sending 200 here by default
+
+        if (!($flags & ~$this->mFlags)) {
+            echo $ex . "\n";
+            flush();
+        }
+    }
+
+    /**
+     * Add a log listener callback
+     * @param ILogListener $Listener
+     * @throws \InvalidArgumentException
+     * @return void
+     */
+    function addLogListener(ILogListener $Listener) {
+        throw new \InvalidArgumentException("Can't add listeners to this mimetype. Add it to the IRequest instead");
     }
 }
+

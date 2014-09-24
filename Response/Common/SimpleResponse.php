@@ -5,11 +5,11 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Response\Types;
+namespace CPath\Response\Common;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 final class SimpleResponse implements IResponse, IMappableKeys {
     private $mCode, $mMessage;
@@ -17,7 +17,7 @@ final class SimpleResponse implements IResponse, IMappableKeys {
     /**
      * Create a new response
      * @param String $msg the response message
-     * @param bool $status the response status
+     * @param int|bool $status the response status code or true/false for success/error
      * @internal param mixed $data additional response data
      */
     function __construct($msg=NULL, $status=true) {

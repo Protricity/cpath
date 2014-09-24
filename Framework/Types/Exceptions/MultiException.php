@@ -10,7 +10,7 @@ namespace CPath\Framework\Types\Exceptions;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Response\Common\ExceptionResponse;
 
 class MultiException extends \Exception implements \Countable, IMappableKeys {
     /** @var \Exception[]  */

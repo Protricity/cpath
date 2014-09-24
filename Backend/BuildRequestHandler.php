@@ -7,43 +7,52 @@
  */
 namespace CPath\Backend;
 
-use CPath\Build\BuildRequest;
+use CPath\Autoloader;
+use CPath\Build\BuildRequestWrapper;
 use CPath\Build\File;
 use CPath\Build\IBuildRequest;
 use CPath\Build\IBuildable;
 use CPath\Build\MethodDocBlock;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
+use CPath\Response\Common\SimpleResponse;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Request\IStaticRequestHandler;
+use CPath\Request\Log\ILogListener;
+use CPath\Request\Request;
 use CPath\Response\ResponseRenderer;
 use CPath\Route\RouteBuilder;
 
+//if(!defined('\CPath\Autoloader'))
+//    include_once(__DIR__ . "/../Autoloader.php");
+
 class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecutable
 {
+    const DOCTAG = 'build';
+    private $mDefaults = false;
 
     /**
      * Execute a command and return a response. Does not render
-     * @param IPrompt $Prompt the request prompt
-     * @return IResponse the execution response
+     * @param \CPath\Request\IRequest $Request
+     * @internal param \CPath\Request\Executable\IPrompt $Prompt the request prompt
+     * @return \CPath\Response\IResponse the execution response
      */
-    function execute(IPrompt $Prompt) {
+    function execute(IRequest $Request) {
         $flags = 0;
 
-        $test = $Prompt->prompt("Skip commit? (Test mode)", 't,test', false);
-        if ($test && !in_array($test, array('n', 'N', '0')))
-            $flags |= IBuildRequest::TEST_MODE;
+        $OriginalRequest = $Request;
+        $this->mDefaults = $Request->getValue('defaults', "Use Defaults? (Skip prompt)") || false;
 
-        $skipPrompt = $Prompt->prompt("Use Defaults? (Skip prompt)", 'f,defaults', false);
-        if ($skipPrompt && !in_array($skipPrompt, array('n', 'N', '0')))
-            $flags |= IBuildRequest::USE_DEFAULTS;
+        if (!$this->mDefaults && $Request->getValue('test', "Skip commit? (Test mode)"))
+            $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;
 
-        $BuildRequest = new BuildRequest($Prompt, $flags);
+        $BuildRequest = new BuildRequestWrapper($OriginalRequest, $flags);
         $this->buildAllFiles($BuildRequest);
+        return new SimpleResponse("Build complete");
     }
 
 
@@ -53,41 +62,60 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecuta
      * @return String|void always returns void
      */
     function buildAllFiles(IBuildRequest $Request) {
-        $Iterator = new File\Iterator\PHPFileIterator('/', '/');
+        $paths = Autoloader::getLoaderPaths();
+        foreach($paths as $path)
+            $Request->log("Path: " . $path);
+
+        $Iterator = new File\Iterator\PHPFileIterator('/', $paths);
 
         $buildableClasses = array();
         while ($file = $Iterator->getNextFile()) {
-            $Scanner = new File\PHPFileScanner($file);
+            $Request->log("File: " . $file, ILogListener::VERBOSE);
 
-            foreach ($Scanner->scanClassTokens() as $fullClass => $tokens) {
-                foreach ($tokens[T_IMPLEMENTS] as $implements) {
-                    if (strpos($implements, 'IBuildable') !== false) {
-                        $buildableClasses[] = $fullClass;
+            $Scanner = new File\PHPFileScanner($file);
+            $results = $Scanner->scanClassTokens();
+            foreach ($results[T_CLASS] as $fullClass => $tokens) {
+                if(isset($tokens[T_IMPLEMENTS])) {
+                    foreach ($tokens[T_IMPLEMENTS] as $implements) {
+                        if (strpos($implements, 'IBuildable') !== false) {
+                            $buildableClasses[] = $fullClass;
+                        }
                     }
                 }
             }
         }
 
         foreach ($buildableClasses as $class) {
-            if (class_exists($class, true)) {
-                $Class = new \ReflectionClass($class);
-                if ($Class->implementsInterface('\CPath\Build\IBuildRequestHandler')) {
-                    $Method = $Class->getMethod('handleStaticBuild');
-                    $MethodDoc = new MethodDocBlock($Method);
-                    if($Tag = $MethodDoc->getNextTag('build')) {
-                        $args = CommandString::parseArgs($Tag->getArgString());
-                        $disabled = isset($args['disable']) && $args['disable'];
-                        if($disabled) {
-                            continue;
-                            // TODO
-                        }
+            $Request->log("Found Class: " . $class);
+
+            $Class = new \ReflectionClass($class);
+            if ($Class->implementsInterface('\CPath\Build\IBuildable')) {
+                /** @var IBuildable $class */
+                $Method = $Class->getMethod('handleStaticBuild');
+                $MethodDoc = new MethodDocBlock($Method);
+                if($Tag = $MethodDoc->getNextTag(self::DOCTAG)) {
+                    $args = CommandString::parseArgs($Tag->getArgString());
+                    if(isset($args['disable']) && $args['disable']) {
+                        $Request->log("Class Building Disabled: " . $class);
+                        continue;
                     }
-                    $Method->invoke(null, $Request);
-                } else {
-                    // TODO
                 }
+
+                try {
+                    $Request->log("Building {$class}...");
+                    $class::handleStaticBuild($Request);
+
+                } catch (\Exception $ex) {
+                    $Request->logEx($ex);
+                    if($Request instanceof IPrompt)
+                        $Request->prompt('error-resume', "Continue build?");
+
+                    break;
+                }
+
             } else {
-                // TODO
+                $Request->log("{$class} does not implement IBuildable");
+
             }
         }
     }
@@ -101,7 +129,7 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecuta
      */
     static function handleStaticRequest(IRequest $Request) {
         $Inst = new BuildRequestHandler();
-        $Response = $Inst->execute($Request->getMethod());
+        $Response = $Inst->execute($Request);
         $Handler = new ResponseRenderer($Response);
         $Handler->render($Request);
     }
@@ -113,10 +141,13 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecuta
      */
     static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new CPathBackendRoutes());
-        $Builder->writeRoute('CLI /build', __CLASS__);
+        $Builder->writeRoute('CLI /cpath/build', __CLASS__);
     }
 
     static function cls() {
         return __CLASS__;
     }
 }
+
+//$Build = new BuildRequestWrapper(Request::create());
+//BuildRequestHandler::handleStaticBuild($Build);

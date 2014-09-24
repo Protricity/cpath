@@ -24,7 +24,7 @@ use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 class PatchAPI implements IAPI {
     private $mSearchColumns;

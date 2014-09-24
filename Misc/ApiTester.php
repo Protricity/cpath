@@ -10,9 +10,9 @@ namespace CPath\Misc;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Backend\CPathBackendRoutes;
 
 class NotAnApiException extends \Exception {}

@@ -2,101 +2,98 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 9/7/14
- * Time: 12:45 PM
+ * Date: 9/21/14
+ * Time: 3:18 PM
  */
 namespace CPath\Request\CLI;
 
-use CPath\Request\IRequest;
+use CPath\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
-use CPath\Request\IRequestMethod;
+use CPath\Request\Executable\IPrompt;
+use CPath\Request\Log\ILogListener;
+use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\MimeType;
+use CPath\Request\Request;
 
-final class CLIRequest implements IRequest
+class CLIRequest extends Request implements IPrompt
 {
-    private $mPath;
-    private $mMethod;
-    private $mArgs;
+    /** @var ILogListener[] */
+    private $mLogs = array();
+    private $mPos = 0;
+    /** @var IRequestedMimeType */
+    private $mMimeType=null;
 
-    public function __construct(Array $argv = null) {
-        if($argv === null) {
-            $argv = $_SERVER['argv'];
-            $file = array_shift($argv);
+    public function __construct($path = null, Array $args = null, $logFlags=0) {
+        $this->mFlags = $logFlags;
+
+        if ($args === null) {
+            $args = $_SERVER['argv'];
+            $file = array_shift($args);
+            $args = CommandString::parseArgs($args);
         }
-        $this->mPath = array_shift($argv);
-        $this->mArgs = CommandString::parseArgs($argv);
-        $this->mMethod = new CLIMethod($this->mArgs);
-    }
-
-    /**
-     * Matches a route prefix to this request
-     * @param $routePrefix '[method] [path]'
-     * @return bool true if the route matched
-     */
-    function match($routePrefix) {
-        list($routeMethod, $path) = explode(' ', $routePrefix, 2);
-
-        $requestMethod = $this->mMethod->getMethodName();
-
-        // /user/abc123/
-        // /user/:id/
-        if ($routeMethod !== 'ANY' && $routeMethod == $requestMethod)
-            return false;
-
-        if(($p = strpos($path, ':')) !== false) {
-            $routeArgs = explode('/', $path);
-            $i=0;
-            foreach(explode('/', $this->getPath()) as $requestPathArg) {
-                if(!isset($routeArgs[$i]))
-                    return false;
-
-                $routeArg = $routeArgs[$i++];
-
-                if($routeArg[0] == ':') {
-                    $this->mArgs[substr($routeArg, 1)] = $requestPathArg;
-
-                } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
-                    return false;
-
-                }
-            }
-
-            if(isset($routeArgs[$i])) // TODO: extra route return false?
-                return false;
-
-            $this->mMethod = new CLIMethod($this->mArgs);
-
-        } else {
-            if (strcasecmp($this->getPath(), $path) !== 0)
-                return false;
-
+        if (isset($args[0]) && !$path) {
+            $path = $args[0];
+            $this->mPos++;
         }
 
-        return true;
+        $flags = 0;
+        if(isset($args['v']) || isset($args['verbose']))
+            $flags |= ILogListener::VERBOSE;
+
+        $this->mMimeType = new TextMimeType($flags);
+
+        parent::__construct($path, $args);
+
     }
 
     /**
-     * Get the Request Method Instance (GET, POST, PUT, PATCH, DELETE, or CLI)
-     * @return \CPath\Request\IRequestMethod
+     * Get the Request Method (CLI)
+     * @return String
      */
-    function getMethod() {
-        return $this->mMethod;
-    }
-
-    /**
-     * Get the route path
-     * @return String the route path starting with '/'
-     */
-    function getPath() {
-        return $this->mPath;
+    function getMethodName() {
+        return 'CLI';
     }
 
     /**
      * Get the requested Mime types for rendering purposes
      * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getMimeTypes() {
-        return array(
-            new TextMimeType(),
-        );
+    function getMimeType() {
+        return $this->mMimeType;
+    }
+
+    /**
+     * Set the requested Mime type for this request
+     * @param MimeType\IRequestedMimeType $MimeType
+     * @return void
+     */
+    function setMimeType(IRequestedMimeType $MimeType) {
+        $this->mMimeType = $MimeType;
+    }
+
+    function getNextArg() {
+        if($this->hasValue($this->mPos))
+            $this->getValue($this->mPos++);
+        return null;
+    }
+
+    /**
+     * Prompt for a value from the request.
+     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @return mixed the parameter value or null on failure
+     * Example:
+     * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
+     */
+    function prompt($description = null) {
+        if($arg = $this->getNextArg())
+            return $arg;
+
+        if (PHP_OS == 'WINNT') {
+            echo $description;
+            $line = stream_get_line(STDIN, 0, "\n");
+        } else {
+            $line = readline($description);
+        }
+        return $line;
     }
 }

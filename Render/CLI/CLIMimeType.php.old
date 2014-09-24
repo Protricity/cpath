@@ -1,0 +1,30 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/22/14
+ * Time: 6:39 PM
+ */
+namespace CPath\Render\CLI;
+
+use CPath\Render\Text\TextMimeType;
+use CPath\Request\IRequest;
+
+final class CLIMimeType extends TextMimeType
+{
+    public function __construct($typeName = 'text/plain') {
+        parent::__construct($typeName);
+    }
+
+    /**
+     * Send response headers for this mime type
+     * @param int $code HTTP response code
+     * @param String $message response message
+     * @internal param \CPath\Request\IRequest $Request
+     * @return bool returns true if the headers were sent, false otherwise
+     */
+    function sendHeaders($code = 200, $message = 'OK'){
+        return false;
+    }
+
+}

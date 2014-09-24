@@ -27,7 +27,7 @@ use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 class GetSearchAPI implements IAPI {
     private $mSearchColumns;

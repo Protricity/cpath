@@ -25,7 +25,7 @@ use CPath\Handlers\Wrapper\MimeTypeSwitchWrapper;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLRenderMap;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRenderJSON, IRenderText {
     private $mResponse;

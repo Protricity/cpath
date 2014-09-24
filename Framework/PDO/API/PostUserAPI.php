@@ -20,7 +20,7 @@ use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
 
@@ -107,7 +107,7 @@ class PostUserAPI extends PostAPI implements IAPIPostCallbacks {
      * Perform on successful GetAPI execution
      * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel|PDOUserModel $NewUser the new user account instance
      * @param IRequest $Request
-     * @param IResponse $Response
+     * @param \CPath\Response\IResponse $Response
      * @return IResponse|null
      * @throws ModelAlreadyExistsException if the user already exists
      */

@@ -15,7 +15,7 @@ use CPath\Framework\API\Validation\CallbackValidation;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Util\UserUtil;
@@ -92,7 +92,7 @@ class PostUserPasswordAPI extends AbstractPDOAPI {
      * Execute this API Endpoint with the entire request.
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @param Array $args additional arguments for this execution
-     * @return IResponse the api call response with data, message, and status
+     * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
     final function execute(IRequest $Request, $args) {
         $T = $this->mTable;

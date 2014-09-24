@@ -9,11 +9,11 @@ namespace CPath\Request\Exceptions;
 
 class RequestArgumentException extends \Exception
 {
-    private $mParamName;
+    private $mArgName;
 
-    public function __construct($msg, $description = null)
+    public function __construct($msg, $argName)
     {
         parent::__construct($msg);
-        $this->mParamName = $paramName;
+        $this->mArgName = $argName;
     }
 }

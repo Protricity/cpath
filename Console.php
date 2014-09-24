@@ -7,15 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Build\IBuildable;
 use CPath\Request\IStaticRequestHandler;
-use CPath\Request\IRequestHandlerAggregate;
-use CPath\Framework\Request\Common\CLIRequest;
 use CPath\Request\IRequest;
-use CPath\Route\Router;
-use String;
 
-class Console implements IRequestHandlerAggregate { // Broke }, IBuildable {
+class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
 
     const ROUTE_PATH = '/console';     // Allow manual building from command line: 'php index.php build'
     const ROUTE_METHODS = 'CLI';    // CLI only
@@ -107,4 +102,13 @@ class Console implements IRequestHandlerAggregate { // Broke }, IBuildable {
         return new static();
     }
 
+    /**
+     * Handle this request and render any content
+     * @param IRequest $Request the IRequest instance for this render
+     * @return String|void always returns void
+     */
+    static function handleStaticRequest(IRequest $Request)
+    {
+        // TODO: Implement handleStaticRequest() method.
+    }
 }

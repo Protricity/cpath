@@ -14,9 +14,9 @@ use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
 use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
-use CPath\Framework\Response\Types\SimpleResponse;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
+use CPath\Response\Common\SimpleResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\Exceptions\MissingRenderModeException;
 use CPath\Render\HTML\HTMLMimeType;
@@ -49,31 +49,22 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
      * @throws \CPath\Render\Exceptions\MissingRenderModeException
      * @return String|void always returns void
      */
-    function handleStaticRequest(IRequest $Request) {
+    static function handleStaticRequest(IRequest $Request) {
+        $MimeType = $Request->getMimeType();
 
-        foreach ($Request->getMimeTypes() as $MimeType) {
-            if($MimeType instanceof HTMLMimeType)
-                $this->handleHTMLRequest($Request);
+        if($MimeType instanceof HTMLMimeType)
+            $this->handleHTMLRequest($Request);
 
-            elseif($MimeType instanceof JSONMimeType)
-                $this->handleJSONRequest($Request);
+        elseif($MimeType instanceof JSONMimeType)
+            $this->handleJSONRequest($Request);
 
-            elseif($MimeType instanceof XMLMimeType)
-                $this->handleXMLRequest($Request);
+        elseif($MimeType instanceof XMLMimeType)
+            $this->handleXMLRequest($Request);
 
-            elseif($MimeType instanceof TextMimeType)
-                $this->handleTextRequest($Request);
+        elseif($MimeType instanceof TextMimeType)
+            $this->handleTextRequest($Request);
 
-            else continue;
-
-            break;
-        }
-
-        $types = array();
-        foreach($Request->getMimeTypes() as $MimeType)
-            $types[] = $MimeType->getMimeTypeName();
-
-        throw new MissingRenderModeException("Render mode could not be determined for [" . implode(', ', $types) . "]: " . get_class($this));
+        throw new MissingRenderModeException("Render mode could not be determined for [" . $Request->getMimeType() . "]: " . get_class($this));
     }
 
     protected function handleHTMLRequest(IRequest $Request) {

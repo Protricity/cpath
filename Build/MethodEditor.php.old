@@ -1,0 +1,208 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/9/14
+ * Time: 1:51 PM
+ */
+namespace CPath\Build;
+
+use CPath\Build\File\IPHPFileScannerCallbacks;
+use CPath\Build\File\PHPFileScanner;
+use CPath\UnitTest\ITestable;
+use CPath\UnitTest\IUnitTestRequest;
+
+
+class MethodEditor implements ITestable
+{
+    const PREG_METHOD = '/^([^{]+{)(.*)(}[^}]*)$/sm';
+
+    private $mMethod;
+
+    public function __construct(\ReflectionMethod $Method) {
+        $this->mMethod = $Method;
+
+        $ID = array_search($Method, self::$Methods);
+        if($ID === false)
+            self::$Methods[$ID = sizeof(self::$Methods)] = $Method;
+
+        if(!isset(self::$InstCount[$ID]))
+            self::$InstCount[$ID] = 1;
+        else
+            self::$InstCount[$ID]++;
+    }
+
+    public function __destruct() {
+        $Method = $this->mMethod;
+
+        $ID = array_search($Method, self::$Methods);
+        if($ID === false)
+            throw new \Exception("Something went wrong");
+
+        self::$InstCount[$ID]--;
+        if(self::$InstCount[$ID] === 0 && !empty(self::$Source[$ID])) {
+
+            $methodBlock = $this->getMethodSourceBlock();
+
+            if (!preg_match(self::PREG_METHOD, $methodBlock, $matches))
+                throw new \InvalidArgumentException("Method source has invalid format: " . $methodBlock);
+
+            list($methodReplace, $methodPreBody, $methodBody, $methodPostBody) = $matches;
+
+            $newReplace = $methodPreBody . "\n" . self::$Source[$ID] . "\n\t" . $methodPostBody;
+
+            $path = $this->mMethod->getFileName();
+            $oldBody = file_get_contents($path);
+            $count = 0;
+            $newBody = str_replace($methodReplace, $newReplace, $oldBody, $count);
+            if($count !== 1)
+                throw new \Exception("Replace {$count} !== 1");
+
+            //$newMethodBlock = $methodPreBody . $newBody . $methodPostBody;
+
+//        $newFileSource = implode("", $this->readSourceBlock(0, $this->mMethod->getStartLine() - 2));
+//        $newFileSource .= $methodPreBody . "\n" . $newBody . "\n\t" . $methodPostBody;
+//        $newFileSource .= implode("", $this->readSourceBlock($this->mMethod->getEndLine()));
+//
+//        $path = $this->mMethod->getFileName();
+
+            file_put_contents($path, $newBody);
+        }
+    }
+
+    private function readSourceBlock($start_line = 0, $end_line = null) {
+        $filename = $this->mMethod->getFileName();
+
+        $handle = @fopen($filename, "r");
+        $i = -1;
+        $lines = array();
+        while (($line = fgets($handle, 4096)) !== false) {
+            $i++;
+            if ($i < $start_line)
+                continue;
+            if (is_int($end_line) && $i > $end_line)
+                break;
+            $lines[] = $line;
+        }
+
+        fclose($handle);
+        return $lines;
+    }
+
+    private function getMethodSourceBlock() {
+
+        $filename = $this->mMethod->getFileName();
+        $content = file_get_contents($filename);
+
+        $tokens = token_get_all($content);
+        foreach($tokens as $token) {
+            switch($token[0]) {
+                case T_OPEN_TAG:
+                    $phpTag = true;
+                    break;
+                case T_CLOSE_TAG:
+                    $phpTag = false;
+                    break;
+
+            }
+        }
+
+        $handle = @fopen($filename, "r");
+        $i = -1;
+        $phpTag = false;
+        while (($line = fgets($handle, 4096)) !== false) {
+            foreach(token_get_all(($phpTag ? '' : '<?php') . $line) as $token) {
+                switch($token[0]) {
+                    case T_OPEN_TAG:
+                        $phpTag = true;
+                        break;
+                    case T_CLOSE_TAG:
+                        $phpTag = false;
+                        break;
+
+                }
+            }
+        }
+
+        fclose($handle);
+        return $lines;
+
+
+
+        $methodBlock = $this->readSourceBlock(
+            $this->mMethod->getStartLine() - 1,
+            $this->mMethod->getEndLine()
+        );
+
+        return implode("", $methodBlock);
+    }
+
+    public function getMethodSource() {
+
+        $ID = array_search($this->mMethod, self::$Methods);
+        if($ID === false)
+            self::$Methods[$ID = sizeof(self::$Methods)] = $this->mMethod;
+        if(isset(self::$Source[$ID]))
+            return self::$Source[$ID];
+
+        $methodBlock = $this->getMethodSourceBlock();
+
+        if (!preg_match(self::PREG_METHOD, $methodBlock, $matches))
+            throw new \InvalidArgumentException("Method source has invalid format: " . $methodBlock);
+
+        list(, $methodPreBody, $methodBody, $methodPostBody) = $matches;
+        return self::$Source[$ID] = $methodBody;
+    }
+
+    public function replaceMethodSource($newBody) {
+        if ($newBody == $this->getMethodSource())
+            return false;
+
+        $ID = array_search($this->mMethod, self::$Methods);
+        if($ID === false)
+            self::$Methods[$ID = sizeof(self::$Methods)] = $this->mMethod;
+
+        self::$Source[$ID] = $newBody;
+
+        return true;
+    }
+
+    // Static
+
+    private static $Methods = array();
+    private static $InstCount = array();
+    private static $Replace = array();
+    private static $Source = array();
+
+//    /**
+//     * Perform a unit test
+//     * @param IUnitTestRequest $Test the unit test request instance for this test session
+//     * @return String|void always returns void
+//     * @test --disable 0
+//     * Note: Use doctag 'test' with '--disable 1' to have this ITestable class skipped during a build
+//     */
+//    static function handleStaticUnitTest(IUnitTestRequest $Test) {
+//        $Class = new \ReflectionClass(__CLASS__);
+//        $SRC1 = "\n\t\techo 'im working #%s';";
+//        $SRC2 = "\n\t\techo 'im not working #%s';";
+//        $SRC3 = $SRC1.$SRC2."\n\t\techo 'im maybe working #%s';";
+//
+//        $Method = $Class->getMethod('testReplaceSrc');
+//        $Editor = new MethodEditor($Method);
+//        for($i=0; $i<=6; $i++) {
+//            $Editor->replaceMethodSource(sprintf($SRC1, $i));
+//            $Editor->replaceMethodSource(sprintf($SRC2, $i));
+//            $Editor->replaceMethodSource(sprintf($SRC3, $i, $i, $i));
+//        }
+//    }
+//
+//    private function testReplaceSrc() {
+//
+//		echo 'im working #6';
+//		echo 'im not working #6';
+//		echo 'im maybe working #6';
+//	}
+
+
+
+}

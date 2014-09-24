@@ -5,12 +5,12 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Framework\Response\Types;
+namespace CPath\Response\Common;
 
 use CPath\Config;
-use CPath\Framework\Response\Exceptions\CodedException;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\Exceptions\CodedException;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
 
 
 class ExceptionResponse implements IResponse {

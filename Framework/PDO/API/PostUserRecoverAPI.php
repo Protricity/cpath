@@ -13,7 +13,7 @@ use CPath\Framework\API\Field\RequiredField;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 class PostUserRecoverAPI extends AbstractPDOAPI {
 

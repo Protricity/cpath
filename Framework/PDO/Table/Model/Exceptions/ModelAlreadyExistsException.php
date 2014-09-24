@@ -7,8 +7,8 @@
  */
 namespace CPath\Framework\PDO\Table\Model\Exceptions;
 
-use CPath\Framework\Response\Exceptions\CodedException;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\Exceptions\CodedException;
+use CPath\Response\IResponse;
 
 class ModelAlreadyExistsException extends CodedException {
     const DEFAULT_CODE = IResponse::STATUS_CONFLICT;

@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Table\Model\Interfaces;
 
 use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 interface IPDOModel extends IMappableKeys, ISerializable {
 

@@ -1,0 +1,50 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/16/14
+ * Time: 10:19 PM
+ */
+namespace CPath\Request\Web;
+
+use CPath\Describable\IDescribable;
+use CPath\Request\Exceptions\RequestArgumentException;
+use CPath\Request\Exceptions\RequestParameterException;
+use CPath\Request\Executable\IPromptValidation;
+use CPath\Request\IRequestMethod;
+use CPath\Request\Validation\PromptException;
+use CPath\Request\Validation\ValidationException;
+
+class GETMethod implements IRequestMethod
+{
+    public function __construct() {
+    }
+
+    /**
+     * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
+     * @return String
+     */
+    function getMethodName() {
+        return 'GET';
+    }
+
+    /**
+     * Get a request value if it exists
+     * @param string $argName the parameter name
+     * @return mixed the parameter value or null
+     */
+    function getValue($argName) {
+        if (!empty($_GET[$argName]))
+            return $_GET[$argName];
+        return null;
+    }
+
+    /**
+     * Checks a request value to see if it exists
+     * @param string $argName the parameter name
+     * @return bool
+     */
+    function hasValue($argName) {
+        return !empty($_GET[$argName]);
+    }
+}

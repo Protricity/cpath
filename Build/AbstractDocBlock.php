@@ -10,11 +10,15 @@ namespace CPath\Build;
 abstract class AbstractDocBlock
 {
     /** @var DocTag[] */
-    private $mTags = array();
+    private $mTags = null;
+    private $mPos = 0;
 
     abstract protected function getDocComment();
 
     public function hasTag($tagName) {
+        if ($this->mTags === null)
+            $this->getAllTags();
+
         foreach ($this->mTags as $Tag)
             if ($Tag->getName() === $tagName)
                 return true;
@@ -27,14 +31,15 @@ abstract class AbstractDocBlock
      * @return DocTag the next tag instance or null if no tag was found
      */
     public function getNextTag($tagName = null) {
+        if ($this->mTags === null)
+            $this->getAllTags();
+
         /** @var DocTag $Tag */
         if ($tagName === null)
-            return next($this->mTags);
+            return isset($this->mTags[$this->mPos]) ? $this->mTags[$this->mPos++] : null;
 
-        if (!$tagName[0] === '@')
-            $tagName = '@' . $tagName;
-
-        while ($Tag = next($this->mTags)) {
+        while (isset($this->mTags[$this->mPos])) {
+            $Tag = $this->mTags[$this->mPos++];
             if ($Tag->getName() === $tagName)
                 return $Tag;
         }
@@ -51,7 +56,7 @@ abstract class AbstractDocBlock
 
         $this->mTags = array();
         $doc = $this->getDocComment();
-        if (preg_match_all('/@([a-zA-Z0-9_]+)\s+([^@$]+)/i', $doc, $matches)) {
+        if (preg_match_all('/@(\w+)\s+([^@\r\n]+)/i', $doc, $matches)) {
             foreach ($matches[1] as $i => $tagName) {
                 $this->mTags[] = new DocTag($tagName, $matches[2][$i]);
             }

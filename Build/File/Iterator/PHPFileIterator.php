@@ -7,16 +7,13 @@
  */
 namespace CPath\Build\File\Iterator;
 
-use CPath\Build\File\Iterator\AbstractFileIterator;
-
 class PHPFileIterator extends AbstractFileIterator
 {
     private $mNSFilter;
 
-    public function __construct($namespaceFilter, $rootPath)
-    {
+    public function __construct($namespaceFilter, $paths) {
         $this->mNSFilter = $namespaceFilter;
-        parent::__construct($rootPath);
+        parent::__construct($paths);
     }
 
     /**
@@ -24,13 +21,11 @@ class PHPFileIterator extends AbstractFileIterator
      * @param $isDir
      * @return bool true if the file or directory should be filtered out (removed from the results)
      */
-    protected function filter($filePath, $isDir)
-    {
+    protected function filter($filePath, $isDir) {
         if ($isDir)
             return false;
 
         if (substr($filePath, -4) !== '.php') {
-            //Log::v2(__CLASS__, "Skipping non-php file: {$filePath}");
             return true;
         }
 

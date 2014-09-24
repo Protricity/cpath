@@ -11,7 +11,7 @@ use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Interfaces\ILogEntry;
 use CPath\Model\ArrayObject;

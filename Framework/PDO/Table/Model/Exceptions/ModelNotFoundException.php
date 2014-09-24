@@ -8,8 +8,8 @@
 namespace CPath\Framework\PDO\Table\Model\Exceptions;
 
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
 
 class ModelNotFoundException extends \Exception implements IResponse
 {

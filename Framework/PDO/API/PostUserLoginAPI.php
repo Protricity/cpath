@@ -13,7 +13,7 @@ use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\User\Session\ISessionManager;
 
 interface IPostLoginExecute
@@ -25,7 +25,7 @@ interface IPostLoginExecute
      * @param ISessionManager $Session the logged in user session
      * @param IRequest $Request
      * @param IResponse $Response
-     * @return IResponse|null
+     * @return \CPath\Response\IResponse|null
      */
     function onPostLoginExecute(PDOUserModel $User, ISessionManager $Session, IRequest $Request, IResponse $Response);
 }

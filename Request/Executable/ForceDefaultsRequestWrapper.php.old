@@ -1,0 +1,74 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/20/14
+ * Time: 5:51 PM
+ */
+namespace CPath\Request\Executable;
+
+use CPath\Describable\IDescribable;
+use CPath\Request\IRequest;
+use CPath\Request\Validation\ValidationException;
+
+class ForceDefaultsRequestWrapper implements IRequest
+{
+    /** @var IRequest */
+    private $mRequest;
+
+    public function __construct(IPrompt $OriginalRequest) {
+        $this->mRequest = $OriginalRequest;
+    }
+    /**
+     * Get the requested Mime types for rendering purposes
+     * @return \CPath\Request\MimeType\IRequestedMimeType[]
+     */
+    function getMimeTypes() {
+        return $this->mRequest->getMimeTypes();
+    }
+
+    /**
+     * Checks a request value to see if it exists
+     * @param string $paramName the parameter name
+     * @return bool
+     */
+    function hasValue($paramName) {
+        return $this->mRequest->getMethodName();
+    }
+
+    /**
+     * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
+     * @return String
+     */
+    function getMethodName() {
+        return $this->mRequest->getMethodName();
+    }
+
+    /**
+     * Return the route path for this request
+     * @return String the route path starting with '/'
+     */
+    function getPath() {
+        return $this->mRequest->getPath();
+    }
+    /**
+     * Matches a route prefix to this request and updates the method args with any extra path
+     * @param $routePrefix '[method] [path]'
+     * @return bool true if the route matched
+     */
+    function match($routePrefix) {
+        return $this->mRequest->match($routePrefix);
+    }
+
+    /**
+     * Get a request value by parameter name if it exists
+     * @param string $paramName the parameter name
+     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @return mixed the parameter value or null
+     */
+    function getValue($paramName, $description = null) {
+        if($this->mRequest->hasValue($paramName))
+            return $this->mRequest->getValue($paramName);
+        return null;
+    }
+}

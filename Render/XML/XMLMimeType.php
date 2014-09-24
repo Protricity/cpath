@@ -7,38 +7,32 @@
  */
 namespace CPath\Render\XML;
 
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
+use CPath\Request\IRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\MimeType\MimeType;
 
-final class XMLMimeType implements IRequestedMimeType
+class XMLMimeType extends MimeType
 {
-    private $mTypeName;
-
-    public function __construct($typeName='application/xml') {
-        $this->mTypeName = $typeName;
-    }
-
-    /**
-     * Get the Mime type as a string
-     * @return String
-     */
-    function getMimeTypeName() {
-        return $this->mTypeName;
+    public function __construct($typeName='application/xml', IRequestedMimeType $nextMimeType=null) {
+        parent::__construct($typeName, $nextMimeType);
     }
 
     /**
      * Send response headers for this mime type
-     * @param IResponse $Response
-     * @throws \Exception
-     * @return void
+     * @param int $code HTTP response code
+     * @param string $message response message
+     * @internal param \CPath\Request\IRequest $Request
+     * @internal param string $origin Access-Control-Allow-Origin. Send false to disable
+     * @return bool returns true if the headers were sent, false otherwise
      */
-    function sendHeaders(IResponse $Response) {
-        if (headers_sent())
-            throw new \Exception("Headers were already sent");
-
-        header("HTTP/1.1 " . $Response->getCode() . " " . preg_replace('/[^\w -]/', '', $Response->getMessage()));
-        header("Content-Type: " . $this->mTypeName);
+    function sendHeaders($code = 200, $message = 'OK') {
+        if(!parent::sendHeaders($code, $message))
+            return false;
 
         header('Access-Control-Allow-Origin: *');
+
+        return true;
     }
+
 }

@@ -7,10 +7,11 @@
  */
 namespace CPath\Route;
 
-use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Request\IRequest;
 use CPath\Request\IStaticRequestHandler;
 use CPath\Request\Common\ExceptionRequest;
+use CPath\Request\Log\ILogListener;
 
 final class RouteRenderer implements IRouteMap
 {
@@ -52,12 +53,17 @@ final class RouteRenderer implements IRouteMap
                 call_user_func_array(array($target, 'handleStaticRequest'), $args);
 
             } catch (\Exception $ex) {
+                if($this->mRequest instanceof ILogListener)
+                    $this->mRequest->logEx($ex);
+
                 $this->mRequest = new ExceptionRequest($ex, $this->mRequest);
                 return false;
 
             }
             return true;
         }
+        //if($this->mRequest instanceof ExceptionRequest)
+        //    throw $this->mRequest->getException();
         return false;
     }
 }

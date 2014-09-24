@@ -15,7 +15,7 @@ use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Layout\Template\Abstract3SectionLayout;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Framework\View\Templates\Layouts\NavBar\AbstractNavBarLayout;
 use CPath\Templates\Themes\CPathDefaultTheme;

@@ -7,14 +7,15 @@
  */
 namespace CPath\Request\Executable;
 
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
+use CPath\Request\IRequest;
 
 interface IExecutable
 {
     /**
      * Execute a command and return a response. Does not render
-     * @param IPrompt $Prompt the request prompt
+     * @param IRequest $Request
      * @return IResponse the execution response
      */
-    function execute(IPrompt $Prompt);
+    function execute(IRequest $Request);
 }

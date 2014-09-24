@@ -15,7 +15,7 @@ use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Common\ModifiedRequestWrapper;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Route\RouteNotFoundException;
 use CPath\Route\IRouteMap;

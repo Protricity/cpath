@@ -11,41 +11,15 @@ use CPath\Describable\IDescribable;
 use CPath\Request\Exceptions\RequestArgumentException;
 use CPath\Request\Exceptions\RequestParameterException;
 use CPath\Request\IRequestMethod;
+use CPath\Request\Validation\PromptException;
 
 class POSTMethod implements IRequestMethod
 {
     private $mName;
-    private $mParams;
     private $mFields;
 
-    public function __construct($methodName, Array $pathParams=array()) {
-        $this->mParams = $pathParams;
+    public function __construct($methodName) {
         $this->mName = $methodName;
-    }
-
-    /**
-     * Prompt for a value from the request.
-     * @param string $name the parameter name
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @param string|null $defaultValue [optional] default value if prompt fails
-     * @return mixed the parameter value
-     * @throws \CPath\Request\Exceptions\RequestParameterException if a prompt failed to produce a result
-     * Example:
-     * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'
-     */
-    function prompt($name, $description = null, $defaultValue = null) {
-        if (!empty($this->mParams[$name]))
-            return $this->mParams[$name];
-
-        $values = $this->getAllFormFieldValues();
-
-        if (!empty($values[$name]))
-            return $values[$name];
-
-        if ($defaultValue !== null)
-            return $defaultValue;
-
-        throw new RequestParameterException($this->getMethodName() . " form field '" . $name . "' not set", $name, $description);
     }
 
     /**
@@ -54,16 +28,6 @@ class POSTMethod implements IRequestMethod
      */
     function getMethodName() {
         return $this->mName;
-    }
-
-    /**
-     * Add a path parameter i.e. /:id/
-     * @param $name
-     * @param $value
-     * @return void
-     */
-    function addPathParameter($name, $value) {
-        $this->mParams[$name] = $value;
     }
 
     /**
@@ -93,5 +57,26 @@ class POSTMethod implements IRequestMethod
 
         $this->mFields = $_POST;
         return $this->mFields;
+    }
+
+    /**
+     * Get a request value if it exists
+     * @param string $argName the parameter name
+     * @return mixed the parameter value or null
+     */
+    function getValue($argName) {
+        $values = $this->getAllFormFieldValues();
+        return !empty($values[$argName]) ? $values[$argName] : null;
+    }
+
+    /**
+     * Checks a request value to see if it exists
+     * @param string $argName the parameter name
+     * @return bool
+     */
+    function hasValue($argName)
+    {
+        $values = $this->getAllFormFieldValues();
+        return empty($values[$argName]);
     }
 }

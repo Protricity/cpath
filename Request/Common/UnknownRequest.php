@@ -34,7 +34,7 @@ final class UnknownRequest implements IRequest
      * @throws \Exception
      * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getMimeTypes()
+    function getMimeType()
     {
         throw new \Exception("Unknown Request: " . $this->mMethod);
     }

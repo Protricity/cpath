@@ -1,6 +1,0 @@
-[submodule "client"]
-	path = client
-	url = prot@entersoundportal.com:repo/soundportal-client.git
-[submodule "web"]
-	path = web
-	url = prot@entersoundportal.com:repo/soundportal-web.git

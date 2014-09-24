@@ -13,7 +13,7 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponseCode;
 
 abstract class PDOModel implements IPDOModel {
     const MODEL_NAME = null;

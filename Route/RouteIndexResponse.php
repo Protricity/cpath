@@ -11,8 +11,8 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IMappableSequence;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
 
 class RouteIndexResponse implements IResponse, IMappableSequence
 {

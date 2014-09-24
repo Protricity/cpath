@@ -7,7 +7,7 @@
  */
 namespace CPath\Request\Log;
 
-interface ILog
+interface ILogListener
 {
     const ERROR = 0x1; // Error log entry
     const VERBOSE = 0x2; // Verbose message meant for the developers to see
@@ -27,4 +27,12 @@ interface ILog
      * @return void
      */
     function logEx(\Exception $ex, $flags = 0);
+
+    /**
+     * Add a log listener callback
+     * @param ILogListener $Listener
+     * @return void
+     * @throws \InvalidArgumentException if this log listener instance does not accept additional listeners
+     */
+    function addLogListener(ILogListener $Listener);
 }

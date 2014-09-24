@@ -20,10 +20,10 @@ use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
@@ -68,7 +68,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
      * @param IRequest $Request the IRequest instance for this render which contains the request
      * @internal param Array $args additional arguments for this execution
-     * @return IResponse the api call response with data, message, and status
+     * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
     final public function execute(IRequest $Request) {
         $this->processRequest($Request);

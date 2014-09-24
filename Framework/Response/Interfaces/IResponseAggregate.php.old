@@ -9,7 +9,7 @@ namespace CPath\Framework\Response\Interfaces;
 
 interface IResponseAggregate {
     /**
-     * @return \CPath\Framework\Response\Interfaces\IResponse
+     * @return \CPath\Response\IResponse
      */
     function createResponse();
 }

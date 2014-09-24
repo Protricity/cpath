@@ -7,6 +7,7 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Route;
+use CPath\Build\Editor\PHP\PHPMethodEditor;
 use CPath\Build\MethodDocBlock;
 use CPath\Build\MethodEditor;
 use CPath\Config;
@@ -18,7 +19,8 @@ class RouteBuilder {
     const BUILD_KEY = 'build';
     const BUILD_ARG = 'routes';
     const BUILD_DISABLED = 'disabled';
-    const FUNC_FORMAT = "\t\t\t\$Map->route('%s', %s)";
+    const FUNC_PREG = "/Map->route\('([^']+)', (.+)\)/";
+    const FUNC_PRINT = "\t\t\t\$Map->route('%s', %s)";
     const KEY_FORMAT = "\t\t\t// @group %s";
 
     private $mGroupKey;
@@ -37,8 +39,10 @@ class RouteBuilder {
         foreach($Class->getMethods() as $Method) {
             $DocBlock = new MethodDocBlock($Method);
             if($DocBlock->hasTag(self::BUILD_KEY)) {
-                $args = $DocBlock->getNextTagArgs(self::BUILD_KEY);
-                if(isset($args[0]) && $args[0] !== self::KEY_FORMAT) {
+                $Tag = $DocBlock->getNextTag(self::BUILD_KEY);
+                $args = CommandString::parseArgs($Tag->getArgString());
+
+                if(isset($args[0]) && $args[0] === self::BUILD_ARG) {
                     if(isset($args[self::BUILD_DISABLED]) && $args[self::BUILD_DISABLED])
                         continue;
                     if($this->mMethod)
@@ -54,33 +58,39 @@ class RouteBuilder {
 
         if(!$groupKey) {
             $backtrace = debug_backtrace();
-            $groupKey = $backtrace[1]['file'] . ':' . $backtrace[1]['line'];
+            $groupKey = $backtrace[1]['class']; // . '::' . $backtrace[1]['function'];
         }
         $this->mGroupKey = $groupKey;
 
         $Editor = new MethodEditor($this->mMethod);
 
+
+        $methodSource = $Editor->getMethodSource();
+        $curKey = '';
+        foreach(explode("\n", $methodSource) as $line) {
+            $prefix = $argList = '';
+
+            if(preg_match(self::FUNC_PREG, $line, $matches)) {
+                $prefix = $matches[1];
+                $argList = $matches[2];
+                if(!isset($this->mRoutes[$curKey]))
+                    $this->mRoutes[$curKey] = array();
+
+                $this->mRoutes[$curKey][$prefix] = $argList;
+
+            } else if(sscanf($line, self::KEY_FORMAT, $key) === 1) {
+                $curKey = $key;
+
+            } else {
+                // todo: unrecognized line
+
+            }
+        }
+
+        //print_r($this->mRoutes);die($this->mGroupKey);
         if($Request->hasFlag($Request::IS_SESSION_BUILD)) {
 
         } else {
-            $methodSource = $Editor->getMethodSource();
-            $curKey = '';
-            foreach(explode("\n", $methodSource) as $line) {
-                $prefix = $argList = '';
-
-                if(sscanf($line, self::FUNC_FORMAT, $prefix, $argList) === 1) {
-                    if(!isset($this->mRoutes[$curKey]))
-                        $this->mRoutes[$curKey] = array();
-                    $this->mRoutes[$curKey][$prefix] = $argList;
-
-                } else if(sscanf($line, self::KEY_FORMAT, $key) === 1) {
-                    $curKey = $key;
-
-                } else {
-                    // todo: unrecognized line
-
-                }
-            }
             unset($this->mRoutes[$this->mGroupKey]);
         }
     }
@@ -88,24 +98,25 @@ class RouteBuilder {
     public function writeRoute($prefix, $target, $_arg=null) {
         $argList = '';
         for($i=1; $i<func_num_args(); $i++)
-            $argList .= ($argList ? ', ' : '') . var_export(func_get_arg($i));
+            $argList .= ($argList ? ', ' : '') . var_export(func_get_arg($i), true);
 
         $this->mRoutes[$this->mGroupKey][$prefix] = $argList;
 
         $src = "\t\treturn";
-        $i=0;
+
+        krsort($this->mRoutes);
         foreach($this->mRoutes as $groupKey => $routes) {
             $src .= "\n" . sprintf(self::KEY_FORMAT, $groupKey);
             foreach($routes as $prefix => $argList) {
-                if($i++ >= 1)
-                    $src .= " ||";
-                $src .= "\n" . sprintf(self::FUNC_FORMAT, $prefix, $argList);
+                $src .= "\n" . sprintf(self::FUNC_PRINT, $prefix, $argList) . " ||";
             }
         }
-        $src .= ";";
+        $src = substr($src, 0, -3) . ";";
 
-        $Editor = new MethodEditor($this->mMethod);
-        return $Editor->replaceMethodSource($src);
+        $Editor = PHPMethodEditor::fromMethod($this->mMethod);
+        $Editor->replaceMethodSource($src);
+        $Editor->write();
+        return true;
     }
 }
 

@@ -10,7 +10,7 @@ namespace CPath\Framework\API\Interfaces;
 use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 
 interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?
@@ -19,7 +19,7 @@ interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?
      * Execute this API Endpoint with the entire request.
      * @param IRequest $Request the IRequest instance for this render which contains the request and args
      * @internal param Array $args additional arguments for this execution
-     * @return IResponse the api call response with data, message, and status
+     * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
     function execute(IRequest $Request);
 

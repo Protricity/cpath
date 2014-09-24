@@ -7,8 +7,8 @@
  */
 namespace CPath\Request\Common;
 
+use CPath\Describable\IDescribable;
 use CPath\Request\IRequest;
-use CPath\Request\IRequestMethod;
 
 class ExceptionRequest implements IRequest
 {
@@ -49,16 +49,8 @@ class ExceptionRequest implements IRequest
      * Get the requested Mime types for rendering purposes
      * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getMimeTypes() {
-        return $this->mRequest->getMimeTypes();
-    }
-
-    /**
-     * Get the Request Method Instance (ERR)
-     * @return IRequestMethod
-     */
-    function getMethod() {
-        return $this->mRequest->getMethod();
+    function getMimeType() {
+        return $this->mRequest->getMimeType();
     }
 
     /**
@@ -67,5 +59,32 @@ class ExceptionRequest implements IRequest
      */
     function getPath() {
         return $this->mRequest->getPath();
+    }
+
+    /**
+     * Checks a request value to see if it exists
+     * @param string $paramName the parameter name
+     * @return bool
+     */
+    function hasValue($paramName) {
+        return $this->mRequest->hasValue($paramName);
+    }
+
+    /**
+     * Get a request value by parameter name if it exists
+     * @param string $paramName the parameter name
+     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @return mixed the parameter value or null
+     */
+    function getValue($paramName, $description = null) {
+        return $this->mRequest->getValue($paramName, $description);
+    }
+
+    /**
+     * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
+     * @return String
+     */
+    function getMethodName() {
+        return $this->mRequest->getMethodName();
     }
 }

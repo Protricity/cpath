@@ -11,7 +11,7 @@ namespace CPath\Framework\PDO\Interfaces;
 use CPath\Framework\API\Exceptions\APIException;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 
 interface IAPIPostUserCallbacks {
 
@@ -31,5 +31,5 @@ interface IAPIPostUserCallbacks {
      * @param IResponse $Response
      * @return IResponse|null
      */
-    function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, IResponse $Response);
+    function onPostUserExecute(PDOUserModel $NewUser, IRequest $Request, \CPath\Response\IResponse $Response);
 }

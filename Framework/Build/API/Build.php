@@ -27,7 +27,7 @@ use CPath\Route\RouteBuilder;
 use CPath\Framework\Render\Layout\API\APILayout;
 use CPath\Log;
 
-class Build implements IRequestHandlerAggregate, IAPI, IBuildable {
+class Build implements IAPI {
 
     //const ROUTE_PATH = '/build';    // Allow manual building from command line: 'php index.php build'
     //const ROUTE_METHOD = 'CLI';    // CLI only

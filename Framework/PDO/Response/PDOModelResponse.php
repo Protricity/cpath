@@ -10,8 +10,8 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Data\Map\IKeyMap;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
-use CPath\Framework\Response\Interfaces\IResponse;
-use CPath\Framework\Response\Interfaces\IResponseCode;
+use CPath\Response\IResponse;
+use CPath\Response\IResponseCode;
 use CPath\Handlers\Response\ResponseUtil;
 
 class PDOModelResponse implements IPDOModel, IResponse

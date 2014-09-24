@@ -10,6 +10,8 @@ namespace CPath;
 use CPath\Interfaces\IAutoLoader;
 use CPath\Loaders\CPathLoader;
 
+const AUTOLOADER = true;
+
 class Autoloader
 {
     /** @var String[] */
@@ -23,6 +25,10 @@ class Autoloader
         if(is_string($path))
             $path = trim($path, '\\') . '\\';
         self::$mLoaders[$namespace] = $path;
+    }
+
+    public static function getLoaderPaths() {
+        return self::$mLoaders;
     }
 
     /** Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class */

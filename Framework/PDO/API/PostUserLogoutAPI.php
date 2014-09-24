@@ -11,9 +11,9 @@ use CPath\Base;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
 use CPath\Request\IRequest;
-use CPath\Framework\Response\Interfaces\IResponse;
+use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Framework\Response\Types\ExceptionResponse;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Framework\User\Session\SessionNotFoundException;
 
 
@@ -23,8 +23,8 @@ interface IPostLogoutExecute {
      * Perform on successful GetAPI execution
      * @param PDOUserModel $User the logged out user account instance
      * @param IRequest $Request
-     * @param IResponse $Response
-     * @return IResponse|null
+     * @param \CPath\Response\IResponse $Response
+     * @return \CPath\Response\IResponse|null
      */
     function onPostLogoutExecute(PDOUserModel $User, IRequest $Request, IResponse $Response);
 }
@@ -68,7 +68,7 @@ class PostUserLogoutAPI extends AbstractPDOAPI
      * Execute this API Endpoint with the entire request.
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
      * @param Array $args additional arguments for this execution
-     * @return \CPath\Framework\Response\Interfaces\IResponse|mixed the api call response with data, message, and status
+     * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */
     final function execute(IRequest $Request, $args)
     {

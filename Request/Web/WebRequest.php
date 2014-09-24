@@ -2,112 +2,79 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 9/7/14
- * Time: 12:47 PM
+ * Date: 9/21/14
+ * Time: 3:18 PM
  */
 namespace CPath\Request\Web;
 
-use CPath\Request\IRequest;
-use CPath\Request\IRequestMethod;
-use CPath\Request\MimeType;
+use CPath\Render\HTML\HTMLMimeType;
+use CPath\Render\JSON\JSONMimeType;
+use CPath\Render\Text\TextMimeType;
+use CPath\Render\XML\XMLMimeType;
+use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\MimeType\UnknownMimeType;
+use CPath\Request\Request;
 
-class WebRequest implements IRequest
+class WebRequest extends Request
 {
-    private $mMimeTypes = null;
-    /** @var IRequestMethod */
-    private $mMethod;
-    private $mPath;
-    private $mArgs=array();
+    /** @var IRequestedMimeType */
+    private $mMimeType = null;
+    private $mHeaders = null;
 
-    public function __construct() {
-        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    private $mMethodName;
 
-        $root = dirname($_SERVER['SCRIPT_NAME']);
+    public function __construct($method, $path = null, Array $params = array()) {
+        $this->mMethodName = $method;
+        if (!$path)
+            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        if (stripos($path, $root) === 0)
-            $path = substr($path, strlen($root));
-        $this->mPath = $path;
-
-        $method = $_SERVER["REQUEST_METHOD"];
-        if($method === 'GET')
-            return $this->mMethod = new GETMethod();
-
-        return $this->mMethod = new POSTMethod($method);
+        parent::__construct($path, $params);
     }
 
     /**
-     * Matches a route prefix to this request
-     * @param $routePrefix '[method] [path]'
-     * @return bool true if the route matched
+     * Get the Request Method (POST, PUT, PATCH, DELETE, or CLI)
+     * @return String
      */
-    function match($routePrefix) {
-        list($routeMethod, $path) = explode(' ', $routePrefix, 2);
-
-        $requestMethod = $this->mMethod->getMethodName();
-
-        // /user/abc123/
-        // /user/:id/
-        if ($routeMethod !== 'ANY' && $routeMethod !== $requestMethod)
-            return false;
-
-        if(($p = strpos($path, ':')) !== false) {
-            $routeArgs = explode('/', trim($path, '/'));
-            $i=0;
-            foreach(explode('/', trim($this->getPath(), '/')) as $requestPathArg) {
-                if(!isset($routeArgs[$i]))
-                    return false;
-
-                $routeArg = $routeArgs[$i++];
-
-                if($routeArg[0] == ':') {
-                    $this->mArgs[substr($routeArg, 1)] = $requestPathArg;
-
-                } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
-                    return false;
-
-                }
-            }
-
-            if(isset($routeArgs[$i])) // TODO: extra route return false?
-                return false;
-
-            if($this->mMethod->getMethodName() === 'GET')
-                return $this->mMethod = new GETMethod($this->mArgs);
-
-            return $this->mMethod = new POSTMethod($this->mMethod->getMethodName(), $this->mArgs);
-
-        } else {
-            if (strcasecmp($this->getPath(), $path) !== 0)
-                return false;
-
-        }
-
-        return true;
+    function getMethodName() {
+        return $this->mMethodName;
     }
 
     /**
-     * Get the Request Method Instance (GET, POST, PUT, PATCH, DELETE, or CLI)
-     * @return \CPath\Request\IRequestMethod
+     * Checks a request value to see if it exists
+     * @param string $paramName the parameter name
+     * @return bool
      */
-    function getMethod() {
-        return $this->mMethod;
+    function hasValue($paramName) {
+        if(parent::hasValue($paramName))
+            return true;
+
+        $values = $this->getAllValues();
+        if(!empty($values[$paramName]))
+            return true;
+
+        return false;
+    }
+
+    function getAllValues() {
+        return $_GET;
     }
 
     /**
-     * Get the route path
-     * @return String the route path starting with '/'
+     * Set the requested Mime type for this request
+     * @param IRequestedMimeType $MimeType
+     * @return void
      */
-    function getPath() {
-        return $this->mPath;
+    function setMimeType(IRequestedMimeType $MimeType) {
+        $this->mMimeType = $MimeType;
     }
 
     /**
-     * Get the requested Mime types
-     * @return \CPath\Request\MimeType\IRequestedMimeType[]
+     * Get the requested Mime type(s) for rendering purposes
+     * @return \CPath\Request\MimeType\IRequestedMimeType
      */
-    function getMimeTypes() {
-        if ($this->mMimeTypes)
-            return $this->mMimeTypes;
+    function getMimeType() {
+        if ($this->mMimeType)
+            return $this->mMimeType;
 
         $accepts = 'text/html';
         if (isset($_SERVER['HTTP_ACCEPT'])) {
@@ -118,7 +85,6 @@ class WebRequest implements IRequest
                     $accepts = $value;
         }
 
-        $types = array();
         foreach (explode(',', $accepts) as $type) {
             list($type) = explode(';', $type, 2);
             $type = trim($type);
@@ -128,91 +94,46 @@ class WebRequest implements IRequest
                 case 'text/javascript':
                 case 'text/x-javascript':
                 case 'text/x-json':
-                    $types[] = new \CPath\Render\JSON\JSONMimeType($type);
+                    $this->mMimeType = new JSONMimeType($type, $this->mMimeType);
                     break;
                 case 'application/xml':
                 case 'text/xml':
-                    $types[] = new \CPath\Render\XML\XMLMimeType($type);
+                $this->mMimeType = new XMLMimeType($type, $this->mMimeType);
                     break;
                 case 'text/html':
                 case 'application/xhtml+xml':
-                    $types[] = new \CPath\Render\HTML\HTMLMimeType($type);
+                    $this->mMimeType = new HTMLMimeType($type, $this->mMimeType);
                     break;
                 case 'text/plain':
-                    $types[] = new \CPath\Render\Text\TextMimeType($type);
+                    $this->mMimeType = new TextMimeType($type, $this->mMimeType);
                     break;
                 default:
-                    $types[] = new MimeType\UnknownMimeType($type);
+                    $this->mMimeType = new UnknownMimeType($type, $this->mMimeType);
             }
         }
 
-        $this->mMimeTypes = $types;
-        return $this->mMimeTypes;
+        return $this->mMimeType;
     }
 
-    // Static
-    private static $mHeaders = null;
-
-    static function getAllHeaders() {
-        if (self::$mHeaders !== null)
-            return self::$mHeaders;
+    function getAllHeaders() {
+        if ($this->mHeaders !== null)
+            return $this->mHeaders;
 
         if (function_exists('getallheaders'))
-            return self::$mHeaders = getallheaders();
+            return $this->mHeaders = getallheaders();
 
         foreach ($_SERVER as $name => $value) {
             if (in_array(substr($name, 0, 5), array('CONTE', 'HTTP_'))) {
                 $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
-                self::$mHeaders[$name] = $value;
+                $this->mHeaders[$name] = $value;
             }
         }
-        return self::$mHeaders;
+        return $this->mHeaders;
     }
 
-    static function getHeader($name) {
+    function getHeader($name) {
         $headers = self::getAllHeaders();
         return $headers[$name];
     }
 
-//
-//    /**
-//     * @return IRequestMethod
-//     */
-//    function getMethod()
-//    {
-//        $methodName = $_SERVER["REQUEST_METHOD"];
-//
-//        switch ($methodName) {
-//            case 'GET':
-//                $Method = new GETRequest();
-//                break;
-//            case 'POST':
-//                $Method = new POSTRequest();
-//                break;
-//            case 'PUT':
-//                $Method = new POSTRequest();
-//                break;
-//            case 'PATCH':
-//                $Method = new POSTRequest();
-//                break;
-//            case 'DELETE':
-//                $Method = new POSTRequest();
-//                break;
-//            case 'CLI':
-//                $Method = new CLIRequest();
-//                break;
-////                $input = file_get_contents('php://input');
-////                $Web->mRawQueryString = $input;
-////                if ($Web->getHeaders('Content-Type') === 'application/json') {
-////                    $Web->mRequest = json_decode($input, true);
-////                } else {
-////                    parse_str($input, $request);
-////                    $Web->mRequest = $request;
-////                }
-////                break;
-//            default:
-////                Log::e(__CLASS__, "Invalid Request Method: " . $Web->mMethod);
-////                $Web->mRequest = array();
-//        }
-//    }
 }

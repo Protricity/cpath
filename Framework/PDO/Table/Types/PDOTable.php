@@ -28,7 +28,7 @@ use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Interfaces\IArrayObject;
 use CPath\Log;
 
-abstract class PDOTable implements IPDOTable, IBuildable
+abstract class PDOTable implements IPDOTable
 {
 
     //const MODEL_CLASS = null;
