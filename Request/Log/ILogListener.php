@@ -7,10 +7,14 @@
  */
 namespace CPath\Request\Log;
 
+use CPath\Request\IRequest;
+
 interface ILogListener
 {
-    const ERROR = 0x1; // Error log entry
-    const VERBOSE = 0x2; // Verbose message meant for the developers to see
+    const VERBOSE = 0x01; // Verbose message meant for the developers to see
+
+    const WARNING = 0x10; // Error log entry
+    const ERROR = 0x20; // Error log entry
 
     /**
      * Add a log entry

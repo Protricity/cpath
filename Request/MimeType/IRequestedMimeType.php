@@ -28,5 +28,5 @@ interface IRequestedMimeType
      * @internal param \CPath\Request\IRequest $Request
      * @return bool returns true if the headers were sent, false otherwise
      */
-    function sendHeaders($code = 200, $message = 'OK');
+    //function sendHeaders($code = 200, $message = 'OK');
 }

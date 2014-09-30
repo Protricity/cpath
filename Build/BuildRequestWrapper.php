@@ -8,7 +8,7 @@
 namespace CPath\Build;
 
 use CPath\Describable\IDescribable;
-use CPath\Request\Exceptions\RequestParameterException;
+use CPath\Request\RequestException;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
@@ -20,14 +20,13 @@ class BuildRequestWrapper extends RequestWrapper implements IBuildRequest
 {
     private static $COUNT = 1;
 
-    private $mRequest;
     private $mFlags;
     private $mID;
     /** @var ILogListener[] */
     private $mLogs = array();
 
     function __construct(IRequest $Request, $flags = null) {
-        $this->mRequest = $Request;
+        parent::__construct($Request);
         $this->mFlags = $flags;
         $this->mID = ++self::$COUNT;
         if($Request instanceof ILogListener)

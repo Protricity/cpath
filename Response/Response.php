@@ -5,13 +5,11 @@
  * Author: Ari Asulin
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
-namespace CPath\Response\Common;
+namespace CPath\Response;
 
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Response\IResponse;
+use CPath\Request\IRequest;
 
-final class SimpleResponse implements IResponse, IMappableKeys {
+class Response implements IHeaderResponse {
     private $mCode, $mMessage;
 
     /**
@@ -73,13 +71,27 @@ final class SimpleResponse implements IResponse, IMappableKeys {
         return $this;
     }
 
+
     /**
-     * Map data to a data map
-     * @param IKeyMap $Map the map instance to add data to
-     * @return void
+     * Send response headers for this response
+     * @param IRequest $Request
+     * @param string $mimeType
+     * @return bool returns true if the headers were sent, false otherwise
      */
-    function mapKeys(IKeyMap $Map) {
-        $Map->map(IResponse::STR_CODE, $this->getCode());
-        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
+    function sendHeaders(IRequest $Request, $mimeType = null) {
+        static $sent = false;
+        if($sent || headers_sent())
+            return false;
+        $sent = true;
+
+        if($mimeType === null)
+            $mimeType = $Request->getMimeType()->getName();
+
+        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
+        header("Content-Type: " . $mimeType);
+
+        header('Access-Control-Allow-Origin: *');
+
+        return true;
     }
 }

@@ -19,23 +19,37 @@ interface IAttributes {
      * @throws \InvalidArgumentException if $replace == false and the attribute exists
      * or $replace == true and the attribute does not exist
      */
-    function add($key, $value = null);
+    //function add($key, $value = null);
 
     /**
      * Add a css class to the collection
      * @param String $class one or multiple css classes. If null is provided, the class is not added
      */
-    function addClass($class);
+    //function addClass($class);
+
+    /**
+     * Checks to see if a class exists in the class list
+     * @param $class
+     * @return bool
+     */
+    function hasClass($class);
+
+    /**
+     * Merge attributes and return an instance
+     * @param IAttributes|null $Attributes
+     * @return IAttributes
+     */
+    function merge(IAttributes $Attributes=null);
 
     /**
      * Add a css style to the collection
      * @param String $style one or multiple css styles. If null is provided, the style is not added
      */
-    function addStyle($style);
+    //function addStyle($style);
 
     /**
-     * Render html attributes
-     * @return String|void always returns void
+     * Get html attribute string
+     * @return String
      */
-    function render();
+    function __toString();
 }

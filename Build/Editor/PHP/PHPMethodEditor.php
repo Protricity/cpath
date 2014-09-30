@@ -90,9 +90,9 @@ class PHPMethodEditor implements ITestable
     }
 
     public function testReplaceSrc() {
-		echo 'im working #9';
-		echo 'im not working #9';
-		echo 'im maybe working #9';
+		echo 'im working #3';
+		echo 'im not working #3';
+		echo 'im maybe working #3';
 	}
 
 }

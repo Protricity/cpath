@@ -9,13 +9,13 @@ namespace CPath\Templates\HTML\Pages;
 
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class EmptyPage implements IContainerHTML
+class EmptyPage implements IHTMLContainer
 {
-    /** @var IContainerHTML */
+    /** @var IHTMLContainer */
     private $mContent;
 
     public function __construct() {
@@ -38,7 +38,7 @@ class EmptyPage implements IContainerHTML
      * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTMLContent(IRequest $Request, IAttributes $Attr = null) {
         $this->mContent->renderHTML($Request, $Attr);
     }
 }

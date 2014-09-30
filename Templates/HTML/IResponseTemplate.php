@@ -7,11 +7,11 @@
  */
 namespace CPath\Templates\HTML;
 
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 
-interface IResponseTemplate extends IContainerHTML
+interface IResponseTemplate extends IHTMLContainer
 {
 
 }

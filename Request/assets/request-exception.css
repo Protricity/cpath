@@ -1,0 +1,47 @@
+form.request-exception .error {
+    color: darkred;
+}
+
+form.request-exception .required {
+    font-weight: bold;
+}
+
+form.request-exception {
+    margin: 0 24pt 6pt 0;
+    display: block;
+}
+
+form.request-exception fieldset {
+    margin: 0;
+    padding: .35em 0 .75em;
+    border: 0;
+}
+
+form.request-exception legend {
+    display: block;
+    width: 100%;
+    padding: .3em 0;
+    margin-bottom: .3em;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+    font-weight: bold;
+}
+
+form.request-exception button,
+form.request-exception input,
+form.request-exception select,
+form.request-exception textarea {
+    font-family: "proxima-nova", sans-serif;
+    padding: .5em .6em;
+    display: block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+form.request-exception textarea {
+    width: 300pt;
+    height: 100pt;
+}

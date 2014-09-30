@@ -7,12 +7,26 @@
  */
 namespace CPath\Framework\Render\Header;
 
+use CPath\Autoloader;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class WriteOnceHeaderRenderer implements IHeaderWriter
 {
     private $mWrittenHeaders = array();
+    private $mRootPath = null;
+
+    public function __construct($rootPath = null) {
+
+        //$autoloads = Autoloader::getLoaderPaths();
+
+        if($rootPath === null) {
+            $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
+            $rootPath = realpath(getcwd());
+            $rootPath = substr($rootPath, 0, strlen($scriptPath));
+        }
+        $this->mRootPath = $rootPath;
+    }
 
     /**
      * Write a header as raw html
@@ -32,7 +46,12 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      * @return IHeaderWriter return instance of self
      */
     function writeScript($scriptPath, $defer = false, $charset = null) {
+        if(strpos($scriptPath, $this->mRootPath) === 0) {
+            $scriptPath = substr($scriptPath, strlen($this->mRootPath));
+        }
         $scriptPath = str_replace('\\', '/', $scriptPath);
+
+
         if(!in_array($scriptPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<script src='", $scriptPath, "'";
             if($defer)
@@ -51,6 +70,9 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      * @return IHeaderWriter return instance of self
      */
     function writeStyleSheet($styleSheetPath) {
+        if(strpos($styleSheetPath, $this->mRootPath) === 0) {
+            $styleSheetPath = substr($styleSheetPath, strlen($this->mRootPath));
+        }
         $styleSheetPath = str_replace('\\', '/', $styleSheetPath);
         if(!in_array($styleSheetPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<link rel='stylesheet' href='", $styleSheetPath, "' />";

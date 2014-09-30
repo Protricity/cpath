@@ -12,12 +12,11 @@ use CPath\Request\Log\ILogListener;
 
 class CLIWebRequest extends WebRequest
 {
-    public function __construct($path = null, Array $args = array()) {
-        parent::__construct('CLI', $path, $args);
+    public function __construct($path = null, $args = array()) {
         $flags = 0;
         if(isset($args['v']) || isset($args['verbose']))
             $flags |= ILogListener::VERBOSE;
 
-        $this->setMimeType(new TextMimeType($flags));
+        parent::__construct('CLI', $path, $args, new TextMimeType($flags));
     }
 }

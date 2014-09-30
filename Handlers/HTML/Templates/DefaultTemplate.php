@@ -10,18 +10,18 @@ namespace CPath\Handlers\HTML\Templates;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLHeaderStyleSheet;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Handlers\HTML\Layouts\ThreeSectionLayout;
 use CPath\Handlers\HTML\Navigation\AbstractNavigator;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 
-class DefaultTemplate implements IContainerHTML
+class DefaultTemplate implements IHTMLContainer
 {
-    /** @var IContainerHTML */
+    /** @var IHTMLContainer */
     private $mResponseBody;
-    /** @var IContainerHTML */
+    /** @var IHTMLContainer */
     private $mLayout;
     /** @var AbstractNavigator */
     private $mNavigation;
@@ -51,7 +51,7 @@ class DefaultTemplate implements IContainerHTML
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTMLContent(IRequest $Request, IAttributes $Attr = null) {
         $this->mResponseBody->renderHTML($Request);
     }
 }

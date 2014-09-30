@@ -9,21 +9,17 @@ namespace CPath\Request\CLI;
 
 use CPath\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
+use CPath\Request\RequestException;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType;
 use CPath\Request\Request;
 
 class CLIRequest extends Request implements IPrompt
 {
-    /** @var ILogListener[] */
-    private $mLogs = array();
     private $mPos = 0;
-    /** @var IRequestedMimeType */
-    private $mMimeType=null;
 
-    public function __construct($path = null, Array $args = null, $logFlags=0) {
+    public function __construct($path = null, $args = null, $logFlags=0) {
         $this->mFlags = $logFlags;
 
         if ($args === null) {
@@ -40,39 +36,16 @@ class CLIRequest extends Request implements IPrompt
         if(isset($args['v']) || isset($args['verbose']))
             $flags |= ILogListener::VERBOSE;
 
-        $this->mMimeType = new TextMimeType($flags);
-
-        parent::__construct($path, $args);
+        parent::__construct('CLI', $path, $args, new TextMimeType($flags));
 
     }
 
-    /**
-     * Get the Request Method (CLI)
-     * @return String
-     */
-    function getMethodName() {
-        return 'CLI';
+    protected function getMissingValue($paramName, $description = null, $flags=0) {
+        return $this->prompt("[--{$paramName}] " . $description . ": ");
     }
 
-    /**
-     * Get the requested Mime types for rendering purposes
-     * @return \CPath\Request\MimeType\IRequestedMimeType[]
-     */
-    function getMimeType() {
-        return $this->mMimeType;
-    }
-
-    /**
-     * Set the requested Mime type for this request
-     * @param MimeType\IRequestedMimeType $MimeType
-     * @return void
-     */
-    function setMimeType(IRequestedMimeType $MimeType) {
-        $this->mMimeType = $MimeType;
-    }
-
-    function getNextArg() {
-        if($this->hasValue($this->mPos))
+    function getNextArg($description = null) {
+        if($this->getValue($this->mPos, $description))
             $this->getValue($this->mPos++);
         return null;
     }

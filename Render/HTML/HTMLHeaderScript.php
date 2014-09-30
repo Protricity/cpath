@@ -9,10 +9,10 @@ namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
-class HTMLHeaderScript implements IRenderHTML, ISupportHeaders
+class HTMLHeaderScript implements IRenderHTML, IHTMLSupportHeaders
 {
     private $mPath, $mDefer, $mCharset;
 

@@ -24,6 +24,7 @@ class RouteBuilder {
 
     private $mGroupKey;
     private $mRoutes = array();
+    private $mGroupArgs = array();
     private $mMethod;
 
     /**
@@ -79,6 +80,8 @@ class RouteBuilder {
 
             } else if(sscanf($line, self::KEY_FORMAT, $key) === 1) {
                 $curKey = $key;
+                list(, $cmd) = explode('@', $line);
+                $this->mGroupArgs[$curKey] = CommandString::parseArgs($cmd);
 
             } else {
                 // todo: unrecognized line
@@ -88,7 +91,11 @@ class RouteBuilder {
 
         //print_r($this->mRoutes);die($this->mGroupKey);
         if($Request->hasFlag($Request::IS_SESSION_BUILD)) {
-
+            //$this->mRoutes = array();
+//            foreach($this->mRoutes as $key => $group) {
+//                if(isset($this->mGroupArgs[$key]) && !empty($this->mGroupArgs[$key]['custom']));
+//                //else unset($this->mGroupArgs[$key], $this->mRoutes[$key]);
+//            }
         } else {
             unset($this->mRoutes[$this->mGroupKey]);
         }
@@ -103,17 +110,18 @@ class RouteBuilder {
 
         $src = "\t\treturn";
 
-        krsort($this->mRoutes);
+        ksort($this->mRoutes);
         foreach($this->mRoutes as $groupKey => $routes) {
             $src .= "\n" . sprintf(self::KEY_FORMAT, $groupKey);
             foreach($routes as $prefix => $argList) {
                 $src .= "\n" . sprintf(self::FUNC_PRINT, $prefix, $argList) . " ||";
             }
+            $src .= "\n";
         }
-        $src = substr($src, 0, -3) . ";";
+        $src = substr($src, 0, -4) . ";";
 
         $Editor = PHPMethodEditor::fromMethod($this->mMethod);
-        $Editor->replaceMethodSource($src);
+        $Editor->replaceMethodSource("\n" . $src . "\n\t");
         $Editor->write();
         return true;
     }

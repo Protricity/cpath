@@ -1,0 +1,74 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/27/14
+ * Time: 3:46 PM
+ */
+namespace CPath\Render\HTML\Attribute;
+
+final class StyleAttributes implements IAttributes
+{
+    private $mStyles = array();
+
+    public function __construct($_styleList = null) {
+        foreach (func_get_args() as $arg)
+            $this->addStyles($arg);
+    }
+
+    /**
+     * Add css styles to the collection
+     * @param String $styleList one or multiple css styles
+     */
+    function addStyles($styleList) {
+        if(preg_match_all('/(\w+):\s+([\w\s,]+);?/', $styleList, $matches)) {
+            foreach($matches[1] as $name) {
+                $this->addStyle($name, $matches[2][$name]);
+            }
+        }
+    }
+
+    /**
+     * Add a css style to the collection
+     * @param $name
+     * @param $value
+     */
+    function addStyle($name, $value) {
+        $this->mStyles[$name] = $value;
+    }
+
+    /**
+     * Checks to see if a class exists in the class list
+     * @param $class
+     * @return bool
+     */
+    function hasClass($class) {
+        return false;
+    }
+
+    /**
+     * Get html attribute string
+     * @return String
+     */
+    function __toString() {
+        $attr = ' style=\'';
+        foreach($this->mStyles as $key => $value)
+            $attr .= " " . $key . ": " . $value . ";";
+        $attr .= '\'';
+        return $attr;
+    }
+
+    /**
+     * Merge attributes and return an instance
+     * @param IAttributes|null $Attributes
+     * @return IAttributes
+     */
+    function merge(IAttributes $Attributes=null) {
+        if(!$Attributes)
+            return $this;
+        $Attr = new HTMLAttributes($Attributes);
+        foreach($this->mStyles as $key => $value)
+            $Attr->addStyle($key, $value);
+        return $Attr;
+    }
+}

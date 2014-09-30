@@ -14,11 +14,11 @@ use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 
-class SearchFormUtil implements IDescribable, ISupportHeaders {
+class SearchFormUtil implements IDescribable, IHTMLSupportHeaders {
     private $mTheme, $mResponse, $mAPI, $mDescriptor, $mDescribable;
     private $mForm;
     private $mResponseBox;
@@ -43,7 +43,7 @@ class SearchFormUtil implements IDescribable, ISupportHeaders {
     function writeHeaders(IHeaderWriter $Head) {
         $this->mForm->writeHeaders($Head);
 
-        if($this->mResponseBox instanceof ISupportHeaders)
+        if($this->mResponseBox instanceof IHTMLSupportHeaders)
             $this->mResponseBox->writeHeaders($Head);
 
         $Head->writeStyleSheet(__NAMESPACE__ . '\assets\searchformutil.css', true);

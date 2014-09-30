@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Common;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Request\IRequest;
 use CPath\Handlers\HTML\AbstractHTMLHandler;
@@ -16,7 +16,7 @@ use CPath\Handlers\HTML\AbstractHTMLHandler;
 class ExceptionHandler extends AbstractHTMLHandler {
 
     private $mEx;
-    public function __construct(\Exception $Ex, IContainerHTML $Template) {
+    public function __construct(\Exception $Ex, IHTMLContainer $Template) {
         parent::__construct($Template);
         $this->mEx = $Ex;
     }

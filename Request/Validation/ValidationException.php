@@ -7,18 +7,21 @@
  */
 namespace CPath\Request\Validation;
 
-use CPath\Response\Exceptions\CodedException;
-use CPath\Response\IResponseCode;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Response\Exceptions\HTTPRequestException;
 
-class ValidationException extends CodedException
+class ValidationException extends HTTPRequestException
 {
-    private $mParamName;
 
-    public function __construct($msg, $paramName) {
-        parent::__construct($msg, IResponseCode::STATUS_ERROR);
-        $this->mParamName = $paramName;
+    private $mValidation;
+
+    public function __construct($msg, IValidateRequest $Validation=null) {
+        parent::__construct($msg);
+        $this->mValidation = $Validation;
     }
-
 
 }
 

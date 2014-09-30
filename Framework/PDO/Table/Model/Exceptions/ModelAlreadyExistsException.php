@@ -7,10 +7,10 @@
  */
 namespace CPath\Framework\PDO\Table\Model\Exceptions;
 
-use CPath\Response\Exceptions\CodedException;
+use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
-class ModelAlreadyExistsException extends CodedException {
-    const DEFAULT_CODE = IResponse::STATUS_CONFLICT;
+class ModelAlreadyExistsException extends HTTPRequestException {
+    const DEFAULT_HTTP_CODE = IResponse::STATUS_CONFLICT;
 }
 

@@ -6,29 +6,22 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Handlers\Response;
-use CPath\Base;
 use CPath\Config;
-use CPath\Framework\Data\Map\Common\MappableCallback;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\HTMLContent;
-use CPath\Render\HTML\HTMLElement;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Framework\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\JSON\JSONRenderMap;
 use CPath\Render\Text\IRenderText;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Handlers\Wrapper\MimeTypeSwitchWrapper;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLRenderMap;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 
 final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRenderJSON, IRenderText {
     private $mResponse;
+    private $mSent = false;
     //private $mContainer;
 
     function __construct(IResponse $Response) {
@@ -36,17 +29,24 @@ final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRen
         //$this->mContainer = $HTMLContainer;
     }
 
-    public function sendHeaders($mimeType = 'text/html') {
+    /**
+     * Send response headers for this response
+     * @param IRequest $Request
+     * @param string $mimeType
+     * @return bool returns true if the headers were sent, false otherwise
+     */
+    function sendHeaders(IRequest $Request, $mimeType = null) {
+        if($this->mSent || headers_sent())
+            return false;
+
         $Response = $this->mResponse;
-
-        if (headers_sent())
-            throw new \Exception("Headers were already sent");
-
         header("HTTP/1.1 " . $Response->getCode() . " " . preg_replace('/[^\w -]/', '', $Response->getMessage()));
-        if ($mimeType)
-            header("Content-Type: " . $mimeType);
+        header("Content-Type: " . $mimeType);
 
         header('Access-Control-Allow-Origin: *');
+
+        $this->mSent = true;
+        return true;
     }
 
     /**

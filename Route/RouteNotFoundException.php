@@ -7,10 +7,10 @@
  */
 namespace CPath\Route;
 
-use CPath\Response\Exceptions\CodedException;
+use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponseCode;
 
-class RouteNotFoundException extends CodedException
+class RouteNotFoundException extends HTTPRequestException
 {
-    const DEFAULT_CODE = IResponseCode::STATUS_NOT_FOUND;
+    const DEFAULT_HTTP_CODE = IResponseCode::STATUS_NOT_FOUND;
 }

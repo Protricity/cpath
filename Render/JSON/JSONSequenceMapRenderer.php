@@ -43,10 +43,11 @@ class JSONSequenceMapRenderer implements ISequenceMap
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param mixed $value
+     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param mixed $_arg additional varargs
      * @return bool false to continue, true to stop
      */
-    function mapNext($value) {
+    function mapNext($value, $_arg = null) {
         $this->tryStart(true);
         if ($this->mCount)
             echo self::DELIMIT;

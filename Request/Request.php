@@ -7,47 +7,144 @@
  */
 namespace CPath\Request;
 
-use CPath\Describable\IDescribable;
 use CPath\Request\Log\ILogListener;
+use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
+use CPath\Response\Exceptions\HTTPRequestException;
 
-abstract class Request implements IRequest
+class Request implements IRequest
 {
-    private $mParams;
+    private $mValues;
     /** @var ILogListener[] */
-    private $mLogs=array();
+    private $mListeners=array();
 
-    public function __construct($path=null, Array $params=array()) {
+    private $mMethodName;
+    /** @var IRequestedMimeType */
+    private $mMimeType=null;
+
+    private $mDescriptions = array();
+    private $mPrefixPath = null;
+
+    public function __construct($method, $path = null, $params = array(), IRequestedMimeType $MimeType=null) {
+
+        $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $root = dirname($_SERVER['SCRIPT_NAME']);
+
+
+        if (!$path && stripos($urlPath, $root) === 0) {
+            $this->mPrefixPath = substr($urlPath, 0, strlen($root));
+            $urlPath = substr($urlPath, strlen($root));
+
+            $path = $urlPath;
+        }
+
+
+        $this->mMethodName = $method;
         $this->mPath = $path ? '/' . ltrim($path, '/') : '/';
-        $this->mParams = $params;
+        $this->mValues = $params;
+        $this->mMimeType = $MimeType;
     }
 
     /**
-     * Checks a request value to see if it exists
-     * @param string $paramName the parameter name
-     * @return bool
+     * Get the Request Method (POST, PUT, PATCH, DELETE, or CLI)
+     * @return String
      */
-    function hasValue($paramName) {
-        if(!empty($this->mParams[$paramName]))
-            return true;
-
-        return false;
+    function getMethodName() {
+        return $this->mMethodName;
     }
 
     /**
-     * Get a request value by parameter name if it exists
-     * @param string $paramName the parameter name
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @return mixed the parameter value or null
+     * Get the requested Mime types for rendering purposes
+     * @return \CPath\Request\MimeType\IRequestedMimeType[]
      */
-    function getValue($paramName, $description = null) {
-        if(!empty($this->mParams[$paramName]))
-            return $this->mParams[$paramName];
+    function getMimeType() {
+        return $this->mMimeType;
+    }
+
+//    /**
+//     * Checks a request value to see if it exists
+//     * @param string $paramName the parameter name
+//     * @return bool
+//     */
+//    final function hasValue($paramName) {
+//        if(isset($this->mValues[$paramName])){
+//            //$this->mParams[$paramName] = new RequestParameter(null, $paramName);
+//            return true;
+//        }
+//
+//        $values = $this->getAllValues();
+//        if(isset($values[$paramName]))
+//            return true;
+//
+//        return false;
+//    }
+
+    protected function getParamValue($paramName) {
+        if(!empty($this->mValues[$paramName]))
+            return $this->mValues[$paramName];
 
         return null;
     }
+
+    /**
+     * Get a request value by parameter name or throw an exception
+     * @param string $paramName the parameter name
+     * @param string $description [optional] description for this prompt
+     * @param int $flags use ::PARAM_REQUIRED for required fields
+     * @throws RequestException
+     * @return mixed the parameter value
+     */
+    final function getValue($paramName, $description = null, $flags=0) {
+        if($description)
+            $this->mDescriptions[$paramName] = array_slice(func_get_args(), 1); //array($description, $flags);
+
+        if($value = $this->getParamValue($paramName))
+            return $value;
+//
+//        if(!empty($this->mValues[$paramName]))
+//            return $this->mValues[$paramName];
+//
+//        $values = $this->getAllValues();
+//        if(!empty($values[$paramName]))
+//            return $values[$paramName];
+//
+//        if($value = $this->getMissingValue($paramName, $description, $flags))
+//            return $value;
+
+        if($flags & IRequest::PARAM_REQUIRED) {
+            $this->mDescriptions[$paramName][1] |= IRequest::PARAM_ERROR;
+            throw new RequestException("Missing parameter: " . $paramName);
+        }
+        return null;
+    }
+//
+//    /**
+//     * Get a request value by parameter name or throw an exception
+//     * @param string $paramName the parameter name
+//     * @param string $description [optional] description for this prompt
+//     * @return mixed the parameter value
+//     * @throws RequestException if the value was not found
+//     */
+//    function requireValue($paramName, $description = null) {
+//        if($description)
+//            $this->mDescriptions[$paramName] = $description;
+//
+//        if(!empty($this->mValues[$paramName]))
+//            return $this->mValues[$paramName];
+//
+//        $values = $this->getAllValues();
+//        if(!empty($values[$paramName]))
+//            return $values[$paramName];
+//
+//        $err = "Missing parameter: " . $paramName;
+//        throw new RequestException($err, $this->mDescriptions);
+//    }
+
+//    protected function getAllValues() {
+//        return array();
+//    }
 
     /**
      * Return the route path for this request
@@ -84,7 +181,7 @@ abstract class Request implements IRequest
                 $routeArg = $routeArgs[$i++];
 
                 if($routeArg[0] == ':') {
-                    $this->mParams[substr($routeArg, 1)] = $requestPathArg;
+                    $this->mValues[substr($routeArg, 1)] = $requestPathArg;
 
                 } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
                     return false;
@@ -105,6 +202,70 @@ abstract class Request implements IRequest
         return true;
     }
 
+
+    /**
+     * Add a log entry
+     * @param String $msg The log message
+     * @param int $flags [optional] log flags
+     * @return void
+     */
+    function log($msg, $flags = 0) {
+        foreach($this->mListeners as $Log)
+            $Log->log($msg, $flags);
+
+        $MimeType = $this->getMimeType();
+        if($MimeType instanceof ILogListener)
+            $MimeType->log($msg, $flags);
+    }
+
+    /**
+     * Log an exception instance
+     * @param \Exception $ex The log message
+     * @param int $flags [optional] log flags
+     * @return void
+     */
+    function logEx(\Exception $ex, $flags = 0) {
+        foreach($this->mListeners as $Log)
+            $Log->logEx($ex, $flags);
+
+        $MimeType = $this->getMimeType();
+        if($MimeType instanceof ILogListener)
+            $MimeType->logEx($ex, $flags);
+    }
+
+    /**
+     * Add a log listener callback
+     * @param ILogListener $Listener
+     * @return void
+     */
+    function addLogListener(ILogListener $Listener) {
+        $this->mListeners[] = $Listener;
+    }
+
+    /**
+     * Returns an associative array of params and their descriptions
+     * @return array
+     */
+    function getParameterDescriptions() {
+        return $this->mDescriptions;
+    }
+
+    /**
+     * @param bool $withDomain
+     * @return String
+     */
+    function getDomainPath($withDomain=true) {
+        $path = $this->mPrefixPath;
+        if($withDomain) {
+            $protocol = 'http';
+            if(isset($_SERVER['HTTPS']))
+                $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
+
+            $path = $protocol . "://" . $_SERVER['SERVER_NAME'] . $path;
+        }
+        return $path;
+    }
+
     // Static
 
     /**
@@ -113,7 +274,7 @@ abstract class Request implements IRequest
      * @param array $args
      * @return IRequest
      */
-    public static function create($route=null, $args=array()) {
+    public static function create($route=null, $args=null) {
         $method = null;
         if(($p = strpos($route, ' ')) !== false)
             if($p <=5)
@@ -134,51 +295,5 @@ abstract class Request implements IRequest
                 $Inst = new WebFormRequest($method, $route, $args);
         }
         return $Inst;
-    }
-
-
-
-    /**
-     * Add a log entry
-     * @param String $msg The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function log($msg, $flags = 0) {
-        foreach($this->mLogs as $Log)
-            $Log->log($msg, $flags);
-
-        $MimeType = $this->getMimeType();
-        if($MimeType instanceof ILogListener)
-            $MimeType->log($msg, $flags);
-
-        //if($this->mVerbose || !($flags & ILogListener::VERBOSE))
-        //echo $msg . "\n";
-    }
-
-    /**
-     * Log an exception instance
-     * @param \Exception $ex The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function logEx(\Exception $ex, $flags = 0) {
-        foreach($this->mLogs as $Log)
-            $Log->logEx($ex, $flags);
-
-        $MimeType = $this->getMimeType();
-        if($MimeType instanceof ILogListener)
-            $MimeType->logEx($ex, $flags);
-        //if($this->mVerbose || !($flags & ILogListener::VERBOSE))
-        //echo $ex . "\n";
-    }
-
-    /**
-     * Add a log listener callback
-     * @param ILogListener $Listener
-     * @return void
-     */
-    function addLogListener(ILogListener $Listener) {
-        $this->mLogs[] = $Listener;
     }
 }

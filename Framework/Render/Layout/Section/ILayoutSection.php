@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\Render\Layout\Section;
 
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 
 interface ILayoutSection extends IRenderHTML
@@ -37,13 +37,4 @@ interface ILayoutSection extends IRenderHTML
      */
     function getContent($index);
 
-}
-
-interface IRenderContainerHTML extends IRenderHTML {
-    /**
-     * Add section content
-     * @param IRenderHTML $Content
-     * @return $this
-     */
-    function addContent(IRenderHTML $Content);
 }

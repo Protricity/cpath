@@ -7,6 +7,8 @@
  */
 namespace CPath\Data\Map;
 
+use CPath\Response\Response;
+
 class ArraySequence implements IMappableSequence
 {
     private $mArr;

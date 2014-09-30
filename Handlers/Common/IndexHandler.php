@@ -8,7 +8,7 @@
 namespace CPath\Handlers\Common;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Request\IRequest;
 use CPath\Handlers\HTML\AbstractHTMLHandler;
 use CPath\Handlers\HTML\Templates\DefaultTemplate;
@@ -16,7 +16,7 @@ use CPath\Handlers\Response\ResponseRenderer;
 
 class IndexHandler extends AbstractHTMLHandler
 {
-    public function __construct(IContainerHTML $Template=null) {
+    public function __construct(IHTMLContainer $Template=null) {
         parent::__construct($Template ?: new DefaultTemplate());
     }
 

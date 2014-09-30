@@ -37,9 +37,9 @@ abstract class MimeType implements IRequestedMimeType
         return $this->mNext;
     }
 
-    protected function headersSent() {
-        return $this->mSent || headers_sent();
-    }
+//    protected function headersSent() {
+//        return $this->mSent || headers_sent();
+//    }
 
     /**
      * Send response headers for this mime type
@@ -47,16 +47,16 @@ abstract class MimeType implements IRequestedMimeType
      * @param String $message response message
      * @return bool returns true if the headers were sent, false otherwise
      */
-    function sendHeaders($code = 200, $message = 'OK') {
-        if($this->headersSent())
-            return false;
-
-        header("HTTP/1.1 " . $code . " " . preg_replace('/[^\w -]/', '', $message));
-        header("Content-Type: " . $this->mName);
-
-        $this->mSent = true;
-        return true;
-    }
+//    function sendHeaders($code = 200, $message = 'OK') {
+//        if($this->headersSent())
+//            return false;
+//
+//        header("HTTP/1.1 " . $code . " " . preg_replace('/[^\w -]/', '', $message));
+//        header("Content-Type: " . $this->mName);
+//
+//        $this->mSent = true;
+//        return true;
+//    }
 
     // Static
 

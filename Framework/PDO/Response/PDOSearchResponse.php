@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Response;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
-use CPath\Framework\Data\Map\Common\MappableCallback;
+use CPath\Framework\Data\Map\Common\MappableKeysCallback;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
@@ -68,7 +68,7 @@ class PDOSearchResponse implements IResponse, IMappableKeys {
             $Descriptor = $this->mQuery->getDescriptor();
             if($Descriptor !== null) {
                 if($Descriptor instanceof IMappableKeys)
-                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new MappableCallback( function(IKeyMap $Map) use ($Descriptor) {
+                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new MappableKeysCallback( function(IKeyMap $Map) use ($Descriptor) {
                         $Descriptor->mapKeys($Map);
                     }));
                 else

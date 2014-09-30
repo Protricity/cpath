@@ -6,7 +6,7 @@ use CPath\Config;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
@@ -16,7 +16,7 @@ use CPath\Templates\Themes\CPathDefaultTheme;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Interfaces\IViewConfig;
 
-class APIResponseBoxFragment implements IRenderHTML, ISupportHeaders{
+class APIResponseBoxFragment implements IRenderHTML, IHTMLSupportHeaders{
     private $mTheme;
     private $mResponse;
 

@@ -5,14 +5,14 @@ use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Handlers\HTML\Navigation\AbstractNavigator;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
-use CPath\Render\HTML\HTMLElement;
+use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Templates\Themes\CPathDefaultTheme;
 use CPath\Render\HTML\Theme\Interfaces\IPageTheme;
 use CPath\Request\IRequest;
@@ -38,7 +38,7 @@ abstract class Abstract3SectionLayout extends ContentLayout {
 
     /** @var \CPath\Render\HTML\\CPath\Render\HTML\Elements\HTMLElement */
     private $mHeader;
-    /** @var HTMLElement */
+    /** @var \CPath\Render\HTML\Element\HTMLElement */
     private $mBody;
     /** @var \CPath\Render\HTML\Container\\CPath\Render\HTML\Elements\HTMLElement */
     private $mFooter;
@@ -71,7 +71,7 @@ abstract class Abstract3SectionLayout extends ContentLayout {
         $Writer = parent::renderHTMLHeaders($Request);
         $Writer->writeStyleSheet(__NAMESPACE__ . '\assets\-section-page.css');
 
-        if($this->mTheme instanceof ISupportHeaders)
+        if($this->mTheme instanceof IHTMLSupportHeaders)
             $this->mTheme->writeHeaders($Writer);
 
         return $Writer;

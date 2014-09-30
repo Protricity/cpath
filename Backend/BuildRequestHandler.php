@@ -14,7 +14,7 @@ use CPath\Build\IBuildRequest;
 use CPath\Build\IBuildable;
 use CPath\Build\MethodDocBlock;
 use CPath\Response\IResponse;
-use CPath\Response\Common\SimpleResponse;
+use CPath\Response\Response;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
@@ -52,7 +52,7 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecuta
 
         $BuildRequest = new BuildRequestWrapper($OriginalRequest, $flags);
         $this->buildAllFiles($BuildRequest);
-        return new SimpleResponse("Build complete");
+        return new Response("Build complete");
     }
 
 
@@ -86,7 +86,7 @@ class BuildRequestHandler implements IStaticRequestHandler, IBuildable, IExecuta
         }
 
         foreach ($buildableClasses as $class) {
-            $Request->log("Found Class: " . $class);
+            $Request->log("Found Class: " . $class, ILogListener::VERBOSE);
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\Build\IBuildable')) {

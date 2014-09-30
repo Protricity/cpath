@@ -7,16 +7,18 @@
  */
 namespace CPath\Response;
 
+use API\Framework\Fingerprint\Entry\Common\UnknownEntry;
 use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IMappableSequence;
+use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Response\IResponse;
+use CPath\Handlers\Response\ResponseUtil;
+use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLMimeType;
-use CPath\Render\HTML\HTMLKeyMapRenderer;
+use CPath\Render\HTML\HTMLMapRenderer;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\HTMLSequenceMapRenderer;
-use CPath\Render\HTML\IContainerHTML;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONKeyMapRenderer;
@@ -30,27 +32,37 @@ use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLKeyMapRenderer;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\IRequest;
+use CPath\Request\MimeType\UnknownMimeType;
 
-class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText
+
+class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHTMLSupportHeaders
 {
     private $mResponse;
-    private $mHTMLRender;
 
-    public function __construct(IResponse $Response, IContainerHTML $HTMLTemplate = null) {
+    public function __construct(IResponse $Response) {
         $this->mResponse = $Response;
-        $this->mHTMLRender = $HTMLTemplate ?: new HTMLResponseBody();
-        $this->mHTMLRender->addContent($this);
+    }
+
+    protected function getResponse(IRequest $Request) {
+        return $this->mResponse;
     }
 
     function render(IRequest $Request, $sendHeaders=true) {
-        $Response = $this->mResponse;
+        $Response = $this->getResponse($Request);
         $MimeType = $Request->getMimeType();
 
-        if($sendHeaders)
-            $MimeType->sendHeaders($Response->getCode(), $Response->getMessage());
+        if($sendHeaders) {
+            if($Response instanceof IHeaderResponse) {
+                $Response->sendHeaders($Request, $MimeType->getName());
+            } else {
+                $Util = new ResponseUtil($Response);
+                $Util->sendHeaders($Request, $MimeType->getName());
+            }
+        }
 
         if($MimeType instanceof HTMLMimeType) {
-            $this->mHTMLRender->renderHTML($Request);
+            $Template = $MimeType->getRenderContainer() ?: new HTMLResponseBody();
+            $Template->renderHTMLContent($Request, $this);
 
         } elseif($MimeType instanceof XMLMimeType) {
             $this->renderXML($Request);
@@ -60,6 +72,24 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
 
         } elseif($MimeType instanceof TextMimeType) {
             $this->renderText($Request);
+        } elseif($MimeType instanceof UnknownMimeType) {
+            //echo 'wut';
+        }
+    }
+
+    /**
+     * Write all support headers used by this IView instance
+     * @param IRequest $Request
+     * @param IHeaderWriter $Head the writer instance to use
+     * @return String|void always returns void
+     */
+    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+        $Response = $this->getResponse($Request);
+        if($Response instanceof IHTMLSupportHeaders)
+            $Response->writeHeaders($Request, $Head);
+        if(!$Response instanceof IRenderHTML) {
+            $HTMLMapRenderer = new HTMLMapRenderer($Request);
+            $HTMLMapRenderer->writeHeaders($Request, $Head);
         }
     }
 
@@ -71,21 +101,21 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Response = $this->mResponse;
+        $Response = $this->getResponse($Request);
 
         if ($Response instanceof IRenderHTML) {
             $Response->renderHTML($Request);
 
         } elseif ($Response instanceof IMappableKeys) {
-            $Renderer = new HTMLKeyMapRenderer($Request, $Attr);
+            $Renderer = new HTMLMapRenderer($Request, $Attr);
             $Response->mapKeys($Renderer);
 
         } elseif ($Response instanceof IMappableSequence) {
-            $Renderer = new HTMLSequenceMapRenderer($Request, $Attr);
+            $Renderer = new HTMLMapRenderer($Request, $Attr);
             $Response->mapSequence($Renderer);
 
         } else {
-            $Renderer = new HTMLKeyMapRenderer($Request, $Attr);
+            $Renderer = new HTMLMapRenderer($Request, $Attr);
             $Renderer->map(IResponse::STR_MESSAGE, $Response->getMessage());
             $Renderer->map(IResponse::STR_CODE, $Response->getCode());
 
@@ -98,7 +128,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderJSON(IRequest $Request) {
-        $Response = $this->mResponse;
+        $Response = $this->getResponse($Request);
 
         if ($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
@@ -125,7 +155,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderText(IRequest $Request) {
-        $Response = $this->mResponse;
+        $Response = $this->getResponse($Request);
 
         if ($Response instanceof IRenderText) {
             $Response->renderText($Request);
@@ -153,7 +183,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-        $Response = $this->mResponse;
+        $Response = $this->getResponse($Request);
 
         if ($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $declaration);

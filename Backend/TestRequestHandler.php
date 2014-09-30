@@ -14,7 +14,7 @@ use CPath\Build\IBuildRequest;
 use CPath\Build\IBuildable;
 use CPath\Build\MethodDocBlock;
 use CPath\Response\IResponse;
-use CPath\Response\Common\SimpleResponse;
+use CPath\Response\Response;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
@@ -55,7 +55,7 @@ class TestRequestHandler implements IStaticRequestHandler, IBuildable, IExecutab
         $flags |= IBuildRequest::IS_SESSION_BUILD;
 
         $BuildRequest = new BuildRequestWrapper($OriginalRequest, $flags);
-        $this->mResponse = new SimpleResponse("Test complete");
+        $this->mResponse = new Response("Test complete");
         $this->mExceptions = array();
         $this->testAllFlies($BuildRequest);
         return $this->mResponse;
@@ -92,7 +92,7 @@ class TestRequestHandler implements IStaticRequestHandler, IBuildable, IExecutab
         }
 
         foreach ($testableClasses as $class) {
-            $Request->log("Found Class: " . $class);
+            $Request->log("Found Class: " . $class, ILogListener::VERBOSE);
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\UnitTest\ITestable')) {
@@ -108,9 +108,11 @@ class TestRequestHandler implements IStaticRequestHandler, IBuildable, IExecutab
                 }
 
                 try {
-                    $Request->log("Testing {$class}...");
+                    $Request->log("*** Testing {$class} ***");
                     $UnitTestRequest = new UnitTestRequestWrapper($Request);
                     $class::handleStaticUnitTest($UnitTestRequest);
+                    $Request->log("*** Test passed ***\n");
+
 
                 } catch (\Exception $ex) {
                     $Request->logEx($ex);
@@ -118,7 +120,7 @@ class TestRequestHandler implements IStaticRequestHandler, IBuildable, IExecutab
                         $Request->prompt('error-resume', "Continue test?");
 
                     $this->mExceptions[] = $ex;
-                    $this->mResponse = new SimpleResponse(count($this->mExceptions) . " Exception(s) occurred", false);
+                    $this->mResponse = new Response(count($this->mExceptions) . " Exception(s) occurred", false);
                     break;
                 }
 

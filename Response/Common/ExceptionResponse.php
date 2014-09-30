@@ -8,7 +8,7 @@
 namespace CPath\Response\Common;
 
 use CPath\Config;
-use CPath\Response\Exceptions\CodedException;
+use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseCode;
 
@@ -19,7 +19,7 @@ class ExceptionResponse implements IResponse {
     public function __construct(\Exception $ex) {
         $this->mEx = $ex;
         $this->mCode = IResponseCode::STATUS_ERROR;
-        if($ex instanceof CodedException)
+        if($ex instanceof HTTPRequestException)
             $this->mCode = $ex->getCode();
     }
 

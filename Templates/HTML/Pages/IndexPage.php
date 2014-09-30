@@ -9,17 +9,17 @@ namespace CPath\Templates\HTML\Pages;
 
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Handlers\HTML\Layouts\ThreeSectionLayout;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 
-class IndexPage implements IContainerHTML
+class IndexPage implements IHTMLContainer
 {
-    /** @var IContainerHTML */
+    /** @var IHTMLContainer */
     private $mContent;
-    /** @var IContainerHTML */
+    /** @var IHTMLContainer */
     private $mLayout;
     private $mNavBar;
 
@@ -46,7 +46,7 @@ class IndexPage implements IContainerHTML
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+    function renderHTMLContent(IRequest $Request, IAttributes $Attr = null)
     {
         $this->mContent->renderHTML($Request, $Attr);
     }

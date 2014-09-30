@@ -9,7 +9,6 @@ namespace CPath\Request;
 
 use CPath\Describable\IDescribable;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\MimeType\IRequestedMimeType;
 
 abstract class RequestWrapper implements IRequest
 {
@@ -21,6 +20,10 @@ abstract class RequestWrapper implements IRequest
         $this->mRequest = $Request;
     }
 
+    function getWrappedRequest() {
+        return $this->mRequest;
+    }
+
     /**
      * Get the requested Mime types for rendering purposes
      * @return \CPath\Request\MimeType\IRequestedMimeType[]
@@ -29,31 +32,16 @@ abstract class RequestWrapper implements IRequest
         return $this->mRequest->getMimeType();
     }
 
-    /**
-     * Set the requested Mime type for this request
-     * @param MimeType\IRequestedMimeType $MimeType
-     * @return void
-     */
-    function setMimeType(IRequestedMimeType $MimeType) {
-        $this->mRequest->setMimeType($MimeType);
-    }
 
     /**
-     * Checks a request value to see if it exists
+     * Get a request value by parameter name or null if not found
      * @param string $paramName the parameter name
-     * @return bool
+     * @param string $description [optional] description for this prompt
+     * @param int $flags use ::PARAM_REQUIRED for required fields
+     * @return mixed the parameter value
+     * @throws RequestException if the value was not found
      */
-    function hasValue($paramName) {
-        return $this->mRequest->hasValue($paramName);
-    }
-
-    /**
-     * Get a request value by parameter name if it exists
-     * @param string $paramName the parameter name
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @return mixed the parameter value or null
-     */
-    function getValue($paramName, $description = null) {
+    function getValue($paramName, $description = null, $flags=0) {
         return $this->mRequest->getValue($paramName, $description);
     }
 
@@ -118,5 +106,21 @@ abstract class RequestWrapper implements IRequest
      */
     function addLogListener(ILogListener $Listener) {
         $this->mLogs[] = $Listener;
+    }
+
+    /**
+     * Returns an associative array of params and their descriptions
+     * @return array
+     */
+    function getParameterDescriptions() {
+        return $this->mRequest->getParameterDescriptions();
+    }
+
+    /**
+     * @param bool $withDomain
+     * @return String
+     */
+    function getDomainPath($withDomain = false) {
+        return $this->mRequest->getDomainPath($withDomain);
     }
 }

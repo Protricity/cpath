@@ -7,8 +7,6 @@
  */
 namespace CPath\Render\Text;
 
-use CPath\Response\IResponse;
-use CPath\Request\Exceptions\RequestArgumentException;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\MimeType;
@@ -28,8 +26,8 @@ class TextMimeType extends MimeType implements ILogListener
      * @return void
      */
     function log($msg, $flags = 0) {
-        if(!$this->headersSent())
-            $this->sendHeaders(); // TODO: Sending 200 here by default
+//        if(!$this->headersSent())
+//            $this->sendHeaders(); // TODO: Sending 200 here by default
 
         if (!($flags & ~$this->mFlags)) {
             echo $msg . "\n";
@@ -44,8 +42,8 @@ class TextMimeType extends MimeType implements ILogListener
      * @return void
      */
     function logEx(\Exception $ex, $flags = 0) {
-        if(!$this->headersSent())
-            $this->sendHeaders(); // TODO: Sending 200 here by default
+//        if(!$this->headersSent())
+//            $this->sendHeaders(); // TODO: Sending 200 here by default
 
         if (!($flags & ~$this->mFlags)) {
             echo $ex . "\n";

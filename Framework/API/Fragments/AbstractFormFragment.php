@@ -5,14 +5,14 @@ use CPath\Base;
 use CPath\Config;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\IFragmentTheme;
 use CPath\Request\IRequest;
 use CPath\Templates\Themes\CPathDefaultTheme;
 use CPath\Render\HTML\HTMLRenderUtil;
 
-abstract class AbstractFormFragment implements IRenderHTML, ISupportHeaders{
+abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
 
     private $mTheme;
 

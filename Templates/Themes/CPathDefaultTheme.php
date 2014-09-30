@@ -9,7 +9,7 @@ use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Theme\Interfaces\IBrowseTheme;
 use CPath\Render\HTML\Theme\IFragmentTheme;
 use CPath\Render\HTML\Theme\Interfaces\IPageTheme;
@@ -23,7 +23,7 @@ use CPath\Render\HTML\Theme\ITableTheme;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 
 
-class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, ISupportHeaders {
+class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTMLSupportHeaders {
 
     private $mRowBody = null, $mIsException = false, $mLastDataElm = null;
 

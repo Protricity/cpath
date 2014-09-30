@@ -18,20 +18,5 @@ class JSONMimeType extends MimeType
         parent::__construct($typeName, $nextMimeType);
     }
 
-    /**
-     * Send response headers for this mime type
-     * @param int $code HTTP response code
-     * @param String $message response message
-     * @internal param \CPath\Request\IRequest $Request
-     * @return bool returns true if the headers were sent, false otherwise
-     */
-    function sendHeaders($code = 200, $message = 'OK') {
-        if(!parent::sendHeaders($code, $message))
-            return false;
-
-        header('Access-Control-Allow-Origin: *');
-
-        return true;
-    }
 
 }

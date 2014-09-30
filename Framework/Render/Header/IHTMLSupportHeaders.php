@@ -10,7 +10,7 @@ namespace CPath\Framework\Render\Header;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Request\IRequest;
 
-interface ISupportHeaders
+interface IHTMLSupportHeaders
 {
     /**
      * Write all support headers used by this IView instance

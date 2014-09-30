@@ -7,7 +7,7 @@
  */
 namespace CPath\Handlers\HTML;
 
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
@@ -16,7 +16,7 @@ use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseCode;
-use CPath\Response\Common\SimpleResponse;
+use CPath\Response\Response;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\Exceptions\MissingRenderModeException;
 use CPath\Render\HTML\HTMLMimeType;
@@ -37,9 +37,9 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
 
     /**
      * Initialize handler with optional template container
-     * @param IContainerHTML|null $Template optionally add an html container to wrap HTML render requests
+     * @param IHTMLContainer|null $Template optionally add an html container to wrap HTML render requests
      */
-    public function __construct(IContainerHTML $Template = null) {
+    public function __construct(IHTMLContainer $Template = null) {
         $this->mTemplate = $Template;
     }
 
@@ -72,8 +72,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         $Util->sendHeaders('text/html');
 
         if ($this->mTemplate) {
-            $this->mTemplate->addContent($this);
-            $this->mTemplate->renderHTML($Request);
+            $this->mTemplate->renderHTMLContent($Request, $this);
         } else {
             $this->renderHTML($Request);
         }
@@ -83,7 +82,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderJSON) {
             $Response = $this;
         } else {
-            $Response = new SimpleResponse("interface IRenderJSON not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderJSON not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
         }
 
         $Util = new ResponseUtil($Response);
@@ -95,7 +94,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderXML) {
             $Response = $this;
         } else {
-            $Response = new SimpleResponse("interface IRenderXML not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderXML not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
         }
 
         $Util = new ResponseUtil($Response);
@@ -107,7 +106,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderText) {
             $Response = $this;
         } else {
-            $Response = new SimpleResponse("interface IRenderText not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderText not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
         }
 
         $Util = new ResponseUtil($Response);

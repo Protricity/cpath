@@ -9,6 +9,10 @@ namespace CPath\Response;
 
 interface IResponseCode {
     const STATUS_SUCCESS = 200;
+
+    const STATUS_SEE_OTHER = 303;
+    const STATUS_TEMPORARY_REDIRECT = 307;
+
     const STATUS_ERROR = 400;
     const STATUS_NOT_FOUND = 404;
     const STATUS_CONFLICT = 409;

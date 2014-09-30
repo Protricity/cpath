@@ -8,7 +8,7 @@ use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Common\WebRequest;
@@ -17,7 +17,7 @@ use CPath\Templates\Themes\CPathDefaultTheme;
 use CPath\Render\HTML\Theme\ITableTheme;
 use CPath\Render\HTML\Theme\Util\TableThemeUtil;
 
-class ModelResultsTableFragment implements IRenderHTML, ISupportHeaders{
+class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
 
     private $mTheme;
 

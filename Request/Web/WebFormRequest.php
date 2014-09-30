@@ -11,62 +11,28 @@ use CPath\Describable\IDescribable;
 
 class WebFormRequest extends WebRequest
 {
-    private $mMethodName;
     private $mValueSource = null;
 
 
-    public function __construct($method, $path = null, Array $params = array()) {
-        $this->mMethodName = $method;
+    public function __construct($method, $path = null, $params = array()) {
+//        if (!$path)
+//            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-        if (!$path)
-            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-        parent::__construct($path, $params);
+        parent::__construct($method, $path, $params);
     }
 
-    /**
-     * Get the Request Method (POST, PUT, PATCH, DELETE, or CLI)
-     * @return String
-     */
-    function getMethodName() {
-        return $this->mMethodName;
-    }
-
-    /**
-     * Checks a request value to see if it exists
-     * @param string $paramName the parameter name
-     * @return bool
-     */
-    function hasValue($paramName) {
-        if(parent::hasValue($paramName))
-            return true;
-
-        $values = $this->getAllValues();
-        if(!empty($values[$paramName]))
-            return true;
-
-        return false;
-    }
-
-    /**
-     * Get a request value by parameter name if it exists
-     * @param string $paramName the parameter name
-     * @param string|IDescribable|null $description [optional] description for this prompt
-     * @return mixed the parameter value or null
-     */
-    function getValue($paramName, $description = null) {
-        if(parent::hasValue($paramName))
-            return parent::getValue($paramName);
-
+    protected function getParamValue($paramName) {
         $values = $this->getAllValues();
         if(!empty($values[$paramName]))
             return $values[$paramName];
 
+        if($value = parent::getParamValue($paramName))
+            return $value;
+
         return null;
     }
 
-
-    function getAllValues() {
+    protected function getAllValues() {
         if ($this->mValueSource !== null)
             return $this->mValueSource;
 

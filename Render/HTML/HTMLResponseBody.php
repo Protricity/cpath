@@ -10,34 +10,35 @@ namespace CPath\Render\HTML;
 use CPath\Describable\IDescribable;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
-use CPath\Framework\Render\Header\ISupportHeaders;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Request\IRequest;
 
-class HTMLResponseBody implements IContainerHTML
+class HTMLResponseBody implements IHTMLContainer
 {
     const DOCTYPE = '<!DOCTYPE html>';
     const TAB = '  ';
     const TAB_START = 0;
 
     /** @var IRenderHTML[] */
-    private $mContent=array();
+    //private $mContent=array();
 
-    public function __construct(IRenderHTML $_Content=null) {
-        foreach(func_get_args() as $arg)
-            if($arg)
-                $this->addContent($arg);
+    public function __construct() {
+//        foreach(func_get_args() as $arg)
+//            if($arg)
+//                $this->addContent($arg);
     }
 
     /**
      * Render the view body html
      * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRenderHTML $Content
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+    function renderHTMLContent(IRequest $Request, IRenderHTML $Content, IAttributes $Attr = null)
     {
         RI::si(static::TAB_START, static::TAB);
         echo self::DOCTYPE;
@@ -48,7 +49,7 @@ class HTMLResponseBody implements IContainerHTML
             echo RI::ni(), '<head>';
             RI::ai(1);
 
-                $this->renderHTMLHeaders($Request);
+                $this->renderHTMLHeaders($Request, $Content);
 
             RI::ai(-1);
             echo RI::ni(), '</head>';
@@ -57,8 +58,9 @@ class HTMLResponseBody implements IContainerHTML
             echo RI::ni(), '<body>';
             RI::ai(1);
 
-                foreach($this->mContent as $Content)
-                    $Content->renderHTML($Request, $Attr);
+                $Content->renderHTML($Request, $Attr);
+//                foreach($this->mContent as $Content)
+//                    $Content->renderHTML($Request, $Attr);
 
             RI::ai(-1);
             echo RI::ni(), '</body>';
@@ -72,32 +74,44 @@ class HTMLResponseBody implements IContainerHTML
      * @param \CPath\Request\IRequest $Request
      * @return WriteOnceHeaderRenderer the writer instance used
      */
-    protected function renderHTMLHeaders(IRequest $Request) {
+    protected function renderHTMLHeaders(IRequest $Request, IRenderHTML $Content) {
         $Writer = new WriteOnceHeaderRenderer();
 
-        if ($this instanceof IDescribable) {
-            $title = $this->getTitle();
+        if ($Content instanceof IDescribable) {
+            $title = $Content->getTitle();
             echo RI::ni(), "<title>", $title, "</title>";
         }
 
-        if ($this instanceof ISupportHeaders)
+        if ($this instanceof IHTMLSupportHeaders)
             $this->writeHeaders($Request, $Writer);
 
-        foreach($this->mContent as $Content)
-            if ($Content instanceof ISupportHeaders)
-                $Content->writeHeaders($Request, $Writer);
+        if ($Content instanceof IHTMLSupportHeaders)
+            $Content->writeHeaders($Request, $Writer);
 
         return $Writer;
     }
-
-    /**
-     * Add HTML Container Content
-     * @param IRenderHTML $Content
-     * @return String|void always returns void
-     */
-    function addContent(IRenderHTML $Content) {
-        $this->mContent[] = $Content;
-    }
+//
+//    /**
+//     * Add HTML Container Content
+//     * @param IRenderHTML $Content
+//     * @return String|void always returns void
+//     */
+//    function addContent(IRenderHTML $Content) {
+//        $this->mContent[] = $Content;
+//    }
+//    /**
+//     * Remove an IRenderHTML instance from the container
+//     * @param IRenderHTML $Content
+//     * @return bool true if the content was found and removed
+//     */
+//    function removeContent(IRenderHTML $Content) {
+//        foreach($this->mContent as $i => $C)
+//            if($C === $Content) {
+//                unset($this->mContent[$i]);
+//                return true;
+//            }
+//        return false;
+//    }
 
 //    /**
 //     * Render this request

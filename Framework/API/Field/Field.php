@@ -25,7 +25,7 @@ use CPath\Validate;
  * @package CPath
  * Represents an 'optional' API Field
  */
-class Field implements IField, IDescribableAggregate, IRenderHTML {
+class Field2 implements IField, IDescribableAggregate, IRenderHTML {
 
     private $mName, $mDescription, $mValidation, $mDefaultValue = null, $mFlags = 0, $mValue=null;
 

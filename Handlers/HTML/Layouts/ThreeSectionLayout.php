@@ -10,26 +10,26 @@ namespace CPath\Handlers\HTML\Layouts;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\ISupportHeaders;
+use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IContainerHTML;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\HTML\HTMLElement;
+use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Request\IRequest;
 use CPath\Handlers\HTML\Navigation\AbstractNavigator;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 
-class ThreeSectionLayout implements IContainerHTML, ISupportHeaders
+class ThreeSectionLayout implements IRenderHTML, IHTMLSupportHeaders
 {
     const SECTION_HEADER = 'header';
     const SECTION_BODY = 'body';
     const SECTION_FOOTER = 'footer';
 
-    /** @var HTMLElement */
+    /** @var \CPath\Render\HTML\Element\HTMLElement */
     private $mHeader;
-    /** @var \CPath\Render\HTML\HTMLElement */
+    /** @var \CPath\Render\HTML\Element\HTMLElement */
     private $mBody;
-    /** @var HTMLElement */
+    /** @var \CPath\Render\HTML\Element\HTMLElement */
     private $mFooter;
 
     public function __construct(IRenderHTML $_Content=null) {
