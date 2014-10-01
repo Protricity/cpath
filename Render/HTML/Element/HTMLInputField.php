@@ -22,4 +22,12 @@ class HTMLInputField extends HTMLElement
     public function setValue($value) {
         $this->setAttribute('value', $value);
     }
+
+    public function setName($value) {
+        $this->setAttribute('name', $value);
+    }
+
+    public function setID($value) {
+        $this->setAttribute('id', $value);
+    }
 }

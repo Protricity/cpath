@@ -7,12 +7,15 @@
  * Date: 4/06/11 */
 namespace CPath\Data\Map;
 
+
 interface IMappableKeys {
 
     /**
-     * Map data to a data map
-     * @param IKeyMap $Map the map instance to add data to
-     * @return void
+     * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
+     * @param String $key
+     * @param String|Array|IKeyMap|ISequenceMap $value
+     * @return bool true to stop or any other value to continue
      */
-    function mapKeys(IKeyMap $Map);
+    function map($key, $value);
 }
+

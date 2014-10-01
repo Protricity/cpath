@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Response;
 
-use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IMappableKeys;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
 use CPath\Response\IResponse;
@@ -28,12 +28,14 @@ class PDOModelResponse implements IPDOModel, IResponse
     function getModel() {
         return $this->mModel;
     }
+
     /**
      * Map data to a data map
-     * @param IKeyMap $Map the map instance to add data to
+     * @param IMappableKeys $Map the map instance to add data to
+     * @internal param \CPath\Framework\PDO\Response\IRequest $Request
      * @return void
      */
-    function mapKeys(IKeyMap $Map)
+    function mapKeys(IMappableKeys $Map)
     {
         $Util = new ResponseUtil($this);
         $Util->mapKeys($Map, $this->mModel);

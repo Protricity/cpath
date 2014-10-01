@@ -3,7 +3,7 @@ namespace CPath\Framework\Render\Fragment\Table;
 
 use CPath\Base;
 use CPath\Framework\Data\Map\Common\ArrayMap;
-use CPath\Data\Map\IMappableKeys;
+use CPath\Data\Map\IKeyMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -61,7 +61,7 @@ class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
 
         $row = $Query->fetch();
         if($row) {
-            if($row instanceof IMappableKeys)
+            if($row instanceof IKeyMap)
                 $row = ArrayMap::get($row);
 
 
@@ -79,7 +79,7 @@ class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
                 foreach($row as $value)
                     $Table->renderTD($value);
                 $row = $Query->fetch();
-                if($row instanceof IMappableKeys)
+                if($row instanceof IKeyMap)
                     $row = ArrayMap::get($row);
             }
         }

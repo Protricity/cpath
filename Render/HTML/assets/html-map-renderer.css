@@ -1,3 +1,58 @@
-.html-map-renderer {
+ul.html-map-renderer {
+    display: inline-block;
+    padding: .3em 0;
+    margin-bottom: .3em;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+    list-style: none;
+    background-color: #EEE;
+    font-family: monospace;
+}
+
+ul.html-map-renderer li {
+    margin-left: 1em;
+}
+
+ul.html-map-renderer li ul.html-map-renderer {
+    background-color: #DDD;
+}
+
+ul.html-map-renderer li ul.html-map-renderer  li ul.html-map-renderer {
+    background-color: #CCC;
+}
+
+li.sequence-item{
+    display: inline-block;
+    /*background-color: #E6E6E6;*/
+}
+
+li.sequence-item h3 {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+li.sequence-item:hover{
+    background-color: #CCAAAA;
+}
+
+li.key-map-pair {
+}
+
+
+li.key-map-pair label {
+    font-weight: bold;
+    margin-right: 10pt;
+    vertical-align: top;
+    /*width: 100px;*/
+    /*display: inline-block;*/
+    /*float: left;*/
 
 }
+
+li.key-map-pair span, li.key-map-pair a {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    float: right;
+    width: 75%;
+}
+

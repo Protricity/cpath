@@ -9,7 +9,7 @@ namespace CPath\Data\Map;
 
 use CPath\Response\Response;
 
-class ArraySequence implements IMappableSequence
+class ArraySequence implements ISequenceMap
 {
     private $mArr;
 
@@ -19,10 +19,11 @@ class ArraySequence implements IMappableSequence
 
     /**
      * Map sequential data to the map
-     * @param ISequenceMap $Map
+     * @param IMappableSequence $Map
+     * @internal param \CPath\Data\Map\IRequest $Request
      * @return mixed
      */
-    function mapSequence(ISequenceMap $Map) {
+    function mapSequence(IMappableSequence $Map) {
         foreach ($this->mArr as $value)
             $Map->mapNext($value);
     }

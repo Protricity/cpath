@@ -7,14 +7,14 @@
  */
 namespace CPath\Route;
 
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\IMappableSequence;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseCode;
 
-class RouteIndexResponse implements IResponse, IMappableSequence
+class RouteIndexResponse implements IResponse, ISequenceMap
 {
     private $mRoutes;
     private $mMatch;
@@ -42,10 +42,11 @@ class RouteIndexResponse implements IResponse, IMappableSequence
 
     /**
      * Map sequential data to the map
-     * @param ISequenceMap $Map
+     * @param IMappableSequence $Map
+     * @internal param \CPath\Route\IRequest $Request
      * @return mixed
      */
-    function mapSequence(ISequenceMap $Map) {
+    function mapSequence(IMappableSequence $Map) {
         $match = $this->mMatch;
         $this->mRoutes->mapRoutes(new RouteCallback(function ($prefix, $target) use ($Map, $match) {
             list($matchMethod, $matchPath) = explode(' ', $match, 2);

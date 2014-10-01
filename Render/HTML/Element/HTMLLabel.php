@@ -12,15 +12,11 @@ use CPath\Render\HTML\IRenderHTML;
 
 class HTMLLabel extends HTMLElement
 {
-    private $mText;
-
     /**
      * @param string $text
      * @param String|\CPath\Render\HTML\Attribute\IAttributes $attr
      */
-    public function __construct($text, $attr = null)
-    {
-        $this->mText = $text;
+    public function __construct($text, $attr = null) {
         parent::__construct('label', $attr);
         $this->addContent(new HTMLText($text));
     }
@@ -31,11 +27,12 @@ class HTMLLabel extends HTMLElement
      * @param null $key
      * @return String|void always returns void
      */
-    function addContent(IRenderHTML $Content, $key = null)
-    {
+    function addContent(IRenderHTML $Content, $key = null) {
         parent::addContent($Content, $key);
         if ($Content instanceof HTMLElement)
-            if ($name = $Content->getAttribute('name'))
-                $this->setAttribute('for', $name);
+            if ($Content->hasAttribute('name'))
+                $this->setAttribute('for', $Content->getAttribute('name'));
     }
 }
+
+

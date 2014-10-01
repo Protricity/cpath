@@ -8,16 +8,16 @@
 namespace CPath\Render\JSON;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\IMappableSequence;
+use CPath\Request\IRequest;
 
-class JSONSequenceMapRenderer implements ISequenceMap
+class JSONSequenceMapRenderer implements IMappableSequence
 {
     const DELIMIT = ', ';
     private $mStarted = false;
     private $mCount = 0;
-
 
     function __destruct() {
         $this->flush();
@@ -43,7 +43,7 @@ class JSONSequenceMapRenderer implements ISequenceMap
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @param mixed $_arg additional varargs
      * @return bool false to continue, true to stop
      */
@@ -55,11 +55,11 @@ class JSONSequenceMapRenderer implements ISequenceMap
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if ($value instanceof IMappableKeys) {
+        if ($value instanceof IKeyMap) {
             $Renderer = new JSONKeyMapRenderer();
             $value->mapKeys($Renderer);
 
-        } elseif ($value instanceof IMappableSequence) {
+        } elseif ($value instanceof ISequenceMap) {
             $Renderer = new JSONSequenceMapRenderer();
             $value->mapSequence($Renderer);
 

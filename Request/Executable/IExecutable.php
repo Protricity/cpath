@@ -7,6 +7,7 @@
  */
 namespace CPath\Request\Executable;
 
+use CPath\Request\RequestException;
 use CPath\Response\IResponse;
 use CPath\Request\IRequest;
 
@@ -16,6 +17,8 @@ interface IExecutable
      * Execute a command and return a response. Does not render
      * @param IRequest $Request
      * @return IResponse the execution response
+     * @throws RequestException
      */
     function execute(IRequest $Request);
 }
+

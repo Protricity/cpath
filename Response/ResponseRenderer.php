@@ -8,8 +8,8 @@
 namespace CPath\Response;
 
 use API\Framework\Fingerprint\Entry\Common\UnknownEntry;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
@@ -106,11 +106,11 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
         if ($Response instanceof IRenderHTML) {
             $Response->renderHTML($Request);
 
-        } elseif ($Response instanceof IMappableKeys) {
+        } elseif ($Response instanceof IKeyMap) {
             $Renderer = new HTMLMapRenderer($Request, $Attr);
             $Response->mapKeys($Renderer);
 
-        } elseif ($Response instanceof IMappableSequence) {
+        } elseif ($Response instanceof ISequenceMap) {
             $Renderer = new HTMLMapRenderer($Request, $Attr);
             $Response->mapSequence($Renderer);
 
@@ -133,11 +133,11 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
         if ($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
 
-        } elseif ($Response instanceof IMappableKeys) {
+        } elseif ($Response instanceof IKeyMap) {
             $Renderer = new JSONKeyMapRenderer();
             $Response->mapKeys($Renderer);
 
-        } elseif ($Response instanceof IMappableSequence) {
+        } elseif ($Response instanceof ISequenceMap) {
             $Renderer = new JSONSequenceMapRenderer();
             $Response->mapSequence($Renderer);
 
@@ -160,11 +160,11 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
         if ($Response instanceof IRenderText) {
             $Response->renderText($Request);
 
-        } elseif ($Response instanceof IMappableKeys) {
+        } elseif ($Response instanceof IKeyMap) {
             $Renderer = new TextKeyMapRenderer();
             $Response->mapKeys($Renderer);
 
-        } elseif ($Response instanceof IMappableSequence) {
+        } elseif ($Response instanceof ISequenceMap) {
             $Renderer = new TextSequenceMapRenderer();
             $Response->mapSequence($Renderer);
 
@@ -188,11 +188,11 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
         if ($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $declaration);
 
-        } elseif ($Response instanceof IMappableKeys) {
+        } elseif ($Response instanceof IKeyMap) {
             $Renderer = new XMLKeyMapRenderer($rootElementName, $declaration);
             $Response->mapKeys($Renderer);
 
-        } elseif ($Response instanceof IMappableSequence) {
+        } elseif ($Response instanceof ISequenceMap) {
             $Map = new XMLKeyMapRenderer($rootElementName, $declaration); // fill in 'root' for xml sequences?
             $Map->map('item', $Response);
 

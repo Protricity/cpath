@@ -16,7 +16,6 @@ class RenderKeyMap implements IKeyMap, IRenderHTML
 {
     private $mMappable;
     private $mClosure;
-    private $mRequest = null;
 
     public function __construct(IMappableKeys $Mappable, \Closure $Closure) {
         $this->mMappable = $Mappable;
@@ -30,9 +29,7 @@ class RenderKeyMap implements IKeyMap, IRenderHTML
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $this->mRequest = $Request;
         $this->mMappable->mapKeys($this);
-        $this->mRequest = null;
     }
 
     /**
@@ -43,6 +40,6 @@ class RenderKeyMap implements IKeyMap, IRenderHTML
      */
     function map($key, $value) {
         $Closure = $this->mClosure;
-        $Closure($this->mRequest, $key, $value);
+        return $Closure($key, $value);
     }
 }

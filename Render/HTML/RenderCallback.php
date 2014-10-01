@@ -5,21 +5,21 @@
  * Date: 9/29/14
  * Time: 3:20 PM
  */
-namespace CPath\Data\Map;
+namespace CPath\Render\HTML;
 
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\IMappableSequence;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class RenderSequence implements ISequenceMap, IRenderHTML
+class RenderCallback implements IMappableSequence, IRenderHTML
 {
-    private $mMappable;
     private $mClosure;
-    private $mRequest = null;
 
-    public function __construct(IMappableSequence $Mappable, \Closure $Closure) {
-        $this->mMappable = $Mappable;
+    public function __construct(\Closure $Closure) {
         $this->mClosure = $Closure;
     }
 
@@ -30,22 +30,19 @@ class RenderSequence implements ISequenceMap, IRenderHTML
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $this->mRequest = $Request;
-        $this->mMappable->mapSequence($this);
-        $this->mRequest = null;
-
+        $call = $this->mClosure;
+        $call($Request, $Attr);
     }
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @param mixed $_arg additional varargs
      * @return bool false to continue, true to stop
      */
     function mapNext($value, $_arg = null) {
         $args = func_get_args();
-        array_unshift($args, $this->mRequest);
-        call_user_func_array($this->mClosure, $args);
+        return call_user_func_array($this->mClosure, $args);
     }
 }
 

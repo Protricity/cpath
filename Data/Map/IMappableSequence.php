@@ -10,10 +10,10 @@ namespace CPath\Data\Map;
 interface IMappableSequence
 {
     /**
-     * Map sequential data to the map
-     * @param ISequenceMap $Map
-     * @return mixed
+     * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
+     * @param String|Array|IKeyMap|ISequenceMap $value
+     * @param mixed $_arg additional varargs
+     * @return bool false to continue, true to stop
      */
-    function mapSequence(ISequenceMap $Map);
+    function mapNext($value, $_arg = null);
 }
-

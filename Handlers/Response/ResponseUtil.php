@@ -7,8 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Response;
 use CPath\Config;
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
+use CPath\Data\Map\IKeyMap;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\IRenderHTML;
@@ -19,7 +19,7 @@ use CPath\Render\XML\IRenderXML;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 
-final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRenderJSON, IRenderText {
+final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSON, IRenderText {
     private $mResponse;
     private $mSent = false;
     //private $mContainer;
@@ -51,10 +51,11 @@ final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRen
 
     /**
      * Map data to a data map
-     * @param IKeyMap $Map the map instance to add data to
+     * @param IMappableKeys $Map the map instance to add data to
+     * @internal param \CPath\Request\IRequest $Request
      * @return void
      */
-    function mapKeys(IKeyMap $Map) {
+    function mapKeys(IMappableKeys $Map) {
         $Response = $this->mResponse;
 
         $Map->map(IResponse::STR_MESSAGE, $Response->getMessage());
@@ -72,7 +73,7 @@ final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRen
         $Response = $this->mResponse;
         if($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
-        } elseif($Response instanceof IMappableKeys) {
+        } elseif($Response instanceof IKeyMap) {
             $Renderer = new JSONRenderMap();
             $Response->mapKeys($Renderer);
 
@@ -96,7 +97,7 @@ final class ResponseUtil implements IMappableKeys, IRenderHTML, IRenderXML, IRen
         $Response = $this->mResponse;
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $rootElementName, $declaration);
-        } elseif($Response instanceof IMappableKeys) {
+        } elseif($Response instanceof IKeyMap) {
             $Renderer = new XMLRenderMap($rootElementName, true);
             $Response->mapKeys($Renderer);
 

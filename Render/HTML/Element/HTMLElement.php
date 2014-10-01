@@ -54,6 +54,10 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
         return $this->mAttr->getAttribute($attrName);
     }
 
+    function hasAttribute($attrName) {
+        return $this->mAttr->hasAttribute($attrName);
+    }
+
     public function addClass($classList) {
         $this->mAttr->addClass($classList);
     }

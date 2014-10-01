@@ -8,10 +8,9 @@
 namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
-use CPath\Request\Validation\IValidateRequest;
-use CPath\Request\Validation\ValidationException;
+use CPath\Request\Parameter\IParameterMap;
 
-interface IRequest extends ILogListener
+interface IRequest extends ILogListener, IParameterMap
 {
     const PARAM_REQUIRED = 0x01;
     const PARAM_ERROR = 0x02;
@@ -59,18 +58,10 @@ interface IRequest extends ILogListener
 
 
     /**
-     * Returns an associative array of params and their descriptions
-     * @return array
+     * Set the request parameters expected by this request
+     * @param IParameterMap $Map
      */
-    function getParameterDescriptions();
-
-    /**
-     * Validate request or throw an exception
-     * @param IValidateRequest $Validation
-     * @return mixed
-     * @throws ValidationException if request validation fails
-     */
-    //function validate(IValidateRequest $Validation);
+    function setRequestParameters(IParameterMap $Map);
 
     /**
      * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)

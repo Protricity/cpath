@@ -7,13 +7,13 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
+use CPath\Data\Map\IKeyMap;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Log;
 
-class PDOSelect extends PDOWhere implements IMappableKeys, \Iterator, \Countable {
+class PDOSelect extends PDOWhere implements IKeyMap, \Iterator, \Countable {
 
     /** @var \PDOStatement */
     protected $mStmt=NULL;
@@ -288,10 +288,11 @@ class PDOSelect extends PDOWhere implements IMappableKeys, \Iterator, \Countable
 
     /**
      * Map data to a data map
-     * @param IKeyMap $Map the map instance to add data to
+     * @param IMappableKeys $Map the map instance to add data to
+     * @internal param \CPath\Framework\PDO\Query\IRequest $Request
      * @return void
      */
-    function mapKeys(IKeyMap $Map)
+    function mapKeys(IMappableKeys $Map)
     {
         while($data = $this->fetch()) {
             $Map->mapArrayObject($data);

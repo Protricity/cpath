@@ -48,6 +48,10 @@ final class HTMLAttributes implements IAttributes {
         return $this->mAttr[$attrName];
     }
 
+    function hasAttribute($attrName) {
+        return isset($this->mAttr[$attrName]);
+    }
+
     /**
      * Add attributes
      * @param $htmlAttr

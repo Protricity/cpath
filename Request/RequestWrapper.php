@@ -9,6 +9,8 @@ namespace CPath\Request;
 
 use CPath\Describable\IDescribable;
 use CPath\Request\Log\ILogListener;
+use CPath\Request\Parameter\IMappableParameters;
+use CPath\Request\Parameter\IParameterMap;
 
 abstract class RequestWrapper implements IRequest
 {
@@ -108,13 +110,13 @@ abstract class RequestWrapper implements IRequest
         $this->mLogs[] = $Listener;
     }
 
-    /**
-     * Returns an associative array of params and their descriptions
-     * @return array
-     */
-    function getParameterDescriptions() {
-        return $this->mRequest->getParameterDescriptions();
-    }
+//    /**
+//     * Returns an associative array of params and their descriptions
+//     * @return array
+//     */
+//    function getParameterDescriptions() {
+//        return $this->mRequest->getParameterDescriptions();
+//    }
 
     /**
      * @param bool $withDomain
@@ -122,5 +124,22 @@ abstract class RequestWrapper implements IRequest
      */
     function getDomainPath($withDomain = false) {
         return $this->mRequest->getDomainPath($withDomain);
+    }
+
+    /**
+     * Map request parameters for this object
+     * @param IMappableParameters $Map
+     * @return void
+     */
+    function mapParameters(IMappableParameters $Map) {
+        $this->mRequest->mapParameters($Map);
+    }
+
+    /**
+     * Set the request parameters expected by this request
+     * @param IParameterMap $Map
+     */
+    function setRequestParameters(IParameterMap $Map) {
+        return $this->mRequest->setRequestParameters($Map);
     }
 }

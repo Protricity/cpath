@@ -7,19 +7,19 @@
  */
 namespace CPath\Request\Log;
 
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\RenderSequence;
+use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\SequenceMapCallback;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
 
-final class StaticLogger implements ILogListener, IMappableSequence, IRenderHTML, IHTMLSupportHeaders
+final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHTMLSupportHeaders
 {
     const CSS_CLASS = 'static-logger';
 
@@ -86,10 +86,11 @@ final class StaticLogger implements ILogListener, IMappableSequence, IRenderHTML
 
     /**
      * Map sequential data to the map
-     * @param ISequenceMap $Map
+     * @param IMappableSequence $Map
+     * @internal param \CPath\Request\IRequest $Request
      * @return mixed
      */
-    function mapSequence(ISequenceMap $Map) {
+    function mapSequence(IMappableSequence $Map) {
         foreach(self::$Log as $log)
             $Map->mapNext($log[0], $log[1]);
     }
@@ -115,18 +116,24 @@ final class StaticLogger implements ILogListener, IMappableSequence, IRenderHTML
         $Div = new HTMLElement('div', $Attr);
         $Div->addClass(self::CSS_CLASS);
 
-        $Div->addContent(new RenderSequence($this, function(IRequest $Request, $msg, $flags) {
-            if($msg instanceof \Exception) {
-                $msg = $msg->getMessage();
-            }
-            $Div = new HTMLElement('div', null, $msg);
-            if($flags & ILogListener::VERBOSE)
-                $Div->addClass('verbose');
-            if($flags & ILogListener::ERROR)
-                $Div->addClass('error');
-            $Div->renderHTML($Request);
-        }));
+        $Render = new RenderCallback(function(IRequest $Request, IAttributes $Attr=null) {
 
+            $Log = new StaticLogger();
+            $Log->mapSequence(new SequenceMapCallback(function($msg, $flags) use ($Request) {
+
+                if($msg instanceof \Exception) {
+                    $msg = $msg->getMessage();
+                }
+                $Div = new HTMLElement('div', null, $msg);
+                if($flags & ILogListener::VERBOSE)
+                    $Div->addClass('verbose');
+                if($flags & ILogListener::ERROR)
+                    $Div->addClass('error');
+                $Div->renderHTML($Request);
+            }));
+        });
+
+        $Div->addContent($Render);
         $Div->renderHTML($Request);
     }
 }

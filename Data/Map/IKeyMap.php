@@ -10,11 +10,10 @@ namespace CPath\Data\Map;
 interface IKeyMap {
 
     /**
-     * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String $key
-     * @param String|Array|IMappableKeys|IMappableSequence $value
-     * @return bool true to stop or any other value to continue
+     * Map data to the key map
+     * @param IMappableKeys $Map the map instance to add data to
+     * @internal param \CPath\Request\IRequest $Request
+     * @return void
      */
-    function map($key, $value);
+    function mapKeys(IMappableKeys $Map);
 }
-

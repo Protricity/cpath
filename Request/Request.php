@@ -9,10 +9,13 @@ namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\Parameter\IMappableParameters;
+use CPath\Request\Parameter\IParameterMap;
+use CPath\Request\Parameter\Parameter;
+use CPath\Request\Parameter\RequiredParameter;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
-use CPath\Response\Exceptions\HTTPRequestException;
 
 class Request implements IRequest
 {
@@ -24,7 +27,10 @@ class Request implements IRequest
     /** @var IRequestedMimeType */
     private $mMimeType=null;
 
-    private $mDescriptions = array();
+    private $mParams = array();
+    /** @var IParameterMap */
+    private $mMap = null;
+
     private $mPrefixPath = null;
 
     public function __construct($method, $path = null, $params = array(), IRequestedMimeType $MimeType=null) {
@@ -98,7 +104,7 @@ class Request implements IRequest
      */
     final function getValue($paramName, $description = null, $flags=0) {
         if($description)
-            $this->mDescriptions[$paramName] = array_slice(func_get_args(), 1); //array($description, $flags);
+            $this->mParams[$paramName] = array_slice(func_get_args(), 1); //array($description, $flags);
 
         if($value = $this->getParamValue($paramName))
             return $value;
@@ -114,7 +120,7 @@ class Request implements IRequest
 //            return $value;
 
         if($flags & IRequest::PARAM_REQUIRED) {
-            $this->mDescriptions[$paramName][1] |= IRequest::PARAM_ERROR;
+            $this->mParams[$paramName][1] |= IRequest::PARAM_ERROR;
             throw new RequestException("Missing parameter: " . $paramName);
         }
         return null;
@@ -241,14 +247,14 @@ class Request implements IRequest
     function addLogListener(ILogListener $Listener) {
         $this->mListeners[] = $Listener;
     }
-
-    /**
-     * Returns an associative array of params and their descriptions
-     * @return array
-     */
-    function getParameterDescriptions() {
-        return $this->mDescriptions;
-    }
+//
+//    /**
+//     * Returns an associative array of params and their descriptions
+//     * @return array
+//     */
+//    function getParameterDescriptions() {
+//        return $this->mParams;
+//    }
 
     /**
      * @param bool $withDomain
@@ -264,6 +270,33 @@ class Request implements IRequest
             $path = $protocol . "://" . $_SERVER['SERVER_NAME'] . $path;
         }
         return $path;
+    }
+
+    /**
+     * Set the request parameters expected by this request
+     * @param IParameterMap $Map
+     */
+    function setRequestParameters(IParameterMap $Map) {
+        $this->mMap = $Map;
+    }
+
+    /**
+     * Map request parameters for this object
+     * @param IMappableParameters $Map
+     * @return void
+     */
+    function mapParameters(IMappableParameters $Map) {
+        // TODO: merge?
+        if($this->mMap) {
+            $this->mMap->mapParameters($Map);
+        } else {
+            foreach($this->mParams as $name => $data) {
+                if(isset($data[1]) && ($data[1] & IRequest::PARAM_REQUIRED))
+                    $Map->map(new RequiredParameter($name, $data[0]));
+                else
+                    $Map->map(new Parameter($name, $data[0]));
+            }
+        }
     }
 
     // Static

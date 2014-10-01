@@ -8,11 +8,11 @@
 namespace CPath\Render\JSON;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
 
-class JSONKeyMapRenderer implements IKeyMap {
+class JSONKeyMapRenderer implements IMappableKeys {
     const DELIMIT = ', ';
     private $mStarted = false, $mNextDelim=null;
 
@@ -42,7 +42,7 @@ class JSONKeyMapRenderer implements IKeyMap {
     /**
      * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
      * @param String $key
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @return bool false to continue, true to stop
      */
     function map($key, $value) {
@@ -56,12 +56,12 @@ class JSONKeyMapRenderer implements IKeyMap {
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if($value instanceof IMappableKeys) {
+        if($value instanceof IKeyMap) {
             $this->mNextDelim = null;
             $Renderer = new JSONKeyMapRenderer();
             $value->mapKeys($Renderer);
 
-        } elseif ($value instanceof IMappableSequence) {
+        } elseif ($value instanceof ISequenceMap) {
             $this->mNextDelim = null;
             $Renderer = new JSONSequenceMapRenderer();
             $value->mapSequence($Renderer);

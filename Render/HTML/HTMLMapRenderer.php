@@ -8,22 +8,25 @@
 namespace CPath\Render\HTML;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\IMappableSequence;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\URL\IHasURL;
 use CPath\Request\IRequest;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class HTMLMapRenderer implements IKeyMap, ISequenceMap, IHTMLSupportHeaders
+class HTMLMapRenderer implements IMappableKeys, IMappableSequence, IHTMLSupportHeaders
 {
     const CSS_CLASS = 'html-map-renderer';
+    const CSS_CLASS_SEQUENCE_ITEM = 'sequence-item';
+    const CSS_CLASS_MAP_KEY_PAIR = 'key-map-pair';
 
     private $mStarted = false;
     private $mAttr;
@@ -55,7 +58,7 @@ class HTMLMapRenderer implements IKeyMap, ISequenceMap, IHTMLSupportHeaders
         if (!$this->mStarted)
             return;
 
-        $this->tryStart();
+        //$this->tryStart();
 
         RI::ai(-1);
         echo RI::ni(), "</ul>";
@@ -77,7 +80,7 @@ class HTMLMapRenderer implements IKeyMap, ISequenceMap, IHTMLSupportHeaders
     /**
      * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
      * @param String $key
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @return bool true to stop or any other value to continue
      */
     function map($key, $value) {
@@ -85,37 +88,57 @@ class HTMLMapRenderer implements IKeyMap, ISequenceMap, IHTMLSupportHeaders
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        echo RI::ni(), "<li>";
+//        if($value instanceof IHasURL) {
+//            echo RI::ni(), "<a href='" . $value->getURL() . "'>";
+//            RI::ai(1);
+//        }
+
+        echo RI::ni(), "<li class='" . self::CSS_CLASS_MAP_KEY_PAIR . "'>";
+        RI::ai(1);
+        echo RI::ni(), "<div>";
         RI::ai(1);
 
+        $key = ucwords(str_replace('_', ' ', $key));
+        if(strlen($key) <= 3)
+            $key = strtoupper($key);
         echo RI::ni(), "<label>", $key, "</label>";
 
-        if ($value instanceof IMappableKeys) {
+        if ($value instanceof IRenderHTML) {
+            $value->renderHTML($this->mRequest);
+
+        } elseif ($value instanceof IKeyMap) {
             $Renderer = new HTMLMapRenderer($this->mRequest);
             $value->mapKeys($Renderer);
             $Renderer->flush();
 
-        } elseif ($value instanceof IMappableSequence) {
+        } elseif ($value instanceof ISequenceMap) {
             $Renderer = new HTMLMapRenderer($this->mRequest);
             $value->mapSequence($Renderer);
             $Renderer->flush();
 
-        } elseif ($value instanceof IDescribable) {
-            echo RI::ni(), "<li>", htmlspecialchars($value->getDescription()), "</li>";
+        } elseif (is_bool($value)) {
+            echo RI::ni(), "<span>", $value ? 'True' : 'False', "</span>";
 
         } else {
-            echo RI::ni(), "<span>", htmlspecialchars($value), "</span>";
+            echo RI::ni(), "<span>", htmlspecialchars(Describable::get($value)->getDescription()), "</span>";
 
         }
+        RI::ai(-1);
+        echo RI::ni(), "</div>";
 
         RI::ai(-1);
         echo RI::ni(), "</li>";
+
+//        if($value instanceof IHasURL) {
+//            RI::ai(-1);
+//            echo RI::ni(), "</a>";
+//        }
     }
 
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @param mixed $_arg additional varargs
      * @return bool false to continue, true to stop
      */
@@ -125,35 +148,44 @@ class HTMLMapRenderer implements IKeyMap, ISequenceMap, IHTMLSupportHeaders
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if ($value instanceof IMappableKeys) {
-            echo RI::ni(), "<li>";
-            RI::ai(1);
+        //$path = $this->mRequest->getDomainPath();
+//        if($value instanceof IHasURL) {
+//            echo RI::ni(), "<a href='" . $path . $value->getURL() . "'>";
+//            RI::ai(1);
+//        }
 
+        echo RI::ni(), "<li class='" . self::CSS_CLASS_SEQUENCE_ITEM . "'>";
+        RI::ai(1);
+
+        echo RI::ni(), "<h3>", Describable::get($value)->getTitle() . "</h3>";
+
+        if ($value instanceof IRenderHTML) {
+            $value->renderHTML($this->mRequest);
+
+        } elseif ($value instanceof IKeyMap) {
             $Renderer = new HTMLMapRenderer($this->mRequest);
             $value->mapKeys($Renderer);
             $Renderer->flush();
 
-            RI::ai(-1);
-            echo RI::ni(), "</li>";
-
-        } elseif ($value instanceof IMappableSequence) {
-            echo RI::ni(), "<li>";
-            RI::ai(1);
-
+        } elseif ($value instanceof ISequenceMap) {
             $Renderer = new HTMLMapRenderer($this->mRequest);
             $value->mapSequence($Renderer);
             $Renderer->flush();
 
-            RI::ai(-1);
-            echo RI::ni(), "</li>";
-
-        } elseif ($value instanceof IDescribable) {
-            echo RI::ni(), "<li>", htmlspecialchars($value->getDescription()), "</li>";
+        } elseif (is_bool($value)) {
+            echo RI::ni(), "<span>", $value ? 'True' : 'False', "</span>";
 
         } else {
-            echo RI::ni(), "<li>", htmlspecialchars(Describable::get($value)->getDescription()), "</li>";
+            echo RI::ni(), "<span>", htmlspecialchars(Describable::get($value)->getDescription()), "</span>";
 
         }
+        RI::ai(-1);
+        echo RI::ni(), "</li>";
+
+//        if($value instanceof IHasURL) {
+//            RI::ai(-1);
+//            echo RI::ni(), "</a>";
+//        }
     }
 }
 

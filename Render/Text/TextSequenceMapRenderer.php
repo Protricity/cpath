@@ -8,17 +8,17 @@
 namespace CPath\Render\Text;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\IMappableSequence;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class TextSequenceMapRenderer implements ISequenceMap
+class TextSequenceMapRenderer implements IMappableSequence
 {
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String|Array|IMappableKeys|IMappableSequence $value
+     * @param String|Array|IKeyMap|ISequenceMap $value
      * @param mixed $_arg additional varargs
      * @return bool false to continue, true to stop
      */
@@ -26,11 +26,11 @@ class TextSequenceMapRenderer implements ISequenceMap
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if ($value instanceof IMappableKeys) {
+        if ($value instanceof IKeyMap) {
             $Map = new TextKeyMapRenderer();
             $value->mapKeys($Map);
 
-        } elseif ($value instanceof IMappableSequence) {
+        } elseif ($value instanceof ISequenceMap) {
             $Renderer = new TextSequenceMapRenderer();
             $value->mapSequence($Renderer);
 

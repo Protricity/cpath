@@ -10,6 +10,7 @@ namespace CPath\Request\Executable;
 use CPath\Render\HTML\Attribute;
 use CPath\Request\IRequest;
 use CPath\Request\Log\StaticLogger;
+use CPath\Request\Parameter\IParameterMap;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\Response;
 use CPath\Response\IResponse;
@@ -28,6 +29,9 @@ class ExecutableRenderer extends ResponseRenderer {
         if($this->mLastResponse)
             return $this->mLastResponse;
         try {
+
+            if($this->mExecutable instanceof IParameterMap)
+                $Request->setRequestParameters($this->mExecutable);
             $Response = $this->mExecutable->execute($Request)
                 ?: new Response("No response", false);
         } catch (IResponse $ex) {

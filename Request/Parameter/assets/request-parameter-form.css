@@ -1,23 +1,23 @@
-form.request-exception .error {
+form.request-parameter-form .error {
     color: darkred;
 }
 
-form.request-exception .required {
+form.request-parameter-form .required {
     font-weight: bold;
 }
 
-form.request-exception {
+form.request-parameter-form {
     margin: 0 24pt 6pt 0;
     display: block;
 }
 
-form.request-exception fieldset {
+form.request-parameter-form fieldset {
     margin: 0;
     padding: .35em 0 .75em;
     border: 0;
 }
 
-form.request-exception legend {
+form.request-parameter-form legend {
     display: block;
     width: 100%;
     padding: .3em 0;
@@ -27,10 +27,10 @@ form.request-exception legend {
     font-weight: bold;
 }
 
-form.request-exception button,
-form.request-exception input,
-form.request-exception select,
-form.request-exception textarea {
+form.request-parameter-form button,
+form.request-parameter-form input,
+form.request-parameter-form select,
+form.request-parameter-form textarea {
     font-family: "proxima-nova", sans-serif;
     padding: .5em .6em;
     display: block;
@@ -41,7 +41,7 @@ form.request-exception textarea {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
-form.request-exception textarea {
+form.request-parameter-form textarea {
     width: 300pt;
     height: 100pt;
 }
