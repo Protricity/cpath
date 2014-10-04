@@ -12,8 +12,7 @@ use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\Log\StaticLogger;
-use CPath\Request\Parameter\RequestParameterForm;
+use CPath\Request\Validation\FormValidation;
 use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
@@ -37,7 +36,7 @@ class RequestException extends HTTPRequestException implements IRenderHTML, IRes
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-        $Form = new RequestParameterForm();
+        $Form = new FormValidation();
         $Form->writeHeaders($Request, $Head);
     }
 
@@ -48,7 +47,18 @@ class RequestException extends HTTPRequestException implements IRenderHTML, IRes
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Form = new RequestParameterForm();
+	    $Form = new FormValidation();
+	    foreach($Request->getParameters() as $Parameter)
+		    $Form->addContent($Parameter);
+
+        //$Form = new RequestParameterForm($this);
+	    $msg = $this->getMessage();
+	    try {
+	        $Form->validateRequest($Request);
+	    } catch (\Exception $ex) {
+		    $msg .= "\n" . $ex->getMessage();
+	    }
+	    $Form->updateResponse($msg, $this->getCode());
         $Form->renderHTML($Request, $Attr);
     }
 

@@ -9,7 +9,6 @@ namespace CPath\Framework\PDO\Table\Model\Interfaces;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
-use CPath\Response\IResponse;
 
 interface IPDOModel extends IKeyMap, ISerializable {
 

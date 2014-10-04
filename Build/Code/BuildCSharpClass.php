@@ -8,8 +8,6 @@
  * Date: 4/06/11 */
 namespace CPath\Build\Code;
 
-use CPath\Build\Code\AbstractBuildCodeClass;
-
 class BuildCSharpClass extends AbstractBuildCodeClass {
 
     const TAB = "\t\t";

@@ -7,8 +7,6 @@
  */
 namespace CPath\Framework\Render\Header;
 
-use CPath\Autoloader;
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class WriteOnceHeaderRenderer implements IHeaderWriter

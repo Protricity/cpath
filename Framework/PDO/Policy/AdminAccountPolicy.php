@@ -12,9 +12,9 @@ use CPath\Framework\PDO\InvalidPermissionException;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
-use CPath\Request\IRequest;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Util\UserUtil;
+use CPath\Request\IRequest;
 
 /**
  * Class AdminAccountPolicy implements an Admin-Only security policy

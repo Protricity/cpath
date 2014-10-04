@@ -9,11 +9,14 @@ namespace CPath\Data\Map;
 
 interface IKeyMap {
 
+    const KEY_TITLE = 'title';
+    const KEY_DESCRIPTION = 'description';
+
     /**
      * Map data to the key map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Request\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map);
+    function mapKeys(IKeyMapper $Map);
 }

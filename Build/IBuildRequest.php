@@ -8,9 +8,7 @@
 namespace CPath\Build;
 
 use CPath\Request\IFlaggedRequest;
-use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
-use CPath\Request\Log\ILogListener;
 
 interface IBuildRequest extends IRequest, IFlaggedRequest
 {

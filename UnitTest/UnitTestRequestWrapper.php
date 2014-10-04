@@ -7,8 +7,6 @@
  */
 namespace CPath\UnitTest;
 
-use CPath\Describable\IDescribable;
-use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Request\RequestWrapper;
 

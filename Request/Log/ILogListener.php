@@ -7,8 +7,6 @@
  */
 namespace CPath\Request\Log;
 
-use CPath\Request\IRequest;
-
 interface ILogListener
 {
     const VERBOSE = 0x01; // Verbose message meant for the developers to see

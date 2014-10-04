@@ -1,0 +1,47 @@
+form.form-validation .error {
+    color: darkred;
+}
+
+form.form-validation .required {
+    font-weight: bold;
+}
+
+form.form-validation {
+    margin: 0 24pt 6pt 0;
+    display: block;
+}
+
+form.form-validation fieldset {
+    margin: 0;
+    padding: .35em 0 .75em;
+    border: 0;
+}
+
+form.form-validation legend {
+    display: block;
+    width: 100%;
+    padding: .3em 0;
+    margin-bottom: .3em;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+    font-weight: bold;
+}
+
+form.form-validation button,
+form.form-validation input,
+form.form-validation select,
+form.form-validation textarea {
+    font-family: "proxima-nova", sans-serif;
+    padding: .5em .6em;
+    display: block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+form.form-validation textarea {
+    width: 300pt;
+    height: 100pt;
+}

@@ -7,10 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Render\HTML;
 
-use CPath\Data\Map\IMappableKeys;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class HTMLRenderUtil {
 

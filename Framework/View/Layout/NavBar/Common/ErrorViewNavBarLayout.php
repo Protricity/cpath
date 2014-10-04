@@ -9,13 +9,13 @@ namespace CPath\Framework\View\Layout\NavBar\Common;
 
 use CPath\Config;
 use CPath\Describable\Describable;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Framework\Request\Common\ExceptionRequestWrapper;
-use CPath\Request\IRequest;
-use CPath\Framework\View\Layout\NavBar\AbstractNavBarLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
-use CPath\Render\HTML\Theme\Util\TableThemeUtil;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\Request\Common\ExceptionRequestWrapper;
+use CPath\Framework\View\Layout\NavBar\AbstractNavBarLayout;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Theme\Util\TableThemeUtil;
+use CPath\Request\IRequest;
 
 class ErrorViewNavBarLayout extends AbstractNavBarLayout
 {

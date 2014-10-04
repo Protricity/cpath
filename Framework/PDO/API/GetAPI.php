@@ -17,12 +17,10 @@ use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
 use CPath\Framework\PDO\Query\PDOWhere;
-use CPath\Framework\PDO\Response\PDOModelResponse;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class GetAPI implements IAPI {

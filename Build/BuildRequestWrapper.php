@@ -7,12 +7,8 @@
  */
 namespace CPath\Build;
 
-use CPath\Describable\IDescribable;
-use CPath\Request\RequestException;
-use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType;
 use CPath\Request\RequestWrapper;
 
@@ -81,4 +77,5 @@ class BuildRequestWrapper extends RequestWrapper implements IBuildRequest
     function addLogListener(ILogListener $Listener) {
         $this->mLogs[] = $Listener;
     }
+
 }

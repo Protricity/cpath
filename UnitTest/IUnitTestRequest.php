@@ -7,8 +7,6 @@
  */
 namespace CPath\UnitTest;
 
-use CPath\Request\Executable\IPrompt;
-use CPath\Request\IFlaggedRequest;
 use CPath\Request\IRequest;
 
 class UnitTestException extends \Exception {

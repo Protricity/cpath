@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class HTMLMapUtil implements IMappableKeys
+class HTMLMapUtil implements IKeyMapper
 {
     private $mStarted = false;
 

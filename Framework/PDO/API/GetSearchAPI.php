@@ -12,22 +12,16 @@ use CPath\Describable\IDescribable;
 use CPath\Framework\API\Field\Field;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Field\Param;
-use CPath\Framework\API\Field\RequiredField;
 use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\API\Util\APIExecuteUtil;
-use CPath\Framework\PDO\Misc\API_GetBrowseDescriptor;
-use CPath\Framework\PDO\Interfaces\IAPIGetBrowseCallbacks;
-use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Interfaces\IReadAccess;
+use CPath\Framework\PDO\Misc\API_GetBrowseDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
-use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 
 class GetSearchAPI implements IAPI {
     private $mSearchColumns;

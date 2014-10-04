@@ -11,6 +11,6 @@ use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class ModelAlreadyExistsException extends HTTPRequestException {
-    const DEFAULT_HTTP_CODE = IResponse::STATUS_CONFLICT;
+    const DEFAULT_HTTP_CODE = IResponse::HTTP_CONFLICT;
 }
 

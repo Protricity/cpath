@@ -35,7 +35,7 @@ class Response implements IHeaderResponse {
         if(is_int($status))
             $this->mCode = $status;
         else
-            $this->mCode = $status ? IResponse::STATUS_SUCCESS : IResponse::STATUS_ERROR;
+            $this->mCode = $status ? IResponse::HTTP_SUCCESS : IResponse::HTTP_ERROR;
         return $this;
     }
 

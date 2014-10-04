@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\HTML\Element;
 
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class HTMLTextAreaField extends HTMLElement
 {

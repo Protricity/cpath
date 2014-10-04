@@ -9,10 +9,10 @@ namespace CPath\Render\XML;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class XMLSequenceMapRenderer implements IMappableSequence
+class XMLSequenceMapRenderer implements ISequenceMapper
 {
     const DELIMIT = ', ';
     private $mElementName;

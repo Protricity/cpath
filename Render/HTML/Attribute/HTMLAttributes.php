@@ -44,8 +44,8 @@ final class HTMLAttributes implements IAttributes {
         }
     }
 
-    function getAttribute($attrName) {
-        return $this->mAttr[$attrName];
+    function getAttribute($attrName, $defaultValue=null) {
+        return isset($this->mAttr[$attrName]) ? $this->mAttr[$attrName] : $defaultValue;
     }
 
     function hasAttribute($attrName) {

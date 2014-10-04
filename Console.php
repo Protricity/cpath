@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath;
 
-use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 
 class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
@@ -18,7 +17,7 @@ class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
     /**
      * Return an instance of IRender
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render
-     * @return \CPath\Request\IStaticRequestHandler return the renderer instance
+     * @return \CPath\Route\IRoute return the renderer instance
      */
     function getHandler(IRequest $Request)
     {

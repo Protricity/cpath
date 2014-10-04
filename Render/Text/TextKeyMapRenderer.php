@@ -8,12 +8,12 @@
 namespace CPath\Render\Text;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class TextKeyMapRenderer implements IMappableKeys
+class TextKeyMapRenderer implements IKeyMapper
 {
     /**
      * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped

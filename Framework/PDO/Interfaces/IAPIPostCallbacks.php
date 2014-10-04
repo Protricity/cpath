@@ -10,7 +10,6 @@ namespace CPath\Framework\PDO\Interfaces;
 
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 
 interface IAPIPostCallbacks {
 

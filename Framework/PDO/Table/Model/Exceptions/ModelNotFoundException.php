@@ -9,7 +9,7 @@ namespace CPath\Framework\PDO\Table\Model\Exceptions;
 
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Response\IResponse;
-use CPath\Response\IResponseCode;
+use CPath\Response\IResponse;
 
 class ModelNotFoundException extends \Exception implements IResponse
 {
@@ -17,6 +17,6 @@ class ModelNotFoundException extends \Exception implements IResponse
         if(is_array($search))
             $search = implode(', ', $search);
         $msg = $Table->getModelName() . " was not found: {$search}";
-        parent::__construct($msg, IResponseCode::STATUS_NOT_FOUND);
+        parent::__construct($msg, IResponse::HTTP_NOT_FOUND);
     }
 }

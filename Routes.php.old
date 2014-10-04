@@ -67,7 +67,7 @@ class Routes2 implements IRoutable {
         $path = $Request->getPath();
         if(($ext = pathinfo($path, PATHINFO_EXTENSION))
             && in_array(strtolower($ext), array('js', 'css', 'png', 'gif', 'jpg', 'bmp', 'ico')))
-            throw new CodedException("File request was passed to Script: ", IResponseCode::STATUS_NOT_FOUND);
+            throw new CodedException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
 
         $Selector = new Routes_SelectorMap($Request);
         $newPrefix = '';

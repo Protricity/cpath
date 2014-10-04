@@ -7,14 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath\Handlers\Response;
 use CPath\Config;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\XML\IRenderXML;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
@@ -51,11 +51,11 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Request\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map) {
+    function mapKeys(IKeyMapper $Map) {
         $Response = $this->mResponse;
 
         $Map->map(IResponse::STR_MESSAGE, $Response->getMessage());

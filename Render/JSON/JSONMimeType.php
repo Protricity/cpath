@@ -7,8 +7,6 @@
  */
 namespace CPath\Render\JSON;
 
-use CPath\Response\IResponse;
-use CPath\Request\IRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\MimeType;
 

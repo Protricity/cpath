@@ -1,21 +1,14 @@
 <?php
 namespace CPath\Framework\Render\Layout\Template;
 
-use CPath\Render\HTML\Attribute\Attr;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
-use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\HTML\Layout\ContentLayout;
-use CPath\Handlers\HTML\Navigation\AbstractNavigator;
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
+use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Templates\Themes\CPathDefaultTheme;
+use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Render\HTML\Theme\Interfaces\IPageTheme;
 use CPath\Request\IRequest;
+use CPath\Templates\Themes\CPathDefaultTheme;
 
 class Empty3SectionLayout extends Abstract3SectionLayout {
 

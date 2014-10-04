@@ -6,16 +6,16 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Data\Map\KeyMapCallback;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
-use CPath\Data\Map\KeyMapCallback;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IKeyMap;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Response\IResponse;
-use CPath\Response\IResponseCode;
 use CPath\Handlers\Response\ResponseUtil;
+use CPath\Response\IResponse;
+use CPath\Response\IResponse;
 
 class PDOSearchResponse implements IResponse, IKeyMap {
     private $mQuery;
@@ -57,11 +57,11 @@ class PDOSearchResponse implements IResponse, IKeyMap {
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Framework\PDO\Response\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map)
+    function mapKeys(IKeyMapper $Map)
     {
         $Util = new ResponseUtil($this);
         $Util->mapKeys($Map, $this->mQuery);
@@ -69,7 +69,7 @@ class PDOSearchResponse implements IResponse, IKeyMap {
             $Descriptor = $this->mQuery->getDescriptor();
             if($Descriptor !== null) {
                 if($Descriptor instanceof IKeyMap)
-                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new KeyMapCallback( function(IMappableKeys $Map) use ($Descriptor) {
+                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new KeyMapCallback( function(IKeyMapper $Map) use ($Descriptor) {
                         $Descriptor->mapKeys($Map);
                     }));
                 else
@@ -93,6 +93,6 @@ class PDOSearchResponse implements IResponse, IKeyMap {
      */
     function getCode()
     {
-        return $this->mCode ?: IResponseCode::STATUS_SUCCESS;
+        return $this->mCode ?: IResponse::HTTP_SUCCESS;
     }
 }

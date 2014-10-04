@@ -17,9 +17,9 @@ use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Table\Types\PDOTable;
+use CPath\Framework\Response\Types\DataResponse;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
-use CPath\Framework\Response\Types\DataResponse;
 
 class PutAPI extends AbstractPDOAPI {
 

@@ -2,14 +2,11 @@
 namespace CPath\Framework\Render\Fragment\Table;
 
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Fragment\Common\Table;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IStaticRequestHandler;
 use CPath\Request\IRequest;
 use CPath\Templates\Themes\CPathDefaultTheme;
-use CPath\Render\HTML\Theme\ITableTheme;
-use CPath\Framework\Render\Fragment\Table\ModelTableFragment;
 
 class ModelTableListFragment implements IRenderHTML {
 

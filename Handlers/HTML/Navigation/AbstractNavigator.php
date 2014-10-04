@@ -8,23 +8,22 @@
 namespace CPath\Handlers\HTML\Navigation;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Handlers\HTML\Navigation\RouteLink;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequestHandlerAggregate;
 use CPath\Request\IRequest;
+use CPath\Request\IRequestHandlerAggregate;
+use CPath\Route\DefaultMap;
 use CPath\Route\IRouteMap;
-use CPath\Route\IRoutable;
-use CPath\Backend\CPathBackendRoutes;
+use CPath\Route\IRouteMapper;
 
-abstract class AbstractNavigator implements IRenderHTML, IRouteMap
+abstract class AbstractNavigator implements IRenderHTML, IRouteMapper
 {
     private $mRoutable;
     /** @var \CPath\Request\IRequest */
     private $mRequest;
 
-    public function __construct(IRoutable $Routable = null)
+    public function __construct(IRouteMap $Routable = null)
     {
-        $this->mRoutable = $Routable ? : new CPathBackendRoutes();
+        $this->mRoutable = $Routable ? : new DefaultMap();
     }
 
     /**

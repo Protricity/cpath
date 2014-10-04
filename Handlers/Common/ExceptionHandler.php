@@ -7,27 +7,49 @@
  */
 namespace CPath\Handlers\Common;
 
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Build\IBuildable;
+use CPath\Build\IBuildRequest;
 use CPath\Request\IRequest;
-use CPath\Handlers\HTML\AbstractHTMLHandler;
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IResponse;
+use CPath\Response\ResponseRenderer;
+use CPath\Route\DefaultMap;
+use CPath\Route\IRoute;
+use CPath\Route\RouteBuilder;
 
-class ExceptionHandler extends AbstractHTMLHandler {
+class ExceptionHandler implements IRoute, IBuildable
+{
 
-    private $mEx;
-    public function __construct(\Exception $Ex, IHTMLContainer $Template) {
-        parent::__construct($Template);
-        $this->mEx = $Ex;
+    /**
+     * Route the request to this class object and return the object
+     * @param IRequest $Request the IRequest instance for this render
+     * @param IRoute|null $Previous
+     * @param null|mixed $_arg [varargs] passed by route map
+     * @return void|bool|Object returns a response object
+     * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
+     * If false is returned, this static handler will be called again if another handler returns an object
+     * If an object is returned, it is passed along to the next handler
+     */
+    static function routeRequestStatic(IRequest $Request, $Previous=null, $_arg=null) {
+        if($Previous instanceof \Exception) {
+            if(!$Previous instanceof IResponse)
+                $Previous = new ExceptionResponse($Previous);
+            $Handler = new ResponseRenderer($Previous);
+            $Handler->render($Request);
+            return true;
+        }
+        return false;
     }
 
     /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
+     * Handle this request and render any content
+     * @param IBuildRequest $Request the build request instance for this build session
      * @return String|void always returns void
+     * @build --disable 0
+     * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        echo RI::ni(), $this->mEx;
+    static function handleStaticBuild(IBuildRequest $Request) {
+        $RouteBuilder = new RouteBuilder($Request, new DefaultMap(), '_ex');
+        $RouteBuilder->writeRoute('ANY *', __CLASS__);
     }
 }

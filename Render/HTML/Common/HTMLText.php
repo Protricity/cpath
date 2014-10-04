@@ -7,7 +7,6 @@
  */
 namespace CPath\Render\HTML\Common;
 
-use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\IRenderHTML;

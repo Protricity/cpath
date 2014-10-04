@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Query;
 use CPath\Config;
-use CPath\Data\Map\IMappableKeys;
+use CPath\Data\Map\IKeyMapper;
 
 class PDOSelectStats extends PDOSelectLimitedStats {
 
@@ -117,11 +117,11 @@ class PDOSelectStats extends PDOSelectLimitedStats {
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Framework\PDO\Query\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map) {
+    function mapKeys(IKeyMapper $Map) {
         parent::mapKeys($Map);
 
         foreach($this as $k=>$v)

@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Render\HTML\Attribute\HTMLAttributes;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\IRenderHTML;
@@ -50,8 +50,8 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
         $this->mAttr->setAttribute($attrName, $attrValue);
     }
 
-    function getAttribute($attrName) {
-        return $this->mAttr->getAttribute($attrName);
+    function getAttribute($attrName, $defaultValue=null) {
+        return $this->mAttr->getAttribute($attrName, $defaultValue);
     }
 
     function hasAttribute($attrName) {

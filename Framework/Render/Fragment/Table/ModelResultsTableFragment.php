@@ -2,20 +2,20 @@
 namespace CPath\Framework\Render\Fragment\Table;
 
 use CPath\Base;
-use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Data\Map\IKeyMap;
+use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Common\WebRequest;
-use CPath\Request\IRequest;
-use CPath\Templates\Themes\CPathDefaultTheme;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\ITableTheme;
 use CPath\Render\HTML\Theme\Util\TableThemeUtil;
+use CPath\Request\IRequest;
+use CPath\Templates\Themes\CPathDefaultTheme;
 
 class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
 

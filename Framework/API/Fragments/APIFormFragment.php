@@ -8,10 +8,10 @@ use CPath\Framework\API\Field\Util\FieldUtil;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Request\IRequest;
+use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\Theme\ITableTheme;
 use CPath\Render\HTML\Theme\Util\TableThemeUtil;
-use CPath\Render\HTML\HTMLRenderUtil;
+use CPath\Request\IRequest;
 
 class APIFormFragment extends AbstractFormFragment{
 

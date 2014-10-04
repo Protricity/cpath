@@ -16,7 +16,6 @@ use CPath\Framework\PDO\API\PostUserLogoutAPI;
 use CPath\Framework\PDO\API\PostUserPasswordAPI;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Interfaces\IUser;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;

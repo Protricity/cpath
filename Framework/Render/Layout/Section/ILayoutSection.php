@@ -7,7 +7,6 @@
  */
 namespace CPath\Framework\Render\Layout\Section;
 
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 
 interface ILayoutSection extends IRenderHTML

@@ -7,7 +7,6 @@
  */
 namespace CPath\Framework\Render\Header;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Request\IRequest;
 
 interface IHTMLSupportHeaders

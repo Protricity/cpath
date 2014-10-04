@@ -4,12 +4,10 @@ namespace CPath\Framework\View\Layout\NavBar;
 use CPath\Base;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
-use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Layout\ContentLayout;
+use CPath\Request\IRequest;
 
 
 abstract class AbstractNavBarLayout extends ContentLayout {

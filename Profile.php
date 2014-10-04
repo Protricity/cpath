@@ -11,7 +11,7 @@ namespace CPath;
  * Class Profile provides profiling information on the framework
  * @package CPath
  */
-abstract class Profile {
+abstract class ProfileOLD {
     const COUNT = 0;
     const TIME_LAST = 1;
     const TIME_AVG = 2;

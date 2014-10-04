@@ -7,10 +7,7 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 use CPath\Response\Response;
 
 class MappableResponse extends Response implements IKeyMap
@@ -29,11 +26,11 @@ class MappableResponse extends Response implements IKeyMap
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Request\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map) {
+    function mapKeys(IKeyMapper $Map) {
         $this->mMappable->mapKeys($Map);
     }
 }

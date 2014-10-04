@@ -19,15 +19,12 @@ class HTMLInputField extends HTMLElement
             $this->setAttribute('type', $type);
     }
 
-    public function setValue($value) {
-        $this->setAttribute('value', $value);
-    }
+    public function getValue()          { return $this->getAttribute('value'); }
+    public function setValue($value)    { $this->setAttribute('value', $value); }
 
-    public function setName($value) {
-        $this->setAttribute('name', $value);
-    }
+    public function getName()           { return $this->getAttribute('name'); }
+    public function setName($value)     { $this->setAttribute('name', $value); }
 
-    public function setID($value) {
-        $this->setAttribute('id', $value);
-    }
+    public function getID()             { return $this->getAttribute('id'); }
+    public function setID($value)       { $this->setAttribute('id', $value); }
 }

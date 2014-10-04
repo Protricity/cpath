@@ -9,13 +9,15 @@ namespace CPath\Request\CLI;
 
 use CPath\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
-use CPath\Request\RequestException;
 use CPath\Request\Executable\IPrompt;
+use CPath\Request\Parameter\Parameter;
+use CPath\Request\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType;
+use CPath\Request\Parameter\IRequestParameter;
 use CPath\Request\Request;
 
-class CLIRequest extends Request implements IPrompt
+class CLIRequest extends Request implements IPrompt, IFormRequest
 {
     private $mPos = 0;
 
@@ -69,4 +71,30 @@ class CLIRequest extends Request implements IPrompt
         }
         return $line;
     }
+
+	/**
+	 * Return a request value
+	 * @param $fieldName
+	 * @return mixed the form field value
+	 */
+	function getFormFieldValue($fieldName) {
+		return $this->getArgumentValue($fieldName);
+	}
+
+	/**
+	 * Return a request value
+	 * @param String|IRequestParameter $Parameter string or instance
+	 * @param String|null $description
+	 * @return mixed the validated parameter value
+	 */
+	function getValue($Parameter, $description = null) {
+		if(!$Parameter instanceof IRequestParameter)
+			$Parameter = new Parameter($Parameter, $description);
+
+		$this->addParam($Parameter);
+
+		$value = $this->getArgumentValue($Parameter->getName());
+
+		return $Parameter->validate($this, $value);
+	}
 }

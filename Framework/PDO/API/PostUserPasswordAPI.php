@@ -14,11 +14,10 @@ use CPath\Framework\API\Field\PasswordField;
 use CPath\Framework\API\Validation\CallbackValidation;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Predicates\IsAdmin;
 use CPath\Framework\User\Util\UserUtil;
+use CPath\Request\IRequest;
 
 class PostUserPasswordAPI extends AbstractPDOAPI {
 

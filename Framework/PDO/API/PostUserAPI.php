@@ -19,10 +19,10 @@ use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
 use CPath\Framework\User\Role\Exceptions\AuthenticationException;
+use CPath\Request\IRequest;
+use CPath\Response\IResponse;
 
 
 class PostUserAPI extends PostAPI implements IAPIPostCallbacks {

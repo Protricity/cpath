@@ -6,9 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Build;
-use CPath\Build\IBuildRequest;
-use CPath\Exceptions\BuildException;
-use CPath\Request\IRequest;
 
 /**
  * Class IBuildable

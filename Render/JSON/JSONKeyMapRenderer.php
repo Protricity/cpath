@@ -8,11 +8,11 @@
 namespace CPath\Render\JSON;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 
-class JSONKeyMapRenderer implements IMappableKeys {
+class JSONKeyMapRenderer implements IKeyMapper {
     const DELIMIT = ', ';
     private $mStarted = false, $mNextDelim=null;
 

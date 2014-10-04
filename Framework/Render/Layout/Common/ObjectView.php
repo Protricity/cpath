@@ -4,14 +4,13 @@ namespace CPath\Framework\Render\Layout\Common;
 use CPath\Config;
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
-use CPath\Render\HTML\Page\ContentPage;
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\Layout\ContentLayout;
+use CPath\Render\HTML\Page\ContentPage;
+use CPath\Request\IRequest;
 
 class ObjectView extends ContentPage implements IDescribable {
     const FIELD_TITLE = 'title';

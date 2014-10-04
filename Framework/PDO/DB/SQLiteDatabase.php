@@ -6,7 +6,6 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\DB;
-use CPath\Framework\PDO\Query\MySQLInsert;
 use CPath\Framework\PDO\Query\SQLiteInsert;
 use CPath\Framework\PDO\Table\Types\PDOTable;
 use PDO;

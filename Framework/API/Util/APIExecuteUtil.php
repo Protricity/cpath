@@ -19,14 +19,14 @@ use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\CLI\Option\Interfaces\IOptionMap;
 use CPath\Framework\CLI\Option\Interfaces\IOptionProcessor;
 use CPath\Framework\CLI\Option\Type\OptionMap;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Response\Common\ExceptionResponse;
 use CPath\Interfaces\IExecute;
 use CPath\Interfaces\ILogEntry;
 use CPath\Interfaces\ILogListener;
+use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IResponse;
 
 class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     private $mAPI, $mLoggingEnabled = true, $mLogs = array(), $mMap = null;
@@ -90,7 +90,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     final public function executeOrCatch(IRequest $Request) {
         try {
             $Response = $this->execute($Request);
-            if($Response->getCode() == IResponse::STATUS_SUCCESS && $this instanceof IExecute)
+            if($Response->getCode() == IResponse::HTTP_SUCCESS && $this instanceof IExecute)
                 $this->onAPIPostExecute($Request, $Response);
         } catch (\Exception $ex) {
             if($ex instanceof IResponseAggregate)

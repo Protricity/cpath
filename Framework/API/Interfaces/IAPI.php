@@ -10,7 +10,6 @@ namespace CPath\Framework\API\Interfaces;
 use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 
 
 interface IAPI { // extends IRender, IViewConfig,IDescribableAggregate, why?

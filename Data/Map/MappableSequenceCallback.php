@@ -17,11 +17,11 @@ class MappableSequenceCallback implements ISequenceMap
 
     /**
      * Map sequential data to the map
-     * @param IMappableSequence $Map
+     * @param ISequenceMapper $Map
      * @internal param \CPath\Framework\Data\Map\Common\IRequest $Request
      * @return void
      */
-    function mapSequence(IMappableSequence $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         $call = $this->mCallback;
         $call($Map);
     }

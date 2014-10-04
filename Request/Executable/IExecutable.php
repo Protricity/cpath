@@ -7,18 +7,16 @@
  */
 namespace CPath\Request\Executable;
 
-use CPath\Request\RequestException;
-use CPath\Response\IResponse;
 use CPath\Request\IRequest;
+use CPath\Response\IResponse;
 
 interface IExecutable
 {
-    /**
-     * Execute a command and return a response. Does not render
-     * @param IRequest $Request
-     * @return IResponse the execution response
-     * @throws RequestException
-     */
+	/**
+	 * Execute a command and return a response. Does not render
+	 * @param IRequest $Request
+	 * @return IResponse the execution response
+	 */
     function execute(IRequest $Request);
 }
 

@@ -8,7 +8,6 @@
 namespace CPath\Render\HTML\Theme;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Request\IRequest;
 
 interface ITableTheme {
 

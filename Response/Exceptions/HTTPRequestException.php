@@ -7,22 +7,19 @@
  * Date: 4/06/11 */
 namespace CPath\Response\Exceptions;
 
-
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Request;
 use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
-use CPath\Response\IResponseCode;
 use CPath\Response\ResponseRenderer;
 
 class HTTPRequestException extends \Exception implements IHeaderResponse {
-    const DEFAULT_HTTP_CODE = IResponseCode::STATUS_ERROR;
+    const DEFAULT_HTTP_CODE = IResponse::HTTP_ERROR;
 
     function __construct($message, $statusCode=null) {
         static $handlerSet = false;
         if(!$handlerSet) {
-            set_exception_handler(__CLASS__ . '::handleException');
+            //set_exception_handler(__CLASS__ . '::handleException');
             $handlerSet = true;
         }
         parent::__construct($message, $statusCode ?: static::DEFAULT_HTTP_CODE);

@@ -7,12 +7,10 @@
  */
 namespace CPath\Handlers\HTML\Navigation;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Handlers\HTML\Navigation\AbstractNavigator;
-use CPath\Handlers\HTML\Navigation\RouteLink;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 
 class OrderedListNavigator extends \CPath\Handlers\HTML\Navigation\AbstractNavigator implements IHTMLSupportHeaders

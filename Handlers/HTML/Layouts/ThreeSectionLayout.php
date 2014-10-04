@@ -7,17 +7,13 @@
  */
 namespace CPath\Handlers\HTML\Layouts;
 
-use CPath\Render\HTML\Attribute\Attr;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Handlers\HTML\Navigation\AbstractNavigator;
-use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 
 class ThreeSectionLayout implements IRenderHTML, IHTMLSupportHeaders
 {

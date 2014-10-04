@@ -6,11 +6,11 @@ use CPath\Describable\Describable;
 use CPath\Framework\API\Field\Util\FieldUtil;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Request\IRequest;
-use CPath\Route\IRoutable;
+use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\Theme\ITableTheme;
 use CPath\Render\HTML\Theme\Util\TableThemeUtil;
-use CPath\Render\HTML\HTMLRenderUtil;
+use CPath\Request\IRequest;
+use CPath\Route\IRouteMap;
 
 class SimpleFormFragment extends AbstractFormFragment{
 
@@ -33,7 +33,7 @@ class SimpleFormFragment extends AbstractFormFragment{
 
         $API = $this->getAPI();
         $Fields = $API->getFields();
-        if(!$API instanceof IRoutable)
+        if(!$API instanceof IRouteMap)
             throw new \Exception("API Not routable");
         $Route = $API->loadRoute();
 

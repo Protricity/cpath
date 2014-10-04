@@ -7,19 +7,17 @@
  */
 namespace CPath\Route;
 
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Response\IResponse;
-use CPath\Response\IResponseCode;
+use CPath\Response\IResponse;
 
 class RouteIndexResponse implements IResponse, ISequenceMap
 {
     private $mRoutes;
     private $mMatch;
 
-    public function __construct(IRoutable $Routes, $matchPrefix = 'ANY /') {
+    public function __construct(IRouteMap $Routes, $matchPrefix = 'ANY /') {
         $this->mRoutes = $Routes;
         $this->mMatch = $matchPrefix;
     }
@@ -37,16 +35,16 @@ class RouteIndexResponse implements IResponse, ISequenceMap
      * @return int
      */
     function getCode() {
-        return IResponseCode::STATUS_SUCCESS;
+        return IResponse::HTTP_SUCCESS;
     }
 
     /**
      * Map sequential data to the map
-     * @param IMappableSequence $Map
+     * @param ISequenceMapper $Map
      * @internal param \CPath\Route\IRequest $Request
      * @return mixed
      */
-    function mapSequence(IMappableSequence $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         $match = $this->mMatch;
         $this->mRoutes->mapRoutes(new RouteCallback(function ($prefix, $target) use ($Map, $match) {
             list($matchMethod, $matchPath) = explode(' ', $match, 2);

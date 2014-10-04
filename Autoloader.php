@@ -7,9 +7,6 @@
  */
 namespace CPath;
 
-use CPath\Interfaces\IAutoLoader;
-use CPath\Loaders\CPathLoader;
-
 const AUTOLOADER = true;
 
 class Autoloader

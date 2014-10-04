@@ -7,9 +7,6 @@
  */
 namespace CPath\Request\MimeType;
 
-use CPath\Response\IResponse;
-use CPath\Request\IRequest;
-
 abstract class MimeType implements IRequestedMimeType
 {
     private $mName;

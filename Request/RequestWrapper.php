@@ -7,10 +7,8 @@
  */
 namespace CPath\Request;
 
-use CPath\Describable\IDescribable;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\Parameter\IMappableParameters;
-use CPath\Request\Parameter\IParameterMap;
+use CPath\Request\Parameter\IRequestParameter;
 
 abstract class RequestWrapper implements IRequest
 {
@@ -126,20 +124,20 @@ abstract class RequestWrapper implements IRequest
         return $this->mRequest->getDomainPath($withDomain);
     }
 
-    /**
-     * Map request parameters for this object
-     * @param IMappableParameters $Map
-     * @return void
-     */
-    function mapParameters(IMappableParameters $Map) {
-        $this->mRequest->mapParameters($Map);
-    }
+	/**
+	 * Return a request argument value
+	 * @param int|String $argIndex
+	 * @return mixed the form field value
+	 */
+	function getArgumentValue($argIndex) {
+		return $this->mRequest->getArgumentValue($argIndex);
+	}
 
-    /**
-     * Set the request parameters expected by this request
-     * @param IParameterMap $Map
-     */
-    function setRequestParameters(IParameterMap $Map) {
-        return $this->mRequest->setRequestParameters($Map);
-    }
+	/**
+	 * Return all request parameters collected by ::getValue
+	 * @return IRequestParameter[]
+	 */
+	function getParameters() {
+		return $this->mRequest->getParameters();
+	}
 }

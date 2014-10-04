@@ -8,15 +8,13 @@
 namespace CPath\Render\HTML;
 
 use CPath\Describable\IDescribable;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IRenderHTML;
+use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 
-class HTMLResponseBody implements IHTMLContainer
+class HTMLResponseBody implements IHTMLTemplate
 {
     const DOCTYPE = '<!DOCTYPE html>';
     const TAB = '  ';

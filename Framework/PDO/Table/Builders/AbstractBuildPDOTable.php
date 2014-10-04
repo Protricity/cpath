@@ -7,8 +7,8 @@
  */
 namespace CPath\Framework\PDO\Table\Builders;
 
-use CPath\Exceptions\BuildException;
 use CPath\Build\Code\BuildPHPClass;
+use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException;

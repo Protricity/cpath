@@ -9,18 +9,17 @@ use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Fragment\Common\HTMLFragment;
 use CPath\Framework\Render\IRenderAll;
 use CPath\Framework\Render\Layout\Template\Abstract3SectionLayout;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\View\Templates\Layouts\NavBar\AbstractNavBarLayout;
+use CPath\Handlers\Response\ResponseUtil;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
-use CPath\Handlers\Response\ResponseUtil;
-use CPath\Framework\View\Templates\Layouts\NavBar\AbstractNavBarLayout;
 use CPath\Templates\Themes\CPathDefaultTheme;
-use CPath\Framework\Render\Theme\Interfaces\ITheme;
-use CPath\Interfaces\IViewConfig;
 
 class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 

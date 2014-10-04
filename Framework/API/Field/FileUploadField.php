@@ -11,9 +11,9 @@ use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Model\FileUpload;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
-use CPath\Model\FileUpload;
 
 /**
  * Class FileUploadField

@@ -11,7 +11,7 @@ use CPath\Framework\PDO\Interfaces\IPDOModelRender;
 use CPath\Framework\PDO\Interfaces\IPDOModelSearchRender;
 use CPath\Framework\PDO\Interfaces\ISecurityPolicyAggregate;
 
-interface IPDORoutable extends \CPath\Route\IRoutable, ISecurityPolicyAggregate, IPDOModelRender, IPDOModelSearchRender {
+interface IPDORoutable extends \CPath\Route\IRouteMap, ISecurityPolicyAggregate, IPDOModelRender, IPDOModelSearchRender {
 
 }
 

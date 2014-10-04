@@ -9,11 +9,11 @@
 namespace CPath\Misc;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\Request\Common\CLIRequest;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
+use CPath\Request\IRequest;
 use CPath\Response\Common\ExceptionResponse;
-use CPath\Backend\CPathBackendRoutes;
+use CPath\Response\IResponse;
+use CPath\Route\DefaultMap;
 
 class NotAnApiException extends \Exception {}
 class APIFailedException extends \Exception {}
@@ -41,14 +41,14 @@ class ApiTester {
             $Response = new DataResponse(true, "API executed successfully", $Response);
         if($Response instanceof ExceptionResponse)
             throw $Response->getException();
-        if($Response->getCode() != IResponse::STATUS_SUCCESS)
+        if($Response->getCode() != IResponse::HTTP_SUCCESS)
             throw new APIFailedException($Response->getMessage());
         return $Response;
     }
 
     static function fromCMD($args, Array $request=NULL) {
         $Cli = CLIRequest::fromArgs($args, $request);
-        $Routes = new CPathBackendRoutes;
+        $Routes = new DefaultMap;
         $Renderer = $Routes->routeRequest($Cli, $Routes);
 
 //        if($Renderer instanceof IRenderAggregate)

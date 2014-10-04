@@ -9,10 +9,10 @@ namespace CPath\Render\HTML\Theme\Util;
 
 use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Request\IRequest;
 use CPath\Framework\Render\Fragment\Common\IRenderFragmentContentDEL;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Theme\IFragmentTheme;
+use CPath\Request\IRequest;
 
 
 class FragmentThemeUtil {

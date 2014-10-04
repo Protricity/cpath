@@ -9,13 +9,13 @@ namespace CPath\Templates\HTML\Pages;
 
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IHTMLTemplate;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class EmptyPage implements IHTMLContainer
+class EmptyPage implements IHTMLTemplate
 {
-    /** @var IHTMLContainer */
+    /** @var IHTMLTemplate */
     private $mContent;
 
     public function __construct() {

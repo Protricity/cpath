@@ -7,14 +7,9 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 
-class SequenceMapCallback implements IMappableSequence
+class SequenceMapCallback implements ISequenceMapper
 {
     private $mCallback;
 

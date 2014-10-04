@@ -10,10 +10,10 @@ namespace CPath\Render\Text;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class TextSequenceMapRenderer implements IMappableSequence
+class TextSequenceMapRenderer implements ISequenceMapper
 {
 
     /**

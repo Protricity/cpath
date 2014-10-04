@@ -7,17 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Data\Map;
 
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 
 
-class KeyMapCallback implements IMappableKeys
+class KeyMapCallback implements IKeyMapper
 {
     private $mCallback;
 

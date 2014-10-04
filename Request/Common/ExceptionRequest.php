@@ -35,8 +35,14 @@ class ExceptionRequest extends RequestWrapper
 
         list(, $path) = explode(' ', $routePrefix, 2);
 
-        if (strpos($this->getPath(), $path) !== 0)
+        if(strpos($path, '*') !== false) {
+            $path = preg_quote($path, '/');
+            $pattern = str_replace( '\*' , '.*?', $path);
+            if(!preg_match( '/^' . $pattern . '$/i', $this->getPath()))
+                return false;
+        } elseif (strcasecmp(rtrim($this->getPath(), '/'), rtrim($path, '/')) !== 0) {
             return false;
+        }
 
         return true;
     }

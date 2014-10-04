@@ -4,11 +4,11 @@ namespace CPath\Framework\View\Templates\CLI;
 use API\Themes\DefaultTheme;
 use CPath\Config;
 use CPath\Framework\PDO\Table\Types\PDOTable;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Request\IRequest;
-use CPath\Framework\View\Layout\NavBar\Common\ErrorViewNavBarLayout;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Theme\Interfaces\IThemeAggregate;
+use CPath\Framework\View\Layout\NavBar\Common\ErrorViewNavBarLayout;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 
 class CLIErrorView extends ErrorViewNavBarLayout {
     public function __construct(\Exception $Exception, PDOTable $Table, ITheme $Theme=null) {

@@ -7,9 +7,6 @@
  */
 namespace CPath\Framework\View;
 
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
-
 //interface IViewDEL extends IRenderHTML
 //{
 //

@@ -7,8 +7,6 @@
  */
 namespace CPath\Request\Parameter\Exceptions;
 
-use CPath\Request\Executable\IExecutable;
-use CPath\Request\Parameter\IMappableParameters;
 use CPath\Request\Parameter\IParameterMap;
 use CPath\Response\Exceptions\HTTPRequestException;
 

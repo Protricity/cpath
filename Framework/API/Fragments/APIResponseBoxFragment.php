@@ -3,18 +3,17 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Render\HTML\Attribute\Attr;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Framework\View\IContainerDEL;
+use CPath\Handlers\Response\ResponseUtil;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
-use CPath\Handlers\Response\ResponseUtil;
-use CPath\Framework\View\IContainerDEL;
 use CPath\Templates\Themes\CPathDefaultTheme;
-use CPath\Framework\Render\Theme\Interfaces\ITheme;
-use CPath\Interfaces\IViewConfig;
 
 class APIResponseBoxFragment implements IRenderHTML, IHTMLSupportHeaders{
     private $mTheme;

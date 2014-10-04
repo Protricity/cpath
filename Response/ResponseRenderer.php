@@ -7,7 +7,6 @@
  */
 namespace CPath\Response;
 
-use API\Framework\Fingerprint\Entry\Common\UnknownEntry;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Header\IHeaderWriter;
@@ -16,10 +15,11 @@ use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLMapRenderer;
+use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLResponseBody;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\IRender;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONKeyMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
@@ -35,20 +35,29 @@ use CPath\Request\IRequest;
 use CPath\Request\MimeType\UnknownMimeType;
 
 
-class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHTMLSupportHeaders
+class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRenderText, IRenderJSON, IRenderXML
 {
     private $mResponse;
-
     public function __construct(IResponse $Response) {
-        $this->mResponse = $Response;
+	    $this->mResponse = $Response;
     }
 
-    protected function getResponse(IRequest $Request) {
-        return $this->mResponse;
-    }
+	/**
+	 * @return mixed
+	 */
+	public function getResponse() {
+		return $this->mResponse;
+	}
 
+    /**
+     * Renders a response object or returns false
+     * @param IRequest $Request the IRequest instance for this render
+     * @param bool $sendHeaders
+     * @internal param \CPath\Request\Executable\IExecutable|\CPath\Response\IResponse $Response
+     * @return bool returns false if no rendering occurred
+     */
     function render(IRequest $Request, $sendHeaders=true) {
-        $Response = $this->getResponse($Request);
+	    $Response = $this->getResponse();
         $MimeType = $Request->getMimeType();
 
         if($sendHeaders) {
@@ -65,13 +74,13 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
             $Template->renderHTMLContent($Request, $this);
 
         } elseif($MimeType instanceof XMLMimeType) {
-            $this->renderXML($Request);
+            $this->renderXML($Request, $Response);
 
         } elseif($MimeType instanceof JSONMimeType) {
-            $this->renderJSON($Request);
+            $this->renderJSON($Request, $Response);
 
         } elseif($MimeType instanceof TextMimeType) {
-            $this->renderText($Request);
+            $this->renderText($Request, $Response);
         } elseif($MimeType instanceof UnknownMimeType) {
             //echo 'wut';
         }
@@ -84,7 +93,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-        $Response = $this->getResponse($Request);
+        $Response = $this->getResponse();
         if($Response instanceof IHTMLSupportHeaders)
             $Response->writeHeaders($Request, $Head);
         if(!$Response instanceof IRenderHTML) {
@@ -101,7 +110,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Response = $this->getResponse($Request);
+	    $Response = $this->getResponse();
 
         if ($Response instanceof IRenderHTML) {
             $Response->renderHTML($Request);
@@ -128,7 +137,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderJSON(IRequest $Request) {
-        $Response = $this->getResponse($Request);
+        $Response = $this->getResponse();
 
         if ($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
@@ -155,7 +164,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderText(IRequest $Request) {
-        $Response = $this->getResponse($Request);
+	    $Response = $this->getResponse();
 
         if ($Response instanceof IRenderText) {
             $Response->renderText($Request);
@@ -183,7 +192,7 @@ class ResponseRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderT
      * @return String|void always returns void
      */
     function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-        $Response = $this->getResponse($Request);
+	    $Response = $this->getResponse();
 
         if ($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $declaration);

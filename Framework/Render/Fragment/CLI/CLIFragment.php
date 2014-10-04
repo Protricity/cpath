@@ -8,12 +8,12 @@
 namespace CPath\Framework\Render\Fragment\CLI;
 
 use CPath\Base;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class CLIFragment implements IRenderHTML, IHTMLSupportHeaders
 {

@@ -7,19 +7,18 @@
  */
 namespace CPath\Templates\HTML\Pages;
 
+use CPath\Handlers\HTML\Layouts\ThreeSectionLayout;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLResponseBody;
-use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IHTMLTemplate;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Handlers\HTML\Layouts\ThreeSectionLayout;
-use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 
-class IndexPage implements IHTMLContainer
+class IndexPage implements IHTMLTemplate
 {
-    /** @var IHTMLContainer */
+    /** @var IHTMLTemplate */
     private $mContent;
-    /** @var IHTMLContainer */
+    /** @var IHTMLTemplate */
     private $mLayout;
     private $mNavBar;
 

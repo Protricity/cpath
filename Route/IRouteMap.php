@@ -7,17 +7,14 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
-use CPath\Request\IStaticRequestHandler;
-
 interface IRouteMap {
 
     /**
-     * Map a Route prefix to a target class or instance. Return true if the route prefix was matched
-     * @param String $prefix route prefix i.e. GET /my/path
-     * @param IStaticRequestHandler|IRoutable|String $target Request handler class name or instance
-     * @param null $_arg Additional varargs
-     * @return bool if true the rendering has occurred
+     * Maps all routes to the route map. Returns true if the route prefix was matched
+     * @param IRouteMapper $Map
+     * @return bool if true the route prefix was matched, otherwise false
+     * @build routes --disable 0
+     * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
      */
-    function route($prefix, $target, $_arg=null);
+    function mapRoutes(IRouteMapper $Map);
 }
-

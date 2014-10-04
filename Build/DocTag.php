@@ -7,8 +7,6 @@
  */
 namespace CPath\Build;
 
-use CPath\Request\CLI\CommandString;
-
 class DocTag
 {
     private $mName, $mArgString;

@@ -9,17 +9,14 @@ namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\Parameter\IMappableParameters;
-use CPath\Request\Parameter\IParameterMap;
-use CPath\Request\Parameter\Parameter;
-use CPath\Request\Parameter\RequiredParameter;
+use CPath\Request\Parameter\IRequestParameter;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
 
-class Request implements IRequest
+abstract class Request implements IRequest
 {
-    private $mValues;
+    private $mArgs;
     /** @var ILogListener[] */
     private $mListeners=array();
 
@@ -27,13 +24,13 @@ class Request implements IRequest
     /** @var IRequestedMimeType */
     private $mMimeType=null;
 
+	/** @var IRequestParameter[] */
     private $mParams = array();
-    /** @var IParameterMap */
-    private $mMap = null;
+//    private $mMap = null;
 
     private $mPrefixPath = null;
 
-    public function __construct($method, $path = null, $params = array(), IRequestedMimeType $MimeType=null) {
+    public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
 
         $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $root = dirname($_SERVER['SCRIPT_NAME']);
@@ -46,10 +43,9 @@ class Request implements IRequest
             $path = $urlPath;
         }
 
-
         $this->mMethodName = $method;
         $this->mPath = $path ? '/' . ltrim($path, '/') : '/';
-        $this->mValues = $params;
+        $this->mArgs = $args;
         $this->mMimeType = $MimeType;
     }
 
@@ -87,44 +83,70 @@ class Request implements IRequest
 //        return false;
 //    }
 
-    protected function getParamValue($paramName) {
-        if(!empty($this->mValues[$paramName]))
-            return $this->mValues[$paramName];
 
-        return null;
-    }
+	protected function addParam(IRequestParameter $Parameter) {
+//		$name = $Parameter->getName();
+//		foreach($this->mParams as $i=>$Param) {
+//			if($Param->getName() === $name) {
+//				if($replace)
+//					$this->mParams[$i] = $Parameter;
+//				return;
+//			}
+//		}
+		$this->mParams[$Parameter->getName()] = $Parameter;
+	}
 
-    /**
-     * Get a request value by parameter name or throw an exception
-     * @param string $paramName the parameter name
-     * @param string $description [optional] description for this prompt
-     * @param int $flags use ::PARAM_REQUIRED for required fields
-     * @throws RequestException
-     * @return mixed the parameter value
-     */
-    final function getValue($paramName, $description = null, $flags=0) {
-        if($description)
-            $this->mParams[$paramName] = array_slice(func_get_args(), 1); //array($description, $flags);
+	/**
+	 * Return all request parameters collected by ::getValue
+	 * @return IRequestParameter[]
+	 */
+	function getParameters() {
+		return $this->mParams;
+	}
 
-        if($value = $this->getParamValue($paramName))
-            return $value;
+//	protected function validateParameter(IRequestParameter $Parameter, $value) {
+//		$this->addParam($Parameter);
+//		return $Parameter->validate($this, $value);
+//	}
+
+	/**
+	 * Return a request argument value
+	 * @param int|String $argIndex
+	 * @return mixed the form field value
+	 */
+	function getArgumentValue($argIndex) {
+		if(!empty($this->mArgs[$argIndex]))
+			return $this->mArgs[$argIndex];
+
+		return null;
+	}
+
+//	/**
+//	 * @param IRequestParameter $Parameter
+//	 * @return mixed the validated parameter value
+//	 * @throws RequestException if the value was not found
+//	 */
+//	function getValue(IRequestParameter $Parameter) {
+//		$this->addParam($Parameter);
 //
-//        if(!empty($this->mValues[$paramName]))
-//            return $this->mValues[$paramName];
-//
-//        $values = $this->getAllValues();
-//        if(!empty($values[$paramName]))
-//            return $values[$paramName];
-//
-//        if($value = $this->getMissingValue($paramName, $description, $flags))
-//            return $value;
-
-        if($flags & IRequest::PARAM_REQUIRED) {
-            $this->mParams[$paramName][1] |= IRequest::PARAM_ERROR;
-            throw new RequestException("Missing parameter: " . $paramName);
-        }
-        return null;
-    }
+//		$value = $this->getParamValue($Parameter->getName());
+//		return $this->validateParameter($Parameter, $value);
+////
+////        if($value = $this->getParamValue($Param->getName()))
+////            return $value;
+//////
+//////        if(!empty($this->mValues[$paramName]))
+//////            return $this->mValues[$paramName];
+//////
+//////        $values = $this->getAllValues();
+//////        if(!empty($values[$paramName]))
+//////            return $values[$paramName];
+//////
+//////        if($value = $this->getMissingValue($paramName, $description, $flags))
+//////            return $value;
+////
+////        throw new RequestException("Missing parameter: " . $paramName);
+//    }
 //
 //    /**
 //     * Get a request value by parameter name or throw an exception
@@ -187,7 +209,7 @@ class Request implements IRequest
                 $routeArg = $routeArgs[$i++];
 
                 if($routeArg[0] == ':') {
-                    $this->mValues[substr($routeArg, 1)] = $requestPathArg;
+                    $this->mArgs[substr($routeArg, 1)] = $requestPathArg;
 
                 } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
                     return false;
@@ -199,8 +221,14 @@ class Request implements IRequest
                 return false;
 
         } else {
-            if (strcasecmp($this->getPath(), $path) !== 0)
+            if(strpos($path, '*') !== false) {
+                $path = preg_quote($path, '/');
+                $pattern = str_replace( '\*' , '.*?', $path);
+                if(!preg_match( '/^' . $pattern . '$/i', $this->getPath()))
+                    return false;
+            } elseif (strcasecmp(rtrim($this->getPath(), '/'), rtrim($path, '/')) !== 0) {
                 return false;
+            }
 
         }
 
@@ -271,33 +299,33 @@ class Request implements IRequest
         }
         return $path;
     }
-
-    /**
-     * Set the request parameters expected by this request
-     * @param IParameterMap $Map
-     */
-    function setRequestParameters(IParameterMap $Map) {
-        $this->mMap = $Map;
-    }
-
-    /**
-     * Map request parameters for this object
-     * @param IMappableParameters $Map
-     * @return void
-     */
-    function mapParameters(IMappableParameters $Map) {
-        // TODO: merge?
-        if($this->mMap) {
-            $this->mMap->mapParameters($Map);
-        } else {
-            foreach($this->mParams as $name => $data) {
-                if(isset($data[1]) && ($data[1] & IRequest::PARAM_REQUIRED))
-                    $Map->map(new RequiredParameter($name, $data[0]));
-                else
-                    $Map->map(new Parameter($name, $data[0]));
-            }
-        }
-    }
+//
+//    /**
+//     * Set the request parameters expected by this request
+//     * @param IParameterMap $Map
+//     */
+//    function setRequestParameters(IParameterMap $Map) {
+//        $this->mMap = $Map;
+//    }
+//
+//    /**
+//     * Map request parameters for this object
+//     * @param IParameterMapper $Map
+//     * @return void
+//     */
+//    function mapParameters(IParameterMapper $Map) {
+//        // TODO: merge?
+//        if($this->mMap) {
+//            $this->mMap->mapParameters($Map);
+//        } else {
+//            foreach($this->mParams as $name => $data) {
+//                if(isset($data[1]) && ($data[1] & IRequest::PARAM_REQUIRED))
+//                    $Map->map(new RequiredParameter($name, $data[0]));
+//                else
+//                    $Map->map(new Parameter($name, $data[0]));
+//            }
+//        }
+//    }
 
     // Static
 

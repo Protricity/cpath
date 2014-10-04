@@ -8,9 +8,9 @@
 
 namespace CPath\Framework\PDO\API\Misc;
 
-use CPath\Framework\API\Interfaces\IAPI;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Query\PDOSelectStats;
@@ -27,11 +27,11 @@ class PDOTableDescriptor implements ISelectDescriptor, IKeyMap {
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Framework\PDO\API\Misc\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map)
+    function mapKeys(IKeyMapper $Map)
     {
         $Stats = $this->execFullStats();
         $Map->map('page', $Stats->getCurPage());

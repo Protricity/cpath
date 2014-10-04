@@ -7,19 +7,18 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Request\IRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\MimeType;
 
 final class HTMLMimeType extends MimeType
 {
-    /** @var IHTMLContainer */
+    /** @var IHTMLTemplate */
     private $mContainer = null;
     public function __construct($typeName='text/html', IRequestedMimeType $nextMimeType=null) {
         parent::__construct($typeName, $nextMimeType);
     }
 
-    public function setRenderContainer(IHTMLContainer $Container) {
+    public function setRenderContainer(IHTMLTemplate $Container) {
         $this->mContainer = $Container;
     }
 

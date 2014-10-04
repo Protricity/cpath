@@ -9,3 +9,4 @@ namespace CPath\Interfaces;
 
 interface IConfig {
 }
+

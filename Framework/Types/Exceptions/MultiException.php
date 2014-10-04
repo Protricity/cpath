@@ -7,9 +7,9 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\Types\Exceptions;
 
-use CPath\Framework\API\Exceptions\ValidationException;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Response\Common\ExceptionResponse;
 
 class MultiException extends \Exception implements \Countable, IKeyMap {
@@ -27,11 +27,11 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Framework\Types\Exceptions\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map) {
+    function mapKeys(IKeyMapper $Map) {
         foreach($this->mEx as $ex)
             $Map->mapArrayObject(new ExceptionResponse($ex));
     }

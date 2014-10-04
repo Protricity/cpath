@@ -7,9 +7,7 @@
  */
 namespace CPath\Build\Editor\PHP;
 
-use CPath\Build\Editor\PHP\PHPClassEditor;
 use CPath\Build\PHPSourceChunk;
-use CPath\Build\Editor\PHP\PHPTokenScanner;
 
 class PHPFileEditor implements IPHPWritableSource
 {

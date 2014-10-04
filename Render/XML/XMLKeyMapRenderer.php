@@ -8,12 +8,12 @@
 namespace CPath\Render\XML;
 
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 
-class XMLKeyMapRenderer implements IMappableKeys
+class XMLKeyMapRenderer implements IKeyMapper
 {
     private $mStarted = false;
     private $mRootElement, $mDeclaration;

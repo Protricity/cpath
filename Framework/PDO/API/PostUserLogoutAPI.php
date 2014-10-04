@@ -10,11 +10,11 @@ namespace CPath\Framework\PDO\API;
 use CPath\Base;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Types\DataResponse;
-use CPath\Response\Common\ExceptionResponse;
 use CPath\Framework\User\Session\SessionNotFoundException;
+use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IResponse;
 
 
 interface IPostLogoutExecute {

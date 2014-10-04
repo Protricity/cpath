@@ -3,14 +3,14 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\IFragmentTheme;
 use CPath\Request\IRequest;
 use CPath\Templates\Themes\CPathDefaultTheme;
-use CPath\Render\HTML\HTMLRenderUtil;
 
 abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
 
@@ -29,16 +29,16 @@ abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
      * @return String|void always returns void
      */
     function writeHeaders(IHeaderWriter $Head) {
-        $Head->writeScript(__NAMESPACE__ . '/assets/jquery.min.js');
+        $Head->writeScript(__DIR__ . '/assets/jquery.min.js');
 
-        $Head->writeScript(__NAMESPACE__ . '/assets/cpath.js');
+        $Head->writeScript(__DIR__ . '/assets/cpath.js');
 
-        $Head->writeStyleSheet(__NAMESPACE__ . '/assets/api.css');
-        $Head->writeScript(__NAMESPACE__ . '/assets/api.js');
+        $Head->writeStyleSheet(__DIR__ . '/assets/api.css');
+        $Head->writeScript(__DIR__ . '/assets/api.js');
 
-        $Head->writeScript(__NAMESPACE__ . '/assets/form.js');
-        $Head->writeStyleSheet(__NAMESPACE__ . '/assets/formfragment.css');
-        $Head->writeScript(__NAMESPACE__ . '/assets/formfragment.js');
+        $Head->writeScript(__DIR__ . '/assets/form.js');
+        $Head->writeStyleSheet(__DIR__ . '/assets/formfragment.css');
+        $Head->writeScript(__DIR__ . '/assets/formfragment.js');
     }
 
     /**

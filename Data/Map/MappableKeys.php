@@ -7,9 +7,6 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IKeyMap;
-
 class MappableKeys implements IKeyMap
 {
     private $mValues = array();
@@ -21,11 +18,11 @@ class MappableKeys implements IKeyMap
 
     /**
      * Map data to a data map
-     * @param IMappableKeys $Map the map instance to add data to
+     * @param IKeyMapper $Map the map instance to add data to
      * @internal param \CPath\Framework\Data\Map\Common\IRequest $Request
      * @return void
      */
-    function mapKeys(IMappableKeys $Map) {
+    function mapKeys(IKeyMapper $Map) {
         foreach ($this->mValues as $key => $value)
             if($Map->map($key, $value))
                 break;

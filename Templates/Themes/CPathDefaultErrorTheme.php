@@ -2,7 +2,6 @@
 namespace CPath\Templates\Themes;
 
 use CPath\Base;
-use CPath\Templates\Themes\CPathDefaultTheme;
 use CPath\Framework\View\IContainerDEL;
 
 

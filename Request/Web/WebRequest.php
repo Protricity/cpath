@@ -13,33 +13,55 @@ use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\Cookie\ICookieRequest;
+use CPath\Request\Parameter\Parameter;
 use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\Session\ISessionRequest;
 use CPath\Request\MimeType\UnknownMimeType;
+use CPath\Request\Parameter\IRequestParameter;
 use CPath\Request\Request;
+use CPath\Request\Session\ISessionRequest;
 use CPath\Response\Exceptions\HTTPRequestException;
-use CPath\Response\IResponseCode;
+use CPath\Response\IResponse;
 
 class WebRequest extends Request implements ISessionRequest, ICookieRequest
 {
     private $mHeaders = null;
 
-    public function __construct($method, $path = null, $params = array(), IRequestedMimeType $MimeType=null) {
-        parent::__construct($method, $path, $params, $MimeType ?: $this->getHeaderMimeType());
+    public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
+        parent::__construct($method, $path, $args, $MimeType ?: $this->getHeaderMimeType());
 
         if(preg_match('/\.(js|css|png|gif|jpg|bmp|ico)/i', $this->getPath(), $matches))
-            throw new HTTPRequestException("File request was passed to Script: ", IResponseCode::STATUS_NOT_FOUND);
+            throw new HTTPRequestException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
     }
 
-    protected function getParamValue($paramName) {
-        if($value = parent::getParamValue($paramName))
-            return $value;
+	/**
+	 * Return a request value
+	 * @param $paramName
+	 * @return mixed the parameter value
+	 */
+	function getRequestValue($paramName) {
+		if(!empty($_GET[$paramName]))
+			return $_GET[$paramName];
+		return null;
+	}
 
-        if(!empty($_GET[$paramName]))
-            return $_GET[$paramName];
+	/**
+	 * Return a request value
+	 * @param String|IRequestParameter $Parameter string or instance
+	 * @param String|null $description
+	 * @return mixed the validated parameter value
+	 */
+	function getValue($Parameter, $description=null) {
+		if(!$Parameter instanceof IRequestParameter)
+			$Parameter = new Parameter($Parameter, $description);
 
-        return null;
-    }
+		$this->addParam($Parameter);
+
+		$value =
+			$this->getArgumentValue($Parameter->getName()) ?:
+			$this->getRequestValue($Parameter->getName());
+
+		return $Parameter->validate($this, $value);
+	}
 
     /**
      * Get the requested Mime type(s) for rendering purposes

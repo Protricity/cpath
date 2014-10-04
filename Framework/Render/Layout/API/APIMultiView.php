@@ -12,22 +12,21 @@ use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Framework\API\Util\APIExecuteUtil;
 use CPath\Framework\Render\IRenderAll;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Common\ModifiedRequestWrapper;
+use CPath\Framework\View\API\AbstractNavBarLayout;
+use CPath\Framework\View\API\IWrapper;
+use CPath\Handlers\Response\ResponseUtil;
+use CPath\Interfaces\IViewConfig;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
-use CPath\Handlers\Response\ResponseUtil;
-use CPath\Route\RouteNotFoundException;
+use CPath\Route\DefaultMap;
 use CPath\Route\IRouteMap;
-use CPath\Route\IRoutable;
-use CPath\Framework\View\API\AbstractNavBarLayout;
-use CPath\Framework\Render\Layout\API\APILayout;
-use CPath\Framework\View\API\IWrapper;
-use CPath\Framework\Render\Theme\Interfaces\ITheme;
-use CPath\Interfaces\IViewConfig;
-use CPath\Backend\CPathBackendRoutes;
+use CPath\Route\IRouteMapper;
+use CPath\Route\RouteNotFoundException;
 
-class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRoutable {
+class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRouteMap {
     /** @var APIFormFragment */
     private $mForm;
     private $mResponseBox;
@@ -64,7 +63,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     private function selectAPI(IRequest &$Request) {
         try {
-            $Routes = new CPathBackendRoutes();
+            $Routes = new DefaultMap();
             $Render = $Routes->routeRequest($Request, $this);
 
             if($Render instanceof IWrapper)
@@ -264,9 +263,9 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Returns the route for this IRender
-     * @param \CPath\Route\IRouteMap $Map
+     * @param \CPath\Route\IRouteMapper $Map
      */
-    function mapRoutes(IRouteMap $Map) {
+    function mapRoutes(IRouteMapper $Map) {
         foreach($this->mAPIs as $prefix => $API) {
             if(strpos($prefix, ' ') !== false) {
                 list($method, $path) = explode(' ', $prefix, 2);

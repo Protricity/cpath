@@ -6,11 +6,9 @@ use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IStaticRequestHandler;
+use CPath\Render\HTML\Theme\Util\TableThemeUtil;
 use CPath\Request\IRequest;
 use CPath\Templates\Themes\CPathDefaultTheme;
-use CPath\Render\HTML\Theme\ITableTheme;
-use CPath\Render\HTML\Theme\Util\TableThemeUtil;
 
 class ModelTableFragment implements IRenderHTML {
 

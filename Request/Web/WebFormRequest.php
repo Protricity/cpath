@@ -7,32 +7,51 @@
  */
 namespace CPath\Request\Web;
 
-use CPath\Describable\IDescribable;
+use CPath\Request\Parameter\Parameter;
+use CPath\Request\IFormRequest;
+use CPath\Request\Parameter\IRequestParameter;
 
-class WebFormRequest extends WebRequest
+class WebFormRequest extends WebRequest implements IFormRequest
 {
     private $mValueSource = null;
 
-
-    public function __construct($method, $path = null, $params = array()) {
-//        if (!$path)
-//            $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-        parent::__construct($method, $path, $params);
+    public function __construct($method, $path = null, $args = array()) {
+        parent::__construct($method, $path, $args);
     }
 
-    protected function getParamValue($paramName) {
-        $values = $this->getAllValues();
-        if(!empty($values[$paramName]))
-            return $values[$paramName];
+	/**
+	 * Return a request value
+	 * @param String|IRequestParameter $Parameter string or instance
+	 * @param String|null $description
+	 * @return mixed the validated parameter value
+	 */
+	function getValue($Parameter, $description=null) {
+		if(!$Parameter instanceof IRequestParameter)
+			$Parameter = new Parameter($Parameter, $description);
 
-        if($value = parent::getParamValue($paramName))
-            return $value;
+		$this->addParam($Parameter);
 
-        return null;
-    }
+		$value =
+			$this->getArgumentValue($Parameter->getName()) ?:
+			$this->getFormFieldValue($Parameter->getName()) ?:
+			$this->getRequestValue($Parameter->getName());
 
-    protected function getAllValues() {
+		return $Parameter->validate($this, $value);
+	}
+
+	/**
+	 * Return a request value
+	 * @param $fieldName
+	 * @return mixed the form field value
+	 */
+	function getFormFieldValue($fieldName) {
+		$values = $this->getAllFormValues();
+		if(!empty($values[$fieldName]))
+			return $values[$fieldName];
+		return null;
+	}
+
+    protected function getAllFormValues() {
         if ($this->mValueSource !== null)
             return $this->mValueSource;
 
@@ -44,4 +63,5 @@ class WebFormRequest extends WebRequest
 
         return $this->mValueSource = $_POST;
     }
+
 }

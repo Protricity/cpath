@@ -12,9 +12,9 @@ use CPath\Framework\API\Field\PasswordField;
 use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
+use CPath\Framework\User\Session\ISessionManager;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
-use CPath\Framework\User\Session\ISessionManager;
 
 interface IPostLoginExecute
 {

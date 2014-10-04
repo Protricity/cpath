@@ -8,9 +8,9 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 use CPath\Build\Editor\PHP\PHPMethodEditor;
+use CPath\Build\IBuildRequest;
 use CPath\Build\MethodDocBlock;
 use CPath\Config;
-use CPath\Build\IBuildRequest;
 use CPath\Request\CLI\CommandString;
 
 class RouteBuilder {
@@ -29,11 +29,11 @@ class RouteBuilder {
 
     /**
      * @param IBuildRequest $Request the build instance for this session
-     * @param IRoutable $Routable instance of class file to be built/modified
+     * @param IRouteMap $Routable instance of class file to be built/modified
      * @param String|null $groupKey optional group key for added routes
      * @throws \InvalidArgumentException
      */
-    public function __construct(IBuildRequest $Request, IRoutable $Routable, $groupKey=null) {
+    public function __construct(IBuildRequest $Request, IRouteMap $Routable, $groupKey=null) {
         $Class = new \ReflectionClass(get_class($Routable));
 
         foreach($Class->getMethods() as $Method) {
@@ -126,4 +126,3 @@ class RouteBuilder {
         return true;
     }
 }
-

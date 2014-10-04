@@ -8,12 +8,28 @@
 namespace CPath\Response;
 
 use CPath\Config;
-use CPath\Response\IResponseCode;
 
-interface IResponse extends IResponseCode
+interface IResponse
 {
+	const HTTP_SUCCESS = 200;
+
+	const HTTP_SEE_OTHER = 303;
+	const HTTP_TEMPORARY_REDIRECT = 307;
+
+	const HTTP_ERROR = 400;
+	const HTTP_NOT_FOUND = 404;
+	const HTTP_CONFLICT = 409;
+
+	const STR_CODE = 'code';
     const STR_MESSAGE = 'message';
+
     //const JSON_RESPONSE = 'response';
+
+	/**
+	 * Get the request status code
+	 * @return int
+	 */
+	function getCode();
 
     /**
      * Get the IResponse Message

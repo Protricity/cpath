@@ -11,9 +11,9 @@ interface ISequenceMap
 {
     /**
      * Map sequential data to the map
-     * @param IMappableSequence $Map
+     * @param ISequenceMapper $Map
      * @return void
      */
-    function mapSequence(IMappableSequence $Map);
+    function mapSequence(ISequenceMapper $Map);
 }
 

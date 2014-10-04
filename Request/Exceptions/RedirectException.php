@@ -9,8 +9,7 @@ namespace CPath\Request\Exceptions;
 
 use CPath\Request\IRequest;
 use CPath\Request\RequestException;
-use CPath\Request\Web\WebRequest;
-use CPath\Response\IResponseCode;
+use CPath\Response\IResponse;
 
 class RedirectException extends RequestException
 {
@@ -23,7 +22,7 @@ class RedirectException extends RequestException
      * @param int $delay
      */
     function __construct($message, $newPath, $delay=5) {
-        parent::__construct($message, IResponseCode::STATUS_TEMPORARY_REDIRECT);
+        parent::__construct($message, IResponse::HTTP_TEMPORARY_REDIRECT);
         $this->mPath = $newPath;
         $this->mDelay = $delay;
     }

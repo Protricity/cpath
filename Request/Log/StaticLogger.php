@@ -8,7 +8,7 @@
 namespace CPath\Request\Log;
 
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\SequenceMapCallback;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
@@ -86,11 +86,11 @@ final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHT
 
     /**
      * Map sequential data to the map
-     * @param IMappableSequence $Map
+     * @param ISequenceMapper $Map
      * @internal param \CPath\Request\IRequest $Request
      * @return mixed
      */
-    function mapSequence(IMappableSequence $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         foreach(self::$Log as $log)
             $Map->mapNext($log[0], $log[1]);
     }

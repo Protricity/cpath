@@ -2,54 +2,59 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 9/26/14
- * Time: 11:45 PM
+ * Date: 10/3/14
+ * Time: 2:06 PM
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
-use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Element\HTMLLabel;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Parameter\IRequestParameter;
 
-class Parameter implements IRenderHTML
+class Parameter implements IRequestParameter
 {
-    private $mName;
-    private $mDescription;
+	const CSS_CLASS_ERROR = 'error';
 
-    public function __construct($paramName, $description=null) {
-        $this->mName = $paramName;
+    private $mDescription;
+    protected $Input;
+	protected $Label;
+
+    public function __construct($paramName, $description=null, $defaultValue=null) {
+        $this->Input = new HTMLInputField($defaultValue);
+        $this->Input->setName($paramName);
+
+        $this->Label = new HTMLLabel($description ?: $paramName);
+        $this->Label->addContent($this->Input);
+
         $this->mDescription = $description;
     }
 
-    /**
-     * Get the request parameter name
-     * @return String
-     */
     function getName() {
-        return $this->mName;
+        return $this->Input->getName();
     }
 
-    /**
-     * Get the request parameter name
-     * @return String
-     */
-    function getDescription() {
-        return $this->mDescription;
-    }
+	/**
+	 * Get parameter description
+	 * @return String
+	 */
+	function getDescription() {
+		return $this->mDescription;
+	}
 
-    /**
-     * Validate this request or throw a ValidationException
-     * @param IRequest $Request
-     * @throws RequestException
-     * @return mixed validated value
-     */
-    function validateRequest(IRequest $Request) {
-        return $Request->getValue($this->getName(), $this->getDescription());
+	/**
+	 * Validate and return the parameter value
+	 * @param IRequest $Request
+	 * @param $value
+	 * @throws \CPath\Request\RequestException
+	 * @return mixed request value
+	 */
+	function validate(IRequest $Request, $value) {
+		if($value)
+            $this->Input->setValue($value);
+        return $value;
     }
 
     /**
@@ -59,23 +64,9 @@ class Parameter implements IRenderHTML
      * @return String|void always returns void
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Input = new HTMLInputField();
-        $Input->setName($this->mName);
-
-        $Label = new HTMLLabel($this->getDescription());
-
-        try {
-            $value = $this->validateRequest($Request);
-            $Input->setValue($value);
-
-        } catch (RequestException $ex) {
-            //$Label->addClass('error');
-            if($Request->getMethodName() === 'POST')
-                $Label->addContent(new HTMLElement('div', 'class=error', $ex->getMessage()));
-
-        }
-
-        $Label->addContent($Input);
-        $Label->renderHTML($Request, $Attr);
-    }
+	    if(!$this->Input->hasAttribute('value'))
+		    $this->Input->setValue($Request->getValue($this));
+        $this->Label->renderHTML($Request, $Attr);
+	}
 }
+

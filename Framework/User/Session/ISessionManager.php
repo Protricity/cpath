@@ -7,10 +7,10 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\User\Session;
 
-use CPath\Response\IResponse;
 use CPath\Framework\Response\Interfaces\IResponseAggregate;
-use CPath\Response\Common\ExceptionResponse;
 use CPath\Framework\User\Interfaces\IUser;
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IResponse;
 
 interface ISessionManager {
 

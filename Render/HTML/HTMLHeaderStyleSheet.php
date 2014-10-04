@@ -7,9 +7,9 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 
 class HTMLHeaderStyleSheet implements IRenderHTML, IHTMLSupportHeaders

@@ -8,7 +8,6 @@
 namespace CPath\Build\Editor\PHP;
 
 use CPath\Build\Editor;
-use CPath\Build\Editor\PHP\PHPTokenScanner;
 
 class PHPClassEditor
 {

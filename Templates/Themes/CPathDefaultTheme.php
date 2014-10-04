@@ -6,21 +6,20 @@ use CPath\Describable\Describable;
 use CPath\Describable\IDescribable;
 use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
-use CPath\Render\HTML\Attribute\Attr;
-use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Framework\Render\Fragment\Table\ModelTableFragment;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\Theme\Interfaces\IBrowseTheme;
+use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Framework\View\IContainerDEL;
+use CPath\Render\HTML\Attribute\Attr;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Theme\IFragmentTheme;
+use CPath\Render\HTML\Theme\Interfaces\IBrowseTheme;
 use CPath\Render\HTML\Theme\Interfaces\IPageTheme;
 use CPath\Render\HTML\Theme\Interfaces\ISearchTheme;
-use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Request\IRequest;
-use CPath\Framework\Render\Fragment\Table\ModelResultsTableFragment;
-use CPath\Framework\Render\Fragment\Table\ModelTableFragment;
-use CPath\Framework\View\IContainerDEL;
 use CPath\Render\HTML\Theme\ITableTheme;
-use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Request\IRequest;
 
 
 class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTMLSupportHeaders {

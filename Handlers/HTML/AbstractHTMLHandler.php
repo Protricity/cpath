@@ -7,24 +7,24 @@
  */
 namespace CPath\Handlers\HTML;
 
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\Text\IRenderText;
-use CPath\Render\XML\IRenderXML;
-use CPath\Request\IStaticRequestHandler;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
-use CPath\Response\IResponseCode;
-use CPath\Response\Response;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\Exceptions\MissingRenderModeException;
 use CPath\Render\HTML\HTMLMimeType;
+use CPath\Render\HTML\IHTMLTemplate;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONMimeType;
+use CPath\Render\Text\IRenderText;
 use CPath\Render\Text\TextMimeType;
+use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLMimeType;
+use CPath\Request\IRequest;
+use CPath\Response\IResponse;
+use CPath\Response\IResponse;
+use CPath\Response\Response;
+use CPath\Route\IRoute;
 
-abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML, IResponse
+abstract class AbstractHTMLHandler implements IRoute, IRenderHTML, IResponse
 {
     const TAB = '    ';
     const TAB_START = 0;
@@ -37,9 +37,9 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
 
     /**
      * Initialize handler with optional template container
-     * @param IHTMLContainer|null $Template optionally add an html container to wrap HTML render requests
+     * @param IHTMLTemplate|null $Template optionally add an html container to wrap HTML render requests
      */
-    public function __construct(IHTMLContainer $Template = null) {
+    public function __construct(IHTMLTemplate $Template = null) {
         $this->mTemplate = $Template;
     }
 
@@ -49,7 +49,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
      * @throws \CPath\Render\Exceptions\MissingRenderModeException
      * @return String|void always returns void
      */
-    static function handleStaticRequest(IRequest $Request) {
+    static function routeRequestStatic(IRequest $Request) {
         $MimeType = $Request->getMimeType();
 
         if($MimeType instanceof HTMLMimeType)
@@ -82,7 +82,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderJSON) {
             $Response = $this;
         } else {
-            $Response = new Response("interface IRenderJSON not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderJSON not implemented for " . get_class($this), IResponse::HTTP_ERROR);
         }
 
         $Util = new ResponseUtil($Response);
@@ -94,7 +94,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderXML) {
             $Response = $this;
         } else {
-            $Response = new Response("interface IRenderXML not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderXML not implemented for " . get_class($this), IResponse::HTTP_ERROR);
         }
 
         $Util = new ResponseUtil($Response);
@@ -106,7 +106,7 @@ abstract class AbstractHTMLHandler implements IStaticRequestHandler, IRenderHTML
         if ($this instanceof IRenderText) {
             $Response = $this;
         } else {
-            $Response = new Response("interface IRenderText not implemented for " . get_class($this), IResponseCode::STATUS_ERROR);
+            $Response = new Response("interface IRenderText not implemented for " . get_class($this), IResponse::HTTP_ERROR);
         }
 
         $Util = new ResponseUtil($Response);

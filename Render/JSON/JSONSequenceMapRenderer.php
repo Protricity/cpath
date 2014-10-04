@@ -10,10 +10,9 @@ namespace CPath\Render\JSON;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\IMappableSequence;
-use CPath\Request\IRequest;
+use CPath\Data\Map\ISequenceMapper;
 
-class JSONSequenceMapRenderer implements IMappableSequence
+class JSONSequenceMapRenderer implements ISequenceMapper
 {
     const DELIMIT = ', ';
     private $mStarted = false;

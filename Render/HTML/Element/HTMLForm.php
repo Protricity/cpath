@@ -7,11 +7,10 @@
  */
 namespace CPath\Render\HTML\Element;
 
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 
 class HTMLForm extends HTMLElement
 {
