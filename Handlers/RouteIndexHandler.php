@@ -7,12 +7,14 @@
  */
 namespace CPath\Handlers;
 
+use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Handlers\Common\MappedRoute;
+use CPath\Render\HTML\URL\URLValue;
 use CPath\Request\IRequest;
 use CPath\Route\DefaultMap;
 use CPath\Route\IRoute;
@@ -20,9 +22,11 @@ use CPath\Route\IRouteMap;
 use CPath\Route\RouteBuilder;
 use CPath\Route\RouteCallback;
 
-class RouteIndexHandler implements ISequenceMap, IKeyMap, IRoute
+class RouteIndexHandler implements ISequenceMap, IKeyMap, IRoute, IBuildable
 {
-    const STR_ROUTES = 'routes';
+	const STR_PATH = 'path';
+	const STR_METHOD = 'method';
+	const STR_ROUTES = 'routes';
 
     private $mRoutes;
     private $mRoutePrefix;
@@ -31,12 +35,13 @@ class RouteIndexHandler implements ISequenceMap, IKeyMap, IRoute
         $this->mRoutePrefix = $routePrefix;
     }
 
-    /**
-     * Map sequential data to the map
-     * @param ISequenceMapper $Map
-     * @return void
-     */
-    function mapSequence(ISequenceMapper $Map) {
+	/**
+	 * Map sequential data to the map
+	 * @param \CPath\Request\IRequest $Request
+	 * @param ISequenceMapper $Map
+	 * @return void
+	 */
+    function mapSequence(IRequest $Request, ISequenceMapper $Map) {
         $this->mRoutes->mapRoutes(
             new RouteCallback(
                 function($prefix, $target) use ($Map) {
@@ -46,16 +51,19 @@ class RouteIndexHandler implements ISequenceMap, IKeyMap, IRoute
         );
     }
 
-    /**
-     * Map data to the key map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Request\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map) {
+	/**
+	 * Map data to the key map
+	 * @param \CPath\Request\IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map) {
 //        $Map->map(IResponse::STR_CODE, $this->getCode());
 //        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
-        $Map->map(self::STR_ROUTES, $this);
+	    $Map->map(self::STR_PATH, new URLValue($Request->getPath(), $Request->getPath()));
+	    $Map->map(self::STR_METHOD, $Request->getMethodName());
+	    $Map->map(self::STR_ROUTES, $this);
     }
 
 
@@ -84,12 +92,16 @@ class RouteIndexHandler implements ISequenceMap, IKeyMap, IRoute
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, $Previous = null, $_arg = null) {
-		var_dump($Previous);
 		if($Previous instanceof IRouteMap) {
 			$Map = $Previous;
 			$Previous = null;
+
+		} elseif($Previous) {
+			return false;
+
 		} else {
 			$Map = new DefaultMap();
+
 		}
 		$routePrefix = 'GET ' . $Request->getPath();
 		$Route = new RouteIndexHandler($Map, $routePrefix);

@@ -15,11 +15,11 @@ use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\HTMLMapRenderer;
+use CPath\Render\HTML\HTMLKeyMapRenderer;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLResponseBody;
+use CPath\Render\HTML\HTMLSequenceMapRenderer;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\IRender;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONKeyMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
@@ -35,7 +35,7 @@ use CPath\Request\IRequest;
 use CPath\Request\MimeType\UnknownMimeType;
 
 
-class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRenderText, IRenderJSON, IRenderXML
+class ResponseRenderer implements IHTMLSupportHeaders, IRenderHTML, IRenderText, IRenderJSON, IRenderXML // IRender,
 {
     private $mResponse;
     public function __construct(IResponse $Response) {
@@ -97,7 +97,7 @@ class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRe
         if($Response instanceof IHTMLSupportHeaders)
             $Response->writeHeaders($Request, $Head);
         if(!$Response instanceof IRenderHTML) {
-            $HTMLMapRenderer = new HTMLMapRenderer($Request);
+            $HTMLMapRenderer = new HTMLSequenceMapRenderer($Request);
             $HTMLMapRenderer->writeHeaders($Request, $Head);
         }
     }
@@ -116,15 +116,15 @@ class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRe
             $Response->renderHTML($Request);
 
         } elseif ($Response instanceof IKeyMap) {
-            $Renderer = new HTMLMapRenderer($Request, $Attr);
-            $Response->mapKeys($Renderer);
+            $Renderer = new HTMLKeyMapRenderer($Request, $Attr);
+            $Response->mapKeys($Request, $Renderer);
 
         } elseif ($Response instanceof ISequenceMap) {
-            $Renderer = new HTMLMapRenderer($Request, $Attr);
-            $Response->mapSequence($Renderer);
+            $Renderer = new HTMLSequenceMapRenderer($Request, $Attr);
+            $Response->mapSequence($Request, $Renderer);
 
         } else {
-            $Renderer = new HTMLMapRenderer($Request, $Attr);
+            $Renderer = new HTMLKeyMapRenderer($Request, $Attr);
             $Renderer->map(IResponse::STR_MESSAGE, $Response->getMessage());
             $Renderer->map(IResponse::STR_CODE, $Response->getCode());
 
@@ -143,15 +143,15 @@ class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRe
             $Response->renderJSON($Request);
 
         } elseif ($Response instanceof IKeyMap) {
-            $Renderer = new JSONKeyMapRenderer();
-            $Response->mapKeys($Renderer);
+            $Renderer = new JSONKeyMapRenderer($Request);
+            $Response->mapKeys($Request, $Renderer);
 
         } elseif ($Response instanceof ISequenceMap) {
-            $Renderer = new JSONSequenceMapRenderer();
-            $Response->mapSequence($Renderer);
+            $Renderer = new JSONSequenceMapRenderer($Request);
+            $Response->mapSequence($Request, $Renderer);
 
         } else {
-            $Map = new JSONKeyMapRenderer();
+            $Map = new JSONKeyMapRenderer($Request);
             $Map->map(IResponse::STR_MESSAGE, $Response->getMessage());
             $Map->map(IResponse::STR_CODE, $Response->getCode());
 
@@ -170,12 +170,12 @@ class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRe
             $Response->renderText($Request);
 
         } elseif ($Response instanceof IKeyMap) {
-            $Renderer = new TextKeyMapRenderer();
-            $Response->mapKeys($Renderer);
+            $Renderer = new TextKeyMapRenderer($Request);
+            $Response->mapKeys($Request, $Renderer);
 
         } elseif ($Response instanceof ISequenceMap) {
-            $Renderer = new TextSequenceMapRenderer();
-            $Response->mapSequence($Renderer);
+            $Renderer = new TextSequenceMapRenderer($Request);
+            $Response->mapSequence($Request, $Renderer);
 
         } else {
             echo RI::ni(), "Status:  ", $Response->getCode();
@@ -198,15 +198,15 @@ class ResponseRenderer implements IHTMLSupportHeaders, IRender, IRenderHTML, IRe
             $Response->renderXML($Request, $declaration);
 
         } elseif ($Response instanceof IKeyMap) {
-            $Renderer = new XMLKeyMapRenderer($rootElementName, $declaration);
-            $Response->mapKeys($Renderer);
+            $Renderer = new XMLKeyMapRenderer($Request, $rootElementName, $declaration);
+            $Response->mapKeys($Request, $Renderer);
 
         } elseif ($Response instanceof ISequenceMap) {
-            $Map = new XMLKeyMapRenderer($rootElementName, $declaration); // fill in 'root' for xml sequences?
+            $Map = new XMLKeyMapRenderer($Request, $rootElementName, $declaration); // fill in 'root' for xml sequences?
             $Map->map('item', $Response);
 
         } else {
-            $Map = new XMLKeyMapRenderer($rootElementName, $declaration);
+            $Map = new XMLKeyMapRenderer($Request, $rootElementName, $declaration);
             $Map->map(IResponse::STR_MESSAGE, $Response->getMessage());
             $Map->map(IResponse::STR_CODE, $Response->getCode());
 

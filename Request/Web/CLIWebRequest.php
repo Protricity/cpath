@@ -8,7 +8,7 @@
 namespace CPath\Request\Web;
 
 use CPath\Render\Text\TextMimeType;
-use CPath\Request\IFormRequest;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\RequestException;
 

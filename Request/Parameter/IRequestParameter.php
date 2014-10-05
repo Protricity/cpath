@@ -8,9 +8,9 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
+use CPath\Request\Validation\IParameterValidation;
 
-interface IRequestParameter extends IRenderHTML
+interface IRequestParameter extends IParameterValidation, IRenderHTML
 {
     /**
      * Get parameter name
@@ -23,12 +23,5 @@ interface IRequestParameter extends IRenderHTML
 	 * @return String
 	 */
 	function getDescription();
-
-	/**
-	 * Validate and return the parameter value
-	 * @param IRequest $Request
-	 * @param $value
-	 * @return mixed request value
-	 */
-	function validate(IRequest $Request, $value);
 }
+

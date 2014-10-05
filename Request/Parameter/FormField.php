@@ -8,9 +8,8 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Request\IFormRequest;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\Parameter;
 
 class FormField extends Parameter
 {
@@ -22,14 +21,14 @@ class FormField extends Parameter
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
 	 * @param $value
-	 * @throws \CPath\Request\RequestException
 	 * @return mixed request value
 	 */
-	function validate(IRequest $Request, $value) {
+	function validateParameter(IRequest $Request, &$value) {
 		if (!$Request instanceof IFormRequest)
 			return null;
-
-		$value = parent::validate($Request, $value);
+		$value = $this->filter($Request, $value);
+		if($value)
+			$this->Input->setValue($value);
 		return $value;
 	}
 

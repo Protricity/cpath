@@ -7,46 +7,21 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Common\HTMLText;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 
 class HTMLTextAreaField extends HTMLElement
 {
-    private $mContent;
+	const ALLOW_CLOSED_TAG = false;
+	const TRIM_CONTENT = true;
 
-    public function __construct($value = null, $attr = null) {
+    public function __construct($text = null, $attr = null) {
         parent::__construct('textarea', $attr);
-        $this->setValue($value);
+	    if($text)
+            $this->addText($text);
     }
 
-    public function setValue($value) {
-        if ($this->mContent)
-            $this->removeContent($this->mContent);
-
-        if (!$value instanceof IRenderHTML)
-            $value = new HTMLText($value);
-
-        $this->mContent = $value;
-        $this->addContent($value);
+    public function addText($text) {
+        $this->addContent(new HTMLText($text));
     }
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Attr = $this->getAttributes()->merge($Attr);
-        echo RI::ni(), "<", $this->getElementType(), $Attr, ">";
-        RI::ai(1);
-
-        $this->renderContent($Request);
-
-        RI::ai(-1);
-        echo "</", $this->getElementType(), ">";
-    }
 }

@@ -84,13 +84,14 @@ final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHT
         }
     }
 
-    /**
-     * Map sequential data to the map
-     * @param ISequenceMapper $Map
-     * @internal param \CPath\Request\IRequest $Request
-     * @return mixed
-     */
-    function mapSequence(ISequenceMapper $Map) {
+	/**
+	 * Map sequential data to the map
+	 * @param \CPath\Request\IRequest $Request
+	 * @param ISequenceMapper $Map
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @return mixed
+	 */
+    function mapSequence(IRequest $Request, ISequenceMapper $Map) {
         foreach(self::$Log as $log)
             $Map->mapNext($log[0], $log[1]);
     }
@@ -119,17 +120,17 @@ final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHT
         $Render = new RenderCallback(function(IRequest $Request, IAttributes $Attr=null) {
 
             $Log = new StaticLogger();
-            $Log->mapSequence(new SequenceMapCallback(function($msg, $flags) use ($Request) {
+            $Log->mapSequence($Request, new SequenceMapCallback(function ($msg, $flags) use ($Request) {
 
-                if($msg instanceof \Exception) {
-                    $msg = $msg->getMessage();
-                }
-                $Div = new HTMLElement('div', null, $msg);
-                if($flags & ILogListener::VERBOSE)
-                    $Div->addClass('verbose');
-                if($flags & ILogListener::ERROR)
-                    $Div->addClass('error');
-                $Div->renderHTML($Request);
+	            if ($msg instanceof \Exception)
+		            $msg = $msg->getMessage();
+
+	            $Div = new HTMLElement('div', null, $msg);
+	            if ($flags & ILogListener::VERBOSE)
+		            $Div->addClass('verbose');
+	            if ($flags & ILogListener::ERROR)
+		            $Div->addClass('error');
+	            $Div->renderHTML($Request);
             }));
         });
 

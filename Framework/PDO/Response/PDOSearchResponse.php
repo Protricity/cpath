@@ -55,22 +55,23 @@ class PDOSearchResponse implements IResponse, IKeyMap {
         );
     }
 
-    /**
-     * Map data to a data map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Framework\PDO\Response\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map)
+	/**
+	 * Map data to a data map
+	 * @param IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\Response\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map)
     {
         $Util = new ResponseUtil($this);
-        $Util->mapKeys($Map, $this->mQuery);
+        $Util->mapKeys($Request, $Map, $this->mQuery);
         if( $this->mQuery->hasDescriptor()) {
             $Descriptor = $this->mQuery->getDescriptor();
             if($Descriptor !== null) {
                 if($Descriptor instanceof IKeyMap)
                     $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new KeyMapCallback( function(IKeyMapper $Map) use ($Descriptor) {
-                        $Descriptor->mapKeys($Map);
+                        $Descriptor->mapKeys($Request, $Map);
                     }));
                 else
                     $Map->map(IResponse::JSON_RESPONSE, $Descriptor);

@@ -11,15 +11,18 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Request\IRequest;
 
 class XMLSequenceMapRenderer implements ISequenceMapper
 {
     const DELIMIT = ', ';
     private $mElementName;
 
+	private $mRequest;
 
-    public function __construct($elementName = 'item') {
+    public function __construct(IRequest $Request, $elementName = 'item') {
         $this->mElementName = $elementName;
+	    $this->mRequest = $Request;
     }
 
 
@@ -31,11 +34,11 @@ class XMLSequenceMapRenderer implements ISequenceMapper
      */
     function mapNext($value, $_arg = null) {
         if ($value instanceof IKeyMap) {
-            $Renderer = new XMLKeyMapRenderer($this->mElementName, false);
-            $value->mapKeys($Renderer);
+            $Renderer = new XMLKeyMapRenderer($this->mRequest, $this->mElementName, false);
+            $value->mapKeys($this->mRequest, $Renderer);
 
         } elseif ($value instanceof ISequenceMap || is_array($value)) { // TODO: array of arrays?
-            $Map = new XMLKeyMapRenderer($this->mElementName, false);
+            $Map = new XMLKeyMapRenderer($this->mRequest, $this->mElementName, false);
             $Map->map($this->mElementName, $value);
 
         } else {

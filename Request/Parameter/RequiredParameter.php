@@ -20,7 +20,6 @@ class RequiredParameter extends Parameter implements IRenderHTML
 		$this->Input->addClass(self::CSS_CLASS_REQUIRED);
 	}
 
-
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
@@ -28,13 +27,13 @@ class RequiredParameter extends Parameter implements IRenderHTML
 	 * @throws \CPath\Request\RequestException
 	 * @return mixed request value
 	 */
-	function validate(IRequest $Request, $value) {
-		//$value = $Request->getValue($this->getName(), $this->mDescription);
-		$value = parent::validate($Request, $value);
+	function validateParameter(IRequest $Request, &$value) {
+		$value = $this->filter($Request, $value);
 		if (!$value) {
 			$this->Label->addClass(self::CSS_CLASS_ERROR);
 			throw new RequestException("Parameter is required: " . $this->getName());
 		}
+		$this->Input->setValue($value);
 		return $value;
 	}
 }

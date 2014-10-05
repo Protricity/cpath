@@ -8,7 +8,7 @@
 namespace CPath\Request\Executable;
 
 use CPath\Render\HTML\Attribute;
-use CPath\Request\IFormRequest;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;

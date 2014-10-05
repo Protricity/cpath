@@ -5,14 +5,13 @@
  * Date: 10/2/14
  * Time: 6:56 PM
  */
-namespace CPath\Response;
+namespace CPath\Handlers;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Request\IRequest;
-use CPath\Route\DefaultMap;
+use CPath\Response\IResponse;
 use CPath\Route\IRoute;
-use CPath\Route\RouteBuilder;
 
 class ResponseHandler implements IRoute, IBuildable
 {
@@ -43,7 +42,7 @@ class ResponseHandler implements IRoute, IBuildable
      * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
      */
     static function handleStaticBuild(IBuildRequest $Request) {
-        $RouteBuilder = new RouteBuilder($Request, new DefaultMap());
-        $RouteBuilder->writeRoute('ANY *', __CLASS__);
+//        $RouteBuilder = new RouteBuilder($Request, new DefaultMap());
+//        $RouteBuilder->writeRoute('ANY *', __CLASS__);
     }
 }

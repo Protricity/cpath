@@ -13,10 +13,10 @@ use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\Cookie\ICookieRequest;
-use CPath\Request\Parameter\Parameter;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Parameter\Parameter;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
 use CPath\Response\Exceptions\HTTPRequestException;
@@ -34,9 +34,9 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
     }
 
 	/**
-	 * Return a request value
+	 * Return a request parameter (GET) value
 	 * @param $paramName
-	 * @return mixed the parameter value
+	 * @return mixed|null the request parameter value or null if not found
 	 */
 	function getRequestValue($paramName) {
 		if(!empty($_GET[$paramName]))
@@ -60,7 +60,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 			$this->getArgumentValue($Parameter->getName()) ?:
 			$this->getRequestValue($Parameter->getName());
 
-		return $Parameter->validate($this, $value);
+		return $Parameter->validateParameter($this, $value);
 	}
 
     /**

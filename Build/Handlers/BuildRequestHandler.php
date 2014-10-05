@@ -35,7 +35,7 @@ class BuildRequestHandler implements IRoute, IBuildable, IExecutable
 
 	/**
 	 * Execute a command and return a response. Does not render
-	 * @param \CPath\Request\IFormRequest|\CPath\Request\IRequest $Request
+	 * @param \CPath\Request\Form\IFormRequest|\CPath\Request\IRequest $Request
 	 * @return IResponse the execution response
 	 */
 	function execute(IRequest $Request) {

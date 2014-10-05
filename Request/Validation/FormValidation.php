@@ -47,7 +47,7 @@ class FormValidation extends \Exception implements IResponse, IRenderHTML, IHTML
 	/**
 	 * Validate a form request
 	 * @param IRequest $Request
-	 * @throws FormValidation
+	 * @throws $this
 	 * @return mixed the validated data
 	 */
 	function validateRequest(IRequest $Request) {
@@ -59,7 +59,7 @@ class FormValidation extends \Exception implements IResponse, IRenderHTML, IHTML
             if($Content instanceof IRequestParameter) {
                 try {
 	                $value = $Request->getValue($Content);
-                    $value = $Content->validate($Request, $value);
+                    $Content->validateParameter($Request, $value);
                     $values[$Content->getName()] = $value;
 	                $c++;
                 } catch (RequestException $ex) {
@@ -96,6 +96,8 @@ class FormValidation extends \Exception implements IResponse, IRenderHTML, IHTML
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
         $Head->writeScript(__DIR__ . '\assets\form-validation.js');
         $Head->writeStyleSheet(__DIR__ . '\assets\form-validation.css');
+		$Logger = new StaticLogger;
+		$Logger->writeHeaders($Request, $Head);
 	}
 
 	/**

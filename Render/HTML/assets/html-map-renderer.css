@@ -1,55 +1,80 @@
-ul.html-map-renderer {
+/** Sequence **/
+
+ul.html-sequence-map-renderer {
     list-style: none;
     font-family: monospace;
+    padding: .5em .6em;
 }
 
-ul.key-map {
-    padding: .5em .6em;
+
+li.sequence-item {
     display: inline-block;
+    /*margin-bottom: .5em;*/
+}
+
+
+/** Key Pair **/
+
+ul.html-key-map-renderer {
+    list-style: none;
+    font-family: monospace;
+    padding: .5em .6em;
+
     border: 1px solid #ccc;
     box-shadow: inset 0 1px 3px #ddd;
     border-radius: 4px;
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    min-width: 300px;
 }
 
-
-li.sequence-item {
-    display: inline-block;
-    margin-bottom: .5em;
+ul.html-key-map-renderer li.key-map-pair {
+    margin: 0;
+    padding: 0;
 }
 
-li.key-map-title {
-    text-align: center;
-    border-bottom: 1px solid #ccc;;
-}
-
-li.key-map-title span.key-value {
-    font-weight: bold;
-}
-
-li.key-map-title label.key-name {
-    display: none;
-}
-
-
-li.key-map-pair label.key-name {
-    font-weight: bold;
-    margin-right: 10pt;
-    vertical-align: top;
-    min-width: 50px;
-    /*display: inline-block;*/
+ul.html-key-map-renderer div.key-name, ul.html-key-map-renderer div.key-value, ul.html-key-map-renderer .key-content {
+    display: block;
     float: left;
+    /*border-bottom: 1px solid #DDD;*/
+    /*border-right: 1px solid #DDD;*/
 }
 
-li.key-map-pair span.key-value {
-    text-overflow: ellipsis;
+ul.html-key-map-renderer div.key-name {
+    font-weight: bold;
+    width: 40pt;
     overflow: hidden;
-    width: 100px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    /*text-align: right;*/
+    color: #888;
+    /*background-color:#F9F9F9;*/
+    /*border-left: 1px solid #DDD;*/
 }
 
-li.key-map-pair ul.html-map-renderer {
+ul.html-key-map-renderer div.key-value {
+    min-width: 100pt;
+    max-width: 180pt;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
+ul.html-key-map-renderer .key-content {
+    min-width: 100pt;
+}
+
+ul.html-key-map-renderer li.key-map-pair.header div {
+    font-weight: bold;
+    cursor: default;
+    background-color:#EEEEEE;
+    /*border-top: 1px solid #DDD;*/
+}
+
+ul.html-key-map-renderer li.key-map-pair:after {
+    content: ".";
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}

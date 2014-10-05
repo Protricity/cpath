@@ -12,9 +12,15 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Request\IRequest;
 
 class TextKeyMapRenderer implements IKeyMapper
 {
+	private $mRequest;
+	function __construct(IRequest $Request) {
+		$this->mRequest = $Request;
+	}
+
     /**
      * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
      * @param String $key
@@ -28,17 +34,17 @@ class TextKeyMapRenderer implements IKeyMapper
         if($value instanceof IKeyMap) {
             echo RI::ni(), $key, ": ";
             RI::i(1);
-            $value->mapKeys($this);
+            $value->mapKeys($this->mRequest, $this);
             RI::i(-1);
 
         } elseif ($value instanceof ISequenceMap) {
-            $Renderer = new TextSequenceMapRenderer();
+            $Renderer = new TextSequenceMapRenderer($this->mRequest);
             echo RI::ni(), $key, ": ";
             RI::i(1);
-            $value->mapSequence($Renderer);
+            $value->mapSequence($this->mRequest, $Renderer);
             RI::i(-1);
 
-        } else {
+        } elseif (is_string($value)) {
             echo RI::ni(), "{$key}: {$value}";
         }
     }

@@ -24,13 +24,14 @@ class MappableResponse extends Response implements IKeyMap
         $this->mMappable = $Mappable;
     }
 
-    /**
-     * Map data to a data map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Request\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map) {
-        $this->mMappable->mapKeys($Map);
+	/**
+	 * Map data to a data map
+	 * @param IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+        $this->mMappable->mapKeys($Request, $Map);
     }
 }

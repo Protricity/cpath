@@ -7,10 +7,11 @@
  */
 namespace CPath\UnitTest;
 
+use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\IRequest;
-use CPath\Request\RequestWrapper;
+use CPath\UnitTest\Exceptions\UnitTestException;
 
-class UnitTestRequestWrapper extends RequestWrapper implements IUnitTestRequest
+class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest
 {
     private $mFlags;
 

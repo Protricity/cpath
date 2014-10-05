@@ -12,9 +12,14 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Request\IRequest;
 
 class TextSequenceMapRenderer implements ISequenceMapper
 {
+	private $mRequest;
+	function __construct(IRequest $Request) {
+		$this->mRequest = $Request;
+	}
 
     /**
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
@@ -27,14 +32,14 @@ class TextSequenceMapRenderer implements ISequenceMapper
             $value = new ArraySequence($value);
 
         if ($value instanceof IKeyMap) {
-            $Map = new TextKeyMapRenderer();
-            $value->mapKeys($Map);
+            $Map = new TextKeyMapRenderer($this->mRequest);
+            $value->mapKeys($this->mRequest, $Map);
 
         } elseif ($value instanceof ISequenceMap) {
-            $Renderer = new TextSequenceMapRenderer();
-            $value->mapSequence($Renderer);
+            $Renderer = new TextSequenceMapRenderer($this->mRequest);
+            $value->mapSequence($this->mRequest, $Renderer);
 
-        } else {
+        } elseif (is_string($value)) {
             echo RI::ni(), $value;
         }
     }

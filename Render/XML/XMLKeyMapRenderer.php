@@ -12,15 +12,18 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Request\IRequest;
 
 class XMLKeyMapRenderer implements IKeyMapper
 {
     private $mStarted = false;
     private $mRootElement, $mDeclaration;
+	private $mRequest;
 
-    public function __construct($rootElementName='root', $declaration=false) {
+    public function __construct(IRequest $Request, $rootElementName='root', $declaration=false) {
         $this->mRootElement = $rootElementName;
         $this->mDeclaration = $declaration;
+	    $this->mRequest = $Request;
     }
 
     function __destruct() {
@@ -66,12 +69,12 @@ class XMLKeyMapRenderer implements IKeyMapper
             $value = new ArraySequence($value);
 
         if ($value instanceof IKeyMap) {
-            $Renderer = new XMLKeyMapRenderer($key);
-            $value->mapKeys($Renderer);
+            $Renderer = new XMLKeyMapRenderer($this->mRequest, $key);
+            $value->mapKeys($this->mRequest, $Renderer);
 
         } elseif ($value instanceof ISequenceMap) {
-            $Renderer = new XMLSequenceMapRenderer($key);
-            $value->mapSequence($Renderer);
+            $Renderer = new XMLSequenceMapRenderer($this->mRequest, $key);
+            $value->mapSequence($this->mRequest, $Renderer);
 
         } else {
             echo RI::ni(), "<", $key, ">", htmlspecialchars($value), "</", $key, ">";

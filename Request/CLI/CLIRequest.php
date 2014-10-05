@@ -10,11 +10,11 @@ namespace CPath\Request\CLI;
 use CPath\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
 use CPath\Request\Executable\IPrompt;
-use CPath\Request\Parameter\Parameter;
-use CPath\Request\IFormRequest;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType;
 use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Parameter\Parameter;
 use CPath\Request\Request;
 
 class CLIRequest extends Request implements IPrompt, IFormRequest
@@ -47,8 +47,8 @@ class CLIRequest extends Request implements IPrompt, IFormRequest
     }
 
     function getNextArg($description = null) {
-        if($this->getValue($this->mPos, $description))
-            $this->getValue($this->mPos++);
+        if($this->getArgumentValue($this->mPos, $description))
+            $this->getArgumentValue($this->mPos++);
         return null;
     }
 
@@ -95,6 +95,6 @@ class CLIRequest extends Request implements IPrompt, IFormRequest
 
 		$value = $this->getArgumentValue($Parameter->getName());
 
-		return $Parameter->validate($this, $value);
+		return $Parameter->validateParameter($this, $value);
 	}
 }

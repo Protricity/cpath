@@ -11,11 +11,16 @@ use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Request\IRequest;
 
 class JSONKeyMapRenderer implements IKeyMapper {
     const DELIMIT = ', ';
     private $mStarted = false, $mNextDelim=null;
 
+	private $mRequest;
+	function __construct(IRequest $Request) {
+		$this->mRequest = $Request;
+	}
 
     function __destruct() {
         $this->flush();
@@ -58,13 +63,13 @@ class JSONKeyMapRenderer implements IKeyMapper {
 
         if($value instanceof IKeyMap) {
             $this->mNextDelim = null;
-            $Renderer = new JSONKeyMapRenderer();
-            $value->mapKeys($Renderer);
+            $Renderer = new JSONKeyMapRenderer($this->mRequest);
+            $value->mapKeys($this->mRequest, $Renderer);
 
         } elseif ($value instanceof ISequenceMap) {
             $this->mNextDelim = null;
-            $Renderer = new JSONSequenceMapRenderer();
-            $value->mapSequence($Renderer);
+            $Renderer = new JSONSequenceMapRenderer($this->mRequest);
+            $value->mapSequence($this->mRequest, $Renderer);
 
         } else {
             echo json_encode($value);

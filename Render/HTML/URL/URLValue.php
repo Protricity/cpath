@@ -21,11 +21,13 @@ class URLValue implements IRenderHTML, IHasURL
 
     /**
      * @param String $url
-     * @param null $content
+     * @param null $text
      */
-    public function __construct($url, $content = null) {
+    public function __construct($url, $text = null) {
         $this->mURL = $url;
-        $this->mContent = $content;
+	    if(!$text)
+		    $text = parse_url($url, PHP_URL_PATH);
+        $this->mContent = $text;
     }
 
 

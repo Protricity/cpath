@@ -20,6 +20,9 @@ use Traversable;
 
 class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregate, \ArrayAccess
 {
+	const ALLOW_CLOSED_TAG = true;
+	const TRIM_CONTENT = false;
+
     private $mElmType;
     private $mAttr;
     /** @var IRenderHTML[] */
@@ -87,20 +90,20 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
 //        }
     }
 
-    /**
-     * Remove an IRenderHTML instance from the container
-     * @param IRenderHTML $Content
-     * @return bool true if the content was found and removed
-     */
-    function removeContent(IRenderHTML $Content) {
-        foreach($this->mContent as $key => $C) {
-            if($C === $Content) {
-                unset($this->mContent[$key]);
-                return true;
-            }
-        }
-        return false;
-    }
+//    /**
+//     * Remove an IRenderHTML instance from the container
+//     * @param IRenderHTML $Content
+//     * @return bool true if the content was found and removed
+//     */
+//    function removeContent(IRenderHTML $Content) {
+//        foreach($this->mContent as $key => $C) {
+//            if($C === $Content) {
+//                unset($this->mContent[$key]);
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     /**
      * Render element content
@@ -120,7 +123,7 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
         $Attr = $this->mAttr->merge($Attr);
-        if(!$this->mContent) {
+        if(!$this->mContent && static::ALLOW_CLOSED_TAG) {
             echo RI::ni(), "<", $this->mElmType, $Attr, "/>";
         } else {
             echo RI::ni(), "<", $this->mElmType, $Attr, ">";
@@ -129,7 +132,9 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
             $this->renderContent($Request);
 
             RI::ai(-1);
-            echo RI::ni(), "</", $this->mElmType, ">";
+	        if(!static::TRIM_CONTENT)
+                echo RI::ni();
+	        echo "</", $this->mElmType, ">";
         }
     }
 

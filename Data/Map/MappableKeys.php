@@ -16,13 +16,14 @@ class MappableKeys implements IKeyMap
     }
 
 
-    /**
-     * Map data to a data map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Framework\Data\Map\Common\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map) {
+	/**
+	 * Map data to a data map
+	 * @param IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\Data\Map\Common\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map) {
         foreach ($this->mValues as $key => $value)
             if($Map->map($key, $value))
                 break;

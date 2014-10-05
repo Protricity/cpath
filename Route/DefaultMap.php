@@ -31,17 +31,14 @@ class DefaultMap implements IRouteMap
 			$Map->route('ANY /cpath/build', BuildRequestHandler::cls()) ||
 			$Map->route('ANY /cpath/', 'CPath\\Backend\\BackendIndexHandler') ||
 
-			// @group CPath\Backend\BuildRequestHandler
-			$Map->route('CLI /cpath/build', 'CPath\\Backend\\BuildRequestHandler') ||
-
 			// @group CPath\Build\Handlers\BuildRequestHandler
 			$Map->route('CLI /cpath/build', 'CPath\\Build\\Handlers\\BuildRequestHandler') ||
 
-			// @group CPath\Response\ResponseHandler
-			$Map->route('ANY *', 'CPath\\Response\\ResponseHandler') ||
-
 			// @group CPath\UnitTest\Handlers\TestRequestHandler
 			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
+
+			// @group _404
+			$Map->route('ANY *', 'CPath\\Handlers\\RouteIndexHandler') ||
 
 			// @group _ex
 			$Map->route('ANY *', 'CPath\\Handlers\\Common\\ExceptionHandler') ||

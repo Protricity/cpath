@@ -7,9 +7,9 @@
  */
 namespace CPath\Request\Web;
 
-use CPath\Request\Parameter\Parameter;
-use CPath\Request\IFormRequest;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Parameter\Parameter;
 
 class WebFormRequest extends WebRequest implements IFormRequest
 {
@@ -36,7 +36,7 @@ class WebFormRequest extends WebRequest implements IFormRequest
 			$this->getFormFieldValue($Parameter->getName()) ?:
 			$this->getRequestValue($Parameter->getName());
 
-		return $Parameter->validate($this, $value);
+		return $Parameter->validateParameter($this, $value);
 	}
 
 	/**

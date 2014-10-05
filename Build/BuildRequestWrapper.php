@@ -7,12 +7,12 @@
  */
 namespace CPath\Build;
 
+use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType;
-use CPath\Request\RequestWrapper;
 
-class BuildRequestWrapper extends RequestWrapper implements IBuildRequest
+class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildRequest
 {
     private static $COUNT = 1;
 

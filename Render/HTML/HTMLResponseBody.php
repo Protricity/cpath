@@ -53,10 +53,11 @@ class HTMLResponseBody implements IHTMLTemplate
             echo RI::ni(), '</head>';
 
 
-            echo RI::ni(), '<body>';
+            echo RI::ni(), '<body', $Attr, '>';
             RI::ai(1);
 
-                $Content->renderHTML($Request, $Attr);
+                $Content->renderHTML($Request);
+
 //                foreach($this->mContent as $Content)
 //                    $Content->renderHTML($Request, $Attr);
 
@@ -67,11 +68,12 @@ class HTMLResponseBody implements IHTMLTemplate
         echo RI::ni(), '</html>';
     }
 
-    /**
-     * Render HTML header html
-     * @param \CPath\Request\IRequest $Request
-     * @return WriteOnceHeaderRenderer the writer instance used
-     */
+	/**
+	 * Render HTML header html
+	 * @param \CPath\Request\IRequest $Request
+	 * @param IRenderHTML $Content
+	 * @return WriteOnceHeaderRenderer the writer instance used
+	 */
     protected function renderHTMLHeaders(IRequest $Request, IRenderHTML $Content) {
         $Writer = new WriteOnceHeaderRenderer();
 

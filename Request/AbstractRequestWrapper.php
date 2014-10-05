@@ -10,7 +10,7 @@ namespace CPath\Request;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\Parameter\IRequestParameter;
 
-abstract class RequestWrapper implements IRequest
+abstract class AbstractRequestWrapper implements IRequest
 {
     private $mRequest;
     /** @var ILogListener[] */

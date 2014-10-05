@@ -115,14 +115,15 @@ class PDOSelectStats extends PDOSelectLimitedStats {
         return $ids;
     }
 
-    /**
-     * Map data to a data map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Framework\PDO\Query\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map) {
-        parent::mapKeys($Map);
+	/**
+	 * Map data to a data map
+	 * @param IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\Query\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+        parent::mapKeys($Request, $Map);
 
         foreach($this as $k=>$v)
             $Map->map($k, $v);

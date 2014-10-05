@@ -7,14 +7,13 @@
  */
 namespace CPath\Render;
 
-use CPath\Request\IRequest;
-
-interface IRender
-{
-    /**
-     * Renders a response object or returns false
-     * @param IRequest $Request the IRequest instance for this render
-     * @return bool returns false if no rendering occurred
-     */
-    function render(IRequest $Request);
-}
+//
+//interface IRender
+//{
+//    /**
+//     * Renders a response object or returns false
+//     * @param IRequest $Request the IRequest instance for this render
+//     * @return bool returns false if no rendering occurred
+//     */
+//    function render(IRequest $Request);
+//}

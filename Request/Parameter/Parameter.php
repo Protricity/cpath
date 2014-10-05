@@ -12,7 +12,8 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Element\HTMLLabel;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\RequestException;
+use CPath\Request\Validation\IParameterValidation;
 
 class Parameter implements IRequestParameter
 {
@@ -21,6 +22,7 @@ class Parameter implements IRequestParameter
     private $mDescription;
     protected $Input;
 	protected $Label;
+	protected $mFilters = array();
 
     public function __construct($paramName, $description=null, $defaultValue=null) {
         $this->Input = new HTMLInputField($defaultValue);
@@ -44,18 +46,58 @@ class Parameter implements IRequestParameter
 		return $this->mDescription;
 	}
 
+	function addFilter($filter, $options=null, $description=null) {
+		$this->mFilters[] = func_get_args();
+	}
+
+	function addValidation(IParameterValidation $Validation) {
+		$this->mFilters[] = $Validation;
+	}
+
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
 	 * @param $value
-	 * @throws \CPath\Request\RequestException
 	 * @return mixed request value
 	 */
-	function validate(IRequest $Request, $value) {
+	function validateParameter(IRequest $Request, &$value) {
+		$value = $this->filter($Request, $value);
 		if($value)
-            $this->Input->setValue($value);
-        return $value;
+			$this->Input->setValue($value);
     }
+
+	/**
+	 * @param IRequest $Request
+	 * @param $value
+	 * @return mixed
+	 * @throws \CPath\Request\RequestException
+	 */
+	protected function filter(IRequest $Request, $value) {
+		foreach($this->mFilters as $Filter) {
+			if($Filter instanceof IParameterValidation) {
+				$Filter->validateParameter($Request, $value);
+
+			} else {
+				list($filterID, $filterOpts, $desc) = $Filter;
+				$value = filter_var($value, $filterID, $filterOpts);
+				if($value === false && $filterID !== FILTER_VALIDATE_BOOLEAN) {
+					if(!$desc) {
+						foreach(filter_list() as $name) {
+							if(filter_id($name) === $filterID) {
+								$desc = "Filter failed: " . $name;
+								break;
+							}
+						}
+						if(!$desc)
+							$desc = "Filter failed: " . implode(', ', $Filter);
+					}
+					throw new RequestException($desc);
+				}
+
+			}
+		}
+		return $value;
+	}
 
     /**
      * Render request as html

@@ -45,13 +45,14 @@ class PDOSelectLimitedStats implements IKeyMap {
         return '?' . http_build_query($params);
     }
 
-    /**
-     * Map data to a data map
-     * @param IKeyMapper $Map the map instance to add data to
-     * @internal param \CPath\Framework\PDO\Query\IRequest $Request
-     * @return void
-     */
-    function mapKeys(IKeyMapper $Map) {
+	/**
+	 * Map data to a data map
+	 * @param IRequest $Request
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\Query\IRequest $Request
+	 * @return void
+	 */
+    function mapKeys(IRequest $Request, IKeyMapper $Map) {
         foreach($this as $k=>$v)
             $Map->map($k, $v);
     }

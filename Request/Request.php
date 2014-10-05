@@ -112,7 +112,7 @@ abstract class Request implements IRequest
 	/**
 	 * Return a request argument value
 	 * @param int|String $argIndex
-	 * @return mixed the form field value
+	 * @return mixed|null the argument value or null if not found
 	 */
 	function getArgumentValue($argIndex) {
 		if(!empty($this->mArgs[$argIndex]))

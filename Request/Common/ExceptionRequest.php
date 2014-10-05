@@ -7,10 +7,10 @@
  */
 namespace CPath\Request\Common;
 
+use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\IRequest;
-use CPath\Request\RequestWrapper;
 
-class ExceptionRequest extends RequestWrapper
+class ExceptionRequest extends AbstractRequestWrapper
 {
     private $mEx;
     private $mRequest;
