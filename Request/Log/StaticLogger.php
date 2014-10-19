@@ -19,7 +19,7 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
 
-final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHTMLSupportHeaders
+final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHeaders
 {
     const CSS_CLASS = 'static-logger';
 
@@ -113,7 +113,7 @@ final class StaticLogger implements ILogListener, ISequenceMap, IRenderHTML, IHT
      * @param Attribute\IAttributes $Attr
      * @return String|void always returns void
      */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+    function renderHTML1(IRequest $Request, IAttributes $Attr = null) {
         $Div = new HTMLElement('div', $Attr);
         $Div->addClass(self::CSS_CLASS);
 

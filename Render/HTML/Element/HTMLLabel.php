@@ -14,10 +14,10 @@ class HTMLLabel extends HTMLElement
 {
     /**
      * @param string $text
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes $attr
+     * @param String|\CPath\Render\HTML\Attribute\IAttributes $classList
      */
-    public function __construct($text, $attr = null) {
-        parent::__construct('label', $attr);
+    public function __construct($text, $classList = null) {
+        parent::__construct('label', $classList);
         $this->addContent(new HTMLText($text));
     }
 

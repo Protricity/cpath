@@ -7,6 +7,7 @@
  */
 namespace CPath\Request;
 
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\Parameter\IRequestParameter;
 
@@ -32,17 +33,26 @@ abstract class AbstractRequestWrapper implements IRequest
         return $this->mRequest->getMimeType();
     }
 
+	/**
+	 * Return a request parameter (GET) value
+	 * @param $paramName
+	 * @return mixed|null the request parameter value or null if not found
+	 */
+	function getRequestValue($paramName) {
+		return $this->mRequest->getRequestValue($paramName);
+	}
 
-    /**
-     * Get a request value by parameter name or null if not found
-     * @param string $paramName the parameter name
-     * @param string $description [optional] description for this prompt
-     * @param int $flags use ::PARAM_REQUIRED for required fields
-     * @return mixed the parameter value
-     * @throws RequestException if the value was not found
-     */
-    function getValue($paramName, $description = null, $flags=0) {
-        return $this->mRequest->getValue($paramName, $description);
+	/**
+	 * Get a request value by parameter name or null if not found
+	 * @param Parameter\IRequestParameter $Parameter
+	 * @param null $description
+	 * @internal param string $paramName the parameter name
+	 * @internal param string $description [optional] description for this prompt
+	 * @internal param int $flags use ::PARAM_REQUIRED for required fields
+	 * @return mixed the parameter value
+	 */
+    function getValue($Parameter, $description = null) {
+        return $this->mRequest->getValue($Parameter, $description);
     }
 
     /**
@@ -124,14 +134,6 @@ abstract class AbstractRequestWrapper implements IRequest
         return $this->mRequest->getDomainPath($withDomain);
     }
 
-	/**
-	 * Return a request argument value
-	 * @param int|String $argIndex
-	 * @return mixed the form field value
-	 */
-	function getArgumentValue($argIndex) {
-		return $this->mRequest->getArgumentValue($argIndex);
-	}
 
 	/**
 	 * Return all request parameters collected by ::getValue
@@ -139,5 +141,15 @@ abstract class AbstractRequestWrapper implements IRequest
 	 */
 	function getParameters() {
 		return $this->mRequest->getParameters();
+	}
+
+	/**
+	 * Get the next argument value or null if no more arguments are found
+	 * @param null $index if set, returns the value at index, otherwise the next value
+	 * @param bool $reset if set resets the current position to $index ?: 0
+	 * @return mixed|null the argument value or null if not found
+	 */
+	function getArgumentValue($index = null, $reset = false) {
+		return $this->mRequest->getParameters($index, $reset);
 	}
 }

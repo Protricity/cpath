@@ -5,13 +5,14 @@
  * Date: 9/27/14
  * Time: 3:00 PM
  */
-namespace CPath\Request;
+namespace CPath\Request\Exceptions;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
 use CPath\Request\Validation\FormValidation;
 use CPath\Response\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;

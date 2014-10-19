@@ -8,7 +8,7 @@
 namespace CPath\Route;
 
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 
 final class RouteRenderer implements IRouteMapper
 {

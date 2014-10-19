@@ -11,8 +11,8 @@ use CPath\Request\IRequest;
 
 interface IKeyMap {
 
-    const KEY_TITLE = 'title';
-    const KEY_DESCRIPTION = 'description';
+//    const KEY_TITLE = 'title';
+//    const KEY_DESCRIPTION = 'description';
 
 	/**
 	 * Map data to the key map

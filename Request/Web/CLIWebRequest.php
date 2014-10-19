@@ -10,7 +10,9 @@ namespace CPath\Request\Web;
 use CPath\Render\Text\TextMimeType;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Parameter\Parameter;
 
 class CLIWebRequest extends WebRequest implements IFormRequest
 {
@@ -22,15 +24,38 @@ class CLIWebRequest extends WebRequest implements IFormRequest
         parent::__construct('CLI', $path, $args, new TextMimeType($flags));
     }
 
-    /**
-     * Get a request value by parameter name or null if not found
-     * @param string $fieldName the parameter name
-     * @param string $description [optional] description for this prompt
-     * @param int $flags use ::PARAM_REQUIRED for required fields
-     * @return mixed the parameter value
-     * @throws RequestException if the value was not found
-     */
-    function getFormValue($fieldName, $description = null, $flags = 0) {
-        return $this->getParamValue($fieldName, $description, $flags);
-    }
+	/**
+	 * Return a request value
+	 * @param $fieldName
+	 * @return mixed the form field value
+	 */
+	function getFormFieldValue($fieldName) {
+		// TODO: unfinished
+		return $this->getArgumentValue($fieldName);
+	}
+
+//
+//	/**
+//	 * Return a request value
+//	 * @param String|IRequestParameter $Parameter string or instance
+//	 * @internal param null|String $description
+//	 * @return mixed the validated parameter value
+//	 */
+//	function getValue(IRequestParameter $Parameter) {
+//		if(!$Parameter instanceof IRequestParameter)
+//			$Parameter = new Parameter($Parameter, $description);
+//
+//		$this->addParam($Parameter);
+//
+//		$value =
+//			$this->getArgumentValue($Parameter->getName()) ?:
+//				$this->getRequestValue($Parameter->getName());
+//
+//		return $Parameter->validateParameter($this, $value);
+//
+//	    if($value = $this->getArgumentValue($fieldName))
+//		    return $value;
+//
+//        return $this->getValue($fieldName, $description, $flags);
+//    }
 }

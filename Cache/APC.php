@@ -13,7 +13,7 @@ use CPath\Config;
  * Class APC - Implements APC cache
  * @package CPath\Cache
  */
-class APC extends Cache {
+class APCCache implements ICache {
 
     /**
      * Caches model after a fetch. To be overwritten by derived class
@@ -49,7 +49,15 @@ class APC extends Cache {
      * Check to see if cache is enabled
      * @return boolean true if this cache is enabled
      */
-    function enabled() {
+    static function enabled() {
         return Config::$APCEnabled;
     }
+
+	/**
+	 * Check to see if cache is enabled
+	 * @return boolean true if this cache is enabled
+	 */
+	static function available() {
+		return function_exists('apc_fetch');
+	}
 }

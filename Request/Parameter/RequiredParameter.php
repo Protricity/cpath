@@ -9,7 +9,7 @@ namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 
 class RequiredParameter extends Parameter implements IRenderHTML
 {
@@ -17,17 +17,21 @@ class RequiredParameter extends Parameter implements IRenderHTML
 
 	public function __construct($paramName, $description=null, $defaultValue=null) {
 		parent::__construct($paramName, $description, $defaultValue);
-		$this->Input->addClass(self::CSS_CLASS_REQUIRED);
+		$this->Input->addClass(static::CSS_CLASS_REQUIRED);
 	}
 
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @param $value
-	 * @throws \CPath\Request\RequestException
+	 * @throws \CPath\Request\Exceptions\RequestException
+	 * @internal param $value
 	 * @return mixed request value
 	 */
-	function validateParameter(IRequest $Request, &$value) {
+	function validateRequest(IRequest $Request) {
+		$name = $this->getName();
+		$value = $Request->getArgumentValue($name)
+			?: $Request->getRequestValue($name);
+
 		$value = $this->filter($Request, $value);
 		if (!$value) {
 			$this->Label->addClass(self::CSS_CLASS_ERROR);

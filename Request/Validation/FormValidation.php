@@ -19,9 +19,8 @@ use CPath\Request\Log\StaticLogger;
 use CPath\Request\Parameter\IRequestParameter;
 use CPath\Request\Parameter\Parameter;
 use CPath\Request\Parameter\RequiredParameter;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Response\IResponse;
-
 
 class FormValidation extends \Exception implements IResponse, IRenderHTML, IHTMLSupportHeaders {
     private $mContent = array();
@@ -58,9 +57,13 @@ class FormValidation extends \Exception implements IResponse, IRenderHTML, IHTML
         foreach($this->mContent as $Content) {
             if($Content instanceof IRequestParameter) {
                 try {
-	                $value = $Request->getValue($Content);
-                    $Content->validateParameter($Request, $value);
-                    $values[$Content->getName()] = $value;
+	                //$value = $Request->getValue($Content);
+                    $return = $Content->validateRequest($Request);
+	                if(is_array($return))
+		                foreach($return as $k=>$v)
+			                $values[$k] = $v;
+	                else
+                        $values[$Content->getName()] = $return;
 	                $c++;
                 } catch (RequestException $ex) {
                     $Exs[] = $ex;

@@ -22,21 +22,13 @@ class WebFormRequest extends WebRequest implements IFormRequest
 	/**
 	 * Return a request value
 	 * @param String|IRequestParameter $Parameter string or instance
-	 * @param String|null $description
+	 * @param null $description
+	 * @internal param null|String $description
 	 * @return mixed the validated parameter value
 	 */
-	function getValue($Parameter, $description=null) {
-		if(!$Parameter instanceof IRequestParameter)
-			$Parameter = new Parameter($Parameter, $description);
-
+	function getValue($Parameter, $description = null) {
 		$this->addParam($Parameter);
-
-		$value =
-			$this->getArgumentValue($Parameter->getName()) ?:
-			$this->getFormFieldValue($Parameter->getName()) ?:
-			$this->getRequestValue($Parameter->getName());
-
-		return $Parameter->validateParameter($this, $value);
+		return $Parameter->validateRequest($this);
 	}
 
 	/**
@@ -45,6 +37,9 @@ class WebFormRequest extends WebRequest implements IFormRequest
 	 * @return mixed the form field value
 	 */
 	function getFormFieldValue($fieldName) {
+		if($value = $this->getArgumentValue($fieldName))
+			return $value;
+
 		$values = $this->getAllFormValues();
 		if(!empty($values[$fieldName]))
 			return $values[$fieldName];

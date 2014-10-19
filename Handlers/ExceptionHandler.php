@@ -5,7 +5,7 @@
  * Date: 9/5/14
  * Time: 4:20 PM
  */
-namespace CPath\Handlers\Common;
+namespace CPath\Handlers;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
@@ -31,12 +31,8 @@ class ExceptionHandler implements IRoute, IBuildable
      * If an object is returned, it is passed along to the next handler
      */
     static function routeRequestStatic(IRequest $Request, $Previous=null, $_arg=null) {
-        if($Previous instanceof \Exception) {
-            if(!$Previous instanceof IResponse)
-                $Previous = new ExceptionResponse($Previous);
-            $Handler = new ResponseRenderer($Previous);
-            $Handler->render($Request);
-            return true;
+        if($Previous instanceof \Exception && !$Previous instanceof IResponse) {
+            return new ExceptionResponse($Previous);
         }
         return false;
     }

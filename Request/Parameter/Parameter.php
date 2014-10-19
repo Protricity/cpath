@@ -11,9 +11,10 @@ use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Element\HTMLLabel;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
-use CPath\Request\Validation\IParameterValidation;
+use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Validation\IRequestValidation;
 
 class Parameter implements IRequestParameter
 {
@@ -50,32 +51,36 @@ class Parameter implements IRequestParameter
 		$this->mFilters[] = func_get_args();
 	}
 
-	function addValidation(IParameterValidation $Validation) {
+	function addValidation(IRequestValidation $Validation) {
 		$this->mFilters[] = $Validation;
 	}
 
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request and return the validated content
 	 * @param IRequest $Request
-	 * @param $value
-	 * @return mixed request value
+	 * @return mixed validated content
 	 */
-	function validateParameter(IRequest $Request, &$value) {
+	function validateRequest(IRequest $Request) {
+		$name = $this->getName();
+		$value = $Request->getArgumentValue($name)
+			?: $Request->getRequestValue($name);
+
 		$value = $this->filter($Request, $value);
 		if($value)
 			$this->Input->setValue($value);
+		return $value;
     }
 
 	/**
 	 * @param IRequest $Request
 	 * @param $value
 	 * @return mixed
-	 * @throws \CPath\Request\RequestException
+	 * @throws \CPath\Request\Exceptions\RequestException
 	 */
 	protected function filter(IRequest $Request, $value) {
 		foreach($this->mFilters as $Filter) {
-			if($Filter instanceof IParameterValidation) {
-				$Filter->validateParameter($Request, $value);
+			if($Filter instanceof IRequestValidation) {
+				$Filter->validateRequest($Request);
 
 			} else {
 				list($filterID, $filterOpts, $desc) = $Filter;
@@ -107,7 +112,7 @@ class Parameter implements IRequestParameter
      */
     function renderHTML(IRequest $Request, IAttributes $Attr = null) {
 	    if(!$this->Input->hasAttribute('value'))
-		    $this->Input->setValue($Request->getValue($this));
+		    $this->Input->setValue($Request->getRequestValue($this));
         $this->Label->renderHTML($Request, $Attr);
 	}
 }

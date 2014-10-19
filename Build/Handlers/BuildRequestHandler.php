@@ -42,9 +42,9 @@ class BuildRequestHandler implements IRoute, IBuildable, IExecutable
         $flags = 0;
 
         $OriginalRequest = $Request;
-        $this->mDefaults = $Request->getValue('defaults', "Use Defaults? (Skip prompt)") || false;
+        $this->mDefaults = $Request->getValue('defaults') || false;
 
-        if (!$this->mDefaults && $Request->getValue('test', "Skip commit? (Test mode)"))
+        if (!$this->mDefaults && $Request->getValue('test'))
             $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;

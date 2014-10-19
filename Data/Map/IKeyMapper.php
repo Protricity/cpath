@@ -18,4 +18,3 @@ interface IKeyMapper {
      */
     function map($key, $value);
 }
-

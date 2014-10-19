@@ -9,13 +9,13 @@ namespace CPath\Request\Validation;
 
 use CPath\Request\IRequest;
 
-interface IParameterValidation
+interface IRequestValidation
 {
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request and return the validated content
 	 * @param IRequest $Request
-	 * @param $value
+	 * @return mixed validated content
 	 */
-	function validateParameter(IRequest $Request, &$value);
+	function validateRequest(IRequest $Request);
 }
 

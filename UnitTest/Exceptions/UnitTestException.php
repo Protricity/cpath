@@ -7,7 +7,9 @@
  */
 namespace CPath\UnitTest\Exceptions;
 
-class UnitTestException extends \Exception
+use CPath\Request\Exceptions\RequestException;
+
+class UnitTestException extends RequestException
 {
 
 }

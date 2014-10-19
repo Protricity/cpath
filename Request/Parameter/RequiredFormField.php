@@ -9,7 +9,7 @@ namespace CPath\Request\Parameter;
 
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 
 class RequiredFormField extends FormField
 {
@@ -20,18 +20,17 @@ class RequiredFormField extends FormField
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @param $value
-	 * @throws \CPath\Request\RequestException
+	 * @throws \CPath\Request\Exceptions\RequestException
+	 * @internal param $value
 	 * @return mixed request value
 	 */
-	function validateParameter(IRequest $Request, &$value) {
+	function validateRequest(IRequest $Request) {
 		if (!$Request instanceof IFormRequest) {
 			$this->Label->addClass(self::CSS_CLASS_ERROR);
 			throw new RequestException("Required Form field must come from a form request: " . $this->getName());
 		}
-		$value =
-			$Request->getArgumentValue($this->getName()) ?: // Block out non-POST but allow arguments
-			$Request->getFormFieldValue($this->getName());
+		$value = $Request->getFormFieldValue($this->getName());
+		/** @var IRequest $Request */
 		$value = $this->filter($Request, $value);
 		if (!$value) {
 			$this->Label->addClass(self::CSS_CLASS_ERROR);

@@ -10,7 +10,7 @@ namespace CPath\Data\Map;
 use CPath\Render\HTML\Attribute;
 
 
-class KeyMapCallback implements IKeyMapper
+class CallbackKeyMapper implements IKeyMapper
 {
     private $mCallback;
 

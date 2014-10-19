@@ -7,6 +7,10 @@
  */
 namespace CPath\Request\Log;
 
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+
 interface ILogListener
 {
     const VERBOSE = 0x01; // Verbose message meant for the developers to see

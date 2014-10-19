@@ -8,7 +8,7 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 
 class PasswordConfirmField extends PasswordField
 {
@@ -25,15 +25,16 @@ class PasswordConfirmField extends PasswordField
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @param $value
-	 * @throws \CPath\Request\RequestException
+	 * @return mixed|string
+	 * @throws \CPath\Request\Exceptions\RequestException
+	 * @internal param $value
 	 */
-	function validateParameter(IRequest $Request, &$value) {
-		parent::validateParameter($Request, $value);
+	function validateRequest(IRequest $Request) {
+		$value = parent::validateRequest($Request);
 		$value2 = $Request->getValue($this->mPassword);
 		if ($value !== null && $value2 !== $value)
 			throw new RequestException("Password confirmation did not match");
 
-		$value = static::PASS_BLANK;
+		return static::PASS_BLANK;
 	}
 }

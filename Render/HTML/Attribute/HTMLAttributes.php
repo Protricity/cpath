@@ -61,6 +61,9 @@ final class HTMLAttributes implements IAttributes {
             foreach($matches[1] as $name) {
                 $this->setAttribute($name, $matches[2]) ;
             }
+        } else {
+	        $this->addClass($htmlAttr);
+	        //throw new \InvalidArgumentException("Invalid element html: " . $htmlAttr);
         }
     }
 

@@ -15,8 +15,6 @@ use CPath\Render\XML\XMLMimeType;
 use CPath\Request\Cookie\ICookieRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
-use CPath\Request\Parameter\IRequestParameter;
-use CPath\Request\Parameter\Parameter;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
 use CPath\Response\Exceptions\HTTPRequestException;
@@ -26,7 +24,21 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 {
     private $mHeaders = null;
 
+	private $mPrefixPath = null;
+
     public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
+	    if(!$path) {
+		    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+		    $root = dirname($_SERVER['SCRIPT_NAME']);
+
+		    if (stripos($urlPath, $root) === 0) {
+			    $this->mPrefixPath = substr($urlPath, 0, strlen($root));
+			    $urlPath = substr($urlPath, strlen($root));
+
+			    $path = $urlPath;
+		    }
+	    }
+
         parent::__construct($method, $path, $args, $MimeType ?: $this->getHeaderMimeType());
 
         if(preg_match('/\.(js|css|png|gif|jpg|bmp|ico)/i', $this->getPath(), $matches))
@@ -34,8 +46,24 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
     }
 
 	/**
+	 * @param bool $withDomain
+	 * @return String
+	 */
+	function getDomainPath($withDomain=true) {
+		$path = $this->mPrefixPath;
+		if($withDomain) {
+			$protocol = 'http';
+			if(isset($_SERVER['HTTPS']))
+				$protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
+
+			$path = $protocol . "://" . $_SERVER['SERVER_NAME'] . $path;
+		}
+		return $path;
+	}
+
+	/**
 	 * Return a request parameter (GET) value
-	 * @param $paramName
+	 * @param String $paramName
 	 * @return mixed|null the request parameter value or null if not found
 	 */
 	function getRequestValue($paramName) {
@@ -44,24 +72,6 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		return null;
 	}
 
-	/**
-	 * Return a request value
-	 * @param String|IRequestParameter $Parameter string or instance
-	 * @param String|null $description
-	 * @return mixed the validated parameter value
-	 */
-	function getValue($Parameter, $description=null) {
-		if(!$Parameter instanceof IRequestParameter)
-			$Parameter = new Parameter($Parameter, $description);
-
-		$this->addParam($Parameter);
-
-		$value =
-			$this->getArgumentValue($Parameter->getName()) ?:
-			$this->getRequestValue($Parameter->getName());
-
-		return $Parameter->validateParameter($this, $value);
-	}
 
     /**
      * Get the requested Mime type(s) for rendering purposes

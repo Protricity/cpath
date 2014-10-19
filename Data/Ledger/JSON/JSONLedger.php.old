@@ -1,0 +1,84 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 10/5/14
+ * Time: 6:04 PM
+ */
+namespace CPath\Data\Ledger\JSON;
+
+use CPath\Data\Ledger\File\LineWriter;
+use CPath\UnitTest\ITestable;
+use CPath\UnitTest\IUnitTestRequest;
+
+class JSONLedger implements ITestable, ILedger{
+	private $mPath;
+	private $mReader = null;
+
+	public function __construct($filePath) {
+		$this->mPath = $filePath;
+	}
+
+	public function nextRow() {
+		$Reader = $this->mReader ?: $this->mReader = new JSONLineReader($this->mPath);
+		return $Reader->readJSON();
+	}
+
+	public function getReader() {
+		return new JSONLineReader($this->mPath);
+	}
+
+	public function scan($key, $_key=null) {
+		$keys = func_get_args();
+		$Reader = $this->getReader();
+		$values = array();
+		while($row = $Reader->readJSON()) {
+			foreach($keys as $k) {
+				if(isset($row[$k]))
+					$values[$k] = $row[$k];
+			}
+		}
+		return $values;
+	}
+
+	public function write(Array $row) {
+		$Writer = new LineWriter($this->mPath);
+
+		return $Writer->writeLine(json_encode($row));
+	}
+
+	// Static
+
+	const TEST_FILE = 'assets/test.json';
+	const TEST_VALUE = 'test.json';
+
+	/**
+	 * Perform a unit test
+	 * @param IUnitTestRequest $Test the unit test request instance for this test session
+	 * @return String|void always returns void
+	 * @test --disable 0
+	 * Note: Use doctag 'test' with '--disable 1' to have this ITestable class skipped during a build
+	 */
+	static function handleStaticUnitTest(IUnitTestRequest $Test) {
+		$testFilePath = __DIR__ . '/' . self::TEST_FILE;
+		$dir = dirname($testFilePath);
+		if(!is_dir($dir))
+			mkdir($dir);
+
+		if(file_exists($testFilePath))
+			unlink($testFilePath);
+
+		$Ledger = new JSONLedger(__DIR__ . '/' . self::TEST_FILE);
+
+		$data = array(
+			array(0=>234, 'value' => 'data'),
+			array(0=>235, 'value' => self::TEST_VALUE),
+		);
+
+		foreach($data as $d)
+			$Ledger->write($d);
+
+		$values = $Ledger->scan('value');
+		$Test->assert($values['value'] == self::TEST_VALUE);
+	}
+}

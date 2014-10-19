@@ -15,7 +15,8 @@ use CPath\Request\IRequest;
 
 class MappedRoute implements IKeyMap // , IRenderHTML
 {
-    const KEY_ROUTE = 'route';
+	const KEY_TITLE = 'title';
+	const KEY_ROUTE = 'route';
     const KEY_TARGET = 'target';
     const KEY_URL = 'url';
 

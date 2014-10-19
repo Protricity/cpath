@@ -9,14 +9,17 @@ namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\Parameter\FormField;
 use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Parameter\Parameter;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
 
-abstract class Request implements IRequest
+class Request implements IRequest
 {
-    private $mArgs;
+	private $mArgPos = 0;
+	private $mArgs;
     /** @var ILogListener[] */
     private $mListeners=array();
 
@@ -28,21 +31,7 @@ abstract class Request implements IRequest
     private $mParams = array();
 //    private $mMap = null;
 
-    private $mPrefixPath = null;
-
-    public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
-
-        $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-        $root = dirname($_SERVER['SCRIPT_NAME']);
-
-
-        if (!$path && stripos($urlPath, $root) === 0) {
-            $this->mPrefixPath = substr($urlPath, 0, strlen($root));
-            $urlPath = substr($urlPath, strlen($root));
-
-            $path = $urlPath;
-        }
-
+    public function __construct($method, $path, $args = array(), IRequestedMimeType $MimeType=null) {
         $this->mMethodName = $method;
         $this->mPath = $path ? '/' . ltrim($path, '/') : '/';
         $this->mArgs = $args;
@@ -65,34 +54,8 @@ abstract class Request implements IRequest
         return $this->mMimeType;
     }
 
-//    /**
-//     * Checks a request value to see if it exists
-//     * @param string $paramName the parameter name
-//     * @return bool
-//     */
-//    final function hasValue($paramName) {
-//        if(isset($this->mValues[$paramName])){
-//            //$this->mParams[$paramName] = new RequestParameter(null, $paramName);
-//            return true;
-//        }
-//
-//        $values = $this->getAllValues();
-//        if(isset($values[$paramName]))
-//            return true;
-//
-//        return false;
-//    }
-
 
 	protected function addParam(IRequestParameter $Parameter) {
-//		$name = $Parameter->getName();
-//		foreach($this->mParams as $i=>$Param) {
-//			if($Param->getName() === $name) {
-//				if($replace)
-//					$this->mParams[$i] = $Parameter;
-//				return;
-//			}
-//		}
 		$this->mParams[$Parameter->getName()] = $Parameter;
 	}
 
@@ -104,75 +67,58 @@ abstract class Request implements IRequest
 		return $this->mParams;
 	}
 
-//	protected function validateParameter(IRequestParameter $Parameter, $value) {
-//		$this->addParam($Parameter);
-//		return $Parameter->validate($this, $value);
-//	}
 
 	/**
-	 * Return a request argument value
-	 * @param int|String $argIndex
-	 * @return mixed|null the argument value or null if not found
+	 * Return a request parameter (GET) value
+	 * @param String $paramName
+	 * @return mixed|null the request parameter value or null if not found
 	 */
-	function getArgumentValue($argIndex) {
-		if(!empty($this->mArgs[$argIndex]))
-			return $this->mArgs[$argIndex];
-
+	function getRequestValue($paramName) {
 		return null;
 	}
 
-//	/**
-//	 * @param IRequestParameter $Parameter
-//	 * @return mixed the validated parameter value
-//	 * @throws RequestException if the value was not found
-//	 */
-//	function getValue(IRequestParameter $Parameter) {
-//		$this->addParam($Parameter);
-//
-//		$value = $this->getParamValue($Parameter->getName());
-//		return $this->validateParameter($Parameter, $value);
-////
-////        if($value = $this->getParamValue($Param->getName()))
-////            return $value;
-//////
-//////        if(!empty($this->mValues[$paramName]))
-//////            return $this->mValues[$paramName];
-//////
-//////        $values = $this->getAllValues();
-//////        if(!empty($values[$paramName]))
-//////            return $values[$paramName];
-//////
-//////        if($value = $this->getMissingValue($paramName, $description, $flags))
-//////            return $value;
-////
-////        throw new RequestException("Missing parameter: " . $paramName);
-//    }
-//
-//    /**
-//     * Get a request value by parameter name or throw an exception
-//     * @param string $paramName the parameter name
-//     * @param string $description [optional] description for this prompt
-//     * @return mixed the parameter value
-//     * @throws RequestException if the value was not found
-//     */
-//    function requireValue($paramName, $description = null) {
-//        if($description)
-//            $this->mDescriptions[$paramName] = $description;
-//
-//        if(!empty($this->mValues[$paramName]))
-//            return $this->mValues[$paramName];
-//
-//        $values = $this->getAllValues();
-//        if(!empty($values[$paramName]))
-//            return $values[$paramName];
-//
-//        $err = "Missing parameter: " . $paramName;
-//        throw new RequestException($err, $this->mDescriptions);
-//    }
+	/**
+	 * Return a request value
+	 * @param String|IRequestParameter $Parameter string or instance
+	 * @param null $description
+	 * @internal param null|String $description
+	 * @return mixed the validated parameter value
+	 */
+	function getValue($Parameter, $description = null) {
+		if(!$Parameter instanceof IRequestParameter) {
+			$name = $Parameter;
+			$Parameter = new FormField($name, $description);
+			if($description || !isset($this->mParams[$name]))
+				$this->mParams[$name] = $Parameter;
 
-//    protected function getAllValues() {
-//        return array();
-//    }
+		} else {
+			$this->mParams[$Parameter->getName()] = $Parameter;
+		}
+		return $Parameter->validateRequest($this);
+	}
+
+	function hasArgumentValue($argIndex) {
+		return isset($this->mArgs[$argIndex]);
+	}
+
+	/**
+	 * Get the next argument value or null if no more arguments are found
+	 * @param null $index if set, returns the value at index, otherwise the next value
+	 * @param bool $reset if set resets the current position to $index ?: 0
+	 * @return mixed|null the argument value or null if not found
+	 */
+	function getArgumentValue($index=null, $reset=false) {
+		if($index !== null) {
+			if($reset && is_int($index))
+				$this->mArgPos = $index;
+			return isset($this->mArgs[$index]) ? $this->mArgs[$index] : null;
+		}
+
+		if($argIndex = $this->mArgs[$this->mArgPos])
+			return $this->mArgs[$this->mArgPos++];
+
+		return null;
+	}
 
     /**
      * Return the route path for this request
@@ -188,7 +134,10 @@ abstract class Request implements IRequest
      * @return bool true if the route matched
      */
     function match($routePrefix) {
-        list($routeMethod, $path) = explode(' ', $routePrefix, 2);
+	    if(strpos($routePrefix, ' ') !== false)
+            list($routeMethod, $path) = explode(' ', $routePrefix, 2);
+	    else
+		    list($routeMethod, $path) = array('ANY', $routePrefix);
 
         $requestMethod = $this->getMethodName();
 
@@ -289,15 +238,14 @@ abstract class Request implements IRequest
      * @return String
      */
     function getDomainPath($withDomain=true) {
-        $path = $this->mPrefixPath;
         if($withDomain) {
             $protocol = 'http';
             if(isset($_SERVER['HTTPS']))
                 $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
 
-            $path = $protocol . "://" . $_SERVER['SERVER_NAME'] . $path;
+            return $protocol . "://" . $_SERVER['SERVER_NAME'];
         }
-        return $path;
+        return '';
     }
 //
 //    /**

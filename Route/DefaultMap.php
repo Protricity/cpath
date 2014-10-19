@@ -41,13 +41,16 @@ class DefaultMap implements IRouteMap
 			$Map->route('ANY *', 'CPath\\Handlers\\RouteIndexHandler') ||
 
 			// @group _ex
-			$Map->route('ANY *', 'CPath\\Handlers\\Common\\ExceptionHandler') ||
+			$Map->route('ANY *', 'CPath\\Handlers\\ExceptionHandler') ||
 
 			// @group _mappable
 			$Map->route('ANY *', 'CPath\\Handlers\\MappableHandler') ||
 
 			// @group _render
-			$Map->route('ANY *', 'CPath\\Handlers\\RenderHandler');
+			$Map->route('ANY *', 'CPath\\Handlers\\RenderHandler') ||
+
+			// @group _response
+			$Map->route('ANY *', 'CPath\\Handlers\\ResponseHandler');
 	}
 
     // Static

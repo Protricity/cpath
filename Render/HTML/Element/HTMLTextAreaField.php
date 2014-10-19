@@ -14,8 +14,8 @@ class HTMLTextAreaField extends HTMLElement
 	const ALLOW_CLOSED_TAG = false;
 	const TRIM_CONTENT = true;
 
-    public function __construct($text = null, $attr = null) {
-        parent::__construct('textarea', $attr);
+    public function __construct($text = null, $classList = null) {
+        parent::__construct('textarea', $classList);
 	    if($text)
             $this->addText($text);
     }

@@ -7,43 +7,12 @@
  */
 namespace CPath\Request;
 
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\Parameter\IRequestParameter;
 
 interface IRequest extends ILogListener
 {
-
-	//const FORM_ERROR = 0x02;
-	//const FORM_REQUIRED = 0x01;
-
-	//const FLAG_TEXTAREA = 0x10;
-
-    /**
-     * Get the requested Mime type for rendering purposes
-     * @return \CPath\Request\MimeType\IRequestedMimeType
-     */
-    function getMimeType();
-
-	/**
-	 * Return a request argument value
-	 * @param int|String $argIndex
-	 * @return mixed|null the argument value or null if not found
-	 */
-	function getArgumentValue($argIndex);
-
-	/**
-	 * Return all request parameters collected by ::getValue
-	 * @return IRequestParameter[]
-	 */
-	function getParameters();
-
-	/**
-	 * Return a request value
-	 * @param String|IRequestParameter $Parameter string or instance
-	 * @param String|null $description
-	 * @return mixed the validated parameter value
-	 */
-	function getValue($Parameter, $description=null);
 
 	/**
 	 * Get the Request Method (GET, POST, PUT, PATCH, DELETE, or CLI)
@@ -69,6 +38,41 @@ interface IRequest extends ILogListener
 	 * @return bool true if the route matched
 	 */
 	function match($routePrefix);
+
+    /**
+     * Get the requested Mime type for rendering purposes
+     * @return \CPath\Request\MimeType\IRequestedMimeType
+     */
+    function getMimeType();
+
+	/**
+	 * Get the next argument value or null if no more arguments are found
+	 * @param null $index if set, returns the value at index, otherwise the next value
+	 * @param bool $reset if set resets the current position to $index ?: 0
+	 * @return mixed|null the argument value or null if not found
+	 */
+	function getArgumentValue($index=null, $reset=false);
+
+	/**
+	 * Return a request parameter (GET) value
+	 * @param $paramName
+	 * @return mixed|null the request parameter value or null if not found
+	 */
+	function getRequestValue($paramName);
+
+	/**
+	 * Return a request value
+	 * @param String|IRequestParameter $Parameter string or instance
+	 * @param null $description
+	 * @return mixed the validated parameter value
+	 */
+	function getValue($Parameter, $description = null);
+
+	/**
+	 * Return all request parameters collected by ::getValue
+	 * @return IRequestParameter[]
+	 */
+	function getParameters();
 
     /**
      * Set the requested Mime type for this request

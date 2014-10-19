@@ -14,6 +14,7 @@ use CPath\UnitTest\Exceptions\UnitTestException;
 class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest
 {
     private $mFlags;
+	private $mAssertionCount = 0;
 
     function __construct(IRequest $Request, $flags = null) {
         parent::__construct($Request);
@@ -42,8 +43,35 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
      * @throws UnitTestException
      */
     function assert($condition, $message = null) {
-        if($condition !== true)
+	    if($condition instanceof IUnitTestAssertion)
+		    $condition->assert($message);
+        elseif($condition !== true)
             throw new UnitTestException($message);
+	    $this->mAssertionCount++;
     }
 
+	/**
+	 * Assert variables are equal or throws an exception
+	 * @param String $expected
+	 * @param String $actual
+	 * @param null $message
+	 * @return void
+	 */
+	function assertEqual($expected, $actual, $message = null) {
+		$this->assert(new AssertEquals($expected, $actual), $message);
+	}
+
+	/**
+	 * Assert a fail condition. Throws a UnitTestException
+	 * @param $message
+	 * @return mixed
+	 * @throws \CPath\UnitTest\Exceptions\UnitTestException
+	 */
+	function fail($message) {
+		$this->assert(false, $message);
+	}
+
+	function getAssertionCount() {
+		return $this->mAssertionCount;
+	}
 }

@@ -8,9 +8,9 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\Validation\IParameterValidation;
+use CPath\Request\Validation\IRequestValidation;
 
-interface IRequestParameter extends IParameterValidation, IRenderHTML
+interface IRequestParameter extends IRequestValidation, IRenderHTML
 {
     /**
      * Get parameter name

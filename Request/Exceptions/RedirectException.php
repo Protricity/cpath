@@ -8,7 +8,7 @@
 namespace CPath\Request\Exceptions;
 
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Response\IResponse;
 
 class RedirectException extends RequestException

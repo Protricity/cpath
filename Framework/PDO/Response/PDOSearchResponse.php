@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Response;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
-use CPath\Data\Map\KeyMapCallback;
+use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
@@ -70,7 +70,7 @@ class PDOSearchResponse implements IResponse, IKeyMap {
             $Descriptor = $this->mQuery->getDescriptor();
             if($Descriptor !== null) {
                 if($Descriptor instanceof IKeyMap)
-                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new KeyMapCallback( function(IKeyMapper $Map) use ($Descriptor) {
+                    $Map->mapSubsection(ISelectDescriptor::JSON_STATS, new CallbackKeyMapper( function(IKeyMapper $Map) use ($Descriptor) {
                         $Descriptor->mapKeys($Request, $Map);
                     }));
                 else

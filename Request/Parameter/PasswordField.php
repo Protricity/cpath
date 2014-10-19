@@ -10,7 +10,7 @@ namespace CPath\Request\Parameter;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\RequestException;
+use CPath\Request\Exceptions\RequestException;
 
 class PasswordField extends Parameter
 {
@@ -26,11 +26,12 @@ class PasswordField extends Parameter
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @param $value
-	 * @throws \CPath\Request\RequestException
+	 * @throws \CPath\Request\Exceptions\RequestException
+	 * @internal param $value
 	 * @return mixed request value
 	 */
-	function validateParameter(IRequest $Request, &$value) {
+	function validateRequest(IRequest $Request) {
+		$value = $Request->getRequestValue($this->getName());
 		if (!$Request instanceof IFormRequest) {
 			if(!$this->mRequired)
 				return null;

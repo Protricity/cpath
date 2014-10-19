@@ -47,9 +47,9 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
         $flags = 0;
 
         $OriginalRequest = $Request;
-        $this->mDefaults = $Request->getValue('defaults', "Use Defaults? (Skip prompt)") || false;
+        $this->mDefaults = $Request->getValue('defaults') || false;
 
-        if (!$this->mDefaults && $Request->getValue('test', "Skip commit? (Test mode)"))
+        if (!$this->mDefaults && $Request->getValue('test'))
             $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;
@@ -61,6 +61,8 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
         return $this->mResponse;
     }
 
+	const CACHE_FILE = '.cache';
+	const CACHE_EXPIRE = 3600;
 
     /**
      * Handle this request and render any content
@@ -72,24 +74,35 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
         foreach($paths as $path)
             $Request->log("Path: " . $path);
 
-        $Iterator = new File\Iterator\PHPFileIterator('/', $paths);
+		$cachePath = __DIR__ . '/' . self::CACHE_FILE;
+	    $testableClasses = array();
+	    if(file_exists($cachePath) && filemtime($cachePath) + self::CACHE_EXPIRE > time()) {
+		    $testableClasses = json_decode(file_get_contents($cachePath), true);
+		    $Request->log("Using cached class list", ILogListener::VERBOSE);
+	    }
 
-        $testableClasses = array();
-        while ($file = $Iterator->getNextFile()) {
-            $Request->log("File: " . $file, ILogListener::VERBOSE);
+	    if(!$testableClasses) {
+		    $testableClasses = array();
+		    $Iterator = new File\Iterator\PHPFileIterator('/', $paths);
+	        while ($file = $Iterator->getNextFile()) {
+	            $Request->log("File: " . $file, ILogListener::VERBOSE);
 
-            $Scanner = new File\PHPFileScanner($file);
-            $results = $Scanner->scanClassTokens();
-            foreach ($results[T_CLASS] as $fullClass => $tokens) {
-                if(isset($tokens[T_IMPLEMENTS])) {
-                    foreach ($tokens[T_IMPLEMENTS] as $implements) {
-                        if (strpos($implements, 'ITestable') !== false) {
-                            $testableClasses[] = $fullClass;
-                        }
-                    }
-                }
-            }
-        }
+	            $Scanner = new File\PHPFileScanner($file);
+	            $results = $Scanner->scanClassTokens();
+	            foreach ($results[T_CLASS] as $fullClass => $tokens) {
+	                if(isset($tokens[T_IMPLEMENTS])) {
+	                    foreach ($tokens[T_IMPLEMENTS] as $implements) {
+	                        if (strpos($implements, 'ITestable') !== false) {
+	                            $testableClasses[] = $fullClass;
+	                        }
+	                    }
+	                }
+	            }
+	        }
+
+			$var = json_encode($testableClasses);
+		    file_put_contents($cachePath, $var);
+	    }
 
         foreach ($testableClasses as $class) {
             $Request->log("Found Class: " . $class, ILogListener::VERBOSE);
@@ -111,7 +124,7 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
                     $Request->log("*** Testing {$class} ***");
                     $UnitTestRequest = new UnitTestRequestWrapper($Request);
                     $class::handleStaticUnitTest($UnitTestRequest);
-                    $Request->log("*** Test passed ***\n");
+                    $Request->log(sprintf("*** Test passed (%d) ***\n", $UnitTestRequest->getAssertionCount()));
 
 
                 } catch (\Exception $ex) {
@@ -158,6 +171,7 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
     static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new DefaultMap());
         $Builder->writeRoute('CLI /cpath/test', __CLASS__);
+	    @unlink(__DIR__ . '/' . self::CACHE_FILE);
     }
 
 //    static function cls() {

@@ -1,0 +1,18 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 10/5/14
+ * Time: 11:21 PM
+ */
+namespace CPath\Data\Ledger\JSON;
+
+interface ILedger
+{
+	public function nextRow();
+
+	public function scan($key, $_key = null);
+
+	public function write(Array $row);
+}
+

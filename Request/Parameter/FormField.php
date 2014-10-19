@@ -20,15 +20,18 @@ class FormField extends Parameter
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @param $value
+	 * @internal param $value
 	 * @return mixed request value
 	 */
-	function validateParameter(IRequest $Request, &$value) {
-		if (!$Request instanceof IFormRequest)
-			return null;
+	function validateRequest(IRequest $Request) {
+		$value = null;
+		if($Request instanceof IFormRequest)
+			$value = $Request->getFormFieldValue($this->getName());
+
 		$value = $this->filter($Request, $value);
 		if($value)
 			$this->Input->setValue($value);
+
 		return $value;
 	}
 
@@ -40,6 +43,8 @@ class FormField extends Parameter
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		if(!$this->Input->hasAttribute('value') && $Request instanceof IFormRequest)
+			$this->Input->setValue($Request->getFormFieldValue($this->getName()));
 		$this->Label->renderHTML($Request, $Attr);
 	}
 }

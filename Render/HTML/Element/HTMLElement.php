@@ -10,9 +10,9 @@ namespace CPath\Render\HTML\Element;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
@@ -30,12 +30,12 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
 
     /**
      * @param string $elmType
-     * @param String|\CPath\Render\HTML\Attribute\IAttributes $attr
+     * @param String|IAttributes $classList attribute instance or class list
      * @param String|null $_content [optional] varargs of content
      */
-    public function __construct($elmType = 'div', $attr = null, $_content = null) {
+    public function __construct($elmType = 'div', $classList = null, $_content = null) {
         $this->mElmType = $elmType;
-        $this->mAttr = $attr instanceof IAttributes ? $attr : new HTMLAttributes($attr);
+        $this->mAttr = $classList instanceof IAttributes ? $classList : new ClassAttributes($classList);
         if($_content !== null)
             for($i=2;$i<func_num_args();$i++)
                 if($Content = func_get_arg($i))
@@ -50,14 +50,23 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
     }
 
     function setAttribute($attrName, $attrValue) {
+	    if(!$this->mAttr instanceof HTMLAttributes)
+		    $this->mAttr = new HTMLAttributes($this->mAttr);
+
         $this->mAttr->setAttribute($attrName, $attrValue);
     }
 
     function getAttribute($attrName, $defaultValue=null) {
+	    if(!$this->mAttr instanceof HTMLAttributes)
+		    $this->mAttr = new HTMLAttributes($this->mAttr);
+
         return $this->mAttr->getAttribute($attrName, $defaultValue);
     }
 
     function hasAttribute($attrName) {
+	    if(!$this->mAttr instanceof HTMLAttributes)
+		    $this->mAttr = new HTMLAttributes($this->mAttr);
+
         return $this->mAttr->hasAttribute($attrName);
     }
 
