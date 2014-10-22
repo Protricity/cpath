@@ -1,0 +1,65 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 10/19/14
+ * Time: 10:57 AM
+ */
+namespace CPath\Render\HTML\Element;
+
+use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
+
+
+
+abstract class AbstractHTMLContainer extends AbstractHTMLElement
+{
+	const TRIM_CONTENT     = false;
+	const ALLOW_CLOSED_TAG = true;
+
+	/**
+	 * @param string $elmType
+	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 */
+	public function __construct($elmType, $classList = null) {
+		parent::__construct($elmType, $classList);
+	}
+
+	/**
+	 * Render element content
+	 * @param IRequest $Request
+	 * @param IAttributes $ContentAttr
+	 */
+	abstract protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
+
+	/**
+	 * Returns true if content is available and should render
+	 * @return bool
+	 */
+	abstract protected function hasContent();
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr optional attributes for the input field
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		$Attr = $this->getAttributes()->merge($Attr);
+		if (!$this->hasContent() && static::ALLOW_CLOSED_TAG) {
+			echo RI::ni(), "<", $this->getElementType(), $Attr, "/>";
+
+		} else {
+			echo RI::ni(), "<", $this->getElementType(), $Attr, ">";
+			RI::ai(1);
+
+			$this->renderContent($Request);
+
+			RI::ai(-1);
+			if (!static::TRIM_CONTENT)
+				echo RI::ni();
+			echo "</", $this->getElementType(), ">";
+		}
+	}
+}

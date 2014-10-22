@@ -1,6 +1,3 @@
-.static-logger .error {
+.log-container .error {
     color: darkred;
-}
-
-.static-logger div {
 }

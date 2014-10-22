@@ -85,12 +85,12 @@ abstract class PDOModel implements IPDOModel {
 
 	/**
 	 * Map data to a data map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\Table\Model\Types\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\Table\Model\Types\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+    function mapKeys(IKeyMapper $Map) {
         foreach($this->table()->getColumns() as $Column)
             if($Column->hasFlag(IPDOColumn::FLAG_EXPORT)) {
                 $name = $Column->getName();

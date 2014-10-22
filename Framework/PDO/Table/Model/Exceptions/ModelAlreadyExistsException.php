@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Table\Model\Exceptions;
 
-use CPath\Response\Exceptions\HTTPRequestException;
+use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class ModelAlreadyExistsException extends HTTPRequestException {

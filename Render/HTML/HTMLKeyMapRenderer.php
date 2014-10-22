@@ -13,7 +13,7 @@ use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Describable\Describable;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -111,12 +111,12 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 
 		} elseif ($value instanceof ISequenceMap) {
 				$Renderer = new HTMLSequenceMapRenderer($this->mRequest, $Attr);
-				$value->mapSequence($this->mRequest, $Renderer);
+				$value->mapSequence($Renderer);
 				$Renderer->flush();
 
 		} elseif ($value instanceof IKeyMap) {
 			$Renderer = new HTMLKeyMapRenderer($this->mRequest, $Attr);
-			$value->mapKeys($this->mRequest, $Renderer);
+			$value->mapKeys($Renderer);
 			$Renderer->flush();
 
 		} elseif (is_bool($value)) {

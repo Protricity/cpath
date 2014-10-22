@@ -62,11 +62,11 @@ class JSONSequenceMapRenderer implements ISequenceMapper
 
         if ($value instanceof IKeyMap) {
             $Renderer = new JSONKeyMapRenderer($this->mRequest);
-            $value->mapKeys($this->mRequest, $Renderer);
+            $value->mapKeys($Renderer);
 
         } elseif ($value instanceof ISequenceMap) {
             $Renderer = new JSONSequenceMapRenderer($this->mRequest);
-            $value->mapSequence($this->mRequest, $Renderer);
+            $value->mapSequence($Renderer);
 
         } else {
             echo json_encode($value);

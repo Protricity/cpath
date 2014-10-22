@@ -1,0 +1,76 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 9/27/14
+ * Time: 3:00 PM
+ */
+namespace CPath\Request\Exceptions;
+
+use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Request\Validation\FormValidation;
+
+class RequestException2 extends HTTPRequestException implements IRenderHTML, IHTMLSupportHeaders
+{
+	//const STR_RENDER = 'render';
+    /**
+     * @param string $message
+     * @param null $statusCode
+     * @param null $_arg [varargs] used to format the exception
+     */
+    function __construct($message, $statusCode=null, $_arg=null) {
+        if($_arg !== null)
+            $message = vsprintf($message, array_slice(func_get_args(), 2));
+        parent::__construct($message, $statusCode);
+    }
+
+    /**
+     * Write all support headers used by this IView instance
+     * @param IRequest $Request
+     * @param IHeaderWriter $Head the writer instance to use
+     * @return String|void always returns void
+     */
+    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+        $Form = new FormValidation();
+        $Form->writeHeaders($Request, $Head);
+    }
+
+    /**
+     * Render request as html
+     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param Attribute\IAttributes $Attr
+     * @return String|void always returns void
+     */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	    $Form = new FormValidation();
+	    foreach($Request->getParameters() as $Parameter)
+		    $Form->addContent($Parameter);
+
+        //$Form = new RequestParameterForm($this);
+	    $msg = $this->getMessage();
+	    try {
+	        $Form->validateRequest($Request);
+	    } catch (\Exception $ex) {
+		    $msg .= "\n" . $ex->getMessage();
+	    }
+	    $Form->updateResponse($msg, $this->getCode());
+        $Form->renderHTML($Request, $Attr);
+    }
+//
+//	/**
+//	 * Map data to the key map
+//	 * @param IKeyMapper $Map the map instance to add data to
+//	 * @internal param \CPath\Request\IRequest $Request
+//	 * @internal param \CPath\Request\IRequest $Request
+//	 * @return void
+//	 */
+//	function mapKeys(IKeyMapper $Map) {
+//		parent::mapKeys($Map);
+//		//$Map->map(self::STR_RENDER, $this);
+//	}
+}

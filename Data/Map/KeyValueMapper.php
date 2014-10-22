@@ -36,9 +36,8 @@ class KeyValueMapper implements \ArrayAccess
 
 			} else {
 				$values = array();
-				$this->mMap->mapKeys($this->mRequest,
-					new CallbackKeyMapper(
-						function($key, $value) use (&$values) {
+				$this->mMap->mapKeys(new CallbackKeyMapper(
+						function ($key, $value) use (&$values) {
 							$values[$key] = $value;
 						}
 					)

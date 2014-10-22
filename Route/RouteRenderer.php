@@ -20,7 +20,7 @@ final class RouteRenderer implements IRouteMapper
     //private $mUnhandled = array();
     /** @var IRoute[] */
     private $mHandlers = array();
-    private $mPrevious = null;
+    private $mPrevious = array();
 
     /**
      * Create a rendering map for IRoutable route maps
@@ -31,7 +31,7 @@ final class RouteRenderer implements IRouteMapper
     }
 
     function renderRoutes(IRouteMap $Map, $withDefaults=true) {
-	    $this->mPrevious = null;
+	    $this->mPrevious = array();
         if($Map->mapRoutes($this))
             return true;
         if($withDefaults) {
@@ -39,14 +39,43 @@ final class RouteRenderer implements IRouteMapper
             if($Defaults->mapRoutes($this))
                 return true;
         }
-	    if($this->mPrevious)
-		    $ex = new RequestException("Unhandled class: " . get_class($this->mPrevious));
-	    else
-            $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
-        foreach($this->mHandlers as $Renderer) {
-            if($Renderer::routeRequestStatic($this->mRequest, $ex))
-                return true;
-        }
+
+//	    $c = sizeof($this->mHandlers);
+//	    $skip = array();
+//	    for($i=0; $i<$c; $i++) {
+//		    if(in_array($i, $skip))
+//			    continue;
+//		    $Handler = $this->mHandlers[$i];
+//		    $Response = $Handler::routeRequestStatic($this->mRequest, $this->mPrevious);
+//		    if($Response === false)
+//			    continue;
+//		    if($Response === true || !$Response) {
+//			    return true;
+//		    }
+//		    array_unshift($this->mPrevious, $Response);
+//		    $skip[] = $i;
+//		    $i=-1;
+//	    }
+
+	    $c = sizeof($this->mPrevious);
+	    if($c > 0) {
+		    if($this->mPrevious[0] instanceof \Exception) {
+			    $ex = $this->mPrevious[0];
+
+			} else {
+			    $cls = array();
+			    foreach($this->mPrevious as $Previous)
+				    $cls[] = get_class($Previous);
+				$ex = new RequestException("Unhandled class: " . implode(', ', $cls));
+			    array_unshift($this->mPrevious, $ex);
+		    }
+
+	    } else {
+		    $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
+		    array_unshift($this->mPrevious, $ex);
+
+	    }
+
         throw $ex;
 
     }
@@ -79,27 +108,35 @@ final class RouteRenderer implements IRouteMapper
             }
 
             if($Response === false) {
-                $this->mHandlers[] = $target;
+	            $this->mHandlers[] = $target;
                 return false;
             }
 
-            foreach($this->mHandlers as $Handler) {
-                $Response2 = $Handler::routeRequestStatic($this->mRequest, $Response);
-                if($Response2 === false)
+	        array_unshift($this->mPrevious, $Response);
+
+	        for($i=0; $i<sizeof($this->mHandlers); $i++) {
+		        /** @var IRoute $Handler */
+		        $Handler = $this->mHandlers[$i];
+                $Response = $Handler::routeRequestStatic($this->mRequest, $this->mPrevious);
+                if($Response === false)
                     continue;
-                if($Response === true || !$Response2) {
+                if($Response === true || !$Response) {
 //                    if(!headers_sent())
 //                        throw new RequestException("IRoute Handler failed to render or return content: " . $Handler);
                     return true;
                 }
-                $Response = $Response2;
+	            array_unshift($this->mPrevious, $Response);
+
+		        unset($this->mHandlers[$i]);
+		        $this->mHandlers = array_values($this->mHandlers);
+		        $i=-1;
             }
 
-            $this->mPrevious = $Response;
 
         } catch (\Exception $ex) {
-            $this->mPrevious = $ex;
+	        array_unshift($this->mPrevious, $ex);
         }
+
         return false;
     }
 }

@@ -10,35 +10,77 @@ namespace CPath\Render\HTML\Element;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class HTMLForm extends HTMLElement
 {
+	const TRIM_CONTENT = false;
     const CSS_FORM_FIELD = 'form-row';
     private $mAttr;
 
-    public function __construct($method = 'POST', $action = null, $name = null, $attr = null) {
-        $this->mAttr = new HTMLAttributes($attr);
-        if ($method !== null)
-            $this->mAttr->setAttribute('method', $method);
-        if ($name !== null)
-            $this->mAttr->setAttribute('name', $name);
-        if ($action !== null)
-            $this->mAttr->setAttribute('action', $action);
+	/**
+	 * @param null $method
+	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param null $_content
+	 */
+	public function __construct($method = null, $classList = null, $_content = null) {
+        $this->mAttr = new HTMLAttributes($classList);
         parent::__construct('form', $this->mAttr);
+		if($method)
+			$this->setMethod($method);
+		if($_content !== null)
+			for($i=2;$i<func_num_args();$i++)
+				if($Content = func_get_arg($i))
+					if($Content instanceof IRenderHTML)
+						$this->addContent($Content);
+					else
+						$this->addContent(new HTMLText($Content));
     }
+
+	public function getName()           { return $this->getAttribute('name'); }
+	public function setName($value)     { $this->setAttribute('name', $value); }
+
+	public function getID()             { return $this->getAttribute('id'); }
+	public function setID($value)       { $this->setAttribute('id', $value); }
+
+	public function setMethod($method)  { $this->mAttr->setAttribute('method', $method); }
+	public function setAction($action)  { $this->mAttr->setAttribute('action', $action); }
+
+
+	public function setFormValues(Array $values, IHTMLContainer $Container=null) {
+		if(!$Container)
+			$Container = $this;
+
+		foreach($Container->getContent() as $Content) {
+			if($Content instanceof IHTMLContainer)
+				$values = $this->setFormValues($values, $Content);
+			elseif(!$Content instanceof IHTMLInput)
+				continue;
+
+			$name = $Content->getName();
+			if(isset($values[$name])) {
+				$Content->setValue($values[$name]);
+				unset($values[$name]);
+			}
+		}
+
+		return $values;
+//		if($values)
+//			throw new \InvalidArgumentException("Form fields not found: " . implode(', ', array_keys($values)));
+	}
 
     public function addSubmit($value = null, $name = null) {
         $this->addInput($value, $name, 'submit');
-        return $this;
     }
 
     public function addInput($value = null, $name = null, $type = null) {
         $Field = new HTMLInputField($value, $type);
         if($name)
-            $Field->setAttribute('name', $name);
+            $Field->setName($name);
         $this->addContent($Field);
-        return $this;
     }
 
     /**
@@ -47,12 +89,13 @@ class HTMLForm extends HTMLElement
      * @param IAttributes $ContentAttr
      */
     protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	    RI::ai(1);
         echo RI::ni(), "<fieldset>";
-        RI::ai(1);
 
         parent::renderContent($Request, $ContentAttr);
 
-        RI::ai(-1);
-        echo RI::ni(), "</fieldset>";
+        echo "</fieldset>";
+	    RI::ai(-1);
+	    RI::ni();
     }
 }

@@ -31,15 +31,15 @@ class PDOModelResponse implements IPDOModel, IResponse
 
 	/**
 	 * Map data to a data map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\Response\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\Response\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map)
+    function mapKeys(IKeyMapper $Map)
     {
         $Util = new ResponseUtil($this);
-        $Util->mapKeys($Request, $Map, $this->mModel);
+        $Util->mapKeys($Map, $this->mModel);
     }
 
     /**

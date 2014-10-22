@@ -1,66 +1,81 @@
 <?php
 /**
- * Created by PhpStorm.
- * User: ari
- * Date: 9/27/14
- * Time: 3:00 PM
- */
+ * Project: CleverPath Framework
+ * IDE: JetBrains PhpStorm
+ * Author: Ari Asulin
+ * Email: ari.asulin@gmail.com
+ * Date: 4/06/11 */
 namespace CPath\Request\Exceptions;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Attribute;
-use CPath\Render\HTML\IRenderHTML;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
 use CPath\Request\IRequest;
-use CPath\Request\Validation\FormValidation;
-use CPath\Response\Exceptions\HTTPRequestException;
+use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
 
-class RequestException extends HTTPRequestException implements IRenderHTML, IResponse, IHTMLSupportHeaders
-{
-    /**
-     * @param string $message
-     * @param null $statusCode
-     * @param null $_arg [varargs] used to format the exception
-     */
-    function __construct($message, $statusCode=null, $_arg=null) {
-        if($_arg !== null)
-            $message = vsprintf($message, array_slice(func_get_args(), 2));
-        parent::__construct($message, $statusCode);
+class RequestException extends \Exception implements IHeaderResponse, IKeyMap {
+    const DEFAULT_HTTP_CODE = IResponse::HTTP_ERROR;
+	const STR_TRACE = 'trace';
+
+    function __construct($message, $statusCode=null) {
+        static $handlerSet = false;
+        if(!$handlerSet) {
+            //set_exception_handler(__CLASS__ . '::handleException');
+            $handlerSet = true;
+        }
+        parent::__construct($message, $statusCode ?: static::DEFAULT_HTTP_CODE);
     }
 
     /**
-     * Write all support headers used by this IView instance
+     * Send response headers for this response
      * @param IRequest $Request
-     * @param IHeaderWriter $Head the writer instance to use
-     * @return String|void always returns void
+     * @param string $mimeType
+     * @return bool returns true if the headers were sent, false otherwise
      */
-    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-        $Form = new FormValidation();
-        $Form->writeHeaders($Request, $Head);
+    function sendHeaders(IRequest $Request, $mimeType = null) {
+        static $sent = false;
+        if($sent || headers_sent())
+            return false;
+        $sent = true;
+
+        if($mimeType === null)
+            $mimeType = $Request->getMimeType()->getName();
+
+        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
+        header("Content-Type: " . $mimeType);
+
+        header('Access-Control-Allow-Origin: *');
+
+        return true;
     }
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param Attribute\IAttributes $Attr
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-	    $Form = new FormValidation();
-	    foreach($Request->getParameters() as $Parameter)
-		    $Form->addContent($Parameter);
+	/**
+	 * Map data to the key map
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @return void
+	 */
+	function mapKeys(IKeyMapper $Map) {
+		$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
+		$Map->map(IResponse::STR_CODE, $this->getCode());
+		$Map->map(self::STR_TRACE, $this->getTraceAsString());
+	}
 
-        //$Form = new RequestParameterForm($this);
-	    $msg = $this->getMessage();
-	    try {
-	        $Form->validateRequest($Request);
-	    } catch (\Exception $ex) {
-		    $msg .= "\n" . $ex->getMessage();
-	    }
-	    $Form->updateResponse($msg, $this->getCode());
-        $Form->renderHTML($Request, $Attr);
-    }
+    // Static
+//
+//    static function handleException(\Exception $ex) {
+//        static $handled = false;
+//        if($ex instanceof IResponse) {
+//            if($handled)
+//                die("FAIL" . $ex);
+//            $handled = true;
+//            $Request = Request::create('/');
+//            $ResponseRenderer = new ResponseRenderer($ex);
+//            $ResponseRenderer->render($Request, true);
+//        } else {
+//            echo $ex;
+//        }
+//    }
 
 }

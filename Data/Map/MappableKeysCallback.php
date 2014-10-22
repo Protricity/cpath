@@ -17,12 +17,12 @@ class MappableKeysCallback implements IKeyMap
 
 	/**
 	 * Map data to a data map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Data\Map\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+    function mapKeys(IKeyMapper $Map) {
         $call = $this->mCallback;
         $call($Map);
     }

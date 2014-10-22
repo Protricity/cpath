@@ -33,11 +33,11 @@ class TextSequenceMapRenderer implements ISequenceMapper
 
         if ($value instanceof IKeyMap) {
             $Map = new TextKeyMapRenderer($this->mRequest);
-            $value->mapKeys($this->mRequest, $Map);
+            $value->mapKeys($Map);
 
         } elseif ($value instanceof ISequenceMap) {
             $Renderer = new TextSequenceMapRenderer($this->mRequest);
-            $value->mapSequence($this->mRequest, $Renderer);
+            $value->mapSequence($Renderer);
 
         } elseif (is_string($value)) {
             echo RI::ni(), $value;

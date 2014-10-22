@@ -17,8 +17,18 @@ final class HTMLAttributes implements IAttributes {
     private $mStyles = null;
 
     function __construct($htmlAttr=null) {
-        if($htmlAttr)
-            $this->addHTML($htmlAttr);
+	    if($htmlAttr) {
+		    if(!is_array($htmlAttr))
+			    $htmlAttr = array($htmlAttr);
+		    foreach($htmlAttr as $k=>$v) {
+			    if(is_int($k))
+				    $this->addHTML($v);
+			    else
+				    $this->setAttribute($k, $v);
+		    }
+	    }
+//        if($htmlAttr)
+//            $this->addHTML($htmlAttr);
     }
 
 

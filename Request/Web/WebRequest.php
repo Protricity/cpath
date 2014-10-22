@@ -17,7 +17,7 @@ use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
-use CPath\Response\Exceptions\HTTPRequestException;
+use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class WebRequest extends Request implements ISessionRequest, ICookieRequest

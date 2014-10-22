@@ -5,11 +5,12 @@
  * Date: 9/6/14
  * Time: 12:47 PM
  */
-namespace CPath\Render\HTML;
+namespace CPath\Render\HTML\Header;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class HTMLHeaderScript implements IRenderHTML, IHTMLSupportHeaders

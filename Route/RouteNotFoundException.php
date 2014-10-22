@@ -7,7 +7,7 @@
  */
 namespace CPath\Route;
 
-use CPath\Response\Exceptions\HTTPRequestException;
+use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class RouteNotFoundException extends HTTPRequestException

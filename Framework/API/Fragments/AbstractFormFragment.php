@@ -4,7 +4,7 @@ namespace CPath\Framework\API\Fragments;
 use CPath\Base;
 use CPath\Config;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\IRenderHTML;

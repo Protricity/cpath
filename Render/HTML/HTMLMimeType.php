@@ -13,18 +13,18 @@ use CPath\Request\MimeType\MimeType;
 final class HTMLMimeType extends MimeType
 {
     /** @var IHTMLTemplate */
-    private $mContainer = null;
+    //private $mContainer = null;
     public function __construct($typeName='text/html', IRequestedMimeType $nextMimeType=null) {
         parent::__construct($typeName, $nextMimeType);
     }
 
-    public function setRenderContainer(IHTMLTemplate $Container) {
-        $this->mContainer = $Container;
-    }
-
-    public function getRenderContainer() {
-        return $this->mContainer;
-    }
+//    public function setRenderContainer(IHTMLTemplate $Container) {
+//        $this->mContainer = $Container;
+//    }
+//
+//    public function getRenderContainer() {
+//        return $this->mContainer;
+//    }
 
 //
 //    public function renderInContainer(IRequest $Request, IRenderHTML $Render) {

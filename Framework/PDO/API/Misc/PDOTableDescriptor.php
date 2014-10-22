@@ -27,12 +27,12 @@ class PDOTableDescriptor implements ISelectDescriptor, IKeyMap {
 
 	/**
 	 * Map data to a data map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\PDO\API\Misc\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\API\Misc\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map)
+    function mapKeys(IKeyMapper $Map)
     {
         $Stats = $this->execFullStats();
         $Map->map('page', $Stats->getCurPage());

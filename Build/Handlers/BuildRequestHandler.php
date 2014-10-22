@@ -13,6 +13,7 @@ use CPath\Build\File;
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Build\MethodDocBlock;
+use CPath\Handlers\RenderHandler;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
@@ -124,17 +125,17 @@ class BuildRequestHandler implements IRoute, IBuildable, IExecutable
     /**
      * Route the request to this class object and return the object
      * @param IRequest $Request the IRequest instance for this render
-     * @param Object|null $Previous a previous response object that was passed to this handler or null
+     * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
      * @param null|mixed $_arg [varargs] passed by route map
      * @return void|bool|Object returns a response object
      * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
      * If false is returned, this static handler will be called again if another handler returns an object
      * If an object is returned, it is passed along to the next handler
      */
-    static function routeRequestStatic(IRequest $Request, $Previous=null, $_arg=null) {
+    static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
         $Inst = new BuildRequestHandler();
         $Response = $Inst->execute($Request);
-        $Handler = new ResponseRenderer($Response);
+        $Handler = new RenderHandler($Response);
         $Handler->render($Request);
     }
 

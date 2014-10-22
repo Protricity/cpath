@@ -7,24 +7,52 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\IRequest;
 
-class HTMLInputField extends HTMLElement
+class HTMLInputField extends AbstractHTMLElement implements IHTMLInput
 {
-    public function __construct($value = null, $type = null, $attr = null) {
-        parent::__construct('input', $attr);
-        if($value)
-            $this->setValue($value);
+	/**
+	 * @param null $name
+	 * @param null $value
+	 * @param null $type
+	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 */
+    public function __construct($name = null, $value = null, $type = null, $classList = null) {
+        parent::__construct('input', $classList);
+	    if($value)
+		    $this->setValue($value);
+	    if($name)
+		    $this->setName($name);
         if($type)
-            $this->setAttribute('type', $type);
+            $this->setType($type);
     }
 
     public function getValue()          { return $this->getAttribute('value'); }
     public function setValue($value)    { $this->setAttribute('value', $value); }
 
-    public function getName()           { return $this->getAttribute('name'); }
-    public function setName($value)     { $this->setAttribute('name', $value); }
+	public function getName()           { return $this->getAttribute('name'); }
+	public function setName($value)     { $this->setAttribute('name', $value); }
+
+	public function getType()           { return $this->getAttribute('type'); }
+	public function setType($value)     { $this->setAttribute('type', $value); }
 
     public function getID()             { return $this->getAttribute('id'); }
     public function setID($value)       { $this->setAttribute('id', $value); }
+
+	/**
+	 * Render element content
+	 * @param IRequest $Request
+	 * @param IAttributes $ContentAttr
+	 */
+	protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	}
+
+	/**
+	 * Returns true if this element has an open tag
+	 * @return bool
+	 */
+	protected function isOpenTag() {
+		return false;
+	}
 }

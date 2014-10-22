@@ -8,111 +8,90 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
-use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\ClassAttributes;
-use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Header\HTMLHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\HTMLContainer;
+use CPath\Render\HTML\HTMLContent;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use Traversable;
 
-class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregate, \ArrayAccess
+class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IHTMLContainer, \IteratorAggregate, \ArrayAccess
 {
 	const ALLOW_CLOSED_TAG = true;
-	const TRIM_CONTENT = false;
-
-    private $mElmType;
-    private $mAttr;
-    /** @var IRenderHTML[] */
-    private $mContent = array();
+    /** @var HTMLContainer */
+    private $mContent;
 
     /**
      * @param string $elmType
-     * @param String|IAttributes $classList attribute instance or class list
+     * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
      * @param String|null $_content [optional] varargs of content
      */
     public function __construct($elmType = 'div', $classList = null, $_content = null) {
-        $this->mElmType = $elmType;
-        $this->mAttr = $classList instanceof IAttributes ? $classList : new ClassAttributes($classList);
+	    parent::__construct($elmType, $classList);
+
+	    $this->mContent = new HTMLContainer();
+
         if($_content !== null)
             for($i=2;$i<func_num_args();$i++)
-                if($Content = func_get_arg($i))
-                    if($Content instanceof IRenderHTML)
-                        $this->addContent($Content);
-                    else
-                        $this->addContent(new HTMLText($Content));
+	            $this->addAll(func_get_arg($i));
     }
 
-    function getElementType() {
-        return $this->mElmType;
+	/**
+	 * Add IRenderHTML Content
+	 * @param IRenderHTML $Render
+	 * @param null $key if provided, add/replace content by key
+	 * @return void always returns void
+	 */
+    function addContent(IRenderHTML $Render, $key=null) {
+	    $this->mContent->addContent($Render, $key);
     }
 
-    function setAttribute($attrName, $attrValue) {
-	    if(!$this->mAttr instanceof HTMLAttributes)
-		    $this->mAttr = new HTMLAttributes($this->mAttr);
+	/**
+	 * Add header content
+	 * @param IHTMLSupportHeaders $Headers
+	 */
+	public function addHeaders(IHTMLSupportHeaders $Headers) {
+		$this->addContent(new HTMLHeaders($Headers));
+	}
 
-        $this->mAttr->setAttribute($attrName, $attrValue);
-    }
+	/**
+	 * Add any kind of content
+	 * @param $content
+	 * @param null $_content
+	 */
+	function addAll($content, $_content=null) {
+		foreach(func_get_args() as $arg) {
+			if(is_array($arg)) {
+				foreach($arg as $a)
+					$this->addAll($a);
+			} else {
+				$this[] = $arg;
+			}
+		}
+	}
 
-    function getAttribute($attrName, $defaultValue=null) {
-	    if(!$this->mAttr instanceof HTMLAttributes)
-		    $this->mAttr = new HTMLAttributes($this->mAttr);
+	/**
+	 * Returns true if content is available and should render
+	 * @param null $key if provided, returns true if content at this key index exists
+	 * @return bool
+	 */
+	function hasContent($key=null) {
+		return $this->mContent->addContent($key);
+	}
 
-        return $this->mAttr->getAttribute($attrName, $defaultValue);
-    }
-
-    function hasAttribute($attrName) {
-	    if(!$this->mAttr instanceof HTMLAttributes)
-		    $this->mAttr = new HTMLAttributes($this->mAttr);
-
-        return $this->mAttr->hasAttribute($attrName);
-    }
-
-    public function addClass($classList) {
-        $this->mAttr->addClass($classList);
-    }
-
-    /**
-     * @return IAttributes
-     */
-    public function getAttributes() {
-        return $this->mAttr;
-    }
-
-    /**
-     * Add HTML Container Content
-     * @param IRenderHTML|string $Content
-     * @param null $key
-     * @return String|void always returns void
-     */
-    function addContent(IRenderHTML $Content, $key=null) {
-        if($key !== null)
-            $this->mContent[$key] = $Content;
-        else
-            $this->mContent[] = $Content;
-//        if($Attr) {
-//            end($this->mContent);
-//            $i = key($this->mContent);
-//            $this->mContentAttr[$i] = $Attr;
-//        }
-    }
-
-//    /**
-//     * Remove an IRenderHTML instance from the container
-//     * @param IRenderHTML $Content
-//     * @return bool true if the content was found and removed
-//     */
-//    function removeContent(IRenderHTML $Content) {
-//        foreach($this->mContent as $key => $C) {
-//            if($C === $Content) {
-//                unset($this->mContent[$key]);
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+	/**
+	 * Returns an array of IRenderHTML content
+	 * @param null $key if provided, get content by key
+	 * @return IRenderHTML[]
+	 * @throws \InvalidArgumentException if content at $key was not found
+	 */
+	public function getContent($key=null) {
+		return $this->mContent->getContent($key);
+	}
 
     /**
      * Render element content
@@ -120,44 +99,39 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
      * @param IAttributes $ContentAttr
      */
     protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
-        foreach($this->mContent as $Render)
+	    RI::ai(1);
+	    $Content = $this->getContent();
+	    $newLine = sizeof($Content) > 1;
+        foreach($Content as $Render) {
             $Render->renderHTML($Request, $ContentAttr);
-    }
-
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr optional attributes for the input field
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $Attr = $this->mAttr->merge($Attr);
-        if(!$this->mContent && static::ALLOW_CLOSED_TAG) {
-            echo RI::ni(), "<", $this->mElmType, $Attr, "/>";
-        } else {
-            echo RI::ni(), "<", $this->mElmType, $Attr, ">";
-            RI::ai(1);
-
-            $this->renderContent($Request);
-
-            RI::ai(-1);
-	        if(!static::TRIM_CONTENT)
-                echo RI::ni();
-	        echo "</", $this->mElmType, ">";
+	        if(!$Render instanceof HTMLContent)
+	            $newLine = true;
         }
+
+	    RI::ai(-1);
+
+	    if($newLine)
+		    echo RI::ni();
     }
 
     /**
      * Write all support headers used by this IView instance
      * @param IRequest $Request
      * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
-     * @return String|void always returns void
+     * @return void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-        foreach($this->mContent as $Content)
-            if($Content instanceof IHTMLSupportHeaders)
-                $Content->writeHeaders($Request, $Head);
+	    if($this->mContent instanceof IHTMLSupportHeaders)
+		    $this->mContent->writeHeaders($Request, $Head);
     }
+
+	/**
+	 * Returns true if this element has an open tag
+	 * @return bool
+	 */
+	protected function isOpenTag() {
+		return !self::ALLOW_CLOSED_TAG || sizeof($this->mContent) > 0;
+	}
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
@@ -212,6 +186,8 @@ class HTMLElement implements IRenderHTML, IHTMLSupportHeaders, \IteratorAggregat
      * @return void
      */
     public function offsetSet($offset, $value) {
+	    if(!$value instanceof IRenderHTML)
+		    $value = new HTMLContent($value);
         $this->addContent($value, $offset);
     }
 

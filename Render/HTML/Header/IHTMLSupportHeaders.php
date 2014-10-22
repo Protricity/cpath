@@ -5,17 +5,20 @@
  * Date: 8/31/14
  * Time: 2:25 PM
  */
-namespace CPath\Framework\Render\Header;
+namespace CPath\Render\HTML\Header;
 
+use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Request\IRequest;
 
 interface IHTMLSupportHeaders
 {
+
     /**
-     * Write all support headers used by this IView instance
+     * Write all support headers used by this renderer
      * @param IRequest $Request
      * @param IHeaderWriter $Head the writer instance to use
-     * @return String|void always returns void
+     * @return void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head);
 }
+

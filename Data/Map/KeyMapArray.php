@@ -27,12 +27,12 @@ class KeyMapArray implements IKeyMap
 
 	/**
 	 * Map data to the key map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
 	 */
-	function mapKeys(IRequest $Request, IKeyMapper $Map) {
+	function mapKeys(IKeyMapper $Map) {
 		foreach ($this->mValues as $key => $value)
 			if ($Map->map($key, $value) === true)
 				break;

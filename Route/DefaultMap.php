@@ -28,7 +28,6 @@ class DefaultMap implements IRouteMap
     function mapRoutes(IRouteMapper $Map) {
 		return
 			// @group CPath\Backend\BackendIndexHandler
-			$Map->route('ANY /cpath/build', BuildRequestHandler::cls()) ||
 			$Map->route('ANY /cpath/', 'CPath\\Backend\\BackendIndexHandler') ||
 
 			// @group CPath\Build\Handlers\BuildRequestHandler
@@ -37,20 +36,8 @@ class DefaultMap implements IRouteMap
 			// @group CPath\UnitTest\Handlers\TestRequestHandler
 			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
 
-			// @group _404
-			$Map->route('ANY *', 'CPath\\Handlers\\RouteIndexHandler') ||
-
-			// @group _ex
-			$Map->route('ANY *', 'CPath\\Handlers\\ExceptionHandler') ||
-
-			// @group _mappable
-			$Map->route('ANY *', 'CPath\\Handlers\\MappableHandler') ||
-
-			// @group _render
-			$Map->route('ANY *', 'CPath\\Handlers\\RenderHandler') ||
-
-			// @group _response
-			$Map->route('ANY *', 'CPath\\Handlers\\ResponseHandler');
+			// @group __render
+			$Map->route('ANY *', 'CPath\\Handlers\\RenderHandler');
 	}
 
     // Static
@@ -65,6 +52,6 @@ class DefaultMap implements IRouteMap
             $Request = Request::create();
 
         $Renderer = new RouteRenderer($Request);
-        $Renderer->renderRoutes(new DefaultMap);
+        return $Renderer->renderRoutes(new DefaultMap);
     }
 }

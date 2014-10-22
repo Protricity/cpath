@@ -5,7 +5,7 @@
  * Date: 10/2/14
  * Time: 1:33 PM
  */
-namespace CPath\Handlers\Common;
+namespace CPath\Route;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
@@ -47,12 +47,12 @@ class MappedRoute implements IKeyMap // , IRenderHTML
 
 	/**
 	 * Map data to the key map
-	 * @param \CPath\Request\IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+    function mapKeys(IKeyMapper $Map) {
         $Map->map(self::KEY_TITLE, $this->__toString()) ||
         $Map->map(self::KEY_ROUTE, $this->getRoute()) ||
         $Map->map(self::KEY_TARGET, $this->getTarget()) ||

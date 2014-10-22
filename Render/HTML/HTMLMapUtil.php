@@ -63,7 +63,7 @@ class HTMLMapUtil implements IKeyMapper
 
         echo RI::ni(), "{$subsectionKey}: ";
         RI::i(1);
-        $Mappable->mapKeys(, $this);
+        $Mappable->mapKeys($this);
         RI::i(-1);
     }
 
@@ -74,7 +74,7 @@ class HTMLMapUtil implements IKeyMapper
      */
     function mapArrayObject(IKeyMap $Mappable)
     {
-        $Mappable->mapKeys(, $this);
+        $Mappable->mapKeys($this);
     }
 
     /**
@@ -92,7 +92,7 @@ class HTMLMapUtil implements IKeyMapper
     static function renderMap(IKeyMap $Map) {
         $Renderer = new HTMLMapUtil();
         $Renderer->start();
-        $Map->mapKeys(, $Renderer);
+        $Map->mapKeys($Renderer);
         $Renderer->stop();
     }
 }

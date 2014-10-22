@@ -8,7 +8,10 @@
 namespace CPath\Request\Log\Render;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Attribute\ClassAttributes;
+use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Element\IHTMLInput;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\IRenderHTML;
@@ -19,6 +22,22 @@ use CPath\Request\Log\ILogListener;
 class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 {
 	private $mLog = array();
+	private $mAttr;
+	private $mTarget = null;
+
+	/**
+	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 */
+	public function __construct($classList = null) {
+		if(!$classList instanceof IAttributes)
+			$classList = new HTMLAttributes($classList);
+		$this->mAttr = $classList;
+		$this->mAttr->addClass('log-container');
+	}
+
+	function bindEventListener($selector) {
+		$this->mTarget = $selector;
+	}
 
 	/**
 	 * Add a log entry
@@ -68,7 +87,11 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$Container = new HTMLElement('div', 'log-container');
+		$Container = new HTMLElement('div', $this->mAttr);
+
+		if($this->mTarget)
+			$Container->setAttribute('data-target', $this->mTarget);
+
 		$THIS = $this;
 		$Container->addContent(
 			new RenderCallback(

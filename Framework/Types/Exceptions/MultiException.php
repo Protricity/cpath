@@ -27,12 +27,12 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 
 	/**
 	 * Map data to a data map
-	 * @param IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Framework\Types\Exceptions\IRequest $Request
 	 * @internal param \CPath\Framework\Types\Exceptions\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map) {
+    function mapKeys(IKeyMapper $Map) {
         foreach($this->mEx as $ex)
             $Map->mapArrayObject(new ExceptionResponse($ex));
     }

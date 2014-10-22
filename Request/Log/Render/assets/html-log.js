@@ -6,46 +6,42 @@
  * To change this template use File | Settings | File Templates.
  */
 (function(){
-//    var THIS = {};
-//
-//    var curMode = null;
-//
-//    var onResize = function() {
-//        var width = jQuery(window).width();
-//        if(width >= THIS.minWidths.wide) {
-//            curMode = THIS.MODE_WIDE;
-//        } else if(width > THIS.minWidths.narrow) {
-//            curMode = THIS.MODE_NARROW;
-//        } else {
-//            curMode = THIS.MODE_MOBILE;
-//        }
-//
-//        var body = jQuery( "body" );
-//
-//        body.removeClass(THIS.MODE_MOBILE);
-//        body.removeClass(THIS.MODE_NARROW);
-//        body.removeClass(THIS.MODE_WIDE);
-//        body.addClass(curMode);
-//
-//        body.trigger( "cpath-resize", width, curMode );
-//    };
-//
-//
-//    jQuery(document).ready(function() {
-//        jQuery(window).resize(onResize);
-//        onResize();
-//    });
-//
-//    window.CPath.Themes.Default = THIS = {
-//        MODE_MOBILE: 'mobile',
-//        MODE_NARROW: 'narrow',
-//        MODE_WIDE: 'wide',
-//
-//        minWidths: {
-//            mobile: 320,
-//            narrow: 640,
-//            wide: 1024
-//        }
-//    };
+    var onResize = function() {};
+
+    var VERBOSE = 0x01; // Verbose message meant for the developers to see
+
+    var WARNING = 0x10; // Warning log entry
+    var ERROR = 0x20;   // Error log entry
+
+    jQuery(document).ready(function() {
+        jQuery(window).resize(onResize);
+        onResize();
+
+        jQuery('div.log-container').each(function(i, container) {
+            container = jQuery(container);
+            var target = 'body';
+            if(container.data('target'))
+                target = container.data('target');
+
+            var log = function(message, flags) {
+                var div = jQuery('<div class="log-entry">' + message + '</div>');
+                if ((flags & VERBOSE))
+                    div.addClass('verbose');
+                if ((flags & WARNING))
+                    div.addClass('warning');
+                if ((flags & ERROR))
+                    div.addClass('error');
+                container.prepend(div);
+            };
+
+            jQuery(target).on('log', function(e, message) {
+                if(message instanceof Error)
+                    log(message, ERROR);
+                else
+                    log(message, 0);
+            });
+        });
+    });
+
 })();
 

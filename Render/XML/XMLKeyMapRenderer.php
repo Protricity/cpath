@@ -70,11 +70,11 @@ class XMLKeyMapRenderer implements IKeyMapper
 
         if ($value instanceof IKeyMap) {
             $Renderer = new XMLKeyMapRenderer($this->mRequest, $key);
-            $value->mapKeys($this->mRequest, $Renderer);
+            $value->mapKeys($Renderer);
 
         } elseif ($value instanceof ISequenceMap) {
             $Renderer = new XMLSequenceMapRenderer($this->mRequest, $key);
-            $value->mapSequence($this->mRequest, $Renderer);
+            $value->mapSequence($Renderer);
 
         } else {
             echo RI::ni(), "<", $key, ">", htmlspecialchars($value), "</", $key, ">";

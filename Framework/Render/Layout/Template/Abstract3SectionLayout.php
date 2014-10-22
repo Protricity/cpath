@@ -1,7 +1,7 @@
 <?php
 namespace CPath\Framework\Render\Layout\Template;
 
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Element\HTMLElement;

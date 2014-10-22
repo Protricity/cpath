@@ -35,7 +35,7 @@ class XMLSequenceMapRenderer implements ISequenceMapper
     function mapNext($value, $_arg = null) {
         if ($value instanceof IKeyMap) {
             $Renderer = new XMLKeyMapRenderer($this->mRequest, $this->mElementName, false);
-            $value->mapKeys($this->mRequest, $Renderer);
+            $value->mapKeys($Renderer);
 
         } elseif ($value instanceof ISequenceMap || is_array($value)) { // TODO: array of arrays?
             $Map = new XMLKeyMapRenderer($this->mRequest, $this->mElementName, false);

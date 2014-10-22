@@ -17,12 +17,12 @@ class ArraySequence implements ISequenceMap
 
 	/**
 	 * Map sequential data to the map
-	 * @param IRequest $Request
 	 * @param ISequenceMapper $Map
+	 * @internal param \CPath\Data\Map\IRequest $Request
 	 * @internal param \CPath\Data\Map\IRequest $Request
 	 * @return mixed
 	 */
-    function mapSequence(IRequest $Request, ISequenceMapper $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         foreach ($this->mArr as $value)
             $Map->mapNext($value);
     }

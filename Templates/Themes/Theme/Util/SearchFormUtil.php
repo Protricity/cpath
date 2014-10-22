@@ -14,7 +14,7 @@ use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Request\IRequest;
 

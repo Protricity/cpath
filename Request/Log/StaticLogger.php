@@ -11,7 +11,7 @@ use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\SequenceMapCallback;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Element\HTMLElement;
@@ -86,12 +86,12 @@ final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHead
 
 	/**
 	 * Map sequential data to the map
-	 * @param \CPath\Request\IRequest $Request
 	 * @param ISequenceMapper $Map
+	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return mixed
 	 */
-    function mapSequence(IRequest $Request, ISequenceMapper $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         foreach(self::$Log as $log)
             $Map->mapNext($log[0], $log[1]);
     }
@@ -120,7 +120,7 @@ final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHead
         $Render = new RenderCallback(function(IRequest $Request, IAttributes $Attr=null) {
 
             $Log = new StaticLogger();
-            $Log->mapSequence($Request, new SequenceMapCallback(function ($msg, $flags) use ($Request) {
+            $Log->mapSequence(new SequenceMapCallback(function ($msg, $flags) use ($Request) {
 
 	            if ($msg instanceof \Exception)
 		            $msg = $msg->getMessage();

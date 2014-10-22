@@ -69,14 +69,18 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
 	/**
 	 * Map data to a data map
-	 * @param \CPath\Request\IRequest $Request
 	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
 	 */
-    function mapKeys(IRequest $Request, IKeyMapper $Map) {
-        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
-        $Map->map(IResponse::STR_CODE, $this->getCode());
+    function mapKeys(IKeyMapper $Map) {
+	    if($this->mResponse instanceof IKeyMap) {
+		    $this->mResponse->mapKeys($Map);
+	    } else {
+		    $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
+		    $Map->map(IResponse::STR_CODE, $this->getCode());
+	    }
     }
 
     /**
@@ -92,11 +96,11 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
             $Response->renderJSON($Request);
         } elseif($Response instanceof IKeyMap) {
             $Renderer = new JSONKeyMapRenderer($Request);
-            $Response->mapKeys($Request, $Renderer);
+            $Response->mapKeys($Renderer);
 
         } else {
             $Renderer = new JSONKeyMapRenderer($Request);
-            $this->mapKeys($Request, $Renderer);
+            $this->mapKeys($Renderer);
 
         }
     }
@@ -116,11 +120,11 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
             $Response->renderXML($Request, $rootElementName, $declaration);
         } elseif($Response instanceof IKeyMap) {
             $Renderer = new XMLKeyMapRenderer($Request, $rootElementName, true);
-            $Response->mapKeys($Request, $Renderer);
+            $Response->mapKeys($Renderer);
 
         } else {
             $Renderer = new XMLKeyMapRenderer($Request, $rootElementName, true);
-            $this->mapKeys($Request, $Renderer);
+            $this->mapKeys($Renderer);
         }
     }
 

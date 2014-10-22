@@ -7,16 +7,12 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Request\IRequest;
-
 interface ISequenceMap
 {
 	/**
 	 * Map sequential data to the map
-	 * @param IRequest $Request
 	 * @param ISequenceMapper $Map
-	 * @return void
 	 */
-    function mapSequence(IRequest $Request, ISequenceMapper $Map);
+	function mapSequence(ISequenceMapper $Map);
 }
 

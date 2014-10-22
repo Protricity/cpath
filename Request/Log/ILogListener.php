@@ -15,7 +15,7 @@ interface ILogListener
 {
     const VERBOSE = 0x01; // Verbose message meant for the developers to see
 
-    const WARNING = 0x10; // Error log entry
+    const WARNING = 0x10; // Warning log entry
     const ERROR = 0x20; // Error log entry
 
     /**

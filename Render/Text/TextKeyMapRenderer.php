@@ -34,14 +34,14 @@ class TextKeyMapRenderer implements IKeyMapper
         if($value instanceof IKeyMap) {
             echo RI::ni(), $key, ": ";
             RI::i(1);
-            $value->mapKeys($this->mRequest, $this);
+            $value->mapKeys($this);
             RI::i(-1);
 
         } elseif ($value instanceof ISequenceMap) {
             $Renderer = new TextSequenceMapRenderer($this->mRequest);
             echo RI::ni(), $key, ": ";
             RI::i(1);
-            $value->mapSequence($this->mRequest, $Renderer);
+            $value->mapSequence($Renderer);
             RI::i(-1);
 
         } elseif (is_string($value)) {

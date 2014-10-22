@@ -8,10 +8,13 @@
 namespace CPath\Response\Common;
 
 use CPath\Config;
-use CPath\Response\Exceptions\HTTPRequestException;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
-class ExceptionResponse implements IResponse {
+class ExceptionResponse implements IResponse, IKeyMap {
+	const STR_TRACE = 'trace';
     /** @var \Exception */
     private $mEx, $mCode;
     public function __construct(\Exception $ex) {
@@ -51,4 +54,20 @@ class ExceptionResponse implements IResponse {
         return $this->mEx;
     }
 
+	/**
+	 * Map data to the key map
+	 * @param IKeyMapper $Map the map instance to add data to
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @internal param \CPath\Request\IRequest $Request
+	 * @return void
+	 */
+	function mapKeys(IKeyMapper $Map) {
+		if($this->mEx instanceof IKeyMap) {
+			$this->mEx->mapKeys($Map);
+		} else {
+			$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
+			$Map->map(IResponse::STR_CODE, $this->getCode());
+			$Map->map(self::STR_TRACE, $this->mEx->getTraceAsString());
+		}
+	}
 }

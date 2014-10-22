@@ -13,7 +13,8 @@ final class ClassAttributes implements IAttributes
 
     public function __construct($classList, $_classList = null) {
         foreach (func_get_args() as $arg)
-            $this->addClass($arg);
+	        if($arg)
+                $this->addClass($arg);
     }
 
     /**

@@ -53,7 +53,7 @@ class URLValue implements IRenderHTML, IHasURL
             $Content = $this->mContent;
             if (!$Content instanceof IRenderHTML)
                 $Content = new HTMLText($Content);
-            $Anchor->addContent($Content);
+            $Anchor->setContent($Content);
         }
         $Anchor->renderHTML($Request, $Attr);
     }

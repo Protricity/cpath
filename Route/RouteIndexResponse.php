@@ -40,12 +40,12 @@ class RouteIndexResponse implements IResponse, ISequenceMap
 
 	/**
 	 * Map sequential data to the map
-	 * @param IRequest $Request
 	 * @param ISequenceMapper $Map
+	 * @internal param \CPath\Route\IRequest $Request
 	 * @internal param \CPath\Route\IRequest $Request
 	 * @return mixed
 	 */
-    function mapSequence(IRequest $Request, ISequenceMapper $Map) {
+    function mapSequence(ISequenceMapper $Map) {
         $match = $this->mMatch;
         $this->mRoutes->mapRoutes(new RouteCallback(function ($prefix, $target) use ($Map, $match) {
             list($matchMethod, $matchPath) = explode(' ', $match, 2);

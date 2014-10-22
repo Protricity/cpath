@@ -35,3 +35,4 @@ class HTMLText implements IRenderHTML
             echo $this->mText;
     }
 }
+

@@ -45,7 +45,7 @@ ul.html-key-map-renderer div.key-name {
     width: 40pt;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: pre;
     /*text-align: right;*/
     color: #888;
     /*background-color:#F9F9F9;*/
@@ -54,10 +54,11 @@ ul.html-key-map-renderer div.key-name {
 
 ul.html-key-map-renderer div.key-value {
     min-width: 100pt;
-    max-width: 180pt;
+    /*max-width: 180pt;*/
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: pre;
 }
 
 ul.html-key-map-renderer .key-content {

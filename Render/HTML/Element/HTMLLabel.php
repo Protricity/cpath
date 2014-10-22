@@ -16,22 +16,23 @@ class HTMLLabel extends HTMLElement
      * @param string $text
      * @param String|\CPath\Render\HTML\Attribute\IAttributes $classList
      */
-    public function __construct($text, $classList = null) {
+    public function __construct($text=null, $classList = null) {
         parent::__construct('label', $classList);
-        $this->addContent(new HTMLText($text));
+	    if($text)
+	        $this->addContent(new HTMLText($text));
     }
 
     /**
      * Add HTML Container Content
-     * @param IRenderHTML|string $Content
+     * @param IRenderHTML|string $Render
      * @param null $key
      * @return String|void always returns void
      */
-    function addContent(IRenderHTML $Content, $key = null) {
-        parent::addContent($Content, $key);
-        if ($Content instanceof HTMLElement)
-            if ($Content->hasAttribute('name'))
-                $this->setAttribute('for', $Content->getAttribute('name'));
+    function addContent(IRenderHTML $Render, $key = null) {
+        parent::addContent($Render, $key);
+        if ($Render instanceof HTMLElement)
+            if ($Render->hasAttribute('name'))
+                $this->setAttribute('for', $Render->getAttribute('name'));
     }
 }
 

@@ -8,125 +8,106 @@
 namespace CPath\Render\HTML;
 
 use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 
-class HTMLResponseBody implements IHTMLTemplate
+class HTMLResponseBody extends HTMLContainer
 {
-    const DOCTYPE = '<!DOCTYPE html>';
-    const TAB = '  ';
-    const TAB_START = 0;
+	const DOCTYPE = '<!DOCTYPE html>';
+	const TAB = '  ';
+	const TAB_START = 0;
 
-    /** @var IRenderHTML[] */
-    //private $mContent=array();
+	/** @var IHTMLSupportHeaders[] */
+	private $mHeaders = array();
 
-    public function __construct() {
-//        foreach(func_get_args() as $arg)
-//            if($arg)
-//                $this->addContent($arg);
-    }
+	public function addHeaders(IHTMLSupportHeaders $Headers) {
+		$this->mHeaders[] = $Headers;
+	}
 
-    /**
-     * Render the view body html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IRenderHTML $Content
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return void
-     */
-    function renderHTMLContent(IRequest $Request, IRenderHTML $Content, IAttributes $Attr = null)
-    {
-        RI::si(static::TAB_START, static::TAB);
-        echo self::DOCTYPE;
+	public function __construct($_content=null) {
+		foreach(func_get_args() as $arg)
+			if(is_array($arg))
+				foreach($arg as $aArg)
+					$this[] = $aArg;
+			else
+				$this[] = $arg;
+	}
 
-        echo RI::ni(), '<html>';
-        RI::ai(1);
-
-            echo RI::ni(), '<head>';
-            RI::ai(1);
-
-                $this->renderHTMLHeaders($Request, $Content);
-
-            RI::ai(-1);
-            echo RI::ni(), '</head>';
-
-
-            echo RI::ni(), '<body', $Attr, '>';
-            RI::ai(1);
-
-                $Content->renderHTML($Request);
-
-//                foreach($this->mContent as $Content)
-//                    $Content->renderHTML($Request, $Attr);
-
-            RI::ai(-1);
-            echo RI::ni(), '</body>';
-
-        RI::ai(-1);
-        echo RI::ni(), '</html>';
-    }
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @return String|void always returns void
+	 */
+	protected function renderHTMLContent(IRequest $Request) {
+		foreach($this->getContent() as $Render)
+			$Render->renderHTML($Request);
+	}
 
 	/**
 	 * Render HTML header html
 	 * @param \CPath\Request\IRequest $Request
-	 * @param IRenderHTML $Content
 	 * @return WriteOnceHeaderRenderer the writer instance used
 	 */
-    protected function renderHTMLHeaders(IRequest $Request, IRenderHTML $Content) {
-        $Writer = new WriteOnceHeaderRenderer();
+	public function renderHTMLHeaders(IRequest $Request) {
+		$Writer = new WriteOnceHeaderRenderer();
 
-        if ($Content instanceof IDescribable) {
-            $title = $Content->getTitle();
-            echo RI::ni(), "<title>", $title, "</title>";
-        }
+		$Renders = $this->getContent();
+		$First = reset($Renders);
 
-        if ($this instanceof IHTMLSupportHeaders)
-            $this->writeHeaders($Request, $Writer);
+		if ($First instanceof IDescribable) {
+			$title = $First->getTitle();
+			echo RI::ni(), "<title>", $title, "</title>";
+		}
 
-        if ($Content instanceof IHTMLSupportHeaders)
-            $Content->writeHeaders($Request, $Writer);
+		if ($this instanceof IHTMLSupportHeaders)
+			$this->writeHeaders($Request, $Writer);
 
-        return $Writer;
-    }
-//
-//    /**
-//     * Add HTML Container Content
-//     * @param IRenderHTML $Content
-//     * @return String|void always returns void
-//     */
-//    function addContent(IRenderHTML $Content) {
-//        $this->mContent[] = $Content;
-//    }
-//    /**
-//     * Remove an IRenderHTML instance from the container
-//     * @param IRenderHTML $Content
-//     * @return bool true if the content was found and removed
-//     */
-//    function removeContent(IRenderHTML $Content) {
-//        foreach($this->mContent as $i => $C)
-//            if($C === $Content) {
-//                unset($this->mContent[$i]);
-//                return true;
-//            }
-//        return false;
-//    }
+		foreach($this->mHeaders as $Headers)
+			$Headers->writeHeaders($Request, $Writer);
 
-//    /**
-//     * Render this request
-//     * @param IRequest $Request the IRequest instance for this render
-//     * @return String|void always returns void
-//     */
-//    function render(IRequest $Request) {
-//        $Renderer = new RenderMimeSwitchUtility($this);
-//        try {
-//            $Renderer->render($Request);
-//        } catch (\Exception $ex) {
-//            $Response = new ExceptionResponse($ex);
-//            $ResponseUtil = new ResponseUtil($Response);
-//            $ExceptionRenderer = new RenderMimeSwitchUtility($ResponseUtil);
-//            $ExceptionRenderer->render($Request);
-//        }
-//    }
+		foreach($Renders as $Render)
+			if ($Render instanceof IHTMLSupportHeaders)
+				$Render->writeHeaders($Request, $Writer);
+
+		return $Writer;
+	}
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		RI::si(static::TAB_START, static::TAB);
+		echo self::DOCTYPE;
+
+		echo RI::ni(), '<html>';
+		RI::ai(1);
+
+		echo RI::ni(), '<head>';
+		RI::ai(1);
+
+		$this->renderHTMLHeaders($Request);
+
+		RI::ai(-1);
+		echo RI::ni(), '</head>';
+
+
+		echo RI::ni(), '<body', $Attr, '>';
+		RI::ai(1);
+
+//		$Content->renderHTML($Request);
+		$this->renderHTMLContent($Request);
+
+		RI::ai(-1);
+		echo RI::ni(), '</body>';
+
+		RI::ai(-1);
+		echo RI::ni(), '</html>';
+	}
+
 }

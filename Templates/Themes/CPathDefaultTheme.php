@@ -8,7 +8,7 @@ use CPath\Framework\PDO\Query\PDOSelect;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Fragment\Table\ModelTableFragment;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\View\IContainerDEL;
