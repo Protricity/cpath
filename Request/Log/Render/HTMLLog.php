@@ -10,6 +10,7 @@ namespace CPath\Request\Log\Render;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -35,6 +36,9 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 		$this->mAttr->addClass('log-container');
 	}
 
+	/**
+	 * @param String $selector
+	 */
 	function bindEventListener($selector) {
 		$this->mTarget = $selector;
 	}

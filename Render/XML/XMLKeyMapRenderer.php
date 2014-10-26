@@ -68,13 +68,13 @@ class XMLKeyMapRenderer implements IKeyMapper
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if ($value instanceof IKeyMap) {
-            $Renderer = new XMLKeyMapRenderer($this->mRequest, $key);
-            $value->mapKeys($Renderer);
-
-        } elseif ($value instanceof ISequenceMap) {
+        if ($value instanceof ISequenceMap) {
             $Renderer = new XMLSequenceMapRenderer($this->mRequest, $key);
             $value->mapSequence($Renderer);
+
+        } elseif ($value instanceof IKeyMap) {
+	        $Renderer = new XMLKeyMapRenderer($this->mRequest, $key);
+	        $value->mapKeys($Renderer);
 
         } else {
             echo RI::ni(), "<", $key, ">", htmlspecialchars($value), "</", $key, ">";

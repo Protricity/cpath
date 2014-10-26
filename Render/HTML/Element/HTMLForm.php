@@ -7,12 +7,12 @@
  */
 namespace CPath\Render\HTML\Element;
 
+use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class HTMLForm extends HTMLElement
@@ -23,21 +23,19 @@ class HTMLForm extends HTMLElement
 
 	/**
 	 * @param null $method
+	 * @param null $action
 	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
 	 * @param null $_content
 	 */
-	public function __construct($method = null, $classList = null, $_content = null) {
+	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
         $this->mAttr = new HTMLAttributes($classList);
         parent::__construct('form', $this->mAttr);
 		if($method)
 			$this->setMethod($method);
+		if($action)
+			$this->setAction($action);
 		if($_content !== null)
-			for($i=2;$i<func_num_args();$i++)
-				if($Content = func_get_arg($i))
-					if($Content instanceof IRenderHTML)
-						$this->addContent($Content);
-					else
-						$this->addContent(new HTMLText($Content));
+			$this->addAll(array_slice(func_get_args(), 3));
     }
 
 	public function getName()           { return $this->getAttribute('name'); }

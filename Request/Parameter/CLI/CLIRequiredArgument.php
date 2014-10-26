@@ -22,7 +22,6 @@ class CLIRequiredArgument extends CLIArgument
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
 	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
 	 * @return mixed request value
 	 */
 	function validateRequest(IRequest $Request) {
@@ -31,5 +30,6 @@ class CLIRequiredArgument extends CLIArgument
 			$this->Label->addClass(static::CSS_CLASS_ERROR);
 			throw new RequestException("Parameter is required: " . $this->getName());
 		}
+		return $value;
 	}
 }

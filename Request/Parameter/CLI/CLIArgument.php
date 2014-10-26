@@ -10,9 +10,10 @@ namespace CPath\Request\Parameter\CLI;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
+use CPath\Request\Parameter\FormField;
 use CPath\Request\Parameter\Parameter;
 
-class CLIArgument extends Parameter
+class CLIArgument extends FormField
 {
 	private $mArgPos = null;
 
@@ -28,22 +29,9 @@ class CLIArgument extends Parameter
 	 * @return mixed request value
 	 */
 	function validateRequest(IRequest $Request) {
-		$value = $Request->getArgumentValue($this->mArgPos);
+		$value = parent::validateRequest($Request)
+			?: $Request->getArgumentValue($this->mArgPos);
 
-		if(!$value) {
-			if($Request instanceof IFormRequest)
-				$value = $Request->getFormFieldValue($this->getName());
-			else
-				$value = $Request->getRequestValue($this->getName());
-		}
-
-		$value = $this->filter($Request, $value);
-		if($value)
-			$this->Input->setValue($value);
-
-		return array(
-			$this->mArgPos => $value,
-			$this->getName() => $value
-		);
+		return $value;
 	}
 }

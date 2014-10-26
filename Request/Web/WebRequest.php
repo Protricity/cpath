@@ -13,6 +13,7 @@ use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\Cookie\ICookieRequest;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Request;
@@ -27,22 +28,19 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	private $mPrefixPath = null;
 
     public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
-	    if(!$path) {
-		    $urlPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-		    $root = dirname($_SERVER['SCRIPT_NAME']);
+	    if(!$path)
+		    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
-		    if (stripos($urlPath, $root) === 0) {
-			    $this->mPrefixPath = substr($urlPath, 0, strlen($root));
-			    $urlPath = substr($urlPath, strlen($root));
-
-			    $path = $urlPath;
-		    }
+	    $root = dirname($_SERVER['SCRIPT_NAME']);
+	    if (stripos($path, $root) === 0) {
+		    $this->mPrefixPath = substr($path, 0, strlen($root));
+		    $path = substr($path, strlen($root));
 	    }
 
         parent::__construct($method, $path, $args, $MimeType ?: $this->getHeaderMimeType());
 
         if(preg_match('/\.(js|css|png|gif|jpg|bmp|ico)/i', $this->getPath(), $matches))
-            throw new HTTPRequestException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
+            throw new RequestException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
     }
 
 	/**

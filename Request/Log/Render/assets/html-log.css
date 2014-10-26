@@ -1,3 +1,7 @@
-.log-container .error {
+.log-entry.error {
     color: darkred;
+}
+
+.log-entry {
+    font-family: monospace;
 }

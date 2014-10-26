@@ -31,7 +31,8 @@
                     div.addClass('warning');
                 if ((flags & ERROR))
                     div.addClass('error');
-                container.prepend(div);
+                container.append(div);
+                container.scrollTop(container.height());
             };
 
             jQuery(target).on('log', function(e, message) {

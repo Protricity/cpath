@@ -20,6 +20,10 @@ class HTMLTextAreaField extends HTMLElement
             $this->addText($text);
     }
 
+	public function setRows($rowCount) {
+		$this->setAttribute('rows', $rowCount);
+	}
+
     public function addText($text) {
         $this->addContent(new HTMLText($text));
     }

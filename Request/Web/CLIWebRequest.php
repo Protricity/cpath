@@ -8,6 +8,7 @@
 namespace CPath\Request\Web;
 
 use CPath\Render\Text\TextMimeType;
+use CPath\Request\CLI\CommandString;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\Exceptions\RequestException;
@@ -17,6 +18,10 @@ use CPath\Request\Parameter\Parameter;
 class CLIWebRequest extends WebRequest implements IFormRequest
 {
     public function __construct($path = null, $args = array()) {
+		$query = parse_url($_SERVER['REQUEST_URI'], PHP_URL_QUERY);
+	    $query = urldecode($query);
+	    $args = CommandString::parseArgs($query);
+
         $flags = 0;
         if(isset($args['v']) || isset($args['verbose']))
             $flags |= ILogListener::VERBOSE;

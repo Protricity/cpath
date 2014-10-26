@@ -17,6 +17,7 @@ use CPath\Request\IRequest;
 class TextKeyMapRenderer implements IKeyMapper
 {
 	private $mRequest;
+	private static $mStarted = false;
 	function __construct(IRequest $Request) {
 		$this->mRequest = $Request;
 	}
@@ -31,21 +32,25 @@ class TextKeyMapRenderer implements IKeyMapper
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if($value instanceof IKeyMap) {
-            echo RI::ni(), $key, ": ";
-            RI::i(1);
-            $value->mapKeys($this);
-            RI::i(-1);
+	    if(self::$mStarted)
+		    echo RI::ni();
+	    self::$mStarted = true;
 
-        } elseif ($value instanceof ISequenceMap) {
+        if ($value instanceof ISequenceMap) {
             $Renderer = new TextSequenceMapRenderer($this->mRequest);
-            echo RI::ni(), $key, ": ";
+            echo $key, ": ";
             RI::i(1);
             $value->mapSequence($Renderer);
             RI::i(-1);
 
+        } elseif($value instanceof IKeyMap) {
+	        echo $key, ": ";
+	        RI::i(1);
+	        $value->mapKeys($this);
+	        RI::i(-1);
+
         } elseif (is_string($value)) {
-            echo RI::ni(), "{$key}: {$value}";
+            echo "{$key}: {$value}";
         }
     }
 }

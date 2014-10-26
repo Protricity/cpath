@@ -181,7 +181,7 @@ class Request implements IRequest
 
         }
 
-            $this->log("Matched " . $routePrefix);
+//        $this->log("Matched " . $routePrefix);
         return true;
     }
 

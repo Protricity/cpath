@@ -61,15 +61,15 @@ class JSONKeyMapRenderer implements IKeyMapper {
         if(is_array($value))
             $value = new ArraySequence($value);
 
-        if($value instanceof IKeyMap) {
-            $this->mNextDelim = null;
-            $Renderer = new JSONKeyMapRenderer($this->mRequest);
-            $value->mapKeys($Renderer);
-
-        } elseif ($value instanceof ISequenceMap) {
+        if ($value instanceof ISequenceMap) {
             $this->mNextDelim = null;
             $Renderer = new JSONSequenceMapRenderer($this->mRequest);
             $value->mapSequence($Renderer);
+
+        } elseif($value instanceof IKeyMap) {
+	        $this->mNextDelim = null;
+	        $Renderer = new JSONKeyMapRenderer($this->mRequest);
+	        $value->mapKeys($Renderer);
 
         } else {
             echo json_encode($value);

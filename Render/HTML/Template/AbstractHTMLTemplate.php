@@ -10,6 +10,7 @@ namespace CPath\Render\HTML\Template;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;

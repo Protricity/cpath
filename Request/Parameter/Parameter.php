@@ -11,7 +11,6 @@ use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Element\HTMLLabel;
-use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Validation\IRequestValidation;
