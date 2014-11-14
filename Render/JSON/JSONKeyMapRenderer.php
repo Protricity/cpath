@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\JSON;
 
+use CPath\Data\Map\ArrayKeyMap;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
@@ -58,8 +59,13 @@ class JSONKeyMapRenderer implements IKeyMapper {
 
         echo json_encode($key), ':';
 
-        if(is_array($value))
-            $value = new ArraySequence($value);
+        if(is_array($value)) {
+	        reset($value);
+	        if(is_string(key($value)))
+		        $value = new ArrayKeyMap($value);
+	        else
+	            $value = new ArraySequence($value);
+        }
 
         if ($value instanceof ISequenceMap) {
             $this->mNextDelim = null;

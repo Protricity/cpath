@@ -18,7 +18,6 @@ use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
-use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class WebRequest extends Request implements ISessionRequest, ICookieRequest
@@ -27,7 +26,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	private $mPrefixPath = null;
 
-    public function __construct($method, $path = null, $args = array(), IRequestedMimeType $MimeType=null) {
+    public function __construct($method, $path = null, $parameters = array(), IRequestedMimeType $MimeType=null) {
 	    if(!$path)
 		    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
@@ -37,7 +36,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		    $path = substr($path, strlen($root));
 	    }
 
-        parent::__construct($method, $path, $args, $MimeType ?: $this->getHeaderMimeType());
+        parent::__construct($method, $path, $parameters, $MimeType ?: $this->getHeaderMimeType());
 
         if(preg_match('/\.(js|css|png|gif|jpg|bmp|ico)/i', $this->getPath(), $matches))
             throw new RequestException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
@@ -59,19 +58,26 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		return $path;
 	}
 
+	function getQueryStringValue($paramName) {
+		if(isset($_GET[$paramName]))
+			return $_GET[$paramName];
+		return null;
+	}
+
 	/**
 	 * Return a request parameter (GET) value
 	 * @param String $paramName
 	 * @return mixed|null the request parameter value or null if not found
 	 */
+
 	function getRequestValue($paramName) {
-		if(!empty($_GET[$paramName]))
-			return $_GET[$paramName];
-		return null;
+		return parent::getRequestValue($paramName)
+			?: (isset($_GET[$paramName])
+			? $_GET[$paramName]
+			: null);
 	}
 
-
-    /**
+	/**
      * Get the requested Mime type(s) for rendering purposes
      * @return \CPath\Request\MimeType\IRequestedMimeType
      */

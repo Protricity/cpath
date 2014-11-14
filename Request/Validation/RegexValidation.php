@@ -7,10 +7,10 @@
  */
 namespace CPath\Request\Validation;
 
-use CPath\Request\IRequest;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\IRequest;
 
-class RegexValidation implements IRequestValidation
+class RegexValidation implements IValidation
 {
 	const DEFAULT_MESSAGE = 'Regex Failed: ';
 	private $mRegex, $mErrorMsg;
@@ -20,14 +20,17 @@ class RegexValidation implements IRequestValidation
 		$this->mErrorMsg = $errorMsg;
 	}
 
+
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request and return the validated value
 	 * @param IRequest $Request
+	 * @param $value
 	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
+	 * @return mixed validated value
 	 */
-	function validateRequest(IRequest $Request) {
+	function validate(IRequest $Request, $value) {
 		if (!preg_match($this->mRegex, $value, $matches))
 			throw new RequestException($this->mErrorMsg ? : (self::DEFAULT_MESSAGE . $this->mRegex));
+		return $value;
 	}
 }

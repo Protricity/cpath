@@ -6,9 +6,9 @@
  * Email: ari.asulin@gmail.com
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Response;
+use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
-use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;

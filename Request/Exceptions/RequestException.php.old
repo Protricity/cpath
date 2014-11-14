@@ -15,7 +15,7 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\FormValidation;
 
-class RequestException2 extends HTTPRequestException implements IRenderHTML, IHTMLSupportHeaders
+class RequestException2 extends RequestException implements IRenderHTML, IHTMLSupportHeaders
 {
 	//const STR_RENDER = 'render';
     /**

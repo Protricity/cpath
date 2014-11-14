@@ -7,7 +7,11 @@
  */
 namespace CPath\Render\HTML;
 
-interface IHTMLContainer
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Request\IRequest;
+
+interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
 {
 	/**
 	 * Returns an array of IRenderHTML content
@@ -31,6 +35,20 @@ interface IHTMLContainer
 	 * @return bool
 	 */
 	function hasContent($key = null);
+
+	/**
+	 * Remove all content or content at a specific key
+	 * @param null $key if provided, removes content at key, if exists
+	 * @return int the number of items removed
+	 */
+	function removeContent($key = null);
+
+	/**
+	 * Render element content
+	 * @param IRequest $Request
+	 * @param IAttributes $ContentAttr
+	 */
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
 }
 
 

@@ -8,22 +8,27 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\HTMLHeaders;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\HTMLContent;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Framework\Render\Util\RenderIndents as RI;
 use Traversable;
 
-class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IHTMLContainer, \IteratorAggregate, \ArrayAccess
+class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \IteratorAggregate, \ArrayAccess
 {
 	const ALLOW_CLOSED_TAG = true;
     /** @var HTMLContainer */
     private $mContent;
+	/** @var IHTMLContainer */
+	private $mItemTemplate = null;
+
+	/** @var IHTMLSupportHeaders[] */
+	private $mSupportHeaders = array();
 
     /**
      * @param string $elmType
@@ -31,6 +36,9 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IH
      * @param String|null $_content [optional] varargs of content
      */
     public function __construct($elmType = 'div', $classList = null, $_content = null) {
+	    if($classList instanceof IHTMLSupportHeaders)
+		    $this->addSupportHeaders($classList);
+
 	    parent::__construct($elmType, $classList);
 
 	    $this->mContent = new HTMLContainer();
@@ -39,6 +47,14 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IH
             for($i=2;$i<func_num_args();$i++)
 	            $this->addAll(func_get_arg($i));
     }
+
+	public function addSupportHeaders(IHTMLSupportHeaders $Headers) {
+		$this->mSupportHeaders[] = $Headers;
+	}
+
+	public function setItemTemplate(IHTMLContainer $Template) {
+		$this->mItemTemplate = $Template;
+	}
 
 	/**
 	 * Add IRenderHTML Content
@@ -50,13 +66,13 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IH
 	    $this->mContent->addContent($Render, $key);
     }
 
-	/**
-	 * Add header content
-	 * @param IHTMLSupportHeaders $Headers
-	 */
-	public function addHeaders(IHTMLSupportHeaders $Headers) {
-		$this->addContent(new HTMLHeaders($Headers));
-	}
+//	/**
+//	 * Add header content
+//	 * @param IHTMLSupportHeaders $Headers
+//	 */
+//	public function addHeaders(IHTMLSupportHeaders $Headers) {
+//		$this->addContent(new HTMLHeaders($Headers));
+//	}
 
 	/**
 	 * Add any kind of content
@@ -93,18 +109,40 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IH
 		return $this->mContent->getContent($key);
 	}
 
+	/**
+	 * Remove content
+	 * @param null $key if provided, removes content at key, if exists
+	 * @return int the number of items removed
+	 */
+	function removeContent($key = null) {
+		return $this->mContent->removeContent($key);
+	}
+
+	/**
+	 * Write all support headers used by this IView instance
+	 * @param IRequest $Request
+	 * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
+	 * @return void always returns void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		$this->mContent->writeHeaders($Request, $Head);
+		foreach($this->mSupportHeaders as $Headers)
+			$Headers->writeHeaders($Request, $Head);
+	}
+
     /**
      * Render element content
      * @param IRequest $Request
      * @param IAttributes $ContentAttr
      */
-    protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+    function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
 	    RI::ai(1);
+
 	    $Content = $this->getContent();
 	    $newLine = sizeof($Content) > 1;
-        foreach($Content as $Render) {
-            $Render->renderHTML($Request, $ContentAttr);
-	        if(!$Render instanceof HTMLContent)
+        foreach($Content as $ContentItem) {
+	        $this->renderContentItem($Request, $ContentItem, $ContentAttr);
+	        if(!$ContentItem instanceof HTMLContent)
 	            $newLine = true;
         }
 
@@ -114,16 +152,15 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLSupportHeaders, IH
 		    echo RI::ni();
     }
 
-    /**
-     * Write all support headers used by this IView instance
-     * @param IRequest $Request
-     * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
-     * @return void always returns void
-     */
-    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-	    if($this->mContent instanceof IHTMLSupportHeaders)
-		    $this->mContent->writeHeaders($Request, $Head);
-    }
+	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
+		if($this->mItemTemplate) {
+			$this->mItemTemplate->removeContent();
+			$this->mItemTemplate->addContent($Content);
+			$this->mItemTemplate->renderHTML($Request);
+		} else {
+			$Content->renderHTML($Request, $ContentAttr);
+		}
+	}
 
 	/**
 	 * Returns true if this element has an open tag

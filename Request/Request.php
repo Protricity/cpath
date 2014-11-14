@@ -9,17 +9,13 @@ namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\Parameter\FormField;
-use CPath\Request\Parameter\IRequestParameter;
-use CPath\Request\Parameter\Parameter;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
 
 class Request implements IRequest
 {
-	private $mArgPos = 0;
-	private $mArgs;
+	private $mParameters;
     /** @var ILogListener[] */
     private $mListeners=array();
 
@@ -27,14 +23,10 @@ class Request implements IRequest
     /** @var IRequestedMimeType */
     private $mMimeType=null;
 
-	/** @var IRequestParameter[] */
-    private $mParams = array();
-//    private $mMap = null;
-
-    public function __construct($method, $path, $args = array(), IRequestedMimeType $MimeType=null) {
+    public function __construct($method, $path, $parameters = array(), IRequestedMimeType $MimeType=null) {
         $this->mMethodName = $method;
         $this->mPath = $path ? '/' . ltrim($path, '/') : '/';
-        $this->mArgs = $args;
+        $this->mParameters = $parameters;
         $this->mMimeType = $MimeType;
     }
 
@@ -54,79 +46,24 @@ class Request implements IRequest
         return $this->mMimeType;
     }
 
-
-	protected function addParam(IRequestParameter $Parameter) {
-		$this->mParams[$Parameter->getName()] = $Parameter;
-	}
-
 	/**
-	 * Return all request parameters collected by ::getValue
-	 * @return IRequestParameter[]
+	 * Return the route path for this request
+	 * @return String the route path starting with '/'
 	 */
-	function getParameters() {
-		return $this->mParams;
+	function getPath() {
+		return $this->mPath;
 	}
 
 
 	/**
-	 * Return a request parameter (GET) value
-	 * @param String $paramName
-	 * @return mixed|null the request parameter value or null if not found
+	 * @param $paramName
+	 * @return String|null
 	 */
 	function getRequestValue($paramName) {
-		return null;
+		return isset($this->mParameters[$paramName])
+			? $this->mParameters[$paramName]
+			: null;
 	}
-
-	/**
-	 * Return a request value
-	 * @param String|IRequestParameter $Parameter string or instance
-	 * @param null $description
-	 * @internal param null|String $description
-	 * @return mixed the validated parameter value
-	 */
-	function getValue($Parameter, $description = null) {
-		if(!$Parameter instanceof IRequestParameter) {
-			$name = $Parameter;
-			$Parameter = new FormField($name, $description);
-			if($description || !isset($this->mParams[$name]))
-				$this->mParams[$name] = $Parameter;
-
-		} else {
-			$this->mParams[$Parameter->getName()] = $Parameter;
-		}
-		return $Parameter->validateRequest($this);
-	}
-
-	function hasArgumentValue($argIndex) {
-		return isset($this->mArgs[$argIndex]);
-	}
-
-	/**
-	 * Get the next argument value or null if no more arguments are found
-	 * @param null $index if set, returns the value at index, otherwise the next value
-	 * @param bool $reset if set resets the current position to $index ?: 0
-	 * @return mixed|null the argument value or null if not found
-	 */
-	function getArgumentValue($index=null, $reset=false) {
-		if($index !== null) {
-			if($reset && is_int($index))
-				$this->mArgPos = $index;
-			return isset($this->mArgs[$index]) ? $this->mArgs[$index] : null;
-		}
-
-		if($argIndex = $this->mArgs[$this->mArgPos])
-			return $this->mArgs[$this->mArgPos++];
-
-		return null;
-	}
-
-    /**
-     * Return the route path for this request
-     * @return String the route path starting with '/'
-     */
-    function getPath() {
-        return $this->mPath;
-    }
 
     /**
      * Matches a route prefix to this request and updates the method args with any extra path
@@ -158,7 +95,7 @@ class Request implements IRequest
                 $routeArg = $routeArgs[$i++];
 
                 if($routeArg[0] == ':') {
-                    $this->mArgs[substr($routeArg, 1)] = $requestPathArg;
+                    $this->mParameters[substr($routeArg, 1)] = $requestPathArg;
 
                 } elseif(strcasecmp($routeArg, $requestPathArg) !== 0) {
                     return false;
@@ -247,33 +184,6 @@ class Request implements IRequest
         }
         return '';
     }
-//
-//    /**
-//     * Set the request parameters expected by this request
-//     * @param IParameterMap $Map
-//     */
-//    function setRequestParameters(IParameterMap $Map) {
-//        $this->mMap = $Map;
-//    }
-//
-//    /**
-//     * Map request parameters for this object
-//     * @param IParameterMapper $Map
-//     * @return void
-//     */
-//    function mapParameters(IParameterMapper $Map) {
-//        // TODO: merge?
-//        if($this->mMap) {
-//            $this->mMap->mapParameters($Map);
-//        } else {
-//            foreach($this->mParams as $name => $data) {
-//                if(isset($data[1]) && ($data[1] & IRequest::PARAM_REQUIRED))
-//                    $Map->map(new RequiredParameter($name, $data[0]));
-//                else
-//                    $Map->map(new Parameter($name, $data[0]));
-//            }
-//        }
-//    }
 
     // Static
 
@@ -305,4 +215,72 @@ class Request implements IRequest
         }
         return $Inst;
     }
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Whether a offset exists
+	 * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+	 * @param mixed $offset <p>
+	 * An offset to check for.
+	 * </p>
+	 * @return boolean true on success or false on failure.
+	 * </p>
+	 * <p>
+	 * The return value will be casted to boolean if non-boolean was returned.
+	 */
+	public function offsetExists($offset) {
+//		$Params = new SessionParameters($this);
+//		if(!$Params->has($offset)) {
+//			$Parameter = new Parameter($offset);
+//			$Params->add($Parameter);
+//		}
+		return $this->getRequestValue($offset) !== null;
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to retrieve
+	 * @link http://php.net/manual/en/arrayaccess.offsetget.php
+	 * @param mixed $offset <p>
+	 * The offset to retrieve.
+	 * </p>
+	 * @return mixed Can return all value types.
+	 */
+	public function offsetGet($offset) {
+//		$Params = new SessionParameters($this);
+//		if(!$Params->has($offset)) {
+//			$Parameter = new RequiredParameter($offset);
+//			$Params->add($Parameter);
+//		}
+		return $this->getRequestValue($offset);
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to set
+	 * @link http://php.net/manual/en/arrayaccess.offsetset.php
+	 * @param mixed $offset <p>
+	 * The offset to assign the value to.
+	 * </p>
+	 * @param mixed $value <p>
+	 * The value to set.
+	 * </p>
+	 * @return void
+	 */
+	public function offsetSet($offset, $value) {
+		$this->mParameters[$offset] = $value;
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to unset
+	 * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+	 * @param mixed $offset <p>
+	 * The offset to unset.
+	 * </p>
+	 * @return void
+	 */
+	public function offsetUnset($offset) {
+		unset($this->mParameters[$offset]);
+	}
 }

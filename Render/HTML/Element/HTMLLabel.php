@@ -9,6 +9,8 @@ namespace CPath\Render\HTML\Element;
 
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\Common\IInputField;
+use CPath\Request\Parameter\IRequestParameter;
 
 class HTMLLabel extends HTMLElement
 {
@@ -34,10 +36,14 @@ class HTMLLabel extends HTMLElement
      * @return String|void always returns void
      */
     function addContent(IRenderHTML $Render, $key = null) {
+	    if ($Render instanceof IInputField) {
+		    if ($name = $Render->getFieldName()) {
+			    $this->setAttribute('for', $name);
+			    $title = ucwords(str_replace('_', ' ', $name));
+			    parent::addContent(new HTMLText($title . ': '));
+		    }
+	    }
         parent::addContent($Render, $key);
-        if ($Render instanceof HTMLInputField)
-            if ($name = $Render->getName())
-                $this->setAttribute('for', $name);
     }
 }
 

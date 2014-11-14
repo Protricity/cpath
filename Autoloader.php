@@ -11,7 +11,7 @@ const AUTOLOADER = true;
 
 class Autoloader
 {
-    /** @var String[] */
+    /** @var Array */
     private static $mLoaders = array();
 
     /**

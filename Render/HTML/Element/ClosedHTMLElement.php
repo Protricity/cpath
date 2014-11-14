@@ -7,9 +7,7 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class ClosedHTMLElement extends AbstractHTMLElement
@@ -31,7 +29,7 @@ class ClosedHTMLElement extends AbstractHTMLElement
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
 	}
 
 	/**

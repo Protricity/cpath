@@ -7,11 +7,12 @@
  */
 namespace CPath\Render\HTML\Element;
 
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;use CPath\Framework\Render\Util\RenderIndents as RI;
-
+use CPath\Request\IRequest;
 
 abstract class AbstractHTMLElement implements IRenderHTML
 {
@@ -26,7 +27,11 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	 */
 	public function __construct($elmType, $classList = null) {
 		$this->mElmType = $elmType;
-		$this->mAttr    = $classList instanceof IAttributes ? $classList : new HTMLAttributes($classList);
+		if($classList instanceof IAttributes) {
+			$this->mAttr = $classList;
+		} else {
+			$this->mAttr = new HTMLAttributes($classList);
+		}
 	}
 
 	/**
@@ -34,7 +39,7 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	abstract protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
+	abstract function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
 
 	/**
 	 * Returns true if this element has an open tag
@@ -47,34 +52,36 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	}
 
 	function setAttribute($attrName, $attrValue) {
-		if (!$this->mAttr instanceof HTMLAttributes)
-			$this->mAttr = new HTMLAttributes($this->mAttr);
-
 		$this->mAttr->setAttribute($attrName, $attrValue);
+		return $this;
 	}
 
 	function getAttribute($attrName, $defaultValue = null) {
-		if (!$this->mAttr instanceof HTMLAttributes)
-			$this->mAttr = new HTMLAttributes($this->mAttr);
-
 		return $this->mAttr->getAttribute($attrName, $defaultValue);
 	}
 
 	function hasAttribute($attrName) {
-		if (!$this->mAttr instanceof HTMLAttributes)
-			$this->mAttr = new HTMLAttributes($this->mAttr);
-
 		return $this->mAttr->hasAttribute($attrName);
+	}
+
+	protected function removeAttribute($attrName) {
+		return $this->mAttr->removeAttribute($attrName);
 	}
 
 	public function addClass($classList) {
 		$this->mAttr->addClass($classList);
 	}
 
+	public function hasClass($className) {
+		return $this->mAttr->hasClass($className);
+	}
+
 	/**
 	 * @return IAttributes
 	 */
 	public function getAttributes() {
+		if (!$this->mAttr instanceof HTMLAttributes)
+			$this->mAttr = new HTMLAttributes($this->mAttr);
 		return $this->mAttr;
 	}
 
@@ -85,17 +92,15 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$Attr = $this->getAttributes()->merge($Attr);
-
 		if($this->isOpenTag()) {
-			echo RI::ni(), "<", $this->getElementType(), $Attr, '>';
+			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), '>';
 			$this->renderContent($Request);
 //			if(!static::TRIM_CONTENT)
 //				echo RI::ni();
 			echo "</", $this->getElementType(), ">";
 
 		} else {
-			echo RI::ni(), "<", $this->getElementType(), $Attr, "/>";
+			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), "/>";
 
 		}
 	}

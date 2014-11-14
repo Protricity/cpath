@@ -22,7 +22,7 @@ use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
 use CPath\Route\DefaultMap;
-use CPath\Route\IRoute;
+use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 use CPath\UnitTest\ITestable;
 use CPath\UnitTest\UnitTestRequestWrapper;
@@ -30,7 +30,7 @@ use CPath\UnitTest\UnitTestRequestWrapper;
 //if(!defined('\CPath\Autoloader'))
 //    include_once(__DIR__ . "/../Autoloader.php");
 
-class TestRequestHandler implements IRoute, IBuildable, IExecutable
+class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 {
     const DOCTAG = 'test';
     private $mDefaults = false;
@@ -47,9 +47,9 @@ class TestRequestHandler implements IRoute, IBuildable, IExecutable
         $flags = 0;
 
         $OriginalRequest = $Request;
-        $this->mDefaults = $Request->getValue('defaults') || false;
+        $this->mDefaults = $Request['defaults'] || false;
 
-        if (!$this->mDefaults && $Request->getValue('test'))
+        if (!$this->mDefaults && $Request['test'])
             $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;

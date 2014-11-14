@@ -7,9 +7,7 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Request\IRequest;
-
-class KeyMapArray implements IKeyMap
+class ArrayKeyMap implements IKeyMap
 {
 	private $mValues;
 
@@ -20,10 +18,6 @@ class KeyMapArray implements IKeyMap
 	function getValues() {
 		return $this->mValues;
 	}
-
-//	public function add($key, $value) {
-//		$this->mValues[$key] = $value;
-//	}
 
 	/**
 	 * Map data to the key map

@@ -11,11 +11,10 @@ use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\SequenceMapCallback;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
 

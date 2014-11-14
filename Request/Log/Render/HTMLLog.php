@@ -8,13 +8,10 @@
 namespace CPath\Request\Log\Render;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\HTMLAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
-use CPath\Render\HTML\Element\IHTMLInput;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
@@ -26,6 +23,8 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	private $mAttr;
 	private $mTarget = null;
 
+	const CSS_REVERSE_ORDER = 'reverse-order';
+
 	/**
 	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
 	 */
@@ -34,6 +33,10 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 			$classList = new HTMLAttributes($classList);
 		$this->mAttr = $classList;
 		$this->mAttr->addClass('log-container');
+	}
+
+	function setReverseOrder() {
+		$this->mAttr->addClass(self::CSS_REVERSE_ORDER);
 	}
 
 	/**

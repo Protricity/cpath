@@ -7,8 +7,8 @@
  */
 namespace CPath\Route;
 
-use CPath\Request\IRequest;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\IRequest;
 
 final class RouteRenderer implements IRouteMapper
 {
@@ -18,7 +18,7 @@ final class RouteRenderer implements IRouteMapper
 
     private $mRequest;
     //private $mUnhandled = array();
-    /** @var IRoute[] */
+    /** @var IRoutable[] */
     private $mHandlers = array();
     private $mPrevious = array();
 
@@ -71,6 +71,17 @@ final class RouteRenderer implements IRouteMapper
 		    }
 
 	    } else {
+			$routePrefix = 'GET ' . $this->mRequest->getPath();
+		    $this->mPrevious[] = new RouteIndex($Map, $routePrefix);
+
+		    if($Map->mapRoutes($this))
+			    return true;
+		    if($withDefaults) {
+			    $Defaults = new DefaultMap();
+			    if($Defaults->mapRoutes($this))
+				    return true;
+		    }
+
 		    $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
 		    array_unshift($this->mPrevious, $ex);
 
@@ -83,7 +94,7 @@ final class RouteRenderer implements IRouteMapper
     /**
      * Maps a route prefix to a target class or instance, and performs a render
      * @param String $prefix route prefix i.e. GET /my/path
-     * @param String|IRoute $target the route target or instance
+     * @param String|IRoutable $target the route target or instance
      * @param null $_arg Additional varargs will be sent to the Request Handler
      * @return bool if true the request was handled and should end
      */
@@ -115,7 +126,7 @@ final class RouteRenderer implements IRouteMapper
 	        array_unshift($this->mPrevious, $Response);
 
 	        for($i=0; $i<sizeof($this->mHandlers); $i++) {
-		        /** @var IRoute $Handler */
+		        /** @var IRoutable $Handler */
 		        $Handler = $this->mHandlers[$i];
                 $Response = $Handler::routeRequestStatic($this->mRequest, $this->mPrevious);
                 if($Response === false)

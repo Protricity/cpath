@@ -10,7 +10,6 @@ namespace CPath\Response\Common;
 use CPath\Config;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
-use CPath\Request\Exceptions\HTTPRequestException;
 use CPath\Response\IResponse;
 
 class ExceptionResponse implements IResponse, IKeyMap {

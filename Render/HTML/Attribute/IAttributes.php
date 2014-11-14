@@ -29,14 +29,41 @@ interface IAttributes {
      * @param $class
      * @return bool
      */
-    function hasClass($class);
+    //function hasClass($class);
+
+	/**
+	 * Returns an array of classes
+	 * @return Array
+	 */
+	function getClasses();
+
+	/**
+	 * Return the style value or a name-value associative array
+	 * @param null $name
+	 * @return String|Array
+	 */
+	function getStyle($name=null);
+
+	/**
+	 * Return the attribute value or a name-value associative array
+	 * @param null $name
+	 * @return String|Array
+	 */
+	function getAttribute($name=null);
+
+	/**
+	 * Render html attributes
+	 * @param IAttributes|null $Additional
+	 * @return string|void always returns void
+	 */
+	function render(IAttributes $Additional=null);
 
     /**
      * Merge attributes and return an instance
      * @param IAttributes|null $Attributes
      * @return IAttributes
      */
-    function merge(IAttributes $Attributes=null);
+    //function merge(IAttributes $Attributes=null);
 
     /**
      * Add a css style to the collection
@@ -44,9 +71,10 @@ interface IAttributes {
      */
     //function addStyle($style);
 
+
     /**
      * Get html attribute string
      * @return String
      */
-    function __toString();
+    //function __toString();
 }

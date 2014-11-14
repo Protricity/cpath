@@ -29,7 +29,7 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 	public function __construct($name = null, $classList = null, $_options = null) {
 		parent::__construct('select', $classList);
 		if($name)
-			$this->setName($name);
+			$this->setFieldName($name);
 		$c = func_num_args();
 		for($i=2; $i<$c; $i++) {
 			$this->mValues[] = func_get_arg($i);
@@ -46,17 +46,17 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 			$this->mSelected[] = $value;
 	}
 
-	public function getValue() { return isset($this->mSelected[0]) ? $this->mSelected[0] : null; }
+	public function getInputValue(IRequest $Request) { return isset($this->mSelected[0]) ? $this->mSelected[0] : null; }
 
-	public function setValue($value) {
+	public function setInputValue($value) {
 		$this->select($value);
 	}
 
-	public function getName() { return $this->getAttribute('name'); }
-	public function setName($value) { $this->setAttribute('name', $value); }
+	public function getFieldName() { return $this->getAttribute('name'); }
+	public function setFieldName($name) { $this->setAttribute('name', $name); }
 
-	public function getID() { return $this->getAttribute('id'); }
-	public function setID($value) { $this->setAttribute('id', $value); }
+	public function getFieldID() { return $this->getAttribute('id'); }
+	public function setFieldID($value) { $this->setAttribute('id', $value); }
 
 	public function select($value, $_value=null) {
 		$values = func_get_args();
@@ -121,8 +121,7 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$Attr = $this->getAttributes()->merge($Attr);
-		echo RI::ni(), "<", $this->getElementType(), $Attr, ">";
+		echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), ">";
 		RI::ai(1);
 
 		$this->mapSequence(new SequenceMapCallback(

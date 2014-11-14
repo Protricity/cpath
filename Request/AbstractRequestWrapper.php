@@ -7,9 +7,7 @@
  */
 namespace CPath\Request;
 
-use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\Parameter\IRequestParameter;
 
 abstract class AbstractRequestWrapper implements IRequest
 {
@@ -31,28 +29,6 @@ abstract class AbstractRequestWrapper implements IRequest
      */
     function getMimeType() {
         return $this->mRequest->getMimeType();
-    }
-
-	/**
-	 * Return a request parameter (GET) value
-	 * @param $paramName
-	 * @return mixed|null the request parameter value or null if not found
-	 */
-	function getRequestValue($paramName) {
-		return $this->mRequest->getRequestValue($paramName);
-	}
-
-	/**
-	 * Get a request value by parameter name or null if not found
-	 * @param Parameter\IRequestParameter $Parameter
-	 * @param null $description
-	 * @internal param string $paramName the parameter name
-	 * @internal param string $description [optional] description for this prompt
-	 * @internal param int $flags use ::PARAM_REQUIRED for required fields
-	 * @return mixed the parameter value
-	 */
-    function getValue($Parameter, $description = null) {
-        return $this->mRequest->getValue($Parameter, $description);
     }
 
     /**
@@ -79,8 +55,6 @@ abstract class AbstractRequestWrapper implements IRequest
     function match($routePrefix) {
         return $this->mRequest->match($routePrefix);
     }
-
-
 
 
     /**
@@ -134,22 +108,61 @@ abstract class AbstractRequestWrapper implements IRequest
         return $this->mRequest->getDomainPath($withDomain);
     }
 
-
 	/**
-	 * Return all request parameters collected by ::getValue
-	 * @return IRequestParameter[]
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Whether a offset exists
+	 * @link http://php.net/manual/en/arrayaccess.offsetexists.php
+	 * @param mixed $offset <p>
+	 * An offset to check for.
+	 * </p>
+	 * @return boolean true on success or false on failure.
+	 * </p>
+	 * <p>
+	 * The return value will be casted to boolean if non-boolean was returned.
 	 */
-	function getParameters() {
-		return $this->mRequest->getParameters();
+	public function offsetExists($offset) {
+		return $this->mRequest->offsetExists($offset);
 	}
 
 	/**
-	 * Get the next argument value or null if no more arguments are found
-	 * @param null $index if set, returns the value at index, otherwise the next value
-	 * @param bool $reset if set resets the current position to $index ?: 0
-	 * @return mixed|null the argument value or null if not found
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to retrieve
+	 * @link http://php.net/manual/en/arrayaccess.offsetget.php
+	 * @param mixed $offset <p>
+	 * The offset to retrieve.
+	 * </p>
+	 * @return mixed Can return all value types.
 	 */
-	function getArgumentValue($index = null, $reset = false) {
-		return $this->mRequest->getParameters($index, $reset);
+	public function offsetGet($offset) {
+		return $this->mRequest->offsetGet($offset);
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to set
+	 * @link http://php.net/manual/en/arrayaccess.offsetset.php
+	 * @param mixed $offset <p>
+	 * The offset to assign the value to.
+	 * </p>
+	 * @param mixed $value <p>
+	 * The value to set.
+	 * </p>
+	 * @return void
+	 */
+	public function offsetSet($offset, $value) {
+		$this->mRequest->offsetSet($offset, $value);
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Offset to unset
+	 * @link http://php.net/manual/en/arrayaccess.offsetunset.php
+	 * @param mixed $offset <p>
+	 * The offset to unset.
+	 * </p>
+	 * @return void
+	 */
+	public function offsetUnset($offset) {
+		$this->mRequest->offsetUnset($offset);
 	}
 }

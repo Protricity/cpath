@@ -18,11 +18,11 @@ use CPath\Framework\PDO\Table\Types\PDOTable;
 use CPath\Interfaces\IDatabase;
 use CPath\Log;
 use CPath\Request\IRequest;
-use CPath\Route\IRoute;
+use CPath\Route\IRoutable;
 
 class NotConfiguredException extends \Exception {}
 
-abstract class PDODatabase extends \PDO implements IDatabase, IRoute {
+abstract class PDODatabase extends \PDO implements IDatabase, IRoutable {
     const VERSION = NULL;
     const BUILD_DB = 'NONE'; // ALL|MODEL|PROC|NONE;
     const BUILD_DB_CSHARP_NAMESPACE = null;

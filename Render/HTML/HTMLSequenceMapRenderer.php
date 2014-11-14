@@ -13,10 +13,10 @@ use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Describable\Describable;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\ClassAttributes;
+use CPath\Render\HTML\Attribute\ClassAttr;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
 class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
@@ -56,10 +56,9 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 		if ($this->mStarted)
 			return;
 
-		$Attr = new ClassAttributes(self::CSS_CLASS, $cls);
-		$Attr = $Attr->merge($this->mAttr);
+		$Attr = new ClassAttr(self::CSS_CLASS, $cls);
 
-		echo RI::ni(), "<ul", $Attr, ">";
+		echo RI::ni(), "<ul", $Attr, $this->mAttr, ">";
 		RI::ai(1);
 
 		$this->mStarted = true;

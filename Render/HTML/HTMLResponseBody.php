@@ -8,10 +8,11 @@
 namespace CPath\Render\HTML;
 
 use CPath\Describable\IDescribable;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
 use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Handlers\RenderHandler;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
 class HTMLResponseBody extends HTMLContainer
@@ -90,18 +91,37 @@ class HTMLResponseBody extends HTMLContainer
 
 		echo RI::ni(), '<head>';
 		RI::ai(1);
+		$body = false;
+		$Writer = null;
+		try {
 
-		$this->renderHTMLHeaders($Request);
+			$Writer = $this->renderHTMLHeaders($Request);
 
-		RI::ai(-1);
-		echo RI::ni(), '</head>';
+			RI::ai(-1);
+			echo RI::ni(), '</head>';
 
+			echo RI::ni(), '<body', $Attr, '>';
+			RI::ai(1);
 
-		echo RI::ni(), '<body', $Attr, '>';
-		RI::ai(1);
+			$body = true;
+			$this->renderHTMLContent($Request);
 
-//		$Content->renderHTML($Request);
-		$this->renderHTMLContent($Request);
+		} catch (\Exception $ex) {
+			if(!$body) {
+				RI::ai(-1);
+				echo RI::ni(), '</head>';
+
+				echo RI::ni(), '<body', $Attr, '>';
+				RI::ai(1);
+			}
+
+			if(!$Writer)
+				$Writer = new WriteOnceHeaderRenderer();
+
+			$Renderer = new RenderHandler($ex);
+			$Renderer->writeHeaders($Request, $Writer);
+			$Renderer->renderHTML($Request);
+		}
 
 		RI::ai(-1);
 		echo RI::ni(), '</body>';

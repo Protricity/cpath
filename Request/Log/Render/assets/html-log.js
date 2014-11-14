@@ -23,6 +23,8 @@
             if(container.data('target'))
                 target = container.data('target');
 
+            var reverse = container.hasClass('reverse-order');
+
             var log = function(message, flags) {
                 var div = jQuery('<div class="log-entry">' + message + '</div>');
                 if ((flags & VERBOSE))
@@ -31,8 +33,18 @@
                     div.addClass('warning');
                 if ((flags & ERROR))
                     div.addClass('error');
-                container.append(div);
-                container.scrollTop(container.height());
+
+                if(reverse) {
+                    var height = container.height();
+                    height += container.offset().top;
+                    container.append(div);
+                    container.scrollTop(height);
+
+                } else {
+                    container.prepend(div);
+                    container.scrollTop(0);
+
+                }
             };
 
             jQuery(target).on('log', function(e, message) {

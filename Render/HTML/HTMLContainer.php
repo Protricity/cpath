@@ -8,20 +8,28 @@
 namespace CPath\Render\HTML;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\HTMLHeaders;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
-class HTMLContainer extends AbstractHTMLContainer implements IHTMLSupportHeaders
+class HTMLContainer extends AbstractHTMLContainer
 {
 	/** @var IRenderHTML[] */
 	private $mContent = array();
+	/** @var IHTMLContainer */
+	private $mItemTemplate = null;
+
 
 	/**
 	 * @param String|null $_content [optional] varargs of content
 	 */
 	public function __construct($_content = null) {
 		$this->addAll(func_get_args());
+	}
+
+	public function setItemTemplate(IHTMLContainer $Template) {
+		$this->mItemTemplate = $Template;
 	}
 
 	/**
@@ -97,4 +105,52 @@ class HTMLContainer extends AbstractHTMLContainer implements IHTMLSupportHeaders
 		return $this[$key];
 	}
 
+
+	/**
+	 * Remove template content
+	 * @param null $key if provided, removes content at key, if exists
+	 * @return int the number of items removed
+	 */
+	function removeContent($key = null) {
+		if($key !== null) {
+			if(isset($this->mContent[$key])) {
+				unset($this->mContent[$key]);
+				return 1;
+			}
+			return 0;
+		}
+
+		$c = sizeof($this->mContent);
+		$this->mContent = array();
+		return $c;
+	}
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		$this->renderContent($Request);
+	}
+
+	/**
+	 * Render element content
+	 * @param IRequest $Request
+	 * @param IAttributes $ContentAttr
+	 */
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+		foreach($this->getContent() as $ContentItem) {
+			$this->renderContentItem($Request, $ContentItem, $ContentAttr);
+		}
+	}
+
+	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
+		if($Content instanceof HTMLContainer) {
+			$this->renderContent($Request, $ContentAttr);
+		} else {
+			$Content->renderHTML($Request, $ContentAttr);
+		}
+	}
 }

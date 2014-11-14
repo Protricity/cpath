@@ -29,32 +29,45 @@ class HTMLButton extends AbstractHTMLElement implements IHTMLInput
 	public function __construct($name = null, $value = null, $content = null, $type = null, $classList = null) {
 		parent::__construct('button', $classList);
 		if ($name)
-			$this->setName($name);
+			$this->setFieldName($name);
 		if ($value)
-			$this->setValue($value);
+			$this->setInputValue($value);
 		if ($type)
 			$this->setType($type);
 		$this->mContent = $content ?: $value;
 	}
 
-	public function getValue()          { return $this->getAttribute('value'); }
-	public function setValue($value)    { $this->setAttribute('value', $value); }
+	public function getInputValue(IRequest $Request)          { return $this->getAttribute('value'); }
+	public function setInputValue($value)    { $this->setAttribute('value', $value); }
 
-	public function getName()           { return $this->getAttribute('name'); }
-	public function setName($value)     { $this->setAttribute('name', $value); }
+	public function getFieldName()           { return $this->getAttribute('name'); }
+	public function setFieldName($name)     { $this->setAttribute('name', $name); }
 
 	public function getType()           { return $this->getAttribute('type'); }
 	public function setType($value)     { $this->setAttribute('type', $value); }
 
-	public function getID()             { return $this->getAttribute('id'); }
-	public function setID($value)       { $this->setAttribute('id', $value); }
+	public function getFieldID()             { return $this->getAttribute('id'); }
+	public function setFieldID($value)       { $this->setAttribute('id', $value); }
+
+	public function setDisabled($disabled=true) {
+		if($disabled)
+			$this->setAttribute('disabled', 'disabled');
+		else
+			$this->removeAttribute('disabled');
+	}
+
+	public function isDisabled() {
+		return $this->hasAttribute('disabled')
+			? $this->getAttribute('disabled') === 'disabled'
+			: false;
+	}
 
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
 		if($this->mContent instanceof IRenderHTML) {
 			RI::ai(1);
 			$this->mContent->renderHTML($Request);

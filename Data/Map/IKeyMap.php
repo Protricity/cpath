@@ -7,8 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Data\Map;
 
-use CPath\Request\IRequest;
-
 interface IKeyMap {
 
 //    const KEY_TITLE = 'title';

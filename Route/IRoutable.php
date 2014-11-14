@@ -9,7 +9,7 @@ namespace CPath\Route;
 
 use CPath\Request\IRequest;
 
-interface IRoute {
+interface IRoutable {
 
     /**
      * Route the request to this class object and return the object

@@ -7,8 +7,6 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Request\IRequest;
-
 interface IRangedSequenceMap extends ISequenceMap
 {
 	/**

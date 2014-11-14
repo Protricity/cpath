@@ -1,0 +1,128 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 10/21/14
+ * Time: 7:13 PM
+ */
+namespace CPath\Render\HTML\Template;
+
+use CPath\Framework\Render\Header\IHeaderWriter;
+use CPath\Handlers\Response\ResponseUtil;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\HTMLContainer;
+use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
+
+abstract class AbstractHTMLTemplate implements IHTMLTemplate
+{
+	/** @var HTMLContainer */
+	private $mContent = array();
+
+	/**
+	 * @param String|null $_content [optional] varargs of content
+	 */
+	public function __construct($_content = null) {
+		$this->mContent = new HTMLContainer($_content);
+	}
+
+	/**
+	 * Write all support headers used by this template
+	 * @param IRequest $Request
+	 * @param IHeaderWriter $Head the writer instance to use
+	 * @return String|void always returns void
+	 */
+	abstract protected function writeTemplateHeaders(IRequest $Request, IHeaderWriter $Head);
+
+	/**
+	 * @return IHTMLContainer
+	 */
+	abstract protected function getContainer();
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		$this->renderContent($Request);
+	}
+
+
+	/**
+	 * Render element content
+	 * @param IRequest $Request
+	 * @param IAttributes $ContentAttr
+	 */
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+		foreach($this->getContent() as $ContentItem) {
+			try {
+				$this->renderContentItem($Request, $ContentItem, $ContentAttr);
+			} catch (\Exception $ex) {
+				$ContentItem = new ResponseUtil(new ExceptionResponse($ex));
+				$this->renderContentItem($Request, $ContentItem);
+			}
+		}
+	}
+
+	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
+		$Content->renderHTML($Request, $ContentAttr);
+	}
+
+
+	/**
+	 * Write all support headers used by this template
+	 * @param IRequest $Request
+	 * @param IHeaderWriter $Head the writer instance to use
+	 * @return String|void always returns void
+	 */
+	final function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		$this->writeTemplateHeaders($Request, $Head);
+		parent::writeHeaders($Request, $Head);
+	}
+
+	/**
+	 * Returns an array of IRenderHTML content
+	 * @param null $key if provided, get content by key
+	 * @return IRenderHTML[]
+	 * @throws \InvalidArgumentException if content at $key was not found
+	 */
+	public function getContent($key = null) {
+		$Container = $this->getContainer();
+		return $Container->getContent($key);
+	}
+
+	/**
+	 * Add IRenderHTML Content
+	 * @param IRenderHTML $Render
+	 * @param null $key if provided, add/replace content by key
+	 * @return void
+	 */
+	function addContent(IRenderHTML $Render, $key = null) {
+		$Container = $this->getContainer();
+		$Container->addContent($Render, $key);
+	}
+
+	/**
+	 * Returns true if content is available and should render
+	 * @param null $key if provided, returns true if content at this key index exists
+	 * @return bool
+	 */
+	function hasContent($key = null) {
+		$Container = $this->getContainer();
+		return $Container->hasContent($key);
+	}
+
+	/**
+	 * Remove all content or content at a specific key
+	 * @param null $key if provided, removes content at key, if exists
+	 * @return int the number of items removed
+	 */
+	function removeContent($key = null) {
+		$Container = $this->getContainer();
+		return $Container->removeContent($key);
+	}
+}

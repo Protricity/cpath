@@ -7,13 +7,9 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Build\IBuildable;
-use CPath\Build\IBuildRequest;
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\ISequenceMap;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLKeyMapRenderer;
 use CPath\Render\HTML\HTMLSequenceMapRenderer;
 use CPath\Render\HTML\IRenderHTML;

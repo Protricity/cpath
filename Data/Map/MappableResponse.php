@@ -8,8 +8,6 @@
 namespace CPath\Data\Map;
 
 use CPath\Render\HTML\Attribute;
-use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Response\Response;
 
 class MappableResponse extends Response implements IKeyMap
@@ -18,11 +16,11 @@ class MappableResponse extends Response implements IKeyMap
 
     /**
      * Create a new response
-     * @param String $msg the response message
+     * @param String $message the response message
      * @param IKeyMap $Mappable
      */
-    function __construct($msg, IKeyMap $Mappable) {
-        parent::__construct($msg);
+    function __construct($message, IKeyMap $Mappable) {
+        parent::__construct($message);
         $this->mMappable = $Mappable;
     }
 

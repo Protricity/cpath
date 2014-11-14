@@ -1,0 +1,53 @@
+form.cpath-default-form-theme .error {
+    color: darkred;
+}
+
+form.cpath-default-form-theme .required {
+    font-weight: bold;
+}
+
+form.cpath-default-form-theme {
+    margin: 0 24pt 6pt 0;
+    display: block;
+}
+
+form.cpath-default-form-theme fieldset {
+    margin: 0;
+    padding: .35em 0 .75em;
+    border: 0;
+}
+
+form.cpath-default-form-theme legend {
+    display: block;
+    width: 100%;
+    padding: .3em 0;
+    margin-bottom: .3em;
+    color: #333;
+    border-bottom: 1px solid #e5e5e5;
+    font-weight: bold;
+}
+
+form.cpath-default-form-theme button,
+form.cpath-default-form-theme input,
+form.cpath-default-form-theme select,
+form.cpath-default-form-theme textarea {
+    font-family: "proxima-nova", sans-serif;
+    padding: .5em .6em;
+    display: block;
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+form.cpath-default-form-theme textarea {
+    width: 300pt;
+    height: 100pt;
+}
+
+form.cpath-default-form-theme label {
+    display: block;
+    padding-bottom: 10px;
+}

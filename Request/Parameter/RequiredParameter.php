@@ -7,9 +7,10 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Parameter\Exceptions\RequiredParameterException;
 
 class RequiredParameter extends Parameter implements IRenderHTML
 {
@@ -17,8 +18,27 @@ class RequiredParameter extends Parameter implements IRenderHTML
 
 	public function __construct($paramName, $description=null, $defaultValue=null) {
 		parent::__construct($paramName, $description, $defaultValue);
-		$this->Input->addClass(static::CSS_CLASS_REQUIRED);
 	}
+
+	protected function getHTMLInput(IRequest $Request, IHTMLInput $Input=null) {
+		$Input = parent::getHTMLInput($Request, $Input);
+		$Input->setAttribute('required', 'required');
+		$Input->addClass(static::CSS_CLASS_REQUIRED);
+		return $Input;
+	}
+
+//	/**
+//	 * Get the request value
+//	 * @throws RequiredParameterException if the parameter failed to validate
+//	 * @return mixed
+//	 */
+//	function getValue() {
+//		$value = parent::getValue();
+//		if (!$value)
+//			throw new RequiredParameterException("Parameter is required: " . $this->getName());
+//		return $value;
+//
+//	}
 
 	/**
 	 * Validate and return the parameter value
@@ -28,17 +48,17 @@ class RequiredParameter extends Parameter implements IRenderHTML
 	 * @return mixed request value
 	 */
 	function validateRequest(IRequest $Request) {
-		$name = $this->getName();
-		$value = $Request->getArgumentValue($name)
-			?: $Request->getRequestValue($name);
-
-		$value = $this->filter($Request, $value);
-		if (!$value) {
-			$this->Label->addClass(self::CSS_CLASS_ERROR);
-			throw new RequestException("Parameter is required: " . $this->getName());
-		}
-		$this->Input->setValue($value);
+		$value = parent::validateRequest($Request);
+		if (!$value)
+			throw new RequiredParameterException("Parameter is required: " . $this->getFieldName());
 		return $value;
+	}
+
+	// Static
+
+	static function tryRequired(IRequest $Request, $paramName, $paramDescription=null, $defaultValue=null) {
+		$Parameter = new RequiredParameter($paramName, $paramDescription, $defaultValue);
+		return $Parameter->getInputValue($Request);
 	}
 }
 

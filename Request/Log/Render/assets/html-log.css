@@ -1,7 +1,12 @@
-.log-entry.error {
-    color: darkred;
+.log-container {
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
-.log-entry {
+.log-container .log-entry.error {
+     color: red;
+ }
+
+.log-container .log-entry {
     font-family: monospace;
 }

@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\XML;
 
+use CPath\Data\Map\ArrayKeyMap;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
@@ -65,8 +66,13 @@ class XMLKeyMapRenderer implements IKeyMapper
     function map($key, $value) {
         $this->tryStart(false);
 
-        if(is_array($value))
-            $value = new ArraySequence($value);
+	    if(is_array($value)) {
+		    reset($value);
+		    if(is_string(key($value)))
+			    $value = new ArrayKeyMap($value);
+		    else
+			    $value = new ArraySequence($value);
+	    }
 
         if ($value instanceof ISequenceMap) {
             $Renderer = new XMLSequenceMapRenderer($this->mRequest, $key);

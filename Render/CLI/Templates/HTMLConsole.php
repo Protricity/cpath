@@ -11,8 +11,6 @@ use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Element\HTMLInputField;
-use CPath\Render\HTML\Element\HTMLLabel;
-use CPath\Render\HTML\Element\HTMLTextAreaField;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
@@ -41,6 +39,7 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 		);
 		//$this->mInput->setRows(1);
 		$this->mHTMLLog->bindEventListener('.html-console');
+		$this->mHTMLLog->setReverseOrder();
 	}
 
 	/**
@@ -69,10 +68,10 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		if(!$this->mInputPath->getValue())
-			$this->mInputPath->setValue($Request->getPath());
-		if(!$this->mInputDomain->getValue())
-			$this->mInputDomain->setValue($Request->getDomainPath(true));
+		if(!$this->mInputPath->getInputValue($Request))
+			$this->mInputPath->setInputValue($Request->getPath());
+		if(!$this->mInputDomain->getInputValue($Request))
+			$this->mInputDomain->setInputValue($Request->getDomainPath(true));
 
 		//$this->getHTMLLog()->log($Request->getPath());
 		$this->mContainer->renderHTML($Request, $Attr);

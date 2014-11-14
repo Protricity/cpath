@@ -9,12 +9,10 @@ namespace CPath\Render\HTML\Attribute;
 
 use CPath\Render\HTML\Attribute;
 
-final class HTMLAttributes implements IAttributes {
+class HTMLAttributes implements IAttributes {
     private $mAttr = array();
-    /** @var ClassAttributes */
-    private $mClasses = null;
-    /** @var StyleAttributes */
-    private $mStyles = null;
+    private $mClasses = array();
+    private $mStyles = array();
 
     function __construct($htmlAttr=null) {
 	    if($htmlAttr) {
@@ -54,13 +52,16 @@ final class HTMLAttributes implements IAttributes {
         }
     }
 
-    function getAttribute($attrName, $defaultValue=null) {
-        return isset($this->mAttr[$attrName]) ? $this->mAttr[$attrName] : $defaultValue;
-    }
+	function hasAttribute($attrName) {
+		return isset($this->mAttr[$attrName]);
+	}
 
-    function hasAttribute($attrName) {
-        return isset($this->mAttr[$attrName]);
-    }
+	function removeAttribute($attrName) {
+		if(!$this->hasAttr($attrName))
+			return false;
+		unset($this->mAttr[$attrName]);
+		return true;
+	}
 
     /**
      * Add attributes
@@ -77,28 +78,69 @@ final class HTMLAttributes implements IAttributes {
         }
     }
 
+	/**
+	 * Return the attribute value or a name-value associative array
+	 * @param null $name
+	 * @return String|Array
+	 */
+	function getAttribute($name = null) {
+		return isset($this->mAttr[$name]) ? $this->mAttr[$name] : $this->mAttr;
+	}
+
+	/**
+	 * Returns an array of classes
+	 * @return Array
+	 */
+	function getClasses() {
+		return $this->mClasses;
+	}
+
+	/**
+	 * Return the style value or a name-value associative array
+	 * @param null $name
+	 * @return String|Array
+	 */
+	function getStyle($name = null) {
+		return isset($this->mStyles[$name]) ? $this->mStyles[$name] : $this->mStyles;
+	}
+
     /**
      * Checks to see if a class exists in the class list
      * @param String $class
      * @return bool
      */
     function hasClass($class) {
-        return $this->mClasses && $this->mClasses->hasClass($class);
+	    foreach($this->mClasses as $class2) {
+		    if($class === $class2)
+			    return true;
+	    }
+	    return false;
     }
 
     function hasAttr($attrName) {
         return isset($this->mAttr[$attrName]);
     }
 
-    /**
-     * Add a css class to the collection
-     * @param Array|String $classList one or multiple css classes
-     */
-    function addClass($classList) {
-        if(!$this->mClasses)
-            $this->mClasses = new ClassAttributes($classList);
-        else
-            $this->mClasses->addClass($classList);
+	/**
+	 * Add a css class to the collection
+	 * @param String $class one or multiple css classes
+	 * @param null $_class [varargs]
+	 * @return int
+	 */
+    function addClass($class, $_class=null) {
+	    $classes = is_array($class)
+		    ? $class
+			: (strpos($class, ' ') !== false
+			    ? preg_split('/\s+/', $class)
+				: func_get_args());
+	    $c = 0;
+	    foreach($classes as $class) {
+		    if(in_array($class, $this->mClasses))
+			    continue;
+		    $c++;
+		    $this->mClasses[] = $class;
+	    }
+	    return $c;
     }
 
     /**
@@ -106,10 +148,11 @@ final class HTMLAttributes implements IAttributes {
      * @param String $styleList one or multiple css styles
      */
     function addStyles($styleList) {
-        if(!$this->mStyles)
-            $this->mStyles = new StyleAttributes($styleList);
-        else
-            $this->mStyles->addStyles($styleList);
+	    if(preg_match_all('/(\w+):\s+([\w\s,]+);?/', $styleList, $matches)) {
+		    foreach($matches[1] as $name) {
+			    $this->setStyle($name, $matches[2][$name]);
+		    }
+	    }
     }
 
     /**
@@ -117,35 +160,43 @@ final class HTMLAttributes implements IAttributes {
      * @param $name
      * @param $value
      */
-    function addStyle($name, $value) {
-        if(!$this->mStyles)
-            $this->mStyles = new StyleAttributes();
-        $this->mStyles->addStyle($name, $value);
+    function setStyle($name, $value) {
+	    $this->mStyles[$name] = $value;
     }
 
-    /**
-     * Get html attribute string
-     * @return String
-     */
-    function __toString() {
-        $attr = '';
-        if($this->mClasses)
-            $attr .= $this->mClasses;
-        if($this->mStyles)
-            $attr .= $this->mStyles;
-        foreach($this->mAttr as $key => $value)
-            $attr .= ' ' . $key . "='" . $value . "'";
-        return $attr;
-    }
+	/**
+	 * Render html attributes
+	 * @param IAttributes|null $Additional
+	 * @return string|void always returns void
+	 */
+	function render(IAttributes $Additional = null) {
+		$classes = $this->mClasses;
+		$styles = $this->mStyles;
+		$attributes = $this->mAttr;
 
-    /**
-     * Merge attributes and return an instance
-     * @param IAttributes|null $Attributes
-     * @return IAttributes
-     */
-    function merge(IAttributes $Attributes = null) {
-        if($Attributes)
-            $this->addHTML((String)$Attributes);
-        return $this;
-    }
+		if($Additional) {
+			$classes = array_combine($classes, $Additional->getClasses());
+			$styles += $Additional->getStyle();
+			$attributes += $Additional->getAttribute();
+		}
+
+		if($classes) {
+			$i=0;
+			echo ' class=\'';
+			foreach($classes as $class)
+				echo ($i++ ? ' ' : ''), $class;
+			echo '\'';
+		}
+
+		if($styles) {
+			$i=0;
+			echo ' style=\'';
+			foreach($styles as $name=>$value)
+				echo ($i++ ? '; ' : ''), $name . ": " . $value;
+			echo '\'';
+		}
+
+		foreach($attributes as $key => $value)
+			echo ' ' . $key . "='" . $value . "'";
+	}
 }

@@ -6,7 +6,6 @@
  * Time: 11:37 AM
  */
 namespace CPath\Route;
-use CPath\Build\Handlers\BuildRequestHandler;
 use CPath\Request\IRequest;
 use CPath\Request\Request;
 

@@ -14,11 +14,10 @@ use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\KeyMapRenderer;
 use CPath\Data\Map\SequenceMapRenderer;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLMimeType;
-use CPath\Render\HTML\HTMLResponseBody;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONMimeType;
@@ -27,19 +26,19 @@ use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Executable\ExecutableRenderer;
+use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\MimeType\MimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
 use CPath\Route\DefaultMap;
-use CPath\Route\IRoute;
+use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
-use CPath\Route\RouteIndex;
 
-class RenderHandler implements IRoute, IBuildable, IRenderHTML, IRenderText, IRenderJSON, IRenderXML
+class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, IRenderJSON, IRenderXML, IHTMLSupportHeaders
 {
 	private $mObject;
 	public function __construct($Object) {
@@ -73,6 +72,9 @@ class RenderHandler implements IRoute, IBuildable, IRenderHTML, IRenderText, IRe
 
 		} elseif ($Object instanceof ISequenceMap) {
 			return new SequenceMapRenderer($Object);
+
+		} elseif ($Object instanceof IExecutable) {
+			return new ExecutableRenderer($Object);
 
 		} elseif ($Object instanceof IResponse) {
 			return new ResponseUtil($Object);
@@ -257,9 +259,10 @@ class RenderHandler implements IRoute, IBuildable, IRenderHTML, IRenderText, IRe
 		//static $failSafe = false;
 
 		if(sizeof($Previous) === 0) {
-			$Map = new DefaultMap();
-			$routePrefix = 'GET ' . $Request->getPath();
-			$Previous[] = new RouteIndex($Map, $routePrefix);
+			return false;
+//			$Map = new DefaultMap();
+//			$routePrefix = 'GET ' . $Request->getPath();
+//			$Previous[] = new RouteIndex($Map, $routePrefix);
 		}
 
 		$Handler = new RenderHandler(reset($Previous));

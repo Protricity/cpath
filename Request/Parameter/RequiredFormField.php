@@ -7,38 +7,41 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Parameter\Exceptions\RequiredFormFieldException;
 
 class RequiredFormField extends FormField
 {
+	const CSS_CLASS_REQUIRED = 'required';
+
 	public function __construct($paramName, $description = null, $defaultValue = null) {
 		parent::__construct($paramName, $description, $defaultValue);
+	}
+
+	protected function getHTMLInput(IRequest $Request, IHTMLInput $Input=null) {
+		$Input = parent::getHTMLInput($Request, $Attr);
+		$Input->setAttribute('required', 'required');
+		$Input->addClass(static::CSS_CLASS_REQUIRED);
+		return $Input;
 	}
 
 	/**
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
-	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
+	 * @throws RequiredFormFieldException
 	 * @return mixed request value
 	 */
 	function validateRequest(IRequest $Request) {
-		if (!$Request instanceof IFormRequest) {
-			$this->Label->addClass(self::CSS_CLASS_ERROR);
-			throw new RequestException("Required Form field must come from a form request: " . $this->getName());
-		}
-		$value = $Request->getFormFieldValue($this->getName());
-		/** @var IRequest $Request */
-		$value = $this->filter($Request, $value);
+		$value = parent::validateRequest($Request);
 		if (!$value) {
-			$this->Label->addClass(self::CSS_CLASS_ERROR);
-			throw new RequestException("Form field is required: " . $this->getName());
+			if (!$Request instanceof IFormRequest)
+				throw new RequiredFormFieldException("Required Form field must come from a form request: " . $this->getFieldName());
+
+			throw new RequiredFormFieldException("Form field is required: " . $this->getFieldName());
 		}
-		$this->Input->setValue($value);
 		return $value;
 	}
-
 }
 

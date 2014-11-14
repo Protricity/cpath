@@ -11,9 +11,6 @@ use CPath\Render\Text\TextMimeType;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\Exceptions\RequestException;
-use CPath\Request\Parameter\IRequestParameter;
-use CPath\Request\Parameter\Parameter;
 
 class CLIWebRequest extends WebRequest implements IFormRequest
 {
@@ -36,7 +33,7 @@ class CLIWebRequest extends WebRequest implements IFormRequest
 	 */
 	function getFormFieldValue($fieldName) {
 		// TODO: unfinished
-		return $this->getArgumentValue($fieldName);
+		return $this[$fieldName];
 	}
 
 //

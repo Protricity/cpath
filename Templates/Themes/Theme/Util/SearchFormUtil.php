@@ -14,8 +14,8 @@ use CPath\Framework\API\Fragments\APIDebugFormFragment;
 use CPath\Framework\API\Fragments\APIResponseBoxFragment;
 use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Framework\Render\Theme\Interfaces\ITheme;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
 class SearchFormUtil implements IDescribable, IHTMLSupportHeaders {

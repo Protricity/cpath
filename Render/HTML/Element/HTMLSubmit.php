@@ -20,6 +20,6 @@ class HTMLSubmit extends HTMLInputField
 	public function __construct($text = 'Submit', $name = null, $classList = null) {
 		parent::__construct($text, 'submit', $classList);
 		if ($name)
-			$this->setName($name);
+			$this->setFieldName($name);
 	}
 }

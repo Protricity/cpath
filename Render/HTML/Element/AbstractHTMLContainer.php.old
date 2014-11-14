@@ -31,7 +31,7 @@ abstract class AbstractHTMLContainer extends AbstractHTMLElement
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	abstract protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
+	abstract function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
 
 	/**
 	 * Returns true if content is available and should render

@@ -7,10 +7,8 @@
  */
 namespace CPath\Request\Parameter\CLI;
 
-use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\CLI\CLIArgument;
-use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Parameter\Exceptions\RequiredParameterException;
 
 class CLIRequiredArgument extends CLIArgument
 {
@@ -22,14 +20,13 @@ class CLIRequiredArgument extends CLIArgument
 	 * Validate and return the parameter value
 	 * @param IRequest $Request
 	 * @throws \CPath\Request\Exceptions\RequestException
+	 * @internal param $value
 	 * @return mixed request value
 	 */
 	function validateRequest(IRequest $Request) {
 		$value = parent::validateRequest($Request);
-		if (!$value) {
-			$this->Label->addClass(static::CSS_CLASS_ERROR);
-			throw new RequestException("Parameter is required: " . $this->getName());
-		}
+		if (!$value)
+			throw new RequiredParameterException("Parameter is required: " . $this->getFieldName());
 		return $value;
 	}
 }

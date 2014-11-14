@@ -8,10 +8,10 @@
 namespace CPath\Handlers\HTML\Layouts;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 

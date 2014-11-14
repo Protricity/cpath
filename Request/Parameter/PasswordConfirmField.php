@@ -7,17 +7,17 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Request\IRequest;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\IRequest;
 
 class PasswordConfirmField extends PasswordField
 {
-	private $mPassword;
+	private $mPasswordParamName;
 
 	public function __construct(PasswordField $PasswordParameter, $paramName = null, $required = true, $description = "Confirm password") {
-		$this->mPassword = $PasswordParameter;
+		$this->mPasswordParamName = $PasswordParameter->getFieldName();
 		if (!$paramName)
-			$paramName = $PasswordParameter->getName() . '_confirmm';
+			$paramName = $PasswordParameter->getFieldName() . '_confirmm';
 		parent::__construct($paramName, $description, $required);
 	}
 
@@ -31,7 +31,7 @@ class PasswordConfirmField extends PasswordField
 	 */
 	function validateRequest(IRequest $Request) {
 		$value = parent::validateRequest($Request);
-		$value2 = $Request->getValue($this->mPassword);
+		$value2 = $Request[$this->mPasswordParamName];
 		if ($value !== null && $value2 !== $value)
 			throw new RequestException("Password confirmation did not match");
 

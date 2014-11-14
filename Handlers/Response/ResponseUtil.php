@@ -19,15 +19,26 @@ use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLKeyMapRenderer;
 use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
+use CPath\Response\Response;
 
 final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHeaderResponse {
     private $mResponse;
     private $mSent = false;
     //private $mContainer;
 
-    function __construct(IResponse $Response) {
+	/**
+	 * @param IResponse $Response
+	 */
+	function __construct($Response) {
+		if($Response instanceof \Exception)
+			$Response = new ExceptionResponse($Response);
+		if(!is_object($Response))
+			$Response = new Response("Not a response object: " . var_export($Response, true), false);
+		if(!$Response instanceof IResponse)
+			$Response = new Response("Invalid Response Object: " . get_class($Response), false);
         $this->mResponse = $Response;
         //$this->mContainer = $HTMLContainer;
     }

@@ -81,7 +81,7 @@ class APIRenderUtil implements IAPI, IRender, IDestination, IDescribableAggregat
      * Render this route destination
      * @param IRequest $Request the IRequest instance for this render
      * @param String $path the matched request path for this destination
-     * @param String[] $args the arguments appended to the path
+     * @param Array $args the arguments appended to the path
      * @return String|void always returns void
      */
     function renderDestination(IRequest $Request, $path, $args) {

@@ -17,13 +17,13 @@ class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
     /**
      * Return an instance of IRender
      * @param \CPath\Request\IRequest $Request the IRequest instance for this render
-     * @return \CPath\Route\IRoute return the renderer instance
+     * @return \CPath\Route\IRoutable return the renderer instance
      */
     function getHandler(IRequest $Request)
     {
         $routes = array();
         foreach(Router::getRoutes() as $Route){
-            /** @var \CPath\Route\IRoute $Route */
+            /** @var \CPath\Route\IRoutable $Route */
             list($method, $route) = explode(' ', $Route->getPrefix(), 2);
             if(!isset($routes[$route]))
                 $routes[$route] = array();

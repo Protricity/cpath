@@ -11,12 +11,6 @@ use CPath\Build\Editor\PHP\PHPMethodEditor;
 use CPath\Build\IBuildRequest;
 use CPath\Build\MethodDocBlock;
 use CPath\Config;
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\IKeyMapper;
-use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\ISequenceMapper;
-use CPath\Route\MappedRoute;
-use CPath\Render\HTML\URL\URLValue;
 use CPath\Request\CLI\CommandString;
 
 class RouteBuilder {

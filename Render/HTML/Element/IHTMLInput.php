@@ -8,16 +8,13 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\Common\IInputField;
 
-interface IHTMLInput
+interface IHTMLInput extends IInputField, IRenderHTML
 {
-	public function getValue();
-	public function setValue($value);
-
-	public function getName();
-	public function setName($value);
-
-	public function getID();
-	public function setID($value);
+	public function getFieldID();
+	public function setFieldID($value);
+	public function setInputValue($value);
+	public function setFieldName($name);
 }
 

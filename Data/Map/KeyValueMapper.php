@@ -31,7 +31,7 @@ class KeyValueMapper implements \ArrayAccess
 
 	function getMappedValues($_key=null) {
 		if($this->mValues === null) {
-			if($this->mMap instanceof KeyMapArray) {
+			if($this->mMap instanceof ArrayKeyMap) {
 				$values = $this->mMap->getValues();
 
 			} else {

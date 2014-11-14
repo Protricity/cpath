@@ -7,7 +7,6 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 
@@ -18,33 +17,15 @@ class FormField extends Parameter
 	}
 
 	/**
-	 * Validate and return the parameter value
-	 * @param IRequest $Request
-	 * @internal param $value
-	 * @return mixed request value
+	 * Get the request value
+	 * @param \CPath\Request\IRequest $Request
+	 * @return mixed
 	 */
-	function validateRequest(IRequest $Request) {
-		$value = null;
+	function getInputValue(IRequest $Request) {
+		$name = $this->getFieldName();
 		if($Request instanceof IFormRequest)
-			$value = $Request->getFormFieldValue($this->getName());
-
-		$value = $this->filter($Request, $value);
-		if($value)
-			$this->Input->setValue($value);
-
-		return $value;
+			return $Request->getFormFieldValue($name);
+		return null;
 	}
 
-
-	/**
-	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
-	 * @return String|void always returns void
-	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		if(!$this->Input->hasAttribute('value') && $Request instanceof IFormRequest)
-			$this->Input->setValue($Request->getFormFieldValue($this->getName()));
-		$this->Label->renderHTML($Request, $Attr);
-	}
 }

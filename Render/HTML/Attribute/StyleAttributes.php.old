@@ -68,7 +68,7 @@ final class StyleAttributes implements IAttributes
             return $this;
         $Attr = new HTMLAttributes($Attributes);
         foreach($this->mStyles as $key => $value)
-            $Attr->addStyle($key, $value);
+            $Attr->setStyle($key, $value);
         return $Attr;
     }
 }

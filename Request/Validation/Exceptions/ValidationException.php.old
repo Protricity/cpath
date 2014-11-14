@@ -1,0 +1,47 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 11/10/14
+ * Time: 3:32 PM
+ */
+namespace CPath\Request\Validation\Exceptions;
+
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Element\HTMLForm;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\IRenderHTML;
+use CPath\Request\IRequest;
+use CPath\Request\Parameter\IRequestParameter;
+
+class ValidationException extends \Exception implements IRenderHTML
+{
+	private $mParameters = array();
+	public function __construct($message) {
+		parent::__construct($message);
+	}
+
+	public function addParameter(IRequestParameter $Parameter) {
+		$this->mParameters[$Parameter->getName()] = $Parameter;
+	}
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		$Form = new HTMLForm('POST');
+		$Form->addClass('form-validation');
+		$Legend = new HTMLElement('legend', null, $this->getMessage());
+		$Form->addContent($Legend);
+
+		foreach($this->mParameters as $Content)
+			$Form->addContent($Content);
+
+		$Form->addSubmit();
+		$Form->renderHTML($Request, $Attr);
+	}
+}

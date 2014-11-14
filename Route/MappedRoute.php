@@ -10,6 +10,7 @@ namespace CPath\Route;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\URL\URLValue;
 use CPath\Request\IRequest;
 
@@ -21,28 +22,33 @@ class MappedRoute implements IKeyMap // , IRenderHTML
     const KEY_URL = 'url';
 
     private $mArgs;
+	private $mRoute;
+	private $mTarget;
 
-    public function __construct(Array $args) {
+    public function __construct($route, $target, Array $args=array()) {
+	    $this->mRoute = $route;
+	    $this->mTarget = $target;
         $this->mArgs = $args;
     }
 
     public function getRoute() {
-        return $this->mArgs[0];
+        return $this->mRoute;
     }
 
     public function getTarget() {
-        return $this->mArgs[1];
+        return $this->mTarget;
     }
 
     public function getArg($index = 0) {
-        return $this->mArgs[2 + $index];
+        return $this->mArgs[$index];
     }
 
-    public function getURL(IRequest $Request=null, $withDomain=false) {
-        list(, $path) = explode(' ', $this->getRoute());
-        if($Request)
-            $path = $Request->getDomainPath($withDomain) . $path;
-        return new URLValue($path);
+    public function getURL() {
+	    $path = $this->getRoute();
+	    if(strpos($path, ' ') !== false)
+            list(, $path) = explode(' ', $this->getRoute());
+	    $href = $path;
+        return new URLValue($href, $path);
     }
 
 	/**
@@ -53,11 +59,22 @@ class MappedRoute implements IKeyMap // , IRenderHTML
 	 * @return void
 	 */
     function mapKeys(IKeyMapper $Map) {
-        $Map->map(self::KEY_TITLE, $this->__toString()) ||
+        //$Map->map(self::KEY_TITLE, $this->__toString()) ||
         $Map->map(self::KEY_ROUTE, $this->getRoute()) ||
         $Map->map(self::KEY_TARGET, $this->getTarget()) ||
         $Map->map(self::KEY_URL, $this->getURL());
     }
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+		$this->getURL()
+			->renderHTML($Request, $Attr);
+	}
 
     function __toString() {
         return "Route: " . $this->getRoute();

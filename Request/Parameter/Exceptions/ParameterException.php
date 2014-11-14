@@ -8,9 +8,8 @@
 namespace CPath\Request\Parameter\Exceptions;
 
 use CPath\Request\Parameter\IParameterMap;
-use CPath\Request\Exceptions\HTTPRequestException;
 
-class RequestParameterException extends \CPath\Request\Exceptions\HTTPRequestException
+class RequestParameterException extends \CPath\Request\Exceptions\RequestException
 {
     public function __construct($message) {
         parent::__construct($message);

@@ -14,13 +14,13 @@ class Response implements IHeaderResponse {
 
     /**
      * Create a new response
-     * @param String $msg the response message
+     * @param String $message the response message
      * @param int|bool $status the response status code or true/false for success/error
      * @internal param mixed $data additional response data
      */
-    function __construct($msg=NULL, $status=true) {
+    function __construct($message=NULL, $status=true) {
         $this->setStatusCode($status);
-        $this->setMessage($msg);
+        $this->setMessage($message);
     }
 
     function getCode() {

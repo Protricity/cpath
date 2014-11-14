@@ -1,10 +1,10 @@
 <?php
 namespace CPath\Framework\Render\Layout\Template;
 
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Handlers\HTML\Navigation\OrderedListNavigator;
 use CPath\Render\HTML\Attribute\Attr;
 use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\Layout\ContentLayout;
 use CPath\Render\HTML\Theme\Interfaces\IPageTheme;
 use CPath\Request\IRequest;

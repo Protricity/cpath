@@ -7,19 +7,25 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\HTMLAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\HeaderConfig;
+use CPath\Render\HTML\Common\RenderableException;
 use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\Validation\FormValidator;
+use CPath\Request\Common\IInputField;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
+use CPath\Render\HTML\Common\RenderableResponse;
+use CPath\Request\Parameter\HTML\ParameterHTMLInputField;
+use CPath\Request\Parameter\HTML\HTMLFormItemTemplate;
+use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\Validation\IValidation;
+use CPath\Response\IResponse;
 
 class HTMLForm extends HTMLElement
 {
 	const TRIM_CONTENT = false;
     const CSS_FORM_FIELD = 'form-row';
-    private $mAttr;
 
 	/**
 	 * @param null $method
@@ -28,24 +34,29 @@ class HTMLForm extends HTMLElement
 	 * @param null $_content
 	 */
 	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
-        $this->mAttr = new HTMLAttributes($classList);
-        parent::__construct('form', $this->mAttr);
+        parent::__construct('form', $classList);
 		if($method)
 			$this->setMethod($method);
 		if($action)
 			$this->setAction($action);
 		if($_content !== null)
 			$this->addAll(array_slice(func_get_args(), 3));
+		$this->setItemTemplate(new HTMLLabel());
     }
 
-	public function getName()           { return $this->getAttribute('name'); }
-	public function setName($value)     { $this->setAttribute('name', $value); }
+	public function getRequestValue(IRequest $Request, $paramName=null) {
+		$FormValidator = new FormValidator($this);
+		return $FormValidator->validateRequest($Request, $paramName);
+	}
 
-	public function getID()             { return $this->getAttribute('id'); }
-	public function setID($value)       { $this->setAttribute('id', $value); }
+	public function getFieldName()           { return $this->getAttribute('name'); }
+	public function setFieldName($value)     { $this->setAttribute('name', $value); }
 
-	public function setMethod($method)  { $this->mAttr->setAttribute('method', $method); }
-	public function setAction($action)  { $this->mAttr->setAttribute('action', $action); }
+	public function getFieldID()             { return $this->getAttribute('id'); }
+	public function setFieldID($value)       { $this->setAttribute('id', $value); }
+
+	public function setMethod($method)  { $this->setAttribute('method', $method); }
+	public function setAction($action)  { $this->setAttribute('action', $action); }
 
 
 	public function setFormValues(Array $values, IHTMLContainer $Container=null) {
@@ -55,12 +66,13 @@ class HTMLForm extends HTMLElement
 		foreach($Container->getContent() as $Content) {
 			if($Content instanceof IHTMLContainer)
 				$values = $this->setFormValues($values, $Content);
-			elseif(!$Content instanceof IHTMLInput)
+
+			if(!$Content instanceof IHTMLInput)
 				continue;
 
-			$name = $Content->getName();
+			$name = $Content->getFieldName();
 			if(isset($values[$name])) {
-				$Content->setValue($values[$name]);
+				$Content->setInputValue($values[$name]);
 				unset($values[$name]);
 			}
 		}
@@ -70,14 +82,16 @@ class HTMLForm extends HTMLElement
 //			throw new \InvalidArgumentException("Form fields not found: " . implode(', ', array_keys($values)));
 	}
 
+	function addParameter(IRequestParameter $Parameter) {
+		$this->addContent(new ParameterHTMLInputField($Parameter));
+	}
+
     public function addSubmit($value = null, $name = null) {
         $this->addInput($value, $name, 'submit');
     }
 
     public function addInput($value = null, $name = null, $type = null) {
-        $Field = new HTMLInputField($value, $type);
-        if($name)
-            $Field->setName($name);
+        $Field = new HTMLInputField($name, $value, $type);
         $this->addContent($Field);
     }
 
@@ -86,7 +100,7 @@ class HTMLForm extends HTMLElement
      * @param IRequest $Request
      * @param IAttributes $ContentAttr
      */
-    protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+    function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
 	    RI::ai(1);
         echo RI::ni(), "<fieldset>";
 
@@ -97,3 +111,4 @@ class HTMLForm extends HTMLElement
 	    RI::ni();
     }
 }
+

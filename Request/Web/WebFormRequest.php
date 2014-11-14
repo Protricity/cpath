@@ -8,28 +8,28 @@
 namespace CPath\Request\Web;
 
 use CPath\Request\Form\IFormRequest;
-use CPath\Request\Parameter\IRequestParameter;
-use CPath\Request\Parameter\Parameter;
 
 class WebFormRequest extends WebRequest implements IFormRequest
 {
     private $mValueSource = null;
 
-    public function __construct($method, $path = null, $args = array()) {
-        parent::__construct($method, $path, $args);
+    public function __construct($method, $path = null, $parameters = array()) {
+        parent::__construct($method, $path, $parameters);
     }
 
 	/**
-	 * Return a request value
-	 * @param String|IRequestParameter $Parameter string or instance
-	 * @param null $description
-	 * @internal param null|String $description
-	 * @return mixed the validated parameter value
+	 * Return a request parameter (GET) value
+	 * @param String $paramName
+	 * @return mixed|null the request parameter value or null if not found
 	 */
-	function getValue($Parameter, $description = null) {
-		$this->addParam($Parameter);
-		return $Parameter->validateRequest($this);
+
+	function getRequestValue($paramName) {
+		$values = $this->getAllFormValues();
+		return isset($values[$paramName])
+			? $values[$paramName]
+			: parent::getRequestValue($paramName);
 	}
+
 
 	/**
 	 * Return a request value
@@ -37,11 +37,8 @@ class WebFormRequest extends WebRequest implements IFormRequest
 	 * @return mixed the form field value
 	 */
 	function getFormFieldValue($fieldName) {
-		if($value = $this->getArgumentValue($fieldName))
-			return $value;
-
 		$values = $this->getAllFormValues();
-		if(!empty($values[$fieldName]))
+		if(isset($values[$fieldName]))
 			return $values[$fieldName];
 		return null;
 	}

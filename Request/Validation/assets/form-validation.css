@@ -41,7 +41,13 @@ form.form-validation textarea {
     -moz-box-sizing: border-box;
     box-sizing: border-box;
 }
+
 form.form-validation textarea {
     width: 300pt;
     height: 100pt;
+}
+
+form.form-validation label {
+    display: block;
+    padding-bottom: 10px;
 }

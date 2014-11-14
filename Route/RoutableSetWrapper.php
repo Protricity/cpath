@@ -13,7 +13,7 @@ class RoutableSetWrapper implements IRequest {
 
     private $mReq, $mRoute, $mRoutes;
     
-    function __construct(IRequest $Request, RoutableSet $Routes, IRoute $NewRoute) {
+    function __construct(IRequest $Request, RoutableSet $Routes, IRoutable $NewRoute) {
         $this->mReq = $Request;
         $this->mRoute = $NewRoute;
         $this->mRoutes = $Routes;
@@ -22,7 +22,7 @@ class RoutableSetWrapper implements IRequest {
     function getRequest() { return $this->mReq; }
     function getRoute() { return $this->mRoute; }
 
-    /** @return RoutableSet|IRoute[] */
+    /** @return RoutableSet|IRoutable[] */
     function getRoutableSet() { return $this->mRoutes; }
     function findRoute() { return $this->getRoute(); }
 

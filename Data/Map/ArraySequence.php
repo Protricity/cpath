@@ -27,3 +27,4 @@ class ArraySequence implements ISequenceMap
             $Map->mapNext($value);
     }
 }
+

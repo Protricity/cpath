@@ -69,7 +69,6 @@
             };
 
             target.bind('keydown', function(e) {
-                console.log(e.keyCode);
                 switch(e.keyCode) {
                     case 9:     // tab
                         var active = document.activeElement === body[0]
@@ -87,6 +86,7 @@
             });
 
             input.bind("keydown", function(e) {
+                console.log(e.keyCode);
                 var text = input.val();
                 var addHistory = function(text) {
                     if(text && history.indexOf(text) === -1) {

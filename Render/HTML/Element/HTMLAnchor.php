@@ -11,7 +11,7 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class HTMLAnchor extends AbstractHTMLContainer
+class HTMLAnchor extends HTMLElement
 {
 	const ALLOW_CLOSED_TAG = false;
 	const TRIM_CONTENT = true;
@@ -20,10 +20,10 @@ class HTMLAnchor extends AbstractHTMLContainer
 	/**
 	 * @param string $href
 	 * @param string|null $text
-	 * @param string|\CPath\Render\HTML\Attribute\IAttributes $attr
+	 * @param null $classList
 	 */
-    public function __construct($href, $text=null, $attr=null) {
-        parent::__construct('a', $attr);
+    public function __construct($href, $text=null, $classList = null) {
+        parent::__construct('a', $classList);
 	    $this->mText = $text;
         $this->setURL($href);
     }
@@ -32,14 +32,14 @@ class HTMLAnchor extends AbstractHTMLContainer
 	public function setURL($value)     { $this->setAttribute('href', $value); }
 
 	public function setContent($text)  { $this->mText = $text; }
-	public function getContent()       { return $this->mText; }
+	public function getContent($key=null)       { return $this->mText; }
 
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	protected function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
 		if($this->mText instanceof IRenderHTML)
 			$this->mText->renderHTML($Request, $ContentAttr);
 		else
@@ -48,10 +48,20 @@ class HTMLAnchor extends AbstractHTMLContainer
 
 	/**
 	 * Returns true if content is available and should render
-	 * @internal param \CPath\Request\IRequest $Request
+	 * @param null $key
 	 * @return bool
 	 */
-	protected function hasContent() {
+	function hasContent($key=null) {
 		return $this->mText !== null;
+	}
+
+	/**
+	 * Add IRenderHTML Content
+	 * @param IRenderHTML $Render
+	 * @param null $key if provided, add/replace content by key
+	 * @return void
+	 */
+	function addContent(IRenderHTML $Render, $key = null) {
+		$this->mText = $Render;
 	}
 }
