@@ -22,7 +22,7 @@ class HTMLButton extends AbstractHTMLElement implements IHTMLInput
 	 * @param String|null $value
 	 * @param String|IRenderHTML|null $content
 	 * @param String|null $type
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 * @internal param null|String $text
 	 * @internal param null|String $value
 	 */
@@ -37,7 +37,7 @@ class HTMLButton extends AbstractHTMLElement implements IHTMLInput
 		$this->mContent = $content ?: $value;
 	}
 
-	public function getInputValue(IRequest $Request)          { return $this->getAttribute('value'); }
+	public function getRequestValue(IRequest $Request)          { return $this->getAttribute('value'); }
 	public function setInputValue($value)    { $this->setAttribute('value', $value); }
 
 	public function getFieldName()           { return $this->getAttribute('name'); }
@@ -57,17 +57,16 @@ class HTMLButton extends AbstractHTMLElement implements IHTMLInput
 	}
 
 	public function isDisabled() {
-		return $this->hasAttribute('disabled')
-			? $this->getAttribute('disabled') === 'disabled'
-			: false;
+		return $this->getAttribute('disabled') === 'disabled';
 	}
 
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
+	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 		if($this->mContent instanceof IRenderHTML) {
 			RI::ai(1);
 			$this->mContent->renderHTML($Request);

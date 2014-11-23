@@ -15,9 +15,9 @@ class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
     const ROUTE_METHODS = 'CLI';    // CLI only
 
     /**
-     * Return an instance of IRender
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
-     * @return \CPath\Route\IRoutable return the renderer instance
+     * Return an inst of IRender
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
+     * @return \CPath\Route\IRoutable return the renderer inst
      */
     function getHandler(IRequest $Request)
     {
@@ -94,8 +94,8 @@ class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
     }
 
     /**
-     * Return an instance of the class for building purposes
-     * @return \CPath\Build\IBuildable|NULL an instance of the class or NULL to ignore
+     * Return an inst of the class for building purposes
+     * @return \CPath\Build\IBuildable|NULL an inst of the class or NULL to ignore
      */
     static function createBuildableInstance() {
         return new static();
@@ -103,7 +103,7 @@ class Console { // implements IStaticRequestHandler { // Broke }, IBuildable {
 
     /**
      * Handle this request and render any content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return String|void always returns void
      */
     static function handleStaticRequest(IRequest $Request)

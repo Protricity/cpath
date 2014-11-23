@@ -14,7 +14,7 @@ class Empty3SectionLayout extends Abstract3SectionLayout {
 
     /**
      * Lazy load page content with request
-     * @param \CPath\Request\IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request inst
      * @return void
      */
     protected function populateLayoutContent(IRequest $Request) {
@@ -50,7 +50,7 @@ abstract class Abstract3SectionLayout extends ContentLayout {
 
     /**
      * Lazy load page content with request
-     * @param IRequest $Request the request instance
+     * @param IRequest $Request the request inst
      * @return void
      */
     abstract protected function populateLayoutContent(IRequest $Request);
@@ -72,7 +72,7 @@ abstract class Abstract3SectionLayout extends ContentLayout {
 
     /**
      * Lazy load page content with request
-     * @param \CPath\Request\IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request inst
      * @return void
      */
     protected function loadLayoutContent(IRequest $Request) {

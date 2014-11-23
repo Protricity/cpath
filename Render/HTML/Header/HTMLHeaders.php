@@ -8,37 +8,39 @@
 namespace CPath\Render\HTML\Header;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class HTMLHeaders implements IRenderHTML, IHTMLSupportHeaders
+class HTMLHeaders implements IHTMLSupportHeaders
 {
+	private $mHeaders = array();
+	public function __construct($header, $_header=null) {
+		$this->mHeaders = is_array($header) ? $header : func_get_args();
+	}
 
-	/** @var IHTMLSupportHeaders */
-	private $mHeaders;
-
-	public function __construct(IHTMLSupportHeaders $Headers) {
-		$this->mHeaders = $Headers;
+	public function addHeader($header) {
+		$this->mHeaders[] = $header;
 	}
 
 	/**
-	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-	 * @return String|void always returns void
-	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		// No render for Headers
-	}
-
-	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$this->mHeaders->writeHeaders($Request, $Head);
+		foreach($this->mHeaders as $header) {
+			if($header instanceof IHTMLSupportHeaders) {
+				$header->writeHeaders($Request, $Head);
+			} else {
+				$ext = pathinfo($header, PATHINFO_EXTENSION);
+				switch(strtolower($ext)) {
+					case 'css': $Head->writeStyleSheet($header); break;
+					case 'js': $Head->writeScript($header); break;
+					default:
+						$Head->writeHTML($header);
+						break;
+				}
+			}
+		}
 	}
 }

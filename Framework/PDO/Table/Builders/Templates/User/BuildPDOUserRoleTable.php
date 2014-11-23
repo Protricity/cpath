@@ -17,7 +17,7 @@ use CPath\Framework\PDO\Templates\User\Role\Table\PDOUserRoleTable;
 class BuildPDOUserRoleTable extends AbstractBuildPDOPKTable {
 
     /**
-     * Create a new BuildPDOUserRoleTable builder instance
+     * Create a new BuildPDOUserRoleTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment

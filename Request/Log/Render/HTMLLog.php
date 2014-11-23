@@ -8,7 +8,7 @@
 namespace CPath\Request\Log\Render;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
@@ -26,11 +26,11 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	const CSS_REVERSE_ORDER = 'reverse-order';
 
 	/**
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 */
 	public function __construct($classList = null) {
 		if(!$classList instanceof IAttributes)
-			$classList = new HTMLAttributes($classList);
+			$classList = new Attributes($classList);
 		$this->mAttr = $classList;
 		$this->mAttr->addClass('log-container');
 	}
@@ -57,7 +57,7 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	}
 
 	/**
-	 * Log an exception instance
+	 * Log an exception inst
 	 * @param \Exception $ex The log message
 	 * @param int $flags [optional] log flags
 	 * @return void
@@ -70,16 +70,16 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	 * Add a log listener callback
 	 * @param ILogListener $Listener
 	 * @return void
-	 * @throws \InvalidArgumentException if this log listener instance does not accept additional listeners
+	 * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
 	 */
 	function addLogListener(ILogListener $Listener) {
 		throw new \InvalidArgumentException("May not add listeners to " . __CLASS__);
 	}
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -89,11 +89,12 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Request\Log\Render\IHTMLContainer $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Container = new HTMLElement('div', $this->mAttr);
 
 		if($this->mTarget)
@@ -118,6 +119,6 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 				}
 			)
 		);
-		$Container->renderHTML($Request, $Attr);
+		$Container->renderHTML($Request, $Attr, $Parent);
 	}
 }

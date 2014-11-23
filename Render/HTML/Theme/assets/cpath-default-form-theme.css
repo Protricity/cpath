@@ -27,11 +27,14 @@ form.cpath-default-form-theme legend {
     font-weight: bold;
 }
 
+form.cpath-default-form-theme legend p {
+    margin: 0 0;
+}
+
 form.cpath-default-form-theme button,
 form.cpath-default-form-theme input,
 form.cpath-default-form-theme select,
 form.cpath-default-form-theme textarea {
-    font-family: "proxima-nova", sans-serif;
     padding: .5em .6em;
     display: block;
     border: 1px solid #ccc;
@@ -40,14 +43,35 @@ form.cpath-default-form-theme textarea {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    margin-bottom: 10px;
 }
 
+form.cpath-default-form-theme input,
+form.cpath-default-form-theme select {
+    font-family: "proxima-nova", sans-serif;
+}
+
+/*form.cpath-default-form-theme input[type=text],*/
+/*form.cpath-default-form-theme textarea,*/
+/*form.cpath-default-form-theme select {*/
+    /*widt3h: 300pt;*/
+/*}*/
+
 form.cpath-default-form-theme textarea {
-    width: 300pt;
     height: 100pt;
 }
 
 form.cpath-default-form-theme label {
     display: block;
-    padding-bottom: 10px;
+}
+
+/** Section **/
+
+
+form.cpath-default-form-theme .form-section {
+    display: block;
+    border: 1px solid #ccc;
+    padding: 0 1em;
+    border-radius: 4px;
+    margin-bottom: 10px;
 }

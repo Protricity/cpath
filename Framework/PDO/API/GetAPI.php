@@ -31,8 +31,8 @@ class GetAPI implements IAPI {
     private $mTable;
 
     /**
-     * Construct an instance of the GET API
-     * @param PDOPrimaryKeyTable|IReadAccess $Table the table instance
+     * Construct an inst of the GET API
+     * @param PDOPrimaryKeyTable|IReadAccess $Table the table inst
      * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
      * PRIMARY key is already included
      */
@@ -56,7 +56,7 @@ class GetAPI implements IAPI {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @throws \CPath\Framework\API\Exceptions\APIException
      * @return IField[]|IFieldCollection
      */
@@ -91,7 +91,7 @@ class GetAPI implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @throws \CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException
      * @internal param Array $args additional arguments for this execution
      * @return PDOPrimaryKeyModel the found model which implements IResponseAggregate
@@ -123,7 +123,7 @@ class GetAPI implements IAPI {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return void
      */

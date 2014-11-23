@@ -14,6 +14,13 @@ use CPath\Request\IRequest;
 interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
 {
 	/**
+	 * Add support headers to content
+	 * @param IHTMLSupportHeaders $Headers
+	 * @return void
+	 */
+	function addSupportHeaders(IHTMLSupportHeaders $Headers);
+
+	/**
 	 * Returns an array of IRenderHTML content
 	 * @param null $key if provided, get content by key
 	 * @return IRenderHTML[]

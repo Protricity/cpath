@@ -29,9 +29,9 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	}
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -41,11 +41,12 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Renderer = new HTMLSequenceMapRenderer($Request);
 		$this->mSequencemap->mapSequence($Renderer);
 	}
@@ -53,7 +54,7 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 
 	/**
 	 * Render request as JSON
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @return String|void always returns void
 	 */
 	function renderJSON(IRequest $Request) {
@@ -63,7 +64,7 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 
 	/**
 	 * Render request as plain text
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @return String|void always returns void
 	 */
 	function renderText(IRequest $Request) {
@@ -73,7 +74,7 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 
 	/**
 	 * Render request as xml
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param string $rootElementName Optional name of the root element
 	 * @param bool $declaration if true, the <!xml...> declaration will be rendered
 	 * @return String|void always returns void

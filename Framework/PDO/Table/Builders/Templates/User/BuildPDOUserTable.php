@@ -32,7 +32,7 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
     protected static $mReceiptTables = array();
 
     /**
-     * Create a new BuildPDOUserSessionTable builder instance
+     * Create a new BuildPDOUserSessionTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment
@@ -95,7 +95,7 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
         //$class = $this->Session_Class;
         //$Session = new $class;
         //if(!($Session instanceof IUserSession))
-        //    throw new BuildException($class . " is not an instance of IUserSession");
+        //    throw new BuildException($class . " is not an inst of IUserSession");
         //$PHP->addConst('SESSION_CLASS', $class);
         $PHPTable->addUse($this->mSessionClass, 'Session');
         $PHPTable->addMethod('session', '', ' static $s = null; return $s ?: $s = new Session; ');

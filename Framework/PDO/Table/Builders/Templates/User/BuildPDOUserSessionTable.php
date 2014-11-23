@@ -18,7 +18,7 @@ class BuildPDOUserSessionTable extends BuildPDOPKTable {
     public $SessionExpireDays, $SessionExpireSeconds, $SessionKey, $SessionKeyLength;
 
     /**
-     * Create a new BuildPDOUserSessionTable builder instance
+     * Create a new BuildPDOUserSessionTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment

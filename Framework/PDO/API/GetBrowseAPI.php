@@ -30,7 +30,7 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
     private $mLimit, $mLimitMax;
 
     /**
-     * Construct an instance of the GET API
+     * Construct an inst of the GET API
      * @param PDOTable|IReadAccess $Table the PDOTable for this API
      * @param int $limit
      * @param int $limitMax
@@ -75,7 +75,7 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return PDOSearchResponse the api call response with data, message, and status
      * @throws ModelNotFoundException if the Model was not found
@@ -122,14 +122,15 @@ class GetBrowseAPI extends AbstractPDOAPI implements IRenderHTML
     }
 
 
-    /**
-     * Render request as html and sends headers as necessary
-     * @param \CPath\Framework\PDO\API\IRenderRequest|\CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
-     * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+	/**
+	 * Render request as html and sends headers as necessary
+	 * @param \CPath\Framework\PDO\API\IRenderRequest|\CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
+	 * @param \CPath\Framework\PDO\API\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
+	 * @return void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null)
     {
 
         foreach ($this->getHandlers() as $Handler)

@@ -288,7 +288,7 @@ class PDOSelect extends PDOWhere implements IKeyMap, \Iterator, \Countable {
 
 	/**
 	 * Map data to a data map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Framework\PDO\Query\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\Query\IRequest $Request
 	 * @return void

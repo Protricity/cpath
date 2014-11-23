@@ -12,7 +12,7 @@ namespace CPath\Render;
 //{
 //    /**
 //     * Renders a response object or returns false
-//     * @param IRequest $Request the IRequest instance for this render
+//     * @param IRequest $Request the IRequest inst for this render
 //     * @return bool returns false if no rendering occurred
 //     */
 //    function render(IRequest $Request);

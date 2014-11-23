@@ -15,7 +15,7 @@ interface IFragmentTheme {
 
     /**
      * Render the start of a fragment.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @param IDescribable|String|Null $Description optional fragment header text or description
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
@@ -24,7 +24,7 @@ interface IFragmentTheme {
 
     /**
      * Render the end of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderFragmentEnd(IRequest $Request);

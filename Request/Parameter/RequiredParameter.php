@@ -7,7 +7,6 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Parameter\Exceptions\RequiredParameterException;
@@ -20,8 +19,8 @@ class RequiredParameter extends Parameter implements IRenderHTML
 		parent::__construct($paramName, $description, $defaultValue);
 	}
 
-	protected function getHTMLInput(IRequest $Request, IHTMLInput $Input=null) {
-		$Input = parent::getHTMLInput($Request, $Input);
+	function getHTMLInput() {
+		$Input = parent::getHTMLInput();
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
 		return $Input;
@@ -41,16 +40,17 @@ class RequiredParameter extends Parameter implements IRenderHTML
 //	}
 
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
-	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
-	 * @return mixed request value
+	 * @param $value
+	 * @param null $fieldName
+	 * @throws Exceptions\RequiredParameterException
+	 * @return mixed validated value
 	 */
-	function validateRequest(IRequest $Request) {
-		$value = parent::validateRequest($Request);
+	function validate(IRequest $Request, $value, $fieldName = null) {
+		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
 		if (!$value)
-			throw new RequiredParameterException("Parameter is required: " . $this->getFieldName());
+			throw new RequiredParameterException($this, "Parameter is required: " . $this->getFieldName());
 		return $value;
 	}
 
@@ -58,7 +58,7 @@ class RequiredParameter extends Parameter implements IRenderHTML
 
 	static function tryRequired(IRequest $Request, $paramName, $paramDescription=null, $defaultValue=null) {
 		$Parameter = new RequiredParameter($paramName, $paramDescription, $defaultValue);
-		return $Parameter->getInputValue($Request);
+		return $Parameter->getRequestValue($Request);
 	}
 }
 

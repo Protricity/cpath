@@ -11,17 +11,10 @@ use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLFormAjaxSupport;
-use CPath\Render\HTML\Element\HTMLInputField;
-use CPath\Render\HTML\Element\HTMLLabel;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Request\Parameter\IRequestParameter;
-use CPath\Request\Parameter\Parameter;
-use CPath\Request\Parameter\RequiredParameter;
-use CPath\Request\Validation\Exceptions\FormValidationException;
-use CPath\Response\IResponse;
 
 
 class FormValidation implements IRenderHTML, IHTMLSupportHeaders {
@@ -83,9 +76,9 @@ class FormValidation implements IRenderHTML, IHTMLSupportHeaders {
 //    }
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -97,11 +90,12 @@ class FormValidation implements IRenderHTML, IHTMLSupportHeaders {
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param Attribute\IAttributes $Attr
+	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Request\Validation\IHTMLContainer $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Form = new HTMLFormAjaxSupport('POST');
 		$Form->addClass('form-validation');
 //		$Legend = new HTMLElement('legend', null, $this->getMessage());
@@ -114,7 +108,7 @@ class FormValidation implements IRenderHTML, IHTMLSupportHeaders {
 		}
 
 		$Form->addSubmit();
-		$Form->renderHTML($Request, $Attr);
+		$Form->renderHTML($Request, $Attr, $Parent);
 
 	}
 }

@@ -16,10 +16,10 @@ class SimpleDescription implements IDescribable {
 
     function __construct($object) {
         if(!is_object($object)) {
-            $this->mDesc = (String) $object;
+            $this->mDesc = htmlentities((String) $object);
         } else {
             if(method_exists($object, '__toString')) {
-                $this->mDesc = (String) $object;
+                $this->mDesc = htmlentities((String) $object);
             } else {
                 $this->mDesc = get_class($object);
             }

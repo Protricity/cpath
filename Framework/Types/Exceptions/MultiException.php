@@ -27,7 +27,7 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 
 	/**
 	 * Map data to a data map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Framework\Types\Exceptions\IRequest $Request
 	 * @internal param \CPath\Framework\Types\Exceptions\IRequest $Request
 	 * @return void
@@ -43,7 +43,7 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 
 //    /**
 //     * Render this request
-//     * @param IRequest $Request the IRequest instance for this render
+//     * @param IRequest $Request the IRequest inst for this render
 //     * @return String|void always returns void
 //     */
 //    function render(IRequest $Request) {
@@ -62,7 +62,7 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 //
 //    /**
 //     * Render request as JSON
-//     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+//     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 //     * @return void
 //     */
 //    function renderJSON(IRequest $Request) {
@@ -80,7 +80,7 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 //
 //    /**
 //     * Render request as xml
-//     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+//     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 //     * @param string $rootElementName Optional name of the root element
 //     * @return void
 //     */
@@ -91,7 +91,7 @@ class MultiException extends \Exception implements \Countable, IKeyMap {
 //
 //    /**
 //     * Render request as html and sends headers as necessary
-//     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+//     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 //     * @param IAttributes $Attr optional attributes for the input field
 //     * @return void
 //     */

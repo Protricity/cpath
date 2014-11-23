@@ -7,7 +7,7 @@
  */
 namespace CPath\Render\HTML\Attribute;
 
-class StyleAttr extends HTMLAttributes
+class StyleAttributes extends Attributes
 {
 	public function __construct($name, $value = null) {
 		if (is_array($name)) {

@@ -29,7 +29,7 @@ class CLIErrorView extends ErrorViewNavBarLayout {
 
     /**
      * Render the main view content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
      * @return void
      */

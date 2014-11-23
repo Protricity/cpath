@@ -72,7 +72,7 @@ class PHPMethodEditor implements ITestable
 
     /**
      * Perform a unit test
-     * @param IUnitTestRequest $Test the unit test request instance for this test session
+     * @param IUnitTestRequest $Test the unit test request inst for this test session
      * @return String|void always returns void
      * @test --disable 0
      * Note: Use doctag 'test' with '--disable 1' to have this ITestable class skipped during a build
@@ -90,9 +90,9 @@ class PHPMethodEditor implements ITestable
     }
 
     public function testReplaceSrc() {
-		echo 'im working #9';
-		echo 'im not working #9';
-		echo 'im maybe working #9';
+		echo 'im working #4';
+		echo 'im not working #4';
+		echo 'im maybe working #4';
 	}
 
 }

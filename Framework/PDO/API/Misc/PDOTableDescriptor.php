@@ -27,7 +27,7 @@ class PDOTableDescriptor implements ISelectDescriptor, IKeyMap {
 
 	/**
 	 * Map data to a data map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Framework\PDO\API\Misc\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\API\Misc\IRequest $Request
 	 * @return void

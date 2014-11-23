@@ -84,9 +84,9 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
     }
 
     /**
-     * Creates a new Model based on the provided row of column value pairs and returns a new instance
+     * Creates a new Model based on the provided row of column value pairs and returns a new inst
      * @param array|mixed $row column value pairs to insert into new row
-     * @return PDOPrimaryKeyModel the created model instance
+     * @return PDOPrimaryKeyModel the created model inst
      * @throws ModelAlreadyExistsException
      * @throws \CPath\Framework\API\Exceptions\ValidationException if a column fails to validate
      */
@@ -96,9 +96,9 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
     }
 
     /**
-     * Creates a new Model based on the provided row of column value pairs and returns a new instance
+     * Creates a new Model based on the provided row of column value pairs and returns a new inst
      * @param array|mixed $row column value pairs to insert into new row
-     * @return PDOPrimaryKeyModel the created model instance
+     * @return PDOPrimaryKeyModel the created model inst
      * @throws ModelAlreadyExistsException
      * @throws \CPath\Framework\API\Exceptions\ValidationException if a column fails to validate
      */
@@ -118,7 +118,7 @@ abstract class PDOPrimaryKeyTable extends PDOTable {
      * Loads a model based on a primary key column value
      * @param $id String the primary key value to search for
      * @param boolean $throwIfNotFound if true, throws an exception if not found
-     * @return PDOModel the found model instance
+     * @return PDOModel the found model inst
      * @throws ModelNotFoundException if a model entry was not found
      * @throws \Exception if the model does not contain primary keys
      */

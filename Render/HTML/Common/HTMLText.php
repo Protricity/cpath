@@ -24,13 +24,14 @@ class HTMLText implements IRenderHTML
         $this->mText = $text;
     }
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param Attribute\IAttributes $Attr
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param Attribute\IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
         if($this->mText !== null)
             echo $this->mText;
     }

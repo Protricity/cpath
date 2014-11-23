@@ -9,26 +9,30 @@ namespace CPath\Render\HTML\Attribute;
 
 use CPath\Render\HTML\Attribute;
 
-class HTMLAttributes implements IAttributes {
+class Attributes implements IAttributes {
     private $mAttr = array();
     private $mClasses = array();
     private $mStyles = array();
 
-    function __construct($htmlAttr=null) {
-	    if($htmlAttr) {
-		    if(!is_array($htmlAttr))
-			    $htmlAttr = array($htmlAttr);
-		    foreach($htmlAttr as $k=>$v) {
-			    if(is_int($k))
-				    $this->addHTML($v);
-			    else
-				    $this->setAttribute($k, $v);
+    function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
+	    $args = func_get_args();
+	    for($i=0; $i<sizeof($args); $i+=2) {
+		    $attrName = $args[$i];
+		    if(isset($args[$i+1])) {
+			    $attrValue = $args[$i+1];
+			    $this->setAttribute($attrName, $attrValue);
+		    } else {
+			    if(!is_array($attrName))
+				    $attrName = array($attrName);
+			    foreach($attrName as $k=>$v) {
+				    if(is_int($k))
+					    $this->addHTML($v);
+				    else
+					    $this->setAttribute($k, $v);
+			    }
 		    }
 	    }
-//        if($htmlAttr)
-//            $this->addHTML($htmlAttr);
     }
-
 
     /**
      * Add an attribute to the collection
@@ -84,7 +88,9 @@ class HTMLAttributes implements IAttributes {
 	 * @return String|Array
 	 */
 	function getAttribute($name = null) {
-		return isset($this->mAttr[$name]) ? $this->mAttr[$name] : $this->mAttr;
+		if($name === null)
+			return $this->mAttr;
+		return isset($this->mAttr[$name]) ? $this->mAttr[$name] : null;
 	}
 
 	/**
@@ -101,7 +107,9 @@ class HTMLAttributes implements IAttributes {
 	 * @return String|Array
 	 */
 	function getStyle($name = null) {
-		return isset($this->mStyles[$name]) ? $this->mStyles[$name] : $this->mStyles;
+		if($name === null)
+			return $this->mStyles;
+		return isset($this->mStyles[$name]) ? $this->mStyles[$name] : null;
 	}
 
     /**
@@ -135,7 +143,7 @@ class HTMLAttributes implements IAttributes {
 				: func_get_args());
 	    $c = 0;
 	    foreach($classes as $class) {
-		    if(in_array($class, $this->mClasses))
+		    if(!$class || in_array($class, $this->mClasses))
 			    continue;
 		    $c++;
 		    $this->mClasses[] = $class;
@@ -167,24 +175,28 @@ class HTMLAttributes implements IAttributes {
 	/**
 	 * Render html attributes
 	 * @param IAttributes|null $Additional
+	 * @param IAttributes $_Additional
 	 * @return string|void always returns void
 	 */
-	function render(IAttributes $Additional = null) {
-		$classes = $this->mClasses;
-		$styles = $this->mStyles;
-		$attributes = $this->mAttr;
+	function render(IAttributes $Additional = null, IAttributes $_Additional = null) {
+		$classes = $this->getClasses();
+		$styles = $this->getStyle();
+		$attributes = $this->getAttribute();
 
-		if($Additional) {
-			$classes = array_combine($classes, $Additional->getClasses());
-			$styles += $Additional->getStyle();
-			$attributes += $Additional->getAttribute();
+		foreach(func_get_args() as $Additional) {
+			if($Additional instanceof IAttributes) {
+				$classes = array_merge($classes, $Additional->getClasses());
+				$styles += $Additional->getStyle();
+				$attributes += $Additional->getAttribute();
+			}
 		}
 
 		if($classes) {
 			$i=0;
 			echo ' class=\'';
 			foreach($classes as $class)
-				echo ($i++ ? ' ' : ''), $class;
+				if($class)
+					echo ($i++ ? ' ' : ''), $class;
 			echo '\'';
 		}
 
@@ -192,11 +204,18 @@ class HTMLAttributes implements IAttributes {
 			$i=0;
 			echo ' style=\'';
 			foreach($styles as $name=>$value)
-				echo ($i++ ? '; ' : ''), $name . ": " . $value;
+				echo ($i++ ? '; ' : ''), $name, ": ", $value;
 			echo '\'';
 		}
 
 		foreach($attributes as $key => $value)
-			echo ' ' . $key . "='" . $value . "'";
+			echo ' ', $key, '="', str_replace('"', "'", $value), '"';
+	}
+
+	function __toString() {
+		ob_start();
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
 	}
 }

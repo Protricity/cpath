@@ -21,7 +21,7 @@ class ArrayKeyMap implements IKeyMap
 
 	/**
 	 * Map data to the key map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void

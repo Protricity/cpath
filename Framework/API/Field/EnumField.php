@@ -32,7 +32,7 @@ class EnumField extends Field {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param IRequest $Request the request instance
+     * @param IRequest $Request the request inst
      * @param String $fieldName the field name
      * @return mixed the formatted input field that passed validation
      * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails
@@ -54,7 +54,7 @@ class EnumField extends Field {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */

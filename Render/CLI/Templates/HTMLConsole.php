@@ -52,7 +52,7 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	/**
 	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -63,17 +63,18 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\CLI\Templates\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		if(!$this->mInputPath->getInputValue($Request))
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		if(!$this->mInputPath->getRequestValue($Request))
 			$this->mInputPath->setInputValue($Request->getPath());
-		if(!$this->mInputDomain->getInputValue($Request))
+		if(!$this->mInputDomain->getRequestValue($Request))
 			$this->mInputDomain->setInputValue($Request->getDomainPath(true));
 
 		//$this->getHTMLLog()->log($Request->getPath());
-		$this->mContainer->renderHTML($Request, $Attr);
+		$this->mContainer->renderHTML($Request, $Attr, $Parent);
 	}
 }

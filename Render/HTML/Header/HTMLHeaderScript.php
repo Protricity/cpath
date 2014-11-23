@@ -8,16 +8,14 @@
 namespace CPath\Render\HTML\Header;
 
 use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class HTMLHeaderScript implements IRenderHTML, IHTMLSupportHeaders
+class HTMLHeaderScript implements IHTMLSupportHeaders
 {
     private $mPath, $mDefer, $mCharset;
 
     /**
-     * Create a <script> header instance
+     * Create a <script> header inst
      * @param String $path the script path
      * @param bool $defer
      * @param null $charset
@@ -29,19 +27,9 @@ class HTMLHeaderScript implements IRenderHTML, IHTMLSupportHeaders
     }
 
     /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        // No render for Headers
-    }
-
-    /**
-     * Write all support headers used by this IView instance
+     * Write all support headers used by this IView inst
      * @param IRequest $Request
-     * @param IHeaderWriter $Head the writer instance to use
+     * @param IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {

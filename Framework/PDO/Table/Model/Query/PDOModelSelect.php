@@ -21,9 +21,9 @@ class PDOModelSelect extends PDOSelect {
 
     /**
      * Create a new PDOModelSelect
-     * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table A PDOTable instance to select with
+     * @param \CPath\Framework\PDO\Table\Types\PDOTable $Table A PDOTable inst to select with
      * @param ISelectDescriptor $Descriptor
-     * @internal param \PDO $DB the database instance
+     * @internal param \PDO $DB the database inst
      */
     public function __construct(Table\Types\PDOTable $Table, ISelectDescriptor $Descriptor=null) {
         parent::__construct($Table, array($Table->getTableName() . '.*'), $Descriptor);

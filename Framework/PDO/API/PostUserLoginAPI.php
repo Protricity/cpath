@@ -21,7 +21,7 @@ interface IPostLoginExecute
 
     /**
      * Perform on successful GetAPI execution
-     * @param PDOUserModel $User the logged in user account instance
+     * @param PDOUserModel $User the logged in user account inst
      * @param ISessionManager $Session the logged in user session
      * @param IRequest $Request
      * @param IResponse $Response
@@ -35,7 +35,7 @@ class PostUserLoginAPI extends AbstractPDOAPI {
     private $mUserTable;
 
     /**
-     * Construct an instance of this API
+     * Construct an inst of this API
      * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the PDOUserTable for this API
      */
     function __construct(PDOUserTable $Table) {
@@ -63,7 +63,7 @@ class PostUserLoginAPI extends AbstractPDOAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return IResponse|mixed the api call response with data, message, and status
      */

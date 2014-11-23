@@ -18,13 +18,16 @@ class HTMLFormAjaxSupport implements IRenderHTML, IHTMLSupportHeaders
 {
 	const CSS_AJAX_SUPPORT = 'html-form-ajax-support';
 
-	public function __construct() {
+	private $mLegendContent = null;
+
+	public function __construct($legendContent="Ajax Form") {
+		$this->mLegendContent = $legendContent;
 	}
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
+	 * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer inst to use
 	 * @return void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -34,12 +37,13 @@ class HTMLFormAjaxSupport implements IRenderHTML, IHTMLSupportHeaders
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$Legend = new HTMLElement('legend', self::CSS_AJAX_SUPPORT);
-		$Legend->renderHTML($Request, $Attr);
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		$Legend = new HTMLElement('legend', self::CSS_AJAX_SUPPORT, $this->mLegendContent);
+		$Legend->renderHTML($Request, $Attr, $Parent);
 	}
 }

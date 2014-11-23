@@ -17,16 +17,17 @@ class CLIRequiredArgument extends CLIArgument
 	}
 
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
-	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
-	 * @return mixed request value
+	 * @param $value
+	 * @param null $fieldName
+	 * @throws \CPath\Request\Parameter\Exceptions\RequiredParameterException
+	 * @return mixed validated value
 	 */
-	function validateRequest(IRequest $Request) {
-		$value = parent::validateRequest($Request);
+	function validate(IRequest $Request, $value, $fieldName = null) {
+		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
 		if (!$value)
-			throw new RequiredParameterException("Parameter is required: " . $this->getFieldName());
+			throw new RequiredParameterException($this, "CLI Argument is required: " . $this->getFieldName());
 		return $value;
 	}
 }

@@ -37,7 +37,7 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements ISessio
     private static $mSession = array();
 
     /**
-     * Loads a session instance from a session key
+     * Loads a session inst from a session key
      * @param $key String the session key to search for
      * @return ISessionManager the found user session
      * @throws SessionExpiredException if the session was active but expired or not found
@@ -53,7 +53,7 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements ISessio
     }
 
     /**
-     * Loads a session instance from the active
+     * Loads a session inst from the active
      * @return ISessionManager|PDOUserSessionModel the found user session
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found
@@ -88,7 +88,7 @@ abstract class PDOUserSessionTable extends PDOPrimaryKeyTable implements ISessio
     }
 
     /**
-     * Create a new Session for an IUser Instance
+     * Create a new Session for an IUser inst
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param \CPath\Framework\User\Interfaces\IUser $User
      * @return ISessionManager the new session

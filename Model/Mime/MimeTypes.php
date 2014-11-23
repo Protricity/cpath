@@ -28,8 +28,8 @@ abstract class MimeTypes {
     // Statics
 
     /**
-     * (Shorthand) Get a mime type from a file name or return the MimeTypes instance
-     * @param String|null $path if passed, the mime type string is returned, otherwise the MimeTypes instance is returned
+     * (Shorthand) Get a mime type from a file name or return the MimeTypes inst
+     * @param String|null $path if passed, the mime type string is returned, otherwise the MimeTypes inst is returned
      * @return MimeTypes|String
      * @throws MimeTypeNotFoundException if no mime type was found
      */

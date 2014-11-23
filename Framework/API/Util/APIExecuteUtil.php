@@ -66,7 +66,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object or throwing an exception
-     * @param IRequest $Request the IRequest instance for this render which contains the request
+     * @param IRequest $Request the IRequest inst for this render which contains the request
      * @internal param Array $args additional arguments for this execution
      * @return \CPath\Response\IResponse the api call response with data, message, and status
      */
@@ -84,7 +84,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Execute this API Endpoint with the entire request returning an IResponse object
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IResponse the api call response with data, message, and status
      */
     final public function executeOrCatch(IRequest $Request) {
@@ -107,7 +107,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Process a request. Validates each Field. Provides optional Field formatting
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @throws \CPath\Framework\API\Exceptions\ValidationExceptions
      * @return void
      */
@@ -152,7 +152,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     private function generateFieldShorts(IRequest $Request) {
@@ -167,7 +167,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
     /**
      * Enable or disable logging for this IAPI
      * @param bool $enable set true to enable and false to disable
-     * @return $this Return the class instance
+     * @return $this Return the class inst
      */
     function enableLog($enable = true) {
         $this->mLoggingEnabled = $enable;
@@ -194,7 +194,7 @@ class APIExecuteUtil implements IAPI, ILogListener, IDescribableAggregate {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {

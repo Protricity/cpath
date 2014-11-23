@@ -14,7 +14,7 @@ interface IRenderXML {
 
     /**
      * Render request as xml
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
      * @param bool $declaration if true, the <!xml...> declaration will be rendered
      * @return String|void always returns void

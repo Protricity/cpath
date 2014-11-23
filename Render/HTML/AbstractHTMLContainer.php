@@ -16,7 +16,7 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \I
 	 * (PHP 5 &gt;= 5.0.0)<br/>
 	 * Retrieve an external iterator
 	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
+	 * @return Traversable An inst of an object implementing <b>Iterator</b> or
 	 * <b>Traversable</b>
 	 */
 	public function getIterator() {
@@ -85,7 +85,8 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \I
 	 * @return void
 	 */
 	public function offsetUnset($offset) {
-		throw new \InvalidArgumentException("May not unset elements in " . get_class($this));
+		$this->removeContent($offset);
+//		throw new \InvalidArgumentException("May not unset elements in " . get_class($this));
 		//unset($this->mContent[$offset]);
 	}
 }

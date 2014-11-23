@@ -12,12 +12,13 @@ use CPath\Request\IRequest;
 
 interface IRenderHTML {
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param IAttributes $Attr
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null);
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null);
 }
 

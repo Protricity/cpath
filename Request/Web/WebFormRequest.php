@@ -25,9 +25,10 @@ class WebFormRequest extends WebRequest implements IFormRequest
 
 	function getRequestValue($paramName) {
 		$values = $this->getAllFormValues();
-		return isset($values[$paramName])
-			? $values[$paramName]
-			: parent::getRequestValue($paramName);
+		if(isset($values[$paramName]))
+			return $values[$paramName];
+
+		return parent::getRequestValue($paramName);
 	}
 
 
@@ -40,7 +41,8 @@ class WebFormRequest extends WebRequest implements IFormRequest
 		$values = $this->getAllFormValues();
 		if(isset($values[$fieldName]))
 			return $values[$fieldName];
-		return null;
+
+		return parent::getRequestValue($fieldName);
 	}
 
     protected function getAllFormValues() {

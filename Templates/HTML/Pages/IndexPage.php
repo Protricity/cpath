@@ -41,7 +41,7 @@ class IndexPage implements IHTMLTemplate
 
     /**
      * Render request as html
-     * @param \CPath\Request\IRequest|\CPath\Templates\HTML\Pages\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest|\CPath\Templates\HTML\Pages\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */

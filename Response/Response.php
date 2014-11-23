@@ -59,11 +59,11 @@ class Response implements IHeaderResponse {
 
     /**
      * Update and return the Response
-     * @param $status
      * @param $msg
+     * @param $status
      * @return $this
      */
-    function update($status=null, $msg=null) {
+    function update($msg=null, $status=null) {
         if($msg !== null)
             $this->setMessage($msg);
         if($status !== null)

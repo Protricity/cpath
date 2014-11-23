@@ -28,8 +28,8 @@ class RouteBuilder {
     private $mMethod;
 
     /**
-     * @param IBuildRequest $Request the build instance for this session
-     * @param IRouteMap $Routable instance of class file to be built/modified
+     * @param IBuildRequest $Request the build inst for this session
+     * @param IRouteMap $Routable inst of class file to be built/modified
      * @param String|null $groupKey optional group key for added routes
      * @throws \InvalidArgumentException
      */

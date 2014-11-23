@@ -7,8 +7,11 @@
  */
 namespace CPath\Request\Parameter\Exceptions;
 
-use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Parameter\IRequestParameter;
 
-class RequiredFormFieldException extends RequestException
+class RequiredFormFieldException extends ParameterException
 {
+	public function __construct(IRequestParameter $Parameter, $message = null) {
+		parent::__construct($Parameter, $message);
+	}
 }

@@ -7,9 +7,7 @@
  */
 namespace CPath\Request\Session;
 
-use CPath\Request\IRequest;
-
-interface ISessionRequest extends IRequest
+interface ISessionRequest
 {
     /**
      * Return a referenced array representing the request session
@@ -18,5 +16,17 @@ interface ISessionRequest extends IRequest
      */
     function &getSession($key = null);
 
-    function resetSession();
+	/**
+	 * Start a new session
+	 * @param bool $reset if true, session will be reset
+	 * @return bool true if session was started, otherwise false
+	 */
+	function startSession($reset=false);
+
+	/**
+	 * End current session
+	 * @return bool true if session was started, otherwise false
+	 */
+	function endSession();
+
 }

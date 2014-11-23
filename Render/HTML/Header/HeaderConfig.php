@@ -10,5 +10,7 @@ namespace CPath\Render\HTML\Header;
 class HeaderConfig
 {
 	static $JQueryPath=null;
+	static $RequireJSPath=null;
 }
 HeaderConfig::$JQueryPath = HeaderConfig::$JQueryPath ?: __DIR__ . '/assets/jquery.min.js';
+HeaderConfig::$RequireJSPath = HeaderConfig::$RequireJSPath ?: __DIR__ . '/assets/require.min.js';

@@ -50,7 +50,7 @@ class ErrorViewNavBarLayout extends AbstractNavBarLayout
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request)
@@ -61,7 +61,7 @@ class ErrorViewNavBarLayout extends AbstractNavBarLayout
 
     /**
      * Render the main view content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
      * @return void
      */
@@ -77,7 +77,7 @@ class ErrorViewNavBarLayout extends AbstractNavBarLayout
 
     /**
      * Render the header
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderBodyFooterContent(IRequest $Request)
@@ -87,7 +87,7 @@ class ErrorViewNavBarLayout extends AbstractNavBarLayout
 
     /**
      * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderNavBarContent(IRequest $Request)

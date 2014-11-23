@@ -24,11 +24,12 @@ final class RenderableResponse extends Response implements IRenderHTML
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$this->mRenderable->renderHTML($Request, $Attr);
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		$this->mRenderable->renderHTML($Request, $Attr, $Parent);
 	}
 }

@@ -29,7 +29,7 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
     /**
      * Write a header as raw html
      * @param String $html
-     * @return IHeaderWriter return instance of self
+     * @return IHeaderWriter return inst of self
      */
     function writeHTML($html) {
         echo RI::ni(), $html;
@@ -41,7 +41,7 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      * @param String $scriptPath the script url
      * @param bool $defer
      * @param null $charset
-     * @return IHeaderWriter return instance of self
+     * @return IHeaderWriter return inst of self
      */
     function writeScript($scriptPath, $defer = false, $charset = null) {
         if(strpos($scriptPath, $this->mRootPath) === 0) {
@@ -65,7 +65,7 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
     /**
      * Write a <link type="text/css"> header only the first time it's encountered
      * @param String $styleSheetPath the stylesheet url
-     * @return IHeaderWriter return instance of self
+     * @return IHeaderWriter return inst of self
      */
     function writeStyleSheet($styleSheetPath) {
         if(strpos($styleSheetPath, $this->mRootPath) === 0) {

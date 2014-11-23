@@ -24,8 +24,8 @@ class CLIArgument extends FormField
 	 * @param \CPath\Request\IRequest $Request
 	 * @return mixed
 	 */
-	function getInputValue(IRequest $Request) {
-		return parent::getInputValue($Request)
+	function getRequestValue(IRequest $Request) {
+		return parent::getRequestValue($Request)
 			?: (isset($Request[$this->mArgPos])
 			? $Request[$this->mArgPos]
 			: null);

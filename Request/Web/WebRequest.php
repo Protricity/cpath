@@ -107,7 +107,8 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
                 case 'text/xml':
                     $Type = new XMLMimeType($type, $Type);
                     break;
-                case 'text/html':
+	            case '*/*':
+	            case 'text/html':
                 case 'application/xhtml+xml':
                     $Type = new HTMLMimeType($type, $Type);
                     break;
@@ -166,11 +167,40 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         return $_SESSION[$key];
     }
 
-    function resetSession() {
-        session_unset();
-        session_regenerate_id();
-        session_start();
-    }
+	/**
+	 * Start a new session
+	 * @param bool $reset
+	 * @throws \Exception
+	 * @return bool true if session was started, otherwise false
+	 */
+	function startSession($reset=false) {
+		if($reset) {
+			session_unset();
+			session_regenerate_id();
+			session_start();
+		} else {
+			if(isset($_SESSION))
+				return true;
+
+			if(headers_sent($file, $line))
+				throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+
+			if(!session_start())
+				return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * End current session
+	 * @return bool true if session was started, otherwise false
+	 */
+	function endSession() {
+		session_regenerate_id();
+		session_destroy();
+	}
+
 
     /**
      * Get a cookie

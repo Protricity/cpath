@@ -17,11 +17,13 @@ interface IResponse
 	const HTTP_TEMPORARY_REDIRECT = 307;
 
 	const HTTP_ERROR = 400;
+	const HTTP_UNAUTHORIZED = 401;
 	const HTTP_NOT_FOUND = 404;
 	const HTTP_CONFLICT = 409;
 
 	const STR_CODE = 'code';
-    const STR_MESSAGE = 'message';
+	const STR_MESSAGE = 'message';
+	const STR_CONTENT = 'content';
 
     //const JSON_RESPONSE = 'response';
 

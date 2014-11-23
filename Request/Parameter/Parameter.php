@@ -7,20 +7,21 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Attribute\AttributeCollection;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
-use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
+use CPath\Request\Parameter\HTML\ParameterHTMLInputField;
 use CPath\Request\Validation\IValidation;
 
-class Parameter implements IRequestParameter, IRenderHTML
+class Parameter implements IRequestParameter, IRenderHTML, IValidation
 {
 	const CSS_CLASS_ERROR = 'error';
 
     private $mName, $mDescription, $mValue;
+	private $mAttributes = array();
 	protected $mFilters = array();
 
     public function __construct($paramName, $description=null, $defaultValue=null) {
@@ -28,6 +29,10 @@ class Parameter implements IRequestParameter, IRenderHTML
 	    $this->mDescription = $description;
 	    $this->mValue = $defaultValue;
     }
+
+	function addAttributes(IAttributes $Attributes) {
+		$this->mAttributes[] = $Attributes;
+	}
 
     function getFieldName() {
         return $this->mName;
@@ -41,18 +46,9 @@ class Parameter implements IRequestParameter, IRenderHTML
 		return $this->mDescription;
 	}
 
-	protected function getHTMLInput(IRequest $Request, IHTMLInput $Input=null) {
-		$Input = $Input ?: new HTMLInputField();
-		$Input->setFieldName($this->getFieldName());
-		try {
-			$value = $this->getInputValue($Request);
-			$Input->setInputValue($value);
-			$this->validateRequest($Request);
-
-		} catch (\Exception $ex) {
-			$Input->addClass(self::CSS_CLASS_ERROR);
-
-		}
+	function getHTMLInput() {
+		$Input = new HTMLInputField($this->getFieldName());
+		$Input->setAttribute('placeholder', $this->getFieldName());
 		return $Input;
 	}
 
@@ -70,7 +66,7 @@ class Parameter implements IRequestParameter, IRenderHTML
 	 * @throws RequestException if the parameter failed validated
 	 * @return mixed
 	 */
-	function getInputValue(IRequest $Request) {
+	function getRequestValue(IRequest $Request) {
 //		$Params = new SessionParameters($Request);
 //		$Params->add($this);
 		$name = $this->getFieldName();
@@ -79,25 +75,34 @@ class Parameter implements IRequestParameter, IRenderHTML
 
 	function tryValue(IRequest $Request, \Exception &$Exception) {
 		try {
-			return $this->validateRequest($Request);
+			$value = $this->getRequestValue($Request);
+			return $this->validate($Request, $value, $this->getFieldName());
 		} catch (\Exception $ex) {
 			$Exception = $ex;
 			return null;
 		}
 	}
 
-	/**
-	 * Validate the request and return the validated content
-	 * @param IRequest $Request
-	 * @return mixed validated content
-	 */
-	function validateRequest(IRequest $Request) {
-		$value = $this->getInputValue($Request);
 
+	/**
+	 * Validate the request value and return the validated value
+	 * @param IRequest $Request
+	 * @param $value
+	 * @param null $fieldName
+	 * @throw Exception if validation failed
+	 * @return mixed validated value
+	 */
+	function validate(IRequest $Request, $value, $fieldName = null) {
 		$value = $this->filter($Request, $value);
 		$this->mValue = $value;
 		return $value;
-    }
+	}
+
+	function validateRequest(IRequest $Request) {
+		$value = $this->getRequestValue($Request);
+		$value = $this->validate($Request, $value, $this->getFieldName());
+		return $value;
+	}
 
 	/**
 	 * @param IRequest $Request
@@ -111,7 +116,7 @@ class Parameter implements IRequestParameter, IRenderHTML
 		foreach($this->mFilters as $Filter) {
 			try {
 				if($Filter instanceof IValidation) {
-					$Filter->validate($Request, $value);
+					$Filter->validate($Request, $value, $this->getFieldName());
 
 				} else {
 					list($filterID, $filterOpts, $desc) = $Filter + array(-1, null, null);
@@ -142,15 +147,25 @@ class Parameter implements IRequestParameter, IRenderHTML
 		return $value;
 	}
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param Attribute\IAttributes $Attr
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-	    $Input = $this->getHTMLInput($Request, $Attr);
-	    $Input->renderHTML($Request, $Attr);
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+	    $Input = $this->getHTMLInput();
+	    $Attrs = $this->mAttributes;
+	    if($Attr) {
+		    $Attrs[] = $Attr;
+		    if(sizeof($Attrs) > 1)
+			    $Attr = AttributeCollection::combineA($Attrs);
+	    } else {
+		    if(sizeof($Attrs) > 0)
+			    $Attr = AttributeCollection::combineA($Attrs);
+	    }
+	    $Input->renderHTML($Request, $Attr, $Parent);
 	}
 
 	function __invoke(IRequest $Request) {

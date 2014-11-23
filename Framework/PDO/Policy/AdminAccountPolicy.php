@@ -27,7 +27,7 @@ class AdminAccountPolicy extends UserAccountViewerPolicy {
 
     /**
      * Create an 'admin only' security policy
-     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an instance of the current user session
+     * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an inst of the current user session
      */
     public function __construct(PDOUserModel $User) {
         $this->mUserTable = new UserUtil($User);
@@ -53,7 +53,7 @@ class AdminAccountPolicy extends UserAccountViewerPolicy {
      * @param IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException
-     * @internal param \CPath\Framework\PDO\Table\PDOTable $Table The table instance
+     * @internal param \CPath\Framework\PDO\Table\PDOTable $Table The table inst
      * @return void
      */
     function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {
@@ -68,7 +68,7 @@ class AdminAccountPolicy extends UserAccountViewerPolicy {
      * @param IRequest $Request
      * @param int $intent the read intent.
      * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
-     * Note: during IWriteAccess::INTENT_POST, the instance $Model contains no data.
+     * Note: during IWriteAccess::INTENT_POST, the inst $Model contains no data.
      * @throws InvalidPermissionException if the user account is not an Admin account
      */
     function assertWriteAccess(PDOModel $User, IRequest $Request, $intent) {
@@ -90,7 +90,7 @@ class AdminAccountPolicy extends UserAccountViewerPolicy {
     }
 
     /**
-     * Return the user model instance
+     * Return the user model inst
      * @return UserUtil
      */
     function getUserAccount() { return $this->mUserTable; }

@@ -40,14 +40,14 @@ interface IAttributes {
 	/**
 	 * Return the style value or a name-value associative array
 	 * @param null $name
-	 * @return String|Array
+	 * @return String|null|Array
 	 */
 	function getStyle($name=null);
 
 	/**
 	 * Return the attribute value or a name-value associative array
 	 * @param null $name
-	 * @return String|Array
+	 * @return String|null|Array
 	 */
 	function getAttribute($name=null);
 
@@ -59,7 +59,7 @@ interface IAttributes {
 	function render(IAttributes $Additional=null);
 
     /**
-     * Merge attributes and return an instance
+     * Merge attributes and return an inst
      * @param IAttributes|null $Attributes
      * @return IAttributes
      */

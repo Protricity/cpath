@@ -52,7 +52,7 @@ final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHead
     }
 
     /**
-     * Log an exception instance
+     * Log an exception inst
      * @param \Exception $ex The log message
      * @param int $flags [optional] log flags
      * @return void
@@ -96,9 +96,9 @@ final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHead
     }
 
     /**
-     * Write all support headers used by this IView instance
+     * Write all support headers used by this IView inst
      * @param IRequest $Request
-     * @param IHeaderWriter $Head the writer instance to use
+     * @param IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -108,7 +108,7 @@ final class StaticLogger implements ILogListener, ISequenceMap, IHTMLSupportHead
 
     /**
      * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param Attribute\IAttributes $Attr
      * @return String|void always returns void
      */

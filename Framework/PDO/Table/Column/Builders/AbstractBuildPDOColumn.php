@@ -228,7 +228,7 @@ abstract class AbstractBuildPDOColumn implements IPDOColumnBuilder
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param \CPath\Request\IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request inst
      * @param String $fieldName the field name
      * @throws \Exception
      * @return mixed the formatted input field that passed validation

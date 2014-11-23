@@ -12,6 +12,7 @@ use CPath\Render\HTML\Element\HTMLForm;
 use CPath\Request\Common\IInputField;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
+use CPath\Request\Parameter\IRequestParameter;
 use CPath\Request\Validation\IValidation;
 use CPath\Response\IResponse;
 
@@ -30,7 +31,7 @@ class FormValidator
 	 * @param IRequest $Request
 	 * @param null $paramName
 	 * @throws \CPath\Render\HTML\Common\RenderableException
-	 * @return array
+	 * @return array|string
 	 */
 	function validateRequest(IRequest $Request, $paramName = null) {
 		$Form   = $this->mForm;
@@ -39,17 +40,25 @@ class FormValidator
 		$Exs   = array();
 		$c     = 0;
 		$found = false;
-		foreach ($Form->getContent() as $Content) {
-			if (!$Content instanceof IInputField)
+		foreach ($Form->getContentRecursive() as $Content) {
+			if($Content instanceof IRequestParameter) {
+				$name = $Content->getFieldName();
+				$value = $Content->getRequestValue($Request);
+
+			} elseif ($Content instanceof IInputField) {
+				$name = $Content->getFieldName();
+				$value = $Content->getRequestValue($Request);
+
+			} else {
 				continue;
-			$name = $Content->getFieldName();
+			}
+
 			if ($name === $paramName)
 				$found = true;
-			$value = $Content->getInputValue($Request);
 
 			if ($Content instanceof IValidation) {
 				try {
-					$return        = $Content->validate($Request, $value);
+					$return        = $Content->validate($Request, $value, $name);
 					$values[$name] = $return;
 					$c++;
 				} catch (RequestException $ex) {
@@ -65,7 +74,9 @@ class FormValidator
 			$Exs[] = new \InvalidArgumentException("Form field not found: " . $paramName);
 
 		if ($Exs) {
-			$message   = sizeof($Exs) . " Exception(s) occurred during validation: \n\t" . implode("\n\t", $Exs);
+			$message   = sizeof($Exs) . " Exception(s) occurred during validation:";
+			foreach($Exs as $Ex)
+				$message .= "\n\t" . $Ex->getMessage();
 			$Exception = new RenderableException($Form, $message, IResponse::HTTP_ERROR, $Exs[0]);
 			throw $Exception;
 		}

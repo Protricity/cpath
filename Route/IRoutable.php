@@ -13,7 +13,7 @@ interface IRoutable {
 
     /**
      * Route the request to this class object and return the object
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
      * @param null|mixed $_arg [varargs] passed by route map
      * @return void|bool|Object returns a response object

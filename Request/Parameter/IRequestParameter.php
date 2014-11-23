@@ -32,6 +32,6 @@ interface IRequestParameter extends IInputField
 	 * @param IRequest $Request
 	 * @return mixed validated content
 	 */
-	function validateRequest(IRequest $Request);
+	//function validateRequest(IRequest $Request);
 }
 

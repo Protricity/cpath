@@ -15,7 +15,7 @@ use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException
 class BuildPDOPKTable extends AbstractBuildPDOPKTable {
 
     /**
-     * Create a new BuildPDOPKTable builder instance
+     * Create a new BuildPDOPKTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment

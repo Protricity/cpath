@@ -19,7 +19,7 @@ class BuildPDOTaskReceiptTable extends AbstractBuildPDOPKTable {
     public $Column_User_ID, $Column_Class, $Column_Data;
 
     /**
-     * Create a new BuildPDOUserSessionTable builder instance
+     * Create a new BuildPDOUserSessionTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment

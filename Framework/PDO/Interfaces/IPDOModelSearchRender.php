@@ -14,17 +14,17 @@ use CPath\Request\IRequest;
 interface IPDOModelSearchRender {
 
     /**
-     * Render a PDOModel instance on successful GetAPI execution
-     * @param IRequest $Request the IRequest instance for this render
+     * Render a PDOModel inst on successful GetAPI execution
+     * @param IRequest $Request the IRequest inst for this render
      * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
      * @return void
      */
     function renderSearch(IRequest $Request, PDOSearchResponse $Response);
 
     /**
-     * Render with no PDOModel instance
+     * Render with no PDOModel inst
      * @param \Exception $Exception the exception to render
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderException(\Exception $Exception, IRequest $Request);

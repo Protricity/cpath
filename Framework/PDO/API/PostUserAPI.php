@@ -30,7 +30,7 @@ class PostUserAPI extends PostAPI implements IAPIPostCallbacks {
     const FIELD_LOGIN = 'login';
 
     /**
-     * Construct an instance of the GET API
+     * Construct an inst of the GET API
      * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the PDOTable for this API
      * PRIMARY key is already included
      */
@@ -105,7 +105,7 @@ class PostUserAPI extends PostAPI implements IAPIPostCallbacks {
 
     /**
      * Perform on successful GetAPI execution
-     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel|PDOUserModel $NewUser the new user account instance
+     * @param \CPath\Framework\PDO\Table\Model\Types\PDOModel|PDOUserModel $NewUser the new user account inst
      * @param IRequest $Request
      * @param \CPath\Response\IResponse $Response
      * @return IResponse|null

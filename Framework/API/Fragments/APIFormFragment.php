@@ -30,7 +30,7 @@ class APIFormFragment extends AbstractFormFragment{
 
     /**
      * Render this API Form
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */

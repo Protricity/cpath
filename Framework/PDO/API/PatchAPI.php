@@ -35,8 +35,8 @@ class PatchAPI implements IAPI {
     private $mPolicy;
 
     /**
-     * Construct an instance of the GET API
-     * @param PDOPrimaryKeyTable $Table the table instance
+     * Construct an inst of the GET API
+     * @param PDOPrimaryKeyTable $Table the table inst
      * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
      * Note: PRIMARY key is already included
      * @param IWriteAccess $SecurityPolicy
@@ -65,7 +65,7 @@ class PatchAPI implements IAPI {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @throws \CPath\Framework\API\Exceptions\APIException
      * @return IField[]|IFieldCollection
      */
@@ -102,7 +102,7 @@ class PatchAPI implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @throws \CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException
      * @throws \CPath\Framework\API\Exceptions\APIException
      * @return IResponse the api call response with data, message, and status

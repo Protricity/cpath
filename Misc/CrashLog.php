@@ -37,7 +37,7 @@ class CrashLog {
         $this->mEmail = $email;
         $config = $this->getConfig();
         if($config[self::PARAM_STATE] == self::STATE_STARTED)
-            $this->reportException(new \Exception("Last instance did not shut down"), $config);
+            $this->reportException(new \Exception("Last inst did not shut down"), $config);
 
         $config[self::PARAM_STATE] = self::STATE_STARTED;
         $config[self::PARAM_REQUEST] = json_encode(Base::getRequest()->getDataPath());

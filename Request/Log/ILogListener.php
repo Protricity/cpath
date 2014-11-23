@@ -23,7 +23,7 @@ interface ILogListener
     function log($msg, $flags = 0);
 
     /**
-     * Log an exception instance
+     * Log an exception inst
      * @param \Exception $ex The log message
      * @param int $flags [optional] log flags
      * @return void
@@ -34,7 +34,7 @@ interface ILogListener
      * Add a log listener callback
      * @param ILogListener $Listener
      * @return void
-     * @throws \InvalidArgumentException if this log listener instance does not accept additional listeners
+     * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
      */
     function addLogListener(ILogListener $Listener);
 }

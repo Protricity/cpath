@@ -140,7 +140,7 @@ PHP;
     {
 
         if (!($DB = $this->mBuildDB))
-            throw new \Exception("No DB Instance for table build");
+            throw new \Exception("No DB inst for table build");
 
         $Table = new BuildPDOTable($DB, $name, $comment);
 

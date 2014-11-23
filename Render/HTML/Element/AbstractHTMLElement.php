@@ -8,38 +8,57 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\HTMLAttributes;
+use CPath\Render\HTML\Attribute\AttributeCollection;
+use CPath\Render\HTML\Attribute\Attributes;
+use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 abstract class AbstractHTMLElement implements IRenderHTML
 {
+	const CSS_CLASS = null;
+	const CSS_CONTENT_CLASS = null;
 	const TRIM_CONTENT = false;
+	const PASS_DOWN_ATTRIBUTES = false;
 
 	private $mElmType;
-	private $mAttr;
+	private $mAttributes;
+	private $mAdditionalAttributes=null;
 
 	/**
 	 * @param string $elmType
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 */
 	public function __construct($elmType, $classList = null) {
 		$this->mElmType = $elmType;
+		$this->mAttributes = new Attributes();
+		
 		if($classList instanceof IAttributes) {
-			$this->mAttr = $classList;
+			$this->addAttributes($classList);
 		} else {
-			$this->mAttr = new HTMLAttributes($classList);
+			$this->addClass($classList);
 		}
+	}
+
+	function addAttributes(IAttributes $Attributes, IAttributes $_Attributes=null) {
+		foreach(func_get_args() as $Attributes) {
+			$this->getAdditionalAttributes()->addAttributes($Attributes);
+		}
+	}
+
+	protected function getAdditionalAttributes() {
+		return $this->mAdditionalAttributes
+			?: $this->mAdditionalAttributes = new AttributeCollection();
 	}
 
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
+	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 */
-	abstract function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
+	abstract function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null);
 
 	/**
 	 * Returns true if this element has an open tag
@@ -52,56 +71,90 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	}
 
 	function setAttribute($attrName, $attrValue) {
-		$this->mAttr->setAttribute($attrName, $attrValue);
+		$this->mAttributes->setAttribute($attrName, $attrValue);
 		return $this;
 	}
 
 	function getAttribute($attrName, $defaultValue = null) {
-		return $this->mAttr->getAttribute($attrName, $defaultValue);
+		return $this->mAttributes->getAttribute($attrName, $defaultValue);
 	}
 
-	function hasAttribute($attrName) {
-		return $this->mAttr->hasAttribute($attrName);
-	}
+//	function hasAttribute($attrName) {
+//		return $this->mAttributes->hasAttribute($attrName);
+//	}
 
 	protected function removeAttribute($attrName) {
-		return $this->mAttr->removeAttribute($attrName);
+		return $this->mAttributes->removeAttribute($attrName);
 	}
 
 	public function addClass($classList) {
-		$this->mAttr->addClass($classList);
+		$this->mAttributes->addClass($classList);
 	}
 
 	public function hasClass($className) {
-		return $this->mAttr->hasClass($className);
+		return in_array($className, $this->getClasses());
+	}
+
+	public function getClasses() {
+		$classes = $this->mAttributes->getClasses();
+		if($this->mAdditionalAttributes)
+			$classes = array_merge($classes, $this->getAdditionalAttributes()->getClasses());
+		return $classes;
 	}
 
 	/**
 	 * @return IAttributes
 	 */
 	public function getAttributes() {
-		if (!$this->mAttr instanceof HTMLAttributes)
-			$this->mAttr = new HTMLAttributes($this->mAttr);
-		return $this->mAttr;
+		return $this->mAttributes;
 	}
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr optional attributes for the input field
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		$ClassAttr = null;
+		if(static::CSS_CLASS)
+			$ClassAttr = new ClassAttributes(static::CSS_CLASS);
 		if($this->isOpenTag()) {
-			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), '>';
-			$this->renderContent($Request);
+			$ContentAttr = null;
+
+			if($Attr && static::PASS_DOWN_ATTRIBUTES) {
+				$ContentAttr = $Attr;
+				$Attr = null;
+			}
+
+			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr, $this->mAdditionalAttributes, $ClassAttr), '>';
+
+			if(static::CSS_CONTENT_CLASS !== null) {
+				if($ContentAttr) {
+					$ContentAttr = new AttributeCollection($ContentAttr, new ClassAttributes(static::CSS_CONTENT_CLASS));
+				} else {
+					$ContentAttr = new ClassAttributes(static::CSS_CONTENT_CLASS);
+				}
+			}
+			$this->renderContent($Request, $ContentAttr);
+
 //			if(!static::TRIM_CONTENT)
 //				echo RI::ni();
 			echo "</", $this->getElementType(), ">";
 
 		} else {
-			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), "/>";
+			echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr, $this->mAdditionalAttributes, $ClassAttr), "/>";
 
 		}
 	}
+
+	function __toString() {
+		$ClassAttr = null;
+		if(static::CSS_CLASS)
+			$ClassAttr = new ClassAttributes(static::CSS_CLASS);
+		return "<" . $this->getElementType() . $this->getAttributes() . $this->mAdditionalAttributes . $ClassAttr . '>';
+	}
+
+
 }

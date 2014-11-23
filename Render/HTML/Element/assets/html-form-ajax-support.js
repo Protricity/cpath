@@ -17,6 +17,12 @@
     var HTTP_NOT_FOUND = 404;
     var HTTP_CONFLICT = 409;
 
+    var deferTrigger = function(elm, eventName, args) {
+        setTimeout(function() {
+            elm.trigger(eventName, args);
+        }, 0)
+    };
+
     jQuery(document).ready(function() {
         jQuery(window).resize(onResize);
         onResize();
@@ -32,7 +38,10 @@
                 container.removeClass('error');
                 if(code !== HTTP_SUCCESS)
                     container.addClass('error');
-                container.text(text);
+                if(text.indexOf("\n") > -1)
+                    text = '<p>' + text.split("\n").join("</p><p>") + '</p>';
+
+                container.html(text);
                 container.hide();
                 container.fadeIn();
             };
@@ -52,21 +61,26 @@
                     pending--;
 
                     var content = jqXHR.responseText;
-                    form.trigger( "response-content", [content, jqXHR.statusText, jqXHR]);
+                    deferTrigger(form, "response-content", [content, jqXHR.statusText, jqXHR]);
 
-                    var jsonContent = jQuery.parseJSON(content);
-                    form.trigger( "response-json", [jsonContent, jqXHR.statusText, jqXHR]);
+                    try {
+                        var jsonContent = jQuery.parseJSON(content);
+                        deferTrigger(form, "response-json", [jsonContent, jqXHR.statusText, jqXHR]);
+                        setLegend(jsonContent.message || "No Message", jsonContent.code || HTTP_ERROR);
 
-                    setLegend(jsonContent.message || "No Message", jsonContent.code || 400);
+                    } catch (e) {
+                        setLegend(e.message + '<br/>' + content, HTTP_ERROR);
+
+                    }
                 },
                 success: function(data, textStatus, jqXHR) {
-                    form.trigger( "success", [data, jqXHR.statusText, jqXHR]);
-                    form.trigger( "log", [jqXHR.statusText]);
+                    deferTrigger(form, "success", [data, jqXHR.statusText, jqXHR]);
+                    deferTrigger(form, "log", [jqXHR.statusText]);
 
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
-                    form.trigger( "error", [errorThrown, jqXHR]);
-                    form.trigger( "log", [new Error(errorThrown)]);
+                    deferTrigger(form, "error", [errorThrown, jqXHR]);
+                    deferTrigger(form, "log", [new Error(errorThrown)]);
 
                 }
             };
@@ -80,7 +94,7 @@
                     throw new Error("Too many pending requests");
                 pending++;
 
-                form.trigger( "request", [ajax.url, ajax.data]);
+                deferTrigger(form, "request", [ajax.url, ajax.data]);
                 //form.trigger( "log", [ajax.url + '?' + jQuery.param(ajax.data)]);
                 jQuery.ajax(ajax);
             };

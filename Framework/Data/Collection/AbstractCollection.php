@@ -30,7 +30,7 @@ abstract class AbstractCollection implements ICollection {
      * (PHP 5 &gt;= 5.0.0)<br/>
      * Retrieve an external iterator
      * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
-     * @return Traversable|ICollectionItem An instance of an object implementing <b>Iterator</b> or
+     * @return Traversable|ICollectionItem An inst of an object implementing <b>Iterator</b> or
      * <b>Traversable</b>
      */
     public function getIterator() {

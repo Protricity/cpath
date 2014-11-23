@@ -56,7 +56,7 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 
 	/**
 	 * Map data to the key map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
@@ -72,7 +72,7 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 	/**
 	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -82,12 +82,13 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Route\IHTMLContainer $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Renderer = new SequenceMapRenderer($this);
-		$Renderer->renderHTML($Request, $Attr);
+		$Renderer->renderHTML($Request, $Attr, $Parent);
 	}
 }

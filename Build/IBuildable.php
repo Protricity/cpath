@@ -10,7 +10,7 @@ namespace CPath\Build;
 /**
  * Class IBuildable
  * A class that extends IBuildable is included in build requests
- * The class should return an instance of itself that will be used to build
+ * The class should return an inst of itself that will be used to build
  * @package CPath\Interfaces
  */
 
@@ -18,7 +18,7 @@ interface IBuildable {
 
     /**
      * Handle this request and render any content
-     * @param IBuildRequest $Request the build request instance for this build session
+     * @param IBuildRequest $Request the build request inst for this build session
      * @return String|void always returns void
      * @build --disable 0
      * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build

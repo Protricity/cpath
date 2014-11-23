@@ -36,7 +36,7 @@ class Build implements IAPI {
 
     /**
      * Get all API Fields
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {
@@ -49,7 +49,7 @@ class Build implements IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the request instance for this render which contains the request and args
+     * @param IRequest $Request the request inst for this render which contains the request and args
      * @internal param Array $args additional arguments for this execution
      * @return DataResponse the api call response with data, message, and status
      */
@@ -70,9 +70,9 @@ class Build implements IAPI {
         $exCount = Build::buildAll(true);
         if($exCount)
             return $Response
-                ->update(false, "Build Failed: {$exCount} Exception(s) Occurred");
+                ->update("Build Failed: {$exCount} Exception(s) Occurred", false);
         return $Response
-            ->update(true, "Build Complete");
+            ->update("Build Complete", true);
     }
 
     /**
@@ -312,13 +312,13 @@ class Build implements IAPI {
             }
 
 //            if(!$Buildable) {
-//                Log::v2(__CLASS__, "No Buildable instance returned for '{$Class->getName()}'");
+//                Log::v2(__CLASS__, "No Buildable inst returned for '{$Class->getName()}'");
 //                $this->mClasses[] = $Class;
 //                continue;
 //            }
 //
 //            if(!$Buildable instanceof IBuildable){
-//                Log::e(__CLASS__, "Buildable instance returned does not implement IBuildable for '{$Class->getName()}'");
+//                Log::e(__CLASS__, "Buildable inst returned does not implement IBuildable for '{$Class->getName()}'");
 //                $exCount++;
 //                continue;
 //            }
@@ -460,7 +460,7 @@ class Build implements IAPI {
 
     /**
      * Render this route destination
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return String|void always returns void
      */
     function getHandler(IRequest $Request) {

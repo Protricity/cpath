@@ -47,9 +47,9 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     }
 //    /**
-//     * Return an instance of IRender
-//     * @param IRequest $Request the IRequest instance for this render
-//     * @return IRender return the renderer instance
+//     * Return an inst of IRender
+//     * @param IRequest $Request the IRequest inst for this render
+//     * @return IRender return the renderer inst
 //     */
 //    function getRenderer(IRequest $Request) {
 //        $this->mArgs = $Request->getArgs();
@@ -58,7 +58,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Render the navigation bar content
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderNavBarContent(IRequest $Request) {
@@ -82,7 +82,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Render request as JSON
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     function renderJSON(IRequest $Request)
@@ -94,7 +94,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Render request as plain text
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     function renderText(IRequest $Request)
@@ -106,7 +106,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Render request as xml
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
      * @return String|void always returns void
      */
@@ -119,7 +119,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
@@ -129,7 +129,7 @@ class APILayout extends Abstract3SectionLayout implements IRenderAll, IAPI {
 
     /**
      * Get all API Fields
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {

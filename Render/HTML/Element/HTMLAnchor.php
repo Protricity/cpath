@@ -38,8 +38,9 @@ class HTMLAnchor extends HTMLElement
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
+	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 		if($this->mText instanceof IRenderHTML)
 			$this->mText->renderHTML($Request, $ContentAttr);
 		else

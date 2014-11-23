@@ -40,13 +40,14 @@ class URLValue implements IRenderHTML, IHasURL
         return $this->mURL;
     }
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param Attribute\IAttributes $Attr
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param Attribute\IAttributes $Attr
+	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Render\HTML\URL\IHTMLContainer $Parent
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
         $url = $Request->getDomainPath() . $this->mURL;
         $Anchor = new HTMLAnchor($url);
         if ($this->mContent) {
@@ -55,7 +56,7 @@ class URLValue implements IRenderHTML, IHasURL
                 $Content = new HTMLText($Content);
             $Anchor->setContent($Content);
         }
-        $Anchor->renderHTML($Request, $Attr);
+        $Anchor->renderHTML($Request, $Attr, $Parent);
     }
 
     function __toString() {

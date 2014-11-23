@@ -27,7 +27,7 @@ interface IPDOPrimaryKeyModel extends IPDOModel {
     function updateColumn($column, $value, $commit=true);
 
     /**
-     * Load column values for an active instance
+     * Load column values for an active inst
      * @param String $_columns a varargs of strings representing columns
      * @return Array an array of column values
      * @throws \Exception if there is no PRIMARY key for this table
@@ -35,7 +35,7 @@ interface IPDOPrimaryKeyModel extends IPDOModel {
     function loadColumnValues($_columns);
 
     /**
-     * Remove this instance from the database
+     * Remove this inst from the database
      */
     function remove();
 }

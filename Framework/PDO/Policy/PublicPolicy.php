@@ -46,7 +46,7 @@ class PublicPolicy implements ISecurityPolicy {
      * @param \CPath\Request\IRequest $Request
      * @param int $intent the read intent.
      * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
-     * Note: during IWriteAccess::INTENT_POST, the instance $Model contains no data.
+     * Note: during IWriteAccess::INTENT_POST, the inst $Model contains no data.
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      */
     function assertWriteAccess(PDOModel $Model, IRequest $Request, $intent) { }

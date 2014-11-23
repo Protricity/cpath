@@ -46,7 +46,7 @@ class PostAPI extends AbstractPDOAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return IResponse|mixed the api call response with data, message, and status
      */

@@ -21,11 +21,11 @@ class FormField extends Parameter
 	 * @param \CPath\Request\IRequest $Request
 	 * @return mixed
 	 */
-	function getInputValue(IRequest $Request) {
-		$name = $this->getFieldName();
+	function getRequestValue(IRequest $Request) {
 		if($Request instanceof IFormRequest)
-			return $Request->getFormFieldValue($name);
-		return null;
+			return $Request->getFormFieldValue($this->getFieldName());
+		return parent::getRequestValue($Request);
 	}
 
 }
+

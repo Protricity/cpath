@@ -37,9 +37,9 @@ class FileUploadField extends Field {
 
     /**
      * Validates an input field. Throws a ValidationException if it fails to validate
-     * @param \CPath\Request\IRequest $Request the request instance
+     * @param \CPath\Request\IRequest $Request the request inst
      * @param String $fieldName the field name
-     * @return FileUpload|Array an instance of the file upload data or an array of instances
+     * @return FileUpload|Array an inst of the file upload data or an array of instances
      * @throws \CPath\Framework\API\Exceptions\ValidationException if validation fails
      */
     function validate(IRequest $Request, $fieldName) {
@@ -59,7 +59,7 @@ class FileUploadField extends Field {
 
     /**
      * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */

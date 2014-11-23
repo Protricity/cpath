@@ -35,7 +35,7 @@ class ObjectView extends ContentPage implements IDescribable {
 
     /**
      * Render the html body for this view
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param IAttributes $Attr optional attributes for the input field
      * @return void
      */

@@ -18,7 +18,7 @@ interface IInputField
 	 * @throws RequestException if the parameter failed validated
 	 * @return mixed
 	 */
-	public function getInputValue(IRequest $Request);
+	public function getRequestValue(IRequest $Request);
 
 	/**
 	 * Get parameter name

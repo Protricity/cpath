@@ -7,6 +7,7 @@
  */
 namespace CPath\Request;
 
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Web\CLIWebRequest;
@@ -139,7 +140,7 @@ class Request implements IRequest
     }
 
     /**
-     * Log an exception instance
+     * Log an exception inst
      * @param \Exception $ex The log message
      * @param int $flags [optional] log flags
      * @return void
@@ -188,7 +189,7 @@ class Request implements IRequest
     // Static
 
     /**
-     * Create a new IRequest instance from environment variables
+     * Create a new IRequest inst from environment variables
      * @param String $route path string or route ([method] [path])
      * @param array $args
      * @return IRequest

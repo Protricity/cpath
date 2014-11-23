@@ -28,7 +28,7 @@ abstract class AbstractNavigator implements IRenderHTML, IRouteMapper
 
     /**
      * Begin NavBar render
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
      * @return String|void always returns void
      */
@@ -43,19 +43,20 @@ abstract class AbstractNavigator implements IRenderHTML, IRouteMapper
     abstract function renderLink(IRequest $Request, RouteLink $Link);
 
     /**
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     abstract function renderEnd(IRequest $Request);
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
-     * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null)
     {
         $this->mRequest = $Request;
         $this->renderStart($Request, $Attr);

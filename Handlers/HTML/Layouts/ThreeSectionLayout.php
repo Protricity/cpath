@@ -52,9 +52,9 @@ class ThreeSectionLayout implements IRenderHTML, IHTMLSupportHeaders
     }
 
     /**
-     * Write all support headers used by this IView instance
+     * Write all support headers used by this IView inst
      * @param \CPath\Request\IRequest $Request
-     * @param IHeaderWriter $Head the writer instance to use
+     * @param IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -65,15 +65,16 @@ class ThreeSectionLayout implements IRenderHTML, IHTMLSupportHeaders
         $this->mFooter->writeHeaders($Request, $Head);
     }
 
-    /**
-     * Render request as html
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return String|void always returns void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-        $this->mHeader->renderHTML($Request);
-        $this->mBody->renderHTML($Request, $Attr);
-        $this->mFooter->renderHTML($Request);
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
+	 * @param \CPath\Handlers\HTML\Layouts\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+        $this->mHeader->renderHTML($Request, $Parent);
+        $this->mBody->renderHTML($Request, $Attr, $Parent);
+        $this->mFooter->renderHTML($Request, $Parent);
     }
 }

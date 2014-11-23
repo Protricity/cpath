@@ -14,6 +14,8 @@ use CPath\Request\Parameter\IRequestParameter;
 
 class HTMLLabel extends HTMLElement
 {
+	const PASS_DOWN_ATTRIBUTES = true;
+
 	/**
 	 * @param string $text
 	 * @param String|\CPath\Render\HTML\Attribute\IAttributes $classList
@@ -36,13 +38,21 @@ class HTMLLabel extends HTMLElement
      * @return String|void always returns void
      */
     function addContent(IRenderHTML $Render, $key = null) {
-	    if ($Render instanceof IInputField) {
-		    if ($name = $Render->getFieldName()) {
-			    $this->setAttribute('for', $name);
-			    $title = ucwords(str_replace('_', ' ', $name));
-			    parent::addContent(new HTMLText($title . ': '));
-		    }
+	    $name = null;
+	    $description = null;
+	    if ($Render instanceof IRequestParameter) {
+		    $description = $Render->getDescription();
+		    $name = $Render->getFieldName();
+
+	    } elseif ($Render instanceof IInputField) {
+		    $name = $Render->getFieldName();
+
 	    }
+
+	    if($name)
+		    $this->setAttribute('for', $name);
+
+	    parent::addContent(new HTMLText($description));
         parent::addContent($Render, $key);
     }
 }

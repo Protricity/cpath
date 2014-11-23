@@ -23,38 +23,18 @@ class StringLengthValidation implements IValidation
 	 * Validate the request and return the validated value
 	 * @param IRequest $Request
 	 * @param $value
+	 * @param null $fieldName
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value) {
+	function validate(IRequest $Request, $value, $fieldName = null) {
+		$fieldDesc = $fieldName ? "Field '$fieldName'" : 'String';
+
 		$l = strlen($value);
 		if ($this->mMin !== null && $l < $this->mMin)
-			throw new RequestException("String(%d) must be at least %d character(s) long", $l, $this->mMin);
+			throw new RequestException(sprintf("%s(%d) must be at least %d character(s) long", $fieldDesc, $l, $this->mMin));
 		if ($this->mMax !== null && $l > $this->mMax)
-			throw new RequestException("String(%d) must be no greater than %d character(s) long", $l, $this->mMax);
-		return $value;
-	}
-}
-
-class RegularExpressionValidation implements IValidation {
-
-	private $mRegex;
-	private $mDescription;
-	public function __construct($regex, $description=null) {
-		$this->mRegex = $regex;
-		$this->mDescription = $description;
-	}
-
-	/**
-	 * Validate the request value and return the validated value
-	 * @param IRequest $Request
-	 * @param $value
-	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @return mixed validated value
-	 */
-	function validate(IRequest $Request, $value) {
-		if(preg_match($this->mRegex, $value, $matches))
-			throw new RequestException($this->mDescription ?: "Value must match regex: " . $this->mRegex);
+			throw new RequestException(sprintf("%s(%d) must be no greater than %d character(s) long", $fieldDesc, $l, $this->mMax));
 		return $value;
 	}
 }

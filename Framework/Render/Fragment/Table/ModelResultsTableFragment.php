@@ -5,7 +5,6 @@ use CPath\Base;
 use CPath\Data\Map\IKeyMap;
 use CPath\Framework\Data\Map\Common\ArrayMap;
 use CPath\Framework\PDO\Query\PDOSelectStats;
-use CPath\Framework\PDO\Response\PDOSearchResponse;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Framework\Request\Common\WebRequest;
@@ -29,8 +28,8 @@ class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
     }
 
     /**
-     * Write all support headers used by this IView instance
-     * @param \CPath\Framework\Render\Header\Interfaces\IHeaderWriter $Head the writer instance to use
+     * Write all support headers used by this IView inst
+     * @param \CPath\Framework\Render\Header\Interfaces\IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IHeaderWriter $Head) {
@@ -38,14 +37,15 @@ class ModelResultsTableFragment implements IRenderHTML, IHTMLSupportHeaders{
         $Head->writeScript(__NAMESPACE__ . '\assets\modelresultstablefragment.js');
     }
 
-    /**
-     * Render this handler
-     * @param IRequest $Request the IRequest instance for this render
-     * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
-     * @param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
-     * @return void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null, PDOSearchResponse $Response = NULL)
+	/**
+	 * Render this handler
+	 * @param IRequest $Request the IRequest inst for this render
+	 * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
+	 * @param \CPath\Framework\Render\Fragment\Table\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @internal param \CPath\Framework\PDO\Response\PDOSearchResponse $Response
+	 * @return void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null)
     {
         $Table = new TableThemeUtil($Request, $this->mTheme);
 

@@ -8,6 +8,7 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class HTMLInputField extends AbstractHTMLElement implements IHTMLInput
@@ -18,7 +19,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLInput
 	 * @param null $name
 	 * @param null $value
 	 * @param null $type
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 */
     public function __construct($name = null, $value = null, $type = null, $classList = null) {
         parent::__construct(static::NODE_TYPE, $classList);
@@ -30,7 +31,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLInput
             $this->setType($type);
     }
 
-    public function getInputValue(IRequest $Request)    { return $this->getAttribute('value'); }
+    public function getRequestValue(IRequest $Request)    { return $this->getAttribute('value'); }
     public function setInputValue($value)               { $this->setAttribute('value', $value); }
 
 	public function getFieldName()                      { return $this->getAttribute('name'); }
@@ -42,12 +43,43 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLInput
     public function getFieldID()                        { return $this->getAttribute('id'); }
     public function setFieldID($value)                  { $this->setAttribute('id', $value); }
 
+
+//	/**
+//	 * Render request as html
+//	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+//	 * @param IAttributes $Attr optional attributes for the input field
+//	 * @param IRenderHTML $Parent
+//	 * @return String|void always returns void
+//	 */
+//	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+//		if($Parent instanceof HTMLForm
+//			|| $Parent instanceof HTMLFormSection) {
+//			$Label = new HTMLLabel();
+//			$Label->addContent($this);
+//			$Label->renderHTML($Request, $Attr, $Parent);
+//			return;
+//		}
+////		if($Attr) {
+////			foreach($Attr->getClasses() as $class) {
+////				switch($class) {
+////					case HTMLForm::CSS_CONTENT_CLASS:
+////						$Label = new HTMLLabel();
+////						$Label->addContent($this);
+////						$Label->renderHTML($Request, $Attr, $Parent);
+////						return;
+////				}
+////			}
+////		}
+//		parent::renderHTML($Request, $Attr, $Parent);
+//	}
+
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
+	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 	}
 
 	/**

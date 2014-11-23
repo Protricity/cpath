@@ -17,6 +17,7 @@ use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
 use CPath\Request\IRequest;
+use CPath\Response\Response;
 
 
 class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders {
@@ -28,11 +29,12 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Request\Executable\IHTMLContainer $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Response = $this->mResponse ?: $this->mExecutable->execute($Request);
 		if(!$Response instanceof IRenderHTML)
 			$Response = new ResponseUtil($Response);
@@ -43,7 +45,7 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 	/**
 	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -55,11 +57,12 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 
 	/**
 	 * Render request as JSON
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @return String|void always returns void
 	 */
 	function renderJSON(IRequest $Request) {
-		$Response = $this->mExecutable->execute($Request);
+		$Response = $this->mExecutable->execute($Request)
+			?: new Response("No Response", false);
 		if(!$Response instanceof IRenderJSON)
 			$Response = new ResponseUtil($Response);
 		$Response->renderJSON($Request);
@@ -67,7 +70,7 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 
 	/**
 	 * Render request as plain text
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @return String|void always returns void
 	 */
 	function renderText(IRequest $Request) {
@@ -79,7 +82,7 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 
 	/**
 	 * Render request as xml
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param string $rootElementName Optional name of the root element
 	 * @param bool $declaration if true, the <!xml...> declaration will be rendered
 	 * @return String|void always returns void

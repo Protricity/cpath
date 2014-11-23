@@ -80,7 +80,7 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
 	/**
 	 * Map data to a data map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
@@ -96,7 +96,7 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as JSON
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return void
      */
     function renderJSON(IRequest $Request) {
@@ -118,7 +118,7 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as XML
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
      * @param bool $declaration
      * @return void
@@ -139,13 +139,14 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
         }
     }
 
-    /**
-     * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr=null) {
+	/**
+	 * Render request as html and sends headers as necessary
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
+	 * @param \CPath\Handlers\Response\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @return void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
         //$this->sendHeaders('text/html');
 
         $Response = $this->mResponse;
@@ -163,7 +164,7 @@ final class ResponseUtil implements IKeyMap, IRenderHTML, IRenderXML, IRenderJSO
 
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as plain text
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param bool $sendHeaders
      * @return void
      */

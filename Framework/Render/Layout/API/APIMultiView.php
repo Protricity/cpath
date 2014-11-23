@@ -54,7 +54,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render this request
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return String|void always returns void
      */
     function render(IRequest $Request) {
@@ -141,7 +141,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render the navigation bar content
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderNavBarContent(IRequest $Request) {
@@ -157,7 +157,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render the main view content
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderPageContent(IRequest $Request) {
@@ -167,7 +167,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render the header
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderBodyHeaderContent(IRequest $Request) {
@@ -185,7 +185,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render the header
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     protected function renderBodyFooterContent(IRequest $Request)
@@ -195,7 +195,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render request as JSON
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     function renderJSON(IRequest $Request)
@@ -209,7 +209,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render request as plain text
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @return String|void always returns void
      */
     function renderText(IRequest $Request)
@@ -223,7 +223,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Render request as xml
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
      * @param string $rootElementName Optional name of the root element
      * @return String|void always returns void
      */
@@ -238,7 +238,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @internal param Array $args additional arguments for this execution
      * @return IResponse the api call response with data, message, and status
      */
@@ -249,7 +249,7 @@ class APIMultiView extends AbstractNavBarLayout implements IRenderAll, IAPI, IRo
 
     /**
      * Get all API Fields
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @return IField[]|IFieldCollection
      */
     function getFields(IRequest $Request) {

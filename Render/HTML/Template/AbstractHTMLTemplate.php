@@ -7,14 +7,18 @@
  */
 namespace CPath\Render\HTML\Template;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 abstract class AbstractHTMLTemplate implements IHTMLContainer
 {
+
+	/** @var IHTMLSupportHeaders[] */
+	private $mSupportHeaders = array();
+
 	/**
 	 * Get the container element for this template
 	 * @return IHTMLContainer
@@ -27,6 +31,15 @@ abstract class AbstractHTMLTemplate implements IHTMLContainer
 	 */
 	abstract function getRenderer();
 
+
+	/**
+	 * Add support headers to content
+	 * @param IHTMLSupportHeaders $Headers
+	 * @return void
+	 */
+	public function addSupportHeaders(IHTMLSupportHeaders $Headers) {
+		$this->mSupportHeaders[] = $Headers;
+	}
 
 	/**
 	 * Add any kind of content
@@ -92,24 +105,19 @@ abstract class AbstractHTMLTemplate implements IHTMLContainer
 	}
 
 	/**
-	 * Write all support headers used by this renderer
-	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
-	 * @return void
-	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Renderer = $this->getRenderer();
-		$Renderer->writeHeaders($Request, $Head);
-	}
-
-	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Renderer = $this->getRenderer();
-		$Renderer->renderHTML($Request, $Attr);
+		if($Renderer instanceof IHTMLContainer) {
+			$Renderer->addSupportHeaders($this);
+			foreach($this->mSupportHeaders as $Headers)
+				$Renderer->addSupportHeaders($Headers);
+		}
+		$Renderer->renderHTML($Request, $Attr, $Parent);
 	}
 }

@@ -23,7 +23,7 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 
 	/**
 	 * @param null $name
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 * @param null $_options [vararg] of options sent to ->addOption($arg)
 	 */
 	public function __construct($name = null, $classList = null, $_options = null) {
@@ -46,7 +46,7 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 			$this->mSelected[] = $value;
 	}
 
-	public function getInputValue(IRequest $Request) { return isset($this->mSelected[0]) ? $this->mSelected[0] : null; }
+	public function getRequestValue(IRequest $Request) { return isset($this->mSelected[0]) ? $this->mSelected[0] : null; }
 
 	public function setInputValue($value) {
 		$this->select($value);
@@ -116,11 +116,12 @@ class HTMLSelectField extends AbstractHTMLElement implements ISequenceMap, IHTML
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\HTML\Element\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		echo RI::ni(), "<", $this->getElementType(), $this->getAttributes()->render($Attr), ">";
 		RI::ai(1);
 
@@ -196,18 +197,19 @@ class HTMLOptionMapper implements ISequenceMapper, IRenderHTML {
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param \CPath\Render\HTML\Element\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$value = $this->getValue();
 		if($value instanceof IRenderHTML) {
-			$value->renderHTML($Request, $Attr);
+			$value->renderHTML($Request, $Attr, $Parent);
 
 		} else {
 			$Option = new HTMLSelectOptionElement($this->getValue(), $this->getDescription(), $this->isSelected());
-			$Option->renderHTML($Request);
+			$Option->renderHTML($Request, $Parent);
 
 		}
 	}

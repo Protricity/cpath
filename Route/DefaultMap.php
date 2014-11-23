@@ -43,7 +43,7 @@ class DefaultMap implements IRouteMap
 
     /**
      * Handle this request and render any content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return bool returns true if the route was rendered, false if no route was matched
      */
     static function route(IRequest $Request=null) {

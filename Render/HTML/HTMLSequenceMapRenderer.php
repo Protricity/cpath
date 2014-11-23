@@ -14,7 +14,7 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Describable\Describable;
 use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\ClassAttr;
+use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
@@ -42,9 +42,9 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 	}
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -56,7 +56,7 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 		if ($this->mStarted)
 			return;
 
-		$Attr = new ClassAttr(self::CSS_CLASS, $cls);
+		$Attr = new ClassAttributes(self::CSS_CLASS, $cls);
 
 		echo RI::ni(), "<ul", $Attr, $this->mAttr, ">";
 		RI::ai(1);

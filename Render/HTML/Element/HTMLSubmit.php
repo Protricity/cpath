@@ -12,13 +12,12 @@ use CPath\Render\HTML\Attribute\IAttributes;
 class HTMLSubmit extends HTMLInputField
 {
 	/**
-	 * @param String|null $text
 	 * @param String|null $name
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
-	 * @internal param null|String $value
+	 * @param string $value
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 */
-	public function __construct($text = 'Submit', $name = null, $classList = null) {
-		parent::__construct($text, 'submit', $classList);
+	public function __construct($name = null, $value = 'Submit', $classList = null) {
+		parent::__construct($name, $value, 'submit', $classList);
 		if ($name)
 			$this->setFieldName($name);
 	}

@@ -21,8 +21,8 @@ use CPath\Response\IResponse;
 class DeleteAPI extends GetAPI implements IAPIGetCallbacks {
 
     /**
-     * Construct an instance of the GET API
-     * @param PDOPrimaryKeyTable $Table the table instance
+     * Construct an inst of the GET API
+     * @param PDOPrimaryKeyTable $Table the table inst
      * @param string|array $searchColumns a column or array of columns that may be used to search for Models.
      * PRIMARY key is already included
      */

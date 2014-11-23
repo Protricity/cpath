@@ -59,7 +59,7 @@ class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildReques
     }
 
     /**
-     * Log an exception instance
+     * Log an exception inst
      * @param \Exception $ex The log message
      * @param int $flags [optional] log flags
      * @return void

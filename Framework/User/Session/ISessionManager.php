@@ -15,7 +15,7 @@ use CPath\Response\IResponse;
 interface ISessionManager {
 
     /**
-     * Create a new Session for an IUser Instance
+     * Create a new Session for an IUser inst
      * @param int|NULL $expireInSeconds time in seconds before the session expires (or 0 for unlimited)
      * @param \CPath\Framework\User\Interfaces\IUser $User
      * @return ISession the new session
@@ -23,7 +23,7 @@ interface ISessionManager {
     function createNewSession(IUser $User, $expireInSeconds=NULL);
 
     /**
-     * Loads a session instance from a session key
+     * Loads a session inst from a session key
      * @param $key String the session key to search for
      * @return ISession the found user session
      * @throws SessionExpiredException if the session was active but expired or not found
@@ -31,7 +31,7 @@ interface ISessionManager {
     function loadByKey($key);
 
     /**
-     * Loads an existing session instance
+     * Loads an existing session inst
      * @return ISession the found user session
      * @throws SessionNotActiveException if the session was not active
      * @throws SessionExpiredException if the session was active but expired or not found

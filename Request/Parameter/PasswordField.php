@@ -17,20 +17,23 @@ class PasswordField extends Parameter
 
 	private $mRequired;
 
-	public function __construct($paramName, $description=null, $required=true) {
+	public function __construct($paramName, $description=null, $required=false) {
 		parent::__construct($paramName, $description);
 		$this->mRequired = $required;
 	}
 
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
+	 * @param $value
+	 * @param null $fieldName
 	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
-	 * @return mixed request value
+	 * @throw Exception if validation failed
+	 * @return mixed validated value
 	 */
-	function validateRequest(IRequest $Request) {
-		$value = $Request[$this->getFieldName()];
+	function validate(IRequest $Request, $value, $fieldName = null) {
+		//$value = $Request[$this->getFieldName()];
+		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
 		if (!$Request instanceof IFormRequest) {
 			if(!$this->mRequired)
 				return null;

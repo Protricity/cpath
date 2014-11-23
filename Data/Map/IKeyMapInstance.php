@@ -12,7 +12,7 @@ use CPath\Request\IRequest;
 interface IKeyMapInstance
 {
 	/**
-	 * Get a new object instance based on mapped keys
+	 * Get a new object inst based on mapped keys
 	 * @param IRequest $Request
 	 * @param IKeyMap $Map the map to grab values from
 	 * @return IKeyMapInstance

@@ -23,7 +23,7 @@ class SimpleFormFragment extends AbstractFormFragment{
 
     /**
      * Render this API Form
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param IAttributes $Attr
      * @throws \Exception
      * @return void

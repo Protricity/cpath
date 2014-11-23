@@ -66,7 +66,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
     /**
      * Handle this request and render any content
-     * @param IBuildRequest $Request the test request instance for this test session
+     * @param IBuildRequest $Request the test request inst for this test session
      * @return String|void always returns void
      */
     function testAllFlies(IBuildRequest $Request) {
@@ -148,7 +148,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
 	/**
 	 * Route the request to this class object and return the object
-	 * @param IRequest $Request the IRequest instance for this render
+	 * @param IRequest $Request the IRequest inst for this render
 	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
      * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
 	 * @param null|mixed $_arg [varargs] passed by route map
@@ -166,7 +166,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
     /**
      * Handle this request and render any content
-     * @param IBuildRequest $Request the build request instance for this build session
+     * @param IBuildRequest $Request the build request inst for this build session
      * @return String|void always returns void
      */
     static function handleStaticBuild(IBuildRequest $Request) {

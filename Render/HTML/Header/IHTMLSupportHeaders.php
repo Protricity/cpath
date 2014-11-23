@@ -16,7 +16,7 @@ interface IHTMLSupportHeaders
     /**
      * Write all support headers used by this renderer
      * @param IRequest $Request
-     * @param IHeaderWriter $Head the writer instance to use
+     * @param IHeaderWriter $Head the writer inst to use
      * @return void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head);

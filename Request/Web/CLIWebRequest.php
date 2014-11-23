@@ -39,7 +39,7 @@ class CLIWebRequest extends WebRequest implements IFormRequest
 //
 //	/**
 //	 * Return a request value
-//	 * @param String|IRequestParameter $Parameter string or instance
+//	 * @param String|IRequestParameter $Parameter string or inst
 //	 * @internal param null|String $description
 //	 * @return mixed the validated parameter value
 //	 */

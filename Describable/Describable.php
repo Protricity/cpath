@@ -13,9 +13,9 @@ class IsNotDescribableException extends \Exception {}
 final class Describable {
 
     /**
-     * Check to see if an object is describable and optionally returns the instance.
+     * Check to see if an object is describable and optionally returns the inst.
      * @param Object $object the describable object
-     * @param null|IDescribable $Describable if the instance was found, this variable is passed that reference
+     * @param null|IDescribable $Describable if the inst was found, this variable is passed that reference
      * @return bool
      */
     static function is($object, &$Describable=NULL) {
@@ -30,10 +30,10 @@ final class Describable {
     }
 
     /**
-     * Get IDescribable instance of object or throw an exception
+     * Get IDescribable inst of object or throw an exception
      * @param mixed $object the describable object
      * @param bool $allowDefault if the object is not describable, use a default description instead, otherwise throw exception
-     * @return IDescribable an instance of IDescribable. This may or may not be the original object
+     * @return IDescribable an inst of IDescribable. This may or may not be the original object
      * @throws IsNotDescribableException if the object does not implement IDescribable
      */
     static function get($object, $allowDefault=true) {
@@ -56,7 +56,7 @@ final class Describable {
         elseif(is_string($agg))
             $agg = new SimpleDescription($agg);
         elseif(!($agg instanceof IDescribable))
-            throw new \InvalidArgumentException("getDescribable did not return a string or instance of IDescribable");
+            throw new \InvalidArgumentException("getDescribable did not return a string or inst of IDescribable");
         return $agg;
     }
 

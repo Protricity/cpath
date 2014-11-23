@@ -36,8 +36,8 @@ class SearchFormUtil implements IDescribable, IHTMLSupportHeaders {
     }
 
     /**
-     * Write all support headers used by this IView instance
-     * @param IHeaderWriter $Head the writer instance to use
+     * Write all support headers used by this IView inst
+     * @param IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IHeaderWriter $Head) {

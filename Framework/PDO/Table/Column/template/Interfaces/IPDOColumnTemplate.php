@@ -18,14 +18,14 @@ interface IPDOColumnTemplate
 
     /**
      * Attempt to match this template to an existing database column
-     * @param \CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn $BuildColumn the column instance
+     * @param \CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn $BuildColumn the column inst
      * @return boolean true if column  matches template
      */
     function matchColumn(BuildPDOColumn $BuildColumn);
 
     /**
      * Attempt to match this template to an column comment arg
-     * @param String $arg the column instance
+     * @param String $arg the column inst
      * @return boolean true if column  matches template
      */
     function matchColumnArg($arg);

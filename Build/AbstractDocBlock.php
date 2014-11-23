@@ -28,7 +28,7 @@ abstract class AbstractDocBlock
     /**
      * Returns the next available doctag from a method
      * @param String|null $tagName Optional name of the tag to parse arguments from
-     * @return DocTag the next tag instance or null if no tag was found
+     * @return DocTag the next tag inst or null if no tag was found
      */
     public function getNextTag($tagName = null) {
         if ($this->mTags === null)

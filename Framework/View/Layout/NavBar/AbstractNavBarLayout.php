@@ -20,7 +20,7 @@ abstract class AbstractNavBarLayout extends ContentLayout {
 
     /**
      * Render the navigation bar content
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     abstract protected function renderNavBarContent(IRequest $Request);

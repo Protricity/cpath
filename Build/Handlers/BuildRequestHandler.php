@@ -58,7 +58,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
     /**
      * Handle this request and render any content
-     * @param IBuildRequest $Request the build request instance for this build session
+     * @param IBuildRequest $Request the build request inst for this build session
      * @return String|void always returns void
      */
     function buildAllFiles(IBuildRequest $Request) {
@@ -124,7 +124,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
     /**
      * Route the request to this class object and return the object
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
      * @param null|mixed $_arg [varargs] passed by route map
      * @return void|bool|Object returns a response object
@@ -141,7 +141,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
     /**
      * Handle this request and render any content
-     * @param IBuildRequest $Request the build request instance for this build session
+     * @param IBuildRequest $Request the build request inst for this build session
      * @return String|void always returns void
      */
     static function handleStaticBuild(IBuildRequest $Request) {

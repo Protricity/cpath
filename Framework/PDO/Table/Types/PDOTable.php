@@ -34,7 +34,7 @@ abstract class PDOTable implements IPDOTable
     const TABLE = null;
 
     const COLUMN_ID = NULL; // Identifier column used in such endpoints as GET, PATCH, DELETE. Defaults to ::COLUMN_PRIMARY or ::COLUMN_ID
-    const COLUMN_TITLE = NULL; // Title column used to describe a model instance. Defaults to ::COLUMN_ID
+    const COLUMN_TITLE = NULL; // Title column used to describe a model inst. Defaults to ::COLUMN_ID
 
     const SEARCH_LIMIT_MAX = 100;
     const SEARCH_LIMIT = 25;
@@ -231,7 +231,7 @@ abstract class PDOTable implements IPDOTable
 //
 //    /**
 //     * Validate a request of column values using compiled configuration
-//     * @param IRequest $Request the IRequest instance to validate
+//     * @param IRequest $Request the IRequest inst to validate
 //     * @throws ValidationException
 //     */
 //    static function validateRequest(IRequest $Request) {
@@ -288,10 +288,10 @@ abstract class PDOTable implements IPDOTable
     }
 
     /**
-     * Creates a new Model based on the provided row of column value pairs and returns a model instance
-     * Note: This model instance is NOT pulled from the database, but is instead filled with the row values.
+     * Creates a new Model based on the provided row of column value pairs and returns a model inst
+     * Note: This model inst is NOT pulled from the database, but is instead filled with the row values.
      * @param array|mixed $row column value pairs to insert into new row
-     * @return \CPath\Framework\PDO\Table\Model\Types\PDOModel the new instance with filled values
+     * @return \CPath\Framework\PDO\Table\Model\Types\PDOModel the new inst with filled values
      * @throws ModelAlreadyExistsException
      * @throws \CPath\Framework\API\Exceptions\ValidationException if a column fails to validate
      */
@@ -303,9 +303,9 @@ abstract class PDOTable implements IPDOTable
     }
 
     /**
-     * Creates a new Model based on the provided row of column value pairs and returns a new instance
+     * Creates a new Model based on the provided row of column value pairs and returns a new inst
      * @param array|mixed $row column value pairs to insert into new row
-     * @return \CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel the created model instance
+     * @return \CPath\Framework\PDO\Table\Model\Types\PDOPrimaryKeyModel the created model inst
      * @throws ModelAlreadyExistsException
      * @throws ValidationException if a column fails to validate
      */
@@ -333,7 +333,7 @@ abstract class PDOTable implements IPDOTable
 
     /**
      * Applies a search to PDOSelect based on specified columns and values.
-     * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect instance to search in
+     * @param String|int|Array|PDOSelect $Select the columns to return or the PDOSelect inst to search in
      * @param String $search the column value to search for
      * @param mixed $columns a string list (comma delimited) or array of columns to search for.
      * Default is columns with PDOColumn::FLAG_SEARCH set
@@ -410,7 +410,7 @@ abstract class PDOTable implements IPDOTable
      * Default is columns with PDOColumn::FLAG_SEARCH set
      * @param boolean $throwIfNotFound if true, throws an exception if not found
      * @param string $logic 'OR' or 'AND' logic between columns
-     * @return \CPath\Framework\PDO\Table\Model\Types\PDOModel the found model instance
+     * @return \CPath\Framework\PDO\Table\Model\Types\PDOModel the found model inst
      * @throws ModelNotFoundException if a model entry was not found
      */
     final public function loadByColumns($search, $columns = NULL, $throwIfNotFound = true, $logic = 'OR') {
@@ -452,8 +452,8 @@ abstract class PDOTable implements IPDOTable
     // Statics
 
     /**
-     * Return an instance of the class for building purposes
-     * @return \CPath\Build\IBuildable|NULL an instance of the class or NULL to ignore
+     * Return an inst of the class for building purposes
+     * @return \CPath\Build\IBuildable|NULL an inst of the class or NULL to ignore
      */
     static function buildClass()
     {

@@ -53,7 +53,7 @@ class MappedRoute implements IKeyMap // , IRenderHTML
 
 	/**
 	 * Map data to the key map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void
@@ -67,7 +67,7 @@ class MappedRoute implements IKeyMap // , IRenderHTML
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
 	 * @return String|void always returns void
 	 */

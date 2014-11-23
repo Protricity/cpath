@@ -31,7 +31,7 @@ class Config implements IConfig {
     static $ProfileEnable = false;
 
     /**
-     * Choose session request instance.
+     * Choose session request inst.
      * Note: Override to replace method
      * @return Request\IRequest
      */
@@ -66,7 +66,7 @@ class Config implements IConfig {
 
     function install() {
         if(__CLASS__ != get_called_class())
-            throw new \Exception(__CLASS__ . "::install() may only be called from an non-inherited instance of " . __CLASS__);
+            throw new \Exception(__CLASS__ . "::install() may only be called from an non-inherited inst of " . __CLASS__);
         //$path = dirname(__DIR__) . '/config.php';
         //$Builder = new Builder($this, $path, true);
     }

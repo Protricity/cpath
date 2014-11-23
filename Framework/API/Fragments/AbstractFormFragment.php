@@ -24,8 +24,8 @@ abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
     }
 
     /**
-     * Write all support headers used by this IView instance
-     * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer instance to use
+     * Write all support headers used by this IView inst
+     * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IHeaderWriter $Head) {
@@ -43,7 +43,7 @@ abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
 
     /**
      * Render this API Form
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
@@ -51,14 +51,14 @@ abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
 
     public function getTheme() { return $this->mTheme; }
 
-    /**
-     * Render request as html and sends headers as necessary
-     * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-     * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
-     * @internal param $ \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
-     * @return void
-     */
-    function renderHTML(IRequest $Request, IAttributes $Attr = null)
+	/**
+	 * Render request as html and sends headers as necessary
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return void
+	 */
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null)
     {
         $this->renderForm($Request, $Attr);
     }

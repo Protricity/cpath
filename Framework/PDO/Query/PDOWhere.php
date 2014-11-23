@@ -46,7 +46,7 @@ abstract class PDOWhere {
      * @param String $destTable the destination table to join to
      * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
      * @param String|null $destField The destination field to join on.
-     * @return $this this instance
+     * @return $this this inst
      */
     public function leftJoinFrom($sourceTable, $destTable, $sourceField, $destField=NULL) {
         $this->mLastAlias = $sourceTable;
@@ -58,7 +58,7 @@ abstract class PDOWhere {
      * @param String $destTable the table to join
      * @param String $sourceField The source field to join on. If $destField is omited, $sourceField represents the entire " ON ..." segment of the join.
      * @param String|null $destField The destination field to join on.
-     * @return $this this instance
+     * @return $this this inst
      */
     public function leftJoin($destTable, $sourceField, $destField=NULL) {
         $alias = $this->getAlias($destTable);
@@ -89,7 +89,7 @@ abstract class PDOWhere {
      * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
      * characters in '?.()', then the alias will not be prepended to the field.
      * If the string '{}' appears, it will be replaced with the alias
-     * @return $this returns the query instance
+     * @return $this returns the query inst
      * @throws \InvalidArgumentException
      */
     public function where($field, $value, $alias=NULL) {
@@ -121,7 +121,7 @@ abstract class PDOWhere {
      * @param String|null $sql The sql code to add to WHERE
      * characters in '?.()', then the alias will not be prepended to the field.
      * If the string '{}' appears, it will be replaced with the alias
-     * @return $this returns the query instance
+     * @return $this returns the query inst
      * @throws \InvalidArgumentException
      */
     public function whereSQL($sql) {
@@ -170,7 +170,7 @@ abstract class PDOWhere {
      * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
      * characters in '.()', then the alias will not be prepended to the field.
      * If the string '{}' appears, it will be replaced with the alias
-     * @return $this the query instance
+     * @return $this the query inst
      */
     function orderBy($field, $desc=false, $alias=NULL) {
         $this->mOrderBy = $this->getAliasedField($field, $alias) . ($desc !== false ? ($desc === true ? ' DESC' : ' '.$desc) : '');
@@ -183,7 +183,7 @@ abstract class PDOWhere {
      * @param String|null $alias The table alias to prepend to the $field. If $value is not set or $field contains
      * characters in '.()', then the alias will not be prepended to the field.
      * If the string '{}' appears, it will be replaced with the alias
-     * @return $this the query instance
+     * @return $this the query inst
      */
     function groupBy($field, $alias=NULL) {
         $this->mGroupBy = $this->getAliasedField($field, $alias);
@@ -191,9 +191,9 @@ abstract class PDOWhere {
     }
 
     /**
-     * Set flags for this query instance
+     * Set flags for this query inst
      * @param int $flags the flag or flags to set
-     * @return $this the query instance
+     * @return $this the query inst
      * @throws \InvalidArgumentException
      */
     function setFlag($flags) {
@@ -204,9 +204,9 @@ abstract class PDOWhere {
     }
 
     /**
-     * Unset flags for this query instance
+     * Unset flags for this query inst
      * @param int $flags the flag or flags to unset
-     * @return $this the query instance
+     * @return $this the query inst
      * @throws \InvalidArgumentException
      */
     function unsetFlag($flags) {

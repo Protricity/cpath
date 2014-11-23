@@ -50,7 +50,7 @@ class PHPTokenScanner implements IPHPWritableSource
     }
 
     /**
-     * Create a source chunk and return the instance
+     * Create a source chunk and return the inst
      * @param $start
      * @param $finish
      * @return array
@@ -82,7 +82,7 @@ class PHPTokenScanner implements IPHPWritableSource
     }
 
     /**
-     * Create a source chunk and return the instance
+     * Create a source chunk and return the inst
      * @param $start
      * @param $finish
      * @return PHPTokenScanner

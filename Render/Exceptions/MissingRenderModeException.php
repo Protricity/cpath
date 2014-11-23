@@ -8,9 +8,6 @@
 namespace CPath\Render\Exceptions;
 
 use CPath\Framework\Render\Exceptions\RenderException;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 
 class MissingRenderModeException extends RenderException
 {

@@ -31,7 +31,7 @@ class PDOSearchResponse implements IResponse, IKeyMap {
 
 
     /**
-     * Return the PDOSelect query instance
+     * Return the PDOSelect query inst
      * @return PDOSelect
      */
     function getQuery() {
@@ -57,7 +57,7 @@ class PDOSearchResponse implements IResponse, IKeyMap {
 
 	/**
 	 * Map data to a data map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Framework\PDO\Response\IRequest $Request
 	 * @internal param \CPath\Framework\PDO\Response\IRequest $Request
 	 * @return void

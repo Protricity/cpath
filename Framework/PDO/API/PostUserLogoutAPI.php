@@ -21,7 +21,7 @@ interface IPostLogoutExecute {
 
     /**
      * Perform on successful GetAPI execution
-     * @param PDOUserModel $User the logged out user account instance
+     * @param PDOUserModel $User the logged out user account inst
      * @param IRequest $Request
      * @param \CPath\Response\IResponse $Response
      * @return \CPath\Response\IResponse|null
@@ -35,7 +35,7 @@ class PostUserLogoutAPI extends AbstractPDOAPI
     private $mTable, $mLoggedIn = false;
 
     /**
-     * Construct an instance of this API
+     * Construct an inst of this API
      * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the user source object for this API
      */
     function __construct(PDOUserTable $Table)
@@ -66,7 +66,7 @@ class PostUserLogoutAPI extends AbstractPDOAPI
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return \CPath\Response\IResponse|mixed the api call response with data, message, and status
      */

@@ -32,7 +32,7 @@ class UserAccountViewerPolicy implements ISecurityPolicy {
      * @param Templates\User\Table\PDOUserTable $Table
      * @param bool $readOtherUsers allow 'GET' and 'GET search' on other user accounts
      * @param bool $deleteOwn allow 'DELETE' on own user account
-     * @internal param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an empty instance of the UserModel
+     * @internal param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel $User an empty inst of the UserModel
      */
     public function __construct(PDOUserTable $Table, $readOtherUsers=false, $deleteOwn=false) {
         $this->mTable = $Table;
@@ -80,7 +80,7 @@ class UserAccountViewerPolicy implements ISecurityPolicy {
      * @param IRequest $Request
      * @param int $intent the read intent.
      * Typically IWriteAccess::INTENT_POST, IWriteAccess::INTENT_PATCH or IWriteAccess::INTENT_DELETE.
-     * Note: during IWriteAccess::INTENT_POST, the instance $Model contains no data.
+     * Note: during IWriteAccess::INTENT_POST, the inst $Model contains no data.
      * @throws InvalidPermissionException if the user does not have permission to handle this Model
      */
     function assertWriteAccess(PDOModel $User, IRequest $Request, $intent) {
@@ -111,7 +111,7 @@ class UserAccountViewerPolicy implements ISecurityPolicy {
     function assignAccessID(IRequest $Request, $intent) { }
 
     /**
-     * Return the user model instance
+     * Return the user model inst
      * @return \CPath\Framework\PDO\Templates\User\Model\PDOUserModel
      */
     function getUserAccount() { return $this->mTable; }

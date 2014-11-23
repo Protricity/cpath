@@ -20,7 +20,7 @@ abstract class AbstractBuildPDOPKTable extends AbstractBuildPDOTable {
     private $mPrimary;
 
     /**
-     * Create a new PDOPrimaryKeyTable builder instance
+     * Create a new PDOPrimaryKeyTable builder inst
      * @param String $name the table name
      * @param String $comment the table comment
      * @param $namespace

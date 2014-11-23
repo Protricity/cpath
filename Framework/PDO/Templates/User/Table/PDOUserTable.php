@@ -136,10 +136,10 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
     }
 
     /**
-     * Loads a user instance from a session key
+     * Loads a user inst from a session key
      * Note: This method does not depend on the current session state
      * @param $key String the session key to search for
-     * @return PDOUserModel the found user instance or primary key id of the user
+     * @return PDOUserModel the found user inst or primary key id of the user
      */
     function loadBySessionKey($key) {
         $S = $this->session();
@@ -153,7 +153,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * Get the current user session or return a guest account
      * @param bool $throwOnFail throws an exception if the user session was not available
      * @param bool $allowGuest returns a guest account if no session is available
-     * @return PDOUserModel|IUser|NULL the user instance or null if not found
+     * @return PDOUserModel|IUser|NULL the user inst or null if not found
      * @throws InvalidUserSessionException if the user is not logged in
      */
     function loadBySession($throwOnFail = true, $allowGuest = false) {
@@ -175,9 +175,9 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
     }
 
     /**
-     * Gets or creates an instance of a guest user
+     * Gets or creates an inst of a guest user
      * @param $insertFields Array|NULL optional associative array of columns and values used when inserting guest
-     * @return PDOUserModel the guest user instance
+     * @return PDOUserModel the guest user inst
      */
     function loadGuestAccount(Array $insertFields=array()) {
         /** @var PDOUserModel $User  */
@@ -200,7 +200,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
      * @param String $search the user account to search for
      * @param String $password the password to log in with
      * @param int $expireInSeconds the amount of time in seconds before an account should expire or 0 for never
-     * @param PDOUserModel $User the user instance loaded during login
+     * @param PDOUserModel $User the user inst loaded during login
      * @throws AuthenticationException
      * @return \CPath\Response\IResponse the login response
      */

@@ -18,7 +18,7 @@ class ClosedHTMLElement extends AbstractHTMLElement
 
 	/**
 	 * @param string $elmType
-	 * @param String|Array|IAttributes $classList attribute instance, class list, or attribute html
+	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 */
 	public function __construct($elmType, $classList = null) {
 		parent::__construct($elmType, $classList);
@@ -28,8 +28,9 @@ class ClosedHTMLElement extends AbstractHTMLElement
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
+	 * @param \CPath\Render\HTML\Element\IRenderHTML|\CPath\Render\HTML\IHTMLContainer $Parent
 	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null) {
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 	}
 
 	/**

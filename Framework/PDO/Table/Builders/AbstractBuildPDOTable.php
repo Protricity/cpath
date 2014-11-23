@@ -54,7 +54,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
 
     /**
-     * Create a new PDOTable builder instance
+     * Create a new PDOTable builder inst
      * @param \PDO $DB
      * @param String $name the table name
      * @param String $comment the table comment

@@ -23,14 +23,15 @@ class PasswordConfirmField extends PasswordField
 
 
 	/**
-	 * Validate and return the parameter value
+	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
-	 * @return mixed|string
+	 * @param $value
+	 * @param null $fieldName
 	 * @throws \CPath\Request\Exceptions\RequestException
-	 * @internal param $value
+	 * @return mixed validated value
 	 */
-	function validateRequest(IRequest $Request) {
-		$value = parent::validateRequest($Request);
+	function validate(IRequest $Request, $value, $fieldName = null) {
+		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
 		$value2 = $Request[$this->mPasswordParamName];
 		if ($value !== null && $value2 !== $value)
 			throw new RequestException("Password confirmation did not match");

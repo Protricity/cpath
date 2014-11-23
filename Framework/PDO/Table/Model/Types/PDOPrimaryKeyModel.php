@@ -86,7 +86,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
 
 
     /**
-     * Load column values for an active instance
+     * Load column values for an active inst
      * @param String $_columns a varargs of strings representing columns
      * @return Array an array of column values
      * @throws \Exception if there is no PRIMARY key for this table
@@ -101,7 +101,7 @@ abstract class PDOPrimaryKeyModel extends PDOModel implements IPDOPrimaryKeyMode
     }
 
     /**
-     * Remove this instance from the database
+     * Remove this inst from the database
      */
     function remove() {
         /** @var PDOPrimaryKeyTable $T */

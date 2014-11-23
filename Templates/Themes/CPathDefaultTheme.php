@@ -30,9 +30,9 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
     }
 
     /**
-     * Write all support headers used by this IView instance
-     * @param IRequest $Request the IRequest instance for this render
-     * @param IHeaderWriter $Head the writer instance to use
+     * Write all support headers used by this IView inst
+     * @param IRequest $Request the IRequest inst for this render
+     * @param IHeaderWriter $Head the writer inst to use
      * @return String|void always returns void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -44,7 +44,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param IDescribable|String|Null $Description optional fragment header text or description
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
@@ -67,7 +67,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderFragmentEnd(IRequest $Request)
@@ -79,7 +79,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of a table.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param String|NULL $captionText text that should appear in the table caption
      * @param IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
@@ -101,7 +101,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of a table row.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param int $flags ::FLAG_ROW_IS_HEADER, ::FLAG_ROW_IS_FOOTER, FLAG_ROW_FIRST_DATA_IS_LABEL
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
@@ -133,7 +133,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of a table data element.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @param int $span set span attribute
      * @param int $flags ::FLAG_DATA_IS_LABEL
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
@@ -157,7 +157,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of a table data element.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderTableDataEnd(IRequest $Request)
@@ -170,7 +170,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of a table row.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderTableRowEnd(IRequest $Request)
@@ -181,7 +181,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of a fragment.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param String|NULL $footerText text that should appear in the footer
      * @return void
      */
@@ -199,9 +199,9 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of an html <body>.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param String|\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content.
-     * Note: If a string is passed instead of IAttributes, it is added as a class to a new instance of IAttributes
+     * Note: If a string is passed instead of IAttributes, it is added as a class to a new inst of IAttributes
      * @return void
      */
     function renderBodyStart(IRequest $Request, IAttributes $Attr=NULL) {
@@ -219,7 +219,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of an html <body>.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderBodyEnd(IRequest $Request)
@@ -231,7 +231,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the start of an html body section.
-     * @param IRequest $Request the IRequest instance for this render
+     * @param IRequest $Request the IRequest inst for this render
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
@@ -250,7 +250,7 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of an html body section.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @param String|Null $className optional class name for this section
      * @return void
      */
@@ -277,8 +277,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the results of a query.
-     * @param IRequest $Request the IRequest instance for this render
-     * @param PDOSelect $Query query instance to render (not yet executed)
+     * @param IRequest $Request the IRequest inst for this render
+     * @param PDOSelect $Query query inst to render (not yet executed)
      * @param \CPath\Render\Attribute\\CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */
@@ -291,8 +291,8 @@ class CPathDefaultTheme implements ITableTheme, IFragmentTheme, IPageTheme, IHTM
 
     /**
      * Render the end of an html body section.
-     * @param IRequest $Request the IRequest instance for this render
-     * @param PDOSearchResponse $Response the PDOSearchResponse instance for this query
+     * @param IRequest $Request the IRequest inst for this render
+     * @param PDOSearchResponse $Response the PDOSearchResponse inst for this query
      * @param \CPath\Render\HTML\Attribute\IAttributes|NULL $Attr optional attributes to add to the content
      * @return void
      */

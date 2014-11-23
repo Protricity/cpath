@@ -10,9 +10,9 @@ namespace CPath\Route;
 interface IRouteMapper {
 
     /**
-     * Map a Route prefix to a target class or instance. Return true if the route prefix was matched
+     * Map a Route prefix to a target class or inst. Return true if the route prefix was matched
      * @param String $prefix route prefix i.e. GET /my/path
-     * @param IRoutable|IRouteMap|String $target Request handler class name or instance
+     * @param IRoutable|IRouteMap|String $target Request handler class name or inst
      * @param null $_arg Additional varargs
      * @return bool if true the rendering has occurred
      */

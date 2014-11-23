@@ -25,10 +25,11 @@ class RegexValidation implements IValidation
 	 * Validate the request and return the validated value
 	 * @param IRequest $Request
 	 * @param $value
+	 * @param null $fieldName
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value) {
+	function validate(IRequest $Request, $value, $fieldName = null) {
 		if (!preg_match($this->mRegex, $value, $matches))
 			throw new RequestException($this->mErrorMsg ? : (self::DEFAULT_MESSAGE . $this->mRegex));
 		return $value;

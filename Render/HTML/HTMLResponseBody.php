@@ -39,7 +39,7 @@ class HTMLResponseBody extends HTMLContainer
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @return String|void always returns void
 	 */
 	protected function renderHTMLContent(IRequest $Request) {
@@ -50,7 +50,7 @@ class HTMLResponseBody extends HTMLContainer
 	/**
 	 * Render HTML header html
 	 * @param \CPath\Request\IRequest $Request
-	 * @return WriteOnceHeaderRenderer the writer instance used
+	 * @return WriteOnceHeaderRenderer the writer inst used
 	 */
 	public function renderHTMLHeaders(IRequest $Request) {
 		$Writer = new WriteOnceHeaderRenderer();
@@ -78,11 +78,12 @@ class HTMLResponseBody extends HTMLContainer
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		RI::si(static::TAB_START, static::TAB);
 		echo self::DOCTYPE;
 
@@ -120,7 +121,7 @@ class HTMLResponseBody extends HTMLContainer
 
 			$Renderer = new RenderHandler($ex);
 			$Renderer->writeHeaders($Request, $Writer);
-			$Renderer->renderHTML($Request);
+			$Renderer->renderHTML($Request, $Parent);
 		}
 
 		RI::ai(-1);

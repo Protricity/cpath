@@ -132,7 +132,7 @@ abstract class PDODatabase extends \PDO implements IDatabase, IRoutable {
 
     /**
      * Render this request
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return String|void always returns void
      */
     function routeRequestStatic(IRequest $Request)

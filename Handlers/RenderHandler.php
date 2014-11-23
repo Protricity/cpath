@@ -93,9 +93,9 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 	}
 
 	/**
-	 * Write all support headers used by this IView instance
+	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer instance to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return String|void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -121,7 +121,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Renders a response object or returns false
-	 * @param IRequest $Request the IRequest instance for this render
+	 * @param IRequest $Request the IRequest inst for this render
 	 * @param bool $sendHeaders
 	 * @internal param \CPath\Request\Executable\IExecutable|\CPath\Response\IResponse $Response
 	 * @return bool returns false if no rendering occurred
@@ -154,25 +154,26 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Render request as html
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
 	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null, $sendHeaders=false) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null, $sendHeaders = true) {
 		if($sendHeaders)
 			$this->sendHeaders($Request);
 
 		try {
 			$Render = $this->getRenderer($Request->getMimeType());
-			$Render->renderHTML($Request, $Attr);
+			$Render->renderHTML($Request, $Attr, $Parent);
 //			$Template = new HTMLResponseBody();
 //			$Template->addContent($this->getRenderer($Request->getMimeType()));
 //			$Template->renderHTML($Request, $Attr);
 
 		} catch (\Exception $ex) {
 			$Render = $this->getRenderer($ex);
-			$Render->renderHTML($Request, $Attr);
+			$Render->renderHTML($Request, $Attr, $Parent);
 //			$Template = new HTMLResponseBody();
 //			$Handler = new RenderHandler($ex);
 //			$Template->addContent($Handler);
@@ -182,7 +183,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Render request as JSON
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
@@ -202,7 +203,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Render request as plain text
-	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
@@ -222,7 +223,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Render request as xml
-	 * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and remaining args
+	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param string $rootElementName Optional name of the root element
 	 * @param bool $declaration if true, the <!xml...> declaration will be rendered
 	 * @param bool $sendHeaders
@@ -246,7 +247,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Route the request to this class object and return the object
-	 * @param IRequest $Request the IRequest instance for this render
+	 * @param IRequest $Request the IRequest inst for this render
 	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
 	 * @param null|mixed $_arg [varargs] passed by route map
 	 * @throws \Exception
@@ -330,7 +331,7 @@ class RenderHandler implements IRoutable, IBuildable, IRenderHTML, IRenderText, 
 
 	/**
 	 * Handle this request and render any content
-	 * @param IBuildRequest $Request the build request instance for this build session
+	 * @param IBuildRequest $Request the build request inst for this build session
 	 * @return String|void always returns void
 	 * @build --disable 0
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build

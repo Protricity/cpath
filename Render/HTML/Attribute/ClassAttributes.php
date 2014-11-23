@@ -7,7 +7,7 @@
  */
 namespace CPath\Render\HTML\Attribute;
 
-class ClassAttr extends HTMLAttributes
+class ClassAttributes extends Attributes
 {
     public function __construct($classList, $_classList = null) {
         foreach (func_get_args() as $arg)

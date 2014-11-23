@@ -22,7 +22,7 @@ class PostUserRecoverAPI extends AbstractPDOAPI {
     private $mUserTable;
 
     /**
-     * Construct an instance of this API
+     * Construct an inst of this API
      * @param \CPath\Framework\PDO\Templates\User\Model\PDOUserModel|\CPath\Framework\PDO\Templates\User\Table\PDOUserTable $UserTable the user source object for this API
      */
     function __construct(PDOUserTable $UserTable) {
@@ -47,7 +47,7 @@ class PostUserRecoverAPI extends AbstractPDOAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return IResponse|mixed the api call response with data, message, and status
      */

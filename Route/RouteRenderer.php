@@ -24,7 +24,7 @@ final class RouteRenderer implements IRouteMapper
 
     /**
      * Create a rendering map for IRoutable route maps
-     * @param IRequest $Request the request instance to render
+     * @param IRequest $Request the request inst to render
      */
     public function __construct(IRequest $Request) {
         $this->mRequest = $Request;
@@ -92,9 +92,9 @@ final class RouteRenderer implements IRouteMapper
     }
 
     /**
-     * Maps a route prefix to a target class or instance, and performs a render
+     * Maps a route prefix to a target class or inst, and performs a render
      * @param String $prefix route prefix i.e. GET /my/path
-     * @param String|IRoutable $target the route target or instance
+     * @param String|IRoutable $target the route target or inst
      * @param null $_arg Additional varargs will be sent to the Request Handler
      * @return bool if true the request was handled and should end
      */

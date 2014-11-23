@@ -19,13 +19,13 @@ class ExceptionResponse implements IResponse, IKeyMap {
     public function __construct(\Exception $ex) {
         $this->mEx = $ex;
         $this->mCode = IResponse::HTTP_ERROR;
-        if($ex instanceof HTTPRequestException)
+        if($ex instanceof IResponse)
             $this->mCode = $ex->getCode();
     }
 
 //    /**
 //     * Map data to a data map
-//     * @param IDataMap $Map the map instance to add data to
+//     * @param IDataMap $Map the map inst to add data to
 //     * @return void
 //     */
 //    function mapData(IDataMap $Map) {
@@ -55,7 +55,7 @@ class ExceptionResponse implements IResponse, IKeyMap {
 
 	/**
 	 * Map data to the key map
-	 * @param IKeyMapper $Map the map instance to add data to
+	 * @param IKeyMapper $Map the map inst to add data to
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @internal param \CPath\Request\IRequest $Request
 	 * @return void

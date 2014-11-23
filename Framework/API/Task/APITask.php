@@ -70,7 +70,7 @@ abstract class APITask implements ITask, IViewConfig, IDescribableAggregate {
 
     /**
      * Render the fragment content
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render
      * @return void
      */
     function renderFragmentContent(IRequest $Request) {

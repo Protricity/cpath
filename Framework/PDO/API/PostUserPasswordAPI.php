@@ -28,7 +28,7 @@ class PostUserPasswordAPI extends AbstractPDOAPI {
     private $mConfirm = false, $mLoggedIn = false, $mTable, $mUser = null;
 
     /**
-     * Construct an instance of this API
+     * Construct an inst of this API
      * @param \CPath\Framework\PDO\Templates\User\Table\PDOUserTable $Table the user source object for this API
      */
     function __construct(PDOUserTable $Table) {
@@ -89,7 +89,7 @@ class PostUserPasswordAPI extends AbstractPDOAPI {
 
     /**
      * Execute this API Endpoint with the entire request.
-     * @param \CPath\Request\IRequest $Request the IRequest instance for this render which contains the request and args
+     * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and args
      * @param Array $args additional arguments for this execution
      * @return \CPath\Response\IResponse the api call response with data, message, and status
      */

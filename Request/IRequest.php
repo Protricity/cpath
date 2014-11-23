@@ -61,7 +61,7 @@ interface IRequest extends ILogListener, \ArrayAccess
 
 //	/**
 //	 * Return a request value
-//	 * @param String|IRequestParameter $Parameter string or instance
+//	 * @param String|IRequestParameter $Parameter string or inst
 //	 * @param null $description
 //	 * @return mixed the validated parameter value
 //	 */
