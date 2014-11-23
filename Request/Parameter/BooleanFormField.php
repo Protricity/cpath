@@ -8,6 +8,7 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\Element\HTMLCheckBoxField;
+use CPath\Render\HTML\Element\IHTMLInput;
 
 class BooleanFormField extends FormField
 {
@@ -16,7 +17,9 @@ class BooleanFormField extends FormField
 
 	}
 
-	function getHTMLInput() {
-		return new HTMLCheckBoxField($this->getFieldName());
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = $Input ?: new HTMLCheckBoxField($this->getFieldName());
+		$Input = parent::getHTMLInput($Input);
+		return $Input;
 	}
 }

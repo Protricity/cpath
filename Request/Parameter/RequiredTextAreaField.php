@@ -7,6 +7,7 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Parameter\Exceptions\RequiredFormFieldException;
@@ -15,8 +16,8 @@ class RequiredTextAreaField extends TextAreaField
 {
 	const CSS_CLASS_REQUIRED = 'required';
 
-	function getHTMLInput() {
-		$Input = parent::getHTMLInput();
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = parent::getHTMLInput($Input);
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
 

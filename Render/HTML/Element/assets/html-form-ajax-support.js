@@ -66,7 +66,13 @@
                     try {
                         var jsonContent = jQuery.parseJSON(content);
                         deferTrigger(form, "response-json", [jsonContent, jqXHR.statusText, jqXHR]);
-                        setLegend(jsonContent.message || "No Message", jsonContent.code || HTTP_ERROR);
+                        if(typeof jsonContent.message !== "undefined") {
+                            setLegend(jsonContent.message || "No Message", jsonContent.code || HTTP_ERROR);
+                            if(jsonContent.code === HTTP_SUCCESS)
+                                form.trigger('log', [jsonContent.message, jsonContent]);
+                            else
+                                form.trigger('log', [new Error(jsonContent.message), jsonContent]);
+                        }
 
                     } catch (e) {
                         setLegend(e.message + '<br/>' + content, HTTP_ERROR);

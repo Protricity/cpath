@@ -19,12 +19,12 @@ form.cpath-default-form-theme fieldset {
 
 form.cpath-default-form-theme legend {
     display: block;
-    width: 100%;
+    /*width: 100%;*/
     padding: .3em 0;
     margin-bottom: .3em;
     color: #333;
-    border-bottom: 1px solid #e5e5e5;
-    font-weight: bold;
+    /*border-bottom: 1px solid #e5e5e5;*/
+    /*font-weight: bold;*/
 }
 
 form.cpath-default-form-theme legend p {
@@ -68,6 +68,7 @@ form.cpath-default-form-theme label {
 /** Section **/
 
 
+form.cpath-default-form-theme fieldset,
 form.cpath-default-form-theme .form-section {
     display: block;
     border: 1px solid #ccc;

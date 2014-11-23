@@ -7,6 +7,7 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Parameter\Exceptions\RequiredParameterException;
@@ -19,8 +20,8 @@ class RequiredParameter extends Parameter implements IRenderHTML
 		parent::__construct($paramName, $description, $defaultValue);
 	}
 
-	function getHTMLInput() {
-		$Input = parent::getHTMLInput();
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = parent::getHTMLInput($Input);
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
 		return $Input;

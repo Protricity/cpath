@@ -8,6 +8,7 @@
 namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\Element\HTMLTextAreaField;
+use CPath\Render\HTML\Element\IHTMLInput;
 
 class TextAreaField extends FormField
 {
@@ -15,9 +16,9 @@ class TextAreaField extends FormField
 		parent::__construct($paramName, $description, $defaultValue);
 	}
 
-	function getHTMLInput() {
-		$Input = new HTMLTextAreaField($this->getFieldName());
-		$Input->setAttribute('placeholder', $this->getFieldName());
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = $Input ?: new HTMLTextAreaField($this->getFieldName());
+		$Input = parent::getHTMLInput($Input);
 		return $Input;
 	}
 }

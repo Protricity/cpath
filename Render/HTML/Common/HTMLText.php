@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\HTML\Common;
 
+use CPath\Framework\Render\Util\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\IRenderHTML;
@@ -32,8 +33,14 @@ class HTMLText implements IRenderHTML
 	 * @return String|void always returns void
 	 */
     function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-        if($this->mText !== null)
-            echo $this->mText;
+        if($this->mText !== null) {
+            if(strpos($this->mText, "\n") === false) {
+	            echo $this->mText;
+            } else {
+	            $i = RI::get()->getIndent(0, "\n");
+	            echo $i, '<p>', implode("</p>" . $i . "<p>", explode("\n", $this->mText)), '</p>';
+            }
+        }
     }
 }
 

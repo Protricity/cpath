@@ -7,6 +7,8 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\HTMLCheckBoxField;
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Parameter\Exceptions\RequiredFormFieldException;
@@ -19,8 +21,9 @@ class RequiredFormField extends FormField
 		parent::__construct($paramName, $description, $defaultValue);
 	}
 
-	function getHTMLInput() {
-		$Input = parent::getHTMLInput();
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = $Input ?: new HTMLCheckBoxField($this->getFieldName());
+		$Input = parent::getHTMLInput($Input);
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
 		return $Input;

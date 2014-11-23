@@ -119,7 +119,8 @@ class AttributeCollection implements IAttributes
 	static function combine($attributes, $_attributes) {
 		$Inst = new AttributeCollection();
 		foreach (func_get_args() as $attributes) {
-			if (is_string($attributes))
+			if (is_null($attributes));
+			elseif (is_string($attributes))
 				$Inst->addAttributes(new ClassAttributes($attributes));
 			elseif(is_array($attributes))
 				self::combineA($attributes, $Inst);

@@ -10,6 +10,7 @@ namespace CPath\Request\Parameter;
 use CPath\Render\HTML\Attribute\AttributeCollection;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLInputField;
+use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
@@ -21,6 +22,7 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 	const CSS_CLASS_ERROR = 'error';
 
     private $mName, $mDescription, $mValue;
+	private $mPlaceholder = null;
 	private $mAttributes = array();
 	protected $mFilters = array();
 
@@ -46,9 +48,19 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 		return $this->mDescription;
 	}
 
-	function getHTMLInput() {
-		$Input = new HTMLInputField($this->getFieldName());
-		$Input->setAttribute('placeholder', $this->getFieldName());
+	function setDescription($text) {
+		$this->mDescription = $text;
+		return $this;
+	}
+
+	function setPlaceholder($text) {
+		$this->mPlaceholder = $text;
+		return $this;
+	}
+
+	function getHTMLInput(IHTMLInput $Input=null) {
+		$Input = $Input ?: new HTMLInputField($this->getFieldName());
+		$Input->setAttribute('placeholder', $this->mPlaceholder ?: $this->getFieldName());
 		return $Input;
 	}
 

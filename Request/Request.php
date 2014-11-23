@@ -7,7 +7,6 @@
  */
 namespace CPath\Request;
 
-use CPath\Request\Form\IFormRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Web\CLIWebRequest;
