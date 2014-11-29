@@ -3,8 +3,8 @@ namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
 use CPath\Config;
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\IRenderHTML;
@@ -25,8 +25,8 @@ abstract class AbstractFormFragment implements IRenderHTML, IHTMLSupportHeaders{
 
     /**
      * Write all support headers used by this IView inst
-     * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer inst to use
-     * @return String|void always returns void
+     * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+     * @return void
      */
     function writeHeaders(IHeaderWriter $Head) {
         $Head->writeScript(__DIR__ . '/assets/jquery.min.js');

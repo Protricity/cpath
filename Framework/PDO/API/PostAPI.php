@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Describable\IDescribable;
 use CPath\Framework\PDO\Interfaces\IAPIPostCallbacks;
 use CPath\Framework\PDO\Interfaces\IAssignAccess;
 use CPath\Framework\PDO\Table\Column\Types\PDOColumn;
@@ -38,7 +37,7 @@ class PostAPI extends AbstractPDOAPI {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Data\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Create a new ".$this->getTable()->getModelName();

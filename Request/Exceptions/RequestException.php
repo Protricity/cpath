@@ -9,22 +9,34 @@ namespace CPath\Request\Exceptions;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
+use CPath\Response\ResponseRenderer;
 
-class RequestException extends \Exception implements IHeaderResponse, IKeyMap {
+class RequestException extends \Exception implements IHeaderResponse, IKeyMap, IRenderHTML, IHTMLSupportHeaders {
     const DEFAULT_HTTP_CODE = IResponse::HTTP_ERROR;
 	const STR_TRACE = 'trace';
 
-    function __construct($message, $statusCode=null) {
+	/** @var IRenderHTML */
+	private $mRenderable = null;
+
+    function __construct($message, $statusCode=null, \Exception $previous=null) {
         static $handlerSet = false;
         if(!$handlerSet) {
             //set_exception_handler(__CLASS__ . '::handleException');
             $handlerSet = true;
         }
-        parent::__construct($message, $statusCode ?: static::DEFAULT_HTTP_CODE);
+        parent::__construct($message, $statusCode ?: static::DEFAULT_HTTP_CODE, $previous);
     }
+
+	public function setRenderable(IRenderHTML $Renderable) {
+		$this->mRenderable = $Renderable;
+	}
 
     /**
      * Send response headers for this response
@@ -33,20 +45,8 @@ class RequestException extends \Exception implements IHeaderResponse, IKeyMap {
      * @return bool returns true if the headers were sent, false otherwise
      */
     function sendHeaders(IRequest $Request, $mimeType = null) {
-        static $sent = false;
-        if($sent || headers_sent())
-            return false;
-        $sent = true;
-
-        if($mimeType === null)
-            $mimeType = $Request->getMimeType()->getName();
-
-        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
-        header("Content-Type: " . $mimeType);
-
-        header('Access-Control-Allow-Origin: *');
-
-        return true;
+	    $ResponseRenderer = new ResponseRenderer($this);
+	    return $ResponseRenderer->sendHeaders($Request, $mimeType);
     }
 
 	/**
@@ -62,20 +62,30 @@ class RequestException extends \Exception implements IHeaderResponse, IKeyMap {
 		$Map->map(self::STR_TRACE, $this->getTraceAsString());
 	}
 
-    // Static
-//
-//    static function handleException(\Exception $ex) {
-//        static $handled = false;
-//        if($ex instanceof IResponse) {
-//            if($handled)
-//                die("FAIL" . $ex);
-//            $handled = true;
-//            $Request = Request::create('/');
-//            $ResponseRenderer = new ResponseRenderer($ex);
-//            $ResponseRenderer->render($Request, true);
-//        } else {
-//            echo $ex;
-//        }
-//    }
+	/**
+	 * Write all support headers used by this renderer
+	 * @param IRequest $Request
+	 * @param IHeaderWriter $Head the writer inst to use
+	 * @return void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		if($this->mRenderable instanceof IHTMLSupportHeaders)
+			$this->mRenderable->writeHeaders($Request, $Head);
+	}
 
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		if($this->mRenderable) {
+			$this->mRenderable->renderHTML($Request, $Attr, $Parent);
+		} else {
+			$ResponseRenderer = new ResponseRenderer($this);
+			$ResponseRenderer->renderHTML($Request, $Attr, $this);
+		}
+	}
 }

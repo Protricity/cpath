@@ -9,22 +9,27 @@ namespace CPath\Request\Parameter;
 
 use CPath\Render\HTML\Attribute\AttributeCollection;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
-use CPath\Render\HTML\Element\IHTMLInput;
+use CPath\Render\HTML\Element\Form\HTMLForm;
+use CPath\Render\HTML\Element\Form\HTMLFormField;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\HTML\ParameterHTMLInputField;
+use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 
-class Parameter implements IRequestParameter, IRenderHTML, IValidation
+class Parameter implements IRequestParameter, IValidation
 {
 	const CSS_CLASS_ERROR = 'error';
 
-    private $mName, $mDescription, $mValue;
+    private $mName, $mDescription;
 	private $mPlaceholder = null;
 	private $mAttributes = array();
-	protected $mFilters = array();
+	private $mValue = null;
+	private $mLastException;
+	private $mForm = null;
+	protected $mValidations = array();
 
     public function __construct($paramName, $description=null, $defaultValue=null) {
 	    $this->mName = $paramName;
@@ -36,9 +41,27 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 		$this->mAttributes[] = $Attributes;
 	}
 
+	public function getInputValue()                     { return $this->mValue; }
+	public function setInputValue($value)               { $this->mValue = $value; }
+
     function getFieldName() {
         return $this->mName;
     }
+
+	/**
+	 * @param HTMLForm $Form
+	 */
+	function setForm(HTMLForm $Form) {
+		$this->mForm = $Form;
+	}
+
+	/**
+	 * Return the form field's form instance or null
+	 * @return HTMLForm|null
+	 */
+	function getForm() {
+		return $this->mForm;
+	}
 
 	/**
 	 * Get parameter description
@@ -58,18 +81,12 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 		return $this;
 	}
 
-	function getHTMLInput(IHTMLInput $Input=null) {
-		$Input = $Input ?: new HTMLInputField($this->getFieldName());
-		$Input->setAttribute('placeholder', $this->mPlaceholder ?: $this->getFieldName());
-		return $Input;
-	}
-
 	function addFilter($filter, $options=null, $description=null) {
-		$this->mFilters[] = func_get_args();
+		$this->mValidations[] = func_get_args();
 	}
 
 	function addValidation(IValidation $Validation) {
-		$this->mFilters[] = $Validation;
+		$this->mValidations[] = $Validation;
 	}
 
 	/**
@@ -79,59 +96,37 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 	 * @return mixed
 	 */
 	function getRequestValue(IRequest $Request) {
-//		$Params = new SessionParameters($Request);
-//		$Params->add($this);
 		$name = $this->getFieldName();
-		return isset($Request[$name]) ? $Request[$name] : null;
-	}
-
-	function tryValue(IRequest $Request, \Exception &$Exception) {
-		try {
-			$value = $this->getRequestValue($Request);
-			return $this->validate($Request, $value, $this->getFieldName());
-		} catch (\Exception $ex) {
-			$Exception = $ex;
-			return null;
+		if(isset($Request[$name])) {
+			$this->mValue = $Request[$name];
+		} else {
+			$this->mValue = null;
 		}
+		return $this->mValue;
 	}
-
 
 	/**
 	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
 	 * @param $value
 	 * @param null $fieldName
+	 * @throws \CPath\Request\Validation\Exceptions\ValidationException
 	 * @throw Exception if validation failed
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
-		$value = $this->filter($Request, $value);
-		$this->mValue = $value;
-		return $value;
-	}
+	function validate(IRequest $Request, $value=null, $fieldName = null) {
+		$value = $value ?: $this->getRequestValue($Request);
+		/** @var \Exception[] $Exs */
+		$Exs = array();
 
-	function validateRequest(IRequest $Request) {
-		$value = $this->getRequestValue($Request);
-		$value = $this->validate($Request, $value, $this->getFieldName());
-		return $value;
-	}
-
-	/**
-	 * @param IRequest $Request
-	 * @param $value
-	 * @return mixed
-	 * @throws \CPath\Request\Exceptions\RequestException
-	 */
-	protected function filter(IRequest $Request, $value) {
-		$exs = array();
-
-		foreach($this->mFilters as $Filter) {
+		$fieldName = $fieldName ?: $this->getFieldName();
+		foreach($this->mValidations as $Validation) {
 			try {
-				if($Filter instanceof IValidation) {
-					$Filter->validate($Request, $value, $this->getFieldName());
+				if($Validation instanceof IValidation) {
+					$Validation->validate($Request, $value, $fieldName);
 
 				} else {
-					list($filterID, $filterOpts, $desc) = $Filter + array(-1, null, null);
+					list($filterID, $filterOpts, $desc) = $Validation + array(-1, null, null);
 					$value = filter_var($value, $filterID, $filterOpts);
 					if($value === false && $filterID !== FILTER_VALIDATE_BOOLEAN) {
 						if(!$desc) {
@@ -142,21 +137,33 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 								}
 							}
 							if(!$desc)
-								$desc = "Filter failed: " . implode(', ', $Filter);
+								$desc = "Filter failed: " . implode(', ', $Validation);
 						}
 						throw new RequestException($desc);
 					}
 
 				}
 			} catch (\Exception $ex) {
-				$exs[] = $ex;
+				$Exs[] = $ex;
 			}
 		}
 
-		if(sizeof($exs))
-			throw new RequestException("Validation exceptions occurred: " . implode("\n\t", $exs));
+		if ($Exs)
+			throw $this->mLastException = new ValidationException($this->mForm, $Exs);
 
 		return $value;
+	}
+
+
+	function getHTMLInput(IHTMLFormField $Input=null) {
+		$Input = $Input ?: new HTMLFormField(, $this->getFieldName());
+		if($this->mValue)
+			$Input->setInputValue($this->mValue);
+		if($this->mPlaceholder)
+			$Input->setAttribute('placeholder', $this->mPlaceholder);
+		//$Input->setAttribute('placeholder', $this->getDescription()); // $this->mPlaceholder ?: $this->getFieldName());
+		$Input->addValidation($this);
+		return $Input;
 	}
 
 	/**
@@ -177,11 +184,24 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 		    if(sizeof($Attrs) > 0)
 			    $Attr = AttributeCollection::combineA($Attrs);
 	    }
+
+	    if(!$this->mLastException && $Request instanceof IFormRequest)
+		    try {
+			    $this->validate($Request);
+		    } catch (\Exception $ex) {
+
+		    }
+
+	    if($this->mLastException)
+		    $Input->addClass(self::CSS_CLASS_ERROR);
+
 	    $Input->renderHTML($Request, $Attr, $Parent);
 	}
 
 	function __invoke(IRequest $Request) {
-		return $this->validateRequest($Request);
+		$value = $this->getRequestValue($Request);
+		$value = $this->validate($Request, $value, $this->getFieldName());
+		return $value;
 	}
 
 	// Static
@@ -191,11 +211,11 @@ class Parameter implements IRequestParameter, IRenderHTML, IValidation
 //		$Params->validateRequest($Request);
 //	}
 
-	static function tryStatic(IRequest $Request, $paramName, $paramDescription=null, $defaultValue=null) {
-		$Parameter = new Parameter($paramName, $paramDescription, $defaultValue);
-		$Parameter->tryValue($Request, $Exceptions);
-		if($Exceptions instanceof \Exception)
-			throw $Exceptions;
-	}
+//	static function tryStatic(IRequest $Request, $paramName, $paramDescription=null, $defaultValue=null) {
+//		$Parameter = new Parameter($paramName, $paramDescription, $defaultValue);
+//		$Parameter->tryValue($Request, $Exceptions);
+//		if($Exceptions instanceof \Exception)
+//			throw $Exceptions;
+//	}
 }
 

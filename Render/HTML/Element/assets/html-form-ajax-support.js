@@ -6,6 +6,11 @@
  * To change this template use File | Settings | File Templates.
  */
 (function(){
+    var EVENTS = 'submit request';
+    var FORM_AJAX_CLASS = 'ajax';
+
+    var pending = 0;
+    var Body = null;
     var onResize = function() {};
 
     var HTTP_SUCCESS = 200;
@@ -23,105 +28,107 @@
         }, 0)
     };
 
+    var sendJSONAjaxRequest = function(e, ajax) {
+        var CurrentTarget = jQuery(e.currentTarget);
+        var Target = jQuery(e.target);
+        ajax = jQuery.extend(ajax, {
+
+            dataType: 'json',
+            headers: {
+                Accept : "application/json; charset=utf-8"
+            },
+            complete: function(jqXHR, textStatus) {
+                pending--;
+
+                var content = jqXHR.responseText;
+                Target.trigger("response-content", [content, jqXHR.statusText, jqXHR]);
+
+                try {
+                    var jsonContent = jQuery.parseJSON(content);
+                    Target.trigger("response-json", [jsonContent, jqXHR.statusText, jqXHR]);
+                    if(typeof jsonContent.message !== "undefined") {
+                        Target.trigger('log', [jsonContent.message, jsonContent.code]);
+                    }
+
+                } catch (e) {
+                    Target.trigger('log', [e, HTTP_ERROR]);
+                }
+            },
+            success: function(data, textStatus, jqXHR) {
+                Target.trigger("success", [data, jqXHR.statusText, jqXHR]);
+                Target.trigger("log", [jqXHR.statusText]);
+
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                Target.trigger("error", [errorThrown, jqXHR]);
+                Target.trigger("log", [new Error(errorThrown)]);
+
+            }
+        });
+
+        e.preventDefault();
+        e.stopPropagation();
+        jQuery.ajax(ajax);
+    };
+
+    var submitForm = function(e, Form) {
+        if(pending > 1)
+            throw new Error("Too many pending requests");
+        pending++;
+
+        var ajax = {
+            data: {},
+            url: Form.attr('action') || document.location.href.split('?')[0],
+            type: Form.attr('method') || 'GET'
+        };
+        jQuery.each(Form.serializeArray(), function(i, obj) {
+            ajax.data[obj.name] = obj.value;
+        });
+
+        e.preventDefault();
+        e.stopPropagation();
+        Form.trigger('request', [ajax]);
+    };
+
+    var eventHandler = function(e, arg) {
+        var Target = jQuery(e.target);
+        var type = e.type;
+
+        switch(type) {
+            case 'submit':
+                var Form = Target;
+                if(!Form.is('form'))
+                    Form = Form.parents('form');
+                if(Form.hasClass(FORM_AJAX_CLASS)) {
+                    submitForm(e, Form);
+                    e.stopPropagation();
+                    e.preventDefault();
+                    return;
+                }
+                break;
+            case 'request':
+                sendJSONAjaxRequest(e, arg);
+                e.stopPropagation();
+                e.preventDefault();
+                return;
+            case 'log':
+                break;
+        }
+    };
+
     jQuery(document).ready(function() {
         jQuery(window).resize(onResize);
         onResize();
-        var pending = 0;
 
-        jQuery('form .html-form-ajax-support').each(function(i, container) {
-            container = jQuery(container);
-            var form = container.parents('form');
-            if(form.length === 0)
-                throw new Error("Form not found");
+        Body = jQuery('body');
+        Body.on(EVENTS, eventHandler);
 
-            var setLegend = function(text, code) {
-                container.removeClass('error');
-                if(code !== HTTP_SUCCESS)
-                    container.addClass('error');
-                if(text.indexOf("\n") > -1)
-                    text = '<p>' + text.split("\n").join("</p><p>") + '</p>';
-
-                container.html(text);
-                container.hide();
-                container.fadeIn();
-            };
-
-            var formValues = {};
-            var ajaxConfig = {
-                url: form.attr('action') || document.location.href.split('?')[0],
-                type: form.attr('method') || 'GET',
-                dataType: 'json',
-                accepts: 'application/json',
-                //contentType: asObject ? 'application/json' : null,
-                headers: {
-                    Accept : "application/json; charset=utf-8"
-                    //"Content-Type": asObject ? 'application/json' : null
-                },
-                complete: function(jqXHR, textStatus) {
-                    pending--;
-
-                    var content = jqXHR.responseText;
-                    deferTrigger(form, "response-content", [content, jqXHR.statusText, jqXHR]);
-
-                    try {
-                        var jsonContent = jQuery.parseJSON(content);
-                        deferTrigger(form, "response-json", [jsonContent, jqXHR.statusText, jqXHR]);
-                        if(typeof jsonContent.message !== "undefined") {
-                            setLegend(jsonContent.message || "No Message", jsonContent.code || HTTP_ERROR);
-                            if(jsonContent.code === HTTP_SUCCESS)
-                                form.trigger('log', [jsonContent.message, jsonContent]);
-                            else
-                                form.trigger('log', [new Error(jsonContent.message), jsonContent]);
-                        }
-
-                    } catch (e) {
-                        setLegend(e.message + '<br/>' + content, HTTP_ERROR);
-
-                    }
-                },
-                success: function(data, textStatus, jqXHR) {
-                    deferTrigger(form, "success", [data, jqXHR.statusText, jqXHR]);
-                    deferTrigger(form, "log", [jqXHR.statusText]);
-
-                },
-                error: function(jqXHR, textStatus, errorThrown) {
-                    deferTrigger(form, "error", [errorThrown, jqXHR]);
-                    deferTrigger(form, "log", [new Error(errorThrown)]);
-
-                }
-            };
-
-            var submit = function(values) {
-                var ajax = jQuery.extend({
-                    data: values || form.serialize()
-                }, ajaxConfig);
-
-                if(pending > 1)
-                    throw new Error("Too many pending requests");
-                pending++;
-
-                deferTrigger(form, "request", [ajax.url, ajax.data]);
-                //form.trigger( "log", [ajax.url + '?' + jQuery.param(ajax.data)]);
-                jQuery.ajax(ajax);
-            };
-
-            form.find('button[type=submit]').click(
-                function(e) {
-                    var input = jQuery(this);
-                    formValues[input.attr('name')] = input.val();
-                }
-            );
-
-            form.submit(function( event ) {
-                var values = {};
-                jQuery.each(form.serializeArray(), function(i, obj) {
-                    values[obj.name] = obj.value;
-                });
-                jQuery.extend(values, formValues);
-                event.preventDefault();
-                submit(values);
-            });
-        });
+//            Form.find('input[type=submit]').click(
+//                function(e) {
+//                    var input = jQuery(this);
+//                    formValues[input.attr('name')] = input.val();
+//                }
+//            );
     });
 
 })();

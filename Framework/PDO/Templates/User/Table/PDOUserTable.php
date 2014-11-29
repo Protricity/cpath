@@ -86,7 +86,7 @@ abstract class PDOUserTable extends PDOPrimaryKeyTable {
 //     * Load all available actions from this object.
 //     */
 //    function loadDefaultTasks(ITaskCollection $Manager) {
-//        \CPath\Framework\PDO\Table\Types\parent::loadDefaultTasks($Manager);
+//        \CPath\Framework\PDO\UIElement\Types\parent::loadDefaultTasks($Manager);
 //        $Manager->add(new Task_Login($this));
 //    }
 

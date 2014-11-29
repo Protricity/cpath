@@ -29,7 +29,7 @@ interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
 	public function getContent($key = null);
 
 	/**
-	 * Add IRenderHTML Content
+	 * Add IRenderHTML MainContent
 	 * @param IRenderHTML $Render
 	 * @param null $key if provided, add/replace content by key
 	 * @return void

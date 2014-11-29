@@ -7,14 +7,18 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Render\HTML\Common\HTMLText;
+use CPath\Data\Describable\IDescribable;
+use CPath\Render\Helpers\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\Common\IInputField;
-use CPath\Request\Parameter\IRequestParameter;
+use CPath\Request\IRequest;
+use CPath\Request\Validation\IValidation;
 
 class HTMLLabel extends HTMLElement
 {
-	const PASS_DOWN_ATTRIBUTES = true;
+	//const PASS_DOWN_ATTRIBUTES = true;
+	private $mText = null;
 
 	/**
 	 * @param string $text
@@ -23,38 +27,48 @@ class HTMLLabel extends HTMLElement
 	 */
     public function __construct($text=null, $classList=null, $_content=null) {
         parent::__construct('label', $classList);
-	    if($text)
-	        $this->addContent(new HTMLText($text));
+	    $this->mText = $text;
 
 	    if($_content !== null)
 		    for($i=2;$i<func_num_args();$i++)
 			    $this->addAll(func_get_arg($i));
     }
 
-    /**
-     * Add HTML Container Content
-     * @param IRenderHTML|string $Render
-     * @param null $key
-     * @return String|void always returns void
-     */
-    function addContent(IRenderHTML $Render, $key = null) {
-	    $name = null;
-	    $description = null;
-	    if ($Render instanceof IRequestParameter) {
-		    $description = $Render->getDescription();
-		    $name = $Render->getFieldName();
+	/**
+	 * Add HTML Container MainContent
+	 * @param \CPath\Render\HTML\IRenderHTML $Content
+	 * @param null $key
+	 * @return void
+	 */
+	function addContent(IRenderHTML $Content, $key = null) {
+		if ($Content instanceof IHTMLFormField)
+			$this->setAttribute('for', $Content->getFieldName());
 
-	    } elseif ($Render instanceof IInputField) {
-		    $name = $Render->getFieldName();
+		parent::addContent($Content, $key);
+	}
 
-	    }
+	protected function renderContentItem(IRequest $Request, $index, IRenderHTML $Content, IAttributes $ContentAttr = null) {
+		if ($Content instanceof IDescribable)
+			echo  RI::ni(), '<span>' . $Content->getDescription() . '</span>';
 
-	    if($name)
-		    $this->setAttribute('for', $name);
+		if ($Content instanceof IValidation) {
+			try {
+				$Content->validate($Request);
+			} catch (\Exception $ex) {
+				echo  RI::ni(), '<span class="error">' . $ex->getMessage() . '</span>';
+			}
+		}
 
-	    parent::addContent(new HTMLText($description));
-        parent::addContent($Render, $key);
-    }
+		parent::renderContentItem($Request, $index, $Content, $ContentAttr);
+	}
+
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
+		if($this->mText)
+			echo  RI::ni(), '<span>' . $this->mText . '</span>';
+
+		parent::renderContent($Request, $ContentAttr, $Parent);
+	}
+
 }
 
 

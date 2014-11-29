@@ -7,6 +7,7 @@
  */
 namespace CPath\Request\Parameter;
 
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\Element\IHTMLInput;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
@@ -16,7 +17,7 @@ class RequiredTextAreaField extends TextAreaField
 {
 	const CSS_CLASS_REQUIRED = 'required';
 
-	function getHTMLInput(IHTMLInput $Input=null) {
+	function getHTMLInput(IHTMLFormField $Input=null) {
 		$Input = parent::getHTMLInput($Input);
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
@@ -33,9 +34,9 @@ class RequiredTextAreaField extends TextAreaField
 	 * @throws Exceptions\RequiredFormFieldException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
-		if (!$value) {
+		if (!trim($value)) {
 			if (!$Request instanceof IFormRequest)
 				throw new RequiredFormFieldException($this, "Required Form field must come from a form request: " . $this->getFieldName());
 

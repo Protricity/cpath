@@ -53,7 +53,7 @@ class AdminAccountPolicy extends UserAccountViewerPolicy {
      * @param IRequest $Request The api request to process and or validate validate
      * @param int $intent the read intent. Typically IReadAccess::INTENT_SEARCH
      * @throws InvalidPermissionException
-     * @internal param \CPath\Framework\PDO\Table\PDOTable $Table The table inst
+     * @internal param \CPath\Framework\PDO\UIElement\PDOTable $UIElement The table inst
      * @return void
      */
     function assertQueryReadAccess(PDOWhere $Select, IRequest $Request, $intent) {

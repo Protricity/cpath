@@ -7,52 +7,104 @@
  */
 namespace CPath\Request\Executable;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Handlers\Response\ResponseUtil;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
 use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IHeaderResponse;
+use CPath\Response\IResponse;
 use CPath\Response\Response;
+use CPath\Response\ResponseRenderer;
 
 
-class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders {
+class ExecutableRenderer implements IHeaderResponse, IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders, IExecutable {
 
-	private $mExecutable, $mResponse=null;
+	private $mExecutable;
+	/** @var IResponse */
+	private $mResponse=null;
     public function __construct(IExecutable $Executable) {
         $this->mExecutable = $Executable;
     }
 
 	/**
-	 * Render request as html
-	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
-	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Request\Executable\IHTMLContainer $Parent
-	 * @return String|void always returns void
+	 * Execute a command and return a response. Does not render
+	 * @param IRequest $Request
+	 * @return IResponse the execution response
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$Response = $this->mResponse ?: $this->mExecutable->execute($Request);
-		if(!$Response instanceof IRenderHTML)
-			$Response = new ResponseUtil($Response);
-		$Response->renderHTML($Request, $Attr);
-		unset($this->mResponse);
+	function execute(IRequest $Request) {
+		try {
+			$Response = $this->mExecutable->execute($Request)
+			?: new Response("No Response", IResponse::HTTP_ERROR);
+
+		} catch (IResponse $ex) {
+			$Response = $ex;
+
+		} catch (\Exception $ex) {
+			$Response = new ExceptionResponse($ex);
+
+		}
+		$this->mResponse = $Response;
+		return $Response;
+	}
+
+	public function getResponse(IRequest $Request=null) {
+		if($this->mResponse)
+			return $this->mResponse;
+
+		if(!$Request)
+			return $this;
+
+		$this->mResponse = $this->execute($Request);
+		return $this->mResponse;
+	}
+
+	/**
+	 * Send response headers for this response
+	 * @param IRequest $Request
+	 * @param string $mimeType
+	 * @return bool returns true if the headers were sent, false otherwise
+	 */
+	function sendHeaders(IRequest $Request, $mimeType = null) {
+		$Response = $this->getResponse($Request);
+		$ResponseRenderer = new ResponseRenderer($Response);
+		$ResponseRenderer->sendHeaders($Request, $mimeType);
 	}
 
 	/**
 	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Response = $this->mResponse ?: $this->mExecutable->execute($Request);
+		$Response = $this->getResponse($Request);
 		if($Response instanceof IHTMLSupportHeaders)
 			$Response->writeHeaders($Request, $Head);
-		$this->mResponse = $Response;
+	}
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		if($this->mExecutable instanceof IRenderHTML) {
+			$this->mExecutable->renderHTML($Request, $Attr, $Parent);
+			return;
+		}
+		$Response = $this->getResponse($Request);
+		if(!$Response instanceof IRenderHTML)
+			$Response = new ResponseRenderer($Response);
+		$Response->renderHTML($Request, $Attr);
+		unset($this->mResponse);
 	}
 
 	/**
@@ -61,10 +113,13 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 	 * @return String|void always returns void
 	 */
 	function renderJSON(IRequest $Request) {
-		$Response = $this->mExecutable->execute($Request)
-			?: new Response("No Response", false);
+		if($this->mExecutable instanceof IRenderJSON) {
+			$this->mExecutable->renderJSON($Request);
+			return;
+		}
+		$Response = $this->getResponse($Request);
 		if(!$Response instanceof IRenderJSON)
-			$Response = new ResponseUtil($Response);
+			$Response = new ResponseRenderer($Response);
 		$Response->renderJSON($Request);
 	}
 
@@ -74,9 +129,13 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 	 * @return String|void always returns void
 	 */
 	function renderText(IRequest $Request) {
-		$Response = $this->mExecutable->execute($Request);
+		if($this->mExecutable instanceof IRenderText) {
+			$this->mExecutable->renderText($Request);
+			return;
+		}
+		$Response = $this->getResponse($Request);
 		if(!$Response instanceof IRenderText)
-			$Response = new ResponseUtil($Response);
+			$Response = new ResponseRenderer($Response);
 		$Response->renderText($Request);
 	}
 
@@ -88,9 +147,33 @@ class ExecutableRenderer implements IRenderHTML, IRenderJSON, IRenderXML, IRende
 	 * @return String|void always returns void
 	 */
 	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-		$Response = $this->mExecutable->execute($Request);
+		if($this->mExecutable instanceof IRenderXML) {
+			$this->mExecutable->renderXML($Request);
+			return;
+		}
+		$Response = $this->getResponse($Request);
 		if(!$Response instanceof IRenderXML)
-			$Response = new ResponseUtil($Response);
+			$Response = new ResponseRenderer($Response);
 		$Response->renderXML($Request);
+	}
+
+	/**
+	 * Get the request status code
+	 * @return int
+	 */
+	function getCode() {
+		return $this->mResponse
+			? $this->mResponse->getCode()
+			: IResponse::HTTP_ERROR;
+	}
+
+	/**
+	 * Get the IResponse Message
+	 * @return String
+	 */
+	function getMessage() {
+		return $this->mResponse
+			? $this->mResponse->getMessage()
+			: "No Execution";
 	}
 }

@@ -125,32 +125,20 @@ class Request implements IRequest
 
     /**
      * Add a log entry
-     * @param String $msg The log message
+     * @param mixed $msg The log message
      * @param int $flags [optional] log flags
-     * @return void
+     * @return int the number of listeners that processed the log entry
      */
     function log($msg, $flags = 0) {
+	    $c = 0;
         foreach($this->mListeners as $Log)
-            $Log->log($msg, $flags);
+            $c += $Log->log($msg, $flags);
 
         $MimeType = $this->getMimeType();
         if($MimeType instanceof ILogListener)
-            $MimeType->log($msg, $flags);
-    }
+	        $c += $MimeType->log($msg, $flags);
 
-    /**
-     * Log an exception inst
-     * @param \Exception $ex The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function logEx(\Exception $ex, $flags = 0) {
-        foreach($this->mListeners as $Log)
-            $Log->logEx($ex, $flags);
-
-        $MimeType = $this->getMimeType();
-        if($MimeType instanceof ILogListener)
-            $MimeType->logEx($ex, $flags);
+	    return $c;
     }
 
     /**

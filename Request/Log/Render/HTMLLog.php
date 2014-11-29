@@ -7,63 +7,44 @@
  */
 namespace CPath\Request\Log\Render;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
-class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
+class HTMLLog implements IRenderHTML, ILogListener
 {
 	private $mLog = array();
-	private $mAttr;
-	private $mTarget = null;
+	private $mReverseOrder = false;
+	/** @var ILogListener[] */
+	private $mLogListeners = array();
 
-	const CSS_REVERSE_ORDER = 'reverse-order';
+	//const CSS_REVERSE_ORDER = 'reverse-order';
 
-	/**
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 */
-	public function __construct($classList = null) {
-		if(!$classList instanceof IAttributes)
-			$classList = new Attributes($classList);
-		$this->mAttr = $classList;
-		$this->mAttr->addClass('log-container');
+	public function __construct() {
 	}
 
-	function setReverseOrder() {
-		$this->mAttr->addClass(self::CSS_REVERSE_ORDER);
+	function setReverseOrder($reverse=true) {
+		$this->mReverseOrder = $reverse;
 	}
 
-	/**
-	 * @param String $selector
-	 */
-	function bindEventListener($selector) {
-		$this->mTarget = $selector;
+	function clearLog() {
+		$this->mLog = array();
 	}
 
 	/**
 	 * Add a log entry
-	 * @param String $msg The log message
+	 * @param mixed $msg The log message
 	 * @param int $flags [optional] log flags
-	 * @return void
+	 * @return int the number of listeners that processed the log entry
 	 */
 	function log($msg, $flags = 0) {
+		$c = 1;
 		$this->mLog[] = array($msg, $flags);
-	}
-
-	/**
-	 * Log an exception inst
-	 * @param \Exception $ex The log message
-	 * @param int $flags [optional] log flags
-	 * @return void
-	 */
-	function logEx(\Exception $ex, $flags = 0) {
-		$this->mLog[] = array($ex, $flags);
+		foreach($this->mLogListeners as $Listener)
+			$c += $Listener->log($msg, $flags);
+		return $c;
 	}
 
 	/**
@@ -73,52 +54,34 @@ class HTMLLog implements IRenderHTML, ILogListener, IHTMLSupportHeaders
 	 * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
 	 */
 	function addLogListener(ILogListener $Listener) {
-		throw new \InvalidArgumentException("May not add listeners to " . __CLASS__);
-	}
-
-	/**
-	 * Write all support headers used by this IView inst
-	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
-	 * @return String|void always returns void
-	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Head->writeScript(__DIR__ . '/assets/html-log.js');
-		$Head->writeStyleSheet(__DIR__ . '/assets/html-log.css');
+		$this->mLogListeners[] = $Listener;
 	}
 
 	/**
 	 * Render request as html
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
-	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Request\Log\Render\IHTMLContainer $Parent
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$Container = new HTMLElement('div', $this->mAttr);
+		$logs = $this->mLog;
+		if($this->mReverseOrder)
+			rsort($logs);
 
-		if($this->mTarget)
-			$Container->setAttribute('data-target', $this->mTarget);
+		foreach($logs as $log) {
+			list($msg, $flags) = $log;
+			if ($msg instanceof \Exception) {
+				$msg = $msg->getMessage();
+				$flags |= static::ERROR;
+			}
 
-		$THIS = $this;
-		$Container->addContent(
-			new RenderCallback(
-				function(IRequest $Request, IAttributes $Attr=null) use ($THIS) {
-					foreach($THIS->mLog as $log) {
-						list($msg, $flags) = $log;
-						if ($msg instanceof \Exception)
-							$msg = $msg->getMessage();
-
-						$Div = new HTMLElement('div', 'log-entry', $msg);
-						if ($flags & ILogListener::VERBOSE)
-							$Div->addClass('verbose');
-						if ($flags & ILogListener::ERROR)
-							$Div->addClass('error');
-						$Div->renderHTML($Request);
-					}
-				}
-			)
-		);
-		$Container->renderHTML($Request, $Attr, $Parent);
+			$Div = new HTMLElement('div', null, $msg);
+			if ($flags & static::VERBOSE)
+				$Div->addClass('verbose');
+			if ($flags & static::ERROR)
+				$Div->addClass('error');
+			$Div->renderHTML($Request, $Attr);
+		}
 	}
 }

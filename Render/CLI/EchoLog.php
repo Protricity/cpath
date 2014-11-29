@@ -17,27 +17,18 @@ class EchoLog implements ILogListener
         $this->mFlags = $flags;
     }
 
-    /**
-     * Add a log entry
-     * @param String $msg The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function log($msg, $flags = 0) {
-        if (!($flags & ~$this->mFlags))
-            echo $msg . "\n";
-    }
-
-    /**
-     * Log an exception inst
-     * @param \Exception $ex The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function logEx(\Exception $ex, $flags = 0) {
-        if (!($flags & ~$this->mFlags))
-            echo $ex . "\n";
-    }
+	/**
+	 * Add a log entry
+	 * @param mixed $msg The log message
+	 * @param int $flags [optional] log flags
+	 * @return int the number of listeners that processed the log entry
+	 */
+	function log($msg, $flags = 0) {
+		if ($flags & ~$this->mFlags)
+			return 0;
+		echo $msg . "\n";
+		return 1;
+	}
 
     /**
      * Add a log listener callback

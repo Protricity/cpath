@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\API;
 
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Framework\API\Field\RequiredField;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;

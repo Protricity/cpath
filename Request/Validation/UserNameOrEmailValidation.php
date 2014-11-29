@@ -16,7 +16,7 @@ class UserNameOrEmailValidation extends UserNameValidation
 		parent::__construct($allowUsernameChars, $minLength, $maxLength);
 	}
 
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$EmailValidation = new EmailValidation();
 		try {
 			$value = $EmailValidation->validate($Request, $value, $fieldName);

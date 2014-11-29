@@ -26,7 +26,7 @@ class BuildCSharpTables {
      * @param IPDOTableBuilder $Table
      * @param String $filePath build file path
      * @return boolean True if the class was built. False if it was ignored.
-     * @throws \CPath\Exceptions\BuildException when a build exception occurred
+     * @throws \CPath\Build\Exceptions\BuildException when a build exception occurred
      */
     public function build(IPDOTableBuilder $Table, $filePath) {
 
@@ -40,12 +40,12 @@ class BuildCSharpTables {
 
         $CS->addDataContractAttribute($Table->getTableName());
 
-        //$CS->addConst('PRIMARY', $Table->Primary);
+        //$CS->addConst('PRIMARY', $UIElement->Primary);
 
 
         //$CS->addConstCode();
-        //$CS->addConstCode("// Table Columns ");
-        //foreach($Table->getColumns() as $Column)
+        //$CS->addConstCode("// UIElement Columns ");
+        //foreach($UIElement->getColumns() as $Column)
         //    $CS->addConst($this->toTitleCase($Column->Name, true), $Column->Name);
 
         /** @var BuildPDOColumn[] $Columns */

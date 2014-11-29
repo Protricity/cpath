@@ -7,7 +7,7 @@
  */
 namespace CPath\Request\Executable;
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Request\Validation\PromptException;
 
 interface IPrompt

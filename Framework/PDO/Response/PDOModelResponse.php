@@ -10,9 +10,9 @@ namespace CPath\Framework\PDO\Response;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Framework\Data\Serialize\Interfaces\ISerializable;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
-use CPath\Handlers\Response\ResponseUtil;
 use CPath\Response\IResponse;
 use CPath\Response\IResponse;
+use CPath\Response\ResponseRenderer;
 
 class PDOModelResponse implements IPDOModel, IResponse
 {
@@ -38,7 +38,7 @@ class PDOModelResponse implements IPDOModel, IResponse
 	 */
     function mapKeys(IKeyMapper $Map)
     {
-        $Util = new ResponseUtil($this);
+        $Util = new ResponseRenderer($this);
         $Util->mapKeys($Map, $this->mModel);
     }
 

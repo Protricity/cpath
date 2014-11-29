@@ -7,8 +7,7 @@
  */
 namespace CPath\Render\HTML\Theme;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\HTMLHeaders;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
@@ -40,8 +39,8 @@ class HTMLThemeConfig
 		self::$ClassHeaders[$selector] = $Headers;
 	}
 }
-
-HTMLThemeConfig::registerThemeHeaders('form.cpath-default-form-theme', new HTMLHeaders(
-	__DIR__ . '\assets\cpath-default-form-theme.css',
-	__DIR__ . '\assets\cpath-default-form-theme.js'
-));
+//
+//HTMLThemeConfig::registerThemeHeaders('form.cpath-default-form-theme', new HTMLHeaders(
+//	__DIR__ . '\assets\cpath-default-form-theme.css',
+//	__DIR__ . '\assets\cpath-default-form-theme.js'
+//));

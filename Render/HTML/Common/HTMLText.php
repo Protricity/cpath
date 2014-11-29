@@ -7,9 +7,11 @@
  */
 namespace CPath\Render\HTML\Common;
 
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Element\Form\HTMLForm;
+use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
@@ -34,12 +36,18 @@ class HTMLText implements IRenderHTML
 	 */
     function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
         if($this->mText !== null) {
-            if(strpos($this->mText, "\n") === false) {
-	            echo $this->mText;
-            } else {
-	            $i = RI::get()->getIndent(0, "\n");
-	            echo $i, '<p>', implode("</p>" . $i . "<p>", explode("\n", $this->mText)), '</p>';
-            }
+	        $i = RI::get()->getIndent(0, PHP_EOL);
+	        if($Parent instanceof HTMLForm && strpos($this->mText, "<") === false) {
+		        $nodeType = 'div';
+
+		        if(strpos($this->mText, PHP_EOL) === false) {
+			        echo $i, '<', $nodeType, '>', $this->mText, '</', $nodeType, '>';
+		        } else {
+			        echo $i, '<', $nodeType, '>', str_replace(PHP_EOL, '</' . $nodeType . '>' . PHP_EOL . '<' . $nodeType . '>', $this->mText), '</', $nodeType, '>';
+		        }
+	        } else {
+		        echo $i, $this->mText;
+	        }
         }
     }
 }

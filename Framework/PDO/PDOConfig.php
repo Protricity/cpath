@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO;
 use CPath\Interfaces\IConfig;
 
-class PDOConfig implements IConfig{
+class PDOConfig {
     static $UpgradeAuto = false;
     static $UpgradeEnable = false;
 }

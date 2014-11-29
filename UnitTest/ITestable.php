@@ -12,7 +12,7 @@ interface ITestable
     /**
      * Perform a unit test
      * @param IUnitTestRequest $Test the unit test request inst for this test session
-     * @return String|void always returns void
+     * @return void
      * @test --disable 0
      * Note: Use doctag 'test' with '--disable 1' to have this ITestable class skipped during a build
      */

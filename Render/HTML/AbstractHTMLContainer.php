@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Render\HTML\Common\HTMLText;
 use Traversable;
 
 abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \IteratorAggregate
@@ -70,7 +71,7 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \I
 	 */
 	public function offsetSet($offset, $value) {
 		if (!$value instanceof IRenderHTML)
-			$value = new HTMLContent($value);
+			$value = new HTMLText($value);
 		$this->addContent($value, $offset);
 	}
 

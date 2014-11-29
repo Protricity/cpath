@@ -79,19 +79,21 @@ class Response implements IHeaderResponse {
      * @return bool returns true if the headers were sent, false otherwise
      */
     function sendHeaders(IRequest $Request, $mimeType = null) {
-        static $sent = false;
-        if($sent || headers_sent())
-            return false;
-        $sent = true;
-
-        if($mimeType === null)
-            $mimeType = $Request->getMimeType()->getName();
-
-        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
-        header("Content-Type: " . $mimeType);
-
-        header('Access-Control-Allow-Origin: *');
-
-        return true;
+	    $ResponseRenderer = new ResponseRenderer($this);
+	    return $ResponseRenderer->sendHeaders($Request, $mimeType);
+//        static $sent = false;
+//        if($sent || headers_sent())
+//            return false;
+//        $sent = true;
+//
+//        if($mimeType === null)
+//            $mimeType = $Request->getMimeType()->getName();
+//
+//        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
+//        header("MainContent-Type: " . $mimeType);
+//
+//        header('Access-Control-Allow-Origin: *');
+//
+//        return true;
     }
 }

@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Model\Types;
 
-use CPath\Config;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Framework\PDO\Table\Column\Interfaces\IPDOColumn;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOModel;
@@ -35,7 +34,7 @@ abstract class PDOModel implements IPDOModel {
 
     function setTable(PDOTable $Table) {
         if($this->mTable)
-            throw new \InvalidArgumentException("Table may only be set once");
+            throw new \InvalidArgumentException("UIElement may only be set once");
         $this->mTable = $Table;
     }
 
@@ -86,8 +85,8 @@ abstract class PDOModel implements IPDOModel {
 	/**
 	 * Map data to a data map
 	 * @param IKeyMapper $Map the map inst to add data to
-	 * @internal param \CPath\Framework\PDO\Table\Model\Types\IRequest $Request
-	 * @internal param \CPath\Framework\PDO\Table\Model\Types\IRequest $Request
+	 * @internal param \CPath\Framework\PDO\UIElement\Model\Types\IRequest $Request
+	 * @internal param \CPath\Framework\PDO\UIElement\Model\Types\IRequest $Request
 	 * @return void
 	 */
     function mapKeys(IKeyMapper $Map) {

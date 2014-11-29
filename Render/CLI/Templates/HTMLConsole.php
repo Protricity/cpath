@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\CLI\Templates;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\Form\HTMLFormField;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Header\HeaderConfig;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
@@ -24,21 +24,21 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	private $mHTMLLog;
 	/** @var HTMLElement */
 	private $mSpanMarker;
-	/** @var HTMLInputField */
+	/** @var HTMLFormField */
 	private $mInputPath;
-	/** @var HTMLInputField */
+	/** @var \CPath\Render\HTML\Element\Form\HTMLFormField */
 	private $mInputDomain;
 	private $mInput;
 	public function __construct($marker = '$') {
 		$this->mContainer = new HTMLElement('div', 'html-console',
 			$this->mHTMLLog = new HTMLLog('html-console-log'),
 			$this->mSpanMarker = new HTMLElement('span', 'html-console-marker', $marker),
-			$this->mInput = new HTMLInputField('text', '', 'text', 'html-console-input-text'),
-			$this->mInputPath = new HTMLInputField('path', '', 'hidden', 'html-console-input-path'),
-			$this->mInputDomain = new HTMLInputField('domain', '', 'hidden', 'html-console-input-domain')
+			$this->mInput = new HTMLFormField('', 'html-console-input-text', 'text', 'text'),
+			$this->mInputPath = new HTMLFormField('', 'html-console-input-path', 'path', 'hidden'),
+			$this->mInputDomain = new HTMLFormField('', 'html-console-input-domain', 'domain', 'hidden')
 		);
 		//$this->mInput->setRows(1);
-		$this->mHTMLLog->bindEventListener('.html-console');
+		//$this->mHTMLLog->bindEventListener('.html-console');
 		$this->mHTMLLog->setReverseOrder();
 	}
 
@@ -65,7 +65,7 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	 * Render request as html
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
-	 * @param \CPath\Render\CLI\Templates\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {

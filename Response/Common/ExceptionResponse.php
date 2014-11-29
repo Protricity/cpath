@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Response\Common;
 
-use CPath\Config;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Response\IResponse;
@@ -15,12 +14,9 @@ use CPath\Response\IResponse;
 class ExceptionResponse implements IResponse, IKeyMap {
 	const STR_TRACE = 'trace';
     /** @var \Exception */
-    private $mEx, $mCode;
+    private $mEx;
     public function __construct(\Exception $ex) {
         $this->mEx = $ex;
-        $this->mCode = IResponse::HTTP_ERROR;
-        if($ex instanceof IResponse)
-            $this->mCode = $ex->getCode();
     }
 
 //    /**
@@ -46,7 +42,9 @@ class ExceptionResponse implements IResponse, IKeyMap {
      * @return int
      */
     function getCode() {
-        return $this->mCode;
+	    if($this->mEx instanceof IResponse)
+		    return $this->mEx->getCode();
+        return IResponse::HTTP_ERROR;
     }
 
     function getException() {

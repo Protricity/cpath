@@ -32,7 +32,7 @@ abstract class AbstractHTMLTemplate implements IHTMLTemplate
 	 * Write all support headers used by this template
 	 * @param IRequest $Request
 	 * @param IHeaderWriter $Head the writer instance to use
-	 * @return String|void always returns void
+	 * @return void
 	 */
 	abstract protected function writeTemplateHeaders(IRequest $Request, IHeaderWriter $Head);
 
@@ -45,9 +45,7 @@ abstract class AbstractHTMLTemplate implements IHTMLTemplate
 	 * Render request as html
 	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
-	 * @return String|void always returns void
-	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
+	 * @return String|void alway* @return voidIRequest $Request, IAttributes $Attr = null) {
 		$this->renderContent($Request);
 	}
 

@@ -7,7 +7,6 @@
  */
 namespace CPath\Framework\PDO\Table\Column\Template\Interfaces;
 
-use CPath\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;
@@ -49,7 +48,7 @@ interface IPDOColumnTemplate
      * Additional processing for PHP classes for a PDO Builder Template
      * @param \CPath\Framework\PDO\Table\Builders\BuildPHPTableClass $TablePHP
      * @param BuildPHPModelClass $ModelPHP
-     * @throws BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP);

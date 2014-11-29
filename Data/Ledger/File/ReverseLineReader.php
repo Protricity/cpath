@@ -44,7 +44,7 @@ class ReverseLineReader implements \Iterator
 			if (count($buffer) > 1) {
 				return array_pop($buffer);
 			}
-			$buffer = explode(\CPath\Data\Ledger\File\self::SEPARATOR, $this->read(\CPath\Data\Ledger\File\self::BUFFER_SIZE) . $buffer[0]);
+			$buffer = explode(self::SEPARATOR, $this->read(self::BUFFER_SIZE) . $buffer[0]);
 		}
 
 		return null;
@@ -60,7 +60,7 @@ class ReverseLineReader implements \Iterator
 			$this->mPos    = $this->mFileSize;
 			$this->mValue  = null;
 			$this->mKey    = -1;
-			$this->mBuffer = explode(\CPath\Data\Ledger\File\self::SEPARATOR, $this->read($this->mFileSize % \CPath\Data\Ledger\File\self::BUFFER_SIZE ? : \CPath\Data\Ledger\File\self::BUFFER_SIZE));
+			$this->mBuffer = explode(self::SEPARATOR, $this->read($this->mFileSize % self::BUFFER_SIZE ? : self::BUFFER_SIZE));
 			$this->next();
 		}
 	}

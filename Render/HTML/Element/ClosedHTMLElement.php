@@ -8,14 +8,11 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
 class ClosedHTMLElement extends AbstractHTMLElement
 {
-	const TRIM_CONTENT = false;
-
-	private $mContent;
-
 	/**
 	 * @param string $elmType
 	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
@@ -28,7 +25,7 @@ class ClosedHTMLElement extends AbstractHTMLElement
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
-	 * @param \CPath\Render\HTML\Element\IRenderHTML|\CPath\Render\HTML\IHTMLContainer $Parent
+	 * @param IRenderHTML $Parent
 	 */
 	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 	}

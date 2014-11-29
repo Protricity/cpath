@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Framework\API\Exceptions\APIException;
 use CPath\Framework\API\Field\Collection\Interfaces\IFieldCollection;
 use CPath\Framework\API\Field\Interfaces\IField;

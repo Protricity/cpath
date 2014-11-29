@@ -114,7 +114,7 @@
                 //contentType: asObject ? 'application/json' : null,
                 headers: {
                     Accept : ajax.accepts + "; charset=utf-8"
-                    //"Content-Type": asObject ? 'application/json' : null
+                    //"MainContent-Type": asObject ? 'application/json' : null
                 }
             });
 

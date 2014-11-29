@@ -19,7 +19,7 @@ class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildReques
     private $mFlags;
     private $mID;
     /** @var ILogListener[] */
-    private $mLogs = array();
+    private $mLogListeners = array();
 
     function __construct(IRequest $Request, $flags = null) {
         parent::__construct($Request);
@@ -49,24 +49,15 @@ class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildReques
 
     /**
      * Add a log entry
-     * @param String $msg The log message
+     * @param mixed $msg The log message
      * @param int $flags [optional] log flags
-     * @return void
+     * @return int the number of listeners that processed the log entry
      */
     function log($msg, $flags = 0) {
-        foreach($this->mLogs as $Log)
-            $Log->log($msg, $flags);
-    }
-
-    /**
-     * Log an exception inst
-     * @param \Exception $ex The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function logEx(\Exception $ex, $flags = 0) {
-        foreach($this->mLogs as $Log)
-            $Log->logEx($ex, $flags);
+	    $c = 0;
+        foreach($this->mLogListeners as $Log)
+            $c += $Log->log($msg, $flags);
+	    return $c;
     }
 
     /**
@@ -75,6 +66,6 @@ class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildReques
      * @return void
      */
     function addLogListener(ILogListener $Listener) {
-        $this->mLogs[] = $Listener;
+        $this->mLogListeners[] = $Listener;
     }
 }

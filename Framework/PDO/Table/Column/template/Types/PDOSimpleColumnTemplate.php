@@ -7,7 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Column\Template\Types;
 
-use CPath\Exceptions\BuildException;
+use CPath\Build\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 use CPath\Framework\PDO\Table\Column\Builders\BuildPDOColumn;

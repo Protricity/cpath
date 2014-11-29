@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\API;
 
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Framework\API\Field\Field;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\API\Field\Param;

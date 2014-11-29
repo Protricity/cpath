@@ -30,7 +30,7 @@ class PasswordConfirmField extends PasswordField
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
 		$value2 = $Request[$this->mPasswordParamName];
 		if ($value !== null && $value2 !== $value)

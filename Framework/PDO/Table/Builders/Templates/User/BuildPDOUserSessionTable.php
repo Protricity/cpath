@@ -72,13 +72,13 @@ class BuildPDOUserSessionTable extends BuildPDOPKTable {
      * Additional processing for PHP classes for a PDO Builder Template
      * @param \CPath\Framework\PDO\Table\Builders\BuildPHPTableClass $PHPTable
      * @param BuildPHPModelClass $PHPModel
-     * @throws \CPath\Exceptions\BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
 
-//        $PHPModel->addUse($PHPTable->getName(true), 'Table');
-//        $PHPModel->addMethod('session', '', ' static $table=null; return $table ?: $table = new Table; ');
+//        $PHPModel->addUse($PHPTable->getName(true), 'UIElement');
+//        $PHPModel->addMethod('session', '', ' static $table=null; return $table ?: $table = new UIElement; ');
 //        $PHPModel->addMethodCode();
     }
 }

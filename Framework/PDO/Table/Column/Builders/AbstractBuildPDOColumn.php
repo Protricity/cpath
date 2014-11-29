@@ -7,7 +7,7 @@
  */
 namespace CPath\Framework\PDO\Table\Column\Builders;
 
-use CPath\Exceptions\BuildException;
+use CPath\Build\Exceptions\BuildException;
 use CPath\Framework\Interfaces\Constructable\Constructable;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Columns\Template\Exceptions\PDOColumnTemplateNotSetException;
@@ -38,7 +38,7 @@ abstract class AbstractBuildPDOColumn implements IPDOColumnBuilder
      * Additional processing for PHP classes for a PDO Builder Template
      * @param BuildPHPTableClass $TablePHP
      * @param BuildPHPModelClass $ModelPHP
-     * @throws BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     abstract function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP);

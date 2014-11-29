@@ -7,11 +7,10 @@
  */
 namespace CPath\Request\CLI;
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\Form\IFormRequest;
-use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Request;
 
@@ -32,7 +31,7 @@ class CLIRequest extends Request implements IPrompt, IFormRequest
 
         $flags = 0;
         if(isset($args['v']) || isset($args['verbose']))
-            $flags |= ILogListener::VERBOSE;
+            $flags |= static::VERBOSE;
 
         parent::__construct('CLI', $path, $args, $MimeType ?: new TextMimeType($flags));
 
@@ -41,7 +40,7 @@ class CLIRequest extends Request implements IPrompt, IFormRequest
 
     /**
      * Prompt for a value from the request.
-     * @param string|IDescribable|null $description [optional] description for this prompt
+     * @param string|\CPath\Data\Describable\IDescribable|null $description [optional] description for this prompt
      * @return mixed the parameter value or null on failure
      * Example:
      * $name = $Request->promptField('name', 'Please enter your name', 'MyName');  // Gets value for parameter 'name' or returns default string 'MyName'

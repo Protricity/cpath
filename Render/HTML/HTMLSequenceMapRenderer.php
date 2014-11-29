@@ -7,15 +7,16 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Data\Describable\Description;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Describable\Describable;
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
@@ -44,8 +45,8 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 	/**
 	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
-	 * @return String|void always returns void
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
@@ -110,7 +111,7 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 			echo RI::ni(), $value ? 'True' : 'False';
 
 		} else {
-			echo RI::ni(), htmlspecialchars(Describable::get($value)->getDescription());
+			echo RI::ni(), htmlspecialchars(new Description($value));
 
 		}
 

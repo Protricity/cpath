@@ -7,7 +7,6 @@
  */
 namespace CPath\Render\HTML\Header;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Request\IRequest;
 
 class HTMLHeaderScript implements IHTMLSupportHeaders
@@ -30,7 +29,7 @@ class HTMLHeaderScript implements IHTMLSupportHeaders
      * Write all support headers used by this IView inst
      * @param IRequest $Request
      * @param IHeaderWriter $Head the writer inst to use
-     * @return String|void always returns void
+     * @return void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
         $Head->writeScript($this->mPath, $this->mDefer, $this->mCharset);

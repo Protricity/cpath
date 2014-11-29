@@ -12,7 +12,7 @@ use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Request\IRequest;
 
 class XMLKeyMapRenderer implements IKeyMapper

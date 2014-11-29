@@ -7,12 +7,11 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Render\HTML\Element\IHTMLInput;
-use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\Exceptions\RequiredParameterException;
 
-class RequiredParameter extends Parameter implements IRenderHTML
+class RequiredParameter extends Parameter
 {
     const CSS_CLASS_REQUIRED = 'required';
 
@@ -20,25 +19,12 @@ class RequiredParameter extends Parameter implements IRenderHTML
 		parent::__construct($paramName, $description, $defaultValue);
 	}
 
-	function getHTMLInput(IHTMLInput $Input=null) {
+	function getHTMLInput(IHTMLFormField $Input=null) {
 		$Input = parent::getHTMLInput($Input);
 		$Input->setAttribute('required', 'required');
 		$Input->addClass(static::CSS_CLASS_REQUIRED);
 		return $Input;
 	}
-
-//	/**
-//	 * Get the request value
-//	 * @throws RequiredParameterException if the parameter failed to validate
-//	 * @return mixed
-//	 */
-//	function getValue() {
-//		$value = parent::getValue();
-//		if (!$value)
-//			throw new RequiredParameterException("Parameter is required: " . $this->getName());
-//		return $value;
-//
-//	}
 
 	/**
 	 * Validate the request value and return the validated value
@@ -48,18 +34,13 @@ class RequiredParameter extends Parameter implements IRenderHTML
 	 * @throws Exceptions\RequiredParameterException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
-		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
+		$fieldName = $fieldName ?: $this->getFieldName();
+		$value = parent::validate($Request, $value, $fieldName);
 		if (!$value)
-			throw new RequiredParameterException($this, "Parameter is required: " . $this->getFieldName());
+			throw new RequestException("Parameter is required: " . $fieldName);
 		return $value;
 	}
 
-	// Static
-
-	static function tryRequired(IRequest $Request, $paramName, $paramDescription=null, $defaultValue=null) {
-		$Parameter = new RequiredParameter($paramName, $paramDescription, $defaultValue);
-		return $Parameter->getRequestValue($Request);
-	}
 }
 

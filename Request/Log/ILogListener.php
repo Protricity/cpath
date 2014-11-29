@@ -16,19 +16,11 @@ interface ILogListener
 
     /**
      * Add a log entry
-     * @param String $msg The log message
+     * @param mixed $msg The log message
      * @param int $flags [optional] log flags
-     * @return void
+     * @return int the number of listeners that processed the log entry
      */
     function log($msg, $flags = 0);
-
-    /**
-     * Log an exception inst
-     * @param \Exception $ex The log message
-     * @param int $flags [optional] log flags
-     * @return void
-     */
-    function logEx(\Exception $ex, $flags = 0);
 
     /**
      * Add a log listener callback

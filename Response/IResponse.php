@@ -7,8 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Response;
 
-use CPath\Config;
-
 interface IResponse
 {
 	const HTTP_SUCCESS = 200;
@@ -18,6 +16,7 @@ interface IResponse
 
 	const HTTP_ERROR = 400;
 	const HTTP_UNAUTHORIZED = 401;
+	const HTTP_FORBIDDEN = 403;
 	const HTTP_NOT_FOUND = 404;
 	const HTTP_CONFLICT = 409;
 

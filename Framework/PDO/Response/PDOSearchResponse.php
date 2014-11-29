@@ -13,9 +13,9 @@ use CPath\Framework\Data\Compare\IComparable;
 use CPath\Framework\Data\Compare\Util\CompareUtil;
 use CPath\Framework\PDO\Interfaces\ISelectDescriptor;
 use CPath\Framework\PDO\Query\PDOSelect;
-use CPath\Handlers\Response\ResponseUtil;
 use CPath\Response\IResponse;
 use CPath\Response\IResponse;
+use CPath\Response\ResponseRenderer;
 
 class PDOSearchResponse implements IResponse, IKeyMap {
     private $mQuery;
@@ -64,7 +64,7 @@ class PDOSearchResponse implements IResponse, IKeyMap {
 	 */
     function mapKeys(IKeyMapper $Map)
     {
-        $Util = new ResponseUtil($this);
+        $Util = new ResponseRenderer($this);
         $Util->mapKeys($Map, $this->mQuery);
         if( $this->mQuery->hasDescriptor()) {
             $Descriptor = $this->mQuery->getDescriptor();

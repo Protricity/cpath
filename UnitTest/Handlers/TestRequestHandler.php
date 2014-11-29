@@ -17,10 +17,8 @@ use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
-use CPath\Request\Log\ILogListener;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
-use CPath\Response\ResponseRenderer;
 use CPath\Route\DefaultMap;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
@@ -35,7 +33,6 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
     const DOCTAG = 'test';
     private $mDefaults = false;
     private $mResponse;
-    private $mExceptions = array();
 
 	/**
 	 * Execute a command and return a response. Does not render
@@ -55,10 +52,9 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
         $flags |= IBuildRequest::IS_SESSION_BUILD;
 
         $BuildRequest = new BuildRequestWrapper($OriginalRequest, $flags);
-        $this->mResponse = new Response("Test complete");
-        $this->mExceptions = array();
+        $this->mResponse = null;
         $this->testAllFlies($BuildRequest);
-        return $this->mResponse;
+        return $this->mResponse ?: $this->mResponse = new Response("Test complete");
     }
 
 	const CACHE_FILE = '.cache';
@@ -67,7 +63,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
     /**
      * Handle this request and render any content
      * @param IBuildRequest $Request the test request inst for this test session
-     * @return String|void always returns void
+     * @return void
      */
     function testAllFlies(IBuildRequest $Request) {
         $paths = Autoloader::getLoaderPaths();
@@ -78,14 +74,14 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 	    $testableClasses = array();
 	    if(file_exists($cachePath) && filemtime($cachePath) + self::CACHE_EXPIRE > time()) {
 		    $testableClasses = json_decode(file_get_contents($cachePath), true);
-		    $Request->log("Using cached class list", ILogListener::VERBOSE);
+		    $Request->log("Using cached class list", $Request::VERBOSE);
 	    }
 
 	    if(!$testableClasses) {
 		    $testableClasses = array();
 		    $Iterator = new File\Iterator\PHPFileIterator('/', $paths);
 	        while ($file = $Iterator->getNextFile()) {
-	            $Request->log("File: " . $file, ILogListener::VERBOSE);
+	            $Request->log("File: " . $file, $Request::VERBOSE);
 
 	            $Scanner = new File\PHPFileScanner($file);
 	            $results = $Scanner->scanClassTokens();
@@ -104,8 +100,10 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 		    file_put_contents($cachePath, $var);
 	    }
 
+	    /** @var \Exception[] $Exs */
+	    $Exs = array();
         foreach ($testableClasses as $class) {
-            $Request->log("Found Class: " . $class, ILogListener::VERBOSE);
+            $Request->log("Found Class: " . $class, $Request::VERBOSE);
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\UnitTest\ITestable')) {
@@ -128,12 +126,11 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
 
                 } catch (\Exception $ex) {
-                    $Request->logEx($ex);
+                    $Request->log($ex, $Request::ERROR);
                     if($Request instanceof IPrompt)
                         $Request->prompt('error-resume', "Continue test?");
 
-                    $this->mExceptions[] = $ex;
-                    $this->mResponse = new Response(count($this->mExceptions) . " Exception(s) occurred", false);
+	                $Exs[] = $ex;
                     break;
                 }
 
@@ -142,6 +139,13 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
             }
         }
+
+	    if($Exs) {
+		    $message   = sizeof($Exs) . " Exception(s) occurred during validation:";
+		    foreach($Exs as $Ex)
+			    $message .= "\n\t" . $Ex->getMessage();
+		    $this->mResponse = new Response($message, IResponse::HTTP_ERROR, $Exs[0]);
+	    }
     }
 
     // Static
@@ -167,7 +171,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
     /**
      * Handle this request and render any content
      * @param IBuildRequest $Request the build request inst for this build session
-     * @return String|void always returns void
+     * @return void
      */
     static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new DefaultMap());

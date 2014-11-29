@@ -20,7 +20,7 @@ class EmailValidation implements IValidation
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$value = filter_var($value, FILTER_VALIDATE_EMAIL);
 		if (!$value)
 			throw new RequestException("Invalid email format");

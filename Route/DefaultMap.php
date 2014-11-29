@@ -36,7 +36,7 @@ class DefaultMap implements IRouteMap
 			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
 
 			// @group __render
-			$Map->route('ANY *', 'CPath\\Handlers\\RenderHandler');
+			$Map->route('ANY *', 'CPath\\Render\\HTML\\Common\\ObjectRenderer');
 	}
 
     // Static

@@ -76,7 +76,7 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
      * Additional processing for PHP classes for a PDO Builder Template
      * @param BuildPHPTableClass $PHPTable
      * @param BuildPHPModelClass $PHPModel
-     * @throws \CPath\Exceptions\BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
@@ -90,7 +90,7 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
         }
         if(!$this->mSessionClass) {
             $this->mSessionClass = SimpleSession::cls();
-            Log::e(__CLASS__, "Warning: No User session class found for Table '{$this->getTableTitle()}'. Defaulting to SimpleUserSession");
+            Log::e(__CLASS__, "Warning: No User session class found for UIElement '{$this->getTableTitle()}'. Defaulting to SimpleUserSession");
         }
         //$class = $this->Session_Class;
         //$Session = new $class;
@@ -116,7 +116,7 @@ class BuildPDOUserTable extends AbstractBuildPDOPKTable {
 
         $Column = $this->getColumn('name');
         //if(!($Column->Flags & PDOColumn::FLAG_UNIQUE))
-        //    Log::e(__CLASS__, "Warning: The user name Column '{$Column->Name}' may not have a unique constraint for Table '{$this->Name}'");
+        //    Log::e(__CLASS__, "Warning: The user name Column '{$Column->Name}' may not have a unique constraint for UIElement '{$this->Name}'");
         $Column->setFlag(PDOColumn::FLAG_REQUIRED | PDOColumn::FLAG_INSERT);
         if(!$Column->mFilter)
             $Column->mFilter = Validate::FILTER_VALIDATE_USERNAME;

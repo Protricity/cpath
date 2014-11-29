@@ -7,8 +7,8 @@
  */
 namespace CPath\Request\Parameter\CLI;
 
+use CPath\Render\HTML\Element\Form\FormField;
 use CPath\Request\IRequest;
-use CPath\Request\Parameter\FormField;
 
 class CLIArgument extends FormField
 {

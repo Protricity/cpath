@@ -7,11 +7,11 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\HTMLHeaderScript;
 use CPath\Render\HTML\Header\HTMLHeaderStyleSheet;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
@@ -53,8 +53,9 @@ class HTMLContainer extends AbstractHTMLContainer
 		$this->addSupportHeaders(new HTMLHeaderStyleSheet($path));
 	}
 
-	public function addSupportHeaders(IHTMLSupportHeaders $Headers) {
-		$this->mSupportHeaders[] = $Headers;
+	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
+		foreach(func_get_args() as $Headers)
+			$this->mSupportHeaders[] = $Headers;
 	}
 
 	public function setItemTemplate(IHTMLContainer $Template) {
@@ -64,8 +65,8 @@ class HTMLContainer extends AbstractHTMLContainer
 	/**
 	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
-	 * @return String|void always returns void
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		foreach($this->mSupportHeaders as $Headers)
@@ -92,10 +93,10 @@ class HTMLContainer extends AbstractHTMLContainer
 	}
 
 	/**
-	 * Add IRenderHTML Content
+	 * Add IRenderHTML MainContent
 	 * @param IRenderHTML $Render
 	 * @param null $key if provided, add/replace content by key
-	 * @return String|void always returns void
+	 * @return void
 	 */
 	function addContent(IRenderHTML $Render, $key = null) {
 		if($this->mTargetContainer)
@@ -104,6 +105,21 @@ class HTMLContainer extends AbstractHTMLContainer
 			$this->mContent[$key] = $Render;
 		else
 			$this->mContent[] = $Render;
+	}
+
+	/**
+	 * Add IRenderHTML MainContent
+	 * @param IRenderHTML $Render
+	 * @param null $key if provided, add/replace content by key
+	 * @return void
+	 */
+	function prependContent(IRenderHTML $Render, $key = null) {
+		if($this->mTargetContainer)
+			$this->mTargetContainer->prependContent($Render);
+		else if ($key !== null)
+			$this->mContent = array($key => $Render) + $this->mContent;
+		else
+			array_unshift($this->mContent, $Render);
 	}
 
 	/**
@@ -135,7 +151,7 @@ class HTMLContainer extends AbstractHTMLContainer
 			return $this->mContent;
 
 		if (!isset($this->mContent[$key]))
-			throw new \InvalidArgumentException("Content at '{$key}'' was not found");
+			throw new \InvalidArgumentException("MainContent at '{$key}'' was not found");
 
 		return $this[$key];
 	}
@@ -206,8 +222,8 @@ class HTMLContainer extends AbstractHTMLContainer
 	}
 
 	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
-//		if($Content instanceof HTMLContainer) {
-//			$Content->renderContent($Request, $ContentAttr, $this);
+//		if($MainContent instanceof HTMLContainer) {
+//			$MainContent->renderContent($Request, $ContentAttr, $this);
 //		} else {
 			$Content->renderHTML($Request, $ContentAttr, $this);
 //		}

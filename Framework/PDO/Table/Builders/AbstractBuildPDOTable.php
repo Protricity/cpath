@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Table\Builders;
 
 use CPath\Build\Code\BuildPHPClass;
-use CPath\Exceptions\BuildException;
+use CPath\Build\Exceptions\BuildException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\DB\PDODatabase;
 use CPath\Framework\PDO\Table\Builders\Exceptions\TableArgumentNotFoundException;
@@ -71,7 +71,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
 
         $this->mNamespace = dirname(get_class($DB));
         $this->mModelClassName = $this->mNamespace . '\\Model\\' . str_replace(' ', '', $this->getTableTitle()) . 'Model';
-        $this->mTableClassName = $this->mNamespace . '\\Table\\' . str_replace(' ', '', $this->getTableTitle()) . 'Table';
+        $this->mTableClassName = $this->mNamespace . '\\UIElement\\' . str_replace(' ', '', $this->getTableTitle()) . 'UIElement';
 
         $comment = preg_replace_callback('/\s*{([^}]*)}\s*/', array($this, 'replace'), $comment);
         if (!$this->mComment)
@@ -270,14 +270,14 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
      * @param PDODatabase $DB
      * @param BuildPHPTableClass $PHPTable
      * @param BuildPHPModelClass $PHPModel
-     * @throws BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processPHP(PDODatabase $DB, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {
         //$this->processArgs();
 
         if ($this->mUnfound)
-            throw new BuildException("Invalid Table Comment Token '" . implode('| ', $this->mUnfound) . "' in Table '{$this->getTableName()}'");
+            throw new BuildException("Invalid UIElement Comment Token '" . implode('| ', $this->mUnfound) . "' in UIElement '{$this->getTableName()}'");
 
 
         $PHPModel->addConst('MODEL_NAME', $this->getModelName());
@@ -333,7 +333,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
         $PHPTable->addConst('TABLE', $this->getTableName());
         $PHPTable->addConstCode();
 
-        $PHPTable->addConstCode("// Table Columns ");
+        $PHPTable->addConstCode("// UIElement Columns ");
         foreach ($this->getColumns() as $Column)
             $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->getName(), true), $Column->getName());
 
@@ -352,7 +352,7 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
             $PHPTable->addConst('SEARCH_LIMIT', $this->mSearchLimit);
         if ($this->mSearchLimitMax)
             $PHPTable->addConst('SEARCH_LIMIT_MAX', $this->mSearchLimitMax);
-        //if ($Table->AllowHandler)
+        //if ($UIElement->AllowHandler)
         //$PHPTable->addImplements('CPath\Interfaces\IBuildable');
     }
 
@@ -362,15 +362,15 @@ abstract class AbstractBuildPDOTable implements IPDOTableBuilder
     }
 
     function processPHPModelTableMethod(BuildPHPClass $PHPModel, BuildPHPClass $PHPTable) {
-        $PHPModel->addUse($PHPTable->getName(), 'Table');
-        $PHPModel->addMethod('loadTable', '', ' return new Table; ', 'protected');
+        $PHPModel->addUse($PHPTable->getName(), 'UIElement');
+        $PHPModel->addMethod('loadTable', '', ' return new UIElement; ', 'protected');
         $PHPModel->addMethodCode();
     }
 
     protected function req($name, $arg, $preg = NULL, $desc = NULL)
     {
         if (!$arg || ($preg && !preg_match($preg, $arg, $matches)))
-            throw new BuildException("Table Comment Token {$name} must be in the format {{$name}:" . ($desc ? : $preg ? : 'value') . '}');
+            throw new BuildException("UIElement Comment Token {$name} must be in the format {{$name}:" . ($desc ? : $preg ? : 'value') . '}');
         if (!$preg)
             return $arg;
         array_shift($matches);

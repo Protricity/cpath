@@ -11,7 +11,7 @@ class APIDebugFormFragment extends APIFormFragment{
 
     /**
      * @param IAPI $API
-     * @param \CPath\Render\HTML\Theme\Interfaces\\CPath\Render\HTML\Theme\Table\\CPath\Render\HTML\Theme\ITableTheme $Theme
+     * @param \CPath\Render\HTML\Theme\Interfaces\\CPath\Render\HTML\Theme\UIElement\\CPath\Render\HTML\Theme\ITableTheme $Theme
      */
     public function __construct(IAPI $API, ITableTheme $Theme = null) {
         parent::__construct($API, $Theme);

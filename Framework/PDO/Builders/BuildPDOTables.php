@@ -8,7 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Builders;
 
-use CPath\Exceptions\BuildException;
+use CPath\Build\Exceptions\BuildException;
 use CPath\Framework\Build\API\Build;
 use CPath\Framework\Build\IBuilder;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
@@ -158,24 +158,24 @@ PHP;
             switch (strtolower($Table->getTemplateID())) {
                 case 'u':
                 case 'user':
-                    Log::v(__CLASS__, "Table identified as template 'User': " . $name);
+                    Log::v(__CLASS__, "UIElement identified as template 'User': " . $name);
                     $Table = new BuildPDOUserTable($DB, $name, $comment);
                     break;
                 case 'us':
                 case 'usersession':
-                    Log::v(__CLASS__, "Table identified as template 'User Session': " . $name);
+                    Log::v(__CLASS__, "UIElement identified as template 'User Session': " . $name);
                     $Table = new BuildPDOUserSessionTable($DB, $name, $comment);
                     break;
                 case 'ur':
                 case 'userrole':
-                    Log::v(__CLASS__, "Table identified as template 'User Role': " . $name);
+                    Log::v(__CLASS__, "UIElement identified as template 'User Role': " . $name);
                     $Table = new BuildPDOUserRoleTable($DB, $name, $comment);
                     break;
                 default:
                     throw new BuildException("Could not locate table template: " . $Table->getTemplateID());
             }
         } elseif ($isPrimary) {
-            Log::v2(__CLASS__, "Table identified as Primary Key table: " . $name);
+            Log::v2(__CLASS__, "UIElement identified as Primary Key table: " . $name);
             $Table = new Tables\BuildPDOPKTable($DB, $name, $comment);
         } else {
             return $Table;
@@ -206,8 +206,8 @@ PHP;
 
         $Class = new \ReflectionClass($DB);
 
-        $tablePath = $this->getFolder($Class, 'Table');
-        //$tableNS = $Class->getNamespaceName() . "\\Table";
+        $tablePath = $this->getFolder($Class, 'UIElement');
+        //$tableNS = $Class->getNamespaceName() . "\\UIElement";
         $modelPath = $this->getFolder($Class, 'Model');
         //$modelNS = $Class->getNamespaceName() . "\\Model";
         $procPath = $this->getFolder($Class, 'Procs');
@@ -273,12 +273,12 @@ PHP;
             if (!$Table instanceof BuildPDOPKTable) // TODO: hacky?
                 $noPrimary[] = $Table;
 
-            //$PHPModel->addConst('PRIMARY', $Table->Primary);
+            //$PHPModel->addConst('PRIMARY', $UIElement->Primary);
 //
 //            $columns = "\n\t\tstatic \$columns = NULL;";
 //            $columns .= "\n\t\treturn \$columns ?: \$columns = array(";
 //            $i = 0;
-//            foreach ($Table->getColumns() as $Column) {
+//            foreach ($UIElement->getColumns() as $Column) {
 //                if ($i++) $columns .= ',';
 //                $columns .= "\n\t\t\t" . var_export($Column->Name, true) . ' => new PDOColumn(';
 //                $columns .= var_export($Column->Name, true);
@@ -306,24 +306,24 @@ PHP;
 //            //$PHP->addStaticProperty('_columns', NULL, 'private');
 //            $PHPTable->addUse('CPath\Framework\PDO\PDOColumn');
 //
-//            if ($Table->SearchWildCard)
+//            if ($UIElement->SearchWildCard)
 //                $PHPTable->addConst('SEARCH_WILDCARD', true);
-//            if ($Table->SearchLimit)
-//                $PHPTable->addConst('SEARCH_LIMIT', $Table->SearchLimit);
-//            if ($Table->SearchLimitMax)
-//                $PHPTable->addConst('SEARCH_LIMIT_MAX', $Table->SearchLimitMax);
-//            if ($Table->AllowHandler)
+//            if ($UIElement->SearchLimit)
+//                $PHPTable->addConst('SEARCH_LIMIT', $UIElement->SearchLimit);
+//            if ($UIElement->SearchLimitMax)
+//                $PHPTable->addConst('SEARCH_LIMIT_MAX', $UIElement->SearchLimitMax);
+//            if ($UIElement->AllowHandler)
 //                $PHPTable->addImplements('CPath\Interfaces\IBuildable');
             //$PHP->addConst('BUILD_IGNORE', false);
 
-            // Table
+            // UIElement
 //
 //            $PHPTable->addConstCode();
-//            $PHPTable->addConstCode("// Table Columns ");
-//            foreach ($Table->getColumns() as $Column)
+//            $PHPTable->addConstCode("// UIElement Columns ");
+//            foreach ($UIElement->getColumns() as $Column)
 //                $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true), $Column->Name);
 //
-//            foreach ($Table->getColumns() as $Column)
+//            foreach ($UIElement->getColumns() as $Column)
 //                if ($Column->EnumConstants) {
 //                    $PHPTable->addConstCode();
 //                    $PHPTable->addConstCode("// Column Enum Values for '" . $Column->Name . "'");
@@ -331,18 +331,18 @@ PHP;
 //                        $PHPTable->addConst(PDOStringUtil::toTitleCase($Column->Name, true) . '_Enum_' . PDOStringUtil::toTitleCase($enum, true), $enum);
 //                }
 //
-//            if ($Table->Primary) // TODO: primary hack needs oop
-//                $PHPModel->addStaticMethod('remove', $Table->ModelClassName . ' $' . $Table->ModelClassName, " parent::removeModel(\${$Table->ModelClassName}); ");
+//            if ($UIElement->Primary) // TODO: primary hack needs oop
+//                $PHPModel->addStaticMethod('remove', $UIElement->ModelClassName . ' $' . $UIElement->ModelClassName, " parent::removeModel(\${$UIElement->ModelClassName}); ");
 
             // Models
 //
-//            foreach ($Table->getColumns() as $Column)
+//            foreach ($UIElement->getColumns() as $Column)
 //                $PHPModel->addProperty($Column->Name);
 
-//            foreach ($Table->getColumns() as $Column) {
+//            foreach ($UIElement->getColumns() as $Column) {
 //                $ucName = PDOStringUtil::toTitleCase($Column->Name, true);
 //                $PHPModel->addMethod('get' . $ucName, '', sprintf(' return $this->%s; ', strtolower($Column->Name)));
-//                if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $Table->Primary) // TODO: primary hack needs oop
+//                if ($Column->Flags & PDOColumn::FLAG_PRIMARY ? 0 : 1 && $UIElement->Primary) // TODO: primary hack needs oop
 //                    $PHPModel->addMethod('set' . $ucName, '$value, $commit=true', sprintf(' return $this->updateColumn(\'%s\', $value, $commit); ', strtolower($Column->Name)));
 //                $PHPModel->addMethodCode();
 //            }
@@ -385,7 +385,7 @@ PHP;
             /** @var BuildPDOTable $Table */
             foreach ($noPrimary as $Table)
                 $t[] = $Table->getTableName();
-            Log::e(__CLASS__, "No PRIMARY key found for (" . count($noPrimary) . ") Table(s) '" . implode("', '", $t) . "'");
+            Log::e(__CLASS__, "No PRIMARY key found for (" . count($noPrimary) . ") UIElement(s) '" . implode("', '", $t) . "'");
         }
 
         //Log::v(__CLASS__, "Built (".sizeof($tables).") table definition class(es)");

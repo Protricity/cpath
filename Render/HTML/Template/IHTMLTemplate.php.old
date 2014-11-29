@@ -16,7 +16,7 @@ interface IHTMLTemplate extends IHTMLContainer, IRenderHTML, IHTMLSupportHeaders
 //	/**
 //	 * Render request as html
 //	 * @param IRequest $Request the IRequest instance for this render which contains the request and remaining args
-//	 * @return String|void always returns void
+//	 * @return void
 //	 */
 //	function renderTemplateHTML(IRequest $Request);
 

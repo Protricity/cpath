@@ -7,8 +7,8 @@
  */
 namespace CPath\Data\Map;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLSequenceMapRenderer;
 use CPath\Render\HTML\IRenderHTML;
@@ -31,8 +31,8 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	/**
 	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
-	 * @return String|void always returns void
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		$Renderer = new HTMLSequenceMapRenderer($Request);

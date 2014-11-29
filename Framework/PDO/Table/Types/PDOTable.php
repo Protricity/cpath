@@ -24,7 +24,6 @@ use CPath\Framework\PDO\Table\Model\Exceptions\ModelAlreadyExistsException;
 use CPath\Framework\PDO\Table\Model\Exceptions\ModelNotFoundException;
 use CPath\Framework\PDO\Table\Model\Query\PDOModelSelect;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
-use CPath\Interfaces\IArrayObject;
 use CPath\Log;
 
 abstract class PDOTable implements IPDOTable

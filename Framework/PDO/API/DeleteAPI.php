@@ -8,7 +8,6 @@
 namespace CPath\Framework\PDO\API;
 
 
-use CPath\Describable\IDescribable;
 use CPath\Framework\API\Field\Interfaces\IField;
 use CPath\Framework\PDO\Interfaces\IAPIGetCallbacks;
 use CPath\Framework\PDO\Interfaces\IWriteAccess;
@@ -32,7 +31,7 @@ class DeleteAPI extends GetAPI implements IAPIGetCallbacks {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Data\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Delete a ".$this->getTable()->getModelName();

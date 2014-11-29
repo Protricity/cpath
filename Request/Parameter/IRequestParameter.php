@@ -7,17 +7,19 @@
  */
 namespace CPath\Request\Parameter;
 
-use CPath\Request\Common\IInputField;
+use CPath\Data\Describable\IDescribable;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 
-interface IRequestParameter extends IInputField
+interface IRequestParameter extends IHTMLFormField, IDescribable, IRenderHTML
 {
 	/**
 	 * Get parameter description
 	 * @return String
 	 */
-	function getDescription();
+	//function getDescription();
 
 	/**
 	 * Get the request value

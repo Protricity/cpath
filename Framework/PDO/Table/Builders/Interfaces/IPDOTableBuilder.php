@@ -20,7 +20,7 @@ interface IPDOTableBuilder extends IPDOTable {
      * @param PDODatabase $DB
      * @param BuildPHPTableClass $PHPTable
      * @param BuildPHPModelClass $PHPModel
-     * @internal param \CPath\Framework\PDO\Table\Builders\Interfaces\IPDOTableBuilder $Table
+     * @internal param \CPath\Framework\PDO\UIElement\Builders\Interfaces\IPDOTableBuilder $UIElement
      * @return void
      */
     function processPHP(PDODatabase $DB, BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel);

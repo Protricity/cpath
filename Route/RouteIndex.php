@@ -14,8 +14,8 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\KeyMapRenderer;
 use CPath\Data\Map\SequenceMapRenderer;
 use CPath\Data\Map\SequenceWrapper;
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
@@ -72,7 +72,7 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 	/**
 	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param IHeaderWriter $Head the writer inst to use
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {

@@ -7,12 +7,11 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLContainer;
-use CPath\Render\HTML\HTMLContent;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\HTMLThemeConfig;
@@ -43,7 +42,6 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
     public function __construct($elmType = 'div', $classList = null, $_content = null) {
 	    parent::__construct($elmType, $classList);
 
-	    $this->mContainer =
 	    $this->mContent = new HTMLContainer();
 
         if($_content !== null)
@@ -52,11 +50,12 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
     }
 
 	public function getContainer() {
-		return $this->mContainer;
+		return $this->mContainer
+			?: $this->mContent;
 	}
 
 	public function setContainer(IHTMLContainer $Container) {
-		foreach($this->getContainer()->getContent() as $Content) {
+		foreach($this->getContainer()->getContentRecursive() as $Content) {
 			if($Container === $Content) {
 				$this->mContainer = $Content;
 				return;
@@ -82,14 +81,24 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	}
 
 	/**
-	 * Add IRenderHTML Content
+	 * Add renderable content
 	 * @param IRenderHTML $Render
 	 * @param null $key if provided, add/replace content by key
 	 * @return void always returns void
 	 */
-    function addContent(IRenderHTML $Render, $key=null) {
-	    $this->mContainer->addContent($Render, $key);
-    }
+	function addContent(IRenderHTML $Render, $key=null) {
+		$this->getContainer()->addContent($Render, $key);
+	}
+
+	/**
+	 * Prepend renderable content
+	 * @param IRenderHTML $Render
+	 * @param null $key if provided, add/replace content by key
+	 * @return void always returns void
+	 */
+	protected function prependContent(IRenderHTML $Render, $key=null) {
+		$this->getContainer()->prependContent($Render, $key);
+	}
 
 //	/**
 //	 * Add header content
@@ -121,7 +130,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @return bool
 	 */
 	function hasContent($key=null) {
-		return $this->mContainer->addContent($key);
+		return $this->getContainer()->hasContent($key);
 	}
 
 	/**
@@ -131,7 +140,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @throws \InvalidArgumentException if content at $key was not found
 	 */
 	public function getContent($key=null) {
-		return $this->mContainer->getContent($key);
+		return $this->getContainer()->getContent($key);
 	}
 
 	/**
@@ -140,13 +149,13 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @return int the number of items removed
 	 */
 	function removeContent($key = null) {
-		return $this->mContainer->removeContent($key);
+		return $this->getContainer()->removeContent($key);
 	}
 
 	/**
 	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
-	 * @param \CPath\Framework\Render\Header\IHeaderWriter $Head the writer inst to use
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
 	 * @return void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
@@ -155,10 +164,9 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		foreach($this->mSupportHeaders as $Headers)
 			$Headers->writeHeaders($Request, $Head);
 
-		if($Additional = $this->getAdditionalAttributes())
-			foreach($Additional as $Attribute)
-				if($Attribute instanceof IHTMLSupportHeaders)
-					$Attribute->writeHeaders($Request, $Head);
+		$Attr = $this->getAttributes();
+		if($Attr instanceof IHTMLSupportHeaders)
+			$Attr->writeHeaders($Request, $Head);
 
 		foreach($this->getClasses() as $class) {
 			$selector = $this->getElementType() . '.' . $class;
@@ -176,16 +184,12 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	    RI::ai(1);
 
 	    $Content = $this->mContent->getContent();
-	    $newLine = sizeof($Content) > 1;
-        foreach($Content as $index => $ContentItem) {
+        foreach($Content as $index => $ContentItem)
 	        $this->renderContentItem($Request, $index, $ContentItem, $ContentAttr);
-	        if(!$ContentItem instanceof HTMLContent)
-	            $newLine = true;
-        }
 
 	    RI::ai(-1);
 
-	    if($newLine)
+	    if(sizeof($Content) > 0)
 		    echo RI::ni();
     }
 
@@ -222,7 +226,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * <b>Traversable</b>
      */
     public function getIterator() {
-        return new \ArrayIterator($this->mContainer->getContent());
+        return new \ArrayIterator($this->getContainer()->getContent());
     }
 
     /**
@@ -238,7 +242,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * The return value will be casted to boolean if non-boolean was returned.
      */
     public function offsetExists($offset) {
-	    return $this->mContainer->offsetExists($offset);
+	    return $this->getContainer()->offsetExists($offset);
     }
 
     /**
@@ -251,7 +255,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return mixed Can return all value types.
      */
     public function offsetGet($offset) {
-	    return $this->mContainer->offsetGet($offset);
+	    return $this->getContainer()->offsetGet($offset);
     }
 
     /**
@@ -267,7 +271,18 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return void
      */
     public function offsetSet($offset, $value) {
-	    $this->mContainer->offsetSet($offset, $value);
+	    if(!$value instanceof IRenderHTML) {
+		    switch(strtolower($this->getElementType())) {
+			    case 'form':
+			    case 'fieldset':
+				    $nodeType = 'div';
+				    if(strpos($value, "<") === false) {
+					    $value = '<' . $nodeType . '>' . str_replace(PHP_EOL, '</' . $nodeType . '>' . PHP_EOL . '<' . $nodeType . '>', $value) . '</' . $nodeType . '>';
+				    }
+				    break;
+		    }
+	    }
+	    $this->getContainer()->offsetSet($offset, $value);
     }
 
     /**
@@ -280,7 +295,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return void
      */
     public function offsetUnset($offset) {
-	    $this->mContainer->offsetUnset($offset);
+	    $this->getContainer()->offsetUnset($offset);
     }
 }
 

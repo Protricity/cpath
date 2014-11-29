@@ -24,8 +24,8 @@ class CLIRequiredArgument extends CLIArgument
 	 * @throws \CPath\Request\Parameter\Exceptions\RequiredParameterException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
-		$value = parent::validate($Request, $value, $fieldName ?: $this->getFieldName());
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
+		$value = parent::validate($Request, $value, $fieldName);
 		if (!$value)
 			throw new RequiredParameterException($this, "CLI Argument is required: " . $this->getFieldName());
 		return $value;

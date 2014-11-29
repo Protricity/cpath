@@ -33,7 +33,7 @@ class RequestException2 extends RequestException implements IRenderHTML, IHTMLSu
      * Write all support headers used by this IView instance
      * @param IRequest $Request
      * @param IHeaderWriter $Head the writer instance to use
-     * @return String|void always returns void
+     * @return void
      */
     function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
         $Form = new FormValidation();

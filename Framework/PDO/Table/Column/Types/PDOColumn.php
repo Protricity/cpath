@@ -8,7 +8,7 @@
 namespace CPath\Framework\PDO\Table\Column\Types;
 
 
-use CPath\Describable\IDescribable;
+use CPath\Data\Describable\IDescribable;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\API\Field\EnumField;
 use CPath\Framework\API\Field\Field;

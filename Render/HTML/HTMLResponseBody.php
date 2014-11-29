@@ -7,13 +7,13 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Header\WriteOnceHeaderRenderer;
-use CPath\Framework\Render\Util\RenderIndents as RI;
-use CPath\Handlers\RenderHandler;
+use CPath\Data\Describable\IDescribable;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\WriteOnceHeaderRenderer;
 use CPath\Request\IRequest;
+use CPath\Response\ResponseRenderer;
 
 class HTMLResponseBody extends HTMLContainer
 {
@@ -21,12 +21,7 @@ class HTMLResponseBody extends HTMLContainer
 	const TAB = '  ';
 	const TAB_START = 0;
 
-	/** @var IHTMLSupportHeaders[] */
-	private $mHeaders = array();
-
-	public function addHeaders(IHTMLSupportHeaders $Headers) {
-		$this->mHeaders[] = $Headers;
-	}
+	private $mTitle = null;
 
 	public function __construct($_content=null) {
 		foreach(func_get_args() as $arg)
@@ -50,28 +45,24 @@ class HTMLResponseBody extends HTMLContainer
 	/**
 	 * Render HTML header html
 	 * @param \CPath\Request\IRequest $Request
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Writer
 	 * @return WriteOnceHeaderRenderer the writer inst used
 	 */
-	public function renderHTMLHeaders(IRequest $Request) {
-		$Writer = new WriteOnceHeaderRenderer();
+	public function renderHTMLHeaders(IRequest $Request, IHeaderWriter $Writer=null) {
+		$Writer = $Writer ?: new WriteOnceHeaderRenderer();
 
 		$Renders = $this->getContent();
 		$First = reset($Renders);
 
-		if ($First instanceof IDescribable) {
-			$title = $First->getTitle();
+		$title = $this->mTitle;
+		if (!$title && $First instanceof IDescribable)
+			$title = $First->getDescription();
+
+
+		if($title)
 			echo RI::ni(), "<title>", $title, "</title>";
-		}
 
-		if ($this instanceof IHTMLSupportHeaders)
-			$this->writeHeaders($Request, $Writer);
-
-		foreach($this->mHeaders as $Headers)
-			$Headers->writeHeaders($Request, $Writer);
-
-		foreach($Renders as $Render)
-			if ($Render instanceof IHTMLSupportHeaders)
-				$Render->writeHeaders($Request, $Writer);
+		$this->writeHeaders($Request, $Writer);
 
 		return $Writer;
 	}
@@ -108,7 +99,10 @@ class HTMLResponseBody extends HTMLContainer
 			$this->renderHTMLContent($Request);
 
 		} catch (\Exception $ex) {
+			$Renderer = new ResponseRenderer($ex);
 			if(!$body) {
+				$Renderer->writeHeaders($Request, $Writer ?: new WriteOnceHeaderRenderer());
+
 				RI::ai(-1);
 				echo RI::ni(), '</head>';
 
@@ -116,12 +110,8 @@ class HTMLResponseBody extends HTMLContainer
 				RI::ai(1);
 			}
 
-			if(!$Writer)
-				$Writer = new WriteOnceHeaderRenderer();
-
-			$Renderer = new RenderHandler($ex);
-			$Renderer->writeHeaders($Request, $Writer);
-			$Renderer->renderHTML($Request, $Parent);
+			$Renderer = new ResponseRenderer($ex);
+			$Renderer->renderHTML($Request, $Attr, $Parent);
 		}
 
 		RI::ai(-1);

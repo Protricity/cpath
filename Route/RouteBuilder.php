@@ -10,7 +10,6 @@ namespace CPath\Route;
 use CPath\Build\Editor\PHP\PHPMethodEditor;
 use CPath\Build\IBuildRequest;
 use CPath\Build\MethodDocBlock;
-use CPath\Config;
 use CPath\Request\CLI\CommandString;
 
 class RouteBuilder {

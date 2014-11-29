@@ -7,8 +7,8 @@
  */
 namespace CPath\Render\HTML\Theme;
 
-use CPath\Framework\Render\Header\IHeaderWriter;
 use CPath\Render\HTML\Attribute\Attributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
@@ -36,7 +36,7 @@ class ThemedClassAttributes extends Attributes implements IHTMLSupportHeaders
 	 * Write all support headers used by this IView inst
 	 * @param IRequest $Request
 	 * @param IHeaderWriter $Head the writer inst to use
-	 * @return String|void always returns void
+	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		//$Head->writeScript(__DIR__ . '\assets\cpath-default-form-theme.js');

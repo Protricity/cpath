@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\API;
 
-use CPath\Describable\IDescribable;
 use CPath\Framework\API\Field\PasswordField;
 use CPath\Framework\API\Field\RequiredParam;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
@@ -55,7 +54,7 @@ class PostUserLoginAPI extends AbstractPDOAPI {
 
     /**
      * Get the Object Description
-     * @return IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Data\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         return "Log in as a ".$this->getTable()->getModelName();

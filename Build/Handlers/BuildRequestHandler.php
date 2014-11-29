@@ -13,12 +13,10 @@ use CPath\Build\File;
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Build\MethodDocBlock;
-use CPath\Handlers\RenderHandler;
 use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
-use CPath\Request\Log\ILogListener;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
@@ -45,7 +43,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
         $OriginalRequest = $Request;
         $this->mDefaults = $Request['defaults'] || false;
 
-        if (!$this->mDefaults && $Request-['test'])
+        if (!$this->mDefaults && $Request['test'])
             $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;
@@ -59,7 +57,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
     /**
      * Handle this request and render any content
      * @param IBuildRequest $Request the build request inst for this build session
-     * @return String|void always returns void
+     * @return void
      */
     function buildAllFiles(IBuildRequest $Request) {
         $paths = Autoloader::getLoaderPaths();
@@ -70,7 +68,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
         $buildableClasses = array();
         while ($file = $Iterator->getNextFile()) {
-            $Request->log("File: " . $file, ILogListener::VERBOSE);
+            $Request->log("File: " . $file, $Request::VERBOSE);
 
             $Scanner = new File\PHPFileScanner($file);
             $results = $Scanner->scanClassTokens();
@@ -86,7 +84,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
         }
 
         foreach ($buildableClasses as $class) {
-            $Request->log("Found Class: " . $class, ILogListener::VERBOSE);
+            $Request->log("Found Class: " . $class, $Request::VERBOSE);
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\Build\IBuildable')) {
@@ -106,7 +104,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
                     $class::handleStaticBuild($Request);
 
                 } catch (\Exception $ex) {
-                    $Request->logEx($ex);
+                    $Request->log($ex, $Request::ERROR);
                     if($Request instanceof IPrompt)
                         $Request->prompt('error-resume', "Continue build?");
 
@@ -135,14 +133,14 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
     static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
         $Inst = new BuildRequestHandler();
         $Response = $Inst->execute($Request);
-        $Handler = new RenderHandler($Response);
+        $Handler = new ResponseRenderer($Response);
         $Handler->render($Request);
     }
 
     /**
      * Handle this request and render any content
      * @param IBuildRequest $Request the build request inst for this build session
-     * @return String|void always returns void
+     * @return void
      */
     static function handleStaticBuild(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new DefaultMap());

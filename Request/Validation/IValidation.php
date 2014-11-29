@@ -16,8 +16,9 @@ interface IValidation
 	 * @param IRequest $Request
 	 * @param $value
 	 * @param null $fieldName
-	 * @throw Exception if validation failed
+	 * @throw \Exception if validation failed
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null);
+	function validate(IRequest $Request, $value = null, $fieldName = null);
 }
+

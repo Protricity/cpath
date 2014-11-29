@@ -7,7 +7,6 @@
  * Date: 4/06/11 */
 namespace CPath\Framework\PDO\Table\Model\Types;
 
-use CPath\Config;
 use CPath\Framework\PDO\Table\Model\Interfaces\IPDOPrimaryKeyModel;
 use CPath\Framework\PDO\Table\Types\PDOPrimaryKeyTable;
 use CPath\Log;

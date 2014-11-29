@@ -14,7 +14,7 @@ use CPath\Request\IRequest;
 class HTMLAnchor extends HTMLElement
 {
 	const ALLOW_CLOSED_TAG = false;
-	const TRIM_CONTENT = true;
+
 	private $mText;
 
 	/**
@@ -57,7 +57,7 @@ class HTMLAnchor extends HTMLElement
 	}
 
 	/**
-	 * Add IRenderHTML Content
+	 * Add IRenderHTML MainContent
 	 * @param IRenderHTML $Render
 	 * @param null $key if provided, add/replace content by key
 	 * @return void

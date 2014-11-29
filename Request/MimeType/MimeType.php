@@ -49,7 +49,7 @@ abstract class MimeType implements IRequestedMimeType
 //            return false;
 //
 //        header("HTTP/1.1 " . $code . " " . preg_replace('/[^\w -]/', '', $message));
-//        header("Content-Type: " . $this->mName);
+//        header("MainContent-Type: " . $this->mName);
 //
 //        $this->mSent = true;
 //        return true;

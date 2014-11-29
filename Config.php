@@ -10,7 +10,7 @@ use CPath\Framework\Build\API\Build;
 use CPath\Interfaces\IConfig;
 use CPath\Request\RequestSelector;
 
-class Config implements IConfig {
+class Config  {
     static $GenPath = 'gen';
 //    static $Paths = array(
 //        'ANY /' => 'CPath\Framework\View\Templates\CLI\CLIErrorView',

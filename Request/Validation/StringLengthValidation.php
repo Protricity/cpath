@@ -27,7 +27,7 @@ class StringLengthValidation implements IValidation
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$fieldDesc = $fieldName ? "Field '$fieldName'" : 'String';
 
 		$l = strlen($value);

@@ -7,9 +7,6 @@
  */
 namespace CPath\Framework\PDO\Table\Column\Builders;
 
-use CPath\Exceptions\BuildException;
-use CPath\Framework\API\Field\Interfaces\IField;
-use CPath\Framework\Exception\Common\NotImplementedException;
 use CPath\Framework\PDO\Builders\Models\BuildPHPModelClass;
 use CPath\Framework\PDO\Table\Builders\BuildPHPTableClass;
 use CPath\Framework\PDO\Table\Column\Exceptions\ColumnArgumentNotFoundException;
@@ -28,7 +25,7 @@ class BuildPDOColumn extends AbstractBuildPDOColumn
      * Additional processing for PHP classes for a PDO Builder Template
      * @param \CPath\Framework\PDO\Table\Builders\BuildPHPTableClass $TablePHP
      * @param BuildPHPModelClass $ModelPHP
-     * @throws BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processTemplatePHP(BuildPHPTableClass $TablePHP, BuildPHPModelClass $ModelPHP) {}
@@ -44,6 +41,7 @@ class BuildPDOColumn extends AbstractBuildPDOColumn
      * @return IField
      */
     function generateAPIField($comment = NULL, $defaultValidation = NULL, $flags = 0) {
-        throw new NotImplementedException();
+	    throw new \InvalidArgumentException();
+
     }
 }

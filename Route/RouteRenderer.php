@@ -66,7 +66,7 @@ final class RouteRenderer implements IRouteMapper
 			    $cls = array();
 			    foreach($this->mPrevious as $Previous)
 				    $cls[] = get_class($Previous);
-				$ex = new RequestException("Unhandled class: " . implode(', ', $cls));
+				$ex = new RequestException("Unhandled class: " . implode(', ', array_unique($cls)));
 			    array_unshift($this->mPrevious, $ex);
 		    }
 

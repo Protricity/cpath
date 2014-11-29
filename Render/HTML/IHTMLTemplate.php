@@ -12,8 +12,8 @@ namespace CPath\Render\HTML;
 ////    /**
 ////     * Render request as html
 ////     * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-////     * @param IRenderHTML $Content
-////     * @return String|void always returns void
+////     * @param IRenderHTML $MainContent
+////     * @return void
 ////     */
-////    function renderHTMLContent(IRequest $Request, IRenderHTML $Content);
+////    function renderHTMLContent(IRequest $Request, IRenderHTML $MainContent);
 //}

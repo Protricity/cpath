@@ -16,8 +16,10 @@ class AttributeCollection implements IAttributes
 		$this->mAttributes = func_get_args();
 	}
 
-	public function addAttributes(IAttributes $Attributes) {
-		$this->mAttributes[] = $Attributes;
+	function addAttributes(IAttributes $Attributes, IAttributes $_Attributes=null) {
+		foreach(func_get_args() as $Attributes) {
+			$this->mAttributes[] = $Attributes;
+		}
 	}
 
 	/**
@@ -139,6 +141,8 @@ class AttributeCollection implements IAttributes
 	static function combineA(Array $attributes, AttributeCollection $Inst=null) {
 		$Inst = $Inst ?: new AttributeCollection();
 		foreach ($attributes as $attribute) {
+			if(!$attributes)
+				continue;
 			if (is_string($attribute))
 				$attribute = new ClassAttributes($attribute);
 			$Inst->addAttributes($attribute);

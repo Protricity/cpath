@@ -49,7 +49,7 @@ class BuildPDOUserRoleTable extends AbstractBuildPDOPKTable {
      * Additional processing for PHP classes for a PDO Builder Template
      * @param BuildPHPTableClass $PHPTable
      * @param BuildPHPModelClass $PHPModel
-     * @throws \CPath\Exceptions\BuildException
+     * @throws \CPath\Build\Exceptions\BuildException
      * @return void
      */
     function processTemplatePHP(BuildPHPTableClass $PHPTable, BuildPHPModelClass $PHPModel) {

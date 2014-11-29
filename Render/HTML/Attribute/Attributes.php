@@ -13,6 +13,8 @@ class Attributes implements IAttributes {
     private $mAttr = array();
     private $mClasses = array();
     private $mStyles = array();
+	/** @var IAttributes[] */
+	private $mAdditionalAttributes=array();
 
     function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
 	    $args = func_get_args();
@@ -33,6 +35,19 @@ class Attributes implements IAttributes {
 		    }
 	    }
     }
+
+	function addAttributes(IAttributes $Attributes) {
+		if($Attributes)
+			$this->mAdditionalAttributes[] = $Attributes;
+	}
+
+//	protected function getAttributeList() {
+//		$arr = array($this);
+//		if($this->mAdditionalAttributes)
+//			foreach($this->mAdditionalAttributes as $Additional)
+//				$arr[] = $Additional;
+//		return $arr;
+//	}
 
     /**
      * Add an attribute to the collection
@@ -73,8 +88,8 @@ class Attributes implements IAttributes {
      */
     function addHTML($htmlAttr) {
         if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
-            foreach($matches[1] as $name) {
-                $this->setAttribute($name, $matches[2]) ;
+            foreach($matches[1] as $i => $name) {
+                $this->setAttribute($name, $matches[2][$i]) ;
             }
         } else {
 	        $this->addClass($htmlAttr);
@@ -88,9 +103,13 @@ class Attributes implements IAttributes {
 	 * @return String|Array
 	 */
 	function getAttribute($name = null) {
+		$attributes = $this->mAttr;
+		foreach($this->mAdditionalAttributes as $Additional)
+			$attributes += $Additional->getAttribute();
+
 		if($name === null)
-			return $this->mAttr;
-		return isset($this->mAttr[$name]) ? $this->mAttr[$name] : null;
+			return $attributes;
+		return isset($attributes[$name]) ? $attributes[$name] : null;
 	}
 
 	/**
@@ -98,7 +117,11 @@ class Attributes implements IAttributes {
 	 * @return Array
 	 */
 	function getClasses() {
-		return $this->mClasses;
+		$classes = $this->mClasses;
+		foreach($this->mAdditionalAttributes as $Additional)
+			foreach($Additional->getClasses() as $class)
+				$classes[] = $class;
+		return $classes;
 	}
 
 	/**
@@ -107,9 +130,13 @@ class Attributes implements IAttributes {
 	 * @return String|Array
 	 */
 	function getStyle($name = null) {
+		$styles = $this->mStyles;
+		foreach($this->mAdditionalAttributes as $Additional)
+			$styles += $Additional->getStyle();
+
 		if($name === null)
-			return $this->mStyles;
-		return isset($this->mStyles[$name]) ? $this->mStyles[$name] : null;
+			return $styles;
+		return isset($styles[$name]) ? $styles[$name] : null;
 	}
 
     /**
@@ -118,7 +145,7 @@ class Attributes implements IAttributes {
      * @return bool
      */
     function hasClass($class) {
-	    foreach($this->mClasses as $class2) {
+	    foreach($this->getClasses() as $class2) {
 		    if($class === $class2)
 			    return true;
 	    }
@@ -183,8 +210,12 @@ class Attributes implements IAttributes {
 		$styles = $this->getStyle();
 		$attributes = $this->getAttribute();
 
-		foreach(func_get_args() as $Additional) {
-			if($Additional instanceof IAttributes) {
+		if($Additional || $_Additional) {
+			$AdditionalList = $this->mAdditionalAttributes;
+			foreach(func_get_args() as $arg)
+				if($arg)
+					$AdditionalList[] = $arg;
+			foreach($AdditionalList as $Additional) {
 				$classes = array_merge($classes, $Additional->getClasses());
 				$styles += $Additional->getStyle();
 				$attributes += $Additional->getAttribute();

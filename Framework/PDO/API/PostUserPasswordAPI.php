@@ -79,7 +79,7 @@ class PostUserPasswordAPI extends AbstractPDOAPI {
 
     /**
      * Get the Object Description
-     * @return \CPath\Describable\IDescribable|String a describable Object, or string describing this object
+     * @return \CPath\Data\Describable\IDescribable|String a describable Object, or string describing this object
      */
     function getDescribable() {
         if($this->mLoggedIn)

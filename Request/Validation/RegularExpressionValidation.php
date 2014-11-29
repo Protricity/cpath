@@ -29,7 +29,7 @@ class RegularExpressionValidation implements IValidation
 	 * @throws \CPath\Request\Exceptions\RequestException
 	 * @return mixed validated value
 	 */
-	function validate(IRequest $Request, $value, $fieldName = null) {
+	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		if (preg_match($this->mRegex, $value, $matches))
 			throw new RequestException($this->mDescription ? : "Value must match regex: " . $this->mRegex);
 

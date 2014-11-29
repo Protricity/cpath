@@ -19,7 +19,7 @@ interface IBuildable {
     /**
      * Handle this request and render any content
      * @param IBuildRequest $Request the build request inst for this build session
-     * @return String|void always returns void
+     * @return void
      * @build --disable 0
      * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
      */

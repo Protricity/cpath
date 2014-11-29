@@ -130,6 +130,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         if (function_exists('getallheaders'))
             return $this->mHeaders = getallheaders();
 
+	    $this->mHeaders = array();
         foreach ($_SERVER as $name => $value) {
             if (in_array(substr($name, 0, 5), array('CONTE', 'HTTP_'))) {
                 $name = str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))));
@@ -139,9 +140,13 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         return $this->mHeaders;
     }
 
-    function getHeader($name) {
+    function getHeader($headerName) {
         $headers = self::getAllHeaders();
-        return $headers[$name];
+	    foreach($headers as $name=>$value)
+		    if(strcasecmp($headerName, $name) === 0)
+			    return $value;
+
+        return null;
     }
 
     /**
