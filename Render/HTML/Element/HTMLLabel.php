@@ -22,11 +22,11 @@ class HTMLLabel extends HTMLElement
 
 	/**
 	 * @param string $text
-	 * @param String|\CPath\Render\HTML\Attribute\IAttributes $classList
+	 * @param String|\CPath\Render\HTML\Attribute\IAttributes $_attributes
 	 * @param null $_content
 	 */
-    public function __construct($text=null, $classList=null, $_content=null) {
-        parent::__construct('label', $classList);
+    public function __construct($text=null, $_attributes=null, $_content=null) {
+        parent::__construct('label', $_attributes);
 	    $this->mText = $text;
 
 	    if($_content !== null)

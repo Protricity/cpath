@@ -1,50 +1,43 @@
-
+.html-console, .html-console-input-text {
+    font-family: monospace;
+    color: #263;
+    font-size: 10pt;
+}
 
 .html-console {
-    font-family: monospace;
-    color: #eee;
-    font-size: 10pt;
-
-    background-color: #111;
-    position: fixed;
-    left: 0;
-    bottom: 0;
+    /*background-color: #111;*/
     padding: 3pt;
-    /*width: 100%;*/
+    width: 100%;
     /*height: 100%;*/
 
-    z-index:    -1000;
+    /*z-index:    -1000;*/
 
-    border: 1px solid #ccc;
-    box-shadow: inset 0 1px 3px #ddd;
-    border-radius: 4px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
+    /*border: 1px solid #ccc;*/
+    /*box-shadow: inset 0 1px 3px #ddd;*/
+    /*border-radius: 4px;*/
+}
+
+.html-console.fixed {
+    position: fixed;
+    left: 5pt;
+    bottom: 5pt;
 }
 
 .html-console-marker {
     position: absolute;
-    color: #eee;
-    font-size: 14pt;
-}
-
-.html-console-input-text {
-    color: #eee;
-    background-color: transparent;
-    width: 100%;
-    padding-left: 10pt;
-    font-size: 14pt;
-
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
 }
 
 .html-console-log {
-    color: #eee;
     max-height: 100pt;
 }
+
+.html-console-input-text {
+    border: 0;
+    background-color: transparent;
+    width: 50%;
+    padding-left: 10pt;
+}
+
 
 .html-console .log-entry {
     white-space: pre;

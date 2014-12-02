@@ -10,7 +10,6 @@ namespace CPath\Route;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Response\IResponse;
-use CPath\Response\IResponse;
 
 class RouteIndexResponse implements IResponse, ISequenceMap
 {

@@ -82,18 +82,20 @@ class Attributes implements IAttributes {
 		return true;
 	}
 
-    /**
-     * Add attributes
-     * @param $htmlAttr
-     */
+	/**
+	 * Add attributes
+	 * @param $htmlAttr
+	 * @throws \InvalidArgumentException
+	 */
     function addHTML($htmlAttr) {
         if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
             foreach($matches[1] as $i => $name) {
                 $this->setAttribute($name, $matches[2][$i]) ;
             }
         } else {
+	        if(strpos($htmlAttr, '=') !== false)
+		        throw new \InvalidArgumentException("Invalid element html: " . $htmlAttr);
 	        $this->addClass($htmlAttr);
-	        //throw new \InvalidArgumentException("Invalid element html: " . $htmlAttr);
         }
     }
 
@@ -245,6 +247,9 @@ class Attributes implements IAttributes {
 
 	function __toString() {
 		ob_start();
+
+		$this->render();
+
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;

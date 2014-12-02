@@ -106,6 +106,9 @@ class AttributeCollection implements IAttributes
 
 	function __toString() {
 		ob_start();
+
+		$this->render();
+
 		$content = ob_get_contents();
 		ob_end_clean();
 		return $content;

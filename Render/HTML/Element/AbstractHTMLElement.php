@@ -12,6 +12,7 @@ use CPath\Render\HTML\Attribute\AttributeCollection;
 use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\IAttributesAggregate;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
@@ -23,29 +24,45 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	const PASS_DOWN_ATTRIBUTES = false;
 
 	private $mElmType;
-	private $mAttributes;
+	private $mAttributes = null;
 
 	/** @var ILogListener[] */
 	private $mLogListeners = array();
 
 	/**
 	 * @param string $elmType
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
+	 * @param null|String|Array|IAttributes $_attributes [varargs] attribute html as string, array, or IAttributes instance
 	 */
-	public function __construct($elmType, $classList = null) {
+	public function __construct($elmType, $_attributes = null) {
 		$this->mElmType = $elmType;
-		$this->mAttributes = new Attributes();
+//		$this->mAttributes = new Attributes();
 
-		if($classList instanceof IAttributes) {
-			$this->addAttributes($classList);
-		} else {
-			$this->mAttributes->addHTML($classList);
+		for($i=1; $i<func_num_args(); $i++) {
+			$arg = func_get_arg($i);
+			$this->addVarArg($arg);
 		}
+	}
+
+	protected function addVarArg($arg, $allowHTMLString=false) {
+		if($arg instanceof IAttributesAggregate) {
+			$this->addAttributes($arg->getAttributes());
+
+		} else if($arg instanceof IAttributes) {
+			$this->addAttributes($arg);
+
+		} else if(is_string($arg) && $allowHTMLString) {
+			$this->getAttributes()->addHTML($arg);
+
+		} else {
+			return false;
+		}
+
+		return true;
 	}
 
 	function addAttributes(IAttributes $Attributes, IAttributes $_Attributes=null) {
 		foreach(func_get_args() as $Attributes) {
-			$this->mAttributes->addAttributes($Attributes);
+			$this->getAttributes()->addAttributes($Attributes);
 		}
 	}
 
@@ -68,12 +85,12 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	}
 
 	function setAttribute($attrName, $attrValue) {
-		$this->mAttributes->setAttribute($attrName, $attrValue);
+		$this->getAttributes()->setAttribute($attrName, $attrValue);
 		return $this;
 	}
 
 	function getAttribute($attrName, $defaultValue = null) {
-		return $this->mAttributes->getAttribute($attrName, $defaultValue);
+		return $this->getAttributes()->getAttribute($attrName, $defaultValue);
 	}
 
 //	function hasAttribute($attrName) {
@@ -81,11 +98,11 @@ abstract class AbstractHTMLElement implements IRenderHTML
 //	}
 
 	protected function removeAttribute($attrName) {
-		return $this->mAttributes->removeAttribute($attrName);
+		return $this->getAttributes()->removeAttribute($attrName);
 	}
 
 	public function addClass($classList) {
-		$this->mAttributes->addClass($classList);
+		$this->getAttributes()->addClass($classList);
 	}
 
 	public function hasClass($className) {
@@ -93,15 +110,16 @@ abstract class AbstractHTMLElement implements IRenderHTML
 	}
 
 	public function getClasses() {
-		$classes = $this->mAttributes->getClasses();
+		$classes = $this->getAttributes()->getClasses();
 		return $classes;
 	}
 
 	/**
-	 * @return IAttributes
+	 * @return Attributes
 	 */
 	public function getAttributes() {
-		return $this->mAttributes;
+		return $this->mAttributes
+			?: $this->mAttributes = new Attributes();
 	}
 
 	/**

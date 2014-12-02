@@ -7,12 +7,10 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Data\Describable\Description;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Describable\Describable;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -62,7 +60,7 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 
 		$Attr = new ClassAttributes(self::CSS_CLASS, $cls);
 
-		echo RI::ni(), "<ul", $Attr, $this->mAttr, ">";
+		echo RI::ni(), "<dl", $Attr, $this->mAttr, ">";
 		RI::ai(1);
 
 		$this->mStarted = true;
@@ -75,7 +73,7 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 		//$this->tryStart();
 
 		RI::ai(-1);
-		echo RI::ni(), "</ul>";
+		echo RI::ni(), "</dl>";
 
 		$this->mStarted = false;
 	}
@@ -96,14 +94,13 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 //        if($this->mKeyCount === 1 && is_string($value))
 //            $css[] = self::CSS_CLASS_HEADER;
 
-		echo RI::ni(), "<li class='", implode(' ', $css), "'>";
-		RI::ai(1);
+//		$key = ucwords(str_replace('_', ' ', $key));
+//		if (strlen($key) <= 2)
+//			$key = strtoupper($key);
 
-		$key = ucwords(str_replace('_', ' ', $key));
-		if (strlen($key) <= 2)
-			$key = strtoupper($key);
+		echo RI::ni(), "<dt>", $key, "</dt>";
+		echo RI::ni(), "<dd>";
 
-		echo RI::ni(), "<div class='", self::CSS_CLASS_KEY_NAME, "'>", $key, "</div>";
 
 		$Attr = new ClassAttributes(self::CSS_CLASS_KEY_CONTENT);
 		if ($value instanceof IRenderHTML) {
@@ -119,16 +116,16 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 			$value->mapKeys($Renderer);
 			$Renderer->flush();
 
-		} elseif (is_bool($value)) {
-			echo RI::ni(), "<div class='", self::CSS_CLASS_KEY_VALUE, "'>", $value ? 'True' : 'False', "</div>";
+		} elseif (is_string($value)) {
+			echo RI::ni(), $value ? htmlspecialchars($value) : '&nbsp;';
 
 		} else {
-			echo RI::ni(), "<div class='", self::CSS_CLASS_KEY_VALUE, "'>", htmlspecialchars(new Description($value)), "</div>";
+			echo RI::ni(), var_export($value, true);
+			//echo RI::ni(), $value ? htmlspecialchars(new Description($value)) : '&nbsp;';
 
 		}
 
-		RI::ai(-1);
-		echo RI::ni(), "</li>";
+		echo RI::ni(), "</dd>";
 
 		return false;
 	}

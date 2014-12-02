@@ -10,20 +10,23 @@ namespace CPath\Render\HTML\Element\Form;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\EmailValidation;
+use CPath\Request\Validation\IValidation;
 
 class HTMLEmailField extends HTMLFormField
 {
 	const INPUT_TYPE = 'email';
 
 	/**
-	 * @param null $description
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $name
-	 * @param bool $value
-	 * @internal param bool $checked
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null $value input value (value=[])
+	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($description = null, $classList = null, $name = null, $value = false) {
-		parent::__construct($description, $classList, $name, $value);
+	public function __construct($classList = null, $name = null, $value = null, $_validation = null) {
+		parent::__construct($classList, $name, $value);
+
+		foreach(func_get_args() as $i => $arg)
+			$this->addVarArg($arg, $i>=3);
 	}
 
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
@@ -33,9 +36,4 @@ class HTMLEmailField extends HTMLFormField
 		return parent::validate($Request, $value, $fieldName);
 	}
 
-	// Static
-
-//	static function get($description = null, $classList = null, $name = null, $value = false) {
-//		return new HTMLCheckBoxField($description, $classList, $name, $value);
-//	}
 }

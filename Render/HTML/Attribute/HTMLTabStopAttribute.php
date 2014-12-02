@@ -7,7 +7,7 @@
  */
 namespace CPath\Render\HTML\Attribute;
 
-class HTMLTabStopAttribute implements IAttributes
+class HTMLTabStopAttribute implements IAttributesAggregate
 {
 
 	private static $IndexCount = 0;
@@ -19,45 +19,10 @@ class HTMLTabStopAttribute implements IAttributes
 	}
 
 	/**
-	 * Returns an array of classes
-	 * @return Array
+	 * @return IAttributes
 	 */
-	function getClasses() {
-		return array();
-	}
-
-	/**
-	 * Return the style value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
-	 */
-	function getStyle($name = null) {
-		return array();
-	}
-
-	/**
-	 * Return the attribute value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
-	 */
-	function getAttribute($name = null) {
-		$attributes = array(
-			'tabindex' => $this->mTabIndex,
-		);
-		if ($name)
-			return $attributes[$name];
-
-		return $attributes;
-	}
-
-	/**
-	 * Render html attributes
-	 * @param IAttributes|null $Additional
-	 * @return string|void always returns void
-	 */
-	function render(IAttributes $Additional = null) {
-		foreach ($this->getAttribute() as $key => $value)
-			echo ' ' . $key . "='" . $value . "'";
+	function getAttributes() {
+		return new Attributes('tabindex', $this->mTabIndex);
 	}
 
 	// Static

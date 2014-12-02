@@ -8,19 +8,25 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Request\Validation\IValidation;
 
 class HTMLFileInputField extends HTMLFormField
 {
+	const INPUT_TYPE = 'file';
 
 	/**
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $name
-	 * @param null $accept
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null $accept
+	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($classList = null, $name = null, $accept = null) {
-		parent::__construct($classList, $name, null, 'file');
-		if($accept)
+	public function __construct($classList = null, $name = null, $accept = null, $_validation = null) {
+		parent::__construct($classList, $name);
+		if(is_string($accept))
 			$this->setAccept($accept);
+
+		foreach(func_get_args() as $i => $arg)
+			$this->addVarArg($arg, $i>=3);
 	}
 
 	public function setAccept($accept) {

@@ -15,10 +15,10 @@ class ClosedHTMLElement extends AbstractHTMLElement
 {
 	/**
 	 * @param string $elmType
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
+	 * @param String|Array|IAttributes $_attributes attribute inst, class list, or attribute html
 	 */
-	public function __construct($elmType, $classList = null) {
-		parent::__construct($elmType, $classList);
+	public function __construct($elmType, $_attributes = null) {
+		parent::__construct($elmType, $_attributes);
 	}
 
 	/**

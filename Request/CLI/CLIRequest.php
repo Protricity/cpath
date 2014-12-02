@@ -7,7 +7,6 @@
  */
 namespace CPath\Request\CLI;
 
-use CPath\Data\Describable\IDescribable;
 use CPath\Render\Text\TextMimeType;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\Form\IFormRequest;

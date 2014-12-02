@@ -31,11 +31,13 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	private $mInput;
 	public function __construct($marker = '$') {
 		$this->mContainer = new HTMLElement('div', 'html-console',
-			$this->mHTMLLog = new HTMLLog('html-console-log'),
+			new HTMLElement('div', 'html-console-log',
+				$this->mHTMLLog = new HTMLLog()
+			),
 			$this->mSpanMarker = new HTMLElement('span', 'html-console-marker', $marker),
-			$this->mInput = new HTMLFormField('', 'html-console-input-text', 'text', 'text'),
-			$this->mInputPath = new HTMLFormField('', 'html-console-input-path', 'path', 'hidden'),
-			$this->mInputDomain = new HTMLFormField('', 'html-console-input-domain', 'domain', 'hidden')
+			$this->mInput = new HTMLFormField('html-console-input-text', 'text'),
+			$this->mInputPath = new HTMLFormField('html-console-input-path', 'path', null, 'hidden'),
+			$this->mInputDomain = new HTMLFormField('html-console-input-domain', 'domain', null, 'hidden')
 		);
 		//$this->mInput->setRows(1);
 		//$this->mHTMLLog->bindEventListener('.html-console');

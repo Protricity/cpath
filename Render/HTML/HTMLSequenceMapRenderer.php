@@ -12,7 +12,6 @@ use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
-use CPath\Describable\Describable;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -90,7 +89,7 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 		if(is_array($value))
 			$value = new ArraySequence($value);
 
-		echo RI::ni(), "<li class='" . self::CSS_CLASS_SEQUENCE_ITEM . "'>";
+		echo RI::ni(), "<li>";
 		RI::ai(1);
 
 		$Attr = null; // new ClassAttributes(self::CSS_CLASS_KEY_CONTENT);

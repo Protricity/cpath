@@ -8,11 +8,10 @@
 namespace CPath\Response;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
-use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\HTMLKeyMapRenderer;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
@@ -20,6 +19,7 @@ use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONKeyMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\IRenderText;
+use CPath\Render\Text\TextKeyMapRenderer;
 use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLKeyMapRenderer;
@@ -136,6 +136,17 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IH
 	}
 
 	/**
+	 * Write all support headers used by this renderer
+	 * @param IRequest $Request
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		if($this->mResponse instanceof IHTMLSupportHeaders)
+			$this->mResponse->writeHeaders($Request, $Head);
+	}
+
+	/**
 	 * Render request as html and sends headers as necessary
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param \CPath\Render\HTML\Attribute\IAttributes $Attr optional attributes for the input field
@@ -147,15 +158,19 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IH
 
 		$Response = $this->mResponse;
 		if($Response instanceof IRenderHTML && $Response !== $Parent) {
-			$Render = $Response;
-		} else {
-			$Render = new HTMLElement('div', null,
-				new HTMLElement('label', null, 'Status: ' . $this->getCode()),
-				new HTMLElement('label', null, 'Message: ' . $this->getMessage())
-			);
-		}
+			$Response->renderHTML($Request, $Attr, $Parent);
 
-		$Render->renderHTML($Request);
+		} else {
+//			echo RI::ni(), "<code>";
+//			RI::ai(1);
+
+			$Renderer = new HTMLKeyMapRenderer($Request);
+			$this->mapKeys($Renderer);
+//
+//			RI::ai(-1);
+//			echo RI::ni(), "</code>";
+
+		}
 	}
 
     /**
@@ -193,6 +208,7 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IH
         $Response = $this->mResponse;
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $rootElementName, $declaration);
+
         } elseif($Response instanceof IKeyMap) {
             $Renderer = new XMLKeyMapRenderer($Request, $rootElementName, true);
             $Response->mapKeys($Renderer);
@@ -215,21 +231,11 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IH
         $Response = $this->mResponse;
         if($Response instanceof IRenderText) {
             $Response->renderText($Request);
+
         } else {
-            echo RI::ni(), "Status:  ", $this->getCode();
-            echo RI::ni(), "Message: ", $this->getMessage();
+	        $Renderer = new TextKeyMapRenderer($Request);
+	        $this->mapKeys($Renderer);
         }
     }
-
-	/**
-	 * Write all support headers used by this renderer
-	 * @param IRequest $Request
-	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
-	 * @return void
-	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		if($this->mResponse instanceof IHTMLSupportHeaders)
-			$this->mResponse->writeHeaders($Request, $Head);
-	}
 }
 

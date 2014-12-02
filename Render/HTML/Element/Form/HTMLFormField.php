@@ -14,37 +14,55 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
+use CPath\Request\Log\ILogListener;
 use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 
-class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IValidation
+class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IValidation, ILogListener
 {
 	const NODE_TYPE = 'input';
 	const INPUT_TYPE = null;
 
 	/** @var IValidation[]  */
 	private $mValidations = array();
-	/** @var \Exception */
-	private $mLastException = null;
 
 	/** @var HTMLForm */
 	private $mForm = null;
+	private $mLogs = array();
 
 	/**
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $name
-	 * @param null $value
-	 * @param null $type
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null $value input value (value=[])
+	 * @param String|null $type input type (type=[])
+	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-    public function __construct($classList = null, $name = null, $value = null, $type = null) {
-        parent::__construct(static::NODE_TYPE, $classList);
-	    if($name)
+    public function __construct($classList = null, $name = null, $value = null, $type = null, $_validation = null) {
+        parent::__construct(static::NODE_TYPE);
+	    if(is_string($classList))
+		    $this->addClass($classList);
+	    if(is_string($name))
 		    $this->setFieldName($name);
-        if($type || static::INPUT_TYPE)
-            $this->setType($type ?: static::INPUT_TYPE);
-	    if($value)
+	    if($type === null)
+		    $type = static::INPUT_TYPE;
+        if(is_string($type))
+            $this->setType($type);
+	    if(is_string($value))
 		    $this->setInputValue($value);
+
+	    foreach(func_get_args() as $i => $arg)
+		    $this->addVarArg($arg, $i>=4);
     }
+
+	protected function addVarArg($arg, $allowHTMLString=false) {
+		$added = parent::addVarArg($arg, $allowHTMLString);
+		if($arg instanceof IValidation) {
+			$this->addValidation($arg);
+			$added = true;
+		}
+
+		return $added;
+	}
 
 	/**
 	 * Get the request value from the IRequest
@@ -101,8 +119,12 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	 * @return String|void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		if($this->mLastException)
-			echo RI::ni(), '<div class="error">', $this->mLastException->getMessage(), '</div>';
+		foreach($this->mLogs as $msg => $flags) {
+			echo RI::ni(), '<div';
+			if($flags & self::ERROR)
+				echo ' class="error"';
+			echo '>', $msg, '</div>';
+		}
 
 		parent::renderHTML($Request, $Attr, $Parent);
 	}
@@ -124,13 +146,9 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 		return false;
 	}
 
-	/**
-	 * Add input validation to this form field
-	 * @param IValidation $Validation
-	 * @return $this
-	 */
-	function addValidation(IValidation $Validation) {
-		$this->mValidations[] = $Validation;
+	function addValidation(IValidation $Validation, IValidation $_Validation=null) {
+		foreach(func_get_args() as $Validation)
+			$this->mValidations[] = $Validation;
 		return $this;
 	}
 
@@ -144,19 +162,28 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	 */
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$value = $value ?: $this->getRequestValue($Request);
+		$fieldName = $fieldName ?: $this->getFieldName();
+
 		$Exs = array();
 
-		$fieldName = $this->getFieldName();
 		foreach($this->mValidations as $Validation) {
 			try {
 				$Validation->validate($Request, $value, $fieldName);
 			} catch (\Exception $ex) {
 				$Exs[] = $ex;
+				$this->log($ex->getMessage(), $this::ERROR);
 			}
 		}
 
-		if ($Exs)
-			throw $this->mLastException = new ValidationException($this->mForm, $Exs);
+		if ($Exs) {
+			$Form = $this->mForm;
+			if(!$Form) {
+				$Form = new HTMLForm();
+				$Form->addContent($this);
+				$Form->addContent(new HTMLSubmit());
+			}
+			throw new ValidationException($Form, $Exs);
+		}
 
 		if($value && $this->getInputValue() === null)
 			$this->setInputValue($value);
@@ -165,9 +192,12 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	}
 
 	function __toString() {
-		return $this->getDescription() !== null
-			? $this->getDescription()
-			: basename(get_class($this)) . ': ' . $this->getFieldName();
+		return basename(get_class($this)) . ': ' . $this->getFieldName();
+	}
+
+	function __invoke(IRequest $Request) {
+		$value = $this->validate($Request);
+		return $value;
 	}
 
 	// Static
@@ -183,4 +213,21 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 //	static function get($description = null, $classList = null, $name = null, $checked = null, $type = null) {
 //		return new HTMLFormField($description, $classList, $name, $checked, $type);
 //	}
+	/**
+	 * Add a log entry
+	 * @param mixed $msg The log message
+	 * @param int $flags [optional] log flags
+	 * @return int the number of listeners that processed the log entry
+	 */
+	function log($msg, $flags = 0) {
+		$c = 0;
+		foreach($this->getLogListeners() as $Log)
+			$c += $Log->log($msg, $flags);
+//		if($this->mForm)
+//			$c += $this->mForm->log($msg, $flags);
+
+		$this->mLogs[$msg] = $flags;
+		$c++;
+		return $c;
+	}
 }

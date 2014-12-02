@@ -10,6 +10,7 @@ namespace CPath\Route;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 
+
 final class RouteRenderer implements IRouteMapper
 {
     //const INTERFACE_CALLBACKS = 'CPath\\Route\\IRouteRendererStaticCallbacks';

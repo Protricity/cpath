@@ -15,6 +15,7 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\Form;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
+use CPath\Request\Validation\IValidation;
 
 class HTMLSelectField extends HTMLFormField implements ISequenceMap
 {
@@ -25,17 +26,15 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 	private $mForm = null;
 
 	/**
-	 * @param null $description
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $name
-	 * @param null $_options [vararg] of options sent to ->addOption($arg)
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null|Array|IAttributes|IValidation $_options [varargs] select options as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($description = null, $classList = null, $name = null, $_options = null) {
-		parent::__construct($description, $classList, $name);
-		$c = func_num_args();
-		for($i=2; $i<$c; $i++) {
-			$this->mValues[] = func_get_arg($i);
-		}
+	public function __construct($classList = null, $name = null, $_options = null) {
+		parent::__construct($classList, $name);
+
+		foreach(func_get_args() as $i => $arg)
+			$this->addVarArg($arg, $i>=2);
 	}
 
 	public function getInputValue() {

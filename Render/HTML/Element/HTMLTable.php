@@ -14,11 +14,11 @@ use CPath\Request\IRequest;
 class HTMLTable extends HTMLElement
 {
 	/**
-	 * @param null $classList
+	 * @param null $attributes
 	 * @param String|null $_content [optional] varargs of content
 	 */
-	public function __construct($classList = null, $_content = null) {
-		parent::__construct('table', $classList);
+	public function __construct($attributes = null, $_content = null) {
+		parent::__construct('table', $attributes);
 	}
 
 	/**

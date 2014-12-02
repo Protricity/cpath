@@ -17,8 +17,14 @@ class HTMLButton extends HTMLFormField
 
 	private $mContent;
 
-	public function __construct($classList = null, $value = null, $name = null, $type = null) {
-		$this->mContent = $value;
+	/**
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null $value input value (value=[])
+	 * @param String|null $type input type (type=[])
+	 */
+	public function __construct($classList = null, $name = null, $value = null, $type = null) {
+		$this->mContent = $value ?: ucwords($name);
 		parent::__construct($classList, $name, null, $type);
 	}
 

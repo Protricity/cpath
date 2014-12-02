@@ -32,6 +32,10 @@ class HTMLResponseBody extends HTMLContainer
 				$this[] = $arg;
 	}
 
+	public function setHeaderTitle($title) {
+		$this->mTitle = $title;
+	}
+
 	/**
 	 * Render request as html
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
@@ -57,7 +61,6 @@ class HTMLResponseBody extends HTMLContainer
 		$title = $this->mTitle;
 		if (!$title && $First instanceof IDescribable)
 			$title = $First->getDescription();
-
 
 		if($title)
 			echo RI::ni(), "<title>", $title, "</title>";

@@ -10,6 +10,7 @@ namespace CPath\Render\HTML\Element\Form;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
+use CPath\Request\Validation\IValidation;
 
 class HTMLTextAreaField extends HTMLFormField {
 
@@ -19,13 +20,16 @@ class HTMLTextAreaField extends HTMLFormField {
 	private $mText;
 
 	/**
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $name
-	 * @param null $value
-	 * @internal param null $description
+	 * @param String|null $classList a list of class elements
+	 * @param String|null $name field name (name=[])
+	 * @param String|null $value input value (value=[])
+	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($classList = null, $name = null, $value = null) {
+	public function __construct($classList = null, $name = null, $value = null, $_validation = null) {
 		parent::__construct($classList, $name, $value);
+
+		foreach(func_get_args() as $i => $arg)
+			$this->addVarArg($arg, $i>=3);
 	}
 
 	public function getInputValue()                     { return $this->mText; }

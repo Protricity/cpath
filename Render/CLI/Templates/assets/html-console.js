@@ -6,11 +6,53 @@
  * To change this template use File | Settings | File Templates.
  */
 (function(){
-    var onResize = function() {};
+
+    var EVENTS = 'log error keydown';
+
+    var onResize = function() {
+//        var Console = jQuery('.html-console');
+//        var windowHeight = jQuery(window).height();
+//        var windowScroll = jQuery(window).scrollTop();
+//        var bodyHeight = jQuery('body').height();
+//        var consoleHeight = Console.height();
+//        if(Console.hasClass('fixed')) {
+//            if(windowHeight + windowScroll > bodyHeight + consoleHeight)
+//                Console.removeClass('fixed')
+//                    .parent().removeClass('fixed');
+//        } else {
+//
+//            if(windowHeight + windowScroll < bodyHeight)
+//                Console.addClass('fixed')
+//                    .parent().addClass('fixed');
+//        }
+    };
+
+    var eventHandler = function(e, arg) {
+        var Target = jQuery(e.target);
+        var type = e.type;
+
+        switch(type) {
+            case 'log':
+                break;
+            case 'error':
+                break;
+            case 'keydown':
+                break;
+        }
+
+    };
+
+
 
     jQuery(document).ready(function() {
+        var Body = jQuery('body');
+        Body.on(EVENTS, eventHandler);
+
         jQuery(window).resize(onResize);
         onResize();
+//        jQuery(window).resize(onResize);
+//        onResize();
+
 
         jQuery('div.html-console').each(function(i, container) {
             container = jQuery(container);
@@ -86,7 +128,7 @@
             });
 
             input.bind("keydown", function(e) {
-                console.log(e.keyCode);
+                //console.log(e.keyCode);
                 var text = input.val();
                 var addHistory = function(text) {
                     if(text && history.indexOf(text) === -1) {

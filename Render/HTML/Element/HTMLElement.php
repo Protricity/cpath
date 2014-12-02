@@ -16,6 +16,7 @@ use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\HTMLThemeConfig;
 use CPath\Request\IRequest;
+use CPath\Request\Validation\IValidation;
 use Traversable;
 
 class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \IteratorAggregate, \ArrayAccess
@@ -34,20 +35,37 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	/** @var IHTMLSupportHeaders[] */
 	private $mSupportHeaders = array();
 
-    /**
-     * @param string $elmType
-     * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-     * @param String|null $_content [optional] varargs of content
-     */
-    public function __construct($elmType = 'div', $classList = null, $_content = null) {
-	    parent::__construct($elmType, $classList);
+	/**
+	 * @param string $elmType
+	 * @param String|null $classList a list of class elements
+	 * @param String|null|Array|IAttributes|IValidation $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
+	 */
+    public function __construct($elmType, $classList = null, $_content = null) {
+	    parent::__construct($elmType);
+
+	    if(is_string($classList))
+		    $this->addClass($classList);
 
 	    $this->mContent = new HTMLContainer();
 
-        if($_content !== null)
-            for($i=2;$i<func_num_args();$i++)
-	            $this->addAll(func_get_arg($i));
+	    foreach(func_get_args() as $i => $arg)
+		    $this->addVarArg($arg, $i>=2);
     }
+
+	protected function addVarArg($arg, $allowHTMLContent = false) {
+		if(parent::addVarArg($arg, false)) {
+			$this->getAttributes()->addHTML($arg);
+
+		} else if($allowHTMLContent) {
+			$this[] = $arg;
+
+		} else {
+			return false;
+
+		}
+
+		return true;
+	}
 
 	public function getContainer() {
 		return $this->mContainer

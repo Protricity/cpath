@@ -7,12 +7,14 @@
  */
 namespace CPath\Request\Validation;
 
+use CPath\Render\HTML\Attribute\Attributes;
+use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\IAttributesAggregate;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 
-class RequiredValidation implements IValidation
+class RequiredValidation implements IValidation, IAttributesAggregate
 {
-
 	/**
 	 * Validate the request value and return the validated value
 	 * @param IRequest $Request
@@ -24,5 +26,12 @@ class RequiredValidation implements IValidation
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		if (!$value)
 			throw new RequestException("Parameter is required: " . $fieldName);
+	}
+
+	/**
+	 * @return IAttributes
+	 */
+	function getAttributes() {
+		return new Attributes('required', 'required');
 	}
 }

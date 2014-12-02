@@ -7,17 +7,18 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Element\HTMLLabel;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\HTML\Theme\HTMLThemeConfig;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
-use CPath\Request\Log\Render\HTMLLog;
+use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 use CPath\Response\IResponse;
 
@@ -30,38 +31,33 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 
 	/** @var IResponse */
 	private $mFormValidation =  null;
+	private $mLogs = array();
+
+	/** @var IValidation[]  */
+	private $mValidations = array();
 
 	/**
 	 * @param null $method
 	 * @param null $action
 	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $_content
+	 * @param null $_validation
 	 */
-	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
+	public function __construct($method = null, $action = null, $classList = null, $_validation = null) {
         parent::__construct('form', $classList ?: HTMLThemeConfig::$DefaultFormTheme);
 		if($method)
 			$this->setMethod($method);
 		if($action)
 			$this->setAction($action);
-		if($_content !== null)
+		if($_validation !== null)
 			$this->addAll(array_slice(func_get_args(), 3));
 		//$this->setItemTemplate(new HTMLLabel());
     }
 
 	function addFieldValidation(IValidation $Validation, $fieldName) {
-		$this->getFormValidation()
-			->addFieldValidation($Validation, $fieldName);
+		$this->mValidations[] = array($Validation, $fieldName);
 		return $this;
 	}
 
-	function getFormValidation() {
-		if($this->mFormValidation)
-			return $this->mFormValidation;
-
-		$this->mFormValidation = new FormValidator($this);
-		$this->mFormValidation->addLogListener($this);
-		return $this->mFormValidation;
-	}
 
 	/**
 	 * @param $fieldName
@@ -104,16 +100,6 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		return $Content;
 	}
 
-	public function validateField(IRequest $Request, $paramName) {
-		$FormValidator = $this->getFormValidation();
-		return $FormValidator->validateField($Request, $paramName);
-	}
-
-	public function validateForm(IRequest $Request) {
-		$FormValidator = $this->getFormValidation();
-		return $FormValidator->validateRequest($Request);
-	}
-
 	public function getFieldName()          { return $this->getAttribute('name'); }
 	public function setFieldName($value)    { $this->setAttribute('name', $value); }
 
@@ -150,14 +136,15 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //			throw new \InvalidArgumentException("Form fields not found: " . implode(', ', array_keys($values)));
 	}
 
-    public function addSubmit($value = null, $name = null) {
-        $this->addInput($value, $name, 'submit');
-    }
-
-    public function addInput($value = null, $name = null, $type = null) {
-        $Field = new HTMLFormField($type, $value, $name);
-        $this->addContent($Field);
-    }
+//    public function addSubmit($classList = null, $value = null, $name = null) {
+//	    $Field = new HTMLSubmit($classList, $value, $name);
+//	    $this->addContent($Field);
+//    }
+//
+//    public function addInput($classList = null, $value = null, $name = null, $type = null) {
+//        $Field = new HTMLFormField($classList, $value, $name, $type);
+//        $this->addContent($Field);
+//    }
 
 	function addContent(IRenderHTML $Render, $key = null) {
 		if($Render instanceof IHTMLContainer) {
@@ -173,6 +160,81 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 
 		parent::addContent($Render, $key);
 	}
+
+	public function validateField(IRequest $Request, $fieldName) {
+		$Field = $this->getFormField($fieldName);
+		$value = $Field->getRequestValue($Request);
+
+		if ($Field instanceof IValidation)
+			try {
+				$value = $Field->validate($Request, $value, $fieldName);
+
+
+			} catch (\Exception $ex) {
+				if(!$ex instanceof ValidationException)
+					$ex = new ValidationException($this, $ex);
+				$this->log($ex->getMessage(), $this::ERROR);
+				throw $ex;
+			}
+
+		return $value;
+	}
+
+	/**
+	 * Validate a form request and returns the values
+	 * @param IRequest $Request
+	 * @throws ValidationException
+	 * @return array|string
+	 */
+	function validateRequest(IRequest $Request) {
+		$values = array();
+		/** @var RequestException[] $Exs */
+		$Exs   = array();
+		$c     = 0;
+		$Validations = $this->mValidations;
+		foreach ($this->getContentRecursive() as $Content) {
+			if (!$Content instanceof IHTMLFormField)
+				continue;
+
+			$name = $Content->getFieldName();
+
+			if ($Content instanceof IValidation) {
+				$Validations[] = array($Content, $name);
+
+			} else {
+				$values[$Content->getFieldName()] = $Content->getRequestValue($Request);
+			}
+		}
+
+		foreach($Validations as $arr) {
+			list($Validation, $fieldName) = $arr;
+			if ($Validation instanceof IHTMLFormField)
+				$value = $Validation->getRequestValue($Request);
+			else
+				$value = $this->getFormField($fieldName)
+					->getRequestValue($Request);
+
+			/** @var IValidation $Validation */
+			try {
+				$return = $Validation->validate($Request, $value, $fieldName);
+				$values[$fieldName] = $return;
+				$c++;
+
+			} catch (\Exception $ex) {
+				$this->log($ex, static::ERROR);
+				$Exs[]         = $ex;
+				$values[$fieldName] = null;
+			}
+		}
+
+		if ($Exs)
+			throw new ValidationException($this, $Exs);
+
+		$this->log("Form Validation completed successfully");
+
+		return $values;
+	}
+
 
 //	/**
 //	 * Render element content
@@ -190,21 +252,32 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //	    RI::ai(-1);
 //	    RI::ni();
 //    }
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		foreach($this->mLogs as $msg => $flags) {
+			echo RI::ni(), '<div class="';
+			if($flags & self::ERROR)
+				echo ' error';
+			echo '">', $msg, '</div>';
+		}
+		parent::renderHTML($Request, $Attr, $Parent);
+	}
 
 
 	/**
 	 * Render content item
 	 * @param IRequest $Request
 	 * @param $index
-	 * @param IRenderHTML $Content
-	 * @param IAttributes $ContentAttr
-	 */
+		* @param IRenderHTML $Content
+		* @param IAttributes $ContentAttr
+		*/
 	protected function renderContentItem(IRequest $Request, $index, IRenderHTML $Content, IAttributes $ContentAttr = null) {
-		$Render = $Content;
-
 		$type = null;
 		if ($Content instanceof AbstractHTMLElement)
 			$type = $Content->getElementType();
+
+		if ($Content instanceof IHTMLFormField)
+			if(!$Content->getForm())
+				$Content->setForm($this);
 
 		switch(strtolower($type)) {
 			case 'textarea':
@@ -215,6 +288,7 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 
 			case 'fieldset':
 			default:
+				$Render = $Content;
 				break;
 		}
 
@@ -231,14 +305,13 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		$c = 0;
 		foreach($this->getLogListeners() as $Log)
 			$c += $Log->log($msg, $flags);
-		foreach($this->getContentRecursive() as $Content)
-			if($Content instanceof ILogListener)
-				$c += $Content->log($msg, $flags);
-		if($c === 0) {
-			$this->prependContent(
-				new HTMLElement('legend', null, new HTMLLog())
-			);
-		}
+//		foreach($this->getContentRecursive() as $Content)
+//			if($Content instanceof ILogListener)
+//				$c += $Content->log($msg, $flags);
+
+		$this->mLogs[$msg] = $flags;
+		$c++;
+		return $c;
 	}
 
 	public function offsetSet($offset, $value) {

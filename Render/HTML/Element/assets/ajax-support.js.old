@@ -12,14 +12,14 @@
     var Body = null;
     var onResize = function() {};
 
-    var HTTP_SUCCESS = 200;
-
-    var HTTP_SEE_OTHER = 303;
-    var HTTP_TEMPORARY_REDIRECT = 307;
-
-    var HTTP_ERROR = 400;
-    var HTTP_NOT_FOUND = 404;
-    var HTTP_CONFLICT = 409;
+//    var HTTP_SUCCESS = 200;
+//
+//    var HTTP_SEE_OTHER = 303;
+//    var HTTP_TEMPORARY_REDIRECT = 307;
+//
+//    var HTTP_ERROR = 400;
+//    var HTTP_NOT_FOUND = 404;
+//    var HTTP_CONFLICT = 409;
 
     var allowCache = false;
     jQuery.ajaxPrefilter(function( options, originalOptions, jqXHR ) {
@@ -54,53 +54,73 @@
         return rightArrowParents.join(" ");
     };
 
+    var matchChildren = function(oldParent, newParent) {
+        var OldChildren = jQuery(oldParent).children();
+        var NewChildren = jQuery(newParent).children();
+        for(var i=0; i<NewChildren.length; i++) {
+            for(var j=0; j<OldChildren.length; j++) {
+                if(matchElements(OldChildren[j], NewChildren[i]))
+                    return true;
+            }
+        }
+        return false;
+    };
+
+    var matchElements = function(oldElm, newElm) {
+        if(newElm.nodeName !== oldElm.nodeName)
+            return false;
+
+        var NewElm = jQuery(newElm);
+        var OldElm = jQuery(oldElm);
+        switch (newElm.nodeName.toLowerCase()) {
+            case 'script':
+                if(!NewElm.attr('src') || NewElm.attr('src') !== OldElm.attr('src'))
+                    return false;
+                break;
+            case 'link':
+                if(!NewElm.attr('href') || NewElm.attr('href') !== OldElm.attr('href'))
+                    return false;
+                break;
+            case 'label':
+                if(!NewElm.attr('for') || NewElm.attr('for') !== OldElm.attr('for'))
+                    return false;
+                break;
+            default:
+                if(NewElm.attr('class') && NewElm.attr('class') === OldElm.attr('class'))
+                    break;
+
+                var newAttr = getAttributeString(newElm);
+                var oldAttr = getAttributeString(oldElm);
+                if(newAttr === oldAttr)
+                    break;
+
+                return false;
+        }
+        console.log("Matched: ", oldElm, newElm);
+        return true;
+    };
+
     var updateDOM = function(OldElements, NewElements) {
         var LastElm = null;
         var Container = OldElements.parent();
         for(var i=0; i<NewElements.length; i++) {
             var newElm = NewElements[i];
-            if(newElm.nodeName.toLowerCase() === '#text')
+            if(newElm.nodeName.toLowerCase() === '#text' && newElm.nodeValue.trim())
                 continue;
             var NewElm = jQuery(newElm);
             var found = false;
             for(var j=0; j<OldElements.length; j++) {
                 var oldElm = OldElements[j];
-                if(newElm.nodeName === oldElm.nodeName) {
-                    var OldElm = jQuery(oldElm);
-                    switch (newElm.nodeName.toLowerCase()) {
-                        case 'script':
-                            if(!NewElm.attr('src') || NewElm.attr('src') !== OldElm.attr('src'))
-                                continue;
-                            break;
-                        case 'link':
-                            if(!NewElm.attr('href') || NewElm.attr('href') !== OldElm.attr('href'))
-                                continue;
-                            break;
-                        case 'label':
-                            if(!NewElm.attr('for') || NewElm.attr('for') !== OldElm.attr('for'))
-                                continue;
-                            break;
-                        default:
-                            if(NewElm.attr('class') && NewElm.attr('class') === OldElm.attr('class'))
-                                break;
+                if(!matchElements(oldElm, newElm))
+                    continue;
 
-                            var newAttr = getAttributeString(newElm);
-                            var oldAttr = getAttributeString(oldElm);
-                            if(newAttr === oldAttr)
-                                break;
-
-                            continue;
-                    }
-                    //console.log("Matched: ", oldElm, newElm);
-
-                    updateDOM(OldElm.children(), OldElm.children());
-                    found = true;
-                    OldElements = OldElements.not(OldElm);
-                    LastElm = OldElm;
-                    //OldElm.trigger('change');
-                    break;
-
-                }
+                var OldElm = jQuery(oldElm);
+                updateDOM(OldElm.children(), NewElm.children());
+                found = true;
+                OldElements = OldElements.not(OldElm);
+                LastElm = OldElm;
+                //OldElm.trigger('change');
+                break;
             }
             if(!found) {
                 if(newElm.nodeName.toLowerCase() !== '#text')
@@ -196,80 +216,28 @@
             case 'navigation-complete':
                 allowCache = true;
                 var HTML = jQuery(arg);
-                //Body.append(Container);
                 allowCache = false;
 
                 var NewHeaders = HTML.filter('script, link');
                 var NewBody = HTML.not(NewHeaders);
 
                 var OldHeaders = jQuery('head script, head link');
+                var OldBody = Body.children();
 
-                updateDOM(OldHeaders, NewHeaders);
 
-                updateDOM(Body.children(), NewBody);
+                if(matchChildren(OldBody, NewBody)) {
+                    updateDOM(OldHeaders, NewHeaders);
+                    updateDOM(OldBody, NewBody);
+                    e.stopImmediatePropagation();
+                    return;
+
+                } else {
+
+                }
+
                 HTML.remove();
                 Body.trigger('ready');
                 break;
-
-//                var found = false;
-//                var NewSections = Container.find('section');
-//                var timeout = 300;
-//                NewSections.each(function(i, newSection) {
-//                    var NewSection = jQuery(newSection);
-//                    var query = newSection.nodeName.toLowerCase() + '.' + NewSection.attr('class').replace(/\s+/, '.');
-//                    var OldSection = jQuery(query);
-//                    if(OldSection.length === 0)
-//                        return;
-//
-//                    var oldDOMPath = getDOMPath(OldSection[0]);
-//                    OldSection.empty();
-//                    NewSection = OldSection.append(NewSection.children());
-//                    var newDOMPath = getDOMPath(NewSection[0]);
-//                    if(newDOMPath !== oldDOMPath)
-//                        console.error("DOM Path mismatch: " + newDOMPath + " != " + oldDOMPath);
-//
-//                    NewSection
-//                        .children()
-//                        .hide()
-//                        .fadeIn(timeout);
-//
-//                    timeout += 300;
-//
-//                    found = true;
-//                });
-//
-//                if(!found) {
-//                    console.error("No page sections found. Replacing entire body");
-//                    Body.empty();
-//                    Body.append(Container
-//                        .children()
-//                        .not(Headers)
-//                    );
-//                }
-//
-//                var OldHeaders = jQuery('head script, head link');
-//                Headers.each(function(i, header) {
-//                    var Header = jQuery(header);
-//                    var found = false;
-//                    if(Header.is('script')) {
-//                        var src = Header.attr('src');
-//                        src = src.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
-//                        var OldScript = OldHeaders.filter('script[src=' + src + ']');
-//                        found = OldScript.length > 0;
-//
-//                    } else if (Header.is('link')) {
-//                        var href = Header.attr('href');
-//                        href = href.replace(/([ #;?%&,.+*~\':"!^$[\]()=>|\/@])/g,'\\$1');
-//                        var OldStyleSheet = OldHeaders.filter('link[href=' + href + ']');
-//                        found = OldStyleSheet.length > 0;
-//
-//                    }
-//
-//                    if(found)
-//                        return;
-//
-//                    OldHeaders.append(header);
-//                });
 
             case 'log':
                 break;
