@@ -20,7 +20,7 @@ use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
-use CPath\Route\DefaultMap;
+use CPath\Route\CPathMap;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 
@@ -143,7 +143,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
      * @return void
      */
     static function handleStaticBuild(IBuildRequest $Request) {
-        $Builder = new RouteBuilder($Request, new DefaultMap());
+        $Builder = new RouteBuilder($Request, new CPathMap());
         $Builder->writeRoute('CLI /cpath/build', __CLASS__);
     }
 

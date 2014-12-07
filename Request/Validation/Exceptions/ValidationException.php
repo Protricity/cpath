@@ -7,19 +7,24 @@
  */
 namespace CPath\Request\Validation\Exceptions;
 
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\Form\HTMLForm;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
+use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use Exception;
 
-class ValidationException extends RequestException
+class ValidationException extends RequestException implements IRenderHTML, IHTMLSupportHeaders
 {
 	private $mForm;
 	private $mExceptions;
 
 	/**
 	 * @param HTMLForm $Form
-	 * @param Exception|Exception[] $Exceptions
+	 * @param String|Array|Exception|Exception[] $Exceptions
 	 * @internal param string $message
 	 */
 	public function __construct(HTMLForm $Form, $Exceptions = null) {
@@ -36,8 +41,6 @@ class ValidationException extends RequestException
 		$this->mExceptions = $Exceptions;
 
 		parent::__construct($message, IResponse::HTTP_FORBIDDEN, $Exceptions[0]);
-
-		$this->setRenderable($Form);
 	}
 
 	function getForm() {
@@ -46,5 +49,26 @@ class ValidationException extends RequestException
 
 	function getExceptions() {
 		return $this->mExceptions;
+	}
+
+	/**
+	 * Write all support headers used by this renderer
+	 * @param IRequest $Request
+	 * @param IHeaderWriter $Head the writer inst to use
+	 * @return void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		$this->mForm->writeHeaders($Request, $Head);
+	}
+
+	/**
+	 * Render request as html
+	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param IAttributes $Attr
+	 * @param IRenderHTML $Parent
+	 * @return String|void always returns void
+	 */
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		$this->mForm->renderHTML($Request, $Attr = null, $Parent);
 	}
 }

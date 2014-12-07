@@ -60,9 +60,17 @@ class Request implements IRequest
 	 * @return String|null
 	 */
 	function getRequestValue($paramName) {
+		return $this->getParameterValue($paramName);
+	}
+
+	function getParameterValue($paramName) {
 		return isset($this->mParameters[$paramName])
 			? $this->mParameters[$paramName]
 			: null;
+	}
+
+	function getParameterValues() {
+		return $this->mParameters;
 	}
 
     /**
@@ -162,7 +170,7 @@ class Request implements IRequest
      * @param bool $withDomain
      * @return String
      */
-    function getDomainPath($withDomain=true) {
+    function getDomainPath($withDomain=false) {
         if($withDomain) {
             $protocol = 'http';
             if(isset($_SERVER['HTTPS']))

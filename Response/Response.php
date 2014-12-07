@@ -9,8 +9,9 @@ namespace CPath\Response;
 
 use CPath\Request\IRequest;
 
-class Response implements IHeaderResponse {
+class Response implements IResponse, IResponseHeaders {
     private $mCode, $mMessage;
+	private $mHeaders = array();
 
     /**
      * Create a new response
@@ -22,6 +23,40 @@ class Response implements IHeaderResponse {
         $this->setStatusCode($status);
         $this->setMessage($message);
     }
+
+	/**
+	 * Add response headers to this response object
+	 * @param String $name i.e. 'Location' or 'Location: /path'
+	 * @param String|null $value i.e. '/path'
+	 * @return $this
+	 */
+	function addHeader($name, $value=null) {
+		$this->mHeaders[$name] = $value;
+		return $this;
+	}
+
+	/**
+	 * Send response headers for this response
+	 * @param IRequest $Request
+	 * @param string $mimeType
+	 * @return bool returns true if the headers were sent, false otherwise
+	 */
+	function sendHeaders(IRequest $Request, $mimeType = null) {
+		if(headers_sent())
+			return false;
+
+		header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
+		header("MainContent-Type: " . $mimeType);
+
+		foreach($this->mHeaders as $name => $value)
+			switch($name) {
+				default:
+					header($value === null ? $name : $name . ': ' . $value);
+					break;
+			}
+
+		return true;
+	}
 
     function getCode() {
         return $this->mCode;
@@ -71,29 +106,4 @@ class Response implements IHeaderResponse {
         return $this;
     }
 
-
-    /**
-     * Send response headers for this response
-     * @param IRequest $Request
-     * @param string $mimeType
-     * @return bool returns true if the headers were sent, false otherwise
-     */
-    function sendHeaders(IRequest $Request, $mimeType = null) {
-	    $ResponseRenderer = new ResponseRenderer($this);
-	    return $ResponseRenderer->sendHeaders($Request, $mimeType);
-//        static $sent = false;
-//        if($sent || headers_sent())
-//            return false;
-//        $sent = true;
-//
-//        if($mimeType === null)
-//            $mimeType = $Request->getMimeType()->getName();
-//
-//        header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
-//        header("MainContent-Type: " . $mimeType);
-//
-//        header('Access-Control-Allow-Origin: *');
-//
-//        return true;
-    }
 }

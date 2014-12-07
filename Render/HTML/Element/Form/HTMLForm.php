@@ -40,17 +40,17 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 	 * @param null $method
 	 * @param null $action
 	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $_validation
+	 * @param Array|\CPath\Render\HTML\Attribute\IAttributes|\CPath\Render\HTML\Header\IHTMLSupportHeaders|\CPath\Render\HTML\IRenderHTML|\CPath\Request\Validation\IValidation|null|String $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($method = null, $action = null, $classList = null, $_validation = null) {
+	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
         parent::__construct('form', $classList ?: HTMLThemeConfig::$DefaultFormTheme);
 		if($method)
 			$this->setMethod($method);
 		if($action)
 			$this->setAction($action);
-		if($_validation !== null)
-			$this->addAll(array_slice(func_get_args(), 3));
 		//$this->setItemTemplate(new HTMLLabel());
+		foreach(func_get_args() as $i => $arg)
+			$this->addVarArg($arg, $i>=3);
     }
 
 	function addFieldValidation(IValidation $Validation, $fieldName) {
@@ -93,10 +93,10 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 	public function getContentRecursive(IHTMLContainer $Container=null) {
 		$Content = $this->getContainer()
 			->getContentRecursive($Container ?: $this);
-		foreach($Content as $ContentItem)
-			if($ContentItem instanceof IHTMLFormField)
-				if(!$ContentItem->getForm())
-					$ContentItem->setForm($this);
+//		foreach($Content as $ContentItem)
+//			if($ContentItem instanceof IHTMLFormField)
+//				if(!$ContentItem->getForm())
+//					$ContentItem->setForm($this);
 		return $Content;
 	}
 
@@ -146,20 +146,20 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //        $this->addContent($Field);
 //    }
 
-	function addContent(IRenderHTML $Render, $key = null) {
-		if($Render instanceof IHTMLContainer) {
-			foreach($Render->getContent() as $Content) {
-				if($Content instanceof IHTMLFormField) {
-					$Content->setForm($this);
-				}
-			}
-		}
-
-		if($Render instanceof IHTMLFormField)
-			$Render->setForm($this);
-
-		parent::addContent($Render, $key);
-	}
+//	function addContent(IRenderHTML $Render, $key = null) {
+//		if($Render instanceof IHTMLContainer) {
+//			foreach($Render->getContent() as $Content) {
+//				if($Content instanceof IHTMLFormField) {
+//					$Content->setForm($this);
+//				}
+//			}
+//		}
+//
+//		if($Render instanceof IHTMLFormField)
+//			$Render->setForm($this);
+//
+//		parent::addContent($Render, $key);
+//	}
 
 	public function validateField(IRequest $Request, $fieldName) {
 		$Field = $this->getFormField($fieldName);
@@ -256,7 +256,7 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		foreach($this->mLogs as $msg => $flags) {
 			echo RI::ni(), '<div class="';
 			if($flags & self::ERROR)
-				echo ' error';
+				echo 'error';
 			echo '">', $msg, '</div>';
 		}
 		parent::renderHTML($Request, $Attr, $Parent);
@@ -274,10 +274,6 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		$type = null;
 		if ($Content instanceof AbstractHTMLElement)
 			$type = $Content->getElementType();
-
-		if ($Content instanceof IHTMLFormField)
-			if(!$Content->getForm())
-				$Content->setForm($this);
 
 		switch(strtolower($type)) {
 			case 'textarea':

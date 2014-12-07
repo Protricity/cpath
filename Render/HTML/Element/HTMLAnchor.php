@@ -8,6 +8,7 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\URLAttribute;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
@@ -16,6 +17,7 @@ class HTMLAnchor extends HTMLElement
 	const ALLOW_CLOSED_TAG = false;
 
 	private $mText;
+	private $mURLAttr;
 
 	/**
 	 * @param string $href
@@ -25,14 +27,21 @@ class HTMLAnchor extends HTMLElement
     public function __construct($href, $text=null, $classList = null) {
         parent::__construct('a', $classList);
 	    $this->mText = $text;
-        $this->setURL($href);
+	    $this->mURLAttr = new URLAttribute($href);
+	    $this->addAttributes($this->mURLAttr);
     }
 
-	public function getURL()           { return $this->getAttribute('href'); }
-	public function setURL($value)     { $this->setAttribute('href', $value); }
+	public function getURL(IRequest $Request=null) {
+		return $this->mURLAttr->getValue($Request);
+	}
 
-	public function setContent($text)  { $this->mText = $text; }
-	public function getContent($key=null)       { return $this->mText; }
+	public function setURL($href) {
+		$this->mURLAttr->setValue($href);
+		return $this;
+	}
+
+	public function setContent($text)       { $this->mText = $text; }
+	public function getContent($key=null)   { return $this->mText; }
 
 	/**
 	 * Render element content

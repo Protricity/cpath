@@ -1,0 +1,68 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 12/6/14
+ * Time: 11:08 PM
+ */
+namespace CPath\Render\HTML\Attribute;
+
+use CPath\Request\IRequest;
+
+class Attribute implements IAttributes
+{
+	private $mName, $mValue;
+
+	function __construct($attrName, $attrValue) {
+		$this->mName  = $attrName;
+		$this->mValue = $attrValue;
+	}
+
+	public function getName() {
+		return $this->mName;
+	}
+
+	public function getValue(IRequest $Request=null) {
+		return $this->mValue;
+	}
+
+	public function setName($name) {
+		$this->mName = $name;
+		return $this;
+	}
+
+	public function setValue($value) {
+		$this->mValue = $value;
+		return $this;
+	}
+
+	/**
+	 * Render html attributes
+	 * @param IRequest $Request
+	 * @internal param \CPath\Render\HTML\Attribute\IAttributes|null $Additional
+	 * @internal param null $attrValue
+	 * @return string|void always returns void
+	 */
+	function renderHTMLAttributes(IRequest $Request) {
+		echo ' ', $this->getName(), '="', str_replace('"', "'", $this->getValue($Request)), '"';
+	}
+
+	/**
+	 * Get html attribute string
+	 * @return String
+	 */
+	function __toString() {
+		$content = ' ' . $this->getName() . '="' . str_replace('"', "'", $this->getValue()) . '"';
+		return $content;
+	}
+
+	/**
+	 * Return an associative array of attribute name-value pairs
+	 * @return Array
+	 */
+	function getAttributeList() {
+		return array(
+			$this->getName() => $this->getValue()
+		);
+	}
+}

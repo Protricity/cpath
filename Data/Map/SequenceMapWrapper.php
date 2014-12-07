@@ -2,49 +2,28 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 10/19/14
- * Time: 12:46 PM
+ * Date: 11/9/14
+ * Time: 9:50 AM
  */
 namespace CPath\Data\Map;
 
-abstract class SequenceMapWrapper implements ISequenceMapper
+class SequenceMapWrapper implements ISequenceMap
 {
-	private $mCount = 0;
-	private $mMapper;
 
-	public function __construct(ISequenceMapper $Mapper) {
-		$this->mMapper   = $Mapper;
+	private $mMap;
+
+	public function __construct(ISequenceMap $Map) {
+		$this->mMap = $Map;
 	}
 
 	/**
-	 * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-	 * @param String|Array|IKeyMap|ISequenceMap $value
-	 * @param mixed $_arg additional varargs
+	 * Map sequential data to the map
+	 * @param ISequenceMapper $Map
+	 * @internal param \CPath\Data\Map\IRequest $Request
+	 * @internal param \CPath\Data\Map\IRequest $Request
+	 * @return mixed
 	 */
-	abstract protected function processMappedArgs(&$value, &$_arg = null);
-
-	/**
-	 * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-	 * @param String|Array|IKeyMap|ISequenceMap $value
-	 * @param mixed $_arg additional varargs
-	 * @return bool false to continue, true to stop
-	 */
-	function mapNext($value, $_arg = null) {
-		$this->mCount++;
-		if ($_arg === null && func_num_args() <= 2) {
-			$this->processMappedArgs($value);
-			return $this->mMapper->mapNext($value);
-
-		} else {
-			$args = func_get_args();
-			call_user_func_array(array($this, 'processMappedArgs'), $args);
-			return call_user_func_array(array($this->mMapper, 'mapNext'), $args);
-
-		}
-	}
-
-	function getCount() {
-		return $this->mCount;
+	function mapSequence(ISequenceMapper $Map) {
+		$this->mMap->mapSequence($Map);
 	}
 }
-

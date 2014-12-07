@@ -17,6 +17,8 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLMimeType;
+use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
@@ -32,14 +34,14 @@ use CPath\Request\IRequest;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Response\Common\ExceptionResponse;
-use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
+use CPath\Response\IResponseHeaders;
 use CPath\Response\ResponseRenderer;
-use CPath\Route\DefaultMap;
+use CPath\Route\CPathMap;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 
-class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBuildable
+class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBuildable, IHTMLContainerItem
 {
 
 	private $mObject;
@@ -117,7 +119,7 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		$MimeType = $Request->getMimeType();
 
 		$Renderer = $this->mObject;
-		if ($Renderer instanceof IHeaderResponse) {
+		if ($Renderer instanceof IResponseHeaders) {
 			$Renderer->sendHeaders($Request, $MimeType->getName());
 
 		} elseif ($Renderer instanceof IResponse) {
@@ -147,7 +149,7 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		$MimeType = $Request->getMimeType();
 
 		if ($MimeType instanceof HTMLMimeType) {
-			$this->renderHTML($Request, $sendHeaders);
+			$this->renderHTML($Request, null, $this, $sendHeaders);
 
 		} elseif ($MimeType instanceof XMLMimeType) {
 			$this->renderXML($Request, $sendHeaders);
@@ -288,17 +290,27 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
-		//static $failSafe = false;
-
 		if(sizeof($Previous) === 0) {
 			return false;
-//			$Map = new DefaultMap();
-//			$routePrefix = 'GET ' . $Request->getPath();
-//			$Previous[] = new RouteIndex($Map, $routePrefix);
 		}
+//
+//		$Object = reset($Previous);
+//		$Handler = null;
+//		foreach($Previous as $Object) {
+//			if($Object instanceof ObjectRenderer) {
+//				foreach($Previous as $Object) {
+//					if(!$Object instanceof IRenderAll)
+//						$Object = new ObjectRenderer($Object);
+//					$Object->render()
+//				}
+//				$Object->render($Request);
+//				return true;
+//		}
 
-		$Handler = new ObjectRenderer(reset($Previous));
-		$Handler->render($Request);
+		$Object = reset($Previous);
+		if(!$Object instanceof IRenderAll)
+			$Object = new ObjectRenderer($Object);
+		$Object->render($Request);
 		return true;
 	}
 
@@ -310,7 +322,17 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
 	static function handleStaticBuild(IBuildRequest $Request) {
-		$RouteBuilder = new RouteBuilder($Request, new DefaultMap(), '__render');
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__render');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
+	}
+
+	/**
+	 * Called when item is added to an IHTMLContainer
+	 * @param IHTMLContainer $Parent
+	 * @return void
+	 */
+	function onContentAdded(IHTMLContainer $Parent) {
+		if($this->mObject instanceof IHTMLContainerItem)
+			$this->mObject->onContentAdded($Parent);
 	}
 }

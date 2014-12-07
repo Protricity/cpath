@@ -9,7 +9,7 @@ namespace CPath\Response;
 
 use CPath\Request\IRequest;
 
-interface IHeaderResponse extends IResponse
+interface IResponseHeaders
 {
     /**
      * Send response headers for this response
@@ -18,4 +18,20 @@ interface IHeaderResponse extends IResponse
      * @return bool returns true if the headers were sent, false otherwise
      */
     function sendHeaders(IRequest $Request, $mimeType = null);
+
+	/**
+	 * Set redirect header for response object
+	 * @param string $uri
+	 * @param int $timeout in seconds
+	 * @return $this
+	 */
+	//function setRedirect($uri, $timeout=null);
+
+	/**
+	 * Set redirect header for response object
+	 * @param string $name
+	 * @param string|null $value
+	 * @return $this
+	 */
+	//function addHeader($name, $value=null);
 }

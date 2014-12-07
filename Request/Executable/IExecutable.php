@@ -7,6 +7,7 @@
  */
 namespace CPath\Request\Executable;
 
+use CPath\Render\HTML\Element\Form\HTMLForm;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 
@@ -20,3 +21,11 @@ interface IExecutable
     function execute(IRequest $Request);
 }
 
+interface IFormExecutable extends IExecutable {
+
+	/**
+	 * Return an HTMLForm instance for this executable
+	 * @return HTMLForm
+	 */
+	function getForm();
+}

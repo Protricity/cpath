@@ -36,7 +36,7 @@ final class RouteRenderer implements IRouteMapper
         if($Map->mapRoutes($this))
             return true;
         if($withDefaults) {
-            $Defaults = new DefaultMap();
+            $Defaults = new CPathMap();
             if($Defaults->mapRoutes($this))
                 return true;
         }
@@ -78,7 +78,7 @@ final class RouteRenderer implements IRouteMapper
 		    if($Map->mapRoutes($this))
 			    return true;
 		    if($withDefaults) {
-			    $Defaults = new DefaultMap();
+			    $Defaults = new CPathMap();
 			    if($Defaults->mapRoutes($this))
 				    return true;
 		    }

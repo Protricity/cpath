@@ -7,12 +7,14 @@
  */
 namespace CPath\Request\Session;
 
-interface ISessionRequest
+use CPath\Request\IRequest;
+
+interface ISessionRequest extends IRequest
 {
     /**
      * Return a referenced array representing the request session
      * @param String|null [optional] $key if set, retrieves &$[Session][$key] instead of &$[Session]
-     * @return array
+     * @return array|mixed|null
      */
     function &getSession($key = null);
 

@@ -14,7 +14,7 @@ use CPath\Request\Request;
  * Class Routes
  * @package CPath
  */
-class DefaultMap implements IRouteMap
+class CPathMap implements IRouteMap
 {
 
     /**
@@ -51,6 +51,6 @@ class DefaultMap implements IRouteMap
             $Request = Request::create();
 
         $Renderer = new RouteRenderer($Request);
-        return $Renderer->renderRoutes(new DefaultMap);
+        return $Renderer->renderRoutes(new CPathMap);
     }
 }

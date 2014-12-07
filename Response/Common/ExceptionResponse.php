@@ -11,12 +11,15 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Response\IResponse;
 
-class ExceptionResponse implements IResponse, IKeyMap {
+class ExceptionResponse extends \Exception implements IResponse, IKeyMap {
 	const STR_TRACE = 'trace';
-    /** @var \Exception */
-    private $mEx;
+	const STR_CLASS = 'class';
+
     public function __construct(\Exception $ex) {
-        $this->mEx = $ex;
+	    $code = IResponse::HTTP_ERROR;
+	    if($ex instanceof IResponse)
+		    $code = $ex->getCode();
+	    parent::__construct($ex->getMessage(), $code, $ex);
     }
 
 //    /**
@@ -29,28 +32,6 @@ class ExceptionResponse implements IResponse, IKeyMap {
 //        $Util->mapData($Map);
 //    }
 
-    /**
-     * Get the IResponse Message
-     * @return String
-     */
-    function getMessage() {
-        return $this->mEx->getMessage();
-    }
-
-    /**
-     * Get the DataResponse status code
-     * @return int
-     */
-    function getCode() {
-	    if($this->mEx instanceof IResponse)
-		    return $this->mEx->getCode();
-        return IResponse::HTTP_ERROR;
-    }
-
-    function getException() {
-        return $this->mEx;
-    }
-
 	/**
 	 * Map data to the key map
 	 * @param IKeyMapper $Map the map inst to add data to
@@ -59,12 +40,14 @@ class ExceptionResponse implements IResponse, IKeyMap {
 	 * @return void
 	 */
 	function mapKeys(IKeyMapper $Map) {
-		if($this->mEx instanceof IKeyMap) {
-			$this->mEx->mapKeys($Map);
+		$Ex = $this->getPrevious();
+		if($Ex instanceof IKeyMap) {
+			$Ex->mapKeys($Map);
 		} else {
 			$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 			$Map->map(IResponse::STR_CODE, $this->getCode());
-			$Map->map(self::STR_TRACE, $this->mEx->getTraceAsString());
+			$Map->map(self::STR_CLASS, get_class($Ex));
+			$Map->map(self::STR_TRACE, $Ex->getTraceAsString());
 		}
 	}
 }

@@ -16,7 +16,7 @@ interface IHTMLFormField
 	/**
 	 * @param HTMLForm $Form
 	 */
-	function setForm(HTMLForm $Form);
+	//function setForm(HTMLForm $Form);
 
 	/**
 	 * Return the form field's form instance or null

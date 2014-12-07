@@ -8,13 +8,12 @@
 namespace CPath\Render\HTML\Attribute;
 
 use CPath\Render\HTML\Attribute;
+use CPath\Request\IRequest;
 
 class Attributes implements IAttributes {
     private $mAttr = array();
     private $mClasses = array();
     private $mStyles = array();
-	/** @var IAttributes[] */
-	private $mAdditionalAttributes=array();
 
     function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
 	    $args = func_get_args();
@@ -35,19 +34,6 @@ class Attributes implements IAttributes {
 		    }
 	    }
     }
-
-	function addAttributes(IAttributes $Attributes) {
-		if($Attributes)
-			$this->mAdditionalAttributes[] = $Attributes;
-	}
-
-//	protected function getAttributeList() {
-//		$arr = array($this);
-//		if($this->mAdditionalAttributes)
-//			foreach($this->mAdditionalAttributes as $Additional)
-//				$arr[] = $Additional;
-//		return $arr;
-//	}
 
     /**
      * Add an attribute to the collection
@@ -106,9 +92,6 @@ class Attributes implements IAttributes {
 	 */
 	function getAttribute($name = null) {
 		$attributes = $this->mAttr;
-		foreach($this->mAdditionalAttributes as $Additional)
-			$attributes += $Additional->getAttribute();
-
 		if($name === null)
 			return $attributes;
 		return isset($attributes[$name]) ? $attributes[$name] : null;
@@ -120,9 +103,6 @@ class Attributes implements IAttributes {
 	 */
 	function getClasses() {
 		$classes = $this->mClasses;
-		foreach($this->mAdditionalAttributes as $Additional)
-			foreach($Additional->getClasses() as $class)
-				$classes[] = $class;
 		return $classes;
 	}
 
@@ -133,9 +113,6 @@ class Attributes implements IAttributes {
 	 */
 	function getStyle($name = null) {
 		$styles = $this->mStyles;
-		foreach($this->mAdditionalAttributes as $Additional)
-			$styles += $Additional->getStyle();
-
 		if($name === null)
 			return $styles;
 		return isset($styles[$name]) ? $styles[$name] : null;
@@ -203,27 +180,12 @@ class Attributes implements IAttributes {
 
 	/**
 	 * Render html attributes
-	 * @param IAttributes|null $Additional
-	 * @param IAttributes $_Additional
+	 * @param IRequest|null $Request
+	 * @internal param bool $return
 	 * @return string|void always returns void
 	 */
-	function render(IAttributes $Additional = null, IAttributes $_Additional = null) {
+	function renderHTMLAttributes(IRequest $Request=null) {
 		$classes = $this->getClasses();
-		$styles = $this->getStyle();
-		$attributes = $this->getAttribute();
-
-		if($Additional || $_Additional) {
-			$AdditionalList = $this->mAdditionalAttributes;
-			foreach(func_get_args() as $arg)
-				if($arg)
-					$AdditionalList[] = $arg;
-			foreach($AdditionalList as $Additional) {
-				$classes = array_merge($classes, $Additional->getClasses());
-				$styles += $Additional->getStyle();
-				$attributes += $Additional->getAttribute();
-			}
-		}
-
 		if($classes) {
 			$i=0;
 			echo ' class=\'';
@@ -233,6 +195,7 @@ class Attributes implements IAttributes {
 			echo '\'';
 		}
 
+		$styles = $this->getStyle();
 		if($styles) {
 			$i=0;
 			echo ' style=\'';
@@ -241,17 +204,55 @@ class Attributes implements IAttributes {
 			echo '\'';
 		}
 
+		$attributes = $this->getAttribute();
 		foreach($attributes as $key => $value)
 			echo ' ', $key, '="', str_replace('"', "'", $value), '"';
+
+		return null;
+	}
+
+	/**
+	 * Return an associative array of attribute name-value pairs
+	 * @param \CPath\Request\IRequest $Request
+	 * @return string
+	 */
+	function getHTMLAttributeString(IRequest $Request=null) {
+		$content = '';
+		$classes = $this->getClasses();
+		if($classes) {
+			$i=0;
+			$content .= ' class=\'';
+			foreach($classes as $class)
+				if($class)
+					$content .= ($i++ ? ' ' : '') . $class;
+			$content .= '\'';
+		}
+
+		$styles = $this->getStyle();
+		if($styles) {
+			$i=0;
+			$content .= ' style=\'';
+			foreach($styles as $name=>$value)
+				$content .= ($i++ ? '; ' : '') . $name . ": " . $value;
+			$content .= '\'';
+		}
+
+		$attributes = $this->getAttribute();
+		foreach($attributes as $key => $value)
+			$content .= ' ' . $key . '="' . str_replace('"', "'", $value) . '"'; custom render
+		return $content;
 	}
 
 	function __toString() {
-		ob_start();
-
-		$this->render();
-
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
+		return $this->getHTMLAttributeString();
 	}
+
+
+//	// Static
+//
+//	public static function fromStyleList($styleList) {
+//		$Attr = new Attributes();
+//		$Attr->addStyles($styleList);
+//		return $Attr;
+//	}
 }

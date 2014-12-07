@@ -23,7 +23,6 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 
 	private $mValues = array();
 	private $mSelected = array();
-	private $mForm = null;
 
 	/**
 	 * @param String|null $classList a list of class elements
@@ -53,20 +52,6 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 	public function getType()                           { return $this->getAttribute('type'); }
 	public function setType($value)                     { $this->setAttribute('type', $value); }
 
-	/**
-	 * @param HTMLForm $Form
-	 */
-	function setForm(HTMLForm $Form) {
-		$this->mForm = $Form;
-	}
-
-	/**
-	 * Return the form field's form instance or null
-	 * @return HTMLForm|null
-	 */
-	function getForm() {
-		return $this->mForm;
-	}
 
 	public function addOption($value, $description=null, $selected=false) {
 		if($description) {
@@ -154,20 +139,6 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 	 */
 	protected function isOpenTag() {
 		return true;
-	}
-
-	// Static
-
-	/**
-	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param null $description
-	 * @param null $name
-	 * @param null $value
-	 * @param null $type
-	 * @return \CPath\Render\HTML\Element\Form\HTMLFormField
-	 */
-	static function get($classList = null, $description = null, $name = null, $value = null, $type = null) {
-		return new HTMLSelectField($classList, $description, $classList, $value);
 	}
 }
 

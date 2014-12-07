@@ -15,15 +15,18 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
+use CPath\Request\Web\WebFormRequest;
+use CPath\Request\Web\WebRequest;
 use CPath\Response\Common\ExceptionResponse;
-use CPath\Response\IHeaderResponse;
 use CPath\Response\IResponse;
+use CPath\Response\IResponseHeaders;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
 
 
-class ExecutableRenderer implements IHeaderResponse, IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders, IExecutable {
+class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders, IExecutable {
 
 	private $mExecutable;
 	/** @var IResponse */
@@ -42,13 +45,12 @@ class ExecutableRenderer implements IHeaderResponse, IRenderHTML, IRenderJSON, I
 			$Response = $this->mExecutable->execute($Request)
 			?: new Response("No Response", IResponse::HTTP_ERROR);
 
-		} catch (IResponse $ex) {
-			$Response = $ex;
-
 		} catch (\Exception $ex) {
-			$Response = new ExceptionResponse($ex);
-
+			$Response = $ex;
+			if(!$Response instanceof IResponse)
+				$Response = new ExceptionResponse($ex);
 		}
+
 		$this->mResponse = $Response;
 		return $Response;
 	}
@@ -72,8 +74,9 @@ class ExecutableRenderer implements IHeaderResponse, IRenderHTML, IRenderJSON, I
 	 */
 	function sendHeaders(IRequest $Request, $mimeType = null) {
 		$Response = $this->getResponse($Request);
-		$ResponseRenderer = new ResponseRenderer($Response);
-		$ResponseRenderer->sendHeaders($Request, $mimeType);
+		if(!$Response instanceof IResponseHeaders)
+			$Response = new ResponseRenderer($Response);
+		return $Response->sendHeaders($Request, $mimeType);
 	}
 
 	/**
@@ -100,9 +103,18 @@ class ExecutableRenderer implements IHeaderResponse, IRenderHTML, IRenderJSON, I
 			$this->mExecutable->renderHTML($Request, $Attr, $Parent);
 			return;
 		}
+
 		$Response = $this->getResponse($Request);
+
+		if($Response instanceof ExceptionResponse
+			&& $Request instanceof WebFormRequest) {
+			$WebRequest = new WebRequest($Request->getMethodName(), $Request->getPath(), $Request->getParameterValues());
+			$Response = $this->execute($WebRequest);
+		}
+
 		if(!$Response instanceof IRenderHTML)
 			$Response = new ResponseRenderer($Response);
+
 		$Response->renderHTML($Request, $Attr);
 		unset($this->mResponse);
 	}

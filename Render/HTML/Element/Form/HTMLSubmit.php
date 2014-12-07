@@ -14,7 +14,7 @@ class HTMLSubmit extends HTMLFormField
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
 	 */
-	public function __construct($classList = null, $value = null, $name = null) {
+	public function __construct($classList = null, $name = null, $value = null) {
 		parent::__construct($classList, $name, $value, 'submit');
 	}
 

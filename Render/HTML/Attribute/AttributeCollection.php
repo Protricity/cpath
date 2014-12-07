@@ -7,6 +7,8 @@
  */
 namespace CPath\Render\HTML\Attribute;
 
+use CPath\Request\IRequest;
+
 class AttributeCollection implements IAttributes
 {
 	/** @var IAttributes[] */
@@ -22,97 +24,34 @@ class AttributeCollection implements IAttributes
 		}
 	}
 
-	/**
-	 * Returns an array of classes
-	 * @return Array
-	 */
-	function getClasses() {
-		$classes = array();
-		foreach ($this->mAttributes as $Attributes)
-			$classes = array_merge($classes, $Attributes->getClasses());
 
-		return array_unique($classes);
+	/**
+	 * Render or returns html attributes
+	 * @param IRequest $Request
+	 * @internal param bool $return if true, the attributes are returned as a string rather than echoed
+	 * @return string|void
+	 */
+	function renderHTMLAttributes(IRequest $Request=null) {
+		foreach($this->mAttributes as $Attributes)
+			$Attributes->renderHTMLAttributes($Request);
 	}
 
 	/**
-	 * Return the style value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
+	 * Return an associative array of attribute name-value pairs
+	 * @param \CPath\Request\IRequest $Request
+	 * @return string
 	 */
-	function getStyle($name = null) {
-		$styles = array();
-		foreach ($this->mAttributes as $Attributes)
-			$styles += $Attributes->getStyle();
-		if ($name)
-			return isset($styles[$name]) ? $styles[$name] : null;
-
-		return $styles;
-	}
-
-	/**
-	 * Return the attribute value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
-	 */
-	function getAttribute($name = null) {
-		$attributes = array();
-		foreach ($this->mAttributes as $Attributes)
-			$attributes += $Attributes->getAttribute();
-		if ($name)
-			return isset($attributes[$name]) ? $attributes[$name] : null;
-
-		return $attributes;
-	}
-
-
-	/**
-	 * Render html attributes
-	 * @param IAttributes|null $Additional
-	 * @param IAttributes $_Additional
-	 * @return string|void always returns void
-	 */
-	function render(IAttributes $Additional = null, IAttributes $_Additional = null) {
-		$classes    = $this->getClasses();
-		$styles     = $this->getStyle();
-		$attributes = $this->getAttribute();
-
-		foreach (func_get_args() as $Additional) {
-			if ($Additional instanceof IAttributes) {
-				$classes = array_merge($classes, $Additional->getClasses());
-				$styles += $Additional->getStyle();
-				$attributes += $Additional->getAttribute();
-			}
-		}
-
-		if ($classes) {
-			$i = 0;
-			echo ' class=\'';
-			foreach ($classes as $class)
-				echo($i++ ? ' ' : ''), $class;
-			echo '\'';
-		}
-
-		if ($styles) {
-			$i = 0;
-			echo ' style=\'';
-			foreach ($styles as $name => $value)
-				echo($i++ ? '; ' : ''), $name . ": " . $value;
-			echo '\'';
-		}
-
-		foreach ($attributes as $key => $value)
-			echo ' ' . $key . "='" . $value . "'";
+	function getHTMLAttributeString(IRequest $Request = null) {
+		$content = '';
+		foreach($this->mAttributes as $Attributes)
+			$content .= $Attributes->getHTMLAttributeString();
+		return $content;
 	}
 
 	function __toString() {
-		ob_start();
-
-		$this->render();
-
-		$content = ob_get_contents();
-		ob_end_clean();
-		return $content;
+		return $this->getHTMLAttributeString();
 	}
+
 
 	// Static
 

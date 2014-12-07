@@ -14,7 +14,6 @@ use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\HTML\Theme\HTMLThemeConfig;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
 use Traversable;
@@ -31,9 +30,6 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 
 	/** @var IHTMLContainer */
 	private $mItemTemplate = null;
-
-	/** @var IHTMLSupportHeaders[] */
-	private $mSupportHeaders = array();
 
 	/**
 	 * @param string $elmType
@@ -52,19 +48,18 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		    $this->addVarArg($arg, $i>=2);
     }
 
-	protected function addVarArg($arg, $allowHTMLContent = false) {
-		if(parent::addVarArg($arg, false)) {
-			$this->getAttributes()->addHTML($arg);
-
-		} else if($allowHTMLContent) {
-			$this[] = $arg;
-
+	protected function addVarArg($arg, $allowHTMLAttributeContent = false) {
+		if($allowHTMLAttributeContent) {
+			if(is_string($arg))
+				$this[] = $arg;
+			else if($arg instanceof IRenderHTML)
+				$this[] = $arg;
+			else
+				parent::addVarArg($arg, false);
 		} else {
-			return false;
-
+			parent::addVarArg($arg, false);
 		}
 
-		return true;
 	}
 
 	public function getContainer() {
@@ -80,18 +75,6 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 			}
 		}
 		throw new \InvalidArgumentException("Container not found: " . get_class($Container));
-	}
-
-	/**
-	 * Add support headers to content
-	 * @param IHTMLSupportHeaders $Headers
-	 * @param IHTMLSupportHeaders $_Headers [vararg]
-	 * @return void
-	 */
-	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
-		foreach(func_get_args() as $Headers) {
-			$this->mSupportHeaders[] = $Headers;
-		}
 	}
 
 	public function setItemTemplate(IHTMLContainer $Template) {
@@ -179,17 +162,16 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		$this->mContent->writeHeaders($Request, $Head);
 
-		foreach($this->mSupportHeaders as $Headers)
-			$Headers->writeHeaders($Request, $Head);
+		parent::writeHeaders($Request, $Head);
 
-		$Attr = $this->getAttributes();
-		if($Attr instanceof IHTMLSupportHeaders)
-			$Attr->writeHeaders($Request, $Head);
-
-		foreach($this->getClasses() as $class) {
-			$selector = $this->getElementType() . '.' . $class;
-			HTMLThemeConfig::writeThemeHeaders($Request, $Head, $selector);
-		}
+		foreach($this->getAttributes($Request) as $Attr)
+			if($Attr instanceof IHTMLSupportHeaders)
+				$Attr->writeHeaders($Request, $Head);
+//
+//		foreach($this->getClasses() as $class) {
+//			$selector = $this->getElementType() . '.' . $class;
+//			HTMLThemeConfig::writeThemeHeaders($Request, $Head, $selector);
+//		}
 	}
 
 	/**
@@ -289,7 +271,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return void
      */
     public function offsetSet($offset, $value) {
-	    if(!$value instanceof IRenderHTML) {
+	    if(is_string($value)) {
 		    switch(strtolower($this->getElementType())) {
 			    case 'form':
 			    case 'fieldset':

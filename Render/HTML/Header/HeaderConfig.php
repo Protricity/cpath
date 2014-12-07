@@ -11,6 +11,12 @@ class HeaderConfig
 {
 	static $JQueryPath=null;
 	static $RequireJSPath=null;
+
+	static function writeJQueryHeadersOnce(IHeaderWriter $Head) {
+		static $written = false;
+		if(!$written) {
+			$Head->writeScript(self::$JQueryPath ?: __DIR__ . '/assets/jquery.min.js');
+			$written = true;
+		}
+	}
 }
-HeaderConfig::$JQueryPath = HeaderConfig::$JQueryPath ?: __DIR__ . '/assets/jquery.min.js';
-HeaderConfig::$RequireJSPath = HeaderConfig::$RequireJSPath ?: __DIR__ . '/assets/require.min.js';

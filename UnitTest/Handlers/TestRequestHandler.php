@@ -19,7 +19,7 @@ use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
-use CPath\Route\DefaultMap;
+use CPath\Route\CPathMap;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 use CPath\UnitTest\ITestable;
@@ -174,7 +174,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
      * @return void
      */
     static function handleStaticBuild(IBuildRequest $Request) {
-        $Builder = new RouteBuilder($Request, new DefaultMap());
+        $Builder = new RouteBuilder($Request, new CPathMap());
         $Builder->writeRoute('CLI /cpath/test', __CLASS__);
 	    @unlink(__DIR__ . '/' . self::CACHE_FILE);
     }

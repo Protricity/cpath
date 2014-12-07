@@ -28,10 +28,12 @@ use CPath\Request\IRequest;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Response\Common\ExceptionResponse;
 
-final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IHTMLSupportHeaders {
+final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, IHTMLSupportHeaders {
     private $mResponse;
     private $mSent = false;
     //private $mContainer;
+
+	private $mHeaders = array();
 
 	/**
 	 * @param IResponse|\Exception $Response
@@ -75,17 +77,59 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IHeaderResponse, IH
      * @return bool returns true if the headers were sent, false otherwise
      */
     function sendHeaders(IRequest $Request, $mimeType = null) {
+//	    if($this->mResponse instanceof IHeaderResponse)
+//		    return $this->mResponse->sendHeaders($Request, $mimeType);
+
         if($this->mSent || headers_sent())
             return false;
 
         header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
         header("MainContent-Type: " . $mimeType);
 
-        header('Access-Control-Allow-Origin: *');
+	    foreach($this->mHeaders as $name => $value)
+		    header($value === null ? $name : $name . ': ' . $value);
 
         $this->mSent = true;
         return true;
     }
+
+	function setAccessControlAllowOrigin($allow = '*') {
+		$this->addHeader('Access-Control-Allow-Origin', $allow);
+		return $this;
+	}
+
+//	/**
+//	 * Set redirect header for response object
+//	 * @param \CPath\Request\IRequest $Request
+//	 * @param string $uri
+//	 * @param int $timeout in seconds
+//	 * @return $this
+//	 */
+//	function setRedirect(IRequest $Request, $uri, $timeout = null) {
+//		$domain = $Request->getDomainPath();
+//		if(strpos($uri, $domain) !== 0)
+//			$uri = $domain . $uri;
+//
+//		if($timeout === null) {
+//			$this->addHeader('Location', $uri);
+//
+//		} else {
+//			$this->addHeader('Refresh', $timeout . '; URL=' . $uri);
+//
+//		}
+//		return $this;
+//	}
+
+	/**
+	 * Add response headers to this response object
+	 * @param String $name i.e. 'Location' or 'Location: /path'
+	 * @param String|null $value i.e. '/path'
+	 * @return $this
+	 */
+	function addHeader($name, $value=null) {
+		$this->mHeaders[$name] = $value;
+		return $this;
+	}
 
 	/**
 	 * Map data to a data map

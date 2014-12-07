@@ -50,7 +50,7 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
+		//$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
 		//$Head->writeScript(__DIR__ . '\assets\html-map-renderer.js', true);
 	}
 
@@ -101,31 +101,45 @@ class HTMLKeyMapRenderer implements IKeyMapper, IHTMLSupportHeaders
 		echo RI::ni(), "<dt>", $key, "</dt>";
 		echo RI::ni(), "<dd>";
 
-
 		$Attr = new ClassAttributes(self::CSS_CLASS_KEY_CONTENT);
 		if ($value instanceof IRenderHTML) {
+			RI::ai(1);
+
 			$value->renderHTML($this->mRequest, $Attr);
 
-		} elseif ($value instanceof ISequenceMap) {
-				$Renderer = new HTMLSequenceMapRenderer($this->mRequest, $Attr);
-				$value->mapSequence($Renderer);
-				$Renderer->flush();
+			RI::ai(-1);
+			echo RI::ni();
 
 		} elseif ($value instanceof IKeyMap) {
+			RI::ai(1);
+
 			$Renderer = new HTMLKeyMapRenderer($this->mRequest, $Attr);
 			$value->mapKeys($Renderer);
 			$Renderer->flush();
 
+			RI::ai(-1);
+			echo RI::ni();
+
+		} elseif ($value instanceof ISequenceMap) {
+			RI::ai(1);
+
+			$Renderer = new HTMLSequenceMapRenderer($this->mRequest, $Attr);
+			$value->mapSequence($Renderer);
+			$Renderer->flush();
+
+			RI::ai(-1);
+			echo RI::ni();
+
 		} elseif (is_string($value)) {
-			echo RI::ni(), $value ? htmlspecialchars($value) : '&nbsp;';
+			echo $value ? nl2br(htmlspecialchars($value)) : '&nbsp;';
 
 		} else {
-			echo RI::ni(), var_export($value, true);
+			echo var_export($value, true);
 			//echo RI::ni(), $value ? htmlspecialchars(new Description($value)) : '&nbsp;';
 
 		}
 
-		echo RI::ni(), "</dd>";
+		echo "</dd>";
 
 		return false;
 	}

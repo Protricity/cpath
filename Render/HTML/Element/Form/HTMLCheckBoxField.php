@@ -21,9 +21,17 @@ class HTMLCheckBoxField extends HTMLFormField
 	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
 	public function __construct($classList = null, $name = null, $checked = false, $_validation = null) {
-		parent::__construct($classList, $name, $checked);
+		parent::__construct($classList, $name);
+		if(is_bool($checked) && $checked)
+			$this->setChecked($checked);
 
 		foreach(func_get_args() as $i => $arg)
 			$this->addVarArg($arg, $i>=3);
+	}
+
+	public function setChecked($checked=true) {
+		$checked
+		? $this->setAttribute('checked', 'checked')
+		: $this->removeAttribute('checked');
 	}
 }

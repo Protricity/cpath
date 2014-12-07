@@ -48,7 +48,7 @@ class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
+		//$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
 		//$Head->writeScript(__DIR__ . '\assets\html-sequence-map-renderer.js', true);
 	}
 

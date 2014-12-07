@@ -7,13 +7,11 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Data\Describable\IDescribable;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Request\Validation\IValidation;
 
 class HTMLLabel extends HTMLElement
 {
@@ -47,20 +45,20 @@ class HTMLLabel extends HTMLElement
 		parent::addContent($Content, $key);
 	}
 
-	protected function renderContentItem(IRequest $Request, $index, IRenderHTML $Content, IAttributes $ContentAttr = null) {
-		if ($Content instanceof IDescribable)
-			echo  RI::ni(), '<span>' . $Content->getDescription() . '</span>';
-
-		if ($Content instanceof IValidation) {
-			try {
-				$Content->validate($Request);
-			} catch (\Exception $ex) {
-				echo  RI::ni(), '<span class="error">' . $ex->getMessage() . '</span>';
-			}
-		}
-
-		parent::renderContentItem($Request, $index, $Content, $ContentAttr);
-	}
+//	protected function renderContentItem(IRequest $Request, $index, IRenderHTML $Content, IAttributes $ContentAttr = null) {
+////		if ($Content instanceof IDescribable)
+////			echo  RI::ni(), '<span>' . $Content->getDescription() . '</span>';
+//
+//		if ($Content instanceof IValidation) {
+//			try {
+//				$Content->validate($Request);
+//			} catch (\Exception $ex) {
+//				echo  RI::ni(), '<div class="error">' . $ex->getMessage() . '</div>';
+//			}
+//		}
+//
+//		parent::renderContentItem($Request, $index, $Content, $ContentAttr);
+//	}
 
 	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 		if($this->mText)

@@ -36,7 +36,7 @@ class HTMLText implements IRenderHTML
     function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
         if($this->mText !== null) {
 	        $i = RI::get()->getIndent(0, PHP_EOL);
-	        if($Parent instanceof HTMLForm && strpos($this->mText, "<") === false) {
+	        if($Parent instanceof HTMLForm && is_string($this->mText) && strpos($this->mText, "<") === false) {
 		        $nodeType = 'div';
 
 		        if(strpos($this->mText, PHP_EOL) === false) {

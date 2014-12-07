@@ -105,6 +105,8 @@ class HTMLContainer extends AbstractHTMLContainer
 			$this->mContent[$key] = $Render;
 		else
 			$this->mContent[] = $Render;
+		if($Render instanceof IHTMLContainerItem)
+			$Render->onContentAdded($this);
 	}
 
 	/**
@@ -120,6 +122,8 @@ class HTMLContainer extends AbstractHTMLContainer
 			$this->mContent = array($key => $Render) + $this->mContent;
 		else
 			array_unshift($this->mContent, $Render);
+		if($Render instanceof IHTMLContainerItem)
+			$Render->onContentAdded($this);
 	}
 
 	/**
@@ -222,11 +226,7 @@ class HTMLContainer extends AbstractHTMLContainer
 	}
 
 	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
-//		if($MainContent instanceof HTMLContainer) {
-//			$MainContent->renderContent($Request, $ContentAttr, $this);
-//		} else {
-			$Content->renderHTML($Request, $ContentAttr, $this);
-//		}
+		$Content->renderHTML($Request, $ContentAttr, $this);
 	}
 
 	// Static

@@ -13,7 +13,7 @@ use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\KeyMapRenderer;
 use CPath\Data\Map\SequenceMapRenderer;
-use CPath\Data\Map\SequenceWrapper;
+use CPath\Data\Map\SequenceMapWrapper;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
@@ -66,7 +66,7 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 //        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 //		$Map->map(self::STR_PATH, new URLValue($Request->getPath(), $Request->getPath()));
 //		$Map->map(self::STR_METHOD, $Request->getMethodName());
-		$Map->map(self::STR_ROUTES, new SequenceWrapper($this));
+		$Map->map(self::STR_ROUTES, new SequenceMapWrapper($this));
 	}
 
 	/**
