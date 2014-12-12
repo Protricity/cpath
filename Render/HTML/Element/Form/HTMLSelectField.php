@@ -33,7 +33,8 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 		parent::__construct($classList, $name);
 
 		foreach(func_get_args() as $i => $arg)
-			$this->addVarArg($arg, $i>=2);
+			if($i >= 2 || !is_string($arg))
+				$this->addVarArg($arg);
 	}
 
 	public function getInputValue() {
@@ -51,6 +52,14 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 
 	public function getType()                           { return $this->getAttribute('type'); }
 	public function setType($value)                     { $this->setAttribute('type', $value); }
+
+
+	protected function addVarArg($arg) {
+		if(is_string($arg))
+			$this->addOption($arg);
+		else
+			parent::addVarArg($arg);
+	}
 
 
 	public function addOption($value, $description=null, $selected=false) {

@@ -7,10 +7,9 @@
  */
 namespace CPath\Data\Map;
 
+use CPath\Build\IBuildable;
+use CPath\Build\IBuildRequest;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\HTMLKeyMapRenderer;
 use CPath\Render\HTML\HTMLSequenceMapRenderer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
@@ -21,32 +20,19 @@ use CPath\Render\Text\TextKeyMapRenderer;
 use CPath\Render\Text\TextSequenceMapRenderer;
 use CPath\Render\XML\IRenderXML;
 use CPath\Render\XML\XMLKeyMapRenderer;
-use CPath\Render\XML\XMLSequenceMapRenderer;
+use CPath\Render\XML\XMLMapper;
 use CPath\Request\IRequest;
+use CPath\Route\IRoutable;
 
-class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHTMLSupportHeaders
+class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IBuildable, IRoutable
 {
 	private $mMappable;
-	public function __construct($Mappable) {
-		$this->mMappable = $Mappable;
-	}
 
 	/**
-	 * Write all support headers used by this IView inst
-	 * @param IRequest $Request
-	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
-	 * @return void
+	 * @param IKeyMap|ISequenceMap $Mappable
 	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Mappable = $this->mMappable;
-		if ($Mappable instanceof IKeyMap) {
-			$Renderer = new HTMLKeyMapRenderer($Request);
-			$Renderer->writeHeaders($Request, $Head);
-
-		} elseif ($Mappable instanceof ISequenceMap) {
-			$Renderer = new HTMLSequenceMapRenderer($Request);
-			$Renderer->writeHeaders($Request, $Head);
-		}
+	public function __construct($Mappable) {
+		$this->mMappable = $Mappable;
 	}
 
 	/**
@@ -58,12 +44,11 @@ class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, 
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$Mappable = $this->mMappable;
+		$Renderer = new HTMLMapRenderer($Request);
 		if ($Mappable instanceof IKeyMap) {
-			$Renderer = new HTMLKeyMapRenderer($Request);
 			$Mappable->mapKeys($Renderer);
 
 		} elseif ($Mappable instanceof ISequenceMap) {
-			$Renderer = new HTMLSequenceMapRenderer($Request);
 			$Mappable->mapSequence($Renderer);
 		}
 	}
@@ -76,12 +61,11 @@ class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, 
 	 */
 	function renderJSON(IRequest $Request) {
 		$Mappable = $this->mMappable;
+		$Renderer = new JSONMapRenderer($Request);
 		if ($Mappable instanceof IKeyMap) {
-			$Renderer = new JSONKeyMapRenderer($Request);
 			$Mappable->mapKeys($Renderer);
 
 		} elseif ($Mappable instanceof ISequenceMap) {
-			$Renderer = new JSONSequenceMapRenderer($Request);
 			$Mappable->mapSequence($Renderer);
 		}
 	}
@@ -93,12 +77,12 @@ class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, 
 	 */
 	function renderText(IRequest $Request) {
 		$Mappable = $this->mMappable;
+		$Renderer = new TextMapRenderer($Request);
+
 		if ($Mappable instanceof IKeyMap) {
-			$Renderer = new TextKeyMapRenderer($Request);
 			$Mappable->mapKeys($Renderer);
 
 		} elseif ($Mappable instanceof ISequenceMap) {
-			$Renderer = new TextSequenceMapRenderer($Request);
 			$Mappable->mapSequence($Renderer);
 		}
 	}
@@ -112,16 +96,45 @@ class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, 
 	 */
 	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
 		$Mappable = $this->mMappable;
+		$Renderer = new XMLMapper($Request, $rootElementName, $declaration);
 		if ($Mappable instanceof IKeyMap) {
-			$Renderer = new XMLKeyMapRenderer($Request, $rootElementName, $declaration);
 			$Mappable->mapKeys($Renderer);
 
-		}
-
-		if ($Mappable instanceof ISequenceMap) {
-			$Renderer = new XMLSequenceMapRenderer($Request, $rootElementName, $declaration);
+		} else if ($Mappable instanceof ISequenceMap) {
 			$Mappable->mapSequence($Renderer);
 		}
 	}
 
+	/**
+	 * Handle this request and render any content
+	 * @param IBuildRequest $Request the build request inst for this build session
+	 * @return void
+	 * @build --disable 0
+	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
+	 */
+	static function handleStaticBuild(IBuildRequest $Request) {
+		// TODO: Implement handleStaticBuild() method.
+	}
+
+	/**
+	 * Route the request to this class object and return the object
+	 * @param IRequest $Request the IRequest inst for this render
+	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
+	 * @param null|mixed $_arg [varargs] passed by route map
+	 * @throws \Exception
+	 * @return void|bool|Object returns a response object
+	 * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
+	 * If false is returned, this static handler will be called again if another handler returns an object
+	 * If an object is returned, it is passed along to the next handler
+	 */
+	static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
+		if(sizeof($Previous) === 0)
+			return false;
+
+		$Object = reset($Previous);
+		if(!$Object instanceof IMap)
+			$Object = new ObjectRenderer($Object);
+		$Object->render($Request);
+		return true;
+	}
 }

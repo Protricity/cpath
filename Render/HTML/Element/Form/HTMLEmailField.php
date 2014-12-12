@@ -26,7 +26,8 @@ class HTMLEmailField extends HTMLFormField
 		parent::__construct($classList, $name, $value);
 
 		foreach(func_get_args() as $i => $arg)
-			$this->addVarArg($arg, $i>=3);
+			if($i >= 3 || !is_string($arg))
+				$this->addVarArg($arg);
 	}
 
 	function validate(IRequest $Request, $value = null, $fieldName = null) {

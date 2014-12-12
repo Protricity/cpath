@@ -11,23 +11,22 @@ use CPath\Render\HTML\Attribute;
 use CPath\Request\IRequest;
 
 class Attributes implements IAttributes {
-    private $mAttr = array();
-    private $mClasses = array();
-    private $mStyles = array();
+    private $mAttributes = array();
 
     function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
-	    $args = func_get_args();
+	    $args = $attrName === null ? func_get_args() : array();
 	    for($i=0; $i<sizeof($args); $i+=2) {
 		    $attrName = $args[$i];
 		    if(isset($args[$i+1])) {
 			    $attrValue = $args[$i+1];
 			    $this->setAttribute($attrName, $attrValue);
+
 		    } else {
 			    if(!is_array($attrName))
 				    $attrName = array($attrName);
 			    foreach($attrName as $k=>$v) {
 				    if(is_int($k))
-					    $this->addHTML($v);
+					    $this->addAttributeHTML($v);
 				    else
 					    $this->setAttribute($k, $v);
 			    }
@@ -43,29 +42,39 @@ class Attributes implements IAttributes {
      * or $replace == true and the attribute does not exist
      */
     function setAttribute($attrName, $value = null) {
-        switch(strtolower($attrName)) {
-            case 'class':
-                $this->addClass($value);
-                break;
-
-            case 'style':
-                $this->addStyles($value);
-                break;
-
-            default:
-                $this->mAttr[$attrName] = $value;
-        }
+        $this->mAttributes[$attrName] = $value;
     }
 
 	function hasAttribute($attrName) {
-		return isset($this->mAttr[$attrName]);
+		return isset($this->mAttributes[$attrName]);
 	}
 
 	function removeAttribute($attrName) {
-		if(!$this->hasAttr($attrName))
+		if(!$this->hasAttribute($attrName))
 			return false;
-		unset($this->mAttr[$attrName]);
+		unset($this->mAttributes[$attrName]);
 		return true;
+	}
+
+	function addAttributes(IAttributes $Attributes, IAttributes $_Attributes=null) {
+		foreach(func_get_args() as $Attributes) {
+			$this->mAttributes[] = $Attributes;
+		}
+	}
+
+	/**
+	 * Return the attribute value
+	 * @param String $name
+	 * @return String|null
+	 */
+	function getAttribute($name) {
+		return isset($this->mAttributes[$name])
+			? $this->mAttributes[$name]
+			: null;
+	}
+
+	function getAttributes() {
+		return $this->mAttributes;
 	}
 
 	/**
@@ -73,89 +82,51 @@ class Attributes implements IAttributes {
 	 * @param $htmlAttr
 	 * @throws \InvalidArgumentException
 	 */
-    function addHTML($htmlAttr) {
-        if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
-            foreach($matches[1] as $i => $name) {
-                $this->setAttribute($name, $matches[2][$i]) ;
-            }
-        } else {
-	        if(strpos($htmlAttr, '=') !== false)
-		        throw new \InvalidArgumentException("Invalid element html: " . $htmlAttr);
-	        $this->addClass($htmlAttr);
-        }
-    }
+	function addAttributeHTML($htmlAttr) {
+		if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
+			foreach($matches[1] as $i => $name) {
+				$this->setAttribute($name, $matches[2][$i]) ;
+			}
 
-	/**
-	 * Return the attribute value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
-	 */
-	function getAttribute($name = null) {
-		$attributes = $this->mAttr;
-		if($name === null)
-			return $attributes;
-		return isset($attributes[$name]) ? $attributes[$name] : null;
+		} else {
+			if(strpos($htmlAttr, '=') !== false)
+				throw new \InvalidArgumentException("Invalid element html: " . $htmlAttr);
+			$this->addClass($htmlAttr);
+		}
 	}
-
 	/**
 	 * Returns an array of classes
 	 * @return Array
 	 */
-	function getClasses() {
-		$classes = $this->mClasses;
-		return $classes;
+	public function getClasses() {
+		if(!empty($this->mAttributes['class']))
+			return preg_split('/\s+/', $this->mAttributes['class']);
+		return array();
 	}
 
 	/**
-	 * Return the style value or a name-value associative array
-	 * @param null $name
-	 * @return String|Array
+	 * Checks to see if a class exists in the class list
+	 * @param String $className
+	 * @return bool
 	 */
-	function getStyle($name = null) {
-		$styles = $this->mStyles;
-		if($name === null)
-			return $styles;
-		return isset($styles[$name]) ? $styles[$name] : null;
+	public function hasClass($className) {
+		if(!empty($this->mAttributes['class']))
+			return preg_match('/(?:^| )' . preg_quote($className) . '(?: |$)/i', $this->mAttributes['class']);
+		return false;
 	}
 
-    /**
-     * Checks to see if a class exists in the class list
-     * @param String $class
-     * @return bool
-     */
-    function hasClass($class) {
-	    foreach($this->getClasses() as $class2) {
-		    if($class === $class2)
-			    return true;
-	    }
-	    return false;
-    }
 
-    function hasAttr($attrName) {
-        return isset($this->mAttr[$attrName]);
-    }
-
-	/**
-	 * Add a css class to the collection
-	 * @param String $class one or multiple css classes
-	 * @param null $_class [varargs]
-	 * @return int
-	 */
-    function addClass($class, $_class=null) {
-	    $classes = is_array($class)
-		    ? $class
-			: (strpos($class, ' ') !== false
-			    ? preg_split('/\s+/', $class)
-				: func_get_args());
-	    $c = 0;
-	    foreach($classes as $class) {
-		    if(!$class || in_array($class, $this->mClasses))
-			    continue;
-		    $c++;
-		    $this->mClasses[] = $class;
-	    }
-	    return $c;
-    }
+	public function addClass($classList) {
+		if(!is_array($classList))
+			$classList = func_get_args();
+		foreach($classList as $class) {
+			if(empty($this->mAttributes['class']))
+				$this->mAttributes['class'] = $class;
+			else
+				$this->mAttributes['class'] .= ' ' . $class;
+		}
+		return $this;
+	}
 
     /**
      * Add css styles to the collection
@@ -169,14 +140,47 @@ class Attributes implements IAttributes {
 	    }
     }
 
-    /**
-     * Add a css style to the collection
-     * @param $name
-     * @param $value
-     */
+	/**
+	 * Add a css style to the collection
+	 * @param $name
+	 * @param $value
+	 * @return $this
+	 */
     function setStyle($name, $value) {
-	    $this->mStyles[$name] = $value;
+	    $styles = $this->getStyle();
+	    $styles[$name] = $value;
+	    $styleList = array();
+	    foreach($styles as $name => $value)
+			$styleList[] = $name . ': ' . $value;
+
+		$this->mAttributes['style'] = implode(';', $styleList) . ';';
+
+	    return $this;
     }
+
+	/**
+	 * Return the style value or a name-value associative array
+	 * @param String|null $name
+	 * @return String|null|Array
+	 */
+	function getStyle($name = null) {
+		if(empty($this->mAttributes['style']))
+			return $name === null ? null : array();
+
+		$stylesList = explode(';', $this->mAttributes['style']);
+		$styles = array();
+		foreach($stylesList as &$style) {
+			list($name, $value) = explode(':', $style, 2);
+			$styles[trim($name)] = trim($value);
+		}
+		if($name === null)
+			return $styles;
+
+		if(!isset($styles[$name]))
+			return null;
+
+		return $this->mAttributes['style'][$name];
+	}
 
 	/**
 	 * Render html attributes
@@ -185,30 +189,19 @@ class Attributes implements IAttributes {
 	 * @return string|void always returns void
 	 */
 	function renderHTMLAttributes(IRequest $Request=null) {
-		$classes = $this->getClasses();
-		if($classes) {
-			$i=0;
-			echo ' class=\'';
-			foreach($classes as $class)
-				if($class)
-					echo ($i++ ? ' ' : ''), $class;
-			echo '\'';
+		$oldAttr = $this->mAttributes;
+		foreach($this->mAttributes as $value) {
+			if($value instanceof IAttributes) {
+				$html = $value->getHTMLAttributeString($Request);
+				$this->addAttributeHTML($html);
+			}
 		}
 
-		$styles = $this->getStyle();
-		if($styles) {
-			$i=0;
-			echo ' style=\'';
-			foreach($styles as $name=>$value)
-				echo ($i++ ? '; ' : ''), $name, ": ", $value;
-			echo '\'';
-		}
+		foreach($this->mAttributes as $name => $value)
+			if(is_string($name))
+				echo ' ', $name, '="', str_replace('"', "'", $value), '"';
 
-		$attributes = $this->getAttribute();
-		foreach($attributes as $key => $value)
-			echo ' ', $key, '="', str_replace('"', "'", $value), '"';
-
-		return null;
+		$this->mAttributes = $oldAttr;
 	}
 
 	/**
@@ -217,42 +210,24 @@ class Attributes implements IAttributes {
 	 * @return string
 	 */
 	function getHTMLAttributeString(IRequest $Request=null) {
+		$oldAttr = $this->mAttributes;
+		foreach($this->mAttributes as $value) {
+			if($value instanceof IAttributes) {
+				$html = $value->getHTMLAttributeString($Request);
+				$this->addAttributeHTML($html);
+			}
+		}
+
 		$content = '';
-		$classes = $this->getClasses();
-		if($classes) {
-			$i=0;
-			$content .= ' class=\'';
-			foreach($classes as $class)
-				if($class)
-					$content .= ($i++ ? ' ' : '') . $class;
-			$content .= '\'';
-		}
+		foreach($this->mAttributes as $name => $value)
+			if(is_string($name))
+				$content .= ' ' . $name . '="' . str_replace('"', "'", $value) . '"';
 
-		$styles = $this->getStyle();
-		if($styles) {
-			$i=0;
-			$content .= ' style=\'';
-			foreach($styles as $name=>$value)
-				$content .= ($i++ ? '; ' : '') . $name . ": " . $value;
-			$content .= '\'';
-		}
-
-		$attributes = $this->getAttribute();
-		foreach($attributes as $key => $value)
-			$content .= ' ' . $key . '="' . str_replace('"', "'", $value) . '"'; custom render
+		$this->mAttributes = $oldAttr;
 		return $content;
 	}
 
 	function __toString() {
 		return $this->getHTMLAttributeString();
 	}
-
-
-//	// Static
-//
-//	public static function fromStyleList($styleList) {
-//		$Attr = new Attributes();
-//		$Attr->addStyles($styleList);
-//		return $Attr;
-//	}
 }

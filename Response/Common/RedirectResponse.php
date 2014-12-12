@@ -9,14 +9,14 @@ namespace CPath\Response\Common;
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
+use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLAnchor;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
-use CPath\Render\Helpers\RenderIndents as RI;
+use CPath\Route\RouteLink;
 
 class RedirectResponse extends Response implements IKeyMap, IRenderHTML
 {
@@ -43,7 +43,7 @@ class RedirectResponse extends Response implements IKeyMap, IRenderHTML
 		$url = $this->mRedirectURL;
 		$domainPath = $Request->getDomainPath();
 		if(strpos($url, $domainPath) === false)
-			$url = $domainPath . $url;
+			$url = $domainPath . '/' . ltrim($url, '/');
 		return $url;
 	}
 
@@ -76,12 +76,33 @@ class RedirectResponse extends Response implements IKeyMap, IRenderHTML
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		static $urlCount = 0;
+		$id = 'url.' . $urlCount++;
 		$url = $this->getRedirectURL($Request);
-		$urlHTML = '<a href="' . $url . '">' . $this->mRedirectURL . '</a>';
-		if($this->mTimeout)
+		$urlHTML = '<a id="' . $id . '" href="' . $url . '">' . $this->mRedirectURL . '</a>';
+		if($this->mTimeout) {
 			echo RI::ni(), '<div class="info">Redirecting to ', $urlHTML, ' in ', $this->mTimeout, ' seconds</div>';
-		else
-			echo RI::ni(), '<div class="info">Redirecting to ' . $urlHTML . '</div>';
+			echo RI::ni();
+			$t = $this->mTimeout;
+			echo <<<HTML
+<script>
+	var t = {$t};
+	for(var i=0; i<=t; i++)
+		setTimeout(function() {
+			var l = document.getElementById("{$id}");
+			l.parentElement.innerHTML =
+			l.parentElement.innerHTML.replace(/\d+ seconds/i, t-- + ' seconds');
+		}, i * 1000);
+	setTimeout(function() {
+		var l = document.getElementById("{$id}");
+		l.click();
+	}, t * 1000);
+</script>
+HTML;
+
+		} else {
+			echo RI::ni(), '<div class="info">Redirecting to ', $urlHTML, '</div>';
+		}
 
 		$ResponseRenderer = new ResponseRenderer($this);
 		$ResponseRenderer->renderHTML($Request, $Attr, $this);
@@ -97,7 +118,7 @@ class RedirectResponse extends Response implements IKeyMap, IRenderHTML
 	function mapKeys(IKeyMapper $Map) {
 		$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 		$Map->map(IResponse::STR_CODE, $this->getCode());
-		$Map->map(static::STR_REDIRECT, new HTMLAnchor($this->mRedirectURL, $this->mRedirectURL));
+		$Map->map(static::STR_REDIRECT, new RouteLink($this->mRedirectURL, $this->mRedirectURL));
 		if($this->mTimeout !== null)
 			$Map->map(static::STR_TIMEOUT, $this->mTimeout);
 	}

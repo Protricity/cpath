@@ -41,23 +41,6 @@ final class RouteRenderer implements IRouteMapper
                 return true;
         }
 
-//	    $c = sizeof($this->mHandlers);
-//	    $skip = array();
-//	    for($i=0; $i<$c; $i++) {
-//		    if(in_array($i, $skip))
-//			    continue;
-//		    $Handler = $this->mHandlers[$i];
-//		    $Response = $Handler::routeRequestStatic($this->mRequest, $this->mPrevious);
-//		    if($Response === false)
-//			    continue;
-//		    if($Response === true || !$Response) {
-//			    return true;
-//		    }
-//		    array_unshift($this->mPrevious, $Response);
-//		    $skip[] = $i;
-//		    $i=-1;
-//	    }
-
 	    $c = sizeof($this->mPrevious);
 	    if($c > 0) {
 		    if($this->mPrevious[0] instanceof \Exception) {
@@ -68,7 +51,6 @@ final class RouteRenderer implements IRouteMapper
 			    foreach($this->mPrevious as $Previous)
 				    $cls[] = get_class($Previous);
 				$ex = new RequestException("Unhandled class: " . implode(', ', array_unique($cls)));
-			    array_unshift($this->mPrevious, $ex);
 		    }
 
 	    } else {
@@ -84,12 +66,12 @@ final class RouteRenderer implements IRouteMapper
 		    }
 
 		    $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
-		    array_unshift($this->mPrevious, $ex);
-
 	    }
 
-        throw $ex;
+	    if($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($ex), $this->mPrevious)))
+		    return true;
 
+	    throw $ex;
     }
 
     /**
@@ -124,31 +106,39 @@ final class RouteRenderer implements IRouteMapper
                 return false;
             }
 
+	        if ($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($Response), $this->mPrevious)))
+		        return true;
+
 	        array_unshift($this->mPrevious, $Response);
-
-	        for($i=0; $i<sizeof($this->mHandlers); $i++) {
-		        /** @var IRoutable $Handler */
-		        $Handler = $this->mHandlers[$i];
-                $Response = $Handler::routeRequestStatic($this->mRequest, $this->mPrevious);
-                if($Response === false)
-                    continue;
-                if($Response === true || !$Response) {
-//                    if(!headers_sent())
-//                        throw new RequestException("IRoute Handler failed to render or return content: " . $Handler);
-                    return true;
-                }
-	            array_unshift($this->mPrevious, $Response);
-
-		        unset($this->mHandlers[$i]);
-		        $this->mHandlers = array_values($this->mHandlers);
-		        $i=-1;
-            }
 
 
         } catch (\Exception $ex) {
+
+	        if ($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($ex), $this->mPrevious)))
+		        return true;
+
 	        array_unshift($this->mPrevious, $ex);
         }
 
         return false;
     }
+
+	protected function tryHandlers(IRequest $Request, Array $Handlers, Array $Previous) {
+
+		foreach($Handlers as $i => $Handler) {
+			/** @var IRoutable $Handler */
+			$Response = $Handler::routeRequestStatic($Request, $Previous);
+			if($Response === false)
+				continue;
+
+			if($Response === true || !$Response) {
+				return true;
+			}
+
+			array_unshift($Previous, $Response);
+			return $this->tryHandlers($Request, array_diff($Handlers, array($Handler)), $Previous);
+		}
+
+		return false;
+	}
 }

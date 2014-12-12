@@ -10,12 +10,11 @@ namespace CPath\Render\HTML\Element\Form;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\AbstractHTMLElement;
+use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IHTMLElement;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
@@ -54,7 +53,8 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 		    $this->setInputValue($value);
 
 	    foreach(func_get_args() as $i => $arg)
-		    $this->addVarArg($arg, $i>=4);
+		    if($i >= 4 || !is_string($arg))
+			    $this->addVarArg($arg);
     }
 
 	protected function addVarArg($arg, $allowHTMLAttributeString=false) {
@@ -62,8 +62,8 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 			$this->addValidation($arg);
 		else if($arg instanceof \Closure)
 			$this->addValidation(new ValidationCallback($arg));
-		else
-			parent::addVarArg($arg, $allowHTMLAttributeString);
+
+		parent::addVarArg($arg, $allowHTMLAttributeString);
 	}
 
 	/**
@@ -176,7 +176,9 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 
 		foreach($this->mValidations as $Validation) {
 			try {
-				$Validation->validate($Request, $value, $fieldName);
+				$newValue = $Validation->validate($Request, $value, $fieldName);
+				if($newValue !== null)
+					$value = $newValue;
 			} catch (\Exception $ex) {
 				$Exs[] = $ex;
 				$this->log($ex->getMessage(), $this::ERROR);
@@ -186,9 +188,14 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 		if ($Exs) {
 			$Form = $this->getForm();
 			if(!$Form) {
-				$Form = new HTMLForm();
-				$Form->addContent($this);
-				$Form->addContent(new HTMLSubmit());
+				$Form = new HTMLForm($Request->getMethodName(), $Request->getPath(), null,
+					new HTMLElement('legend', 'content-title', $Request->getPath()),
+
+					"Enter value for field '" . $this->getFieldName() . "': ",
+					$this,
+					new HTMLSubmit()
+
+					);
 			}
 			throw new ValidationException($Form, $Exs);
 		}

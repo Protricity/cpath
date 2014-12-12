@@ -9,7 +9,7 @@ namespace CPath\Render\HTML\Attribute;
 
 use CPath\Request\IRequest;
 
-class ClassAttributes implements IClassAttributes, IAttributes
+class ClassAttributes implements IAttributes
 {
 	private $mClasses = array();
 	function __construct($className=null, $_className=null) {

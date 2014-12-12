@@ -25,12 +25,8 @@ class HTMLPasswordField extends HTMLFormField
 		parent::__construct($classList, $name, $value);
 
 		foreach(func_get_args() as $i => $arg)
-			$this->addVarArg($arg, $i>=3);
+			if($i >= 3 || !is_string($arg))
+				$this->addVarArg($arg);
 	}
 
-	// Static
-
-//	static function get($description = null, $classList = null, $name = null) {
-//		return new HTMLPasswordField($description, $classList, $name);
-//	}
 }

@@ -8,7 +8,6 @@
 namespace CPath\Request\Exceptions;
 
 use CPath\Response\IResponse;
-use CPath\Response\Response;
 
 class RedirectException extends RequestException
 {

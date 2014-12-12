@@ -7,7 +7,7 @@
  */
 namespace CPath\Request\Web;
 
-use BC\User\Profile\Common\CookieUtil;
+use BC\Util\CookieUtil;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\TextMimeType;
@@ -71,10 +71,9 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 */
 
 	function getRequestValue($paramName) {
-		return parent::getRequestValue($paramName)
-			?: (isset($_GET[$paramName])
+		return (isset($_GET[$paramName])
 			? $_GET[$paramName]
-			: null);
+			: parent::getRequestValue($paramName));
 	}
 
 	/**

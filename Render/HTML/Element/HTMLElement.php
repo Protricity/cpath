@@ -45,21 +45,17 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	    $this->mContent = new HTMLContainer();
 
 	    foreach(func_get_args() as $i => $arg)
-		    $this->addVarArg($arg, $i>=2);
+		    if($i >= 2 || !is_string($arg))
+		        $this->addVarArg($arg);
     }
 
-	protected function addVarArg($arg, $allowHTMLAttributeContent = false) {
-		if($allowHTMLAttributeContent) {
-			if(is_string($arg))
-				$this[] = $arg;
-			else if($arg instanceof IRenderHTML)
-				$this[] = $arg;
-			else
-				parent::addVarArg($arg, false);
-		} else {
+	protected function addVarArg($arg) {
+		if(is_string($arg))
+			$this[] = $arg;
+		else if($arg instanceof IRenderHTML)
+			$this[] = $arg;
+		else
 			parent::addVarArg($arg, false);
-		}
-
 	}
 
 	public function getContainer() {

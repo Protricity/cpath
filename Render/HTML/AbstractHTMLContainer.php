@@ -8,10 +8,34 @@
 namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Request\IRequest;
 use Traversable;
 
 abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \IteratorAggregate
 {
+
+	/** @var IHTMLSupportHeaders[] */
+	private $mSupportHeaders = array();
+
+
+	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
+		foreach(func_get_args() as $Headers)
+			$this->mSupportHeaders[] = $Headers;
+	}
+
+
+	/**
+	 * Write all support headers used by this IView inst
+	 * @param IRequest $Request
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		foreach($this->mSupportHeaders as $Headers)
+			$Headers->writeHeaders($Request, $Head);
+	}
 
 	/**
 	 * (PHP 5 &gt;= 5.0.0)<br/>

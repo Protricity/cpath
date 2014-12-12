@@ -28,9 +28,6 @@ class HTMLContainer extends AbstractHTMLContainer
 	/** @var IHTMLContainer */
 	private $mItemTemplate = null;
 
-	/** @var IHTMLSupportHeaders[] */
-	private $mSupportHeaders = array();
-
 	/**
 	 * @param String|null $_content [optional] varargs of content
 	 */
@@ -53,11 +50,6 @@ class HTMLContainer extends AbstractHTMLContainer
 		$this->addSupportHeaders(new HTMLHeaderStyleSheet($path));
 	}
 
-	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
-		foreach(func_get_args() as $Headers)
-			$this->mSupportHeaders[] = $Headers;
-	}
-
 	public function setItemTemplate(IHTMLContainer $Template) {
 		$this->mItemTemplate = $Template;
 	}
@@ -69,8 +61,7 @@ class HTMLContainer extends AbstractHTMLContainer
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		foreach($this->mSupportHeaders as $Headers)
-			$Headers->writeHeaders($Request, $Head);
+		parent::writeHeaders($Request, $Head);
 		foreach ($this->getContent() as $Content)
 			if ($Content instanceof IHTMLSupportHeaders)
 				$Content->writeHeaders($Request, $Head);

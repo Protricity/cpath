@@ -7,8 +7,8 @@
  */
 namespace CPath\Route\HTML;
 
-use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\HTMLAnchor;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Route\IRouteMap;
@@ -70,9 +70,6 @@ class HTMLRouteNavigator implements IRenderHTML
 
 
 	function renderRoute(IRequest $Request, $prefix, $title=null) {
-		$domain = $Request->getDomainPath();
-
-//		list($matchMethod, $matchPath) = explode(' ', $match, 2);
 		list($routeMethod, $routePath) = explode(' ', $prefix, 2);
 
 		$routePath = str_replace('\\', '/', $routePath);
@@ -87,7 +84,8 @@ class HTMLRouteNavigator implements IRenderHTML
 		if(!$title)
 			$title = ltrim($routePath, '/');
 
-		echo RI::ni(), "<a href='" . $domain . $routePath . "'>", $title, "</a>";
+		$Anchor = new HTMLAnchor($routePath, $title);
+		$Anchor->renderHTML($Request);
 
 		return false;
 	}

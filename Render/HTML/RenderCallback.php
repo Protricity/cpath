@@ -10,8 +10,8 @@ namespace CPath\Render\HTML;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Request\IRequest;
 
 class RenderCallback implements ISequenceMapper, IRenderHTML

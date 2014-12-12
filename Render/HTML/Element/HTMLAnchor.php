@@ -7,47 +7,64 @@
  */
 namespace CPath\Render\HTML\Element;
 
+use CPath\Data\Value\IHasURL;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Attribute\URLAttribute;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class HTMLAnchor extends HTMLElement
+class HTMLAnchor extends AbstractHTMLElement implements IHasURL
 {
 	const ALLOW_CLOSED_TAG = false;
 
 	private $mText;
-	private $mURLAttr;
+	private $mURL;
 
 	/**
 	 * @param string $href
 	 * @param string|null $text
-	 * @param null $classList
+	 * @param string|null $classList
 	 */
     public function __construct($href, $text=null, $classList = null) {
         parent::__construct('a', $classList);
 	    $this->mText = $text;
-	    $this->mURLAttr = new URLAttribute($href);
-	    $this->addAttributes($this->mURLAttr);
+	    $this->mURL = $href;
     }
 
+	/**
+	 * Render html attributes
+	 * @param IRequest|null $Request
+	 * @internal param bool $return
+	 * @return string|void always returns void
+	 */
+	function renderHTMLAttributes(IRequest $Request=null) {
+		parent::renderHTMLAttributes($Request);
+		echo ' href="', str_replace('"', "'", $this->getURL($Request)), '"';
+	}
+
 	public function getURL(IRequest $Request=null) {
-		return $this->mURLAttr->getValue($Request);
+		if($Request) {
+			$domainPath = $Request->getDomainPath(true);
+			if(strpos($this->mURL, $domainPath) === false)
+				return $domainPath . $this->mURL;
+		}
+		return $this->mURL;
 	}
 
 	public function setURL($href) {
-		$this->mURLAttr->setValue($href);
+		$this->mURL = $href;
 		return $this;
 	}
 
-	public function setContent($text)       { $this->mText = $text; }
-	public function getContent($key=null)   { return $this->mText; }
+	public function setText($text) {
+		$this->mText = $text;
+		return $this;
+	}
 
 	/**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
-	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
+	 * @param \CPath\Render\HTML\IRenderHTML $Parent
 	 */
 	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 		if($this->mText instanceof IRenderHTML)
@@ -57,21 +74,10 @@ class HTMLAnchor extends HTMLElement
 	}
 
 	/**
-	 * Returns true if content is available and should render
-	 * @param null $key
+	 * Returns true if this element has an open tag
 	 * @return bool
 	 */
-	function hasContent($key=null) {
-		return $this->mText !== null;
-	}
-
-	/**
-	 * Add IRenderHTML MainContent
-	 * @param IRenderHTML $Render
-	 * @param null $key if provided, add/replace content by key
-	 * @return void
-	 */
-	function addContent(IRenderHTML $Render, $key = null) {
-		$this->mText = $Render;
+	protected function isOpenTag() {
+		return true;
 	}
 }

@@ -2,26 +2,39 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 9/18/14
- * Time: 5:15 PM
+ * Date: 12/12/2014
+ * Time: 11:33 AM
  */
-namespace CPath\Route;
+namespace CPath\Data\Value;
+
 
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLAnchor;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class RouteLink implements IRenderHTML, IKeyMap
+class URLValue implements IRenderHTML, IKeyMap, IHasURL
 {
-    private $mPrefix, $mTarget;
+	private $mURL;
+	private $mValue;
+	public function __construct($url, $value=null) {
+		$this->mURL = $url;
+		$this->mValue = $value;
+	}
 
-    public function __construct($prefix, $target) {
-        $this->mPrefix = $prefix;
-        $this->mTarget = $target;
-    }
+	public function getURL(IRequest $Request=null, $withDomain=true) {
+		if($Request && strpos($this->mURL, 'http') === false) {
+			$domainPath = $Request->getDomainPath($withDomain);
+			if(strpos($this->mURL, $domainPath) === false)
+				return $domainPath . $this->mURL;
+		}
+		return $this->mURL;
+	}
+
+	public function getValue() {
+		return $this->mValue ?: $this->mURL;
+	}
 
 	/**
 	 * Map data to the key map
@@ -31,8 +44,7 @@ class RouteLink implements IRenderHTML, IKeyMap
 	 * @return void
 	 */
 	function mapKeys(IKeyMapper $Map) {
-		$Map->map('prefix', $this->mPrefix);
-		$Map->map('target', $this->mTarget);
+		// TODO: Implement mapKeys() method.
 	}
 
 	/**
@@ -43,11 +55,12 @@ class RouteLink implements IRenderHTML, IKeyMap
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$path = $this->mPrefix;
-		if(strpos($this->mPrefix, ' ') !== false)
-			list($method, $path) = explode(' ', $this->mPrefix, 2);
-
-		$Anchor = new HTMLAnchor($path, $this->mPrefix);
-		$Anchor->renderHTML($Request, $Attr, $this);
+		// TODO: Implement renderHTML() method.
 	}
+
+	function __toString() {
+		// TODO: Implement __toString() method.
+	}
+
+
 }

@@ -13,9 +13,9 @@ use CPath\Framework\PDO\Interfaces\IWriteAccess;
 use CPath\Framework\PDO\InvalidPermissionException;
 use CPath\Framework\PDO\Query\PDOWhere;
 use CPath\Framework\PDO\Table\Model\Types\PDOModel;
+use CPath\Framework\PDO\Templates;
 use CPath\Framework\PDO\Templates\User\Model\PDOUserModel;
 use CPath\Framework\PDO\Templates\User\Table\PDOUserTable;
-use CPath\Framework\PDO\Templates;
 use CPath\Request\IRequest;
 
 /**

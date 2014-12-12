@@ -43,12 +43,8 @@ class MappedRoute implements IKeyMap // , IRenderHTML
         return $this->mArgs[$index];
     }
 
-    public function getURL() {
-	    $path = $this->getRoute();
-	    if(strpos($path, ' ') !== false)
-            list(, $path) = explode(' ', $this->getRoute());
-	    $href = $path;
-        return new URLValue($href, $path);
+    public function getLink() {
+        return new RouteLink($this->getRoute(), $this->getTarget());
     }
 
 	/**
@@ -62,7 +58,7 @@ class MappedRoute implements IKeyMap // , IRenderHTML
         //$Map->map(self::KEY_TITLE, $this->__toString()) ||
         $Map->map(self::KEY_ROUTE, $this->getRoute()) ||
         $Map->map(self::KEY_TARGET, $this->getTarget()) ||
-        $Map->map(self::KEY_URL, $this->getURL());
+        $Map->map(self::KEY_URL, $this->getLink());
     }
 
 	/**
@@ -72,7 +68,7 @@ class MappedRoute implements IKeyMap // , IRenderHTML
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null) {
-		$this->getURL()
+		$this->getLink()
 			->renderHTML($Request, $Attr);
 	}
 

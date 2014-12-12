@@ -26,7 +26,8 @@ class HTMLFileInputField extends HTMLFormField
 			$this->setAccept($accept);
 
 		foreach(func_get_args() as $i => $arg)
-			$this->addVarArg($arg, $i>=3);
+			if($i >= 3 || !is_string($arg))
+				$this->addVarArg($arg);
 	}
 
 	public function setAccept($accept) {

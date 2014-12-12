@@ -15,7 +15,6 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
-use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;

@@ -33,7 +33,7 @@ class ValidationException extends RequestException implements IRenderHTML, IHTML
 		if (!is_array($Exceptions))
 			$Exceptions = array($Exceptions);
 
-		$message = sizeof($Exceptions) . " Exception(s) occurred during validation:";
+		$message = sizeof($Exceptions) . " Exception(s) occurred during validation: ";
 
 		foreach($Exceptions as $Ex)
 			$message .= "\n\t" . ($Ex instanceof Exception ? $Ex->getMessage() : $Ex);
@@ -45,6 +45,11 @@ class ValidationException extends RequestException implements IRenderHTML, IHTML
 
 	function getForm() {
 		return $this->getForm();
+	}
+
+	function setForm(HTMLForm $Form) {
+		$this->mForm = $Form;
+		return $this;
 	}
 
 	function getExceptions() {

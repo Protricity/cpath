@@ -17,7 +17,7 @@ use CPath\Render\JSON\JSONSequenceMapRenderer;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\Text\TextSequenceMapRenderer;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLSequenceMapRenderer;
+use CPath\Render\XML\XMLMapper;
 use CPath\Request\IRequest;
 
 class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHTMLSupportHeaders
@@ -80,7 +80,7 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	 * @return String|void always returns void
 	 */
 	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-		$Renderer = new XMLSequenceMapRenderer($Request, $rootElementName, $declaration);
+		$Renderer = new XMLMapper($Request, $rootElementName, $declaration);
 		$this->mSequencemap->mapSequence($Renderer);
 	}
 }

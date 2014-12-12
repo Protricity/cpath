@@ -73,7 +73,7 @@ class HTMLResponseBody extends HTMLContainer
 	/**
 	 * Render request as html
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
+	 * @param String|IAttributes $Attr
 	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */

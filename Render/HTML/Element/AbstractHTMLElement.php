@@ -8,10 +8,9 @@
 namespace CPath\Render\HTML\Element;
 
 use CPath\Render\Helpers\RenderIndents as RI;
-use CPath\Render\HTML\Attribute\ClassAttributes;
+use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute\IAttributesAggregate;
-use CPath\Render\HTML\Attribute\StyleAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainer;
@@ -20,12 +19,11 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
-abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
+abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
 {
 	const PASS_DOWN_ATTRIBUTES = false;
 
 	private $mElmType;
-	private $mAttributes = array();
 
 	/** @var ILogListener[] */
 	private $mLogListeners = array();
@@ -41,8 +39,12 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 	 * @param null|String|Array|IAttributes $_attributes [varargs] attribute html as string, array, or IAttributes instance
 	 */
 	public function __construct($elmType, $_attributes = null) {
+		parent::__construct();
+		if(strpos($elmType, ' ') !== false) {
+			list($elmType, $attrHTML) = explode(' ', $elmType, 2);
+			$this->addAttributeHTML($attrHTML);
+		}
 		$this->mElmType = $elmType;
-//		$this->mAttributes = new Attributes();
 
 		for($i=1; $i<func_num_args(); $i++) {
 			$arg = func_get_arg($i);
@@ -58,7 +60,7 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 		return $this->mParent;
 	}
 
-	protected function addVarArg($arg, $allowHTMLAttributeString=false) {
+	protected function addVarArg($arg) {
 		if($arg instanceof IHTMLSupportHeaders)
 			$this->addSupportHeaders($arg);
 
@@ -68,8 +70,8 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 		if($arg instanceof IAttributes)
 			$this->addAttributes($arg);
 
-		if(is_string($arg) && $allowHTMLAttributeString)
-			$this->mAttributes[] = $arg;
+		if(is_string($arg))
+			$this->addAttributeHTML($arg);
 	}
 
 	/**
@@ -95,13 +97,6 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 			$Headers->writeHeaders($Request, $Head);
 	}
 
-
-	function addAttributes(IAttributes $Attributes, IAttributes $_Attributes=null) {
-		foreach(func_get_args() as $Attributes) {
-			$this->mAttributes[] = $Attributes;
-		}
-	}
-
 	/**
 	 * Render element content
 	 * @param IRequest $Request
@@ -118,88 +113,6 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 
 	function getElementType() {
 		return $this->mElmType;
-	}
-
-	protected function getAttributes(IRequest $Request=null) {
-		return $this->mAttributes;
-	}
-
-	function setAttribute($attrName, $attrValue) {
-		$this->mAttributes[$attrName] = $attrValue;
-		return $this;
-	}
-
-	function getAttribute($attrName, $defaultValue = null) {
-		return isset($this->mAttributes[$attrName]) ? $this->mAttributes[$attrName] : $defaultValue;
-	}
-
-	function hasAttribute($attrName) {
-		return isset($this->mAttributes[$attrName]);
-	}
-
-	protected function removeAttribute($attrName) {
-		unset($this->mAttributes[$attrName]);
-		return $this;
-	}
-
-	public function addClass($classList) {
-		$ClassAttr = isset($this->mAttributes['class']) ? $this->mAttributes['class']
-			: $this->mAttributes['class'] = new ClassAttributes();
-		$ClassAttr->addClass($classList);
-		return $this;
-	}
-
-	public function addStyle($styleName, $styleValue) {
-		$StyleAttr = isset($this->mAttributes['style']) ? $this->mAttributes['style']
-			: $this->mAttributes['style'] = new StyleAttributes();
-		$StyleAttr->addStyle($styleName, $styleValue);
-		return $this;
-	}
-
-	public function hasClass($className) {
-		if(!empty($this->mAttributes['class']))
-			return preg_match('/(?:^| )' . preg_quote($className) . '(?: |$)/i', $this->mAttributes['class']);
-		return false;
-	}
-
-	public function getClasses() {
-		if(!empty($this->mAttributes['class']))
-			return preg_split('/\s+/', $this->mAttributes['class']);
-		return array();
-	}
-
-
-	/**
-	 * Render html attributes
-	 * @param IRequest $Request
-	 * @return string|void always returns void
-	 */
-	function renderHTMLAttributes(IRequest $Request=null) {
-		foreach($this->mAttributes as $name => $value) {
-			if($value instanceof IAttributes) {
-				$value->renderHTMLAttributes($Request);
-				continue;
-			}
-			echo ' ', $name, '="', str_replace('"', "'", $value), '"';
-		}
-	}
-
-	/**
-	 * Return an associative array of attribute name-value pairs
-	 * @param \CPath\Request\IRequest $Request
-	 * @return string
-	 */
-	function getHTMLAttributeString(IRequest $Request = null) {
-		$content = '';
-		foreach($this->mAttributes as $name => $value) {
-			if($value instanceof IAttributes) {
-				$content .= ($content ? ' ' : '') . $value->getHTMLAttributeString($Request);
-				continue;
-			}
-			$content .= ($content ? ' ' : '') . $name . '="' . str_replace('"', "'", $value) . '"';
-		}
-
-		return $content;
 	}
 
 	/**
@@ -251,6 +164,6 @@ abstract class AbstractHTMLElement implements IHTMLElement, IAttributes
 	}
 
 	function __toString() {
-		return "<" . $this->getElementType() . $this->getHTMLAttributeString() . '>';
+		return "<" . $this->getElementType() . $this->getHTMLAttributeString() . ($this->isOpenTag() ? '>' : '/>');
 	}
 }

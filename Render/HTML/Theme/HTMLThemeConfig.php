@@ -7,10 +7,6 @@
  */
 namespace CPath\Render\HTML\Theme;
 
-use CPath\Render\HTML\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Request\IRequest;
-
 class HTMLThemeConfig
 {
 	static $DefaultFormTheme = 'cpath-default-form-theme';

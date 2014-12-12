@@ -2,99 +2,121 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 9/18/14
- * Time: 2:35 PM
+ * Date: 9/16/14
+ * Time: 8:29 PM
  */
 namespace CPath\Render\HTML;
 
+use CPath\Data\Describable\Description;
 use CPath\Data\Map\ArraySequence;
-use CPath\Data\Map\IMappableKeys;
-use CPath\Data\Map\IMappableSequence;
+use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Describable\Describable;
-use CPath\Describable\IDescribable;
-use CPath\Framework\Render\Util\RenderIndents as RI;
+use CPath\Data\Map\ISequenceMapper;
+use CPath\Render\Helpers\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
-class HTMLSequenceMapRenderer implements ISequenceMap
+class HTMLSequenceMapRenderer implements ISequenceMapper, IHTMLSupportHeaders
 {
-    private $mStarted = false;
-    private $mAttr;
-    private $mRequest;
+	const CSS_CLASS = 'html-sequence-map-renderer';
 
-    public function __construct(IRequest $Request, IAttributes $Attr = null) {
-        $this->mRequest = $Request;
-        $this->mAttr = $Attr;
-    }
+	const CSS_CLASS_SEQUENCE_ITEM = 'sequence-item';
 
-    function __destruct() {
-        $this->flush();
-    }
+	const CSS_CLASS_FIRST = 'first';
 
-    private function tryStart() {
-        if ($this->mStarted)
-            return;
+	private $mStarted = false;
+	private $mAttr;
+	private $mRequest;
+	private $mCount = 0;
 
-        echo RI::ni(), "<ul", $this->mAttr, ">";
-        RI::ai(1);
+	public function __construct(IRequest $Request, IAttributes $Attr = null) {
+		$this->mRequest = $Request;
+		$this->mAttr = $Attr;
+	}
 
-        $this->mStarted = true;
-    }
+	function __destruct() {
+		$this->flush();
+	}
 
-    public function flush() {
-        if (!$this->mStarted)
-            return;
+	/**
+	 * Write all support headers used by this IView inst
+	 * @param IRequest $Request
+	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @return void
+	 */
+	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+		//$Head->writeStyleSheet(__DIR__ . '\assets\html-map-renderer.css');
+		//$Head->writeScript(__DIR__ . '\assets\html-sequence-map-renderer.js', true);
+	}
 
-        $this->tryStart();
+	private function tryStart($cls=null) {
+		if ($this->mStarted)
+			return;
 
-        RI::ai(-1);
-        echo RI::ni(), "</ul>";
+		$Attr = new ClassAttributes(self::CSS_CLASS, $cls);
 
-        $this->mStarted = false;
-    }
+		echo RI::ni(), "<ul", $Attr, $this->mAttr, ">";
+		RI::ai(1);
 
-    /**
-     * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
-     * @param String|Array|IMappableKeys|IMappableSequence $value
-     * @param mixed $_arg additional varargs
-     * @return bool false to continue, true to stop
-     */
-    function mapNext($value, $_arg = null) {
-        $this->tryStart();
+		$this->mStarted = true;
+	}
 
-        if(is_array($value))
-            $value = new ArraySequence($value);
+	public function flush() {
+		if (!$this->mStarted)
+			return;
 
-        if ($value instanceof IMappableKeys) {
-            echo RI::ni(), "<li>";
-            RI::ai(1);
+		//$this->tryStart();
 
-            $Renderer = new HTMLMapRenderer($this->mRequest);
-            $value->mapKeys($Renderer);
-            $Renderer->flush();
+		RI::ai(-1);
+		echo RI::ni(), "</ul>";
 
-            RI::ai(-1);
-            echo RI::ni(), "</li>";
+		$this->mStarted = false;
+	}
 
-        } elseif ($value instanceof IMappableSequence) {
-            echo RI::ni(), "<li>";
-            RI::ai(1);
+	/**
+	 * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
+	 * @param String|Array|IKeyMap|ISequenceMap $value
+	 * @param mixed $_arg additional varargs
+	 * @return bool false to continue, true to stop
+	 */
+	function mapNext($value, $_arg = null) {
+		$this->mCount++;
+		$this->tryStart();
 
-            $Renderer = new HTMLSequenceMapRenderer($this->mRequest);
-            $value->mapSequence($Renderer);
-            $Renderer->flush();
+		if(is_array($value))
+			$value = new ArraySequence($value);
 
-            RI::ai(-1);
-            echo RI::ni(), "</li>";
+		echo RI::ni(), "<li>";
+		RI::ai(1);
 
-        } elseif ($value instanceof IDescribable) {
-            echo RI::ni(), "<li>", htmlspecialchars($value->getDescription()), "</li>";
+		$Attr = null; // new ClassAttributes(self::CSS_CLASS_KEY_CONTENT);
+		if ($value instanceof IRenderHTML) {
+			$value->renderHTML($this->mRequest, $Attr);
 
-        } else {
-            echo RI::ni(), "<li>", htmlspecialchars(Describable::get($value)->getDescription()), "</li>";
+		} elseif ($value instanceof IKeyMap) {
+			$Renderer = new HTMLMapper($this->mRequest, $Attr);
+			$value->mapKeys($Renderer);
+			$Renderer->flush();
 
-        }
-    }
+		} elseif ($value instanceof ISequenceMap) {
+			$Renderer = new HTMLSequenceMapRenderer($this->mRequest, $Attr);
+			$value->mapSequence($Renderer);
+			$Renderer->flush();
 
+		} elseif (is_bool($value)) {
+			echo RI::ni(), $value ? 'True' : 'False';
+
+		} else {
+			echo RI::ni(), htmlspecialchars(new Description($value));
+
+		}
+
+
+		RI::ai(-1);
+		echo RI::ni(), "</li>";
+	}
 }
+

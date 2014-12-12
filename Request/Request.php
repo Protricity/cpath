@@ -111,8 +111,17 @@ class Request implements IRequest
                 }
             }
 
-            if(isset($routeArgs[$i])) // TODO: extra route return false?
-                return false;
+	        while(isset($routeArgs[$i])) {
+		        $routeArg = $routeArgs[$i];
+		        if($routeArg[0] === ':') {
+			        // There was more variable path, so the variable goes null
+			        $this->mParameters[substr($routeArg, 1)] = null;
+			        $i++;
+			        continue;
+		        }
+
+		        return false; // There was more path and it wasn't variable
+	        }
 
         } else {
             if(strpos($path, '*') !== false) {

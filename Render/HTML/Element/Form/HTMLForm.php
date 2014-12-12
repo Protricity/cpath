@@ -11,10 +11,9 @@ use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Render\HTML\Element\HTMLLabel;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\HTML\Theme\HTMLThemeConfig;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
@@ -35,23 +34,46 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 
 	/** @var IValidation[]  */
 	private $mValidations = array();
+	private $mAction = null;
 
 	/**
 	 * @param null $method
 	 * @param null $action
 	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
-	 * @param Array|\CPath\Render\HTML\Attribute\IAttributes|\CPath\Render\HTML\Header\IHTMLSupportHeaders|\CPath\Render\HTML\IRenderHTML|\CPath\Request\Validation\IValidation|null|String $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
+	 * @param Array|IAttributes|IHTMLSupportHeaders|IRenderHTML|IValidation|null|String $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
 	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
-        parent::__construct('form', $classList ?: HTMLThemeConfig::$DefaultFormTheme);
+        parent::__construct('form', $classList);
 		if($method)
 			$this->setMethod($method);
-		if($action)
-			$this->setAction($action);
+		$this->mAction = $action;
 		//$this->setItemTemplate(new HTMLLabel());
 		foreach(func_get_args() as $i => $arg)
-			$this->addVarArg($arg, $i>=3);
+			if($i >= 3 || !is_string($arg))
+				$this->addVarArg($arg);
     }
+
+	public function getActionURL(IRequest $Request=null) {
+		if($Request) {
+			$domainPath = $Request->getDomainPath(false);
+			if(strpos($this->mAction, $domainPath) === false)
+				return $domainPath . '/' . ltrim($this->mAction, '/');
+		}
+		return $this->mAction;
+	}
+
+
+	/**
+	 * Render html attributes
+	 * @param IRequest|null $Request
+	 * @internal param bool $return
+	 * @return string|void always returns void
+	 */
+	function renderHTMLAttributes(IRequest $Request=null) {
+		if($this->mAction)
+			echo ' action="', str_replace('"', "'", $this->getActionURL($Request)), '"';
+		parent::renderHTMLAttributes($Request);
+	}
 
 	function addFieldValidation(IValidation $Validation, $fieldName) {
 		$this->mValidations[] = array($Validation, $fieldName);
@@ -173,6 +195,8 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 			} catch (\Exception $ex) {
 				if(!$ex instanceof ValidationException)
 					$ex = new ValidationException($this, $ex);
+				else
+					$ex->setForm($this);
 				$this->log($ex->getMessage(), $this::ERROR);
 				throw $ex;
 			}
@@ -276,11 +300,11 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 			$type = $Content->getElementType();
 
 		switch(strtolower($type)) {
-			case 'textarea':
-			case 'input':
-				$Render = new HTMLLabel();
-				$Render->addContent($Content);
-				break;
+//			case 'textarea1':
+//			case 'input1':
+//				$Render = new HTMLLabel();
+//				$Render->addContent($Content);
+//				break;
 
 			case 'fieldset':
 			default:

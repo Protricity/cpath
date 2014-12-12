@@ -116,23 +116,27 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	}
 
 	function sendHeaders(IRequest $Request) {
+		if(headers_sent())
+			return false;
+
 		$MimeType = $Request->getMimeType();
 
 		$Renderer = $this->mObject;
 		if ($Renderer instanceof IResponseHeaders) {
-			$Renderer->sendHeaders($Request, $MimeType->getName());
+			return $Renderer->sendHeaders($Request, $MimeType->getName());
 
 		} elseif ($Renderer instanceof IResponse) {
 			$Util = new ResponseRenderer($Renderer);
-			$Util->sendHeaders($Request, $MimeType->getName());
+			return $Util->sendHeaders($Request, $MimeType->getName());
 
 		} elseif ($Renderer instanceof IExecutable) {
 			$Renderer = $this->mExecutableRenderer
 				?: $this->mExecutableRenderer = new ExecutableRenderer($this->mObject);
-			$Renderer->sendHeaders($Request, $MimeType->getName());
+			return $Renderer->sendHeaders($Request, $MimeType->getName());
 
 		} else {
 			$Request->log("No response provided with render object: " . get_class($Renderer), $Request::WARNING);
+			return false;
 		}
 	}
 

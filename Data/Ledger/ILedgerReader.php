@@ -11,3 +11,4 @@ interface ILedgerReader
 {
 	function readRow(&$row);
 }
+
