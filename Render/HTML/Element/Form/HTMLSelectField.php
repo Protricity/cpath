@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
+use CPath\Data\Map\CallbackMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Map\SequenceMapCallback;
@@ -129,7 +130,7 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 		RI::ai(1);
 
 		$THIS = $this;
-		$this->mapSequence(new SequenceMapCallback(
+		$this->mapSequence(new CallbackMapper(
 				function ($value, $description=null, $isSelected=false) use ($Request, $THIS) {
 					$Input = $value instanceof IRenderHTML
 						? $value

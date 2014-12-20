@@ -14,6 +14,18 @@ interface IUnitTestRequest extends IRequest //, IFlaggedRequest
     //const USE_DEFAULTS = 0x2;
 
 	/**
+	 * Set a test request parameter for unit test purposes
+	 * @param $name
+	 * @param $value
+	 */
+	function setRequestParameter($name, $value);
+
+	/**
+	 * Clear test request parameters
+	 */
+	function clearRequestParameters();
+
+	/**
 	 * Assert condition is true or throws an exception
 	 * @param bool|IUnitTestAssertion $condition
 	 * @param String $message

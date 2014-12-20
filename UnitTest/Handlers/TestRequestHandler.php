@@ -124,7 +124,6 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
                     $class::handleStaticUnitTest($UnitTestRequest);
                     $Request->log(sprintf("*** Test passed (%d) ***\n", $UnitTestRequest->getAssertionCount()));
 
-
                 } catch (\Exception $ex) {
                     $Request->log($ex, $Request::ERROR);
                     if($Request instanceof IPrompt)
@@ -161,7 +160,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 	 * If false is returned, this static handler will be called again if another handler returns an object
 	 * If an object is returned, it is passed along to the next handler
 	 */
-	static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
+	static function routeRequestStatic(IRequest $Request, Array &$Previous=array(), $_arg=null) {
         $Inst = new TestRequestHandler();
         return $Inst->execute($Request);
 //        $Handler = new ResponseRenderer($Response);

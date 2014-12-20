@@ -13,7 +13,7 @@ interface ISequenceMapper
      * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
      * @param String|Array|IKeyMap|ISequenceMap $value
      * @param mixed $_arg additional varargs
-     * @return bool false to continue, true to stop
+     * @return bool true to stop or any other value to continue
      */
     function mapNext($value, $_arg = null);
 }

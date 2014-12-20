@@ -7,7 +7,7 @@
  */
 namespace CPath\Request\Web;
 
-use BC\Util\CookieUtil;
+use CPath\Render\Helpers\CookieUtil;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\TextMimeType;
@@ -202,7 +202,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 */
 	function endSession() {
 		session_regenerate_id();
-		session_destroy();
+		return session_destroy();
 	}
 
 

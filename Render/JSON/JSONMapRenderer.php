@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 3/23/14
- * Time: 9:12 AM
+ * Date: 12/12/2014
+ * Time: 1:27 PM
  */
 namespace CPath\Render\JSON;
 
@@ -11,38 +11,50 @@ use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\Map\AbstractMapRenderer;
 use CPath\Request\IRequest;
 use CPath\Route\CPathMap;
-use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 
-class JSONMapRenderer implements IRenderJSON, IRoutable, IBuildable
-{
-	private $mMap;
 
-	/**
-	 * @param IKeyMap|ISequenceMap $Map
-	 */
+class JSONMapRenderer extends AbstractMapRenderer implements IBuildable
+{
+	private $mRootElement, $mDeclaration;
+
 	public function __construct($Map) {
-		$this->mMap = $Map;
+		parent::__construct($Map);
 	}
 
-	/**
-	 * Render request as json
-	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
-	 * @param IRenderJSON $Parent
-	 * @return String|void always returns void
-	 */
-	function renderJSON(IRequest $Request, IAttributes $Attr = null, IRenderJSON $Parent = null) {
-		$Mappable = $this->mMap;
-		$Renderer = new JSONMapper($Request);
-		if ($Mappable instanceof IKeyMap) {
-			$Mappable->mapKeys($Renderer);
+	protected function renderKeyValue($key, $value) {
+		echo json_encode($key), ':';
+		$ret = parent::renderKeyValue($key, $value);
+		return $ret;
+	}
 
-		} elseif ($Mappable instanceof ISequenceMap) {
-			$Mappable->mapSequence($Renderer);
+	protected function renderValue($value) {
+		$ret = parent::renderValue($value);
+		return $ret;
+	}
+
+
+	protected function renderStart($isArray) {
+		if($isArray) {
+			echo '[';
+
+		} else {
+			echo '{';
+		}
+	}
+
+	protected function renderEnd($isArray) {
+		if($isArray === false) {
+			echo '}';
+
+		} else if($isArray === true) {
+			echo ']';
+
+		} else {
+			echo '{}';
 		}
 	}
 
@@ -58,14 +70,11 @@ class JSONMapRenderer implements IRenderJSON, IRoutable, IBuildable
 	 * If false is returned, this static handler will be called again if another handler returns an object
 	 * If an object is returned, it is passed along to the next handler
 	 */
-	static function routeRequestStatic(IRequest $Request, Array $Previous = array(), $_arg = null) {
+	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
 		$Object = reset($Previous);
-		if ($Request->getMimeType() instanceof JSONMimeType) {
-			if ($Object instanceof IKeyMap)
-				return new JSONMapRenderer($Object);
-			if ($Object instanceof ISequenceMap)
-				return new JSONMapRenderer($Object);
-		}
+		if ($Request->getMimeType() instanceof JSONMimeType)
+			if ($Object instanceof IKeyMap || $Object instanceof ISequenceMap)
+				return new static($Object);
 
 		return false;
 	}
@@ -78,7 +87,7 @@ class JSONMapRenderer implements IRenderJSON, IRoutable, IBuildable
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
 	static function handleStaticBuild(IBuildRequest $Request) {
-		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__map_json');
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_map_json');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}
 }

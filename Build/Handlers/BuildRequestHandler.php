@@ -120,17 +120,17 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
     // Static
 
-    /**
-     * Route the request to this class object and return the object
-     * @param IRequest $Request the IRequest inst for this render
-     * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
-     * @param null|mixed $_arg [varargs] passed by route map
-     * @return void|bool|Object returns a response object
-     * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
-     * If false is returned, this static handler will be called again if another handler returns an object
-     * If an object is returned, it is passed along to the next handler
-     */
-    static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
+	/**
+	 * Route the request to this class object and return the object
+	 * @param IRequest $Request the IRequest inst for this render
+	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
+	 * @param null|mixed $_arg [varargs] passed by route map
+	 * @return void|bool|Object returns a response object
+	 * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
+	 * If false is returned, this static handler will be called again if another handler returns an object
+	 * If an object is returned, it is passed along to the next handler
+	 */
+    static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg=null) {
         $Inst = new BuildRequestHandler();
         $Response = $Inst->execute($Request);
         $Handler = new ResponseRenderer($Response);

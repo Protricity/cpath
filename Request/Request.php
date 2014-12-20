@@ -12,6 +12,7 @@ use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
+use Traversable;
 
 class Request implements IRequest
 {
@@ -192,13 +193,14 @@ class Request implements IRequest
 
     // Static
 
-    /**
-     * Create a new IRequest inst from environment variables
-     * @param String $route path string or route ([method] [path])
-     * @param array $args
-     * @return IRequest
-     */
-    public static function create($route=null, $args=null) {
+	/**
+	 * Create a new IRequest inst from environment variables
+	 * @param String $route path string or route ([method] [path])
+	 * @param array $args
+	 * @param IRequestedMimeType $MimeType
+	 * @return IRequest
+	 */
+    public static function create($route=null, $args=null, IRequestedMimeType $MimeType=null) {
         $method = null;
         if(($p = strpos($route, ' ')) !== false)
             if($p <=5)
@@ -212,7 +214,7 @@ class Request implements IRequest
             if(!$method)
                 $method = $_SERVER["REQUEST_METHOD"];
             if ($method === 'GET')
-                $Inst = new WebRequest($method, $route, $args);
+                $Inst = new WebRequest($method, $route, $args, $MimeType);
             elseif ($method === 'CLI')
                 $Inst = new CLIWebRequest($route, $args);
             else
@@ -287,5 +289,16 @@ class Request implements IRequest
 	 */
 	public function offsetUnset($offset) {
 		unset($this->mParameters[$offset]);
+	}
+
+	/**
+	 * (PHP 5 &gt;= 5.0.0)<br/>
+	 * Retrieve an external iterator
+	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
+	 * @return Traversable An instance of an object implementing <b>Iterator</b> or
+	 * <b>Traversable</b>
+	 */
+	public function getIterator() {
+		return new \ArrayIterator($this->mParameters);
 	}
 }

@@ -49,3 +49,4 @@ class SequenceResponse extends Response implements ISequenceMap, \Countable
 		return count($this->mCollection);
 	}
 }
+

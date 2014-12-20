@@ -28,14 +28,34 @@ class Autoloader
         return self::$mLoaders;
     }
 
-    /** Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class */
-    static function loadClass($name) {
+	/**
+	 * @param $className
+	 * @return String class autoloader path
+	 */
+	public static function getPathFromClassName($className) {
+		foreach (self::$mLoaders as $prefix => $path) {
+			if (stripos($className, $prefix) === 0) {
+				if(is_callable($path))
+					$path = $path($className);
+				else
+					$path = $path . substr($className, strlen($prefix) + 1) . '.php';
+				return $path;
+			}
+		}
+		throw new \InvalidArgumentException("Class did not match autoloader prefix: ". $className);
+	}
+
+	/**
+	 * Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class
+	 * @param $className
+	 */
+    static function loadClass($className) {
         foreach (self::$mLoaders as $prefix => $path) {
-            if (stripos($name, $prefix) === 0) {
+            if (stripos($className, $prefix) === 0) {
                 if(is_callable($path))
-                    $path = $path($name);
+                    $path = $path($className);
                 else
-                    $path = $path . substr($name, strlen($prefix) + 1) . '.php';
+                    $path = $path . substr($className, strlen($prefix) + 1) . '.php';
                 include($path);
                 return;
             }

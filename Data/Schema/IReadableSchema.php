@@ -8,9 +8,11 @@
 namespace CPath\Data\Schema;
 
 interface IReadableSchema {
+
     /**
      * Write schema to a writable source
      * @param IWritableSchema $DB
      */
     public function writeSchema(IWritableSchema $DB);
 }
+define('IReadableSchema', __NAMESPACE__ . '\\IReadableSchema');

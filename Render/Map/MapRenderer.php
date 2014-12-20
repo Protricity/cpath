@@ -2,41 +2,34 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 10/20/14
- * Time: 2:18 PM
+ * Date: 12/12/2014
+ * Time: 2:57 PM
  */
-namespace CPath\Data\Map;
+namespace CPath\Render\Map;
 
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\IKeyMapper;
+use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\HTMLSequenceMapRenderer;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\JSON\JSONSequenceMapRenderer;
 use CPath\Render\Text\IRenderText;
-use CPath\Render\Text\TextSequenceMapRenderer;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLMapper;
 use CPath\Request\IRequest;
 
-class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IHTMLSupportHeaders
+class MapRenderer implements IRenderHTML, IRenderText, IRenderJSON, IRenderXML
 {
-	private $mSequencemap;
-
-	public function __construct(ISequenceMap $SequenceMap) {
-		$this->mSequencemap = $SequenceMap;
-	}
+	private $mMap;
+	private $mMapper;
 
 	/**
-	 * Write all support headers used by this IView inst
-	 * @param IRequest $Request
-	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
-	 * @return void
+	 * @param IKeyMap|ISequenceMap $Map
+	 * @param IKeyMapper|ISequenceMapper $Mapper
 	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Renderer = new HTMLSequenceMapRenderer($Request);
-		$Renderer->writeHeaders($Request, $Head);
+	public function __construct($Map, $Mapper) {
+		$this->mMap    = $Map;
+		$this->mMapper = $Mapper;
 	}
 
 	/**
@@ -47,10 +40,14 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$Renderer = new HTMLSequenceMapRenderer($Request);
-		$this->mSequencemap->mapSequence($Renderer);
-	}
+		$Mappable = $this->mMap;
+		if ($Mappable instanceof IKeyMap) {
+			$Mappable->mapKeys($this->mMapper);
 
+		} elseif ($Mappable instanceof ISequenceMap) {
+			$Mappable->mapSequence($this->mMapper);
+		}
+	}
 
 	/**
 	 * Render request as JSON
@@ -58,8 +55,13 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	 * @return String|void always returns void
 	 */
 	function renderJSON(IRequest $Request) {
-		$Renderer = new JSONSequenceMapRenderer($Request);
-		$this->mSequencemap->mapSequence($Renderer);
+		$Mappable = $this->mMap;
+		if ($Mappable instanceof IKeyMap) {
+			$Mappable->mapKeys($this->mMapper);
+
+		} elseif ($Mappable instanceof ISequenceMap) {
+			$Mappable->mapSequence($this->mMapper);
+		}
 	}
 
 	/**
@@ -68,8 +70,13 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	 * @return String|void always returns void
 	 */
 	function renderText(IRequest $Request) {
-		$Renderer = new TextSequenceMapRenderer($Request);
-		$this->mSequencemap->mapSequence($Renderer);
+		$Mappable = $this->mMap;
+		if ($Mappable instanceof IKeyMap) {
+			$Mappable->mapKeys($this->mMapper);
+
+		} elseif ($Mappable instanceof ISequenceMap) {
+			$Mappable->mapSequence($this->mMapper);
+		}
 	}
 
 	/**
@@ -80,7 +87,12 @@ class SequenceMapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRend
 	 * @return String|void always returns void
 	 */
 	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-		$Renderer = new XMLMapper($Request, $rootElementName, $declaration);
-		$this->mSequencemap->mapSequence($Renderer);
+		$Mappable = $this->mMap;
+		if ($Mappable instanceof IKeyMap) {
+			$Mappable->mapKeys($this->mMapper);
+
+		} elseif ($Mappable instanceof ISequenceMap) {
+			$Mappable->mapSequence($this->mMapper);
+		}
 	}
 }

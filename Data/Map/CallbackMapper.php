@@ -10,7 +10,7 @@ namespace CPath\Data\Map;
 use CPath\Render\HTML\Attribute;
 
 
-class CallbackKeyMapper implements IKeyMapper
+class CallbackMapper implements IKeyMapper, ISequenceMapper
 {
     private $mCallback;
 
@@ -29,5 +29,15 @@ class CallbackKeyMapper implements IKeyMapper
         $call = $this->mCallback;
         return $call($key, $value);
     }
+
+	/**
+	 * Map a sequential value to this map. If method returns true, the sequence should abort and no more values should be mapped
+	 * @param String|Array|IKeyMap|ISequenceMap $value
+	 * @param mixed $_arg additional varargs
+	 * @return bool true to stop or any other value to continue
+	 */
+	function mapNext($value, $_arg = null) {
+		return call_user_func_array($call, func_get_args());
+	}
 }
 

@@ -11,18 +11,12 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
-use CPath\Data\Map\KeyMapRenderer;
-use CPath\Data\Map\SequenceMapRenderer;
-use CPath\Data\Map\SequenceMapWrapper;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Header\IHeaderWriter;
-use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHeaders
+class RouteIndex implements ISequenceMap, IKeyMap // , IRenderHTML
 {
-
 	const STR_PATH   = 'path';
 	const STR_METHOD = 'method';
 	const STR_ROUTES = 'routes';
@@ -31,7 +25,7 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 	private $mRoutePrefix;
 	private $mArgs = null;
 
-	public function __construct(IRouteMap $Routes, $routePrefix = null) {
+	public function __construct(IRouteMap $Routes, $routePrefix = 'GET /') {
 		$this->mRoutes      = $Routes;
 		$this->mRoutePrefix = $routePrefix;
 	}
@@ -44,11 +38,22 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 	 */
 	function mapSequence(ISequenceMapper $Map) {
 		$args = & $this->mArgs;
+		$matchPrefix = $this->mRoutePrefix;
 		$this->mRoutes->mapRoutes(
 			new RouteCallback(
-				function ($prefix, $target) use ($Map, &$args) {
-					$Route = new MappedRoute($prefix, $target);
+				function ($prefix, $target) use ($Map, &$args, $matchPrefix) {
+					list($matchMethod, $matchPath) = explode(' ', $matchPrefix, 2);
+					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
+					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
+						return false;
+
+					$routePath = str_replace('\\', '/', $routePath);
+					if (strpos($routePath, $matchPath) !== 0)
+						return false;
+
+					$Route = new RouteLink($prefix, $target);
 					$Map->mapNext($Route);
+					return false;
 				}
 			)
 		);
@@ -66,29 +71,17 @@ class RouteIndex implements ISequenceMap, IKeyMap, IRenderHTML, IHTMLSupportHead
 //        $Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 //		$Map->map(self::STR_PATH, new URLValue($Request->getPath(), $Request->getPath()));
 //		$Map->map(self::STR_METHOD, $Request->getMethodName());
-		$Map->map(self::STR_ROUTES, new SequenceMapWrapper($this));
-	}
-
-	/**
-	 * Write all support headers used by this renderer
-	 * @param IRequest $Request
-	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
-	 * @return void
-	 */
-	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Renderer = new KeyMapRenderer($this);
-		$Renderer->writeHeaders($Request, $Head);
+		$Map->map(self::STR_ROUTES, $this);
 	}
 
 	/**
 	 * Render request as html
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
-	 * @param \CPath\Render\HTML\IRenderHTML|\CPath\Route\IHTMLContainer $Parent
+	 * @param IRenderHTML $Parent
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$Renderer = new SequenceMapRenderer($this);
-		$Renderer->renderHTML($Request, $Attr, $Parent);
+		// TODO: Implement renderHTML() method.
 	}
 }

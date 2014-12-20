@@ -2,8 +2,8 @@
 /**
  * Created by PhpStorm.
  * User: ari
- * Date: 12/12/2014
- * Time: 1:17 PM
+ * Date: 10/4/14
+ * Time: 11:13 PM
  */
 namespace CPath\Render\HTML;
 
@@ -11,38 +11,70 @@ use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\Helpers\RenderIndents as RI;
+use CPath\Render\Map\AbstractMapRenderer;
 use CPath\Request\IRequest;
 use CPath\Route\CPathMap;
-use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 
-class HTMLMapRenderer implements IRenderHTML, IRoutable, IBuildable
+class HTMLMapRenderer extends AbstractMapRenderer implements IBuildable
 {
-	private $mMap;
-
-	/**
-	 * @param IKeyMap|ISequenceMap $Map
-	 */
 	public function __construct($Map) {
-		$this->mMap = $Map;
+		parent::__construct($Map);
 	}
 
-	/**
-	 * Render request as html
-	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
-	 * @param IRenderHTML $Parent
-	 * @return String|void always returns void
-	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		$Mappable = $this->mMap;
-		$Renderer = new HTMLMapper($Request);
-		if ($Mappable instanceof IKeyMap) {
-			$Mappable->mapKeys($Renderer);
+	protected function renderKeyValue($key, $value) {
+		echo RI::ni(), "<dt>", $key, "</dt>";
+		echo RI::ni(), "<dd>";
+		if($value instanceof IRenderHTML) {
+			RI::ai(1);
+			$value->renderHTML($this->getRequest());
+			RI::ai(-1);
+			$ret = true;
+			echo RI::ni();
 
-		} elseif ($Mappable instanceof ISequenceMap) {
-			$Mappable->mapSequence($Renderer);
+		} else {
+			$ret = parent::renderKeyValue($key, $value);
+		}
+		echo "</dd>";
+		return $ret;
+	}
+
+	protected function renderValue($value) {
+		echo RI::ni(), "<li>";
+		RI::ai(1);
+		if($value instanceof IRenderHTML) {
+			$value->renderHTML($this->getRequest());
+			$ret = true;
+
+		} else {
+			$ret = parent::renderValue($value);
+		}
+		RI::ai(-1);
+		echo RI::ni(), "</li>";
+		return $ret;
+	}
+
+
+	protected function renderStart($isArray) {
+		if($isArray === true) {
+			echo RI::ni(), "<ul>";
+			RI::ai(1);
+
+		} else if($isArray === false) {
+			echo RI::ni(), "<dl>";
+			RI::ai(1);
+		}
+	}
+
+	protected function renderEnd($isArray) {
+		if($isArray === true) {
+			RI::ai(-1);
+			echo RI::ni(), "</ul>";
+
+		} else if($isArray === false) {
+			RI::ai(-1);
+			echo RI::ni(), "</dl>";
 		}
 	}
 
@@ -58,14 +90,11 @@ class HTMLMapRenderer implements IRenderHTML, IRoutable, IBuildable
 	 * If false is returned, this static handler will be called again if another handler returns an object
 	 * If an object is returned, it is passed along to the next handler
 	 */
-	static function routeRequestStatic(IRequest $Request, Array $Previous = array(), $_arg = null) {
+	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
 		$Object = reset($Previous);
-		if ($Request->getMimeType() instanceof HTMLMimeType) {
-			if ($Object instanceof IKeyMap)
-				return new HTMLMapRenderer($Object);
-			if ($Object instanceof ISequenceMap)
-				return new HTMLMapRenderer($Object);
-		}
+		if ($Request->getMimeType() instanceof HTMLMimeType)
+			if ($Object instanceof IKeyMap || $Object instanceof ISequenceMap)
+				return new static($Object);
 
 		return false;
 	}
@@ -78,7 +107,7 @@ class HTMLMapRenderer implements IRenderHTML, IRoutable, IBuildable
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
 	static function handleStaticBuild(IBuildRequest $Request) {
-		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__map_html');
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_map_html');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}
 }

@@ -24,7 +24,7 @@ use CPath\Render\XML\XMLMapper;
 use CPath\Request\IRequest;
 use CPath\Route\IRoutable;
 
-class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, IBuildable, IRoutable
+class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText
 {
 	private $mMappable;
 
@@ -103,38 +103,5 @@ class MapRenderer implements IRenderHTML, IRenderXML, IRenderJSON, IRenderText, 
 		} else if ($Mappable instanceof ISequenceMap) {
 			$Mappable->mapSequence($Renderer);
 		}
-	}
-
-	/**
-	 * Handle this request and render any content
-	 * @param IBuildRequest $Request the build request inst for this build session
-	 * @return void
-	 * @build --disable 0
-	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
-	 */
-	static function handleStaticBuild(IBuildRequest $Request) {
-		// TODO: Implement handleStaticBuild() method.
-	}
-
-	/**
-	 * Route the request to this class object and return the object
-	 * @param IRequest $Request the IRequest inst for this render
-	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
-	 * @param null|mixed $_arg [varargs] passed by route map
-	 * @throws \Exception
-	 * @return void|bool|Object returns a response object
-	 * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
-	 * If false is returned, this static handler will be called again if another handler returns an object
-	 * If an object is returned, it is passed along to the next handler
-	 */
-	static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
-		if(sizeof($Previous) === 0)
-			return false;
-
-		$Object = reset($Previous);
-		if(!$Object instanceof IMap)
-			$Object = new ObjectRenderer($Object);
-		$Object->render($Request);
-		return true;
 	}
 }

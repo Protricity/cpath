@@ -9,7 +9,7 @@ namespace CPath\Request;
 
 use CPath\Request\Log\ILogListener;
 
-interface IRequest extends ILogListener, \ArrayAccess
+interface IRequest extends ILogListener, \ArrayAccess, \IteratorAggregate
 {
 	/**
 	 * Get the requested Mime type for rendering purposes

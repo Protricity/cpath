@@ -10,7 +10,6 @@ namespace CPath\Response\Common;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Common\ObjectRenderer;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLContainer;
@@ -22,6 +21,7 @@ use CPath\Response\Response;
 class RenderableResponse extends Response implements IHTMLContainer
 {
 	private $mContainer = null;
+	private $mMaps = array();
 
 	/**
 	 * Create a new response
@@ -36,9 +36,9 @@ class RenderableResponse extends Response implements IHTMLContainer
 			if($arg instanceof IRenderHTML)
 				$this->mContainer->addContent($arg);
 			elseif($arg instanceof IKeyMap)
-				$this->mContainer->addContent(new ObjectRenderer($arg));
+				$this->mMaps[] = $arg;
 			elseif($arg instanceof ISequenceMap)
-				$this->mContainer->addContent(new ObjectRenderer($arg));
+				$this->mMaps[] = $arg;
 			else if (is_string($arg))
 				$this->setMessage($arg);
 			else if (is_bool($arg) || is_int($arg))

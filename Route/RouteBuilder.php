@@ -109,8 +109,9 @@ class RouteBuilder {
 
         $src = "\t\treturn";
 
-        ksort($this->mRoutes);
-        foreach($this->mRoutes as $groupKey => $routes) {
+	    $routeList = $this->mRoutes;
+        ksort($routeList);
+        foreach($routeList as $groupKey => $routes) {
             $src .= "\n" . sprintf(self::KEY_FORMAT, $groupKey);
             foreach($routes as $prefix => $argList) {
                 $src .= "\n" . sprintf(self::FUNC_PRINT, $prefix, $argList) . " ||";

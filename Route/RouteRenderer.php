@@ -31,15 +31,10 @@ final class RouteRenderer implements IRouteMapper
         $this->mRequest = $Request;
     }
 
-    function renderRoutes(IRouteMap $Map, $withDefaults=true) {
+    function renderRoutes(IRouteMap $Map) {
 	    $this->mPrevious = array();
         if($Map->mapRoutes($this))
             return true;
-        if($withDefaults) {
-            $Defaults = new CPathMap();
-            if($Defaults->mapRoutes($this))
-                return true;
-        }
 
 	    $c = sizeof($this->mPrevious);
 	    if($c > 0) {
@@ -59,11 +54,6 @@ final class RouteRenderer implements IRouteMapper
 
 		    if($Map->mapRoutes($this))
 			    return true;
-		    if($withDefaults) {
-			    $Defaults = new CPathMap();
-			    if($Defaults->mapRoutes($this))
-				    return true;
-		    }
 
 		    $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
 	    }
@@ -91,22 +81,22 @@ final class RouteRenderer implements IRouteMapper
         }
 
         try {
-            $args = array($this->mRequest, $this->mPrevious);
+            $args = array($this->mRequest, &$this->mPrevious);
             for($i=2; $i<func_num_args(); $i++)
                 $args[] = func_get_arg($i);
             $Response = call_user_func_array(array($target, self::REQUEST_METHOD), $args);
             if($Response === null || $Response === true) {
-//                if(!headers_sent())
-//                    throw new RequestException("IRoute failed to render or return content: " . $target);
                 return true;
             }
 
             if($Response === false) {
-	            $this->mHandlers[] = $target;
-                return false;
+	            array_unshift($this->mHandlers, $target);
+	            return false;
             }
 
-	        if ($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($Response), $this->mPrevious)))
+	        if ($this->tryHandlers($this->mRequest,
+		        array_diff($this->mHandlers, array($target)),
+		        array_merge(array($Response), $this->mPrevious)))
 		        return true;
 
 	        array_unshift($this->mPrevious, $Response);
@@ -114,7 +104,9 @@ final class RouteRenderer implements IRouteMapper
 
         } catch (\Exception $ex) {
 
-	        if ($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($ex), $this->mPrevious)))
+	        if ($this->tryHandlers($this->mRequest,
+		        array_diff($this->mHandlers, array($target)),
+		        array_merge(array($ex), $this->mPrevious)))
 		        return true;
 
 	        array_unshift($this->mPrevious, $ex);

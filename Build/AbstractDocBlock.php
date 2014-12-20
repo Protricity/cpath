@@ -71,7 +71,7 @@ abstract class AbstractDocBlock
         if($withoutTags)
             $doc = preg_replace('/@\w+\s+.*$/', '', $doc);
 
-        $doc = preg_replace('/^\s+[*/]+\s+', '', $doc);
+        $doc = preg_replace('/^\s+[*\/]+\s+/', '', $doc);
 
         return trim($doc);
     }

@@ -7,13 +7,13 @@
  */
 namespace CPath\Data\Map;
 
-class MappableSequenceCallback implements ISequenceMap
+class CallbackSequenceMap implements ISequenceMap
 {
-    private $mCallback;
+	private $mCallback;
 
-    function __construct(\Closure $callback) {
-        $this->mCallback = $callback;
-    }
+	function __construct(\Closure $callback) {
+		$this->mCallback = $callback;
+	}
 
 	/**
 	 * Map sequential data to the map
@@ -22,9 +22,9 @@ class MappableSequenceCallback implements ISequenceMap
 	 * @internal param \CPath\Framework\Data\Map\Common\IRequest $Request
 	 * @return void
 	 */
-    function mapSequence(ISequenceMapper $Map) {
-        $call = $this->mCallback;
-        $call($Map);
-    }
-
+	function mapSequence(ISequenceMapper $Map) {
+		$call = $this->mCallback;
+		$call($Map);
+	}
 }
+

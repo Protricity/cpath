@@ -21,7 +21,7 @@ class HTMLRouteNavigator implements IRenderHTML
 	private $mMatch;
 	private $mPathNames = array();
 
-	public function __construct(IRouteMap $Route, $includeSubPaths = false, $matchPrefix = null) { // 'ANY /') {
+	public function __construct(IRouteMap $Route, $includeSubPaths = false, $matchPrefix = 'GET /') { // 'ANY /') {
 		$this->mRoute = $Route;
 		$this->mSubPaths = $includeSubPaths;
 		$this->mMatch = $matchPrefix;
@@ -55,7 +55,7 @@ class HTMLRouteNavigator implements IRenderHTML
 				function($prefix, $target, $_arg = null) use ($Request, $THIS, $match) {
 					list($matchMethod, $matchPath) = explode(' ', $match, 2);
 					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
-					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod == $matchMethod)
+					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
 						return false;
 
 					$routePath = str_replace('\\', '/', $routePath);

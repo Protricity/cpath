@@ -8,10 +8,11 @@
 namespace CPath\Data\Schema;
 
 use CPath\Build\ClassDocBlock;
+use CPath\Build\Code\IConstructorArgs;
 use CPath\Build\PropertyDocBlock;
 use CPath\Request\CLI\CommandString;
 
-class TableSchema implements IReadableSchema
+class TableSchema implements IReadableSchema, IConstructorArgs
 {
     const TABLE_TAG = 'table';
     const COLUMN_TAG = 'column';
@@ -21,9 +22,12 @@ class TableSchema implements IReadableSchema
 
     private $mClass;
 
-    public function __construct($class) {
-        $this->mClass = $class;
-        $DocBlock = new ClassDocBlock($class);
+	/**
+	 * @param string|object $Schema
+	 */
+    public function __construct($Schema) {
+        $this->mClass = is_string($Schema) ? $Schema : get_class($Schema);
+        $DocBlock = new ClassDocBlock($this->mClass);
         if(!$DocBlock->hasTag(self::TABLE_TAG))
             throw new \InvalidArgumentException("Class '" . $this->mClass . "' does not have @" . self::TABLE_TAG . " doctag ");
     }
@@ -38,7 +42,7 @@ class TableSchema implements IReadableSchema
                 case self::TABLE_TAG:
                     $args = CommandString::parseArgs($Tag->getArgString());
                     $tableName = isset($args['name'])         ? $args['name']       : null;
-                    $tableComment = isset($args['comment'])   ? $args['comment']    : $ClassDoc->getComment(true);
+                    $tableComment = isset($args['comment'])   ? $args['comment']    : null; //$ClassDoc->getComment(true);
 
                     if(!$tableName && !empty($args[0]))
                         $tableName = array_shift($args);
@@ -47,7 +51,7 @@ class TableSchema implements IReadableSchema
                     for($i=0; isset($args[$i]); $i++)
                         $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                    $DB->writeTable($tableName, $argString, $tableComment);
+                    $DB->writeTable($this, $tableName, $argString, $tableComment);
                     break;
             }
         }
@@ -64,13 +68,13 @@ class TableSchema implements IReadableSchema
                         case self::COLUMN_TAG:
                             $args = CommandString::parseArgs($Tag->getArgString());
                             $columnName = isset($args['name'])        ? $args['name']       : $Property->getName();
-                            $columnComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
+                            $columnComment = isset($args['comment'])  ? $args['comment']    : null; //$PropertyDoc->getComment(true);
 
                             $argString = '';
                             for($i=0; isset($args[$i]); $i++)
                                 $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                            $DB->writeColumn($columnName, $argString, $columnComment);
+                            $DB->writeColumn($this, $columnName, $argString, $columnComment);
                             break;
 
                         case self::PRIMARY_TAG:
@@ -95,11 +99,19 @@ class TableSchema implements IReadableSchema
                             for($i=0; isset($args[$i]); $i++)
                                 $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                            $DB->writeIndex($indexName, $columnList, $argString, $indexComment);
+                            $DB->writeIndex($this, $indexName, $columnList, $argString, $indexComment);
                             break;
                     }
                 }
             }
         }
     }
+
+	/**
+	 * Return a list of args that could be called to initialize this class object
+	 * @return array
+	 */
+	function getConstructorArgs() {
+		return array($this->mClass);
+	}
 }

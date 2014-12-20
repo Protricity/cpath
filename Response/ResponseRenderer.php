@@ -11,21 +11,17 @@ use CPath\Data\Map\IKeyMapper;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
-use CPath\Render\HTML\HTMLMapper;
+use CPath\Render\HTML\HTMLMapRenderer;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
-use CPath\Render\JSON\JSONKeyMapRenderer;
-use CPath\Render\JSON\JSONMapper;
+use CPath\Render\JSON\JSONMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\IRenderText;
-use CPath\Render\Text\TextKeyMapRenderer;
-use CPath\Render\Text\TextMapper;
+use CPath\Render\Text\TextMapRenderer;
 use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\IRenderXML;
-use CPath\Render\XML\XMLKeyMapRenderer;
-use CPath\Render\XML\XMLMapper;
 use CPath\Render\XML\XMLMapRenderer;
 use CPath\Render\XML\XMLMimeType;
 use CPath\Request\IRequest;
@@ -164,16 +160,16 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 		$MimeType = $Request->getMimeType();
 
 		if ($MimeType instanceof HTMLMimeType) {
-			$this->renderHTML($Request, false);
+			$this->renderHTML($Request);
 
 		} elseif ($MimeType instanceof XMLMimeType) {
-			$this->renderXML($Request, false);
+			$this->renderXML($Request);
 
 		} elseif ($MimeType instanceof JSONMimeType) {
-			$this->renderJSON($Request, false);
+			$this->renderJSON($Request);
 
 		} elseif ($MimeType instanceof TextMimeType) {
-			$this->renderText($Request, false);
+			$this->renderText($Request);
 
 		} elseif ($MimeType instanceof UnknownMimeType) {
 			return false;
@@ -209,15 +205,8 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 			$Response->renderHTML($Request, $Attr, $Parent);
 
 		} else {
-//			echo RI::ni(), "<code>";
-//			RI::ai(1);
-
-			$Mapper = new HTMLMapper($Request);
-			$this->mapKeys($Mapper);
-//
-//			RI::ai(-1);
-//			echo RI::ni(), "</code>";
-
+			$Mapper = new HTMLMapRenderer($this);
+			$Mapper->renderHTML($Request, $Attr, $Parent);
 		}
 	}
 
@@ -227,19 +216,17 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
      * @return void
      */
     function renderJSON(IRequest $Request) {
-        //$this->sendHeaders('application/json');
-
         $Response = $this->mResponse;
         if($Response instanceof IRenderJSON) {
             $Response->renderJSON($Request);
+
         } elseif($Response instanceof IKeyMap) {
-	        $Mapper = new JSONMapper($Request);
-            $Response->mapKeys($Mapper);
+	        $Mapper = new JSONMapRenderer($Response);
+	        $Mapper->renderJSON($Request);
 
         } else {
-	        $Mapper = new JSONMapper($Request);
-            $this->mapKeys($Mapper);
-
+	        $Mapper = new JSONMapRenderer($this);
+	        $Mapper->renderJSON($Request);
         }
     }
 
@@ -251,38 +238,33 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
      * @return void
      */
     function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
-        //$this->sendHeaders('application/xml');
-
         $Response = $this->mResponse;
         if($Response instanceof IRenderXML) {
             $Response->renderXML($Request, $rootElementName, $declaration);
 
         } elseif($Response instanceof IKeyMap) {
-            $Mapper = new XMLMapper($Request, $rootElementName, true);
+            $Mapper = new XMLMapRenderer($Request, $rootElementName, true);
             $Response->mapKeys($Mapper);
 
         } else {
-	        $Mapper = new XMLMapper($Request, $rootElementName, true);
-            $this->mapKeys($Mapper);
+	        $Mapper = new XMLMapRenderer($this);
+	        $Mapper->renderXML($Request, $rootElementName, true);
         }
     }
 
     /**
      * Sends headers if necessary, executes the request, and renders an IResponse as plain text
      * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-     * @param bool $sendHeaders
      * @return void
      */
-    function renderText(IRequest $Request, $sendHeaders=false) {
-        //$this->sendHeaders('text/plain');
-
+    function renderText(IRequest $Request) {
         $Response = $this->mResponse;
         if($Response instanceof IRenderText) {
             $Response->renderText($Request);
 
         } else {
-	        $Mapper = new TextMapper($Request);
-	        $this->mapKeys($Mapper);
+	        $Mapper = new TextMapRenderer($this);
+	        $Mapper->renderText($Request);
         }
     }
 }

@@ -9,10 +9,6 @@ namespace CPath\Render\HTML\Common;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\KeyMapRenderer;
-use CPath\Data\Map\SequenceMapRenderer;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
@@ -31,8 +27,6 @@ use CPath\Request\Exceptions\RequestException;
 use CPath\Request\Executable\ExecutableRenderer;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
-use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
@@ -53,31 +47,12 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	}
 
 	/**
-	 * @param IRequestedMimeType $MimeType
-	 * @return IRenderHTML|IRenderText|IRenderXML|IRenderJSON
+	 * @return IRenderAll
 	 */
-	public function getRenderableObject(IRequestedMimeType $MimeType = null) {
+	public function getRenderableObject() {
 		$Object = $this->mObject;
 
-		if ($Object instanceof IRenderHTML && $MimeType instanceof HTMLMimeType) {
-			return $Object;
-
-		} elseif ($Object instanceof IRenderText && $MimeType instanceof TextMimeType) {
-			return $Object;
-
-		} elseif ($Object instanceof IRenderJSON && $MimeType instanceof JSONMimeType) {
-			return $Object;
-
-		} elseif ($Object instanceof IRenderXML && $MimeType instanceof XMLMimeType) {
-			return $Object;
-
-		} elseif ($Object instanceof IKeyMap) {
-			return new KeyMapRenderer($Object);
-
-		} elseif ($Object instanceof ISequenceMap) {
-			return new SequenceMapRenderer($Object);
-
-		} elseif ($Object instanceof IExecutable) {
+		if ($Object instanceof IExecutable) {
 			return $this->mExecutableRenderer
 				?: $this->mExecutableRenderer = new ExecutableRenderer($Object);
 
@@ -86,7 +61,6 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 
 		} elseif ($Object instanceof \Exception) {
 			$Object = new ExceptionResponse($Object);
-
 			return new ResponseRenderer($Object);
 
 		} else {
@@ -147,29 +121,28 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	 * @return bool returns false if no rendering occurred
 	 */
 	function render(IRequest $Request, $sendHeaders = true) {
-//		if ($sendHeaders)
-//			$this->sendHeaders($Request);
-
 		$MimeType = $Request->getMimeType();
 
 		if ($MimeType instanceof HTMLMimeType) {
 			$this->renderHTML($Request, null, $this, $sendHeaders);
-
-		} elseif ($MimeType instanceof XMLMimeType) {
-			$this->renderXML($Request, $sendHeaders);
-
-		} elseif ($MimeType instanceof JSONMimeType) {
-			$this->renderJSON($Request, $sendHeaders);
-
-		} elseif ($MimeType instanceof TextMimeType) {
-			$this->renderText($Request, $sendHeaders);
-
-		} elseif ($MimeType instanceof UnknownMimeType) {
-			return false;
-
+			return true;
 		}
-
-		return true;
+		if ($MimeType instanceof XMLMimeType) {
+			$this->renderXML($Request, $sendHeaders);
+			return true;
+		}
+		if ($MimeType instanceof JSONMimeType) {
+			$this->renderJSON($Request, $sendHeaders);
+			return true;
+		}
+		if ($MimeType instanceof TextMimeType) {
+			$this->renderText($Request, $sendHeaders);
+			return true;
+		}
+//		if ($MimeType instanceof UnknownMimeType) {
+//
+//		}
+		return false;
 	}
 
 	/**
@@ -184,9 +157,12 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		if ($sendHeaders)
 			$this->sendHeaders($Request);
 
+		$Object = $this->mObject;
+		if(!$Object instanceof IRenderHTML)
+			$Object = $this->getRenderableObject();
+
 		try {
-			$Renderer = $this->getRenderableObject($Request->getMimeType());
-			$Renderer->renderHTML($Request, $Attr, $Parent);
+			$Object->renderHTML($Request, $Attr, $Parent);
 
 		} catch (IRenderHTML $ex) {
 			$ex->renderHTML($Request);
@@ -212,9 +188,12 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		if ($sendHeaders)
 			$this->sendHeaders($Request);
 
+		$Object = $this->mObject;
+		if(!$Object instanceof IRenderJSON)
+			$Object = $this->getRenderableObject();
+
 		try {
-			$Renderer = $this->getRenderableObject($Request->getMimeType());
-			$Renderer->renderJSON($Request);
+			$Object->renderJSON($Request);
 
 		} catch (IResponse $ex) {
 			$Renderer = new ResponseRenderer($ex);
@@ -237,9 +216,12 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		if ($sendHeaders)
 			$this->sendHeaders($Request);
 
+		$Object = $this->mObject;
+		if(!$Object instanceof IRenderText)
+			$Object = $this->getRenderableObject();
+
 		try {
-			$Renderer = $this->getRenderableObject($Request->getMimeType());
-			$Renderer->renderText($Request);
+			$Object->renderText($Request);
 
 		} catch (IResponse $ex) {
 			$Renderer = new ResponseRenderer($ex);
@@ -264,9 +246,12 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		if ($sendHeaders)
 			$this->sendHeaders($Request);
 
+		$Object = $this->mObject;
+		if(!$Object instanceof IRenderXML)
+			$Object = $this->getRenderableObject();
+
 		try {
-			$Renderer = $this->getRenderableObject($Request->getMimeType());
-			$Renderer->renderXML($Request, $rootElementName, $declaration);
+			$Object->renderXML($Request, $rootElementName, $declaration);
 
 		} catch (IResponse $ex) {
 			$Renderer = new ResponseRenderer($ex);
@@ -279,6 +264,16 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 		}
 	}
 
+	/**
+	 * Called when item is added to an IHTMLContainer
+	 * @param IHTMLContainer $Parent
+	 * @return void
+	 */
+	function onContentAdded(IHTMLContainer $Parent) {
+		if($this->mObject instanceof IHTMLContainerItem)
+			$this->mObject->onContentAdded($Parent);
+	}
+
 
 	// Static
 
@@ -287,35 +282,26 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	 * @param IRequest $Request the IRequest inst for this render
 	 * @param Object[]|null $Previous all previous response object that were passed from a handler, if any
 	 * @param null|mixed $_arg [varargs] passed by route map
-	 * @throws \Exception
 	 * @return void|bool|Object returns a response object
 	 * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
 	 * If false is returned, this static handler will be called again if another handler returns an object
-	 * If an object is returned, it is passed along to the next handler
+	 * If an object is returned, it is passed along to the next handler and this static handler will be called again
 	 */
-	static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null) {
+	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg=null) {
 		if(sizeof($Previous) === 0) {
 			return false;
 		}
-//
-//		$Object = reset($Previous);
-//		$Handler = null;
-//		foreach($Previous as $Object) {
-//			if($Object instanceof ObjectRenderer) {
-//				foreach($Previous as $Object) {
-//					if(!$Object instanceof IRenderAll)
-//						$Object = new ObjectRenderer($Object);
-//					$Object->render()
-//				}
-//				$Object->render($Request);
-//				return true;
-//		}
 
 		$Object = reset($Previous);
-		if(!$Object instanceof IRenderAll)
-			$Object = new ObjectRenderer($Object);
-		$Object->render($Request);
-		return true;
+
+		if($Object instanceof IRenderAll) {
+			$Object->render($Request);
+			return true;
+		}
+
+		$ObjectRenderer = new ObjectRenderer($Object);
+		$Previous[0] = $ObjectRenderer->getRenderableObject($Request);
+		return false;
 	}
 
 	/**
@@ -328,15 +314,5 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	static function handleStaticBuild(IBuildRequest $Request) {
 		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__render');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
-	}
-
-	/**
-	 * Called when item is added to an IHTMLContainer
-	 * @param IHTMLContainer $Parent
-	 * @return void
-	 */
-	function onContentAdded(IHTMLContainer $Parent) {
-		if($this->mObject instanceof IHTMLContainerItem)
-			$this->mObject->onContentAdded($Parent);
 	}
 }

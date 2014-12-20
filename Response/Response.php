@@ -69,7 +69,7 @@ class Response implements IResponse, IResponseHeaders {
     function setStatusCode($status) {
         if(is_int($status))
             $this->mCode = $status;
-        else
+        else if(!is_null($status))
             $this->mCode = $status ? IResponse::HTTP_SUCCESS : IResponse::HTTP_ERROR;
         return $this;
     }

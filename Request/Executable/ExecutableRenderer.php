@@ -12,6 +12,7 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
@@ -25,7 +26,7 @@ use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
 
 
-class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IRenderJSON, IRenderXML, IRenderText, IHTMLSupportHeaders, IExecutable {
+class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHTMLSupportHeaders, IExecutable {
 
 	private $mExecutable;
 	/** @var IResponse */

@@ -21,5 +21,5 @@ interface IRoutable {
      * If false is returned, this static handler will be called again if another handler returns an object
      * If an object is returned, it is passed along to the next handler
      */
-    static function routeRequestStatic(IRequest $Request, Array $Previous=array(), $_arg=null);
+    static function routeRequestStatic(IRequest $Request, Array &$Previous=array(), $_arg=null);
 }

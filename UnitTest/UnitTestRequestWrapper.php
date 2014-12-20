@@ -8,15 +8,17 @@
 namespace CPath\UnitTest;
 
 use CPath\Request\AbstractRequestWrapper;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Session\ISessionRequest;
 use CPath\UnitTest\Exceptions\UnitTestException;
 
-class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest, ISessionRequest
+class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest, ISessionRequest, IFormRequest
 {
     private $mFlags;
 	private $mAssertionCount = 0;
 	private $mTestSession = array();
+	private $mTestParameters = array();
 
     function __construct(IRequest $Request, $flags = null) {
         parent::__construct($Request);
@@ -117,5 +119,50 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	function endSession() {
 		$this->mTestSession = array();
 		return true;
+	}
+
+	/**
+	 * Set a test request parameter for unit test purposes
+	 * @param $name
+	 * @param $value
+	 */
+	function setRequestParameter($name, $value) {
+		$this->mTestParameters[$name] = $value;
+	}
+
+	/**
+	 * Return a request value
+	 * @param $fieldName
+	 * @return mixed|null the form field value or null if not found
+	 */
+	function getFormFieldValue($fieldName) {
+		return $this->offsetGet($fieldName);
+	}
+
+	/**
+	 * Clear test request parameters
+	 */
+	function clearRequestParameters() {
+		$this->mTestParameters = array();
+	}
+
+	public function offsetExists($offset) {
+		return isset($this->mTestParameters[$offset])
+			? true
+			: parent::offsetExists($offset);
+	}
+
+	public function offsetGet($offset) {
+		return isset($this->mTestParameters[$offset])
+			? $this->mTestParameters[$offset]
+			:  parent::offsetGet($offset);
+	}
+
+	public function offsetSet($offset, $value) {
+		$this->setRequestParameter($offset, $value);
+	}
+
+	public function offsetUnset($offset) {
+		unset($this->mTestParameters[$offset]);
 	}
 }

@@ -24,6 +24,10 @@ class RouteCallback implements IRouteMapper
      */
     function route($prefix, $target, $_arg=null) {
         $call = $this->mCallback;
+
+	    if($target instanceof IRouteMap) {
+		    return $target->mapRoutes($this);
+	    }
         return call_user_func_array($call, func_get_args());
     }
 }
