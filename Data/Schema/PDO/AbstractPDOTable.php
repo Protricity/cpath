@@ -12,17 +12,25 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 use CPath\Data\Schema\TableSchema;
+use CPath\Request\Log\ILogListener;
 
-abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema
+define('AbstractPDOTable', __NAMESPACE__ . '\\AbstractPDOTable');
+abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogListener
 {
+	const className = AbstractPDOTable;
+	const SELECT_COLUMNS = '*';
+	const INSERT_COLUMNS = null;
+	const UPDATE_COLUMNS = null;
+
 	const TABLE_NAME = null;
-	const ROW_CLASS = null;
+	const FETCH_CLASS = null;
 
 	const DEFAULT_LIMIT = 25;
 
 	const PRIMARY_COLUMN = null;
-	const SELECT_COLUMNS = '*';
-	const SELECT_COMPARE = '=?';
+
+	/** @var ILogListener[] */
+	protected $mLogListeners = array();
 
 //	final public function __construct() {
 //
@@ -40,26 +48,44 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema
 
 	function getTableName() { return static::TABLE_NAME; }
 
-	function getSelectSQL($searchColumn = null, $compare = null, $limit = null, $format=null) {
+	function getSelectStatement($selectColumns = '*', $searchColumn = null, $compare = '=?', $limit = null, $format = null) {
+		$selectColumns === '*' ? $selectColumns = self::SELECT_COLUMNS : null;
 		$tableName = static::TABLE_NAME;
-		$selectColumns = static::SELECT_COLUMNS;
 		is_string($limit) ?: $limit = " LIMIT " . ($limit ?: static::DEFAULT_LIMIT);
-		$sql = "SELECT {$selectColumns} FROM {$tableName}";
+		$sql = "SELECT {$selectColumns}\n FROM {$tableName}\n";
 		$sql .= $this->getWhereSQL($searchColumn, $compare);
 		if($format)
 			$sql = sprintf($format, $sql);
-		return $sql;
+		return $this->prepare($sql);
 	}
 
-	function getWhereSQL($searchColumn = null, $compare = null) {
+	function getInsertStatement($insert, $format=null) {
+		$DB = $this->getDatabase();
+		$tableName = static::TABLE_NAME;
+		$sql = "INSERT INTO {$tableName}";
+		if(is_array($insert)) {
+			foreach($insert as $k =>&$v)
+				$v = $DB->quote($v);
+			if(isset($insert[0])) {
+				$sql .= ' VALUES (' . implode(', ', $insert) . ')';
+			} else {
+				$sql .= ' (\'' . implode("', '", array_keys($insert)) . '\') VALUES (' . implode(', ', $insert) . ')';
+			}
+		} else {
+			$sql .= $insert;
+		}
+		if($format)
+			$sql = sprintf($format, $sql);
+		return $this->prepare($sql);
+	}
+
+	function getWhereSQL($searchColumn = null, $compare = '=?') {
 		$searchColumn!==null ?: $searchColumn = static::PRIMARY_COLUMN;
-		$compare!==null ?: $compare = static::SELECT_COMPARE;
-		$sql = "WHERE {$searchColumn} {$compare}";
+		$sql = "WHERE {$searchColumn}{$compare}";
 		return $sql;
 	}
 
-
-	function getUpdateSQL($set, $where, $format=null) {
+	function getUpdateStatement($set, $where, $format=null) {
 		$DB = $this->getDatabase();
 
 		if(is_array($set)) {
@@ -73,47 +99,72 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema
 			$where = implode("\n\tAND ", $where);
 		}
 		$tableName = static::TABLE_NAME;
-		$sql = "UPDATE {$tableName} SET {$set} WHERE {$where}";
+		$sql = "UPDATE {$tableName}\n\tSET {$set}\n\tWHERE {$where}";
 		if($format)
 			$sql = sprintf($format, $sql);
-		return $sql;
+		return $this->prepare($sql);
 	}
 
-	function fetch($search = null, $searchColumn = null, $compare = null, $limit = null, $format=null) {
-		$query = $this->select($search, $searchColumn, $compare, $limit, $format);
-		return $query->fetch();
+	/**
+	 * @param $sql
+	 * @return \PDOStatement
+	 */
+	function prepare($sql) {
+		$DB = $this->getDatabase();
+		try {
+			return $DB->prepare($sql);
+		} catch (\PDOException $ex) {
+			if(preg_match('/no such table: (.*)$/i', $ex->getMessage(), $matches)) {
+				$tableName = $matches[1];
+				if($tableName === static::TABLE_NAME) {
+					$TableWriter = new PDOTableWriter($DB);
+					$this->writeSchema($TableWriter);
+					$TableWriter->commit();
+					return $DB->prepare($sql);
+				}
+			}
+
+			throw new \PDOException($ex->getMessage() . ' - ' . $sql, intval($ex->getCode()), $ex);
+		}
 	}
 
-	function fetchOne($search = null, $searchColumn = null, $compare = null, $limit = null, $format=null) {
-		$result = $this->fetch($search, $searchColumn, $compare, $limit, $format);
+	function fetch($search, $searchColumn = null, $compare = '=?', $selectColumns = '*') {
+		$statement = $this->select($selectColumns, $search, $searchColumn, $compare, 1);
+		return $statement->fetch();
+	}
+
+	function fetchOne($search, $searchColumn = null, $compare = '=?', $selectColumns = '*') {
+		$result = $this->fetch($search, $searchColumn, $compare, $selectColumns);
 		if(!$result)
-			throw new \PDOException("Row not found: " . $search);
+			throw new \PDOException("Results not found: " . $search);
 		return $result;
 	}
 
-	function fetchAll($search = null, $searchColumn = null, $compare = null, $limit = null, $format=null) {
-		$query = $this->select($search, $searchColumn, $compare, $limit, $format);
-		return $query->fetchAll();
+	function fetchAll($search, $searchColumn = null, $compare = '=?', $limit = null, $selectColumns = '*') {
+		$statement = $this->select($selectColumns, $search, $searchColumn, $compare, $limit);
+		return $statement->fetchAll();
 	}
 
-	function select($search = null, $searchColumn = null, $compare = null, $limit = null, $format=null) {
-		$DB = $this->getDatabase();
-
-		$sql = $this->getSelectSQL($searchColumn, $compare, $limit, $format);
-		$query = $DB->prepare($sql);
-		$query->setAttribute(\PDO::FETCH_CLASS, get_called_class());
-		$query->execute(array($search));
-
-		return $query;
+	function select($selectColumns = '*', $search = null, $searchColumn = null, $compare = '=?', $limit = null, $format=null) {
+		$statement = $this->getSelectStatement($selectColumns, $searchColumn, $compare, $limit, $format);
+		$statement->execute(array($search));
+		$statement->setFetchMode(\PDO::FETCH_CLASS, static::FETCH_CLASS);
+		return $statement;
 	}
 
 	function update($set, $where) {
-		$DB = $this->getDatabase();
-
-		$sql = $this->getUpdateSQL($set, $where);
-		$query = $DB->prepare($sql);
-		return $query->execute();
+		$statement = $this->getUpdateStatement($set, $where);
+		return $statement->execute();
 	}
+
+	function insert($insert) {
+		$statement = $this->getInsertStatement($insert);
+		return $statement->execute();
+	}
+
+// TODO
+//	function insertAndFetch($insert) {
+//	}
 
 	function updateByPrimary($primaryKeyID, $set) {
 		$DB = $this->getDatabase();
@@ -137,9 +188,9 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema
 	 */
 	function mapSequence(ISequenceMapper $Map, $offset=0, $limit=100) {
 		$limit = "LIMIT {$offset} {$limit}";
-		$query = $this->select(null, null, null, null, $limit);
+		$statement = $this->select(null, null, null, null, $limit);
 		$i = $offset;
-		while($row = $query->fetch()) {
+		while($row = $statement->fetch()) {
 			$ret = $Map->mapNext($row, $i++);
 			if($ret === true)
 				break;
@@ -153,5 +204,27 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema
 	function writeSchema(IWritableSchema $DB) {
 		$Schema = $this->getSchema();
 		$Schema->writeSchema($DB);
+	}
+
+	/**
+	 * Add a log entry
+	 * @param mixed $msg The log message
+	 * @param int $flags [optional] log flags
+	 * @return int the number of listeners that processed the log entry
+	 */
+	function log($msg, $flags = 0) {
+		$c = 0;
+		foreach($this->mLogListeners as $Log)
+			$c += $Log->log($msg, $flags);
+		return $c;
+	}
+
+	/**
+	 * Add a log listener callback
+	 * @param ILogListener $Listener
+	 * @return void
+	 */
+	function addLogListener(ILogListener $Listener) {
+		$this->mLogListeners[] = $Listener;
 	}
 }

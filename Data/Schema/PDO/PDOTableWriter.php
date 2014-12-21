@@ -24,25 +24,50 @@ class PDOTableWriter implements IWritableSchema
 
 	public function commit() {
 		if ($this->mTableInfo !== null) {
-			$DB = $this->mPDO;
 			list($Schema, $tableName, $tableArgs, $tableComment) = $this->mTableInfo;
+			$this->mTableInfo = null;
+
 			// write
-			$sql  = "CREATE TABLE " . $tableName
-				. ($tableComment ? "\n\t-- " . $tableComment : '')
-				. "() {$tableArgs};";
+			$DB = $this->mPDO;
+
+			$sql  = "CREATE TABLE {$tableName}"
+				. "(";
+
+			foreach($this->mColumns as $i => $columnInfo) {
+				list($columnName, $columnArgs, $columnComment) = $columnInfo;
+				$sql .= ($i ? "," : '') . "\n\t{$columnName} {$columnArgs}";
+			}
+
+			$sql .= ") {$tableArgs};";
 
 			$DB->exec($sql);
 
 			foreach($this->mColumns as $columnInfo) {
 				list($columnName, $columnArgs, $columnComment) = $columnInfo;
-				$sql = "ALTER TABLE {tableName} ADD COLUMN {$columnName} {$columnArgs}";
-				$DB->exec($sql);
+				$sql = "ALTER TABLE {$tableName} ADD COLUMN {$columnName} {$columnArgs}";
+				try {
+					$DB->exec($sql);
+				} catch (\PDOException $ex) {
+					if(strpos($ex->getMessage(), 'duplicate column name: ' . $columnName) !== false) {
+
+					} else {
+						throw $ex;
+					}
+				}
 			}
 
 			foreach($this->mIndexes as $indexInfo) {
 				list($indexName, $columns, $indexArgs, $indexComment) = $indexInfo;
 				$sql = "CREATE INDEX {$indexName} {$indexArgs} ON {$tableName} ({$columns})";
-				$DB->exec($sql);
+				try {
+					$DB->exec($sql);
+				} catch (\PDOException $ex) {
+					if(strpos($ex->getMessage(), 'duplicate column name: ' . $columnName) !== false) {
+
+					} else {
+						throw $ex;
+					}
+				}
 			}
 		}
 		$this->mTableInfo = null;
@@ -60,6 +85,8 @@ class PDOTableWriter implements IWritableSchema
 	 */
 	function writeTable(IReadableSchema $Schema, $tableName, $tableArgs = null, $tableComment = null) {
 		$this->commit();
+		$this->mColumns   = array();
+		$this->mIndexes   = array();
 		$this->mTableInfo = func_get_args();
 	}
 

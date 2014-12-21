@@ -16,60 +16,169 @@ class PDOTableClassWriter implements IWritableSchema
 {
 	private $mPDOClass;
 	private $mPath;
-	private $mRes = null;
 	private $mClassName;
-	private $mPrimaryColumn;
-	private $mAppend = null;
-	private $mRowClass;
+	private $mFetchClass;
+
+
+	private $mTableInfo = null;
+	private $mColumns = array();
+	private $mIndexes = array();
 
 	public function __construct(\PDO $PDO, $className, $rowClass) {
-		$this->mRowClass  = $rowClass;
+		$this->mFetchClass  = $rowClass;
 		$this->mPDOClass  = get_class($PDO);
 		$this->mClassName = str_replace('/', '\\', $className);
 		$this->mPath      = Autoloader::getPathFromClassName($this->mClassName);
 	}
 
 	function __destruct() {
-		if ($this->mRes)
-			$this->finish();
+		$this->commit();
 	}
 
-	function start(IReadableSchema $Schema) {
-		if($this->mRes)
-			throw new \InvalidArgumentException("Writer already started");
 
-		$this->mRes      = fopen($this->mPath, 'w+');
+	public function commit() {
+		if ($this->mTableInfo !== null) {
+			list($Schema, $tableName, $tableArgs, $oldTableComment) = $this->mTableInfo;
+			$this->mTableInfo = null;
 
-		$Namespace       = ($ns = dirname($this->mClassName)) ? "\nnamespace " . $ns . ';' : '';
-		$Use             = "\nuse " . AbstractPDOTable::cls() . ' as AbstractBase;';
-		$Use            .= "\nuse " . $this->mPDOClass . ' as DB;';
-		$Use            .= "\nuse " . get_class($Schema) . ';';
-		if($Schema instanceof IConstructorArgs) {
-			$Use        .= "\nuse " . IReadableSchema . ';';
-		}
-		//$Use            .= "\nuse " . IWritableSchema . ';';
+			$fetchClass = $this->mFetchClass;
+			$fetchClassBaseName = basename($fetchClass);
 
-		fwrite($this->mRes,
-			<<<PHP
-<?{$Namespace}
-{$Use}
+			$constList = array(
+				'TABLE_NAME' => $tableName,
+				'FETCH_CLASS' => $fetchClass,
+				'SELECT_COLUMNS' => null,
+				'UPDATE_COLUMNS' => null,
+				'INSERT_COLUMNS' => null,
+			);
 
+			$primaryKeyColumn = null;
+			foreach($this->mColumns as $columnInfo) {
+				list($columnName, $columnArgs, $columnComment) = $columnInfo;
+				if (!$primaryKeyColumn && strpos($columnArgs, 'PRIMARY') !== false)
+					$primaryKeyColumn = $columnName;
+				if(preg_match_all('/^\s+\*\s+@(select|update|insert)\s(\w+)?/m', $columnComment, $matches)) {
+					foreach($matches[1] as $i => $match) {
+						$key = strtoupper($match) . '_COLUMNS';
+						$c = $constList[$key];
+						$constList[$key] = ($c ? $c . ', ' : '') . ($matches[2][$i] ? $matches[2][$i] : $columnName);
+					}
+				}
+			}
+
+			if($primaryKeyColumn)
+				$constList['PRIMARY_COLUMN'] = $primaryKeyColumn;
+
+			$compareDefault = "'=?'";
+			$searchColumnDefault = $primaryKeyColumn ? "'{$primaryKeyColumn}'" : "null";
+
+			$fRes            = fopen($this->mPath, 'w+');
+
+			$namespace       = ($ns = dirname($this->mClassName)) ? "\nnamespace " . $ns . ';' : '';
+			$useList         = "\nuse " . AbstractPDOTable::className . ' as AbstractBase;';
+			$useList        .= "\nuse " . $this->mPDOClass . ' as DB;';
+			$useList        .= "\nuse " . get_class($Schema) . ';';
+			if($Schema instanceof IConstructorArgs) {
+				$useList    .= "\nuse " . IReadableSchema::interfaceName . ';';
+			}
+			//$Use            .= "\nuse " . IWritableSchema . ';';
+
+			$className = $this->mClassName;
+			$baseClassName = basename($className);
+//			$constComment = $tableComment ? "\n\t * " . $tableComment : '';
+			$Implements = null;
+			if($Schema instanceof IConstructorArgs)
+				$Implements = ' implements ' . basename(IReadableSchema);
+
+			if(strpos($oldTableComment, '/**') === false) {
+			}
+
+			$tableComment = "";
+			if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $oldTableComment, $matches)) {
+				foreach($matches[1] as $i => $comment)
+					$tableComment .= "\n * @" . rtrim($comment);
+			}
+
+			// write
+
+			fwrite($fRes,
+				<<<PHP
+<?{$namespace}
+{$useList}
+
+/**
+ * Class {$baseClassName}{$tableComment}
+ * @method {$fetchClassBaseName} fetch(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch a {$fetchClassBaseName} instance
+ * @method {$fetchClassBaseName} fetchOne(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch a single {$fetchClassBaseName}
+ * @method {$fetchClassBaseName} fetchAll(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch an array of {$fetchClassBaseName}[]
+ */
+class {$baseClassName} extends AbstractBase{$Implements} {
 PHP
-		);
+			);
 
+			foreach($constList as $constName => $constValue)
+				if($constValue)
+					fwrite($fRes, "\n\tconst {$constName} = " . var_export($constValue, true) . ';');
 
-	}
+			foreach($this->mColumns as $columnInfo) {
+				list($columnName, $columnArgs, $columnComment) = $columnInfo;
 
-	function finish() {
-		if (!$this->mRes)
-			throw new \InvalidArgumentException("Writer already finished");
+				$comment = "";
+				if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $columnComment, $matches)) {
+					foreach($matches[1] as $i => $c)
+						$comment .= "\n\t * @" . rtrim($c);
+				}
 
+				$constName    = preg_replace('/[^\w_]/', '_', strtoupper($columnName));
+				if($comment)
+					fwrite($fRes, "\n\t/**{$comment}\n\t */");
+				fwrite($fRes, "\n\tconst COLUMN_{$constName} = " . var_export($columnName, true) . ';');
+			}
 
-		fwrite($this->mRes, $this->mAppend . "\n}");
-		$this->mAppend = null;
+			foreach($this->mIndexes as $indexInfo) {
+				list($indexName, $columns, $indexArgs, $indexComment) = $indexInfo;
+				$comment = "";
+				if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $indexComment, $matches)) {
+					foreach($matches[1] as $i => $c)
+						$comment .= "\n\t * @" . rtrim($c);
+				}
+//				$comment .= "\n * @columns " . $columns;
 
-		fclose($this->mRes);
-		$this->mRes = null;
+				$constName    = preg_replace('/[^\w_]/', '_', strtoupper($indexName));
+				if($comment)
+					fwrite($fRes, "\n\t/**{$comment}\n\t */");
+				fwrite($fRes, "\n\tconst {$constName} = " . var_export($indexComment, true) . ';');
+			}
+
+//			if($primaryKeyColumn && $constList['UPDATE_COLUMNS']) {
+//				$args = '$' . implode(' = null, $', explode(', ', $constList['UPDATE_COLUMNS'])) . ' = null';
+//				fwrite($fRes, "\n\n\tfunction updateFields({$args}, \$where) { \$this->update(get_defined_vars(), \$where); }");
+//			}
+
+			if($constList['INSERT_COLUMNS']) {
+				$args = '$' . implode(' = null, $', explode(', ', $constList['INSERT_COLUMNS'])) . ' = null';
+				fwrite($fRes, "\n\n\tfunction insertFields({$args}) { return \$this->insert(get_defined_vars()); }");
+			}
+
+			if($Schema instanceof IConstructorArgs) {
+				$schemaClassName = basename(get_class($Schema));
+				$args = $Schema->getConstructorArgs();
+				foreach($args as &$arg)
+					$arg = var_export($arg, true);
+				$construct = "new {$schemaClassName}(" . implode(', ', $args) . ')';
+
+				fwrite($fRes, "\n\n\tfunction getSchema() { return {$construct}; }");
+			}
+
+			fwrite($fRes, "\n\n\tfunction getDatabase() { return new DB(); }");
+
+			fwrite($fRes, "\n}");
+
+			fclose($fRes);
+		}
+		$this->mTableInfo = null;
+		$this->mColumns   = array();
+		$this->mIndexes   = array();
 	}
 
 	/**
@@ -81,52 +190,9 @@ PHP
 	 * @return void
 	 */
 	function writeTable(IReadableSchema $Schema, $tableName, $tableArgs = null, $tableComment = null) {
-		if (!$this->mRes)
-			$this->start($Schema);
-
-		$className = $this->mClassName;
-		$baseClassName = basename($className);
-		$ConstComment = $tableComment ? "\n\t * " . $tableComment : '';
-		$Implements = null;
-		if($Schema instanceof IConstructorArgs)
-			$Implements = ' implements ' . basename(IReadableSchema);
-
-		$rowClass = $this->mRowClass;
-
-		fwrite($this->mRes,
-			<<<PHP
-
-/**
- * Class {$className}
- * @table {$tableName} {$tableArgs}{$ConstComment}
- */
-class {$baseClassName} extends AbstractBase{$Implements} {
-	const TABLE_NAME = '{$tableName}';
-	const ROW_CLASS = '{$rowClass}';
-
-
-PHP
-		);
-
-		if($Schema instanceof IConstructorArgs) {
-			$schemaClassName = basename(get_class($Schema));
-			$args = $Schema->getConstructorArgs();
-			foreach($args as &$arg)
-				$arg = var_export($arg, true);
-			$construct = "new {$schemaClassName}(" . implode(', ', $args) . ')';
-
-			$this->mAppend .= <<<PHP
-
-	function getSchema() { return {$construct}; }
-PHP;
-		}
-
-		$this->mAppend .= <<<PHP
-
-	function getDatabase() { return new DB(); }
-PHP;
+		$this->commit();
+		$this->mTableInfo = func_get_args();
 	}
-
 
 	/**
 	 * Write a column to the last schema table
@@ -137,50 +203,19 @@ PHP;
 	 * @return void
 	 */
 	function writeColumn(IReadableSchema $Schema, $columnName, $columnArgs = null, $columnComment = null) {
-		$ConstName    = preg_replace('/[^\w_]/', '_', strtoupper($columnName));
-		$ConstComment = $columnComment ? "\n\t// " . $columnComment : '';
-
-		if(!$this->mPrimaryColumn && strpos($columnArgs, 'PRIMARY') !== false) {
-			$this->mPrimaryColumn = $columnName;
-
-			fwrite($this->mRes,
-				<<<PHP
-	// Primary Key Column
-	const PRIMARY_COLUMN = '{$columnName}';
-
-PHP
-			);
-
-		}
-
-		fwrite($this->mRes,
-			<<<PHP
-	// @column {$columnName} {$columnArgs}{$ConstComment}
-	const COLUMN_{$ConstName} = '{$columnName}';
-
-PHP
-		);
+		$this->mColumns[] = array_slice(func_get_args(), 1);
 	}
 
 	/**
 	 * Write a column index to the last schema table
 	 * @param IReadableSchema $Schema
-	 * @param String $indexName
+	 * @param $indexName
 	 * @param String $columns list of columns comma delimited
 	 * @param String|null $indexArgs
 	 * @param String|null $indexComment
 	 * @return mixed
 	 */
 	function writeIndex(IReadableSchema $Schema, $indexName, $columns, $indexArgs = null, $indexComment = null) {
-		$ConstName    = preg_replace('/[^\w_]/', '_', strtoupper($indexName));
-		$ConstComment = $indexComment ? "\n\t// " . $indexComment : '';
-
-		fwrite($this->mRes,
-			<<<PHP
-	// @index {$indexName} {$indexArgs}{$ConstComment}
-	const INDEX_{$ConstName} = '{$indexName}';
-
-PHP
-		);
+		$this->mIndexes[] = array_slice(func_get_args(), 1);
 	}
 }

@@ -56,23 +56,22 @@ abstract class AbstractDocBlock
 
         $this->mTags = array();
         $doc = $this->getDocComment();
-        if (preg_match_all('/@(\w+)\s+([^@\r\n]+)/i', $doc, $matches)) {
+        if (preg_match_all('/@(\w+)\s+([^@*\r\n]+)/i', $doc, $matches)) {
             foreach ($matches[1] as $i => $tagName) {
-                $this->mTags[] = new DocTag($tagName, $matches[2][$i]);
+                $this->mTags[] = new DocTag($tagName, trim($matches[2][$i]));
             }
         }
 
         return $this->mTags;
     }
 
-    public function getComment($withoutTags = true) {
+    public function getComment($withoutTags = false) {
         $doc = $this->getDocComment();
+	    $doc2 = $doc;
 
         if($withoutTags)
-            $doc = preg_replace('/@\w+\s+.*$/', '', $doc);
+            $doc2 = preg_replace('/^\s+\*\s+@\w+.*$/m', '', $doc2);
 
-        $doc = preg_replace('/^\s+[*\/]+\s+/', '', $doc);
-
-        return trim($doc);
+        return $doc2;
     }
 }

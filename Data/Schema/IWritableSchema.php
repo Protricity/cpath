@@ -7,9 +7,12 @@
  */
 namespace CPath\Data\Schema;
 
+define('IWritableSchema', __NAMESPACE__ . '\\IWritableSchema');
 interface IWritableSchema
 {
-	/**
+	const interfaceName = IWritableSchema;
+
+		/**
 	 * Create a table in the schema
 	 * @param IReadableSchema $Schema
 	 * @param String $tableName
@@ -40,4 +43,3 @@ interface IWritableSchema
 	 */
     function writeIndex(IReadableSchema $Schema, $indexName, $columns, $indexArgs = null, $indexComment = null);
 }
-define('IWritableSchema', __NAMESPACE__ . '\\IWritableSchema');

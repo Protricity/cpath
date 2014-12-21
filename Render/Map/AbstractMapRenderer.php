@@ -7,7 +7,6 @@
  */
 namespace CPath\Render\Map;
 
-use CPath\Build\IBuildable;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;

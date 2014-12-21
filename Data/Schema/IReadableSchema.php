@@ -7,12 +7,12 @@
  */
 namespace CPath\Data\Schema;
 
+define('IReadableSchema', __NAMESPACE__ . '\\IReadableSchema');
 interface IReadableSchema {
-
+	const interfaceName = IReadableSchema;
     /**
      * Write schema to a writable source
      * @param IWritableSchema $DB
      */
     public function writeSchema(IWritableSchema $DB);
 }
-define('IReadableSchema', __NAMESPACE__ . '\\IReadableSchema');

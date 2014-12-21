@@ -18,7 +18,8 @@ class TableSchema implements IReadableSchema, IConstructorArgs
     const COLUMN_TAG = 'column';
     const INDEX_TAG = 'index';
     const PRIMARY_TAG = 'primary';
-    const UNIQUE_TAG = 'unique';
+	const UNIQUE_TAG = 'unique';
+	const SELECT_TAG = 'select';
 
     private $mClass;
 
@@ -42,7 +43,7 @@ class TableSchema implements IReadableSchema, IConstructorArgs
                 case self::TABLE_TAG:
                     $args = CommandString::parseArgs($Tag->getArgString());
                     $tableName = isset($args['name'])         ? $args['name']       : null;
-                    $tableComment = isset($args['comment'])   ? $args['comment']    : null; //$ClassDoc->getComment(true);
+//                    $tableComment = isset($args['comment'])   ? $args['comment']    : null; //$ClassDoc->getComment(true);
 
                     if(!$tableName && !empty($args[0]))
                         $tableName = array_shift($args);
@@ -51,7 +52,7 @@ class TableSchema implements IReadableSchema, IConstructorArgs
                     for($i=0; isset($args[$i]); $i++)
                         $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                    $DB->writeTable($this, $tableName, $argString, $tableComment);
+                    $DB->writeTable($this, $tableName, $argString, $ClassDoc->getComment());
                     break;
             }
         }
@@ -68,13 +69,13 @@ class TableSchema implements IReadableSchema, IConstructorArgs
                         case self::COLUMN_TAG:
                             $args = CommandString::parseArgs($Tag->getArgString());
                             $columnName = isset($args['name'])        ? $args['name']       : $Property->getName();
-                            $columnComment = isset($args['comment'])  ? $args['comment']    : null; //$PropertyDoc->getComment(true);
+                            //$columnComment = isset($args['comment'])  ? $args['comment']    : null; //$PropertyDoc->getComment(true);
 
                             $argString = '';
                             for($i=0; isset($args[$i]); $i++)
                                 $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                            $DB->writeColumn($this, $columnName, $argString, $columnComment);
+                            $DB->writeColumn($this, $columnName, $argString, $PropertyDoc->getComment());
                             break;
 
                         case self::PRIMARY_TAG:
@@ -92,14 +93,14 @@ class TableSchema implements IReadableSchema, IConstructorArgs
                             }
 
                             $indexName = isset($args['name'])        ? $args['name']       : $tableName . '_' . ($columnName ?: $Property->getName()) . '_index';
-                            $indexComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
+//                            $indexComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
                             $columnList = isset($args['columns'])    ? $args['columns']    : $Property->getName();
 
                             $argString = '';
                             for($i=0; isset($args[$i]); $i++)
                                 $argString .= ($argString ? ' ' : '') . $args[$i];
 
-                            $DB->writeIndex($this, $indexName, $columnList, $argString, $indexComment);
+                            $DB->writeIndex($this, $indexName, $columnList, $argString, $PropertyDoc->getComment());
                             break;
                     }
                 }
