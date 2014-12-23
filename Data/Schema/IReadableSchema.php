@@ -16,3 +16,4 @@ interface IReadableSchema {
      */
     public function writeSchema(IWritableSchema $DB);
 }
+

@@ -107,7 +107,6 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\UnitTest\ITestable')) {
-                /** @var ITestable $class */
                 $Method = $Class->getMethod('handleStaticUnitTest');
                 $MethodDoc = new MethodDocBlock($Method);
                 if($Tag = $MethodDoc->getNextTag(self::DOCTAG)) {
@@ -118,6 +117,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
                     }
                 }
 
+	            /** @var ITestable $class */
                 try {
                     $Request->log("*** Testing {$class} ***");
                     $UnitTestRequest = new UnitTestRequestWrapper($Request);

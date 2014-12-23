@@ -57,6 +57,7 @@ class TableSchema implements IReadableSchema, IConstructorArgs
             }
         }
 
+	    $indexes = array();
 
         $Class = new \ReflectionClass($this->mClass);
         foreach($Class->getProperties() as $Property) {
@@ -92,20 +93,29 @@ class TableSchema implements IReadableSchema, IConstructorArgs
                                     break;
                             }
 
-                            $indexName = isset($args['name'])        ? $args['name']       : $tableName . '_' . ($columnName ?: $Property->getName()) . '_index';
+                            $indexName = isset($args['name'])        ? $args['name']       : $tableName . '_' . ($columnName ?: $Property->getName()) . '_' . $Tag->getName();
 //                            $indexComment = isset($args['comment'])  ? $args['comment']    : $PropertyDoc->getComment(true);
                             $columnList = isset($args['columns'])    ? $args['columns']    : $Property->getName();
 
                             $argString = '';
                             for($i=0; isset($args[$i]); $i++)
                                 $argString .= ($argString ? ' ' : '') . $args[$i];
+							if(isset($indexes[$indexName])) {
+								$indexes[$indexName][1] .= ', ' . $columnList;
+							} else {
+								$indexes[$indexName] = array($indexName, $columnList, $argString, $PropertyDoc->getComment());
+							}
 
-                            $DB->writeIndex($this, $indexName, $columnList, $argString, $PropertyDoc->getComment());
                             break;
                     }
                 }
             }
         }
+
+	    foreach($indexes as $index) {
+		    list($indexName, $columnList, $argString, $comment) = $index;
+		    $DB->writeIndex($this, $indexName, $columnList, $argString, $comment);
+	    }
     }
 
 	/**

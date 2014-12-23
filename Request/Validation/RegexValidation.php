@@ -36,11 +36,17 @@ class RegexValidation implements IValidation
 	 * @return mixed validated value
 	 */
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
-		if (!preg_match($this->mRegex, $value, $matches))
-			throw new RequestException($this->mErrorMsg ? : (self::DEFAULT_MESSAGE . $this->mRegex));
+		if (!preg_match($this->mRegex, $value, $matches)) {
+			throw new RequestException($this->mErrorMsg ? : (self::DEFAULT_MESSAGE . $this->mRegex)); }
 		/** @var IValidation $Validation */
 		foreach($this->mValidations as $Validation)
 			$value = $Validation->validate($Request, $value);
 		return $value;
+	}
+
+	// Static
+
+	static function get($regex, $errorMsg=null) {
+		return new RegexValidation($regex, $errorMsg);
 	}
 }

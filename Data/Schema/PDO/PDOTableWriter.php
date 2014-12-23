@@ -10,16 +10,40 @@ namespace CPath\Data\Schema\PDO;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 
+
 class PDOTableWriter implements IWritableSchema
 {
 
 	private $mPDO;
+	private $mTableName;
 	private $mTableInfo = null;
 	private $mColumns = array();
 	private $mIndexes = array();
 
 	public function __construct(\PDO $PDO) {
 		$this->mPDO = $PDO;
+	}
+
+	public function tryRepair(\PDOException $ex, IReadableSchema $Schema) {
+		$matched = preg_match('/no such (table|column): ([\w_-]+)/i', $ex->getMessage(), $matches)
+			|| preg_match('/(table|column) ([\w_-]+) has no column named ([\w_-]+)/i', $ex->getMessage(), $matches);
+
+		if($matched) {
+			list(, $type, $name) = $matches;
+			switch($type) {
+				case 'table':
+					$this->mTableName = $name;
+					break;
+				case 'column':
+					break;
+				default:
+					throw new \Exception("Invalid type: " . $type);
+			}
+			$Schema->writeSchema($this);
+			$this->commit();
+			return true;
+		}
+		return false;
 	}
 
 	public function commit() {
@@ -38,9 +62,17 @@ class PDOTableWriter implements IWritableSchema
 				$sql .= ($i ? "," : '') . "\n\t{$columnName} {$columnArgs}";
 			}
 
-			$sql .= ") {$tableArgs};";
+			$sql .= "\n) {$tableArgs};";
 
-			$DB->exec($sql);
+			try {
+				$DB->exec($sql);
+			} catch (\PDOException $ex) {
+				if(strpos($ex->getMessage(), "table {$tableName} already exists") !== false) {
+
+				} else {
+					throw new \PDOException($ex->getMessage() . ' - ' . $sql, null, $ex);
+				}
+			}
 
 			foreach($this->mColumns as $columnInfo) {
 				list($columnName, $columnArgs, $columnComment) = $columnInfo;
@@ -51,21 +83,21 @@ class PDOTableWriter implements IWritableSchema
 					if(strpos($ex->getMessage(), 'duplicate column name: ' . $columnName) !== false) {
 
 					} else {
-						throw $ex;
+						throw new \PDOException($ex->getMessage() . ' - ' . $sql, null, $ex);
 					}
 				}
 			}
 
 			foreach($this->mIndexes as $indexInfo) {
 				list($indexName, $columns, $indexArgs, $indexComment) = $indexInfo;
-				$sql = "CREATE INDEX {$indexName} {$indexArgs} ON {$tableName} ({$columns})";
+				$sql = "CREATE {$indexArgs} INDEX {$indexName} ON {$tableName} ({$columns})";
 				try {
 					$DB->exec($sql);
 				} catch (\PDOException $ex) {
-					if(strpos($ex->getMessage(), 'duplicate column name: ' . $columnName) !== false) {
+					if(strpos($ex->getMessage(), $indexName . ' already exists') !== false) {
 
 					} else {
-						throw $ex;
+						throw new \PDOException($ex->getMessage() . ' - ' . $sql, null, $ex);
 					}
 				}
 			}
@@ -87,6 +119,9 @@ class PDOTableWriter implements IWritableSchema
 		$this->commit();
 		$this->mColumns   = array();
 		$this->mIndexes   = array();
+		$this->mTableInfo = null;
+		if($this->mTableName && $this->mTableName !== $tableName)
+			return;
 		$this->mTableInfo = func_get_args();
 	}
 
@@ -99,7 +134,8 @@ class PDOTableWriter implements IWritableSchema
 	 * @return void
 	 */
 	function writeColumn(IReadableSchema $Schema, $columnName, $columnArgs = null, $columnComment = null) {
-		$this->mColumns[] = array_slice(func_get_args(), 1);
+		if($this->mTableInfo)
+			$this->mColumns[] = array_slice(func_get_args(), 1);
 	}
 
 	/**
@@ -112,6 +148,7 @@ class PDOTableWriter implements IWritableSchema
 	 * @return mixed
 	 */
 	function writeIndex(IReadableSchema $Schema, $indexName, $columns, $indexArgs = null, $indexComment = null) {
-		$this->mIndexes[] = array_slice(func_get_args(), 1);
+		if($this->mTableInfo)
+			$this->mIndexes[] = array_slice(func_get_args(), 1);
 	}
 }

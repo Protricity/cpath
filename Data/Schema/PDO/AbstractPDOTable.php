@@ -18,16 +18,16 @@ define('AbstractPDOTable', __NAMESPACE__ . '\\AbstractPDOTable');
 abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogListener
 {
 	const className = AbstractPDOTable;
+
 	const SELECT_COLUMNS = '*';
 	const INSERT_COLUMNS = null;
 	const UPDATE_COLUMNS = null;
 
 	const TABLE_NAME = null;
+	const FETCH_MODE = \PDO::FETCH_CLASS;
 	const FETCH_CLASS = null;
 
 	const DEFAULT_LIMIT = 25;
-
-	const PRIMARY_COLUMN = null;
 
 	/** @var ILogListener[] */
 	protected $mLogListeners = array();
@@ -47,17 +47,6 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 	function getSchema() { throw new \InvalidArgumentException("Not implemented"); }
 
 	function getTableName() { return static::TABLE_NAME; }
-
-	function getSelectStatement($selectColumns = '*', $searchColumn = null, $compare = '=?', $limit = null, $format = null) {
-		$selectColumns === '*' ? $selectColumns = self::SELECT_COLUMNS : null;
-		$tableName = static::TABLE_NAME;
-		is_string($limit) ?: $limit = " LIMIT " . ($limit ?: static::DEFAULT_LIMIT);
-		$sql = "SELECT {$selectColumns}\n FROM {$tableName}\n";
-		$sql .= $this->getWhereSQL($searchColumn, $compare);
-		if($format)
-			$sql = sprintf($format, $sql);
-		return $this->prepare($sql);
-	}
 
 	function getInsertStatement($insert, $format=null) {
 		$DB = $this->getDatabase();
@@ -79,11 +68,6 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		return $this->prepare($sql);
 	}
 
-	function getWhereSQL($searchColumn = null, $compare = '=?') {
-		$searchColumn!==null ?: $searchColumn = static::PRIMARY_COLUMN;
-		$sql = "WHERE {$searchColumn}{$compare}";
-		return $sql;
-	}
 
 	function getUpdateStatement($set, $where, $format=null) {
 		$DB = $this->getDatabase();
@@ -112,64 +96,99 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 	function prepare($sql) {
 		$DB = $this->getDatabase();
 		try {
-			return $DB->prepare($sql);
+			$statement = $DB->prepare($sql);
+
 		} catch (\PDOException $ex) {
-			if(preg_match('/no such table: (.*)$/i', $ex->getMessage(), $matches)) {
-				$tableName = $matches[1];
-				if($tableName === static::TABLE_NAME) {
-					$TableWriter = new PDOTableWriter($DB);
-					$this->writeSchema($TableWriter);
-					$TableWriter->commit();
-					return $DB->prepare($sql);
-				}
+			$statement = null;
+			if (stripos($ex->getMessage(), 'Duplicate') !== false)
+				throw new DuplicateRowException($ex->getMessage(), null, $ex);
+			$Schema = $DB;
+			if($Schema instanceof IReadableSchema) {
+				$TableWriter = new PDOTableWriter($DB);
+				$TableWriter->tryRepair($ex, $Schema);
+				$statement = $DB->prepare($sql);
+				$ex = null;
 			}
 
-			throw new \PDOException($ex->getMessage() . ' - ' . $sql, intval($ex->getCode()), $ex);
+			if($ex)
+				throw new \PDOException($ex->getMessage() . ' - ' . $sql, intval($ex->getCode()), $ex);
 		}
-	}
-
-	function fetch($search, $searchColumn = null, $compare = '=?', $selectColumns = '*') {
-		$statement = $this->select($selectColumns, $search, $searchColumn, $compare, 1);
-		return $statement->fetch();
-	}
-
-	function fetchOne($search, $searchColumn = null, $compare = '=?', $selectColumns = '*') {
-		$result = $this->fetch($search, $searchColumn, $compare, $selectColumns);
-		if(!$result)
-			throw new \PDOException("Results not found: " . $search);
-		return $result;
-	}
-
-	function fetchAll($search, $searchColumn = null, $compare = '=?', $limit = null, $selectColumns = '*') {
-		$statement = $this->select($selectColumns, $search, $searchColumn, $compare, $limit);
-		return $statement->fetchAll();
-	}
-
-	function select($selectColumns = '*', $search = null, $searchColumn = null, $compare = '=?', $limit = null, $format=null) {
-		$statement = $this->getSelectStatement($selectColumns, $searchColumn, $compare, $limit, $format);
-		$statement->execute(array($search));
-		$statement->setFetchMode(\PDO::FETCH_CLASS, static::FETCH_CLASS);
 		return $statement;
 	}
 
-	function update($set, $where) {
-		$statement = $this->getUpdateStatement($set, $where);
-		return $statement->execute();
+	function fetch($whereColumn, $whereValue = null, $compare = '=?', $selectColumns = null) {
+		return $this->select($selectColumns)
+			->where($whereColumn, $whereValue, $compare, 2)
+			->fetch();
 	}
 
-	function insert($insert) {
-		$statement = $this->getInsertStatement($insert);
-		return $statement->execute();
+	function fetchOne($whereColumn, $whereValue = null, $compare = '=?', $selectColumns = null) {
+		return $this->select($selectColumns)
+			->where($whereColumn, $whereValue, $compare, 2)
+			->fetchOne();
 	}
 
-// TODO
-//	function insertAndFetch($insert) {
-//	}
+	public function fetchColumn($column_number, $search, $searchColumn = null, $compare = '=?', $selectColumns = null) {
+		return $this->select($selectColumns)
+			->where($searchColumn, $search, $compare, 2)
+			->fetchColumn($column_number);
+	}
 
-	function updateByPrimary($primaryKeyID, $set) {
-		$DB = $this->getDatabase();
+	function fetchAll($search, $searchColumn = null, $compare = '=?', $limit = null, $selectColumns = null) {
+		return $this->select($selectColumns)
+			->where($searchColumn, $search, $compare, $limit)
+			->fetchAll();
+	}
 
-		return $this->update($set, static::PRIMARY_COLUMN . ' = ' . $DB->quote($primaryKeyID));
+	function where($whereColumn, $whereValue = null, $compare = '=?', $logic = 'AND') {
+		$Where = new PDOSelectBuilder($this->getDatabase());
+		$Where->table(static::TABLE_NAME);
+		$Where->setFetchMode(static::FETCH_MODE, static::FETCH_CLASS);
+		$Where->where($whereColumn, $whereValue, $compare, $logic);
+		return $Where;
+	}
+
+	function select($column=null, $alias=null, $format=null) {
+		$Select = new PDOSelectBuilder($this->getDatabase());
+		$Select->table(static::TABLE_NAME);
+		if($column === null) {
+			$Select->setFetchMode(static::FETCH_MODE, static::FETCH_CLASS);
+			$Select->select(static::SELECT_COLUMNS);
+
+		} else {
+			$Select->select($column, $alias, $format);
+		}
+
+		return $Select;
+	}
+
+	function update($fieldName, $fieldValue=null) {
+		$Update = new PDOUpdateBuilder($this->getDatabase());
+		$Update->table(static::TABLE_NAME);
+		$Update->update($fieldName, $fieldValue);
+		return $Update;
+	}
+
+	function insert($fields, $_field=null) {
+		$Insert = new PDOInsertBuilder($this->getDatabase());
+		$Insert->table(static::TABLE_NAME);
+		$Insert->insert(is_array($fields) ? $fields : func_get_args());
+		return $Insert;
+	}
+
+	function execInsert(Array $insertData) {
+		$this->insert($insertData)
+			->execute();
+		return $this;
+	}
+
+	function delete($where, $whereColumn = null, $compare = '=?', $logic = 'AND') { // , $limit = 1
+		$Delete = new PDODeleteBuilder($this->getDatabase());
+		$Delete->table(static::TABLE_NAME);
+		$Delete->where($whereColumn, $where, $compare, $logic);
+//		if($limit)
+//			$Delete->limit($limit);
+		return $Delete;
 	}
 
 	function writeSchemaToPDODatabase(\PDO $PDO=null) {
@@ -178,8 +197,6 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		$TableSchema->writeSchema($TableWriter);
 	}
 
-	static function cls() { return get_called_class(); }
-
 	/**
 	 * Map sequential data to the map
 	 * @param ISequenceMapper $Map
@@ -187,14 +204,7 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 	 * @param int $limit
 	 */
 	function mapSequence(ISequenceMapper $Map, $offset=0, $limit=100) {
-		$limit = "LIMIT {$offset} {$limit}";
-		$statement = $this->select(null, null, null, null, $limit);
-		$i = $offset;
-		while($row = $statement->fetch()) {
-			$ret = $Map->mapNext($row, $i++);
-			if($ret === true)
-				break;
-		}
+		$this->select()->mapSequence($Map, $offset, $limit);
 	}
 
 	/**

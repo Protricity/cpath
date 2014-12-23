@@ -16,8 +16,7 @@ class Tester implements ITester
      * @return void
      * @throws \CPath\UnitTest\TestException
      */
-    function assert($condition, $label = null)
-    {
+    function assert($condition, $label = null) {
         if(!$condition)
             $this->fail(null, $label);
     }
@@ -29,8 +28,7 @@ class Tester implements ITester
      * @return void
      * @throws \CPath\UnitTest\TestException
      */
-    function assertEquals($expected, $actual, $label = null)
-    {
+    function assertEquals($expected, $actual, $label = null) {
         if($expected !== $actual)
             $this->fail("{$expected} !== {$actual}", $label);
     }

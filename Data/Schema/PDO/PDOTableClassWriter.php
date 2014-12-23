@@ -41,6 +41,7 @@ class PDOTableClassWriter implements IWritableSchema
 			list($Schema, $tableName, $tableArgs, $oldTableComment) = $this->mTableInfo;
 			$this->mTableInfo = null;
 
+			$abstractBaseClass = AbstractPDOTable::className;
 			$fetchClass = $this->mFetchClass;
 			$fetchClassBaseName = basename($fetchClass);
 
@@ -66,8 +67,10 @@ class PDOTableClassWriter implements IWritableSchema
 				}
 			}
 
-			if($primaryKeyColumn)
+			if($primaryKeyColumn) {
 				$constList['PRIMARY_COLUMN'] = $primaryKeyColumn;
+				$abstractBaseClass           = AbstractPDOPrimaryKeyTable::className;
+			}
 
 			$compareDefault = "'=?'";
 			$searchColumnDefault = $primaryKeyColumn ? "'{$primaryKeyColumn}'" : "null";
@@ -75,7 +78,7 @@ class PDOTableClassWriter implements IWritableSchema
 			$fRes            = fopen($this->mPath, 'w+');
 
 			$namespace       = ($ns = dirname($this->mClassName)) ? "\nnamespace " . $ns . ';' : '';
-			$useList         = "\nuse " . AbstractPDOTable::className . ' as AbstractBase;';
+			$useList         = "\nuse " . $abstractBaseClass . ' as AbstractBase;';
 			$useList        .= "\nuse " . $this->mPDOClass . ' as DB;';
 			$useList        .= "\nuse " . get_class($Schema) . ';';
 			if($Schema instanceof IConstructorArgs) {
@@ -108,9 +111,11 @@ class PDOTableClassWriter implements IWritableSchema
 
 /**
  * Class {$baseClassName}{$tableComment}
- * @method {$fetchClassBaseName} fetch(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch a {$fetchClassBaseName} instance
- * @method {$fetchClassBaseName} fetchOne(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch a single {$fetchClassBaseName}
- * @method {$fetchClassBaseName} fetchAll(\$search, \$searchColumn={$searchColumnDefault}, \$compare={$compareDefault}, \$selectColumns='*') fetch an array of {$fetchClassBaseName}[]
+ * @method {$fetchClassBaseName} insertOrUpdate(\$primaryKeyValue, Array \$insertData) insert or update a {$fetchClassBaseName} instance
+ * @method {$fetchClassBaseName} insertAndFetch(Array \$insertData) insert and fetch a {$fetchClassBaseName} instance
+ * @method {$fetchClassBaseName} fetch(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a {$fetchClassBaseName} instance
+ * @method {$fetchClassBaseName} fetchOne(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a single {$fetchClassBaseName}
+ * @method {$fetchClassBaseName}[] fetchAll(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch an array of {$fetchClassBaseName}[]
  */
 class {$baseClassName} extends AbstractBase{$Implements} {
 PHP
@@ -123,11 +128,10 @@ PHP
 			foreach($this->mColumns as $columnInfo) {
 				list($columnName, $columnArgs, $columnComment) = $columnInfo;
 
-				$comment = "";
-				if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $columnComment, $matches)) {
+				$comment = "\n";
+				if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $columnComment, $matches))
 					foreach($matches[1] as $i => $c)
 						$comment .= "\n\t * @" . rtrim($c);
-				}
 
 				$constName    = preg_replace('/[^\w_]/', '_', strtoupper($columnName));
 				if($comment)
@@ -137,17 +141,16 @@ PHP
 
 			foreach($this->mIndexes as $indexInfo) {
 				list($indexName, $columns, $indexArgs, $indexComment) = $indexInfo;
-				$comment = "";
-				if(preg_match_all('/^\s+\*\s+@(\w+.*)$/m', $indexComment, $matches)) {
-					foreach($matches[1] as $i => $c)
-						$comment .= "\n\t * @" . rtrim($c);
-				}
-//				$comment .= "\n * @columns " . $columns;
+				$comment = "\n\n\t * @index " . $indexArgs;
+				$comment .= "\n\t * @columns " . $columns;
+//				if(preg_match_all('/^\s+\*\s+@(index\w*).*$/m', $indexComment, $matches))
+//					foreach($matches[1] as $i => $c)
+//						$comment .= "\n\t * @" . rtrim($c);
 
 				$constName    = preg_replace('/[^\w_]/', '_', strtoupper($indexName));
 				if($comment)
 					fwrite($fRes, "\n\t/**{$comment}\n\t */");
-				fwrite($fRes, "\n\tconst {$constName} = " . var_export($indexComment, true) . ';');
+				fwrite($fRes, "\n\tconst {$constName} = " . var_export($indexName, true) . ';');
 			}
 
 //			if($primaryKeyColumn && $constList['UPDATE_COLUMNS']) {
@@ -157,8 +160,12 @@ PHP
 
 			if($constList['INSERT_COLUMNS']) {
 				$args = '$' . implode(' = null, $', explode(', ', $constList['INSERT_COLUMNS'])) . ' = null';
-				fwrite($fRes, "\n\n\tfunction insertFields({$args}) { return \$this->insert(get_defined_vars()); }");
+				fwrite($fRes, "\n\n\tfunction insertRow({$args}) { \n\t\treturn \$this->insert(get_defined_vars());\n\t}");
 			}
+
+//			if($primaryKeyColumn) {
+//				fwrite($fRes, "\n\n\tfunction delete({$fetchClassBaseName} \$Row) { return parent::deleteAt(\$Row->{$primaryKeyColumn}); }");
+//			}
 
 			if($Schema instanceof IConstructorArgs) {
 				$schemaClassName = basename(get_class($Schema));
@@ -170,7 +177,7 @@ PHP
 				fwrite($fRes, "\n\n\tfunction getSchema() { return {$construct}; }");
 			}
 
-			fwrite($fRes, "\n\n\tfunction getDatabase() { return new DB(); }");
+			fwrite($fRes, "\n\n\tprivate \$mDB = null;\n\tfunction getDatabase() { return \$this->mDB ?: \$this->mDB = new DB(); }");
 
 			fwrite($fRes, "\n}");
 
