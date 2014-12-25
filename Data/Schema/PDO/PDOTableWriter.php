@@ -120,8 +120,9 @@ class PDOTableWriter implements IWritableSchema
 		$this->mColumns   = array();
 		$this->mIndexes   = array();
 		$this->mTableInfo = null;
-		if($this->mTableName && $this->mTableName !== $tableName)
+		if($this->mTableName && $this->mTableName !== $tableName) {
 			return;
+		}
 		$this->mTableInfo = func_get_args();
 	}
 

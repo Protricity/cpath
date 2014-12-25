@@ -7,8 +7,11 @@
  */
 namespace CPath\Request;
 
+use CPath\Render\HTML\Element\Form\HTMLForm;
+use CPath\Render\HTML\Element\Form\HTMLFormField;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\Validation\RequiredValidation;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
@@ -18,11 +21,13 @@ class Request implements IRequest
 {
 	private $mParameters;
     /** @var ILogListener[] */
-    private $mListeners=array();
+    private $mLogListeners=array();
 
     private $mMethodName;
     /** @var IRequestedMimeType */
     private $mMimeType=null;
+
+	private $mRequestedParams = array();
 
     public function __construct($method, $path, $parameters = array(), IRequestedMimeType $MimeType=null) {
         $this->mMethodName = $method;
@@ -61,6 +66,8 @@ class Request implements IRequest
 	 * @return String|null
 	 */
 	function getRequestValue($paramName) {
+		in_array($paramName, $this->mRequestedParams)
+			?: $this->mRequestedParams[] = $paramName;
 		return $this->getParameterValue($paramName);
 	}
 
@@ -149,7 +156,7 @@ class Request implements IRequest
      */
     function log($msg, $flags = 0) {
 	    $c = 0;
-        foreach($this->mListeners as $Log)
+        foreach($this->mLogListeners as $Log)
             $c += $Log->log($msg, $flags);
 
         $MimeType = $this->getMimeType();
@@ -165,7 +172,8 @@ class Request implements IRequest
      * @return void
      */
     function addLogListener(ILogListener $Listener) {
-        $this->mListeners[] = $Listener;
+	    if(!in_array($Listener, $this->mLogListeners))
+            $this->mLogListeners[] = $Listener;
     }
 //
 //    /**
@@ -259,7 +267,27 @@ class Request implements IRequest
 //			$Parameter = new RequiredParameter($offset);
 //			$Params->add($Parameter);
 //		}
-		return $this->getRequestValue($offset);
+		if($offset[strlen($offset)-1] === '?') {
+			$value = $this->getRequestValue(substr($offset, 0, -1));
+			return $value;
+		}
+
+		$value = $this->getRequestValue($offset);
+
+		if($value === null) {
+			static $onlyOnce = false;
+			if(!$onlyOnce) {
+				$onlyOnce = true;
+				$Form = new HTMLForm($this->getMethodName(), $this->getPath());
+				foreach ($this->mRequestedParams as $param)
+					$Form->addContent(new HTMLFormField(null, $param));
+
+				$Form->getFormField($offset)
+					->addValidation(new RequiredValidation());
+				$Form->validateRequest($this);
+			}
+		}
+		return $value;
 	}
 
 	/**

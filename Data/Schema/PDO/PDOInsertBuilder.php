@@ -48,15 +48,15 @@ class PDOInsertBuilder extends AbstractPDOQueryBuilder
 		return $this;
 	}
 
+//
+//	public function execValues($value, $_value=null) {
+//		$values = is_array($value) ? $value : func_get_args();
+//		$this->values($values);
+//		return $this->execute();
+//	}
 
-	public function execValues($value, $_value=null) {
-		$values = is_array($value) ? $value : func_get_args();
-		$this->values($values);
-		return $this->execute();
-	}
 
-
-	public function getSQL() {
+	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
 		if(!$this->mInsertSQL)

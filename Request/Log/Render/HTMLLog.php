@@ -54,7 +54,8 @@ class HTMLLog implements IRenderHTML, ILogListener
 	 * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
 	 */
 	function addLogListener(ILogListener $Listener) {
-		$this->mLogListeners[] = $Listener;
+		if(!in_array($Listener, $this->mLogListeners))
+			$this->mLogListeners[] = $Listener;
 	}
 
 	/**

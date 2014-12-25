@@ -69,7 +69,7 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	/**
 	 * Get the request value from the IRequest
 	 * @param IRequest $Request
-	 * @return mixed
+	 * @return mixed|null
 	 */
 	public function getRequestValue(IRequest $Request) {
 		$fieldName = $this->getFieldName();
@@ -80,7 +80,7 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 						return $Request->getFormFieldValue($fieldName);
 			}
 		}
-		return $Request[$fieldName];
+		return isset($Request[$fieldName]) ? $Request[$fieldName] : null;
 	}
 
 	public function getInputValue()                     { return $this->getAttribute('value'); }

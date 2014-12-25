@@ -37,7 +37,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		return $this;
 	}
 
-	public function getSQL() {
+	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
 //		if(!$this->mSelectSQL)

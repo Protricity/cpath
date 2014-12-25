@@ -9,21 +9,25 @@ namespace CPath\Data\Schema\PDO;
 
 
 use CPath\Data\Schema\IReadableSchema;
-use CPath\Request\Exceptions\RequestException;
+use CPath\Request\IRequest;
+use CPath\Request\Log\ILogListener;
 
-abstract class AbstractPDOQueryBuilder
+abstract class AbstractPDOQueryBuilder implements ILogListener
 {
 	private $mPDO;
 	private $mValues = array();
 	private $mModes = array();
 	private $mPrepared = null;
-	private $mExecuted = false;
 
+	/** @var ILogListener[] */
+	private $mLogListeners = array();
+
+	protected $mExecuted = false;
 	protected $mValueIndex = 1;
 	protected $mTableSQL = null;
 	protected $mFormat = null;
 
-	abstract function getSQL();
+	abstract protected function getSQL();
 
 	public function __construct(\PDO $PDO) {
 		$this->mPDO = $PDO;
@@ -55,6 +59,10 @@ abstract class AbstractPDOQueryBuilder
 		return $this;
 	}
 
+	public function getValues() {
+		return $this->mValues;
+	}
+
 	public function bindValue($value, $name=null) {
 		if($name === null)
 			$this->mValues[$this->mValueIndex++] = $value;
@@ -64,7 +72,10 @@ abstract class AbstractPDOQueryBuilder
 		return $this;
 	}
 
-	public function prepare() {
+	public function prepare(IRequest $Request = null) {
+		if($Request)
+			$this->addLogListener($Request);
+
 		if($this->mPrepared)
 			return $this->mPrepared;
 
@@ -73,6 +84,7 @@ abstract class AbstractPDOQueryBuilder
 
 		try {
 			$statement = $DB->prepare($sql);
+			$this->log($sql, $this::VERBOSE);
 
 		} catch (\PDOException $ex) {
 			$statement = null;
@@ -82,9 +94,11 @@ abstract class AbstractPDOQueryBuilder
 			$Schema = $DB;
 			if($Schema instanceof IReadableSchema) {
 				$TableWriter = new PDOTableWriter($DB);
-				$TableWriter->tryRepair($ex, $Schema);
-				$statement = $this->mPDO->prepare($sql);
-				$ex = null;
+				$repaired = $TableWriter->tryRepair($ex, $Schema);
+				if($repaired) {
+					$statement = $this->mPDO->prepare($sql);
+					$ex = null;
+				}
 			}
 
 			if($ex)
@@ -99,10 +113,15 @@ abstract class AbstractPDOQueryBuilder
 		return $this->mPrepared = $statement;
 	}
 
-	public function execute(Array $values = null) {
-		$statement = $this->prepare();
+	public function execute(IRequest $Request = null, Array $values = null) {
+		if($Request)
+			$this->addLogListener($Request);
+
+		$statement = $this->prepare($Request);
 		if(!$this->mExecuted) try {
 			$this->mExecuted = $statement->execute($values);
+			if(!$values)
+				$this->mValues = array();
 		} catch (\PDOException $ex) {
 			if (preg_match('/column (.*) is not unique/i', $ex->getMessage(), $matches))
 				throw new DuplicateRowException($matches[1], $ex->getMessage(), null, $ex);
@@ -114,5 +133,29 @@ abstract class AbstractPDOQueryBuilder
 
 	public function format($format) {
 		$this->mFormat = $format;
+	}
+
+	/**
+	 * Add a log entry
+	 * @param mixed $msg The log message
+	 * @param int $flags [optional] log flags
+	 * @return int the number of listeners that processed the log entry
+	 */
+	function log($msg, $flags = 0) {
+		$c = 0;
+		foreach($this->mLogListeners as $Log)
+			$c += $Log->log($msg, $flags);
+		return $c;
+	}
+
+	/**
+	 * Add a log listener callback
+	 * @param ILogListener $Listener
+	 * @return void
+	 * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
+	 */
+	function addLogListener(ILogListener $Listener) {
+		if(!in_array($Listener, $this->mLogListeners))
+			$this->mLogListeners[] = $Listener;
 	}
 }

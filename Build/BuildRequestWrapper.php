@@ -66,6 +66,7 @@ class BuildRequestWrapper extends AbstractRequestWrapper implements IBuildReques
      * @return void
      */
     function addLogListener(ILogListener $Listener) {
-        $this->mLogListeners[] = $Listener;
+	    if(!in_array($Listener, $this->mLogListeners))
+		    $this->mLogListeners[] = $Listener;
     }
 }

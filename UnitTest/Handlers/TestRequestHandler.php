@@ -17,6 +17,7 @@ use CPath\Request\CLI\CommandString;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\Executable\IPrompt;
 use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Route\CPathMap;
@@ -44,9 +45,9 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
         $flags = 0;
 
         $OriginalRequest = $Request;
-        $this->mDefaults = $Request['defaults'] || false;
+        $this->mDefaults = $Request['defaults?'] || false;
 
-        if (!$this->mDefaults && $Request['test'])
+        if (!$this->mDefaults && $Request['test?'])
             $flags |= IBuildRequest::TEST_MODE;
 
         $flags |= IBuildRequest::IS_SESSION_BUILD;
@@ -119,10 +120,11 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 
 	            /** @var ITestable $class */
                 try {
+	                $t = microtime(true);
                     $Request->log("*** Testing {$class} ***");
                     $UnitTestRequest = new UnitTestRequestWrapper($Request);
                     $class::handleStaticUnitTest($UnitTestRequest);
-                    $Request->log(sprintf("*** Test passed (%d) ***\n", $UnitTestRequest->getAssertionCount()));
+                    $Request->log(sprintf("*** Test passed (%d) in %.3f seconds ***\n", $UnitTestRequest->getAssertionCount(), (microtime(true) - $t)));
 
                 } catch (\Exception $ex) {
                     $Request->log($ex, $Request::ERROR);
@@ -143,7 +145,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
 		    $message   = sizeof($Exs) . " Exception(s) occurred during validation:";
 		    foreach($Exs as $Ex)
 			    $message .= "\n\t" . $Ex->getMessage();
-		    $this->mResponse = new Response($message, IResponse::HTTP_ERROR, $Exs[0]);
+		    $this->mResponse = new ExceptionResponse($Exs[0], $message);
 	    }
     }
 

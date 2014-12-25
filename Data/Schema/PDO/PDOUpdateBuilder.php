@@ -32,7 +32,7 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 		return $this;
 	}
 
-	public function getSQL() {
+	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
 		if(!$this->mUpdateSQL)

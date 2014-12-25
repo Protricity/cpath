@@ -20,7 +20,14 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 			return $this;
 		}
 
-		if ($whereValue) {
+		if($whereValue instanceof PDOSelectBuilder) {
+			$sql = $whereValue->getSQL();
+			$sql = preg_replace('/\n/m', "\n\t", "\n" . $sql);
+			$whereColumn = $whereColumn . " in (" . $sql . "\n)";
+			foreach($whereValue->getValues() as $k => $val)
+				$this->bindValue($val, is_int($k) ? null : $k);
+
+		} elseif ($whereValue) {
 //			$compare === '=?' ?: $compare = '=:' . $whereColumn;
 			$this->bindValue($whereValue);
 			$whereColumn = $whereColumn . ' ' . $compare;

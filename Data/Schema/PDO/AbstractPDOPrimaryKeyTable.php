@@ -7,6 +7,8 @@
  */
 namespace CPath\Data\Schema\PDO;
 
+use CPath\Request\IRequest;
+
 define('AbstractPDOPrimaryKeyTable', __NAMESPACE__ . '\\AbstractPDOPrimaryKeyTable');
 abstract class AbstractPDOPrimaryKeyTable extends AbstractPDOTable
 {
@@ -49,9 +51,9 @@ abstract class AbstractPDOPrimaryKeyTable extends AbstractPDOTable
 		return $fetch;
 	}
 
-	function insertAndReturnRowID(Array $insertData) {
+	function insertAndReturnRowID(Array $insertData, IRequest $Request=null) {
 		$this->insert($insertData)
-			->execute();
+			->execute($Request);
 		if (isset($insertData[static::PRIMARY_COLUMN]))
 			$id = $insertData[static::PRIMARY_COLUMN];
 		else

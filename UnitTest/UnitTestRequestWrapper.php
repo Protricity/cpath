@@ -19,6 +19,7 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	private $mAssertionCount = 0;
 	private $mTestSession = array();
 	private $mTestParameters = array();
+	private $mMethodMocks = array();
 
     function __construct(IRequest $Request, $flags = null) {
         parent::__construct($Request);
@@ -164,5 +165,40 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 
 	public function offsetUnset($offset) {
 		unset($this->mTestParameters[$offset]);
+	}
+
+	/**
+	 * Checks to see if a method mock is available
+	 * @param $key
+	 * @param $callback
+	 * @return bool
+	 */
+	function addMock($key, $callback) {
+		if($this->hasMock($key))
+			throw new \InvalidArgumentException("Mock already exists: {$key}");
+		$this->mMethodMocks[$key] = $callback;
+		return $this;
+	}
+
+	/**
+	 * Checks to see if a method mock is available
+	 * @param $key
+	 * @return bool
+	 */
+	function hasMock($key) {
+		return isset($this->mMethodMocks[$key]);
+	}
+
+	/**
+	 * Mock a class method
+	 * @param $key
+	 * @param $args
+	 * @return mixed
+	 */
+	function mock($key, $args) {
+		if(!$this->hasMock($key))
+			throw new \InvalidArgumentException("Mock unavailable: {$key}");
+		$callback = $this->mMethodMocks[$key];
+		return call_user_func_array($callback, $args);
 	}
 }

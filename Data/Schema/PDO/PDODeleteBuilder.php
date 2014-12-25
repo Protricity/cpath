@@ -9,7 +9,7 @@ namespace CPath\Data\Schema\PDO;
 
 class PDODeleteBuilder extends PDOWhereBuilder
 {
-	public function getSQL() {
+	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
 		if(!$this->mWhereSQL)

@@ -67,9 +67,18 @@ class PDOTableClassWriter implements IWritableSchema
 				}
 			}
 
+			$methodDocs = '';
+			if($primaryKeyColumn) {
+
+			}
 			if($primaryKeyColumn) {
 				$constList['PRIMARY_COLUMN'] = $primaryKeyColumn;
 				$abstractBaseClass           = AbstractPDOPrimaryKeyTable::className;
+				$methodDocs = <<<PHP
+
+ * @method {$fetchClassBaseName} insertOrUpdate(\${$primaryKeyColumn}, Array \$insertData) insert or update a {$fetchClassBaseName} instance
+ * @method {$fetchClassBaseName} insertAndFetch(Array \$insertData) insert and fetch a {$fetchClassBaseName} instance
+PHP;
 			}
 
 			$compareDefault = "'=?'";
@@ -102,6 +111,7 @@ class PDOTableClassWriter implements IWritableSchema
 					$tableComment .= "\n * @" . rtrim($comment);
 			}
 
+
 			// write
 
 			fwrite($fRes,
@@ -110,9 +120,7 @@ class PDOTableClassWriter implements IWritableSchema
 {$useList}
 
 /**
- * Class {$baseClassName}{$tableComment}
- * @method {$fetchClassBaseName} insertOrUpdate(\$primaryKeyValue, Array \$insertData) insert or update a {$fetchClassBaseName} instance
- * @method {$fetchClassBaseName} insertAndFetch(Array \$insertData) insert and fetch a {$fetchClassBaseName} instance
+ * Class {$baseClassName}{$tableComment}{$methodDocs}
  * @method {$fetchClassBaseName} fetch(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a {$fetchClassBaseName} instance
  * @method {$fetchClassBaseName} fetchOne(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a single {$fetchClassBaseName}
  * @method {$fetchClassBaseName}[] fetchAll(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch an array of {$fetchClassBaseName}[]

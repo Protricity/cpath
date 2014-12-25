@@ -15,11 +15,11 @@ class ExceptionResponse extends \Exception implements IResponse, IKeyMap {
 	const STR_TRACE = 'trace';
 	const STR_CLASS = 'class';
 
-    public function __construct(\Exception $ex) {
+    public function __construct(\Exception $ex, $message=null) {
 	    $code = IResponse::HTTP_ERROR;
 	    if($ex instanceof IResponse)
 		    $code = $ex->getCode();
-	    parent::__construct($ex->getMessage(), $code, $ex);
+	    parent::__construct($message ?: $ex->getMessage(), $code, $ex);
     }
 
 //    /**

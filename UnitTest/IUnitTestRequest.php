@@ -9,7 +9,7 @@ namespace CPath\UnitTest;
 
 use CPath\Request\IRequest;
 
-interface IUnitTestRequest extends IRequest //, IFlaggedRequest
+interface IUnitTestRequest extends IRequest, IUnitTestMockMethod //, IFlaggedRequest
 {
     //const USE_DEFAULTS = 0x2;
 

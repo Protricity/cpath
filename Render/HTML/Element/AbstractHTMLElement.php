@@ -156,7 +156,8 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
 	 * @return void
 	 */
 	function addLogListener(ILogListener $Listener) {
-		$this->mLogListeners[] = $Listener;
+		if(!in_array($Listener, $this->mLogListeners))
+			$this->mLogListeners[] = $Listener;
 	}
 
 	protected function getLogListeners() {

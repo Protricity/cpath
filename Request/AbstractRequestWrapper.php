@@ -14,7 +14,7 @@ abstract class AbstractRequestWrapper implements IRequest
 {
     private $mRequest;
     /** @var ILogListener[] */
-    private $mLogs=array();
+    private $mLogListeners=array();
 
     function __construct(IRequest $Request) {
         $this->mRequest = $Request;
@@ -66,7 +66,7 @@ abstract class AbstractRequestWrapper implements IRequest
      */
     function log($msg, $flags = 0) {
 	    $c = 0;
-        foreach($this->mLogs as $Log)
+        foreach($this->mLogListeners as $Log)
             $c += $Log->log($msg, $flags);
 
         $c += $this->mRequest->log($msg, $flags);
@@ -79,7 +79,8 @@ abstract class AbstractRequestWrapper implements IRequest
      * @return void
      */
     function addLogListener(ILogListener $Listener) {
-        $this->mLogs[] = $Listener;
+	    if(!in_array($Listener, $this->mLogListeners))
+            $this->mLogListeners[] = $Listener;
     }
 
     /**

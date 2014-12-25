@@ -12,6 +12,7 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 use CPath\Data\Schema\TableSchema;
+use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
 define('AbstractPDOTable', __NAMESPACE__ . '\\AbstractPDOTable');
@@ -176,18 +177,16 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		return $Insert;
 	}
 
-	function execInsert(Array $insertData) {
+	function execInsert(Array $insertData, IRequest $Request=null) {
 		$this->insert($insertData)
-			->execute();
+			->execute($Request);
 		return $this;
 	}
 
-	function delete($where, $whereColumn = null, $compare = '=?', $logic = 'AND') { // , $limit = 1
+	function delete($whereColumn, $whereValue = null, $compare = '=?', $logic = 'AND') {
 		$Delete = new PDODeleteBuilder($this->getDatabase());
 		$Delete->table(static::TABLE_NAME);
-		$Delete->where($whereColumn, $where, $compare, $logic);
-//		if($limit)
-//			$Delete->limit($limit);
+		$Delete->where($whereColumn, $whereValue, $compare, $logic);
 		return $Delete;
 	}
 
@@ -235,6 +234,7 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 	 * @return void
 	 */
 	function addLogListener(ILogListener $Listener) {
+		if(!in_array($Listener, $this->mLogListeners))
 		$this->mLogListeners[] = $Listener;
 	}
 }

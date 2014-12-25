@@ -251,8 +251,8 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 			}
 		}
 
-		if ($Exs)
-			throw new ValidationException($this, $Exs);
+		if ($Exs) {
+			throw new ValidationException($this, $Exs);}
 
 		$this->log("Form Validation completed successfully");
 
@@ -277,7 +277,8 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //	    RI::ni();
 //    }
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		foreach($this->mLogs as $msg => $flags) {
+		foreach($this->mLogs as $arr) {
+			list($msg, $flags) = $arr;
 			echo RI::ni(), '<div class="';
 			if($flags & self::ERROR)
 				echo 'error';
@@ -329,7 +330,12 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //			if($Content instanceof ILogListener)
 //				$c += $Content->log($msg, $flags);
 
-		$this->mLogs[$msg] = $flags;
+		if(is_string($msg)) {
+			$this->mLogs[$msg] = array($msg, $flags);
+
+		} else {
+			$this->mLogs[] = array($msg, $flags);
+		}
 		$c++;
 		return $c;
 	}
