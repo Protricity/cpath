@@ -7,6 +7,8 @@
  */
 namespace CPath\Data\Schema\PDO;
 
+use CPath\Request\IRequest;
+
 class PDOUpdateBuilder extends PDOWhereBuilder
 {
 	private $mUpdateSQL = null;
@@ -48,5 +50,13 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 			. ($this->mUpdateSQL)
 			. ($this->mWhereSQL)
 			. ($this->mLimitSQL);
+	}
+
+	public function execUpdate(IRequest $Request=null, $throwExceptionIfUnmodified=true) {
+		$this->execute($Request);
+		$c = $this->rowCount();
+		if($c === 0 && $throwExceptionIfUnmodified)
+			throw new PDOUnmodifiedException($this, "UPDATE Query failed to update any row(s): " . $this->getSQL());
+		return $c;
 	}
 }

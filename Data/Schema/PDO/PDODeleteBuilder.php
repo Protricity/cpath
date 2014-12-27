@@ -7,6 +7,8 @@
  */
 namespace CPath\Data\Schema\PDO;
 
+use CPath\Request\IRequest;
+
 class PDODeleteBuilder extends PDOWhereBuilder
 {
 	protected function getSQL() {
@@ -22,5 +24,13 @@ class PDODeleteBuilder extends PDOWhereBuilder
 			. ($this->mTableSQL)
 			. ($this->mWhereSQL)
 			. ($this->mLimitSQL);
+	}
+
+	public function execDelete(IRequest $Request=null, $throwExceptionIfUnmodified=true) {
+		$this->execute($Request);
+		$c = $this->rowCount();
+		if($c === 0 && $throwExceptionIfUnmodified)
+			throw new PDOUnmodifiedException($this, "DELETE Query failed to delete row(s): " . $this->getSQL());
+		return $c;
 	}
 }

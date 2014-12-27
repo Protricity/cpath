@@ -17,7 +17,8 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 	private $mPDO;
 	private $mValues = array();
 	private $mModes = array();
-	private $mPrepared = null;
+	/** @var \PDOStatement */
+	private $mStatement = null;
 
 	/** @var ILogListener[] */
 	private $mLogListeners = array();
@@ -34,7 +35,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 	}
 
 	public function __destruct() {
-		if($this->mPrepared === null) {
+		if($this->mStatement === null) {
 			$r = $this->execute();
 		}
 	}
@@ -76,8 +77,8 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 		if($Request)
 			$this->addLogListener($Request);
 
-		if($this->mPrepared)
-			return $this->mPrepared;
+		if($this->mStatement)
+			return $this->mStatement;
 
 		$DB = $this->getDatabase();
 		$sql       = $this->getSQL();
@@ -89,7 +90,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 		} catch (\PDOException $ex) {
 			$statement = null;
 			if (stripos($ex->getMessage(), 'Duplicate') !== false)
-				throw new DuplicateRowException($ex->getMessage(), null, $ex);
+				throw new PDODuplicateRowException($this, $ex->getMessage(), null, $ex);
 
 			$Schema = $DB;
 			if($Schema instanceof IReadableSchema) {
@@ -110,7 +111,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 		foreach ($this->mValues as $k => $v)
 			$statement->bindValue($k, $v);
 
-		return $this->mPrepared = $statement;
+		return $this->mStatement = $statement;
 	}
 
 	public function execute(IRequest $Request = null, Array $values = null) {
@@ -124,11 +125,16 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 				$this->mValues = array();
 		} catch (\PDOException $ex) {
 			if (preg_match('/column (.*) is not unique/i', $ex->getMessage(), $matches))
-				throw new DuplicateRowException($matches[1], $ex->getMessage(), null, $ex);
+				throw new PDODuplicateRowException($this, $matches[1], $ex->getMessage(), null, $ex);
 			throw $ex;
 		}
-//		if($this->getDatabase()->errorInfo()
 		return $this->mExecuted;
+	}
+
+	public function rowCount() {
+		if($this->mStatement)
+			return $this->mStatement->rowCount();
+		return null;
 	}
 
 	public function format($format) {

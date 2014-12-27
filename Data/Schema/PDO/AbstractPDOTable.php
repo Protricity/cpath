@@ -12,6 +12,7 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 use CPath\Data\Schema\TableSchema;
+use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
@@ -102,7 +103,7 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		} catch (\PDOException $ex) {
 			$statement = null;
 			if (stripos($ex->getMessage(), 'Duplicate') !== false)
-				throw new DuplicateRowException($ex->getMessage(), null, $ex);
+				throw new RequestException($ex->getMessage(), null, $ex);
 			$Schema = $DB;
 			if($Schema instanceof IReadableSchema) {
 				$TableWriter = new PDOTableWriter($DB);

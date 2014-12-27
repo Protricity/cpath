@@ -32,7 +32,7 @@ class PDOTableWriter implements IWritableSchema
 			list(, $type, $name) = $matches;
 			switch($type) {
 				case 'table':
-					$this->mTableName = $name;
+					//$this->mTableName = $name;
 					break;
 				case 'column':
 					break;
