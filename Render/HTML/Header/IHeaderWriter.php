@@ -9,7 +9,6 @@ namespace CPath\Render\HTML\Header;
 
 interface IHeaderWriter
 {
-
     /**
      * Write a header as raw html
      * Note: Uniqueness of html is not checked. String will be written every time

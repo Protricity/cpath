@@ -12,7 +12,6 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\XML\IRenderXML;
@@ -26,7 +25,7 @@ use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
 
 
-class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHTMLSupportHeaders, IExecutable {
+class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IRenderText, IRenderJSON, IRenderXML, IHTMLSupportHeaders, IExecutable {
 
 	private $mExecutable;
 	/** @var IResponse */
@@ -96,9 +95,13 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param IAttributes $Attr
 	 * @param IRenderHTML $Parent
+	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null, $sendHeaders = true) {
+		if ($sendHeaders)
+			$this->sendHeaders($Request);
+
 		if($this->mExecutable instanceof IRenderHTML) {
 			$this->mExecutable->renderHTML($Request, $Attr, $Parent);
 			return;
@@ -122,9 +125,13 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	/**
 	 * Render request as JSON
 	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
-	function renderJSON(IRequest $Request) {
+	function renderJSON(IRequest $Request, $sendHeaders = true) {
+		if ($sendHeaders)
+			$this->sendHeaders($Request);
+
 		if($this->mExecutable instanceof IRenderJSON) {
 			$this->mExecutable->renderJSON($Request);
 			return;
@@ -138,9 +145,13 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	/**
 	 * Render request as plain text
 	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
+	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
-	function renderText(IRequest $Request) {
+	function renderText(IRequest $Request, $sendHeaders = true) {
+		if ($sendHeaders)
+			$this->sendHeaders($Request);
+
 		if($this->mExecutable instanceof IRenderText) {
 			$this->mExecutable->renderText($Request);
 			return;
@@ -156,9 +167,13 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * @param \CPath\Request\IRequest $Request the IRequest inst for this render which contains the request and remaining args
 	 * @param string $rootElementName Optional name of the root element
 	 * @param bool $declaration if true, the <!xml...> declaration will be rendered
+	 * @param bool $sendHeaders
 	 * @return String|void always returns void
 	 */
-	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false) {
+	function renderXML(IRequest $Request, $rootElementName = 'root', $declaration = false, $sendHeaders = true) {
+		if ($sendHeaders)
+			$this->sendHeaders($Request);
+
 		if($this->mExecutable instanceof IRenderXML) {
 			$this->mExecutable->renderXML($Request);
 			return;

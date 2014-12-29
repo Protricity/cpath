@@ -7,9 +7,10 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Render\HTML\Header\IHTMLHeaderContainer;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 
-interface IHTMLElement extends IRenderHTML, IHTMLSupportHeaders, IHTMLContainerItem
+interface IHTMLElement extends IRenderHTML, IHTMLSupportHeaders, IHTMLHeaderContainer
 {
 	/**
 	 * Return element parent or null

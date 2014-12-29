@@ -7,6 +7,7 @@
  * Date: 4/06/11 */
 namespace CPath\Route;
 
+define('IRouteMap', __NAMESPACE__ . '\\IRouteMap');
 interface IRouteMap {
 
     /**

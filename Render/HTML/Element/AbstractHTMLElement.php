@@ -13,13 +13,15 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute\IAttributesAggregate;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\HTMLHeaderContainer;
 use CPath\Render\HTML\IHTMLContainer;
+use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IHTMLElement;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
-abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
+abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, IHTMLContainerItem
 {
 	const PASS_DOWN_ATTRIBUTES = false;
 
@@ -28,8 +30,8 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
 	/** @var ILogListener[] */
 	private $mLogListeners = array();
 
-	/** @var IHTMLSupportHeaders[] */
-	private $mSupportHeaders = array();
+	/** @var HTMLHeaderContainer */
+	private $mHeaders = array();
 
 	/** @var IHTMLContainer */
 	private $mParent = null;
@@ -81,9 +83,26 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
 	 * @return void
 	 */
 	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
-		foreach(func_get_args() as $Headers) {
-			$this->mSupportHeaders[] = $Headers;
-		}
+		$this->getSupportHeaders();
+		foreach(func_get_args() as $Headers)
+			$this->getSupportHeaders()->addSupportHeaders($Headers);
+	}
+
+
+	/**
+	 * @return HTMLHeaderContainer
+	 */
+	function getSupportHeaders() {
+		return $this->mHeaders ?: $this->mHeaders = new HTMLHeaderContainer();
+	}
+
+	/**
+	 * Get meta tag content or return null
+	 * @param String $name tag name
+	 * @return String|null
+	 */
+	function getMetaTagContent($name) {
+		return $this->getSupportHeaders()->getMetaTagContent($name);
 	}
 
 	/**
@@ -93,8 +112,7 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		foreach($this->mSupportHeaders as $Headers)
-			$Headers->writeHeaders($Request, $Head);
+		$this->getSupportHeaders()->writeHeaders($Request, $Head);
 	}
 
 	/**

@@ -23,7 +23,7 @@ class HTMLAjaxSupportHeaders implements IHTMLSupportHeaders
 	 * @return void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		HeaderConfig::writeJQueryHeadersOnce($Head);
+		HeaderConfig::writeJQueryHeaders($Head);
 		$Head->writeScript(__DIR__ . '/assets/ajax-support.js');
 	}
 }

@@ -19,25 +19,24 @@ use CPath\Request\Log\Render\HTMLLog;
 
 class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 {
-
 	private $mContainer;
 	private $mHTMLLog;
 	/** @var HTMLElement */
-	private $mSpanMarker;
+//	private $mSpanMarker;
 	/** @var HTMLFormField */
-	private $mInputPath;
+//	private $mInputPath;
 	/** @var \CPath\Render\HTML\Element\Form\HTMLFormField */
-	private $mInputDomain;
+//	private $mInputDomain;
 	private $mInput;
 	public function __construct($marker = '$') {
 		$this->mContainer = new HTMLElement('div', 'html-console',
 			new HTMLElement('div', 'html-console-log',
 				$this->mHTMLLog = new HTMLLog()
 			),
-			$this->mSpanMarker = new HTMLElement('span', 'html-console-marker', $marker),
-			$this->mInput = new HTMLFormField('html-console-input-text', 'text'),
-			$this->mInputPath = new HTMLFormField('html-console-input-path', 'path', null, 'hidden'),
-			$this->mInputDomain = new HTMLFormField('html-console-input-domain', 'domain', null, 'hidden')
+//			$this->mSpanMarker = new HTMLElement('span', 'html-console-marker', $marker),
+//			$this->mInput = new HTMLFormField('html-console-input-text', 'text')
+//			$this->mInputPath = new HTMLFormField('html-console-input-path', 'path', null, 'hidden'),
+//			$this->mInputDomain = new HTMLFormField('html-console-input-domain', 'domain', null, 'hidden')
 		);
 		//$this->mInput->setRows(1);
 		//$this->mHTMLLog->bindEventListener('.html-console');
@@ -58,7 +57,7 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		HeaderConfig::writeJQueryHeadersOnce($Head);
+		HeaderConfig::writeJQueryHeaders($Head);
 		$Head->writeScript(__DIR__ . '/assets/html-console.js');
 		$Head->writeStyleSheet(__DIR__ . '/assets/html-console.css');
 	}

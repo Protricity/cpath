@@ -11,7 +11,9 @@ use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\HTMLHeaderScript;
 use CPath\Render\HTML\Header\HTMLHeaderStyleSheet;
+use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLHeaderContainer;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
@@ -40,6 +42,27 @@ class HTMLContainer extends AbstractHTMLContainer
 		if(!in_array($Container, $Contents, true))
 			throw new \InvalidArgumentException("Container not found recursively: " . static::toString($Container));
 		$this->mTargetContainer = $Container;
+	}
+
+	public function addMetaTag($name, $content) {
+		$this->addSupportHeaders(new HTMLMetaTag($name, $content));
+	}
+
+	public function getMetaTagContent($name) {
+		foreach($this->getSupportHeaders() as $Header) {
+			if($Header instanceof HTMLMetaTag) {
+				if($Header->getName() === $name) {
+					return $Header->getContent();
+				}
+			}
+		}
+
+		foreach($this->getContent() as $Content)
+			if($Content instanceof IHTMLHeaderContainer)
+				if($content = $Content->getMetaTagContent($name))
+					return $content;
+
+		return null;
 	}
 
 	public function addHeaderScript($path, $defer = false, $charset = null) {
@@ -96,8 +119,6 @@ class HTMLContainer extends AbstractHTMLContainer
 			$this->mContent[$key] = $Render;
 		else
 			$this->mContent[] = $Render;
-		if($Render instanceof IHTMLContainerItem)
-			$Render->onContentAdded($this);
 	}
 
 	/**

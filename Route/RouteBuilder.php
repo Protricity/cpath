@@ -102,8 +102,11 @@ class RouteBuilder {
 
     public function writeRoute($prefix, $target, $_arg=null) {
         $argList = '';
-        for($i=1; $i<func_num_args(); $i++)
-            $argList .= ($argList ? ', ' : '') . var_export(func_get_arg($i), true);
+        for($i=1; $i<func_num_args(); $i++) {
+	        $arg = func_get_arg($i);
+	        $argList .= ($argList ? ', ' : '');
+	        $argList .= strpos($arg, 'new ') === false ? var_export($arg, true) : $arg;
+        }
 
         $this->mRoutes[$this->mGroupKey][$prefix] = $argList;
 

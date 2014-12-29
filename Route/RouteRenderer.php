@@ -91,6 +91,10 @@ final class RouteRenderer implements IRouteMapper
 
             if($Response === false) {
 	            array_unshift($this->mHandlers, $target);
+	            if (sizeof($this->mPrevious) >= 1 && $this->tryHandlers($this->mRequest,
+		            array_diff($this->mHandlers, array($target)),
+		            $this->mPrevious))
+		            return true;
 	            return false;
             }
 
@@ -128,7 +132,7 @@ final class RouteRenderer implements IRouteMapper
 			}
 
 			array_unshift($Previous, $Response);
-			return $this->tryHandlers($Request, array_diff($Handlers, array($Handler)), $Previous);
+			return $this->tryHandlers($Request, array_diff($this->mHandlers, array($Handler)), $Previous);
 		}
 
 		return false;

@@ -17,13 +17,13 @@ use CPath\Route\RouteCallback;
 class HTMLRouteNavigator implements IRenderHTML
 {
 	private $mRoute;
-	private $mSubPaths;
+	private $mSubPathLevel;
 	private $mMatch;
 	private $mPathNames = array();
 
-	public function __construct(IRouteMap $Route, $includeSubPaths = false, $matchPrefix = 'GET /') { // 'ANY /') {
+	public function __construct(IRouteMap $Route, $subPathLevel = 1, $matchPrefix = 'GET /') { // 'ANY /') {
 		$this->mRoute = $Route;
-		$this->mSubPaths = $includeSubPaths;
+		$this->mSubPathLevel = $subPathLevel;
 		$this->mMatch = $matchPrefix;
 	}
 
@@ -53,13 +53,21 @@ class HTMLRouteNavigator implements IRenderHTML
 		$Route->mapRoutes(
 			new RouteCallback(
 				function($prefix, $target, $_arg = null) use ($Request, $THIS, $match) {
-					list($matchMethod, $matchPath) = explode(' ', $match, 2);
+					$matchPath = $match;
+					$matchMethod = 'GET';
+					if(strpos($matchPath, ' ') !== false)
+						list($matchMethod, $matchPath) = explode(' ', $matchPath, 2);
 					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
 					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
 						return false;
 
+
+					$dirPath = dirname($matchPath);
+					if($dirPath === '\\')
+						$dirPath = '/';
+
 					$routePath = str_replace('\\', '/', $routePath);
-					if (strpos($routePath, $matchPath) !== 0)
+					if (strpos($routePath, $dirPath) !== 0)
 						return false;
 
 					return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath);
@@ -74,15 +82,18 @@ class HTMLRouteNavigator implements IRenderHTML
 
 		$routePath = str_replace('\\', '/', $routePath);
 
-		if(!$this->mSubPaths) {
-			if(($c = strpos($routePath, '/', 1)) > 0)
-				$routePath = substr($routePath, 0, $c + 1);
-			if(in_array($routePath, $this->mPathNames))
-				return false;
-			$this->mPathNames[] = $routePath;
-		}
+		$routeArgs = explode('/', trim($routePath, '/'));
+
+		$routePath = '/';
+		for($i=0; $i<$this->mSubPathLevel; $i++)
+			if(!empty($routeArgs[$i]) && $routeArgs[$i][0] !== ':')
+				$routePath .= $routeArgs[$i] . '/';
+
+		if(in_array($routePath, $this->mPathNames))
+			return false;
+		$this->mPathNames[] = $routePath;
 		if(!$title)
-			$title = ltrim($routePath, '/');
+			$title = rtrim($routePath, '/');
 
 		$Anchor = new HTMLAnchor($routePath, $title);
 		$Anchor->renderHTML($Request);

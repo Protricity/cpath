@@ -8,6 +8,7 @@
 namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
@@ -15,26 +16,45 @@ use Traversable;
 
 abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \IteratorAggregate
 {
+	private $mHeaders = null;
 
-	/** @var IHTMLSupportHeaders[] */
-	private $mSupportHeaders = array();
-
-
+	/**
+	 * Add support headers to content
+	 * @param IHTMLSupportHeaders $Headers
+	 * @param IHTMLSupportHeaders $_Headers [vararg]
+	 * @return void
+	 */
 	public function addSupportHeaders(IHTMLSupportHeaders $Headers, IHTMLSupportHeaders $_Headers=null) {
+		$this->getSupportHeaders();
 		foreach(func_get_args() as $Headers)
-			$this->mSupportHeaders[] = $Headers;
+			$this->getSupportHeaders()->addSupportHeaders($Headers);
 	}
 
 
 	/**
-	 * Write all support headers used by this IView inst
+	 * @return HTMLHeaderContainer
+	 */
+	function getSupportHeaders() {
+		return $this->mHeaders ?: $this->mHeaders = new HTMLHeaderContainer();
+	}
+
+	/**
+	 * Get meta tag content or return null
+	 * @param String $name tag name
+	 * @return String|null
+	 */
+	function getMetaTagContent($name) {
+		return $this->getSupportHeaders()->getMetaTagContent($name);
+	}
+
+	/**
+	 * Write all support headers used by this renderer
 	 * @param IRequest $Request
-	 * @param \CPath\Render\HTML\Header\IHeaderWriter $Head the writer inst to use
+	 * @param IHeaderWriter $Head the writer inst to use
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		foreach($this->mSupportHeaders as $Headers)
-			$Headers->writeHeaders($Request, $Head);
+		$this->getSupportHeaders()->writeHeaders($Request, $Head);
 	}
 
 	/**

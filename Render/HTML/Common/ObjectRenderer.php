@@ -35,7 +35,7 @@ use CPath\Route\CPathMap;
 use CPath\Route\IRoutable;
 use CPath\Route\RouteBuilder;
 
-class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBuildable, IHTMLContainerItem
+class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBuildable
 {
 
 	private $mObject;
@@ -262,16 +262,6 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 			$Renderer = new ResponseRenderer($Response);
 			$Renderer->renderXML($Request, $rootElementName, $declaration);
 		}
-	}
-
-	/**
-	 * Called when item is added to an IHTMLContainer
-	 * @param IHTMLContainer $Parent
-	 * @return void
-	 */
-	function onContentAdded(IHTMLContainer $Parent) {
-		if($this->mObject instanceof IHTMLContainerItem)
-			$this->mObject->onContentAdded($Parent);
 	}
 
 

@@ -21,6 +21,18 @@ interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
 	function addSupportHeaders(IHTMLSupportHeaders $Headers);
 
 	/**
+	 * Get meta tag content or return null
+	 * @param String $name tag name
+	 * @return String|null
+	 */
+	//function getMetaTagContent($name);
+
+	/**
+	 * @return IHTMLSupportHeaders[]
+	 */
+	function getSupportHeaders();
+
+	/**
 	 * Returns an array of IRenderHTML content
 	 * @param null $key if provided, get content by key
 	 * @return IRenderHTML[]
