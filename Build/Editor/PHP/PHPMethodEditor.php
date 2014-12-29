@@ -10,7 +10,7 @@ namespace CPath\Build\Editor\PHP;
 use CPath\UnitTest\ITestable;
 use CPath\UnitTest\IUnitTestRequest;
 
-class PHPMethodEditor implements ITestable
+class   PHPMethodEditor implements ITestable
 {
 
     private $mSource;
@@ -74,7 +74,7 @@ class PHPMethodEditor implements ITestable
      * Perform a unit test
      * @param IUnitTestRequest $Test the unit test request inst for this test session
      * @return void
-     * @test --disable 0
+     * @test --disable 1
      * Note: Use doctag 'test' with '--disable 1' to have this ITestable class skipped during a build
      */
     static function handleStaticUnitTest(IUnitTestRequest $Test) {
@@ -90,9 +90,9 @@ class PHPMethodEditor implements ITestable
     }
 
     public function testReplaceSrc() {
-		echo 'im working #7';
-		echo 'im not working #7';
-		echo 'im maybe working #7';
+		echo 'im working #12';
+		echo 'im not working #12';
+		echo 'im maybe working #12';
 	}
 
 }
