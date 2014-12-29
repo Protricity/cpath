@@ -116,7 +116,7 @@ PHP;
 
 			fwrite($fRes,
 				<<<PHP
-<?{$namespace}
+<?php{$namespace}
 {$useList}
 
 /**
