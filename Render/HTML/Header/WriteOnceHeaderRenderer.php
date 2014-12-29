@@ -62,7 +62,7 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
     function writeStyleSheet($styleSheetPath) {
 	    foreach($this->mReplace as $name => $filePath)
 		    $styleSheetPath = str_replace($filePath, $name, $styleSheetPath);
-	    
+
         $styleSheetPath = str_replace('\\', '/', $styleSheetPath);
         if(!in_array($styleSheetPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<link rel='stylesheet' href='", $styleSheetPath, "' />";

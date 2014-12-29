@@ -20,7 +20,7 @@ class Autoloader
 	 */
 	public static function addLoader($namespace, $path) {
 		if(is_string($path))
-			$path = trim($path, '\\/') . '/';
+			$path = rtrim($path, '\\/') . '/';
 		$namespace = str_replace('\\', '/', $namespace);
 		self::$mLoaders[$namespace] = $path;
 	}
