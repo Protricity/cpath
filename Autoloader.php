@@ -11,22 +11,23 @@ const AUTOLOADER = true;
 
 class Autoloader
 {
-    /** @var Array */
-    private static $mLoaders = array();
+	/** @var Array */
+	private static $mLoaders = array();
 
-    /**
-     * @param String $namespace with trailing backslash
-     * @param String|Callable $path
-     */
-    public static function addLoader($namespace, $path) {
-        if(is_string($path))
-            $path = trim($path, '\\') . '\\';
-        self::$mLoaders[$namespace] = $path;
-    }
+	/**
+	 * @param String $namespace with trailing backslash
+	 * @param String|Callable $path
+	 */
+	public static function addLoader($namespace, $path) {
+		if(is_string($path))
+			$path = trim($path, '\\/') . '/';
+		$namespace = str_replace('\\', '/', $namespace);
+		self::$mLoaders[$namespace] = $path;
+	}
 
-    public static function getLoaderPaths() {
-        return self::$mLoaders;
-    }
+	public static function getLoaderPaths() {
+		return self::$mLoaders;
+	}
 
 	/**
 	 * @param $className
@@ -49,22 +50,23 @@ class Autoloader
 	 * Autoloader for CPath + registered namespaces. Path matches namespace hierarchy of Class
 	 * @param $className
 	 */
-    static function loadClass($className) {
-        foreach (self::$mLoaders as $prefix => $path) {
-            if (stripos($className, $prefix) === 0) {
-                if(is_callable($path))
-                    $path = $path($className);
-                else
-                    $path = $path . substr($className, strlen($prefix) + 1) . '.php';
-                include($path);
-                return;
-            }
-        }
-    }
+	static function loadClass($className) {
+		foreach (self::$mLoaders as $prefix => $path) {
+			if (stripos($className, $prefix) === 0) {
+				if(is_callable($path))
+					$path = $path($className);
+				else
+					$path = $path . substr(str_replace('\\', '/', $className), strlen($prefix) + 1) . '.php';
+				include($path);
+				return;
+			}
+		}
+	}
 
 }
 Autoloader::addLoader(__NAMESPACE__, __DIR__);
 spl_autoload_register(__NAMESPACE__ . '\Autoloader::loadClass', true);
+
 
 
 

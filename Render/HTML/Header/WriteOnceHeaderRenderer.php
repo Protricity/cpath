@@ -12,18 +12,12 @@ use CPath\Render\Helpers\RenderIndents as RI;
 class WriteOnceHeaderRenderer implements IHeaderWriter
 {
     private $mWrittenHeaders = array();
-    private $mRootPath = null;
+	private $mReplace = array();
 
-    public function __construct($rootPath = null) {
-
-        //$autoloads = Autoloader::getLoaderPaths();
-
-        if($rootPath === null) {
-            $scriptPath = dirname($_SERVER['SCRIPT_NAME']);
-            $rootPath = realpath(getcwd());
-            $rootPath = substr($rootPath, 0, strlen($scriptPath));
-        }
-        $this->mRootPath = $rootPath;
+    public function __construct() {
+        $fileName = dirname($_SERVER['SCRIPT_FILENAME']);
+        $name = dirname($_SERVER['SCRIPT_NAME']);
+        $this->mReplace[$name] = $fileName;
     }
 
     /**
@@ -44,11 +38,9 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      * @return IHeaderWriter return inst of self
      */
     function writeScript($scriptPath, $defer = false, $charset = null) {
-        if(strpos($scriptPath, $this->mRootPath) === 0) {
-            $scriptPath = substr($scriptPath, strlen($this->mRootPath));
-        }
+	    foreach($this->mReplace as $name => $filePath)
+		    $scriptPath = str_replace($filePath, $name, $scriptPath);
         $scriptPath = str_replace('\\', '/', $scriptPath);
-
 
         if(!in_array($scriptPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<script src='", $scriptPath, "'";
@@ -68,9 +60,9 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      * @return IHeaderWriter return inst of self
      */
     function writeStyleSheet($styleSheetPath) {
-        if(strpos($styleSheetPath, $this->mRootPath) === 0) {
-            $styleSheetPath = substr($styleSheetPath, strlen($this->mRootPath));
-        }
+	    foreach($this->mReplace as $name => $filePath)
+		    $styleSheetPath = str_replace($filePath, $name, $styleSheetPath);
+	    
         $styleSheetPath = str_replace('\\', '/', $styleSheetPath);
         if(!in_array($styleSheetPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<link rel='stylesheet' href='", $styleSheetPath, "' />";

@@ -277,7 +277,6 @@ abstract class PDOTable implements IPDOTable
         } catch (\PDOException $ex) {
             if (stripos($ex->getMessage(), 'Duplicate') !== false) {
                 $err = "A Duplicate " . $this->getModelName() . " already exists";
-                if (Config::$Debug)
                     $err .= ': ' . $ex->getMessage();
                 Log::v(get_called_class(), "Duplicate " . $this->getModelName() . " already exists");
                 throw new ModelAlreadyExistsException($err, $ex->getCode(), $ex);

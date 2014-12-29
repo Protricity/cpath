@@ -61,7 +61,6 @@ class HTMLRouteNavigator implements IRenderHTML
 					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
 						return false;
 
-
 					$dirPath = dirname($matchPath);
 					if($dirPath === '\\')
 						$dirPath = '/';
