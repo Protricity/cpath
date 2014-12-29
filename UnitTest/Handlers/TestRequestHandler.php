@@ -127,12 +127,14 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
                     $Request->log(sprintf("*** Test passed (%d) in %.3f seconds ***\n", $UnitTestRequest->getAssertionCount(), (microtime(true) - $t)));
 
                 } catch (\Exception $ex) {
+	                $t = microtime(true);
+	                $Request->log(sprintf("*** Test failed in %.3f seconds: %s ***\n", (microtime(true) - $t), $ex));
                     $Request->log($ex, $Request::ERROR);
                     if($Request instanceof IPrompt)
                         $Request->prompt('error-resume', "Continue test?");
 
 	                $Exs[] = $ex;
-                    break;
+                    continue;
                 }
 
             } else {
