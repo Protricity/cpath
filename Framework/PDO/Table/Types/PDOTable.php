@@ -7,7 +7,6 @@
  */
 namespace CPath\Framework\PDO\Table\Types;
 
-use CPath\Config;
 use CPath\Framework\API\Exceptions\ValidationException;
 use CPath\Framework\PDO\Query\PDODelete;
 use CPath\Framework\PDO\Query\PDOInsert;

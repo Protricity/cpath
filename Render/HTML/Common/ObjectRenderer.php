@@ -13,8 +13,6 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLMimeType;
-use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;

@@ -8,7 +8,6 @@
 namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Common\HTMLText;
-use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
