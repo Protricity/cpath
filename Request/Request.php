@@ -11,6 +11,7 @@ use CPath\Render\HTML\Element\Form\HTMLForm;
 use CPath\Render\HTML\Element\Form\HTMLFormField;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
+use CPath\Request\Session\ISessionRequest;
 use CPath\Request\Validation\RequiredValidation;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
@@ -81,12 +82,26 @@ class Request implements IRequest
 		return $this->mParameters;
 	}
 
-    /**
-     * Matches a route prefix to this request and updates the method args with any extra path
-     * @param $routePrefix '[method] [path]'
-     * @return bool true if the route matched
-     */
-    function match($routePrefix) {
+	/**
+	 * Matches a route prefix to this request and updates the method args with any extra path
+	 * @param $routePrefix '[method] [path]'
+	 * @param int $flags
+	 * @return bool true if the route matched
+	 */
+    function match($routePrefix, $flags=0) {
+
+	    if($flags) {
+		    if($flags & IRequest::MATCH_NO_SESSION) {
+			    if($this instanceof ISessionRequest
+				    && $this->hasActiveSession())
+				    return false;
+		    }
+		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
+			    if(!$this instanceof ISessionRequest)
+				    return false;
+		    }
+	    }
+
 	    if(strpos($routePrefix, ' ') !== false)
             list($routeMethod, $path) = explode(' ', $routePrefix, 2);
 	    else

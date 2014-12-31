@@ -102,12 +102,19 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	}
 
 	/**
+	 * Returns true if the session is active, false if inactive
+	 * @return bool
+	 */
+	function hasActiveSession() {
+		return true;
+	}
+
+	/**
 	 * Start a new session
-	 * @param bool $reset if true, session will be reset
-	 * @throws \InvalidArgumentException
+	 * @internal param bool $reset if true, session will be reset
 	 * @return bool true if session was started, otherwise false
 	 */
-	function startSession($reset = false) {
+	function startSession() {
 		$this->mTestSession = array();
 		return true;
 	}

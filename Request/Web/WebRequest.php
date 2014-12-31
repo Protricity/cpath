@@ -18,6 +18,7 @@ use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
+use CPath\Request\Session\SessionRequestException;
 use CPath\Response\IResponse;
 
 class WebRequest extends Request implements ISessionRequest, ICookieRequest
@@ -148,19 +149,28 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         return null;
     }
 
-    /**
-     * Return a referenced array representing the request session
-     * @param String|null [optional] $key if set, retrieves &$[Session][$key] instead of &$[Session]
-     * @return array
-     */
+
+	/**
+	 * Returns true if the session is active, false if inactive
+	 * @return bool
+	 */
+	function hasActiveSession() {
+		if (version_compare(phpversion(), '5.4.0', '>=')) {
+			return session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE;
+		} else {
+			return session_id() === '' ? FALSE : TRUE;
+		}
+	}
+
+	/**
+	 * Return a referenced array representing the request session
+	 * @param String|null [optional] $key if set, retrieves &$[Session][$key] instead of &$[Session]
+	 * @throws SessionRequestException if no session was active
+	 * @return array
+	 */
     function &getSession($key = null) {
-        if (version_compare(phpversion(), '5.4.0', '>=')) {
-            $active = session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE;
-        } else {
-            $active = session_id() === '' ? FALSE : TRUE;
-        }
-        if(!$active)
-            session_start();
+	    if(!$this->hasActiveSession())
+		    throw new SessionRequestException("No active session");
 
         if($key === null)
             return $_SESSION;
@@ -173,35 +183,35 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	/**
 	 * Start a new session
-	 * @param bool $reset
-	 * @throws \Exception
+	 * @throws SessionRequestException
 	 * @return bool true if session was started, otherwise false
 	 */
-	function startSession($reset=false) {
-		if($reset) {
-			session_unset();
-			session_regenerate_id();
-			session_start();
-		} else {
-			if(isset($_SESSION))
-				return true;
+	function startSession() {
+		if($this->hasActiveSession())
+			throw new SessionRequestException("Session already active");
 
-			if(headers_sent($file, $line))
-				throw new \Exception("Cannot Start Session: Headers already sent by {$file}:{$line}");
+		if(isset($_SESSION))
+			return true;
 
-			if(!session_start())
-				return false;
-		}
+		if(headers_sent($file, $line))
+			throw new SessionRequestException("Cannot Start Session: Headers already sent by {$file}:{$line}");
+
+		if(!session_start())
+			return false;
 
 		return true;
 	}
 
 	/**
 	 * End current session
+	 * @throws SessionRequestException
 	 * @return bool true if session was started, otherwise false
 	 */
 	function endSession() {
-		session_regenerate_id();
+		if(!$this->hasActiveSession())
+			throw new SessionRequestException("No active session");
+		//session_regenerate_id();
+		session_unset();
 		return session_destroy();
 	}
 

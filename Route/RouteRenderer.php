@@ -9,8 +9,8 @@ namespace CPath\Route;
 
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
-use CPath\Request\Session\ISessionRequest;
-
+use CPath\Response\Common\ExceptionResponse;
+use CPath\Response\IResponse;
 
 final class RouteRenderer implements IRouteMapper
 {
@@ -69,66 +69,52 @@ final class RouteRenderer implements IRouteMapper
      * Maps a route prefix to a target class or inst, and performs a render
      * @param String $prefix route prefix i.e. GET /my/path
      * @param String|IRoutable $target the route target or inst
-     * @param null $_arg Additional varargs will be sent to the Request Handler
+     * @param null $arg Additional varargs will be sent to the Request Handler
      * @return bool if true the request was handled and should end
      */
-    function route($prefix, $target, $_arg=null) {
+    function route($prefix, $target, $arg=null) {
 
-	    if(is_int($_arg)) {
-		    switch($_arg) {
-			    case IRouteMap::FLAG_NO_SESSION:
-					if($this->mRequest instanceof ISessionRequest)
-						return false;
-				    break;
-			    case IRouteMap::FLAG_SESSION_ONLY:
-				    if(!$this->mRequest instanceof ISessionRequest)
-					    return false;
-				    break;
-		    }
-	    }
-
-        if(!$this->mRequest->match($prefix))
+        if(!$this->mRequest->match($prefix, is_int($arg) ? $arg : 0))
             return false;
 
         if($target instanceof IRouteMap) {
             return $target->mapRoutes($this);
         }
 
-        try {
-            $args = array($this->mRequest, &$this->mPrevious);
-            for($i=2; $i<func_num_args(); $i++)
-                $args[] = func_get_arg($i);
+        $args = array($this->mRequest, &$this->mPrevious);
+        for($i=2; $i<func_num_args(); $i++)
+            $args[] = func_get_arg($i);
+
+	    try {
             $Response = call_user_func_array(array($target, self::REQUEST_METHOD), $args);
-            if($Response === null || $Response === true) {
-                return true;
-            }
 
-            if($Response === false) {
-	            array_unshift($this->mHandlers, $target);
-	            if (sizeof($this->mPrevious) >= 1 && $this->tryHandlers($this->mRequest,
-		            array_diff($this->mHandlers, array($target)),
-		            $this->mPrevious))
-		            return true;
-	            return false;
-            }
+	    } catch (IResponse $ex) {
+		    $Response = $ex;
 
-	        if ($this->tryHandlers($this->mRequest,
-		        array_diff($this->mHandlers, array($target)),
-		        array_merge(array($Response), $this->mPrevious)))
-		        return true;
+	    } catch (\Exception $ex) {
+		    $Response = new ExceptionResponse($ex);
+	    }
 
-	        array_unshift($this->mPrevious, $Response);
-
-
-        } catch (\Exception $ex) {
-
-	        if ($this->tryHandlers($this->mRequest,
-		        array_diff($this->mHandlers, array($target)),
-		        array_merge(array($ex), $this->mPrevious)))
-		        return true;
-
-	        array_unshift($this->mPrevious, $ex);
+        if($Response === null || $Response === true) {
+            return true;
         }
+
+        if($Response === false) {
+            array_unshift($this->mHandlers, $target);
+            if (sizeof($this->mPrevious) >= 1 && $this->tryHandlers($this->mRequest,
+	            array_diff($this->mHandlers, array($target)),
+	            $this->mPrevious))
+	            return true;
+            return false;
+        }
+
+        if ($this->tryHandlers($this->mRequest,
+	        array_diff($this->mHandlers, array($target)),
+	        array_merge(array($Response), $this->mPrevious)))
+	        return true;
+
+        array_unshift($this->mPrevious, $Response);
+
 
         return false;
     }

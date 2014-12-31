@@ -53,17 +53,17 @@ class HTMLRouteNavigator implements IRenderHTML
 		$THIS = $this;
 		$Route->mapRoutes(
 			new RouteCallback(
-				function($prefix, $target, $_arg = null) use ($Request, $THIS, $match) {
-					if(is_int($_arg)) {
-						switch($_arg) {
-							case IRouteMap::FLAG_NO_SESSION:
-								if($Request instanceof ISessionRequest)
-									return false;
-								break;
-							case IRouteMap::FLAG_SESSION_ONLY:
-								if(!$Request instanceof ISessionRequest)
-									return false;
-								break;
+				function($prefix, $target, $flags = 0) use ($Request, $THIS, $match) {
+					if(is_int($flags)) {
+						if($flags & IRequest::MATCH_NO_SESSION) {
+							if($Request instanceof ISessionRequest
+								&& $Request->hasActiveSession())
+								return false;
+						}
+						elseif($flags & IRequest::MATCH_SESSION_ONLY) {
+							if(!$Request instanceof ISessionRequest
+								|| !$Request->hasActiveSession())
+								return false;
 						}
 					}
 

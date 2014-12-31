@@ -52,13 +52,14 @@ abstract class AbstractRequestWrapper implements IRequest, IRequestAggregate
         return $this->mRequest->getPath();
     }
 
-    /**
-     * Matches a route prefix to this request and updates the method args with any extra path
-     * @param $routePrefix '[method] [path]'
-     * @return bool true if the route matched
-     */
-    function match($routePrefix) {
-        return $this->mRequest->match($routePrefix);
+	/**
+	 * Matches a route prefix to this request and updates the method args with any extra path
+	 * @param $routePrefix '[method] [path]'
+	 * @param int $flags
+	 * @return bool true if the route matched
+	 */
+    function match($routePrefix, $flags=0) {
+        return $this->mRequest->match($routePrefix, $flags);
     }
 
 

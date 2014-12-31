@@ -11,6 +11,9 @@ use CPath\Request\Log\ILogListener;
 
 interface IRequest extends ILogListener, \ArrayAccess, \IteratorAggregate
 {
+	const MATCH_SESSION_ONLY = 0x10;
+	const MATCH_NO_SESSION   = 0x20;
+
 	/**
 	 * Get the requested Mime type for rendering purposes
 	 * @return \CPath\Request\MimeType\IRequestedMimeType
@@ -38,9 +41,10 @@ interface IRequest extends ILogListener, \ArrayAccess, \IteratorAggregate
 	/**
 	 * Matches a route prefix to this request and updates the method args with any extra path
 	 * @param $routePrefix '[method] [path]'
+	 * @param int $flags
 	 * @return bool true if the route matched
 	 */
-	function match($routePrefix);
+	function match($routePrefix, $flags=0);
 
 }
 
