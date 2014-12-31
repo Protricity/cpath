@@ -89,7 +89,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\Build\IBuildable')) {
                 /** @var IBuildable $class */
-                $Method = $Class->getMethod('handleStaticBuild');
+                $Method = $Class->getMethod('handleBuildStatic');
                 $MethodDoc = new MethodDocBlock($Method);
                 if($Tag = $MethodDoc->getNextTag(self::DOCTAG)) {
                     $args = CommandString::parseArgs($Tag->getArgString());
@@ -101,7 +101,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
                 try {
                     $Request->log("Building {$class}...");
-                    $class::handleStaticBuild($Request);
+                    $class::handleBuildStatic($Request);
 
                 } catch (\Exception $ex) {
                     $Request->log($ex, $Request::ERROR);
@@ -142,7 +142,7 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
      * @param IBuildRequest $Request the build request inst for this build session
      * @return void
      */
-    static function handleStaticBuild(IBuildRequest $Request) {
+    static function handleBuildStatic(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new CPathMap());
         $Builder->writeRoute('CLI /cpath/build', __CLASS__);
     }

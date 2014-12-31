@@ -299,7 +299,7 @@ class ObjectRenderer implements IRenderAll, IHTMLSupportHeaders, IRoutable, IBui
 	 * @build --disable 0
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
-	static function handleStaticBuild(IBuildRequest $Request) {
+	static function handleBuildStatic(IBuildRequest $Request) {
 		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__render');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}

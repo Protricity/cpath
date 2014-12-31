@@ -15,10 +15,11 @@ use CPath\Data\Map\ISequenceMapper;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
+use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\IRequest;
 use CPath\Route\IRoutable;
 
-abstract class AbstractMapRenderer implements IRenderAll, IKeyMapper, ISequenceMapper, IRoutable
+abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRenderAll, IKeyMapper, ISequenceMapper, IRoutable
 {
 	private $mIsArray = null;
 	private $mMap;
@@ -27,9 +28,11 @@ abstract class AbstractMapRenderer implements IRenderAll, IKeyMapper, ISequenceM
 	private $mFinished = false;
 
 	/**
+	 * @param IRequest $Request
 	 * @param IKeyMap|ISequenceMap $Map
 	 */
-	public function __construct($Map) {
+	public function __construct(IRequest $Request, $Map) {
+		parent::__construct($Request);
 		$this->mMap = $Map;
 	}
 

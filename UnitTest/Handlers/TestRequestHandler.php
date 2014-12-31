@@ -176,7 +176,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
      * @param IBuildRequest $Request the build request inst for this build session
      * @return void
      */
-    static function handleStaticBuild(IBuildRequest $Request) {
+    static function handleBuildStatic(IBuildRequest $Request) {
         $Builder = new RouteBuilder($Request, new CPathMap());
         $Builder->writeRoute('CLI /cpath/test', __CLASS__);
 	    @unlink(__DIR__ . '/' . self::CACHE_FILE);

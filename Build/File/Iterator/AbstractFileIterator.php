@@ -31,7 +31,7 @@ abstract class AbstractFileIterator implements File\Iterator\IFileIterator
 
     private function scan($dir) {
         foreach (scandir($dir) as $fileName) {
-            if (in_array($fileName, array('.', '..')))
+            if (in_array($fileName, array('.', '..')) || $fileName[0] === '.')
                 continue;
             $filePath = $dir . '/' . $fileName;
             $isDir = is_dir($filePath);

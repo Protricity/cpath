@@ -9,6 +9,7 @@ namespace CPath\Route;
 
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
+use CPath\Request\Session\ISessionRequest;
 
 
 final class RouteRenderer implements IRouteMapper
@@ -72,6 +73,19 @@ final class RouteRenderer implements IRouteMapper
      * @return bool if true the request was handled and should end
      */
     function route($prefix, $target, $_arg=null) {
+
+	    if(is_int($_arg)) {
+		    switch($_arg) {
+			    case IRouteMap::FLAG_NO_SESSION:
+					if($this->mRequest instanceof ISessionRequest)
+						return false;
+				    break;
+			    case IRouteMap::FLAG_SESSION_ONLY:
+				    if(!$this->mRequest instanceof ISessionRequest)
+					    return false;
+				    break;
+		    }
+	    }
 
         if(!$this->mRequest->match($prefix))
             return false;

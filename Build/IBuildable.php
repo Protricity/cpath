@@ -23,6 +23,6 @@ interface IBuildable {
      * @build --disable 0
      * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
      */
-    static function handleStaticBuild(IBuildRequest $Request);
+    static function handleBuildStatic(IBuildRequest $Request);
 }
 

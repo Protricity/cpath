@@ -9,6 +9,8 @@ namespace CPath\Route;
 
 define('IRouteMap', __NAMESPACE__ . '\\IRouteMap');
 interface IRouteMap {
+	const FLAG_SESSION_ONLY = 0x10;
+	const FLAG_NO_SESSION   = 0x20;
 
     /**
      * Maps all routes to the route map. Returns true if the route prefix was matched

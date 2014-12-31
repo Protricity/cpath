@@ -11,6 +11,10 @@ use CPath\Request\IRequest;
 
 class HTMLMetaTag implements IHTMLSupportHeaders
 {
+	const META_TITLE = 'title';
+	const META_AUTHOR = 'author';
+	const META_DESCRIPTION = 'description';
+
 	private $mName, $mContent;
 
 	public function __construct($name, $content) {

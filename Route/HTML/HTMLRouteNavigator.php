@@ -11,6 +11,7 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLAnchor;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
+use CPath\Request\Session\ISessionRequest;
 use CPath\Route\IRouteMap;
 use CPath\Route\RouteCallback;
 
@@ -53,6 +54,19 @@ class HTMLRouteNavigator implements IRenderHTML
 		$Route->mapRoutes(
 			new RouteCallback(
 				function($prefix, $target, $_arg = null) use ($Request, $THIS, $match) {
+					if(is_int($_arg)) {
+						switch($_arg) {
+							case IRouteMap::FLAG_NO_SESSION:
+								if($Request instanceof ISessionRequest)
+									return false;
+								break;
+							case IRouteMap::FLAG_SESSION_ONLY:
+								if(!$Request instanceof ISessionRequest)
+									return false;
+								break;
+						}
+					}
+
 					$matchPath = $match;
 					$matchMethod = 'GET';
 					if(strpos($matchPath, ' ') !== false)

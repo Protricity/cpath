@@ -22,8 +22,8 @@ class XMLMapRenderer extends AbstractMapRenderer implements IBuildable
 {
 	private $mRootElement, $mDeclaration;
 
-	public function __construct($Map) {
-		parent::__construct($Map);
+	public function __construct(IRequest $Request, $Map) {
+		parent::__construct($Request, $Map);
 	}
 
 	protected function renderKeyValue($key, $value) {
@@ -88,7 +88,7 @@ class XMLMapRenderer extends AbstractMapRenderer implements IBuildable
 		$Object = reset($Previous);
 		if ($Request->getMimeType() instanceof XMLMimeType)
 			if ($Object instanceof IKeyMap || $Object instanceof ISequenceMap)
-				return new static($Object);
+				return new static($Request, $Object);
 
 		return false;
 	}
@@ -100,7 +100,7 @@ class XMLMapRenderer extends AbstractMapRenderer implements IBuildable
 	 * @build --disable 0
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
-	static function handleStaticBuild(IBuildRequest $Request) {
+	static function handleBuildStatic(IBuildRequest $Request) {
 		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_map_xml');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}

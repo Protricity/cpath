@@ -10,7 +10,7 @@ namespace CPath\Request;
 use CPath\Request\Log\ILogListener;
 use Traversable;
 
-abstract class AbstractRequestWrapper implements IRequest
+abstract class AbstractRequestWrapper implements IRequest, IRequestAggregate
 {
     private $mRequest;
     /** @var ILogListener[] */
@@ -20,6 +20,10 @@ abstract class AbstractRequestWrapper implements IRequest
         $this->mRequest = $Request;
     }
 
+	/**
+	 * Return the aggregate request instance
+	 * @return IRequest
+	 */
     function getWrappedRequest() {
         return $this->mRequest;
     }

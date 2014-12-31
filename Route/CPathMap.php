@@ -26,9 +26,6 @@ class CPathMap implements IRouteMap
      */
     function mapRoutes(IRouteMapper $Map) {
 		return
-			// @group CPath\Backend\BackendIndexHandler
-			$Map->route('ANY /cpath/', 'CPath\\Backend\\BackendIndexHandler') ||
-
 			// @group CPath\Build\Handlers\BuildRequestHandler
 			$Map->route('CLI /cpath/build', 'CPath\\Build\\Handlers\\BuildRequestHandler') ||
 
