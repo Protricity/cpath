@@ -31,6 +31,7 @@ class RenderableResponse extends Response implements IHTMLContainer
 	 */
 	function __construct($message=NULL, $status=true, $_content=null) {
 		$this->mContainer = new HTMLContainer();
+		$this->mContainer->onContentAdded($this);
 		$args = func_get_args();
 		foreach($args as $arg)
 			if($arg instanceof IRenderHTML)

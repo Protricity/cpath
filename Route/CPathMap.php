@@ -35,17 +35,8 @@ class CPathMap implements IRouteMap
 			// @group __render
 			$Map->route('ANY *', 'CPath\\Render\\HTML\\Common\\ObjectRenderer') ||
 
-			// @group _map_html
-			$Map->route('ANY *', 'CPath\\Render\\HTML\\HTMLMapRenderer') ||
-
-			// @group _map_json
-			$Map->route('ANY *', 'CPath\\Render\\JSON\\JSONMapRenderer') ||
-
-			// @group _map_text
-			$Map->route('ANY *', 'CPath\\Render\\Text\\TextMapRenderer') ||
-
-			// @group _map_xml
-			$Map->route('ANY *', 'CPath\\Render\\XML\\XMLMapRenderer');
+			// @group _map
+			$Map->route('ANY *', 'CPath\\Render\\Map\\MapRenderer');
 	}
 
     // Static

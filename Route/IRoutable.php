@@ -9,7 +9,10 @@ namespace CPath\Route;
 
 use CPath\Request\IRequest;
 
+
 interface IRoutable {
+	const ROUTE_METHOD = 'routeRequestStatic';
+	const INTERFACE_CLASS = __CLASS__;
 
     /**
      * Route the request to this class object and return the object

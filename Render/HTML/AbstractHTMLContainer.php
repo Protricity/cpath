@@ -7,15 +7,36 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Render\Handler\RenderHandler;
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 use Traversable;
 
-abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \IteratorAggregate
+abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerItem, \ArrayAccess, \IteratorAggregate
 {
 	private $mHeaders = null;
+
+	/** @var IHTMLContainer */
+	private $mParent = null;
+
+	/**
+	 * Return element parent or null
+	 * @return IHTMLContainer|null
+	 */
+	public function getParent() {
+		return $this->mParent;
+	}
+
+	/**
+	 * Called when item is added to an IHTMLContainer
+	 * @param IHTMLContainer $Parent
+	 * @return void
+	 */
+	function onContentAdded(IHTMLContainer $Parent) {
+		$this->mParent = $Parent;
+	}
 
 	/**
 	 * Add support headers to content
@@ -115,6 +136,7 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, \ArrayAccess, \I
 	public function offsetSet($offset, $value) {
 		if (!$value instanceof IRenderHTML)
 			$value = new HTMLText($value);
+
 		$this->addContent($value, $offset);
 	}
 

@@ -15,4 +15,10 @@ interface IHTMLContainerItem
 	 * @return void
 	 */
 	function onContentAdded(IHTMLContainer $Parent);
+
+	/**
+	 * Return element parent or null
+	 * @return IHTMLContainer|null
+	 */
+	function getParent();
 }

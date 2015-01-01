@@ -43,6 +43,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		    $this->addClass($classList);
 
 	    $this->mContent = new HTMLContainer();
+	    $this->mContent->onContentAdded($this);
 
 	    foreach(func_get_args() as $i => $arg)
 		    if($i >= 2 || !is_string($arg))

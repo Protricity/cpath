@@ -86,7 +86,12 @@ final class RouteRenderer implements IRouteMapper
             $args[] = func_get_arg($i);
 
 	    try {
-            $Response = call_user_func_array(array($target, self::REQUEST_METHOD), $args);
+		    $i = class_implements($target);
+		    if(in_array(IRoutable::INTERFACE_CLASS, $i)) {
+			    $Response = call_user_func_array(array($target, self::REQUEST_METHOD), $args);
+		    } else {
+			    return false;
+		    }
 
 	    } catch (IResponse $ex) {
 		    $Response = $ex;

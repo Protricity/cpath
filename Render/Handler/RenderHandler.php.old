@@ -1,0 +1,47 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: ari
+ * Date: 12/31/2014
+ * Time: 4:30 PM
+ */
+namespace CPath\Render\Handler;
+
+use CPath\Render\IRenderAll;
+use CPath\Request\IRequest;
+
+final class RenderHandler implements IRenderHandler
+{
+	/** @var IRenderHandler[] */
+	private static $Handlers = array();
+
+	function addRenderHandler(IRenderHandler $Handler) {
+		self::$Handlers[] = $Handler;
+	}
+
+	/**
+	 * Return true if the object can be rendered
+	 * @param $Object
+	 * @return bool
+	 */
+	function canHandle($Object) {
+		foreach (self::$Handlers as $Handler)
+			if ($Handler->canHandle($Object))
+				return true;
+
+		return false;
+	}
+
+	/**
+	 * Return a renderer for this object
+	 * @param IRequest $Request
+	 * @param $Object
+	 * @return IRenderAll
+	 */
+	function getRenderer(IRequest $Request, $Object) {
+		foreach (self::$Handlers as $Handler)
+			if ($Handler->canHandle($Object))
+				return $Handler->getRenderer($Request, $Object);
+		throw new \InvalidArgumentException("Could not find renderer for " . get_class($Object));
+	}
+}

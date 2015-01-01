@@ -14,7 +14,7 @@ class Attributes implements IAttributes {
     private $mAttributes = array();
 
     function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
-	    $args = $attrName === null ? func_get_args() : array();
+	    $args = $attrName !== null ? func_get_args() : array();
 	    for($i=0; $i<sizeof($args); $i+=2) {
 		    $attrName = $args[$i];
 		    if(isset($args[$i+1])) {

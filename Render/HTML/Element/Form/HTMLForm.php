@@ -135,27 +135,22 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 	public function setAction($action)      { $this->setAttribute('action', $action); }
 
 
-	public function setFormValues(Array $values, IHTMLContainer $Container=null) {
+	public function setFormValues(IRequest $Request, IHTMLContainer $Container=null) {
 		if(!$Container)
 			$Container = $this;
 
-		foreach($Container->getContentRecursive() as $Content) {
+		foreach($Container->getContent() as $Content) {
 			if($Content instanceof IHTMLContainer)
-				$values = $this->setFormValues($values, $Content);
+				$this->setFormValues($Request, $Content);
 
 			if(!$Content instanceof IHTMLFormField)
 				continue;
 
 			$name = $Content->getFieldName();
-			if(isset($values[$name])) {
-				$Content->setInputValue($values[$name]);
-				unset($values[$name]);
+			if(isset($Request[$name])) {
+				$Content->setInputValue($Request[$name]);
 			}
 		}
-
-		return $values;
-//		if($values)
-//			throw new \InvalidArgumentException("Form fields not found: " . implode(', ', array_keys($values)));
 	}
 
 //    public function addSubmit($classList = null, $value = null, $name = null) {

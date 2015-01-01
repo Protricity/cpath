@@ -13,7 +13,6 @@ use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainerItem;
-use CPath\Render\HTML\IHTMLElement;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
@@ -22,7 +21,7 @@ use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 use CPath\Request\Validation\ValidationCallback;
 
-class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IValidation, ILogListener, IHTMLContainerItem
+class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IValidation, ILogListener
 {
 	const NODE_TYPE = 'input';
 	const INPUT_TYPE = null;
@@ -53,7 +52,7 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 		    $this->setInputValue($value);
 
 	    foreach(func_get_args() as $i => $arg)
-		    if($i >= 4 || !is_string($arg))
+		    if(!is_string($arg))
 			    $this->addVarArg($arg);
     }
 
@@ -108,7 +107,7 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 		while($Parent) {
 			if($Parent instanceof HTMLForm)
 				return $Parent;
-			if($Parent instanceof IHTMLElement)
+			if($Parent instanceof IHTMLContainerItem)
 				$Parent = $Parent->getParent();
 			else
 				return null;

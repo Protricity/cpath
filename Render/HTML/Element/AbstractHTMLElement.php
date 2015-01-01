@@ -12,16 +12,16 @@ use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute\IAttributesAggregate;
 use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLHeaderContainer;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLHeaderContainer;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IHTMLContainerItem;
-use CPath\Render\HTML\IHTMLElement;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 
-abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, IHTMLContainerItem
+abstract class AbstractHTMLElement extends Attributes implements IRenderHTML, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
 {
 	const PASS_DOWN_ATTRIBUTES = false;
 
@@ -60,6 +60,15 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, I
 	 */
 	public function getParent() {
 		return $this->mParent;
+	}
+
+	/**
+	 * Called when item is added to an IHTMLContainer
+	 * @param IHTMLContainer $Parent
+	 * @return void
+	 */
+	function onContentAdded(IHTMLContainer $Parent) {
+		$this->mParent = $Parent;
 	}
 
 	protected function addVarArg($arg) {
@@ -157,15 +166,6 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, I
 			echo RI::ni(), "<", $this->getElementType(), $this->renderHTMLAttributes($Request), '/>';
 
 		}
-	}
-
-	/**
-	 * Called when item is added to an IHTMLContainer
-	 * @param IHTMLContainer $Parent
-	 * @return void
-	 */
-	function onContentAdded(IHTMLContainer $Parent) {
-		$this->mParent = $Parent;
 	}
 
 	/**

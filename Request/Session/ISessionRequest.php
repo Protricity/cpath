@@ -7,7 +7,6 @@
  */
 namespace CPath\Request\Session;
 
-use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 
 interface ISessionRequest extends IRequest

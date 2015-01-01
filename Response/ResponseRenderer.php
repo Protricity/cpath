@@ -18,6 +18,7 @@ use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
 use CPath\Render\JSON\JSONMapRenderer;
 use CPath\Render\JSON\JSONMimeType;
+use CPath\Render\Map\MapRenderer;
 use CPath\Render\Text\IRenderText;
 use CPath\Render\Text\TextMapRenderer;
 use CPath\Render\Text\TextMimeType;
@@ -205,7 +206,8 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 			$Response->renderHTML($Request, $Attr, $Parent);
 
 		} else {
-			$Mapper = new HTMLMapRenderer($Request, $this);
+			$Mapper = new MapRenderer($this);
+			$Mapper = $Mapper->getRenderer($Request);
 			$Mapper->renderHTML($Request, $Attr, $Parent);
 		}
 	}
@@ -221,11 +223,13 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
             $Response->renderJSON($Request);
 
         } elseif($Response instanceof IKeyMap) {
-	        $Mapper = new JSONMapRenderer($Request, $Response);
-	        $Mapper->renderJSON($Request);
+	        $Mapper = new MapRenderer($this);
+	        $Mapper = $Mapper->getRenderer($Request);
+	        $Response->mapKeys($Mapper);
 
         } else {
-	        $Mapper = new JSONMapRenderer($Request, $this);
+	        $Mapper = new MapRenderer($this);
+	        $Mapper = $Mapper->getRenderer($Request);
 	        $Mapper->renderJSON($Request);
         }
     }
@@ -243,11 +247,13 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
             $Response->renderXML($Request, $rootElementName, $declaration);
 
         } elseif($Response instanceof IKeyMap) {
-            $Mapper = new XMLMapRenderer($Request, $rootElementName, true);
+	        $Mapper = new MapRenderer($this);
+	        $Mapper = $Mapper->getRenderer($Request);
             $Response->mapKeys($Mapper);
 
         } else {
-	        $Mapper = new XMLMapRenderer($Request, $this);
+	        $Mapper = new MapRenderer($this);
+	        $Mapper = $Mapper->getRenderer($Request);
 	        $Mapper->renderXML($Request, $rootElementName, true);
         }
     }
@@ -263,7 +269,8 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
             $Response->renderText($Request);
 
         } else {
-	        $Mapper = new TextMapRenderer($Request, $this);
+	        $Mapper = new MapRenderer($this);
+	        $Mapper = $Mapper->getRenderer($Request);
 	        $Mapper->renderText($Request);
         }
     }

@@ -17,9 +17,8 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\IRenderAll;
 use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\IRequest;
-use CPath\Route\IRoutable;
 
-abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRenderAll, IKeyMapper, ISequenceMapper, IRoutable
+abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRenderAll, IKeyMapper, ISequenceMapper
 {
 	private $mIsArray = null;
 	private $mMap;
@@ -62,6 +61,19 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 	abstract protected function renderStart($isArray);
 
 	abstract protected function renderEnd($isArray);
+
+//	/**
+//	 * Customize a value
+//	 * @param $value
+//	 */
+//	abstract protected function processValue(&$value);
+//
+//	/**
+//	 * Customize a key'ed value
+//	 * @param $key
+//	 * @param $value
+//	 */
+//	abstract protected function processKeyValue($key, &$value);
 
 	protected function getRequest() {
 		return $this->mRequest;
