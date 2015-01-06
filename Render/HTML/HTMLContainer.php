@@ -94,7 +94,7 @@ class HTMLContainer extends AbstractHTMLContainer
 	 * @param $content
 	 * @param null $_content
 	 */
-	protected function addAll($content, $_content=null) {
+	public function addAll($content, $_content=null) {
 		foreach(func_get_args() as $arg) {
 			if(is_array($arg)) {
 				foreach($arg as $a)
@@ -112,12 +112,16 @@ class HTMLContainer extends AbstractHTMLContainer
 	 * @return void
 	 */
 	function addContent(IRenderHTML $Render, $key = null) {
-		if($this->mTargetContainer)
+		if($this->mTargetContainer) {
 			$this->mTargetContainer->addContent($Render, $key);
-		else if ($key !== null)
+			return;
+		}
+
+		if ($key !== null) {
 			$this->mContent[$key] = $Render;
-		else
+		} else {
 			$this->mContent[] = $Render;
+		}
 		if($Render instanceof IHTMLContainerItem)
 			$Render->onContentAdded($this);
 	}
@@ -181,9 +185,8 @@ class HTMLContainer extends AbstractHTMLContainer
 		foreach($Container->getContent() as $Content) {
 			$array[] = $Content;
 			if($Content instanceof IHTMLContainer) {
-				foreach($this->getContentRecursive($Content) as $Content2) {
-					$array[] = $Content2;
-				}
+				foreach($this->getContentRecursive($Content) as $C)
+					$array[] = $C;
 			}
 		}
 

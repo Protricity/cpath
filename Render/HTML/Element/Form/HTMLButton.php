@@ -8,24 +8,25 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
-class HTMLButton extends HTMLFormField
+class HTMLButton extends HTMLInputField
 {
 	const NODE_TYPE = 'button';
 
 	private $mContent;
 
 	/**
-	 * @param String|null $classList a list of class elements
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
 	 * @param String|null $type input type (type=[])
+	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($classList = null, $name = null, $value = null, $type = null) {
+	public function __construct($name = null, $value = null, $type = null) {
 		$this->mContent = $value ?: ucwords($name);
-		parent::__construct($classList, $name, null, $type);
+		parent::__construct($name, null, $type);
 	}
 
 	public function getInputValue()                     { return $this->mContent; }

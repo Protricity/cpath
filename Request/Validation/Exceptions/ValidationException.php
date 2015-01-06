@@ -44,7 +44,7 @@ class ValidationException extends RequestException implements IRenderHTML, IHTML
 	}
 
 	function getForm() {
-		return $this->getForm();
+		return $this->mForm;
 	}
 
 	function setForm(HTMLForm $Form) {

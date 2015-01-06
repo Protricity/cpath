@@ -7,15 +7,24 @@
  */
 namespace CPath\Request\Executable;
 
+use CPath\Build\IBuildable;
+use CPath\Build\IBuildRequest;
 use CPath\Render\HTML\Attribute;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\IRenderAll;
 use CPath\Render\JSON\IRenderJSON;
+use CPath\Render\JSON\JSONMimeType;
 use CPath\Render\Text\IRenderText;
+use CPath\Render\Text\TextMimeType;
 use CPath\Render\XML\IRenderXML;
+use CPath\Render\XML\XMLMimeType;
+use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
+use CPath\Request\NonFormRequestWrapper;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
 use CPath\Response\Common\ExceptionResponse;
@@ -23,15 +32,20 @@ use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
+use CPath\Route\CPathMap;
+use CPath\Route\IRoutable;
+use CPath\Route\RouteBuilder;
 
 
-class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IRenderText, IRenderJSON, IRenderXML, IHTMLSupportHeaders, IExecutable {
+class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHTMLSupportHeaders, IExecutable, IRoutable, IBuildable {
 
 	private $mExecutable;
 	/** @var IResponse */
 	private $mResponse=null;
-    public function __construct(IExecutable $Executable) {
+	private $mUseFormRequest = false;
+    public function __construct(IExecutable $Executable, $useFormRequest=false) {
         $this->mExecutable = $Executable;
+	    $this->mUseFormRequest = $useFormRequest;
     }
 
 	/**
@@ -40,6 +54,11 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IR
 	 * @return IResponse the execution response
 	 */
 	function execute(IRequest $Request) {
+		if($Request instanceof WebFormRequest && !$this->mUseFormRequest)
+			$Request = $Request->getWebRequest();
+		if($Request instanceof IFormRequest && !$this->mUseFormRequest)
+			$Request = new NonFormRequestWrapper($Request);
+
 		try {
 			$Response = $this->mExecutable->execute($Request)
 			?: new Response("No Response", IResponse::HTTP_ERROR);
@@ -185,6 +204,34 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IR
 	}
 
 	/**
+	 * Renders a response object or returns false
+	 * @param IRequest $Request the IRequest inst for this render
+	 * @param bool $sendHeaders
+	 * @return bool returns false if no rendering occurred
+	 */
+	function render(IRequest $Request, $sendHeaders = true) {
+		$MimeType = $Request->getMimeType();
+
+		if ($MimeType instanceof HTMLMimeType) {
+			$this->renderHTML($Request, null, $this, $sendHeaders);
+			return true;
+		}
+		if ($MimeType instanceof XMLMimeType) {
+			$this->renderXML($Request, $sendHeaders);
+			return true;
+		}
+		if ($MimeType instanceof JSONMimeType) {
+			$this->renderJSON($Request, $sendHeaders);
+			return true;
+		}
+		if ($MimeType instanceof TextMimeType) {
+			$this->renderText($Request, $sendHeaders);
+			return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Get the request status code
 	 * @return int
 	 */
@@ -202,5 +249,39 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderHTML, IR
 		return $this->mResponse
 			? $this->mResponse->getMessage()
 			: "No Execution";
+	}
+
+	// Static
+
+	/**
+	 * Handle this request and render any content
+	 * @param IBuildRequest $Request the build request inst for this build session
+	 * @return void
+	 * @build --disable 0
+	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
+	 */
+	static function handleBuildStatic(IBuildRequest $Request) {
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_executable');
+		$RouteBuilder->writeRoute('ANY *', __CLASS__);
+	}
+
+	/**
+	 * Route the request to this class object and return the object
+	 * @param IRequest $Request the IRequest inst for this render
+	 * @param array|null $Previous all previous response object that were passed from a handler, if any
+	 * @param null|mixed $_arg [varargs] passed by route map
+	 * @return void|bool|Object returns a response object
+	 * If nothing is returned (or bool[true]), it is assumed that rendering has occurred and the request ends
+	 * If false is returned, this static handler will be called again if another handler returns an object
+	 * If an object is returned, it is passed along to the next handler
+	 */
+	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
+		if(sizeof($Previous) === 0
+			|| !$Previous[0] instanceof IExecutable) {
+			return false;
+		}
+
+		$Object = $Previous[0];
+		return new ExecutableRenderer($Object, true);
 	}
 }

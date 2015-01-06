@@ -20,8 +20,9 @@ use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
+use CPath\Response\IResponse;
 
-abstract class AbstractHTMLElement extends Attributes implements IRenderHTML, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
+abstract class AbstractHTMLElement extends Attributes implements IResponse, IRenderHTML, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
 {
 	const PASS_DOWN_ATTRIBUTES = false;
 
@@ -52,6 +53,23 @@ abstract class AbstractHTMLElement extends Attributes implements IRenderHTML, IH
 			$arg = func_get_arg($i);
 			$this->addVarArg($arg);
 		}
+	}
+
+
+	/**
+	 * Get the request status code
+	 * @return int
+	 */
+	function getCode() {
+		return IResponse::HTTP_SUCCESS;
+	}
+
+	/**
+	 * Get the IResponse Message
+	 * @return String
+	 */
+	function getMessage() {
+		return $this->getElementType() . " element";
 	}
 
 	/**

@@ -9,7 +9,7 @@ namespace CPath\Render\HTML\Attribute;
 
 use CPath\Request\IRequest;
 
-class StyleAttributes implements IStyleAttributes, IAttributes
+class StyleAttributes implements IAttributes
 {
 	private $mStyle = array();
 	function __construct($styleName=null, $styleValue=null, $_styleName=null, $_styleValue=null) {

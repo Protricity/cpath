@@ -10,7 +10,7 @@ namespace CPath\Request;
 use CPath\Request\Log\ILogListener;
 use Traversable;
 
-abstract class AbstractRequestWrapper implements IRequest, IRequestAggregate
+abstract class AbstractRequestWrapper implements IRequest, IRequestAggregate // No form request
 {
     private $mRequest;
     /** @var ILogListener[] */

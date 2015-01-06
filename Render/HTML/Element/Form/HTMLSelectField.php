@@ -14,11 +14,12 @@ use CPath\Data\Map\SequenceMapCallback;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\Form;
+use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
 
-class HTMLSelectField extends HTMLFormField implements ISequenceMap
+class HTMLSelectField extends HTMLInputField implements ISequenceMap
 {
 	const NODE_TYPE = 'select';
 
@@ -26,12 +27,12 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 	private $mSelected = array();
 
 	/**
-	 * @param String|null $classList a list of class elements
 	 * @param String|null $name field name (name=[])
 	 * @param String|null|Array|IAttributes|IValidation $_options [varargs] select options as string, array, or IValidation || IAttributes instance
+	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($classList = null, $name = null, $_options = null) {
-		parent::__construct($classList, $name);
+	public function __construct($name = null, $_options = null) {
+		parent::__construct($name);
 
 		foreach(func_get_args() as $i => $arg)
 			if($i >= 2 || !is_string($arg))
@@ -56,16 +57,20 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 
 
 	protected function addVarArg($arg, $allowHTMLAttributeString=false) {
-		if(is_string($arg))
+		if(is_array($arg)) {
+			foreach($arg as $k=>$a)
+				$this->addOption($a, is_int($k) ? null : $k);
+		} else if(is_string($arg)) {
 			$this->addOption($arg);
-		else
+		} else {
 			parent::addVarArg($arg, $allowHTMLAttributeString);
+		}
 	}
 
 
 	public function addOption($value, $description=null, $selected=false) {
 		if($description) {
-			$this->mValues[] = array($value, $description, $selected);
+			$this->mValues[] = array($value, $description);
 		} else {
 			$this->mValues[] = $value;
 		}
@@ -103,11 +108,10 @@ class HTMLSelectField extends HTMLFormField implements ISequenceMap
 
 		foreach($this->mValues as $value) {
 			if(is_array($value)) {
-				foreach($value as $k=>$v) {
-					$done = $Map->mapNext($v, is_int($k) ? null : $k, $this->isSelected($v));
-					if($done === true)
-						break;
-				}
+				list($value, $description) = $value;
+				$done = $Map->mapNext($value, $description, $this->isSelected($value));
+				if($done === true)
+					break;
 
 			} elseif ($value instanceof ISequenceMap) {
 				$value->mapSequence($Map);

@@ -5,12 +5,12 @@
  * Date: 9/27/14
  * Time: 5:10 PM
  */
-namespace CPath\Render\HTML\Element\Form;
+namespace CPath\Render\HTML\Element;
 
-use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\AbstractHTMLElement;
-use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Element\Form\HTMLForm;
+use CPath\Render\HTML\Element\Form\HTMLSubmit;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
@@ -21,7 +21,7 @@ use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 use CPath\Request\Validation\ValidationCallback;
 
-class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IValidation, ILogListener
+class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IValidation, ILogListener
 {
 	const NODE_TYPE = 'input';
 	const INPUT_TYPE = null;
@@ -32,16 +32,14 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	private $mLogs = array();
 
 	/**
-	 * @param String|null $classList a list of class elements
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
 	 * @param String|null $type input type (type=[])
-	 * @param String|null|Array|IAttributes|IHTMLSupportHeaders|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
+	 * @param String|null|Array|IAttributes|IHTMLSupportHeaders|IValidation $_content [varargs] class as string, array, or IValidation || IAttributes instance
+	 * @internal param null|String $classList a list of class elements
 	 */
-    public function __construct($classList = null, $name = null, $value = null, $type = null, $_validation = null) {
+    public function __construct($name = null, $value = null, $type = null, $_content = null) {
         parent::__construct(static::NODE_TYPE);
-	    if(is_string($classList))
-		    $this->addClass($classList);
 	    if(is_string($name))
 		    $this->setFieldName($name);
 	    if($type === null)
@@ -123,12 +121,12 @@ class HTMLFormField extends AbstractHTMLElement implements IHTMLFormField, IVali
 	 * @return String|void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		foreach($this->mLogs as $msg => $flags) {
-			echo RI::ni(), '<div class="';
-			if($flags & self::ERROR)
-				echo 'error';
-			echo '">', $msg, '</div>';
-		}
+//		foreach($this->mLogs as $msg => $flags) {
+//			echo RI::ni(), '<div class="';
+//			if($flags & self::ERROR)
+//				echo 'error';
+//			echo '">', $msg, '</div>';
+//		}
 
 		parent::renderHTML($Request, $Attr, $Parent);
 	}

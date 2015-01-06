@@ -8,7 +8,7 @@
 namespace CPath\Request;
 
 use CPath\Render\HTML\Element\Form\HTMLForm;
-use CPath\Render\HTML\Element\Form\HTMLFormField;
+use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Session\ISessionRequest;
@@ -92,12 +92,13 @@ class Request implements IRequest
 
 	    if($flags) {
 		    if($flags & IRequest::MATCH_NO_SESSION) {
-			    if($this instanceof ISessionRequest
-				    && $this->hasActiveSession())
-				    return false;
+//			    if($this instanceof ISessionRequest
+//				    && $this->hasActiveSession())
+//				    return false;
 		    }
 		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
-			    if(!$this instanceof ISessionRequest)
+			    if(!$this instanceof ISessionRequest
+				    || !$this->hasActiveSession())
 				    return false;
 		    }
 	    }
@@ -295,10 +296,13 @@ class Request implements IRequest
 				$onlyOnce = true;
 				$Form = new HTMLForm($this->getMethodName(), $this->getPath());
 				foreach ($this->mRequestedParams as $param)
-					$Form->addContent(new HTMLFormField(null, $param));
+					$Form->addAll(
+						$param,
+						new HTMLInputField($param,
+							new RequiredValidation()
+						)
+					);
 
-				$Form->getFormField($offset)
-					->addValidation(new RequiredValidation());
 				$Form->validateRequest($this);
 			}
 		}

@@ -24,8 +24,8 @@ class RequiredValidation implements IValidation, IAttributesAggregate
 	 * @return mixed validated value
 	 */
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
-		if (!$value)
-			throw new RequestException("Parameter is required: " . $fieldName);
+		if (!$value) {
+			throw new RequestException("Parameter is required: " . $fieldName); }
 	}
 
 	/**

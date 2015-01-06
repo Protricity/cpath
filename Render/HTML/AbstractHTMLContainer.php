@@ -7,10 +7,15 @@
  */
 namespace CPath\Render\HTML;
 
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
 use CPath\Render\Handler\RenderHandler;
 use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\Map\MapRenderer;
+use CPath\Request\Executable\ExecutableRenderer;
+use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
 use Traversable;
 
@@ -134,8 +139,14 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerIt
 	 * @return void
 	 */
 	public function offsetSet($offset, $value) {
-		if (!$value instanceof IRenderHTML)
-			$value = new HTMLText($value);
+		if (!$value instanceof IRenderHTML) {
+			if($value instanceof IExecutable)
+				$value = new ExecutableRenderer($value);
+			elseif($value instanceof ISequenceMap || $value instanceof IKeyMap)
+				$value = new MapRenderer($value);
+			else
+				$value = new HTMLText($value);
+		}
 
 		$this->addContent($value, $offset);
 	}

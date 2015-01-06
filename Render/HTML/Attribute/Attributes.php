@@ -189,19 +189,26 @@ class Attributes implements IAttributes {
 	 * @return string|void always returns void
 	 */
 	function renderHTMLAttributes(IRequest $Request=null) {
-		$oldAttr = $this->mAttributes;
 		foreach($this->mAttributes as $value) {
 			if($value instanceof IAttributes) {
-				$html = $value->getHTMLAttributeString($Request);
-				$this->addAttributeHTML($html);
+				$value->renderHTMLAttributes($Request);
 			}
 		}
 
 		foreach($this->mAttributes as $name => $value)
-			if(is_string($name))
-				echo ' ', $name, '="', str_replace('"', "'", $value), '"';
-
-		$this->mAttributes = $oldAttr;
+			if(is_string($name)) {
+				if(strpos($value, '"') !== false) {
+					if(strpos($value, "'") !== false) {
+						echo ' ', $name, "='", str_replace('"', '`', str_replace("'", '`', $value)), "'";
+					} else {
+						echo ' ', $name, "='", str_replace("'", '"', $value), "'";
+					}
+				} else if(strpos($value, "'") !== false) {
+					echo ' ', $name, '="', str_replace('"', "'", $value), '"';
+				} else {
+					echo ' ', $name, '="', $value, '"';
+				}
+			}
 	}
 
 	/**
@@ -220,8 +227,19 @@ class Attributes implements IAttributes {
 
 		$content = '';
 		foreach($this->mAttributes as $name => $value)
-			if(is_string($name))
-				$content .= ' ' . $name . '="' . str_replace('"', "'", $value) . '"';
+			if(is_string($name)) {
+				if (strpos($value, '"') !== false) {
+					if (strpos($value, "'") !== false) {
+						$content .= ' ' . $name . "='" . str_replace('"', '`', str_replace("'", '`', $value)) . "'";
+					} else {
+						$content .= ' ' . $name . "='" . str_replace("'", '"', $value) . "'";
+					}
+				} else if (strpos($value, "'") !== false) {
+					$content .= ' ' . $name . '="' . str_replace('"', "'", $value) . '"';
+				} else {
+					$content .= ' ' . $name . '="' . $value . '"';
+				}
+			}
 
 		$this->mAttributes = $oldAttr;
 		return $content;

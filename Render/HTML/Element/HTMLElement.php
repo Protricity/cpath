@@ -14,6 +14,7 @@ use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
+use CPath\Render\HTML\RenderCallback;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
 use Traversable;
@@ -45,13 +46,16 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	    $this->mContent = new HTMLContainer();
 	    $this->mContent->onContentAdded($this);
 
-	    foreach(func_get_args() as $i => $arg)
-		    if($i >= 2 || !is_string($arg))
+	    $args = func_get_args();
+	    foreach($args as $i => $arg)
+		    if(!is_string($arg) || $i >= 2)
 		        $this->addVarArg($arg);
     }
 
 	protected function addVarArg($arg) {
-		if(is_string($arg))
+		if($arg instanceof \Closure)
+			$this->addContent(new RenderCallback($arg));
+		elseif(is_string($arg))
 			$this[] = $arg;
 		else if($arg instanceof IRenderHTML)
 			$this[] = $arg;
@@ -272,9 +276,9 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		    switch(strtolower($this->getElementType())) {
 			    case 'form':
 			    case 'fieldset':
-				    $nodeType = 'div';
 				    if(strpos($value, "<") === false) {
-					    $value = '<' . $nodeType . '>' . str_replace(PHP_EOL, '</' . $nodeType . '>' . PHP_EOL . '<' . $nodeType . '>', $value) . '</' . $nodeType . '>';
+					    $nodeType = 'label';
+					    $value = str_replace("\n", '<br/>' , $value);
 				    }
 				    break;
 		    }

@@ -11,13 +11,12 @@ use CPath\Request\IRequest;
 
 interface ISessionRequest extends IRequest
 {
-    /**
-     * Return a referenced array representing the request session
-     * @param String|null [optional] $key if set, retrieves &$[Session][$key] instead of &$[Session]
-     * @return array|mixed|null
-     * @throws SessionRequestException if no session was started yet
-     */
-    function &getSession($key = null);
+	/**
+	 * Return a referenced array representing the request session
+	 * @return array
+	 * @throws SessionRequestException if no session was started yet
+	 */
+	function &getSession();
 
 	/**
 	 * Start a new session
@@ -38,4 +37,10 @@ interface ISessionRequest extends IRequest
 	 * @return bool
 	 */
 	function hasActiveSession();
+
+	/**
+	 * Returns true if the session has started
+	 * @return bool
+	 */
+	function isStarted();
 }

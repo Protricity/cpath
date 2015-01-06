@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\Map;
 
+use CPath\Data\Map\ArrayKeyMap;
 use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
@@ -85,7 +86,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 
 	protected function renderKeyValue($key, $value) {
 		if (is_array($value))
-			$value = new ArraySequence($value);
+			$value = is_string(key($value))
+				? new ArrayKeyMap($value)
+				: new ArraySequence($value);
 
 		if ($value instanceof IKeyMap && $this->mMap !== $value) {
 			/** @var AbstractMapRenderer $Mapper */
@@ -159,10 +162,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 		}
 
 		try {
-			return $this->renderKeyValue($key, $value);
-
+			$this->renderKeyValue($key, $value);
 		} catch (\Exception $ex) {
-			return $this->renderKeyValue($key, $ex->getMessage());
+			$this->renderKeyValue($key, $ex->getMessage());
 		}
 	}
 

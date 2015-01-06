@@ -46,7 +46,7 @@ class HTMLRouteNavigator implements IRenderHTML
 			$match = $Request->getMethodName() . ' ' . $curPath;
 		$match = str_replace('\\', '/', $match);
 
-		$this->renderRoute($Request, $Request->getMethodName() . ' ' . $curPath, '.');
+//		$this->renderRoute($Request, $Request->getMethodName() . ' ' . $curPath, '.');
 		if(dirname($curPath))
 			$this->renderRoute($Request, $Request->getMethodName() . ' ' . dirname($curPath), '..');
 

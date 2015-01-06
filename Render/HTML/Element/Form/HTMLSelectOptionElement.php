@@ -34,7 +34,7 @@ class HTMLSelectOptionElement extends AbstractHTMLElement
 	 * @param \CPath\Render\HTML\IHTMLContainer|\CPath\Render\HTML\IRenderHTML $Parent
 	 */
 	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
-		echo $this->mDescription;
+		echo $this->mDescription ?: $this->getAttribute('value');
 	}
 
 	/**

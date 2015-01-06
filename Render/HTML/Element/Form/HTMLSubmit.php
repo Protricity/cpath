@@ -7,15 +7,17 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
-class HTMLSubmit extends HTMLFormField
+use CPath\Render\HTML\Element\HTMLInputField;
+
+class HTMLSubmit extends HTMLInputField
 {
 	/**
-	 * @param String|null $classList a list of class elements
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
+	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($classList = null, $name = null, $value = null) {
-		parent::__construct($classList, $name, $value, 'submit');
+	public function __construct($name = null, $value = null) {
+		parent::__construct($name, $value, 'submit');
 	}
 
 }

@@ -7,6 +7,7 @@
  */
 namespace CPath\Route;
 
+use CPath\Render\IRenderAll;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Response\Common\ExceptionResponse;
@@ -39,8 +40,14 @@ final class RouteRenderer implements IRouteMapper
 
 	    $c = sizeof($this->mPrevious);
 	    if($c > 0) {
-		    if($this->mPrevious[0] instanceof \Exception) {
-			    $ex = $this->mPrevious[0];
+		    $Object = $this->mPrevious[0];
+		    if($Object instanceof IRenderAll) {
+			    $Object->render($this->mRequest, true);
+			    return true;
+		    }
+
+		    if($Object instanceof \Exception) {
+			    $ex = $Object;
 
 			} else {
 			    $cls = array();
@@ -119,7 +126,6 @@ final class RouteRenderer implements IRouteMapper
 	        return true;
 
         array_unshift($this->mPrevious, $Response);
-
 
         return false;
     }

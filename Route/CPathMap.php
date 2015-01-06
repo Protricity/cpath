@@ -32,11 +32,14 @@ class CPathMap implements IRouteMap
 			// @group CPath\UnitTest\Handlers\TestRequestHandler
 			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
 
-			// @group __render
-			$Map->route('ANY *', 'CPath\\Render\\HTML\\Common\\ObjectRenderer') ||
+			// @group _executable
+			$Map->route('ANY *', 'CPath\\Request\\Executable\\ExecutableRenderer') ||
 
 			// @group _map
-			$Map->route('ANY *', 'CPath\\Render\\Map\\MapRenderer');
+			$Map->route('ANY *', 'CPath\\Render\\Map\\MapRenderer') ||
+
+			// @group _response
+			$Map->route('ANY *', 'CPath\\Response\\ResponseRenderer');
 	}
 
     // Static

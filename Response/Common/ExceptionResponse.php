@@ -41,13 +41,13 @@ class ExceptionResponse extends \Exception implements IResponse, IKeyMap {
 	 */
 	function mapKeys(IKeyMapper $Map) {
 		$Ex = $this->getPrevious();
-		if($Ex instanceof IKeyMap) {
-			$Ex->mapKeys($Map);
-		} else {
+//		if($Ex instanceof IKeyMap) {
+//			$Ex->mapKeys($Map);
+//		} else {
 			$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 			$Map->map(IResponse::STR_CODE, $this->getCode());
 			$Map->map(self::STR_CLASS, get_class($Ex));
-			$Map->map(self::STR_TRACE, $Ex->getTraceAsString());
-		}
+			$Map->map(self::STR_TRACE, strstr($Ex->getTraceAsString(), "#5", true));
+//		}
 	}
 }

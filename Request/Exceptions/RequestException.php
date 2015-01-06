@@ -10,6 +10,7 @@ namespace CPath\Request\Exceptions;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
 use CPath\Response\Response;
@@ -63,9 +64,7 @@ class RequestException extends \Exception implements IResponse, IResponseHeaders
 	 * @return void
 	 */
 	function mapKeys(IKeyMapper $Map) {
-		$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
-		$Map->map(IResponse::STR_CODE, $this->getCode());
-		$Map->map(self::STR_TRACE, $this->getTraceAsString());
-		$Map->map(self::STR_CLASS, get_class($this));
+		$Renderer = new ExceptionResponse($this);
+		$Renderer->mapKeys($Map);
 	}
 }

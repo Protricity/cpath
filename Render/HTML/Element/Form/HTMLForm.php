@@ -21,7 +21,7 @@ use CPath\Request\Validation\Exceptions\ValidationException;
 use CPath\Request\Validation\IValidation;
 use CPath\Response\IResponse;
 
-class HTMLForm extends HTMLElement implements IResponse, ILogListener
+class HTMLForm extends HTMLElement implements ILogListener
 {
 	const TRIM_CONTENT = false;
     const CSS_FORM_FIELD = 'form-row';
@@ -43,25 +43,27 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 	 * @param Array|IAttributes|IHTMLSupportHeaders|IRenderHTML|IValidation|null|String $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
 	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
-        parent::__construct('form', $classList);
-		if($method)
-			$this->setMethod($method);
-		$this->mAction = $action;
+        parent::__construct('form');
+		if(is_string($method)) $this->setMethod($method);
+		if(is_string($action)) $this->mAction = $action;
+		if(is_string($classList)) $this->addClass($classList);
+
+		$args = func_get_args();
 		//$this->setItemTemplate(new HTMLLabel());
-		foreach(func_get_args() as $i => $arg)
-			if($i >= 3 || !is_string($arg))
+		foreach($args as $i => $arg)
+			if(!is_string($arg) || $i >= 3)
 				$this->addVarArg($arg);
     }
 
-	public function getActionURL(IRequest $Request=null) {
-		if($Request) {
-			$domainPath = $Request->getDomainPath(false);
-			if(strpos($this->mAction, $domainPath) === false)
-				return $domainPath . '/' . ltrim($this->mAction, '/');
-		}
-		return $this->mAction;
+	public function getActionURL(IRequest $Request) {
+		$action = $this->mAction;
+		if(!$action)
+			$action = $Request->getPath();
+		$domainPath = $Request->getDomainPath(false);
+		if(strpos($action, $domainPath) === false)
+			return $domainPath . '/' . ltrim($action, '/');
+		return $action;
 	}
-
 
 	/**
 	 * Render html attributes
@@ -113,13 +115,19 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 
 
 	public function getContentRecursive(IHTMLContainer $Container=null) {
-		$Content = $this->getContainer()
-			->getContentRecursive($Container ?: $this);
-//		foreach($Content as $ContentItem)
-//			if($ContentItem instanceof IHTMLFormField)
-//				if(!$ContentItem->getForm())
-//					$ContentItem->setForm($this);
-		return $Content;
+		if(!$Container)
+			$Container = $this->getContainer(); // $this->mTargetContainer ?:
+		$array = array();
+
+		foreach($Container->getContent() as $Content) {
+			$array[] = $Content;
+			if($Content instanceof IHTMLContainer) {
+				foreach($this->getContentRecursive($Content) as $C)
+					$array[] = $C;
+			}
+		}
+
+		return $array;
 	}
 
 	public function getFieldName()          { return $this->getAttribute('name'); }
@@ -139,6 +147,9 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		if(!$Container)
 			$Container = $this;
 
+		if(!$this->hasAttribute('action'))
+			$this->setAttribute('action', $this->getActionURL($Request));
+
 		foreach($Container->getContent() as $Content) {
 			if($Content instanceof IHTMLContainer)
 				$this->setFormValues($Request, $Content);
@@ -153,31 +164,6 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		}
 	}
 
-//    public function addSubmit($classList = null, $value = null, $name = null) {
-//	    $Field = new HTMLSubmit($classList, $value, $name);
-//	    $this->addContent($Field);
-//    }
-//
-//    public function addInput($classList = null, $value = null, $name = null, $type = null) {
-//        $Field = new HTMLFormField($classList, $value, $name, $type);
-//        $this->addContent($Field);
-//    }
-
-//	function addContent(IRenderHTML $Render, $key = null) {
-//		if($Render instanceof IHTMLContainer) {
-//			foreach($Render->getContent() as $Content) {
-//				if($Content instanceof IHTMLFormField) {
-//					$Content->setForm($this);
-//				}
-//			}
-//		}
-//
-//		if($Render instanceof IHTMLFormField)
-//			$Render->setForm($this);
-//
-//		parent::addContent($Render, $key);
-//	}
-
 	public function validateField(IRequest $Request, $fieldName) {
 		$Field = $this->getFormField($fieldName);
 		$value = $Field->getRequestValue($Request);
@@ -185,7 +171,6 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 		if ($Field instanceof IValidation)
 			try {
 				$value = $Field->validate($Request, $value, $fieldName);
-
 
 			} catch (\Exception $ex) {
 				if(!$ex instanceof ValidationException)
@@ -324,6 +309,8 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 //		foreach($this->getContentRecursive() as $Content)
 //			if($Content instanceof ILogListener)
 //				$c += $Content->log($msg, $flags);
+		if($msg instanceof \Exception)
+			$msg = $msg->getMessage();
 
 		if(is_string($msg)) {
 			$this->mLogs[$msg] = array($msg, $flags);
@@ -336,8 +323,6 @@ class HTMLForm extends HTMLElement implements IResponse, ILogListener
 	}
 
 	public function offsetSet($offset, $value) {
-		if (!$value instanceof IRenderHTML) {
-		}
 		parent::offsetSet($offset, $value);
 	}
 
