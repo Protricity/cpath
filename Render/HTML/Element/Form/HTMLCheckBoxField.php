@@ -8,7 +8,6 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Request\Validation\IValidation;
 
 class HTMLCheckBoxField extends HTMLInputField
@@ -19,16 +18,20 @@ class HTMLCheckBoxField extends HTMLInputField
 	 * @param String|null $name field name (name=[])
 	 * @param bool|null $checked
 	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
+	 * @param String|null $classList a list of element classes
 	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($name = null, $checked = false, $_validation = null) {
+	public function __construct($name = null, $checked = false, $classList = null, $_validation = null) {
 		parent::__construct($name);
 		if(is_bool($checked) && $checked)
 			$this->setChecked($checked);
 
-		foreach(func_get_args() as $i => $arg)
-			if($i >= 3 || !is_string($arg))
-				$this->addVarArg($arg);
+		is_string($name)        ?: $this->addVarArg($name);
+		is_string($checked)     ?: $this->addVarArg($checked);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+
+		for($i=3; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
 	}
 
 	public function setChecked($checked=true) {

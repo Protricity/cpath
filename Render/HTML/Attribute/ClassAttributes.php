@@ -18,6 +18,17 @@ class ClassAttributes implements IAttributes
 		}
 	}
 
+	/**
+	 * Return the attribute value
+	 * @param String $name
+	 * @return String|null
+	 */
+	function getAttribute($name) {
+		if(strcasecmp($name, 'class') === 0)
+			return $this->getHTMLClassAttributeString();
+		return null;
+	}
+
 	public function addClass($className, $_className=null) {
 		foreach(func_get_args() as $arg) {
 			foreach(preg_split('/\s+/', $arg) as $className) {

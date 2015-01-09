@@ -8,9 +8,10 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
+use CPath\Request\Validation\IValidation;
 
 class HTMLButton extends HTMLInputField
 {
@@ -22,11 +23,19 @@ class HTMLButton extends HTMLInputField
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
 	 * @param String|null $type input type (type=[])
-	 * @internal param null|String $classList a list of class elements
+	 * @param String|null $classList a list of element classes
+	 * @param String|null|Array|IAttributes|IHTMLSupportHeaders|IValidation $_content [varargs] class as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($name = null, $value = null, $type = null) {
+	public function __construct($name = null, $value = null, $type = null, $classList = null, $_content = null) {
 		$this->mContent = $value ?: ucwords($name);
 		parent::__construct($name, null, $type);
+
+		is_string($name)        ?: $this->addVarArg($name);
+		is_string($type)        ?: $this->addVarArg($type);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+
+		for($i=4; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
 	}
 
 	public function getInputValue()                     { return $this->mContent; }

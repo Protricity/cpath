@@ -9,7 +9,6 @@ namespace CPath\Render\HTML\Element;
 
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\Form\IHTMLFormField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 
@@ -39,8 +38,13 @@ class HTMLLabel extends HTMLElement
 	 * @return void
 	 */
 	function addContent(IRenderHTML $Content, $key = null) {
-		if ($Content instanceof IHTMLFormField)
-			$this->setAttribute('for', $Content->getFieldName());
+		if ($Content instanceof IHTMLElement) {
+			switch (strtolower($Content->getElementType())) {
+				case 'input':
+					if ($name = $Content->getAttribute('name'))
+						$this->setAttribute('for', $name);
+			}
+		}
 
 		parent::addContent($Content, $key);
 	}

@@ -7,8 +7,6 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
-use CPath\Render\HTML\Element\HTMLInputField;
-
 class HTMLSubmit extends HTMLInputField
 {
 	/**

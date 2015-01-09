@@ -30,7 +30,7 @@ interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
 	/**
 	 * @return IHTMLSupportHeaders[]
 	 */
-	function getSupportHeaders();
+	//function getSupportHeaders();
 
 	/**
 	 * Returns an array of IRenderHTML content

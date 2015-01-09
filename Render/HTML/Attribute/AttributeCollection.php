@@ -24,6 +24,17 @@ class AttributeCollection implements IAttributes
 		}
 	}
 
+	/**
+	 * Return the attribute value
+	 * @param String $name
+	 * @return String|null
+	 */
+	function getAttribute($name) {
+		foreach($this->mAttributes as $Attribute)
+			if($value = $Attribute->getAttribute($name))
+				return $value;
+		return null;
+	}
 
 	/**
 	 * Render or returns html attributes

@@ -21,6 +21,17 @@ class StyleAttributes implements IAttributes
 		}
 	}
 
+	/**
+	 * Return the attribute value
+	 * @param String $name
+	 * @return String|null
+	 */
+	function getAttribute($name) {
+		if(strcasecmp($name, 'class') === 0)
+			return $this->getHTMLStyleAttributeString();
+		return null;
+	}
+
 	public function addStyle($styleName, $styleValue) {
 		$this->mStyle[$styleName] = $styleValue;
 		return $this;

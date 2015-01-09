@@ -21,16 +21,3 @@ class MethodDocBlock extends AbstractDocBlock
     }
 }
 
-class PropertyDocBlock extends AbstractDocBlock
-{
-    /** @var DocTag[] */
-    private $mProperty;
-
-    public function __construct(\ReflectionProperty $Property) {
-        $this->mProperty = $Property;
-    }
-
-    protected function getDocComment() {
-        return $this->mProperty->getDocComment();
-    }
-}

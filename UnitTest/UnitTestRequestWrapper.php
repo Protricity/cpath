@@ -130,6 +130,15 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	}
 
 	/**
+	 * Returns true if the session is active, false if inactive
+	 * @return bool
+	 */
+	function hasActiveSession() {
+		return true;
+	}
+
+
+	/**
 	 * Set a test request parameter for unit test purposes
 	 * @param $name
 	 * @param $value

@@ -8,7 +8,7 @@
 namespace CPath\Request;
 
 use CPath\Render\HTML\Element\Form\HTMLForm;
-use CPath\Render\HTML\Element\HTMLInputField;
+use CPath\Render\HTML\Element\Form\HTMLInputField;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\Session\ISessionRequest;

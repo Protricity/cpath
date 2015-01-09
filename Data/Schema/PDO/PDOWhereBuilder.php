@@ -29,8 +29,20 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 
 		} elseif ($whereValue) {
 //			$compare === '=?' ?: $compare = '=:' . $whereColumn;
-			$this->bindValue($whereValue);
-			$whereColumn = $whereColumn . ' ' . $compare;
+			if(is_array($whereValue)) {
+
+				$whereColumn = $whereColumn . ' in (';// . $compare;
+				$i=0;
+				foreach($whereValue as $value) {
+					$this->bindValue($value);
+					$whereColumn .= ($i ? ', ' : '') . '?';
+				}
+				$whereColumn .= ')';
+
+			} else {
+				$this->bindValue($whereValue);
+				$whereColumn = $whereColumn . ' ' . $compare;
+			}
 		}
 
 		if ($this->mWhereSQL) {

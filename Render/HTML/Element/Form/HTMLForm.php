@@ -37,22 +37,21 @@ class HTMLForm extends HTMLElement implements ILogListener
 	private $mAction = null;
 
 	/**
-	 * @param null $method
-	 * @param null $action
+	 * @param String $method
+	 * @param String $action
+	 * @param String $name
 	 * @param String|Array|IAttributes $classList attribute inst, class list, or attribute html
 	 * @param Array|IAttributes|IHTMLSupportHeaders|IRenderHTML|IValidation|null|String $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
-	public function __construct($method = null, $action = null, $classList = null, $_content = null) {
+	public function __construct($method = null, $action = null, $name = null, $classList = null, $_content = null) {
         parent::__construct('form');
-		if(is_string($method)) $this->setMethod($method);
-		if(is_string($action)) $this->mAction = $action;
-		if(is_string($classList)) $this->addClass($classList);
+		is_string($method)      ? $this->setMethod($method)     : $this->addVarArg($method);
+		is_string($action)      ? $this->setAction($action)     : $this->addVarArg($action);
+		is_string($name)        ? $this->setFormName($name)     : $this->addVarArg($name);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
-		$args = func_get_args();
-		//$this->setItemTemplate(new HTMLLabel());
-		foreach($args as $i => $arg)
-			if(!is_string($arg) || $i >= 3)
-				$this->addVarArg($arg);
+		for($i=4; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
     }
 
 	public function getActionURL(IRequest $Request) {
@@ -60,6 +59,8 @@ class HTMLForm extends HTMLElement implements ILogListener
 		if(!$action)
 			$action = $Request->getPath();
 		$domainPath = $Request->getDomainPath(false);
+		if(!$domainPath)
+			return $action;
 		if(strpos($action, $domainPath) === false)
 			return $domainPath . '/' . ltrim($action, '/');
 		return $action;
@@ -89,11 +90,10 @@ class HTMLForm extends HTMLElement implements ILogListener
 	 * @return IHTMLFormField
 	 */
 	function getFormField($fieldName) {
-		foreach($this->getContentRecursive() as $Content) {
-			if($Content instanceof IHTMLFormField)
-				if($Content->getFieldName() === $fieldName)
+		foreach($this->getContentRecursive() as $Content)
+			if ($Content instanceof IHTMLFormField)
+				if ($fieldName === $Content->getFieldName())
 					return $Content;
-		}
 		throw new \InvalidArgumentException("Form field not found in form: " . $fieldName);
 	}
 
@@ -130,8 +130,7 @@ class HTMLForm extends HTMLElement implements ILogListener
 		return $array;
 	}
 
-	public function getFieldName()          { return $this->getAttribute('name'); }
-	public function setFieldName($value)    { $this->setAttribute('name', $value); }
+	public function setFormName($value)    { $this->setAttribute('name', $value); }
 
 //	public function getFieldID()            { return $this->getAttribute('id'); }
 //	public function setFieldID($value)      { $this->setAttribute('id', $value); }
@@ -140,7 +139,7 @@ class HTMLForm extends HTMLElement implements ILogListener
 	public function setMethod($method)      { $this->setAttribute('method', $method); }
 
 	public function getAction()             { return $this->getAttribute('action'); }
-	public function setAction($action)      { $this->setAttribute('action', $action); }
+	public function setAction($action)      { $this->mAction = $action; }
 
 
 	public function setFormValues(IRequest $Request, IHTMLContainer $Container=null) {
@@ -154,11 +153,9 @@ class HTMLForm extends HTMLElement implements ILogListener
 			if($Content instanceof IHTMLContainer)
 				$this->setFormValues($Request, $Content);
 
-			if(!$Content instanceof IHTMLFormField)
-				continue;
-
-			$name = $Content->getFieldName();
-			if(isset($Request[$name])) {
+			if($Content instanceof IHTMLFormField
+				&& ($name = $Content->getFieldName())
+				&& isset($Request[$name])) {
 				$Content->setInputValue($Request[$name]);
 			}
 		}

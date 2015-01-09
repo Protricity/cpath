@@ -9,7 +9,6 @@ namespace CPath\Render\CLI\Templates;
 
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLElement;
-use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
@@ -23,9 +22,9 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	private $mHTMLLog;
 	/** @var HTMLElement */
 //	private $mSpanMarker;
-	/** @var HTMLInputField */
+	/** @var \CPath\Render\HTML\Element\Form\HTMLInputField */
 //	private $mInputPath;
-	/** @var \CPath\Render\HTML\Element\HTMLInputField */
+	/** @var \CPath\Render\HTML\Element\Form\HTMLInputField */
 //	private $mInputDomain;
 	private $mInput;
 	public function __construct($marker = '$') {

@@ -10,6 +10,12 @@ namespace CPath\Render\HTML\Attribute;
 use CPath\Request\IRequest;
 
 interface IAttributes {
+	/**
+	 * Return the attribute value
+	 * @param String $name
+	 * @return String|null
+	 */
+	function getAttribute($name);
 
 	/**
 	 * Render or returns html attributes

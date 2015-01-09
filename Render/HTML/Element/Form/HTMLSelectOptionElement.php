@@ -21,7 +21,6 @@ class HTMLSelectOptionElement extends AbstractHTMLElement
 	public function __construct($value, $description = null, $selected=false, $classList = null) {
 		parent::__construct('option', $classList);
 		$this->mDescription = $description;
-		if ($value)
 			$this->setAttribute('value', $value);
 		if ($selected)
 			$this->setAttribute('selected', 'selected');

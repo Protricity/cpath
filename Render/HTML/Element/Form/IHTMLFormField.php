@@ -14,11 +14,6 @@ use CPath\Request\Validation\IValidation;
 interface IHTMLFormField
 {
 	/**
-	 * @param HTMLForm $Form
-	 */
-	//function setForm(HTMLForm $Form);
-
-	/**
 	 * Return the form field's form instance or null
 	 * @return HTMLForm|null
 	 */
@@ -39,18 +34,6 @@ interface IHTMLFormField
 	public function getFieldName();
 
 	/**
-	 * Add input validation to this form field
-	 * @param IValidation $Validation
-	 */
-	public function addValidation(IValidation $Validation);
-
-	/**
-	 * Set parameter name
-	 * @param $name
-	 */
-	//public function setFieldName($name);
-
-	/**
 	 * Set input value
 	 * @param $value
 	 * @return mixed
@@ -58,8 +41,15 @@ interface IHTMLFormField
 	public function setInputValue($value);
 
 	/**
+	 * Add input validation to this form field
+	 * @param IValidation $Validation
+	 */
+	//public function addValidation(IValidation $Validation);
+
+
+	/**
 	 * Get the field value
 	 * @return mixed
 	 */
-	public function getInputValue();
+	//public function getInputValue();
 }

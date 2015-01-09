@@ -8,7 +8,7 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
+use CPath\Render\HTML\Element\Form\HTMLInputField;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\EmailValidation;
 use CPath\Request\Validation\IValidation;

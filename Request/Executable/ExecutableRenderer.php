@@ -26,7 +26,6 @@ use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\NonFormRequestWrapper;
 use CPath\Request\Web\WebFormRequest;
-use CPath\Request\Web\WebRequest;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
@@ -128,11 +127,11 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 
 		$Response = $this->getResponse($Request);
 
-		if($Response instanceof ExceptionResponse
-			&& $Request instanceof WebFormRequest) {
-			$WebRequest = new WebRequest($Request->getMethodName(), $Request->getPath(), $Request->getParameterValues());
-			$Response = $this->execute($WebRequest);
-		}
+//		if($Response instanceof ExceptionResponse
+//			&& $Request instanceof WebFormRequest) {
+//			$WebRequest = new WebRequest($Request->getMethodName(), $Request->getPath(), $Request->getParameterValues());
+//			$Response = $this->execute($WebRequest);
+//		}
 
 		if(!$Response instanceof IRenderHTML)
 			$Response = new ResponseRenderer($Response);
@@ -281,7 +280,7 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 			return false;
 		}
 
-		$Object = $Previous[0];
-		return new ExecutableRenderer($Object, true);
+		$Previous[0] = new ExecutableRenderer($Previous[0], true);
+		return $Previous[0];
 	}
 }

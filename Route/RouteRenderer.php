@@ -119,14 +119,16 @@ final class RouteRenderer implements IRouteMapper
 	            return true;
             return false;
         }
+	    $Previous = $this->mPrevious;
+	    if(!in_array($Response, $Previous, true))
+		    array_unshift($Previous, $Response);
 
         if ($this->tryHandlers($this->mRequest,
 	        array_diff($this->mHandlers, array($target)),
-	        array_merge(array($Response), $this->mPrevious)))
+	        $Previous))
 	        return true;
 
-        array_unshift($this->mPrevious, $Response);
-
+		$this->mPrevious = $Previous;
         return false;
     }
 

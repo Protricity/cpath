@@ -22,7 +22,7 @@ use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Response\IResponse;
 
-abstract class AbstractHTMLElement extends Attributes implements IResponse, IRenderHTML, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
+abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
 {
 	const PASS_DOWN_ATTRIBUTES = false;
 
@@ -156,6 +156,10 @@ abstract class AbstractHTMLElement extends Attributes implements IResponse, IRen
 	 */
 	abstract protected function isOpenTag();
 
+	/**
+	 * Get HTMLElement node type
+	 * @return String
+	 */
 	function getElementType() {
 		return $this->mElmType;
 	}

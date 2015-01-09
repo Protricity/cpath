@@ -14,7 +14,6 @@ use CPath\Data\Map\SequenceMapCallback;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\Form;
-use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
@@ -28,15 +27,17 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 
 	/**
 	 * @param String|null $name field name (name=[])
+	 * @param String|null $classList a list of element classes
 	 * @param String|null|Array|IAttributes|IValidation $_options [varargs] select options as string, array, or IValidation || IAttributes instance
 	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($name = null, $_options = null) {
+	public function __construct($name = null, $classList=null, $_options = null) {
 		parent::__construct($name);
+		is_string($name)        ?: $this->addVarArg($name);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
-		foreach(func_get_args() as $i => $arg)
-			if($i >= 2 || !is_string($arg))
-				$this->addVarArg($arg);
+		for($i=2; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
 	}
 
 	public function getInputValue() {

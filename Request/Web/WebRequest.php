@@ -28,8 +28,6 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	private $mPrefixPath = null;
 	protected $mValueSource = null;
 
-	private $mSessionStarted = false;
-
     public function __construct($method, $path = null, $parameters = array(), IRequestedMimeType $MimeType=null) {
 	    if(!$path)
 		    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -218,9 +216,6 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		if(!session_start())
 			throw new SessionRequestException("Session did not start");
 
-		if($this->mSessionStarted) {
-			throw new SessionRequestException("Session was restarted after being stopped"); }
-		$this->mSessionStarted = true;
 		return true;
 	}
 

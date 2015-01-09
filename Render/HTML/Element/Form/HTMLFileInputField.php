@@ -8,7 +8,6 @@
 namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\HTMLInputField;
 use CPath\Request\Validation\IValidation;
 
 class HTMLFileInputField extends HTMLInputField
@@ -18,17 +17,18 @@ class HTMLFileInputField extends HTMLInputField
 	/**
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $accept
+	 * @param String|null $classList a list of element classes
 	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($name = null, $accept = null, $_validation = null) {
+	public function __construct($name = null, $accept = null, $classList = null, $_validation = null) {
 		parent::__construct($name);
-		if(is_string($accept))
-			$this->setAccept($accept);
+		is_string($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
+		is_string($accept)      ? $this->setInputValue($accept) : $this->addVarArg($accept);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
-		foreach(func_get_args() as $i => $arg)
-			if($i >= 3 || !is_string($arg))
-				$this->addVarArg($arg);
+		for($i=3; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
 	}
 
 	public function setAccept($accept) {

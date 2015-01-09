@@ -7,19 +7,17 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
-use CPath\Render\HTML\Element\HTMLInputField;
-
 class HTMLRangeInputField extends HTMLInputField
 {
-	public function __construct($name = null, $value = null, $min = null, $max = null, $step = null, $_content = null) {
+	public function __construct($name = null, $value = null, $min = null, $max = null, $step = null, $classList = null, $_content = null) {
 		parent::__construct($name, $value, 'range');
-		if (is_scalar($min)) $this->setMin($min);
-		if (is_scalar($max)) $this->setMax($max);
-		if (is_scalar($step)) $this->setStep($step);
+		is_string($min)   ? $this->setMin($min)   : $this->addVarArg($min);
+		is_string($max)   ? $this->setMax($max)   : $this->addVarArg($max);
+		is_string($step)   ? $this->setStep($step)   : $this->addVarArg($step);
+		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
-		foreach (func_get_args() as $i => $arg)
-			if (!is_string($arg))
-				$this->addVarArg($arg);
+		for($i=6; $i<func_num_args(); $i++)
+			$this->addVarArg(func_get_arg($i));
 	}
 
 	public function setMin($min) { $this->setAttribute('min', $min); }

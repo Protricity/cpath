@@ -5,12 +5,11 @@
  * Date: 9/27/14
  * Time: 5:10 PM
  */
-namespace CPath\Render\HTML\Element;
+namespace CPath\Render\HTML\Element\Form;
 
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\Form\HTMLForm;
-use CPath\Render\HTML\Element\Form\HTMLSubmit;
-use CPath\Render\HTML\Element\Form\IHTMLFormField;
+use CPath\Render\HTML\Element\AbstractHTMLElement;
+use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
@@ -35,23 +34,22 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 	 * @param String|null $name field name (name=[])
 	 * @param String|null $value input value (value=[])
 	 * @param String|null $type input type (type=[])
+	 * @param String|null $classList a list of element classes
 	 * @param String|null|Array|IAttributes|IHTMLSupportHeaders|IValidation $_content [varargs] class as string, array, or IValidation || IAttributes instance
 	 * @internal param null|String $classList a list of class elements
 	 */
-    public function __construct($name = null, $value = null, $type = null, $_content = null) {
+    public function __construct($name = null, $value = null, $type = null, $classList=null, $_content = null) {
         parent::__construct(static::NODE_TYPE);
-	    if(is_string($name))
-		    $this->setFieldName($name);
-	    if($type === null)
-		    $type = static::INPUT_TYPE;
-        if(is_string($type))
-            $this->setType($type);
-	    if(is_string($value))
-		    $this->setInputValue($value);
 
-	    foreach(func_get_args() as $i => $arg)
-		    if(!is_string($arg))
-			    $this->addVarArg($arg);
+	    if(static::INPUT_TYPE)
+		    $this->setType(static::INPUT_TYPE);
+	    is_string($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
+	    is_string($value)       ? $this->setInputValue($value)  : $this->addVarArg($value);
+	    is_string($type)        ? $this->setType($type)         : $this->addVarArg($type);
+	    is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+
+	    for($i=4; $i<func_num_args(); $i++)
+		    $this->addVarArg(func_get_arg($i));
     }
 
 	protected function addVarArg($arg, $allowHTMLAttributeString=false) {
@@ -75,6 +73,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 				case 'POST':
 					if($Request instanceof IFormRequest)
 						return $Request->getFormFieldValue($fieldName);
+					return null;
 			}
 		}
 		return isset($Request[$fieldName]) ? $Request[$fieldName] : null;
@@ -185,7 +184,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 		if ($Exs) {
 			$Form = $this->getForm();
 			if(!$Form) {
-				$Form = new HTMLForm($Request->getMethodName(), $Request->getPath(), null,
+				$Form = new HTMLForm($Request->getMethodName(), $Request->getPath(),
 					new HTMLElement('legend', 'content-title', $Request->getPath()),
 
 					"Enter value for field '" . $this->getFieldName() . "': ",
