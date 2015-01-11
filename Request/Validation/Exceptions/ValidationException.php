@@ -14,7 +14,9 @@ use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
+use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
+use CPath\Response\ResponseRenderer;
 use Exception;
 
 class ValidationException extends RequestException implements IRenderHTML, IHTMLSupportHeaders
@@ -40,7 +42,7 @@ class ValidationException extends RequestException implements IRenderHTML, IHTML
 
 		$this->mExceptions = $Exceptions;
 
-		parent::__construct($message, IResponse::HTTP_FORBIDDEN, $Exceptions[0]);
+		parent::__construct($message, IResponse::HTTP_FORBIDDEN, $Exceptions[0] instanceof Exception ? $Exceptions[0] : new Exception($Exceptions[0]));
 	}
 
 	function getForm() {
@@ -74,6 +76,8 @@ class ValidationException extends RequestException implements IRenderHTML, IHTML
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+		$ResponseRenderer = new ResponseRenderer(new ExceptionResponse($this));
+		$ResponseRenderer->renderHTML($Request, $Attr, $Parent);
 		$this->mForm->renderHTML($Request, $Attr = null, $Parent);
 	}
 }

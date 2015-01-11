@@ -44,7 +44,9 @@ class HTMLContainer extends AbstractHTMLContainer
 	}
 
 	public function addMetaTag($name, $content) {
-		$this->addSupportHeaders(new HTMLMetaTag($name, $content));
+		$MetaTag = new HTMLMetaTag($name, $content);
+		$this->addSupportHeaders($MetaTag);
+		return $MetaTag;
 	}
 //
 //	public function getMetaTagContent($name) {

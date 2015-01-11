@@ -33,8 +33,8 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 	 */
 	public function __construct($name = null, $classList=null, $_options = null) {
 		parent::__construct($name);
-		is_string($name)        ?: $this->addVarArg($name);
-		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+		is_scalar($name)        ?: $this->addVarArg($name);
+		is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 		for($i=2; $i<func_num_args(); $i++)
 			$this->addVarArg(func_get_arg($i));

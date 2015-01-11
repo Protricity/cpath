@@ -23,9 +23,9 @@ class HTMLFileInputField extends HTMLInputField
 	 */
 	public function __construct($name = null, $accept = null, $classList = null, $_validation = null) {
 		parent::__construct($name);
-		is_string($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
-		is_string($accept)      ? $this->setInputValue($accept) : $this->addVarArg($accept);
-		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+		is_scalar($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
+		is_scalar($accept)      ? $this->setInputValue($accept) : $this->addVarArg($accept);
+		is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 		for($i=3; $i<func_num_args(); $i++)
 			$this->addVarArg(func_get_arg($i));

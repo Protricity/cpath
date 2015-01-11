@@ -8,6 +8,7 @@
  * Date: 4/06/11 */
 namespace CPath\Build\Code;
 
+
 class BuildPHPClass extends AbstractBuildCodeClass {
 
     const TAB = "\t";

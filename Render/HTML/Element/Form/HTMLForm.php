@@ -45,10 +45,10 @@ class HTMLForm extends HTMLElement implements ILogListener
 	 */
 	public function __construct($method = null, $action = null, $name = null, $classList = null, $_content = null) {
         parent::__construct('form');
-		is_string($method)      ? $this->setMethod($method)     : $this->addVarArg($method);
-		is_string($action)      ? $this->setAction($action)     : $this->addVarArg($action);
-		is_string($name)        ? $this->setFormName($name)     : $this->addVarArg($name);
-		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+		is_scalar($method)      ? $this->setMethod($method)     : $this->addVarArg($method);
+		is_scalar($action)      ? $this->setAction($action)     : $this->addVarArg($action);
+		is_scalar($name)        ? $this->setFormName($name)     : $this->addVarArg($name);
+		is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 		for($i=4; $i<func_num_args(); $i++)
 			$this->addVarArg(func_get_arg($i));

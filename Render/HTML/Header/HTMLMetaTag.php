@@ -7,30 +7,35 @@
  */
 namespace CPath\Render\HTML\Header;
 
+use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Request\IRequest;
 
-class HTMLMetaTag implements IHTMLSupportHeaders
+class HTMLMetaTag extends Attributes implements IHTMLSupportHeaders
 {
 	const META_TITLE = 'title';
 	const META_AUTHOR = 'author';
 	const META_DESCRIPTION = 'description';
-
-	private $mName, $mContent;
+	const META_CONTENT_TYPE = 'content-type';
 
 	public function __construct($name, $content) {
-		$this->mName    = $name;
-		$this->mContent = $content;
+		switch($name) {
+			case self::META_CONTENT_TYPE:
+				$this->setAttribute('http-equiv', self::META_CONTENT_TYPE);
+				break;
+			default:
+				$this->setAttribute('name', $name);
+				break;
+		}
+		$this->setAttribute('content', $content);
 	}
 
 	public function getContent() {
-		return $this->mContent;
+		return $this->getAttribute('content');
 	}
 
 	public function getName() {
-		return $this->mName;
+		return $this->getAttribute('name');
 	}
-
-
 
 	/**
 	 * Write all support headers used by this IView inst
@@ -39,6 +44,6 @@ class HTMLMetaTag implements IHTMLSupportHeaders
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$Head->writeHTML("<meta name='{$this->mName}' content='{$this->mContent}'>");
+		$Head->writeHTML("<meta" . $this->getHTMLAttributeString($Request) . ">");
 	}
 }

@@ -81,7 +81,7 @@ class HTMLResponseBody extends HTMLContainer
 		RI::si(static::TAB_START, static::TAB);
 		echo self::DOCTYPE;
 
-		echo RI::ni(), '<html>';
+		echo RI::ni(), '<html xmlns="http://www.w3.org/1999/xhtml">';
 		RI::ai(1);
 
 		echo RI::ni(), '<head>';

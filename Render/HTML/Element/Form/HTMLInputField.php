@@ -43,10 +43,10 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 
 	    if(static::INPUT_TYPE)
 		    $this->setType(static::INPUT_TYPE);
-	    is_string($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
-	    is_string($value)       ? $this->setInputValue($value)  : $this->addVarArg($value);
-	    is_string($type)        ? $this->setType($type)         : $this->addVarArg($type);
-	    is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+	    is_scalar($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
+	    is_scalar($value)       ? $this->setInputValue($value)  : $this->addVarArg($value);
+	    is_scalar($type)        ? $this->setType($type)         : $this->addVarArg($type);
+	    is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 	    for($i=4; $i<func_num_args(); $i++)
 		    $this->addVarArg(func_get_arg($i));

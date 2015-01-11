@@ -11,10 +11,10 @@ class HTMLRangeInputField extends HTMLInputField
 {
 	public function __construct($name = null, $value = null, $min = null, $max = null, $step = null, $classList = null, $_content = null) {
 		parent::__construct($name, $value, 'range');
-		is_string($min)   ? $this->setMin($min)   : $this->addVarArg($min);
-		is_string($max)   ? $this->setMax($max)   : $this->addVarArg($max);
-		is_string($step)   ? $this->setStep($step)   : $this->addVarArg($step);
-		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+		is_scalar($min)   ? $this->setMin($min)   : $this->addVarArg($min);
+		is_scalar($max)   ? $this->setMax($max)   : $this->addVarArg($max);
+		is_scalar($step)   ? $this->setStep($step)   : $this->addVarArg($step);
+		is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 		for($i=6; $i<func_num_args(); $i++)
 			$this->addVarArg(func_get_arg($i));

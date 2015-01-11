@@ -17,21 +17,27 @@ class HTMLCheckBoxField extends HTMLInputField
 	/**
 	 * @param String|null $name field name (name=[])
 	 * @param bool|null $checked
-	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
+	 * @param null $value
 	 * @param String|null $classList a list of element classes
+	 * @param String|null|Array|IAttributes|IValidation $_validation [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 * @internal param null|String $classList a list of class elements
 	 */
-	public function __construct($name = null, $checked = false, $classList = null, $_validation = null) {
+	public function __construct($name = null, $checked = false, $value = null, $classList = null, $_validation = null) {
 		parent::__construct($name);
 		if(is_bool($checked) && $checked)
 			$this->setChecked($checked);
 
-		is_string($name)        ?: $this->addVarArg($name);
-		is_string($checked)     ?: $this->addVarArg($checked);
-		is_string($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
+		is_scalar($name)        ?: $this->addVarArg($name);
+		is_scalar($value)       ? $this->setAttribute('value', $value) : $this->addVarArg($value);
+		is_scalar($checked)     ?: $this->addVarArg($checked);
+		is_scalar($classList)   ? $this->addClass($classList)   : $this->addVarArg($classList);
 
 		for($i=3; $i<func_num_args(); $i++)
 			$this->addVarArg(func_get_arg($i));
+	}
+
+	public function setInputValue($value) {
+		$this->setChecked($value);
 	}
 
 	public function setChecked($checked=true) {

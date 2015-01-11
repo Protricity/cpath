@@ -40,27 +40,25 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
     public function __construct($elmType, $classList = null, $_content = null) {
 	    parent::__construct($elmType);
 
-	    if(is_string($classList))
-		    $this->addClass($classList);
-
 	    $this->mContent = new HTMLContainer();
 	    $this->mContent->onContentAdded($this);
 
-	    $args = func_get_args();
-	    foreach($args as $i => $arg)
-		    if(!is_string($arg) || $i >= 2)
-		        $this->addVarArg($arg);
+	    is_scalar($classList)   ? $this->addClass($classList) : $this->addVarArg($classList);
+
+	    for($i=2; $i<func_num_args(); $i++)
+		    $this->addVarArg(func_get_arg($i));
     }
 
 	protected function addVarArg($arg) {
-		if($arg instanceof \Closure)
+		if ($arg instanceof \Closure){
 			$this->addContent(new RenderCallback($arg));
-		elseif(is_string($arg))
+		} elseif (is_string($arg)){
 			$this[] = $arg;
-		else if($arg instanceof IRenderHTML)
+		} else if ($arg instanceof IRenderHTML){
 			$this[] = $arg;
-		else
+		} else {
 			parent::addVarArg($arg, false);
+		}
 	}
 
 	public function getContainer() {
@@ -272,17 +270,16 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return void
      */
     public function offsetSet($offset, $value) {
-	    if(is_string($value)) {
-		    switch(strtolower($this->getElementType())) {
-			    case 'form':
-			    case 'fieldset':
-				    if(strpos($value, "<") === false) {
-					    $nodeType = 'label';
-					    $value = str_replace("\n", '<br/>' , $value);
-				    }
-				    break;
-		    }
-	    }
+//	    if(is_string($value)) {
+//		    switch(strtolower($this->getElementType())) {
+//			    case 'form':
+//			    case 'fieldset':
+//				    if(strpos($value, "<") === false) {
+//					    $value = str_replace("\n", '<br/>' , $value);
+//				    }
+//				    break;
+//		    }
+//	    }
 	    $this->getContainer()->offsetSet($offset, $value);
     }
 
