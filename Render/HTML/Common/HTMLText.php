@@ -45,7 +45,7 @@ class HTMLText implements IRenderHTML
 			        echo $i, '<', $nodeType, '>', str_replace(PHP_EOL, '</' . $nodeType . '>' . PHP_EOL . '<' . $nodeType . '>', $this->mText), '</', $nodeType, '>';
 		        }
 	        } else {
-		        echo $i, $this->mText;
+		        echo $this->mText; // $i,
 	        }
         }
     }

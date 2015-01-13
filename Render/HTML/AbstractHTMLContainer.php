@@ -17,6 +17,7 @@ use CPath\Render\Map\MapRenderer;
 use CPath\Request\Executable\ExecutableRenderer;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
+use CPath\Response\IResponse;
 use Traversable;
 
 abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerItem, \ArrayAccess, \IteratorAggregate
@@ -25,6 +26,24 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerIt
 
 	/** @var IHTMLContainer */
 	private $mParent = null;
+
+
+	/**
+	 * Get the request status code
+	 * @return int
+	 */
+	function getCode() {
+		return IResponse::HTTP_SUCCESS;
+	}
+
+	/**
+	 * Get the IResponse Message
+	 * @return String
+	 */
+	function getMessage() {
+		return basename(get_called_class());
+	}
+
 
 	/**
 	 * Return element parent or null

@@ -188,7 +188,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 
 	    RI::ai(-1);
 
-	    if(sizeof($Content) > 0)
+	    if(sizeof($Content) > 1)
 		    echo RI::ni();
     }
 

@@ -43,7 +43,7 @@ class RedirectResponse extends Response implements IKeyMap, IRenderHTML
 		$url = $this->mRedirectURL;
 		$domainPath = $Request->getDomainPath();
 		if(strpos($url, $domainPath) === false)
-			$url = $domainPath . '/' . ltrim($url, '/');
+			$url = $domainPath . ltrim($url, '/');
 		return $url;
 	}
 

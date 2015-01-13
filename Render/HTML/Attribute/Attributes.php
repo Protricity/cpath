@@ -68,9 +68,16 @@ class Attributes implements IAttributes {
 	 * @return String|null
 	 */
 	function getAttribute($name) {
-		return isset($this->mAttributes[$name])
-			? $this->mAttributes[$name]
-			: null;
+		foreach($this->mAttributes as $key => $Attr) {
+			if($Attr instanceof IAttributes) {
+				if(null !== ($value = $Attr->getAttribute($name))) {
+					return $value;
+				}
+			} elseif ($name === $key) {
+				return $this->mAttributes[$name];
+			}
+		}
+		return null;
 	}
 
 	function getAttributes() {

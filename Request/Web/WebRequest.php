@@ -34,7 +34,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	    $root = dirname($_SERVER['SCRIPT_NAME']);
 	    if (stripos($path, $root) === 0) {
-		    $this->mPrefixPath = substr($path, 0, strlen($root));
+		    $this->mPrefixPath = substr($path, 0, strlen($root)) . '/';
 		    $path = substr($path, strlen($root));
 	    }
 
@@ -265,4 +265,11 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         $CookieUtil = new CookieUtil();
         return $CookieUtil->sendCookie($name, $value, $maxage, $path, $domain, $secure, $HTTPOnly);
     }
+
+	public function offsetGet($offset) {
+		$value = parent::offsetGet($offset);
+		return htmlspecialchars(is_string($value) ? htmlspecialchars($value) : $value);
+	}
+
+
 }

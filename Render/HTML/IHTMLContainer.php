@@ -10,8 +10,9 @@ namespace CPath\Render\HTML;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
+use CPath\Response\IResponse;
 
-interface IHTMLContainer extends IRenderHTML, IHTMLSupportHeaders
+interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 {
 	/**
 	 * Add support headers to content
