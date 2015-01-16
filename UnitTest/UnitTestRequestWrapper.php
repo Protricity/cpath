@@ -98,7 +98,7 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 //		if($Request instanceof ISessionRequest)
 //			return $Request->getSession($key);
 //
-//		throw new \InvalidArgumentException("Wrapped requests does not implement ISessionRequest");
+//		throw new \InvalidArgumentException("Wrapped activeRequests does not implement ISessionRequest");
 	}
 
 	/**

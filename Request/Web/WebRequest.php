@@ -29,9 +29,12 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	protected $mValueSource = null;
 
     public function __construct($method, $path = null, $parameters = array(), IRequestedMimeType $MimeType=null) {
-	    if(!$path)
-		    $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
+	    if(!$path) {
+		    $parse = parse_url($_SERVER['REQUEST_URI']);
+		    $path = $parse['path'];
+//		    if(!$parameters)
+//			    parse_str($parse['query'], $parameters);
+	    }
 	    $root = dirname($_SERVER['SCRIPT_NAME']);
 	    if (stripos($path, $root) === 0) {
 		    $this->mPrefixPath = substr($path, 0, strlen($root)) . '/';
@@ -88,8 +91,8 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 */
 
 	function getRequestValue($paramName) {
-		return $this->getQueryStringValue($paramName)
-			?: parent::getRequestValue($paramName);
+		return parent::getRequestValue($paramName)
+			?: $this->getQueryStringValue($paramName);
 	}
 
 	/**

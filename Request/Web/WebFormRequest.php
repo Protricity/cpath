@@ -34,7 +34,7 @@ class WebFormRequest extends WebRequest implements IFormRequest
 			&& $input = file_get_contents('php://input')) {
 			$vars = array();
 			parse_str($input, $vars);
-			$this->log('$_POST data not available. input parsed from php://input', static::ERROR);
+			$this->log('$_POST data not available. input parsed from php://input', static::ERROR || static::VERBOSE);
 			return $this->mValueSource = $vars;
 		}
 
@@ -48,11 +48,15 @@ class WebFormRequest extends WebRequest implements IFormRequest
 	 */
 
 	function getRequestValue($paramName) {
+		$value = parent::getRequestValue($paramName);
+		if($value !== null)
+			return $value;
+
 		$values = $this->getAllFormValues();
 		if(isset($values[$paramName]))
 			return $values[$paramName];
 
-		return parent::getRequestValue($paramName);
+		return null;
 	}
 
 
@@ -66,7 +70,7 @@ class WebFormRequest extends WebRequest implements IFormRequest
 		if(isset($values[$fieldName]))
 			return $values[$fieldName];
 
-		return parent::getRequestValue($fieldName);
+		return null;
 	}
 
 }

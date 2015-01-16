@@ -9,7 +9,7 @@ namespace CPath\Build;
 
 /**
  * Class IBuildable
- * A class that extends IBuildable is included in build requests
+ * A class that extends IBuildable is included in build activeRequests
  * The class should return an inst of itself that will be used to build
  * @package CPath\Interfaces
  */

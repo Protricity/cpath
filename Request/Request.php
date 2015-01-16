@@ -224,7 +224,7 @@ class Request implements IRequest
 	 * @param IRequestedMimeType $MimeType
 	 * @return IRequest
 	 */
-    public static function create($route=null, $args=null, IRequestedMimeType $MimeType=null) {
+    public static function create($route=null, Array $args=array(), IRequestedMimeType $MimeType=null) {
         $method = null;
         if(($p = strpos($route, ' ')) !== false)
             if($p <=5)
@@ -265,6 +265,11 @@ class Request implements IRequest
 //			$Parameter = new Parameter($offset);
 //			$Params->add($Parameter);
 //		}
+
+
+		$values = $this->getAllFormValues();
+		if(isset($values[$paramName]))
+			return $values[$paramName];
 		return $this->getRequestValue($offset) !== null;
 	}
 
@@ -298,8 +303,8 @@ class Request implements IRequest
 				foreach ($this->mRequestedParams as $param)
 					$Form->addAll(
 						$param,
-						new HTMLInputField($param,
-							new RequiredValidation()
+						new HTMLInputField($param
+//							new RequiredValidation()
 						)
 					);
 
