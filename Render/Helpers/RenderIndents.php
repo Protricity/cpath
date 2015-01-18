@@ -88,7 +88,7 @@ final class RenderIndents
 
 	/** Shorthand for ::get()->indent($addCount) prepended by a new line character
 	 * @param int $addCount the number of tabs to add for this render
-	 * @return String always returns null
+	 * @return void|String always returns null
 	 */
 	public static function ni($addCount = 0) {
 		echo "\n";
@@ -107,7 +107,7 @@ final class RenderIndents
 
 	/** Shorthand for ::get()->addIndent($addCount)
 	 * @param int $addCount the number of total tabs to set
-	 * @return String always returns null
+	 * @return void|String always returns null
 	 */
 	public static function ai($addCount = 0) {
 		static::get()

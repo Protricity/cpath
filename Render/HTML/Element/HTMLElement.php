@@ -188,7 +188,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 
 	    RI::ai(-1);
 
-	    if(sizeof($Content) > 1)
+	    if(!$this->hasFlag(self::FLAG_SKIP_NEWLINE) && sizeof($Content) > 1)
 		    echo RI::ni();
     }
 

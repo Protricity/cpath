@@ -65,8 +65,11 @@ class HTMLLabel extends HTMLElement
 //	}
 
 	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
-		if($this->mText)
-			echo  RI::ni(), '<span>' . $this->mText . '</span>';
+		if($this->mText) {
+			if(!$this->hasFlag(self::FLAG_SKIP_NEWLINE))
+				echo RI::ni();
+			echo  '<span>' . $this->mText . '</span>';
+		}
 
 		parent::renderContent($Request, $ContentAttr, $Parent);
 	}

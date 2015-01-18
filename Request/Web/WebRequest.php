@@ -18,6 +18,7 @@ use CPath\Request\MimeType\IRequestedMimeType;
 use CPath\Request\MimeType\UnknownMimeType;
 use CPath\Request\Request;
 use CPath\Request\Session\ISessionRequest;
+use CPath\Request\Session\SessionRequest;
 use CPath\Request\Session\SessionRequestException;
 use CPath\Response\IResponse;
 
@@ -27,6 +28,8 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	private $mPrefixPath = null;
 	protected $mValueSource = null;
+
+	private $mSessionRequest = null;
 
     public function __construct($method, $path = null, $parameters = array(), IRequestedMimeType $MimeType=null) {
 	    if(!$path) {
@@ -46,6 +49,11 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         if(preg_match('/\.(js|css|png|gif|jpg|bmp|ico)/i', $this->getPath(), $matches))
             throw new RequestException("File request was passed to Script: ", IResponse::HTTP_NOT_FOUND);
     }
+
+	public function getSessionRequest() {
+		return $this->mSessionRequest ?:
+			$this->mSessionRequest = new SessionRequest();
+	}
 
 	protected function getAllFormValues() {
 		if ($this->mValueSource !== null)
@@ -171,7 +179,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 * Returns true if the session is active, false if inactive
 	 * @return bool
 	 */
-	function hasActiveSession() {
+	function hasSessionCookie() {
 		return (isset($_COOKIE[session_name()]));
 	}
 
@@ -181,14 +189,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 * @return bool
 	 */
 	function isStarted() {
-		return isset($_SESSION);
-//			session_start();
-//
-//		if (version_compare(phpversion(), '5.4.0', '>=')) {
-//			return session_status() === PHP_SESSION_ACTIVE ? TRUE : FALSE;
-//		} else {
-//			return session_id() === '' ? FALSE : TRUE;
-//		}
+		return $this->getSessionRequest()->isStarted();
 	}
 
 	/**
@@ -198,9 +199,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 * @return array
 	 */
     function &getSession() {
-	    if(!isset($_SESSION))
-		    throw new SessionRequestException("No active session");
-        return $_SESSION;
+	    return $this->getSessionRequest()->getSession();
     }
 
 	/**
@@ -209,17 +208,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 * @return bool true if session was started, otherwise false
 	 */
 	function startSession() {
-		if(isset($_SESSION))
-			return true;
-			//throw new SessionRequestException("Session already active");
-
-		if(headers_sent($file, $line))
-			throw new SessionRequestException("Cannot Start Session: Headers already sent by {$file}:{$line}");
-
-		if(!session_start())
-			throw new SessionRequestException("Session did not start");
-
-		return true;
+		return $this->getSessionRequest()->startSession();
 	}
 
 	/**
@@ -228,20 +217,17 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	 * @return bool true if session was started, otherwise false
 	 */
 	function endSession() {
-		if(!isset($_SESSION))
-			throw new SessionRequestException("No active session");
-
-		//remove PHPSESSID from browser
-		if ( isset( $_COOKIE[session_name()] ) )
-			setcookie( session_name(), "", time()-3600, "/" );
-
-		//clear session from globals
-		$_SESSION = array();
-
-		//clear session from disk
-		return session_destroy();
+		return $this->getSessionRequest()->endSession();
 	}
 
+	/**
+	 * Destroy session data
+	 * @return bool true if session was destroyed, otherwise false
+	 * @throws SessionRequestException if session wasn't active
+	 */
+	function destroySession() {
+		return $this->getSessionRequest()->destroySession();
+	}
 
     /**
      * Get a cookie
@@ -273,6 +259,5 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		$value = parent::offsetGet($offset);
 		return htmlspecialchars(is_string($value) ? htmlspecialchars($value) : $value);
 	}
-
 
 }

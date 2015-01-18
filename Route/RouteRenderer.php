@@ -63,7 +63,7 @@ final class RouteRenderer implements IRouteMapper
 		    if($Map->mapRoutes($this))
 			    return true;
 
-		    $ex = new RequestException("Route not found: " . $this->mRequest->getPath());
+		    $ex = new RouteNotFoundException("Route not found: " . $this->mRequest->getPath());
 	    }
 
 	    if($this->tryHandlers($this->mRequest, $this->mHandlers, array_merge(array($ex), $this->mPrevious)))

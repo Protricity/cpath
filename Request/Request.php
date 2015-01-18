@@ -98,7 +98,7 @@ class Request implements IRequest
 		    }
 		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
 			    if(!$this instanceof ISessionRequest
-				    || !$this->hasActiveSession())
+				    || !$this->hasSessionCookie())
 				    return false;
 		    }
 	    }
@@ -260,16 +260,6 @@ class Request implements IRequest
 	 * The return value will be casted to boolean if non-boolean was returned.
 	 */
 	public function offsetExists($offset) {
-//		$Params = new SessionParameters($this);
-//		if(!$Params->has($offset)) {
-//			$Parameter = new Parameter($offset);
-//			$Params->add($Parameter);
-//		}
-
-
-		$values = $this->getAllFormValues();
-		if(isset($values[$paramName]))
-			return $values[$paramName];
 		return $this->getRequestValue($offset) !== null;
 	}
 
@@ -283,11 +273,6 @@ class Request implements IRequest
 	 * @return mixed Can return all value types.
 	 */
 	public function offsetGet($offset) {
-//		$Params = new SessionParameters($this);
-//		if(!$Params->has($offset)) {
-//			$Parameter = new RequiredParameter($offset);
-//			$Params->add($Parameter);
-//		}
 		if($offset[strlen($offset)-1] === '?') {
 			$value = $this->getRequestValue(substr($offset, 0, -1));
 			return $value;

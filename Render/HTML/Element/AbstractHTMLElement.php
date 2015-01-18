@@ -24,6 +24,9 @@ use CPath\Response\IResponse;
 
 abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
 {
+	const FLAG_SKIP_INDENTS = 0x01;
+	const FLAG_SKIP_NEWLINE = 0x02;
+
 	const PASS_DOWN_ATTRIBUTES = false;
 
 	private $mElmType;
@@ -36,6 +39,8 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, I
 
 	/** @var IHTMLContainer */
 	private $mParent = null;
+
+	private $mFlags = 0;
 
 	/**
 	 * @param string $elmType
@@ -55,6 +60,26 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, I
 		}
 	}
 
+	/**
+	 * Returns true one or more flags are set, otherwise false
+	 * Note: multiple flags follows 'OR' logic. Only one flag has to match to return true
+	 * @param int $flag the flag or flags to check
+	 * @return bool true one or more flags are set, otherwise false
+	 */
+	function hasFlag($flag) { return $this->mFlags & $flag ? true : false; }
+
+	/**
+	 * Set
+	 * @param $flag
+	 * @param bool $on
+	 * @return $this
+	 */
+	function setFlag($flag, $on = true) {
+		$on
+			? $this->mFlags |= $flag
+			: $this->mFlags &= ~$flag;
+		return $this;
+	}
 
 	/**
 	 * Get the request status code
@@ -179,13 +204,16 @@ abstract class AbstractHTMLElement extends Attributes implements IHTMLElement, I
 				$ContentAttr = $Attr;
 				$Attr = null;
 			}
-
-			echo RI::ni(), "<", $this->getElementType(), $this->renderHTMLAttributes($Request), '>';
+			if(!$this->hasFlag(self::FLAG_SKIP_NEWLINE))
+				echo RI::ni();
+			echo "<", $this->getElementType(), $this->renderHTMLAttributes($Request), '>';
 			$this->renderContent($Request, $ContentAttr, $Parent);
 			echo "</", $this->getElementType(), ">";
 
 		} else {
-			echo RI::ni(), "<", $this->getElementType(), $this->renderHTMLAttributes($Request), '/>';
+			if(!$this->hasFlag(self::FLAG_SKIP_NEWLINE))
+				echo RI::ni();
+			echo "<", $this->getElementType(), $this->renderHTMLAttributes($Request), '/>';
 
 		}
 	}

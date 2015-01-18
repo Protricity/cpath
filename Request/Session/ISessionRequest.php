@@ -7,9 +7,7 @@
  */
 namespace CPath\Request\Session;
 
-use CPath\Request\IRequest;
-
-interface ISessionRequest extends IRequest
+interface ISessionRequest
 {
 	/**
 	 * Return a referenced array representing the request session
@@ -26,17 +24,24 @@ interface ISessionRequest extends IRequest
 	function startSession();
 
 	/**
-	 * End current session
-	 * @return bool true if session was started, otherwise false
+	 * End session
+	 * @return bool true if session was ended, otherwise false
 	 * @throws SessionRequestException if session wasn't active
 	 */
 	function endSession();
 
 	/**
+	 * Destroy session data
+	 * @return bool true if session was destroyed, otherwise false
+	 * @throws SessionRequestException if session wasn't active
+	 */
+	function destroySession();
+
+	/**
 	 * Returns true if the session is active, false if inactive
 	 * @return bool
 	 */
-	function hasActiveSession();
+	function hasSessionCookie();
 
 	/**
 	 * Returns true if the session has started
