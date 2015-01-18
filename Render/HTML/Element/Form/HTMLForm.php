@@ -256,7 +256,9 @@ class HTMLForm extends HTMLElement implements ILogListener
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		foreach($this->mLogs as $arr) {
 			list($msg, $flags) = $arr;
-			echo RI::ni(), '<div class="';
+			if(!$this->hasFlag(self::FLAG_SKIP_NEWLINE))
+				echo RI::ni();
+			echo '<div class="';
 			if($flags & self::ERROR)
 				echo 'error';
 			echo '">', $msg, '</div>';

@@ -13,7 +13,10 @@ use CPath\Request\MimeType\MimeType;
 
 class TextMimeType extends MimeType implements ILogListener
 {
-    private $mFlags;
+	/** @var ILogListener[] */
+	private $mLogListeners = array();
+
+	private $mFlags;
     public function __construct($logFlags=0, $typeName='text/plain', IRequestedMimeType $nextMimeType=null) {
         $this->mFlags = $logFlags;
         parent::__construct($typeName, $nextMimeType);
@@ -26,22 +29,26 @@ class TextMimeType extends MimeType implements ILogListener
      * @return int the number of listeners that processed the log entry
      */
     function log($msg, $flags = 0) {
+	    $c = 0;
         if (!($flags & ~$this->mFlags)) {
             echo $msg . "\n";
             flush();
-	        return 1;
+	        $c++;
         }
-	    return 0;
+	    foreach($this->mLogListeners as $Log)
+		    $c += $Log->log($msg, $flags);
+	    return $c;
     }
 
-    /**
-     * Add a log listener callback
-     * @param ILogListener $Listener
-     * @throws \InvalidArgumentException
-     * @return void
-     */
-    function addLogListener(ILogListener $Listener) {
-        throw new \InvalidArgumentException("Can't add listeners to this mimetype. Add it to the IRequest instead");
-    }
+	/**
+	 * Add a log listener callback
+	 * @param ILogListener $Listener
+	 * @return void
+	 * @throws \InvalidArgumentException if this log listener inst does not accept additional listeners
+	 */
+	function addLogListener(ILogListener $Listener) {
+		if(!in_array($Listener, $this->mLogListeners))
+			$this->mLogListeners[] = $Listener;
+	}
 }
 

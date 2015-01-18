@@ -220,17 +220,17 @@ PHP;
 
         $oldFiles = array();
         if (!file_exists($procPath)) {
-            mkdir($procPath, 0777, true);
+            mkdir($procPath, null, true);
             $force = true;
         }
         if (!file_exists($modelPath)) {
-            mkdir($modelPath, 0777, true);
+            mkdir($modelPath, null, true);
             $force = true;
 //        } else {
 //          $oldFiles = array_diff(array_merge(scandir($modelPath), scandir($modelPath)), array('..', '.'));
         }
         if (!file_exists($tablePath)) {
-            mkdir($tablePath, 0777, true);
+            mkdir($tablePath, null, true);
             $force = true;
         }
 
@@ -373,7 +373,7 @@ PHP;
 
             $fileCSharp = $modelPath . 'CSharp/' . ($Table->getModelClass()) . '.cs';
             if (!file_exists($dir = dirname($fileCSharp)))
-                mkdir($dir, 0777, true);
+                mkdir($dir, null, true);
             $CBuilder = new BuildCSharpTables($DB::BUILD_DB_CSHARP_NAMESPACE);
             $CBuilder->build($Table, $fileCSharp);
 

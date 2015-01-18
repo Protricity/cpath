@@ -57,12 +57,12 @@ class HTMLRouteNavigator implements IRenderHTML
 					if(is_int($flags)) {
 						if($flags & IRequest::MATCH_NO_SESSION) {
 							if($Request instanceof ISessionRequest
-								&& $Request->hasActiveSession())
+								&& $Request->hasSessionCookie())
 								return false;
 						}
 						elseif($flags & IRequest::MATCH_SESSION_ONLY) {
 							if(!$Request instanceof ISessionRequest
-								|| !$Request->hasActiveSession())
+								|| !$Request->hasSessionCookie())
 								return false;
 						}
 					}

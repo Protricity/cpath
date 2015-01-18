@@ -47,7 +47,7 @@ class ExceptionResponse extends \Exception implements IResponse, IKeyMap {
 			$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
 			$Map->map(IResponse::STR_CODE, $this->getCode());
 			$Map->map(self::STR_CLASS, get_class($Ex));
-			$Map->map(self::STR_TRACE, strstr($Ex->getTraceAsString(), "#5", true));
+			$Map->map(self::STR_TRACE, strstr($Ex->getTraceAsString(), "#8", true));
 //		}
 	}
 }

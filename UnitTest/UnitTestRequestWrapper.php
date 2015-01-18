@@ -11,6 +11,7 @@ use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
 use CPath\Request\Session\ISessionRequest;
+use CPath\Request\Session\SessionRequestException;
 use CPath\UnitTest\Exceptions\UnitTestException;
 
 class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest, ISessionRequest, IFormRequest
@@ -130,10 +131,19 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	}
 
 	/**
+	 * Destroy session data
+	 * @return bool true if session was destroyed, otherwise false
+	 * @throws SessionRequestException if session wasn't active
+	 */
+	function destroySession() {
+		$this->mTestSession = array();
+	}
+
+	/**
 	 * Returns true if the session is active, false if inactive
 	 * @return bool
 	 */
-	function hasActiveSession() {
+	function hasSessionCookie() {
 		return true;
 	}
 
