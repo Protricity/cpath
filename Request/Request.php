@@ -91,9 +91,9 @@ class Request implements IRequest
 
 	    if($flags) {
 		    if($flags & IRequest::MATCH_NO_SESSION) {
-//			    if($this instanceof ISessionRequest
-//				    && $this->hasActiveSession())
-//				    return false;
+			    if($this instanceof ISessionRequest
+				    && $this->hasSessionCookie())
+				    return false;
 		    }
 		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
 			    if(!$this instanceof ISessionRequest

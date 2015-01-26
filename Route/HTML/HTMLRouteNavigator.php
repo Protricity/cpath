@@ -72,15 +72,22 @@ class HTMLRouteNavigator implements IRenderHTML
 					if(strpos($matchPath, ' ') !== false)
 						list($matchMethod, $matchPath) = explode(' ', $matchPath, 2);
 					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
-					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
+					if ($routeMethod !== 'ANY'
+						&& $matchMethod !== 'ANY'
+						&& $routeMethod !== $matchMethod)
+//						&& substr_count($routePath, '/') > 2)
 						return false;
 
 					$dirPath = dirname($matchPath);
-					if($dirPath === '\\')
-						$dirPath = '/';
+//					if($dirPath === '\\')
+//						$dirPath = '/';
 
 					$routePath = str_replace('\\', '/', $routePath);
-					if (strpos($routePath, $dirPath) !== 0)
+//					if (strpos($routePath, $dirPath) !== 0)
+//						&& substr_count($routePath, '/') > 2)
+//						return false;
+
+					if(strpos($routePath, '*') !== false)
 						return false;
 
 					return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath);
@@ -92,13 +99,16 @@ class HTMLRouteNavigator implements IRenderHTML
 
 	function renderRoute(IRequest $Request, $prefix, $title=null) {
 		list($routeMethod, $routePath) = explode(' ', $prefix, 2);
+		$pathLevel = $this->mSubPathLevel;
+		if(strpos($routePath, $Request->getPath()) === 0)
+			$pathLevel ++;
 
 		$routePath = str_replace('\\', '/', $routePath);
 
 		$routeArgs = explode('/', trim($routePath, '/'));
 
 		$routePath = '/';
-		for($i=0; $i<$this->mSubPathLevel; $i++)
+		for($i=0; $i<$pathLevel; $i++)
 			if(!empty($routeArgs[$i]) && $routeArgs[$i][0] !== ':')
 				$routePath .= $routeArgs[$i] . '/';
 

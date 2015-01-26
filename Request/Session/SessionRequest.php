@@ -87,19 +87,12 @@ class SessionRequest implements ISessionRequest
 	/**
 	 * Start a new session
 	 * @internal param bool $reset if true, session will be reset
+	 * @throws SessionRequestException
 	 * @return bool true if session was started, otherwise false
 	 */
 	function startSession() {
 		if(isset($_SESSION))
-			return true;
-		//throw new SessionRequestException("Session already active");
-//
-//		if ($this->mHandler) {
-//			session_set_save_handler($this->mHandler, true);
-//		}
-
-		if(!session_start())
-			throw new SessionRequestException("Session did not start");
+			throw new SessionRequestException("Session already active");
 
 		if(!session_start())
 			throw new SessionRequestException("Session did not start");
@@ -117,6 +110,7 @@ class SessionRequest implements ISessionRequest
 			throw new SessionRequestException("No active session");
 
 		session_write_close();
+		session_unset();
 		return true;
 	}
 
@@ -129,15 +123,12 @@ class SessionRequest implements ISessionRequest
 		if(!isset($_SESSION))
 			throw new SessionRequestException("No active session");
 
-		//remove PHPSESSID from browser
-		if ($this->hasSessionCookie())
-			setcookie( session_name(), "", time()-3600, "/" );
+		session_start();
+		if(!session_destroy())
+			throw new SessionRequestException("Could not destroy session");
 
-		//clear session from globals
-		$_SESSION = array();
-
-		//clear session from disk
-		return session_destroy();
+		setcookie( session_name(), "", time()-3600, "/" );
+		return true;
 	}
 
 	/**

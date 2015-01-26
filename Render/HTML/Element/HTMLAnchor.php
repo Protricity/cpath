@@ -45,7 +45,7 @@ class HTMLAnchor extends AbstractHTMLElement implements IHasURL
 		if($Request) {
 			$domainPath = $Request->getDomainPath(true);
 			if(strpos($this->mURL, $domainPath) === false)
-				return $domainPath . $this->mURL;
+				return $domainPath . ltrim($this->mURL, '/');
 		}
 		return $this->mURL;
 	}
