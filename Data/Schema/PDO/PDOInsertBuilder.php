@@ -21,16 +21,15 @@ class PDOInsertBuilder extends AbstractPDOQueryBuilder
 				return $this;
 			}
 
-			$DB = $this->getDatabase();
-			foreach($fields as &$field)
-				$field = $DB->quote($field);
+//			$DB = $this->getDatabase();
+//			foreach($fields as &$field)
+//				$field = $DB->quote($field, \PDO::PARAM_STR);
 			$fields = implode(', ', $fields);
 		}
 
 		if($fields[0] !== '(')
 			$fields = "(" . $fields . ")";
 		$this->mInsertSQL = " " . $fields;
-
 		return $this;
 	}
 

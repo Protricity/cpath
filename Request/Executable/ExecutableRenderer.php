@@ -260,7 +260,7 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
 	static function handleBuildStatic(IBuildRequest $Request) {
-		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_executable');
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__executable');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}
 
@@ -275,12 +275,12 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
-		if(sizeof($Previous) === 0
-			|| !$Previous[0] instanceof IExecutable) {
+		if(sizeof($Previous) === 0)
 			return false;
-		}
+		if($Previous[0] instanceof IRenderAll || !$Previous[0] instanceof IExecutable)
+			return false;
 
 		$Previous[0] = new ExecutableRenderer($Previous[0], true);
-		return $Previous[0];
+		return false;
 	}
 }

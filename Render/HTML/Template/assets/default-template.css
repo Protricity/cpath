@@ -1,0 +1,317 @@
+/** Body **/
+
+body {
+    font-family: monospace;
+}
+
+body.mobile {
+    width: 100%;
+    min-width: 320px ;
+}
+
+body.narrow {
+    max-width: 640px ;
+}
+
+body.wide {
+    max-width: 1024px ;
+}
+
+/** Controls **/
+
+.toggle {
+    cursor: pointer;
+}
+
+.toggle:hover {
+    color: #238;
+}
+
+/** Message Boxes **/
+
+.log    { color: #333; }
+.info   { color: #777; font-style: italic; }
+.error  { color: darkred; font-weight: bold; font-style: italic;  }
+
+div.info,
+div.error {
+    padding: 0 4pt 4pt 4pt;
+    margin: 2pt -2pt;
+    border-radius: 4pt;
+}
+div.info { background-color: #dde; border-top: 3pt solid #cce; }
+div.error { background-color: #edd; border-top: 3pt solid #ecc; }
+
+.pending {
+    opacity: 0.5;
+}
+
+/** Page Layout **/
+
+section, div.section {
+    /*padding: 3pt 0;*/
+    margin: 0 1.5pt 1pt 1.5pt;
+    border: 1pt solid #ccc;
+
+    background-color: #eee;
+    overflow: hidden;
+    padding: 15pt;
+
+}
+
+.header {
+}
+
+/*.console {*/
+    /*background-color: #000;*/
+    /*min-height: 20pt;*/
+/*}*/
+
+.navbar {
+    float: left;
+    max-width: 14em;
+}
+
+.navbar a {
+    display: block;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    background-color: #ccc;
+}
+
+.navbar .navbar-title {
+    font-size: 1em;
+    text-overflow: ellipsis;
+    overflow-x: hidden;
+    display: inline-block;
+}
+
+.content {
+}
+
+.footer {
+    background-color: #eee;
+    clear:both;
+    min-height: 20pt;
+    padding: 1pt;
+
+}
+.footer.fixed {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 0;
+}
+
+
+/** Data **/
+
+
+dl, ul, ol
+{
+    display: block;
+
+    /*float: left;*/
+    /*width: 648px;*/
+    margin: 5pt;
+    padding: 0 8pt 4pt 0;
+
+    /*border-radius: 8pt;*/
+    /*border: 2pt solid #ccc;*/
+
+    min-width: 30pt;
+}
+
+dd > a {
+    text-decoration: none;
+}
+
+dl > dt
+{
+    float: left;
+    clear: left;
+    width: 70pt;
+    margin: 0 15px 0 0;
+    text-align: right;
+    font-weight: bold;
+    color: #999;
+
+    padding: 3pt 0 0;
+}
+
+dl > dd
+{
+    /*white-space: pre-line;*/
+    /*white-space: nowrap;*/
+    /*overflow-x: hidden;*/
+    overflow-y: hidden;
+
+    margin: 0 0 0 70pt;
+    padding: 3pt 0 0;
+
+    min-height: 12pt;
+}
+
+ul > li
+{
+    list-style-type: none;
+}
+
+/*dd dl.closed > :not(.stay-open) {*/
+    /*display: none;*/
+/*}*/
+
+/** Form **/
+
+form {
+    position: relative;
+    font-family: monospace;
+}
+
+form > legend,
+fieldset > legend {
+    padding: 0 3pt;
+    /*margin-bottom: .5em;*/
+    font-weight: bold;
+}
+
+form > legend {
+    font-size: 1.5em;
+    margin-bottom: 1em;
+}
+
+fieldset {
+    border-radius: 4px;
+    border: 2pt solid #ccc;
+    /*margin: 0 0.2em 0.5em 0;*/
+    vertical-align: top;
+}
+
+/*form * + label {*/
+     /*margin-top: 10pt;*/
+/*}*/
+
+
+form button,
+form select,
+form textarea,
+form input:not([type]),
+form input[type="text"],
+form input[type="email"],
+form input[type="password"] {
+    border: 1px solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+}
+
+form button {
+    cursor: pointer;
+}
+
+form button,
+form select,
+form textarea,
+form input:not([type]),
+form input[type="text"],
+form input[type="email"],
+form input[type="submit"],
+form input[type="password"]  {
+    border: 1px solid #ccc;
+    /*box-shadow: inset 1pt 1pt 1pt #ddd;*/
+    padding: 5pt 5pt;
+    border-radius: 4pt;
+}
+
+
+form input[type="checkbox"],
+form input[type="range"] {
+    /*width: 2em;*/
+    height: 2.5em;
+    margin: 0;
+    vertical-align: bottom;
+    /*box-shadow: inset 1em 1em 1em #ddd;*/
+}
+
+form textarea {
+    height: 150pt;
+    width: 450pt;
+}
+
+/** Prompt **/
+
+form.form-prompt {
+
+    background-color: rgba(235, 235, 235, 0.6);
+
+    padding: 5em;
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+}
+
+form.form-prompt fieldset input,
+form.form-prompt fieldset button {
+    margin: 1em;
+}
+form.form-prompt fieldset {
+
+    margin: auto;
+
+    width: 20em;
+
+    padding: 1em;
+    background: #CCC;
+
+    overflow: hidden;
+
+    border: 2pt solid #ccc;
+    box-shadow: inset 0 1px 3px #ddd;
+    border-radius: 4px;
+}
+
+/** Focus container **/
+
+.highlight {
+    font-size: 1em;
+    color: #945214;
+    font-weight: bold;
+    text-decoration: wavy;
+    border-color: #ed47f4;
+}
+
+/*form.focus {*/
+    /*background-color: #DDD;*/
+    /*opacity: 0.8;*/
+
+    /*margin: -0.5em;*/
+    /*padding: 0.5em;*/
+
+    /*border-radius: 0.5em;*/
+    /*color: #AAA;*/
+/*}*/
+
+
+/*form.focus input,*/
+/*form.focus textarea,*/
+/*form.focus button {*/
+    /*opacity: 0.2;*/
+
+/*}*/
+
+/*form.focus div.focus,*/
+/*form.focus input.focus,*/
+/*form.focus textarea.focus,*/
+/*form.focus button.focus  {*/
+    /*opacity: 1;*/
+    /*font-weight: bold;*/
+/*}*/

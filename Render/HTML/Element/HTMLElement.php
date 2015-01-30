@@ -50,7 +50,10 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
     }
 
 	protected function addVarArg($arg) {
-		if ($arg instanceof \Closure){
+		if(is_array($arg)) {
+			foreach($arg as $a)
+				$this->addVarArg($a);
+		} elseif ($arg instanceof \Closure){
 			$this->addContent(new RenderCallback($arg));
 		} elseif (is_string($arg)){
 			$this[] = $arg;
@@ -141,6 +144,14 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 */
 	public function getContent($key=null) {
 		return $this->getContainer()->getContent($key);
+	}
+	/**
+	 * Returns a single dimension array containing all content
+	 * @return IRenderHTML[]
+	 * @throws \InvalidArgumentException if content at $key was not found
+	 */
+	public function getContentRecursive() {
+		return $this->getContainer()->getContentRecursive();
 	}
 
 	/**
@@ -270,16 +281,6 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * @return void
      */
     public function offsetSet($offset, $value) {
-//	    if(is_string($value)) {
-//		    switch(strtolower($this->getElementType())) {
-//			    case 'form':
-//			    case 'fieldset':
-//				    if(strpos($value, "<") === false) {
-//					    $value = str_replace("\n", '<br/>' , $value);
-//				    }
-//				    break;
-//		    }
-//	    }
 	    $this->getContainer()->offsetSet($offset, $value);
     }
 

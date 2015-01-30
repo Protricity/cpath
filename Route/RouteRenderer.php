@@ -13,7 +13,7 @@ use CPath\Request\IRequest;
 use CPath\Response\Common\ExceptionResponse;
 use CPath\Response\IResponse;
 
-final class RouteRenderer implements IRouteMapper
+final class RouteRenderer implements IRouteMapper, IRouteMap
 {
     //const INTERFACE_CALLBACKS = 'CPath\\Route\\IRouteRendererStaticCallbacks';
     const INTERFACE_ROUTE = 'CPath\\Route\\IRoute';
@@ -25,6 +25,9 @@ final class RouteRenderer implements IRouteMapper
     private $mHandlers = array();
     private $mPrevious = array();
 
+	/** @var IRouteMap[] */
+	private $mActiveMaps = array();
+
     /**
      * Create a rendering map for IRoutable route maps
      * @param IRequest $Request the request inst to render
@@ -33,10 +36,18 @@ final class RouteRenderer implements IRouteMapper
         $this->mRequest = $Request;
     }
 
+	/**
+	 * @return IRouteMap
+	 */
+	public function getActiveMap() {
+		return $this->mActiveMaps;
+	}
+
     function renderRoutes(IRouteMap $Map) {
+	    $this->mActiveMaps[] = $Map;
 	    $this->mPrevious = array();
         if($Map->mapRoutes($this))
-            return true;
+	        return true;
 
 	    $c = sizeof($this->mPrevious);
 	    if($c > 0) {
@@ -57,12 +68,6 @@ final class RouteRenderer implements IRouteMapper
 		    }
 
 	    } else {
-			$routePrefix = 'GET ' . $this->mRequest->getPath();
-		    $this->mPrevious[] = new RouteIndex($Map, $routePrefix);
-
-		    if($Map->mapRoutes($this))
-			    return true;
-
 		    $ex = new RouteNotFoundException("Route not found: " . $this->mRequest->getPath());
 	    }
 
@@ -88,9 +93,9 @@ final class RouteRenderer implements IRouteMapper
             return $target->mapRoutes($this);
         }
 
-        $args = array($this->mRequest, &$this->mPrevious);
+        $args = array($this->mRequest, &$this->mPrevious, $this, array());
         for($i=2; $i<func_num_args(); $i++)
-            $args[] = func_get_arg($i);
+            $args[3][] = func_get_arg($i);
 
 	    try {
 		    $i = class_implements($target);
@@ -136,7 +141,7 @@ final class RouteRenderer implements IRouteMapper
 
 		foreach($Handlers as $i => $Handler) {
 			/** @var IRoutable $Handler */
-			$Response = $Handler::routeRequestStatic($Request, $Previous);
+			$Response = $Handler::routeRequestStatic($Request, $Previous, $this, array());
 			if($Response === false)
 				continue;
 
@@ -148,6 +153,20 @@ final class RouteRenderer implements IRouteMapper
 			return $this->tryHandlers($Request, array_diff($this->mHandlers, array($Handler)), $Previous);
 		}
 
+		return false;
+	}
+
+	/**
+	 * Maps all routes to the route map. Returns true if the route prefix was matched
+	 * @param IRouteMapper $Mapper
+	 * @return bool true if the route mapper should stop mapping, otherwise false to continue
+	 * @build routes --disable 0
+	 * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
+	 */
+	function mapRoutes(IRouteMapper $Mapper) {
+		foreach($this->mActiveMaps as $Map)
+			if($Map->mapRoutes($Mapper))
+				return true;
 		return false;
 	}
 }

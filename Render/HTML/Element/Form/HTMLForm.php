@@ -141,22 +141,26 @@ class HTMLForm extends HTMLElement implements ILogListener
 	public function getAction()             { return $this->getAttribute('action'); }
 	public function setAction($action)      { $this->mAction = $action; }
 
-
-	public function setFormValues(IRequest $Request, IHTMLContainer $Container=null) {
+	/**
+	 * @param Array|IRequest $values
+	 * @param IHTMLContainer $Container
+	 */
+	public function setFormValues($values, IHTMLContainer $Container=null) {
 		if(!$Container)
 			$Container = $this;
 
-		if(!$this->hasAttribute('action'))
-			$this->setAttribute('action', $this->getActionURL($Request));
+		if($values instanceof IRequest)
+			if(!$this->hasAttribute('action'))
+				$this->setAttribute('action', $this->getActionURL($values));
 
 		foreach($Container->getContent() as $Content) {
 			if($Content instanceof IHTMLContainer)
-				$this->setFormValues($Request, $Content);
+				$this->setFormValues($values, $Content);
 
 			if($Content instanceof IHTMLFormField
 				&& ($name = $Content->getFieldName())
-				&& isset($Request[$name])) {
-				$Content->setInputValue($Request[$name]);
+				&& isset($values[$name])) {
+				$Content->setInputValue($values[$name]);
 			}
 		}
 	}

@@ -72,7 +72,9 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		$this->execute();
 		$stmt = $this->prepare();
 		$this->mCurIndex++;
-		return $stmt->fetchAll($fetch_style, $fetch_argument, $ctor_args);
+		if($fetch_argument !== null)
+			return $stmt->fetchAll($fetch_style, $fetch_argument, $ctor_args);
+		return $stmt->fetchAll($fetch_style);
 	}
 
 	function fetchOne($fetch_style = null) {

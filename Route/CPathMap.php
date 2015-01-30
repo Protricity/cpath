@@ -32,22 +32,25 @@ class CPathMap implements IRouteMap
 			// @group CPath\UnitTest\Handlers\TestRequestHandler
 			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
 
-			// @group _executable
+			// @group __executable
 			$Map->route('ANY *', 'CPath\\Request\\Executable\\ExecutableRenderer') ||
 
-			// @group _map
+			// @group __map
 			$Map->route('ANY *', 'CPath\\Render\\Map\\MapRenderer') ||
 
-			// @group _response
-			$Map->route('ANY *', 'CPath\\Response\\ResponseRenderer');
+			// @group __response
+			$Map->route('ANY *', 'CPath\\Response\\ResponseRenderer') ||
+
+			// @group _default_template
+			$Map->route('ANY *', 'CPath\\Render\\HTML\\Template\\DefaultCPathTemplate');
 	}
 
     // Static
 
-	static function map(IRouteMapper $Map) {
-		$Inst = new CPathMap();
-		return $Inst->mapRoutes($Map);
-	}
+//	static function map(IRouteMapper $Map) {
+//		$Inst = new CPathMap();
+//		return $Inst->mapRoutes($Map);
+//	}
 
     /**
      * Handle this request and render any content

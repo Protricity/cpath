@@ -16,7 +16,7 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 	public function update($fieldName, $fieldValue=null) {
 		if (is_array($fieldName)) {
 			foreach ($fieldName as $k => $v)
-				$this->update($v, is_int($k) ? null : $k);
+				$this->update(is_int($k) ? $v : $k, $v);
 			return $this;
 		}
 

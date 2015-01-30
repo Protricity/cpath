@@ -78,14 +78,6 @@ class HTMLRouteNavigator implements IRenderHTML
 //						&& substr_count($routePath, '/') > 2)
 						return false;
 
-					$dirPath = dirname($matchPath);
-//					if($dirPath === '\\')
-//						$dirPath = '/';
-
-					$routePath = str_replace('\\', '/', $routePath);
-//					if (strpos($routePath, $dirPath) !== 0)
-//						&& substr_count($routePath, '/') > 2)
-//						return false;
 
 					if(strpos($routePath, '*') !== false)
 						return false;
@@ -99,18 +91,20 @@ class HTMLRouteNavigator implements IRenderHTML
 
 	function renderRoute(IRequest $Request, $prefix, $title=null) {
 		list($routeMethod, $routePath) = explode(' ', $prefix, 2);
-		$pathLevel = $this->mSubPathLevel;
-		if(strpos($routePath, $Request->getPath()) === 0)
-			$pathLevel ++;
+//		$pathLevel = $this->mSubPathLevel;
+//		if(strpos($Request->getPath(), $routePath) === 0)
+//			$pathLevel ++;
 
 		$routePath = str_replace('\\', '/', $routePath);
+		if(strpos($routePath, ':') !== false)
+			$routePath = strstr($routePath, ':', true);
 
-		$routeArgs = explode('/', trim($routePath, '/'));
-
-		$routePath = '/';
-		for($i=0; $i<$pathLevel; $i++)
-			if(!empty($routeArgs[$i]) && $routeArgs[$i][0] !== ':')
-				$routePath .= $routeArgs[$i] . '/';
+//		$routeArgs = explode('/', trim($routePath, '/'));
+//
+//		$routePath = '/';
+//		for($i=0; $i<$pathLevel; $i++)
+//			if(!empty($routeArgs[$i]) && $routeArgs[$i][0] !== ':')
+//				$routePath .= $routeArgs[$i] . '/';
 
 		if(in_array($routePath, $this->mPathNames))
 			return false;

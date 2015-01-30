@@ -163,6 +163,8 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerIt
 				$value = new ExecutableRenderer($value);
 			elseif($value instanceof ISequenceMap || $value instanceof IKeyMap)
 				$value = new MapRenderer($value);
+			elseif($value instanceof \Closure)
+				$value = new RenderCallback($value);
 			else
 				$value = new HTMLText($value);
 		}

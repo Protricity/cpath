@@ -92,18 +92,13 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 			if (stripos($ex->getMessage(), 'Duplicate') !== false)
 				throw new PDODuplicateRowException($this, $ex->getMessage(), null, $ex);
 
-			$Schema = $DB;
-			if($Schema instanceof IReadableSchema) {
-				$TableWriter = new PDOTableWriter($DB);
-				$repaired = $TableWriter->tryRepair($ex, $Schema);
-				if($repaired) {
-					$statement = $this->mPDO->prepare($sql);
-					$ex = null;
-				}
-			}
+			if($this->tryRepairTable($ex)) {
+				$statement = $DB->prepare($sql);
+				$this->log($sql, $this::VERBOSE);
 
-			if($ex)
-				throw new \PDOException($ex->getMessage() . ' - ' . $sql, intval($ex->getCode()), $ex);
+			} else {
+				throw new \PDOException($ex->getMessage() . ' - ' . $this->getSQL(), intval($ex->getCode()), $ex);
+			}
 		}
 
 		foreach ($this->mModes as $mode)
@@ -121,12 +116,18 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 		$statement = $this->prepare($Request);
 		if(!$this->mExecuted) try {
 			$this->mExecuted = $statement->execute($values);
-			if(!$values)
-				$this->mValues = array();
+			$this->mValues = array();
 		} catch (\PDOException $ex) {
 			if (preg_match('/column (.*) is not unique/i', $ex->getMessage(), $matches))
 				throw new PDODuplicateRowException($this, $matches[1], $ex->getMessage(), null, $ex);
-			throw $ex;
+
+			if($this->tryRepairTable($ex)) {
+				$this->mExecuted = $statement->execute($values);
+				$this->mValues = array();
+
+			} else {
+				throw new \PDOException($ex->getMessage() . ' - ' . $this->getSQL(), intval($ex->getCode()), $ex);
+			}
 		}
 		return $this->mExecuted;
 	}
@@ -139,6 +140,20 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 	public function format($format) {
 		$this->mFormat = $format;
+	}
+
+	protected function tryRepairTable(\PDOException $ex) {
+		if (preg_match('/table( or view)? not found/i', $ex->getMessage(), $matches)) {
+			$DB = $this->getDatabase();
+			$Schema = $DB;
+			if($Schema instanceof IReadableSchema) {
+				$TableWriter = new PDOTableWriter($DB);
+				$repaired = $TableWriter->tryRepair($ex, $Schema);
+				if($repaired)
+					return true;
+			}
+		}
+		return false;
 	}
 
 	/**

@@ -11,11 +11,8 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
-use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\IRenderHTML;
-use CPath\Request\IRequest;
 
-class RouteIndex implements ISequenceMap, IKeyMap // , IRenderHTML
+class RouteIndex implements ISequenceMap, IKeyMap
 {
 	const STR_PATH   = 'path';
 	const STR_METHOD = 'method';
@@ -74,14 +71,4 @@ class RouteIndex implements ISequenceMap, IKeyMap // , IRenderHTML
 		$Map->map(self::STR_ROUTES, $this);
 	}
 
-	/**
-	 * Render request as html
-	 * @param IRequest $Request the IRequest inst for this render which contains the request and remaining args
-	 * @param IAttributes $Attr
-	 * @param IRenderHTML $Parent
-	 * @return String|void always returns void
-	 */
-	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
-		// TODO: Implement renderHTML() method.
-	}
 }

@@ -1,7 +1,6 @@
 <?php
 namespace CPath\Framework\API\Fragments;
 
-use CPath\Config;
 use CPath\Framework\API\Interfaces\IAPI;
 use CPath\Render\HTML\HTMLRenderUtil;
 use CPath\Render\HTML\Theme\ITableTheme;

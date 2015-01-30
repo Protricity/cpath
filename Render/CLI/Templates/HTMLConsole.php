@@ -56,7 +56,7 @@ class HTMLConsole implements IRenderHTML, IHTMLSupportHeaders
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		HeaderConfig::writeJQueryHeaders($Head);
+		$Head->writeScript(HeaderConfig::$JQueryPath);
 		$Head->writeScript(__DIR__ . '/assets/html-console.js');
 		$Head->writeStyleSheet(__DIR__ . '/assets/html-console.css');
 	}

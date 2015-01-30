@@ -17,7 +17,7 @@ class TextMimeType extends MimeType implements ILogListener
 	private $mLogListeners = array();
 
 	private $mFlags;
-    public function __construct($logFlags=0, $typeName='text/plain', IRequestedMimeType $nextMimeType=null) {
+    public function __construct($logFlags=NULL, $typeName='text/plain', IRequestedMimeType $nextMimeType=null) {
         $this->mFlags = $logFlags;
         parent::__construct($typeName, $nextMimeType);
     }
@@ -30,7 +30,7 @@ class TextMimeType extends MimeType implements ILogListener
      */
     function log($msg, $flags = 0) {
 	    $c = 0;
-        if (!($flags & ~$this->mFlags)) {
+        if (!$this->mFlags || !($flags & ~$this->mFlags)) {
             echo $msg . "\n";
             flush();
 	        $c++;

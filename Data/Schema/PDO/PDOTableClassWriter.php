@@ -76,19 +76,24 @@ class PDOTableClassWriter implements IWritableSchema
 				$abstractBaseClass           = AbstractPDOPrimaryKeyTable::className;
 				$methodDocs = <<<PHP
 
- * @method {$fetchClassBaseName} insertOrUpdate(\${$primaryKeyColumn}, Array \$insertData) insert or update a {$fetchClassBaseName} instance
- * @method {$fetchClassBaseName} insertAndFetch(Array \$insertData) insert and fetch a {$fetchClassBaseName} instance
+ * @method Entry insertOrUpdate(\${$primaryKeyColumn}, Array \$insertData) insert or update a {$fetchClassBaseName} instance
+ * @method Entry insertAndFetch(Array \$insertData) insert and fetch a {$fetchClassBaseName} instance
 PHP;
 			}
 
 			$compareDefault = "'=?'";
 			$searchColumnDefault = $primaryKeyColumn ? "'{$primaryKeyColumn}'" : "null";
 
+			if(!is_dir(dirname($this->mPath)))
+				mkdir(dirname($this->mPath));
 			$fRes            = fopen($this->mPath, 'w+');
+			if(!$fRes)
+				throw new \Exception("Could not open path for writing: " . $this->mPath);
 
 			$namespace       = ($ns = dirname($this->mClassName)) ? "\nnamespace " . $ns . ';' : '';
 			$useList         = "\nuse " . $abstractBaseClass . ' as AbstractBase;';
 			$useList        .= "\nuse " . $this->mPDOClass . ' as DB;';
+			$useList        .= "\nuse " . $fetchClass . ' as Entry;';
 			$useList        .= "\nuse " . get_class($Schema) . ';';
 			if($Schema instanceof IConstructorArgs) {
 				$useList    .= "\nuse " . IReadableSchema::interfaceName . ';';
@@ -121,9 +126,9 @@ PHP;
 
 /**
  * Class {$baseClassName}{$tableComment}{$methodDocs}
- * @method {$fetchClassBaseName} fetch(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a {$fetchClassBaseName} instance
- * @method {$fetchClassBaseName} fetchOne(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a single {$fetchClassBaseName}
- * @method {$fetchClassBaseName}[] fetchAll(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch an array of {$fetchClassBaseName}[]
+ * @method Entry fetch(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a {$fetchClassBaseName} instance
+ * @method Entry fetchOne(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch a single {$fetchClassBaseName}
+ * @method Entry[] fetchAll(\$whereColumn, \$whereValue=null, \$compare={$compareDefault}, \$selectColumns=null) fetch an array of {$fetchClassBaseName}[]
  */
 class {$baseClassName} extends AbstractBase{$Implements} {
 PHP

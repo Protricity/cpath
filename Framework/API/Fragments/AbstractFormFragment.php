@@ -2,7 +2,6 @@
 namespace CPath\Framework\API\Fragments;
 
 use CPath\Base;
-use CPath\Config;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;

@@ -12,10 +12,10 @@ interface IRouteMap {
 
     /**
      * Maps all routes to the route map. Returns true if the route prefix was matched
-     * @param IRouteMapper $Map
+     * @param IRouteMapper $Mapper
      * @return bool true if the route mapper should stop mapping, otherwise false to continue
      * @build routes --disable 0
      * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
      */
-    function mapRoutes(IRouteMapper $Map);
+    function mapRoutes(IRouteMapper $Mapper);
 }

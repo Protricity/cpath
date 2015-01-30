@@ -287,7 +287,7 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 	 * Note: Use doctag 'build' with '--disable 1' to have this IBuildable class skipped during a build
 	 */
 	static function handleBuildStatic(IBuildRequest $Request) {
-		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '_response');
+		$RouteBuilder = new RouteBuilder($Request, new CPathMap(), '__response');
 		$RouteBuilder->writeRoute('ANY *', __CLASS__);
 	}
 
@@ -302,13 +302,13 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
-		if(sizeof($Previous) === 0
-			|| !$Previous[0] instanceof IResponse) {
+		if(sizeof($Previous) === 0)
 			return false;
-		}
+		if($Previous[0] instanceof IRenderAll || !$Previous[0] instanceof IResponse)
+			return false;
 
-		$Object = $Previous[0];
-		return new ResponseRenderer($Object);
+		$Previous[0] = new ResponseRenderer($Previous[0]);
+		return false;
 	}
 }
 
