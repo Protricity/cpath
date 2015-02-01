@@ -20,12 +20,12 @@ class TextMapRenderer extends AbstractMapRenderer
 		parent::__construct($Request, $Map);
 	}
 
-	protected function renderKeyValue($key, $value) {
+	protected function renderNamedValue($name, $value) {
 		if (self::$mStarted)
 			echo RI::ni();
 		self::$mStarted = true;
-		echo $key, ": ";
-		$ret = parent::renderKeyValue($key, $value);
+		echo $name, ": ";
+		$ret = parent::renderNamedValue($name, $value);
 
 		return $ret;
 	}

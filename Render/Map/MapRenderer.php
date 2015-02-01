@@ -45,16 +45,6 @@ class MapRenderer implements IRenderAll, IBuildable, IRoutable
 	}
 
 	/**
-	 * Return true if the object can be rendered
-	 * @param $Object
-	 * @return bool
-	 */
-	function canHandle($Object) {
-		return $Object instanceof IKeyMap
-			|| $Object instanceof ISequenceMap;
-	}
-
-	/**
 	 * @param IRequest $Request
 	 * @return AbstractMapRenderer
 	 */

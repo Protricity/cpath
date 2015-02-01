@@ -19,20 +19,14 @@ class HTMLMapRenderer extends AbstractMapRenderer
 		parent::__construct($Request, $Map);
 	}
 
-	/**
-	 * Return true if the object can be rendered
-	 * @param $Object
-	 * @return bool
-	 */
-	function canHandle($Object) {
-		return $Object instanceof IKeyMap
-		|| $Object instanceof ISequenceMap;
-	}
-
-	protected function renderKeyValue($key, $value) {
-		echo RI::ni(), "<dt>", $key, "</dt>";
+	protected function renderNamedValue($name, $value) {
+		echo RI::ni(), "<dt>", $name, "</dt>";
 		echo RI::ni(), "<dd>";
-		if ($value instanceof IRenderHTML) {
+		if(is_scalar($value)) {
+			HTMLConfig::renderNamedValue($name, $value);
+			$ret = true;
+
+		} else if ($value instanceof IRenderHTML) {
 			RI::ai(1);
 			$value->renderHTML($this->getRequest());
 			RI::ai(-1);
@@ -40,7 +34,7 @@ class HTMLMapRenderer extends AbstractMapRenderer
 			echo RI::ni();
 
 		} else {
-			$ret = parent::renderKeyValue($key, $value);
+			$ret = parent::renderNamedValue($name, $value);
 		}
 		echo "</dd>";
 
@@ -50,7 +44,12 @@ class HTMLMapRenderer extends AbstractMapRenderer
 	protected function renderValue($value) {
 		echo RI::ni(), "<li>";
 		RI::ai(1);
-		if ($value instanceof IRenderHTML) {
+
+		if(is_scalar($value)) {
+			HTMLConfig::renderValue($value);
+			$ret = true;
+
+		} else if ($value instanceof IRenderHTML) {
 			$value->renderHTML($this->getRequest());
 			$ret = true;
 
@@ -58,6 +57,7 @@ class HTMLMapRenderer extends AbstractMapRenderer
 			$ret = parent::renderValue($value);
 		}
 		RI::ai(-1);
+
 		echo RI::ni(), "</li>";
 
 		return $ret;
@@ -84,5 +84,14 @@ class HTMLMapRenderer extends AbstractMapRenderer
 			RI::ai(-1);
 			echo RI::ni(), "</dl>";
 		}
+	}
+
+	// Static
+
+
+	/** @var IHTMLValueRenderer */
+	static $mValueRenderers = array() ;
+	public function addValueRenderer(IHTMLValueRenderer $Renderer) {
+		$this->mValueRenderers = $Renderer;
 	}
 }

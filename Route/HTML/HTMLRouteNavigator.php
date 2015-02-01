@@ -18,13 +18,11 @@ use CPath\Route\RouteCallback;
 class HTMLRouteNavigator implements IRenderHTML
 {
 	private $mRoute;
-	private $mSubPathLevel;
 	private $mMatch;
 	private $mPathNames = array();
 
-	public function __construct(IRouteMap $Route, $subPathLevel = 1, $matchPrefix = 'GET /') { // 'ANY /') {
+	public function __construct(IRouteMap $Route, $matchPrefix = 'GET /') { // 'ANY /') {
 		$this->mRoute = $Route;
-		$this->mSubPathLevel = $subPathLevel;
 		$this->mMatch = $matchPrefix;
 	}
 
@@ -47,14 +45,17 @@ class HTMLRouteNavigator implements IRenderHTML
 		$match = str_replace('\\', '/', $match);
 
 //		$this->renderRoute($Request, $Request->getMethodName() . ' ' . $curPath, '.');
-		if(dirname($curPath))
-			$this->renderRoute($Request, $Request->getMethodName() . ' ' . dirname($curPath), '..');
+//		if(dirname($curPath))
+//			$this->renderRoute($Request, $Request->getMethodName() . ' ' . dirname($curPath), '..');
 
 		$THIS = $this;
 		$Route->mapRoutes(
 			new RouteCallback(
-				function($prefix, $target, $flags = 0) use ($Request, $THIS, $match) {
+				function($prefix, $target, $flags = 0, $title=null) use ($Request, $THIS, $match) {
 					if(is_int($flags)) {
+						if(!($flags & IRequest::NAVIGATION_ROUTE)) {
+							return false;
+						}
 						if($flags & IRequest::MATCH_NO_SESSION) {
 							if($Request instanceof ISessionRequest
 								&& $Request->hasSessionCookie())
@@ -82,7 +83,7 @@ class HTMLRouteNavigator implements IRenderHTML
 					if(strpos($routePath, '*') !== false)
 						return false;
 
-					return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath);
+					return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath, $title);
 				}
 			)
 		);

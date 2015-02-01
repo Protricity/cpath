@@ -17,9 +17,9 @@ class JSONMapRenderer extends AbstractMapRenderer
 		parent::__construct($Request, $Map);
 	}
 
-	protected function renderKeyValue($key, $value) {
-		echo json_encode($key), ':';
-		$ret = parent::renderKeyValue($key, $value);
+	protected function renderNamedValue($name, $value) {
+		echo json_encode($name), ':';
+		$ret = parent::renderNamedValue($name, $value);
 
 		return $ret;
 	}

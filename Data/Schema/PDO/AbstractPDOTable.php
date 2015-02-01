@@ -136,9 +136,9 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 			->fetchColumn($column_number);
 	}
 
-	function fetchAll($search, $searchColumn = null, $compare = '=?', $limit = null, $selectColumns = null) {
+	function fetchAll($whereColumn, $whereValue = null, $compare = '=?', $limit = null, $selectColumns = null) {
 		return $this->select($selectColumns)
-			->where($searchColumn, $search, $compare, $limit)
+			->where($whereColumn, $whereValue, $compare, $limit)
 			->fetchAll();
 	}
 

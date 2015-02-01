@@ -23,8 +23,6 @@ class CallbackKeyMapper implements IKeyMapper
 	 * @return bool true to stop or any other value to continue
 	 */
 	function map($key, $value) {
-		$call = $this->mCallback;
-
-		return $call($key, $value);
+		return call_user_func_array($this->mCallback, func_get_args());
 	}
 }

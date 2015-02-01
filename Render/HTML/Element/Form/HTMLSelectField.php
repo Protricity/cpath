@@ -71,7 +71,7 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 
 	public function addOption($value, $description=null, $selected=false) {
 		if($description) {
-			$this->mValues[] = array($value, $description);
+			$this->mValues[$description] = $value;
 		} else {
 			$this->mValues[] = $value;
 		}
@@ -81,7 +81,7 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 
 	public function select($value, $_value=null) {
 		foreach(func_get_args() as $value)
-			if(!in_array($value, $this->mValues))
+			if(in_array($value, $this->mValues))
 				$this->mSelected[] = $value;
 	}
 
@@ -107,18 +107,12 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 	function mapSequence(ISequenceMapper $Map) {
 		//$Map = new HTMLOptionMapper($Map, $this->mSelected);
 
-		foreach($this->mValues as $value) {
-			if(is_array($value)) {
-				list($value, $description) = $value;
-				$done = $Map->mapNext($value, $description, $this->isSelected($value));
-				if($done === true)
-					break;
-
-			} elseif ($value instanceof ISequenceMap) {
+		foreach($this->mValues as $description => $value) {
+			if ($value instanceof ISequenceMap) {
 				$value->mapSequence($Map);
 
 			} else {
-				$done = $Map->mapNext($value, null, $this->isSelected($value));
+				$done = $Map->mapNext($value, is_string($description) ? $description : null, $this->isSelected($value));
 				if($done === true)
 					break;
 			}

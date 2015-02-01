@@ -34,15 +34,17 @@ class Attributes implements IAttributes {
 	    }
     }
 
-    /**
-     * Add an attribute to the collection
-     * @param String $attrName the attribute name. If null is provided, the attribute is not added
-     * @param String|null $value the attribute value. If null is provided,
-     * @throws \InvalidArgumentException if $replace == false and the attribute exists
-     * or $replace == true and the attribute does not exist
-     */
+	/**
+	 * Add an attribute to the collection
+	 * @param String $attrName the attribute name. If null is provided, the attribute is not added
+	 * @param String|null $value the attribute value. If null is provided,
+	 * @return $this
+	 * @throws \InvalidArgumentException if $replace == false and the attribute exists
+	 * or $replace == true and the attribute does not exist
+	 */
     function setAttribute($attrName, $value = null) {
         $this->mAttributes[$attrName] = $value;
+	    return $this;
     }
 
 	function hasAttribute($attrName) {

@@ -84,7 +84,7 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 		return $this->mMap;
 	}
 
-	protected function renderKeyValue($key, $value) {
+	protected function renderNamedValue($name, $value) {
 		if (is_array($value))
 			$value = is_string(key($value))
 				? new ArrayKeyMap($value)
@@ -162,9 +162,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 		}
 
 		try {
-			$this->renderKeyValue($key, $value);
+			$this->renderNamedValue($key, $value);
 		} catch (\Exception $ex) {
-			$this->renderKeyValue($key, $ex->getMessage());
+			$this->renderNamedValue($key, $ex->getMessage());
 		}
 	}
 

@@ -11,8 +11,10 @@ use CPath\Request\Log\ILogListener;
 
 interface IRequest extends ILogListener, \ArrayAccess, \IteratorAggregate
 {
-	const MATCH_SESSION_ONLY = 0x10;
-	const MATCH_NO_SESSION   = 0x20;
+	const MATCH_SESSION_ONLY = 0x010;
+	const MATCH_NO_SESSION   = 0x020;
+
+	const NAVIGATION_ROUTE   = 0x100;
 
 	/**
 	 * Get the requested Mime type for rendering purposes

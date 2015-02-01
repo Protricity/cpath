@@ -88,7 +88,6 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
             $Class = new \ReflectionClass($class);
             if ($Class->implementsInterface('\CPath\Build\IBuildable')) {
-                /** @var IBuildable $class */
                 $Method = $Class->getMethod('handleBuildStatic');
                 $MethodDoc = new MethodDocBlock($Method);
                 if($Tag = $MethodDoc->getNextTag(self::DOCTAG)) {
@@ -101,7 +100,8 @@ class BuildRequestHandler implements IRoutable, IBuildable, IExecutable
 
                 try {
                     $Request->log("Building {$class}...");
-                    $class::handleBuildStatic($Request);
+	                /** @var IBuildable $class */
+	                $class::handleBuildStatic($Request);
 
                 } catch (\Exception $ex) {
                     $Request->log($ex, $Request::ERROR);

@@ -20,10 +20,10 @@ class XMLMapRenderer extends AbstractMapRenderer
 		parent::__construct($Request, $Map);
 	}
 
-	protected function renderKeyValue($key, $value) {
-		echo RI::ni(), "<", $key, ">";
-		$ret = parent::renderKeyValue($key, $value);
-		echo RI::ni(), "</", $key, ">";
+	protected function renderNamedValue($name, $value) {
+		echo RI::ni(), "<", $name, ">";
+		$ret = parent::renderNamedValue($name, $value);
+		echo RI::ni(), "</", $name, ">";
 
 		return $ret;
 	}

@@ -80,9 +80,9 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 	function fetchOne($fetch_style = null) {
 		$result = $this->fetchAll($fetch_style);
 		if(!$result || sizeof($result) < 0)
-			throw new \PDOException("Results not found");
+			throw new PDONotFoundException($this, "Results not found");
 		if(sizeof($result) > 1)
-			throw new \PDOException("More than 1 Result found: ");
+			throw new PDOQueryException($this, "More than 1 Result found: ");
 		return $result[0];
 	}
 
@@ -93,10 +93,11 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 	 * @param int $limit
 	 */
 	function mapSequence(ISequenceMapper $Map, $offset=0, $limit=100) {
-		$limit = "LIMIT {$offset} {$limit}";
+//		$limit = "LIMIT {$offset} {$limit}";
 		$this->limit($limit, $offset);
 		$stmt = $this->prepare();
 		$i = $offset;
+		$stmt->execute();
 		while($Row = $stmt->fetch()) {
 			$ret = $Map->mapNext($Row, $i++);
 			if($ret === true)

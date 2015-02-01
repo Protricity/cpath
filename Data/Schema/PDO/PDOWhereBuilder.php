@@ -60,7 +60,7 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 
 	public function limit($limit, $offset = null) {
 		if ($offset !== null)
-			$limit = "{$limit} {$offset}";
+			$limit = "{$offset}, {$limit}";
 
 		if(strpos($limit, 'LIMIT') === false)
 			$limit = "\n\tLIMIT " . $limit;
