@@ -13,3 +13,4 @@ interface IHasURL
 {
 	function getURL(IRequest $Request = null);
 }
+

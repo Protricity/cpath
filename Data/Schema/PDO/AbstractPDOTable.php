@@ -158,6 +158,7 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 			$Select->select(static::SELECT_COLUMNS);
 
 		} else {
+			$Select->setFetchMode(\PDO::FETCH_ASSOC);
 			$Select->select($column, $alias, $format);
 		}
 

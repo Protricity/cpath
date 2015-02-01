@@ -16,6 +16,10 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 	private $mCurIndex = -1;
 	private $mCount = null;
 	private $mSelectSQL = null;
+	private $mRowCallbacks = array();
+
+	private $mOrderBy = null;
+	private $mGroupBy = null;
 
 	public function select($column, $alias=null, $format=null) {
 		if (is_array($column)) {
@@ -25,7 +29,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		}
 		if($format)
 			$column = sprintf($format, $column, $alias);
-		else if($alias !== null)
+		if($alias !== null)
 			$column .= " as " . $alias;
 
 		if ($this->mSelectSQL) {
@@ -44,21 +48,55 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 //			throw new \InvalidArgumentException("Select not set");
 
 		if($this->mFormat)
-			return sprintf($this->mFormat, $this->mSelectSQL, $this->mTableSQL, $this->mWhereSQL, $this->mLimitSQL);
+			return sprintf($this->mFormat,
+				$this->mSelectSQL,
+				$this->mTableSQL,
+				$this->mWhereSQL,
+				$this->mOrderBy,
+				$this->mGroupBy,
+				$this->mLimitSQL);
 
 		return
 			($this->mSelectSQL ?: "SELECT * ")
 			. ("\n\tFROM " . $this->mTableSQL)
 			. ($this->mWhereSQL)
+			. ($this->mOrderBy)
+			. ($this->mGroupBy)
 			. ($this->mLimitSQL);
 	}
 
+	public function addRowCallback(Callable $callback) {
+		$this->mRowCallbacks[] = $callback;
+		return $this;
+	}
+
+	public function orderBy($orderBy, $order='ASC') {
+		if($order)
+			$orderBy .= ' ' . $order;
+		if(strpos($orderBy, 'ORDER') === false)
+			$orderBy = "\n\tORDER BY " . $orderBy;
+		$this->mOrderBy = $orderBy;
+		return $this;
+	}
+
+	public function groupBy($groupBy) {
+//		$groupBy = implode(', ', func_get_args());
+		if(strpos($groupBy, 'GROUP') === false)
+			$groupBy = "\n\tGROUP BY " . $groupBy;
+		$this->mGroupBy = $groupBy;
+		return $this;
+	}
 
 	public function fetch($fetch_style = null, $cursor_orientation = \PDO::FETCH_ORI_NEXT, $cursor_offset = 0) {
 		$this->execute();
 		$stmt = $this->prepare();
 		$this->mCurIndex++;
-		return $stmt->fetch($fetch_style, $cursor_orientation, $cursor_offset);
+		$row = $stmt->fetch($fetch_style, $cursor_orientation, $cursor_offset);
+		if(!$row)
+			return false;
+		foreach($this->mRowCallbacks as $callback)
+			$callback($row);
+		return $row;
 	}
 
 	public function fetchColumn($column_number = 0) {
@@ -74,7 +112,11 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		$this->mCurIndex++;
 		if($fetch_argument !== null)
 			return $stmt->fetchAll($fetch_style, $fetch_argument, $ctor_args);
-		return $stmt->fetchAll($fetch_style);
+		$rows = $stmt->fetchAll($fetch_style);
+		foreach($this->mRowCallbacks as $callback)
+			foreach($rows as $row)
+				$callback($row);
+		return $rows;
 	}
 
 	function fetchOne($fetch_style = null) {
@@ -98,8 +140,10 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		$stmt = $this->prepare();
 		$i = $offset;
 		$stmt->execute();
-		while($Row = $stmt->fetch()) {
-			$ret = $Map->mapNext($Row, $i++);
+		while($row = $stmt->fetch()) {
+			foreach($this->mRowCallbacks as $callback)
+				$callback($row);
+			$ret = $Map->mapNext($row, $i++);
 			if($ret === true)
 				break;
 		}

@@ -40,6 +40,11 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 			$this->addVarArg(func_get_arg($i));
 	}
 
+	public function setMultiple() {
+		$this->setAttribute('multiple', 'multiple');
+		return $this;
+	}
+
 	public function getInputValue() {
 		return isset($this->mSelected[0])
 			? $this->mSelected[0]
@@ -73,10 +78,11 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 		if($description) {
 			$this->mValues[$description] = $value;
 		} else {
-			$this->mValues[] = $value;
+			if(!in_array($value, $this->mValues))
+				$this->mValues[] = $value;
 		}
 		if($selected)
-			$this->mSelected[] = $value;
+			$this->select($value);
 	}
 
 	public function select($value, $_value=null) {

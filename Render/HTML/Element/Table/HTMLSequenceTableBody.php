@@ -7,6 +7,7 @@
  */
 namespace CPath\Render\HTML\Element\Table;
 
+use CPath\Data\Map\ArrayKeyMap;
 use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
@@ -91,6 +92,9 @@ class HTMLSequenceTableBody extends HTMLElement implements ISequenceMapper, IKey
 	function mapNext($value, $_arg = null) {
 		echo RI::ni(), "<tr>";
 		echo RI::ai(1);
+		if(is_array($value))
+			$value = new ArrayKeyMap($value);
+
 		if ($value instanceof IKeyMap) {
 			if($this->mRowCount === 0) {
 				$value->mapKeys(
