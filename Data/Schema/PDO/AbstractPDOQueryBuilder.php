@@ -36,7 +36,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 	public function __destruct() {
 		if($this->mStatement === null) {
-			$r = $this->execute();
+			$this->execute();
 		}
 	}
 
@@ -117,15 +117,18 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 		if($Request)
 			$this->addLogListener($Request);
 
-		$statement = $this->prepare($Request);
-		if(!$this->mExecuted) try {
-			$this->mExecuted = $statement->execute($values);
-			$this->mValues = array();
+		try {
+			$statement = $this->prepare($Request);
+			if(!$this->mExecuted) {
+				$this->mExecuted = $statement->execute($values);
+				$this->mValues = array();
+			}
 		} catch (\PDOException $ex) {
 			if (preg_match('/column (.*) is not unique/i', $ex->getMessage(), $matches))
 				throw new PDODuplicateRowException($this, $matches[1], $ex->getMessage(), null, $ex);
 
 			if($this->tryRepairTable($ex)) {
+				$statement = $this->prepare($Request);
 				$this->mExecuted = $statement->execute($values);
 				$this->mValues = array();
 
@@ -147,7 +150,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 	}
 
 	protected function tryRepairTable(\PDOException $ex) {
-		if (preg_match('/table( or view)? not found/i', $ex->getMessage(), $matches)) {
+		if (preg_match('/(column|table)( or view)? not found/i', $ex->getMessage(), $matches)) {
 			$DB = $this->getDatabase();
 			$Schema = $DB;
 			if($Schema instanceof IReadableSchema) {

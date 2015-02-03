@@ -16,8 +16,11 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
 
     public function __construct() {
         $filePath = dirname($_SERVER['SCRIPT_FILENAME']);
-        $name = dirname($_SERVER['SCRIPT_NAME']);
-        $this->mReplace[$name] = str_replace('\\', '/', $filePath);
+	    $realPath = realpath($filePath);
+        $name = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME']));
+	    if(strlen($name) <= 1)
+		    $name = '';
+	    $this->mReplace[] = array(str_replace('\\', '/', $realPath), $name);
     }
 
     /**
@@ -39,8 +42,10 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      */
     function writeScript($scriptPath, $defer = false, $charset = null) {
 	    $scriptPath = str_replace('\\', '/', $scriptPath);
-	    foreach($this->mReplace as $name => $filePath)
-		    $scriptPath = str_replace($filePath, $name, $scriptPath);
+	    foreach($this->mReplace as $replace) {
+		    list($replace, $with) = $replace;
+		    $scriptPath = str_replace($replace, $with, $scriptPath);
+	    }
 
         if(!in_array($scriptPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<script src='", $scriptPath, "'";
@@ -61,10 +66,12 @@ class WriteOnceHeaderRenderer implements IHeaderWriter
      */
     function writeStyleSheet($styleSheetPath) {
 	    $styleSheetPath = str_replace('\\', '/', $styleSheetPath);
-	    foreach($this->mReplace as $name => $filePath)
-		    $styleSheetPath = str_replace($filePath, $name, $styleSheetPath);
+	    foreach($this->mReplace as $replace) {
+		    list($replace, $with) = $replace;
+		    $styleSheetPath = str_replace($replace, $with, $styleSheetPath);
+	    }
 
-        if(!in_array($styleSheetPath, $this->mWrittenHeaders)) {
+	    if(!in_array($styleSheetPath, $this->mWrittenHeaders)) {
             echo RI::ni(), "<link rel='stylesheet' href='", $styleSheetPath, "' />";
             $this->mWrittenHeaders[] = $styleSheetPath;
         }

@@ -11,6 +11,8 @@ namespace CPath\Data\Date;
 class DateUtil
 {
 	static function ago($d) {
+		if(is_numeric($d))
+			$d = '@' . $d;
 		$ts = time() - strtotime(str_replace("-","/",$d));
 
 		if($ts>315360000) $val = round($ts/31536000,0).' year';

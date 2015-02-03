@@ -24,7 +24,7 @@ class HTMLConfig  {
 		foreach(self::$mValueRenderers as $Renderer)
 			if($Renderer->renderValue($value))
 				return;
-		echo $value ? (htmlspecialchars($value)) : '&nbsp;';
+		echo $value ? (($value)) : '&nbsp;';
 	}
 
 	/**
@@ -38,6 +38,6 @@ class HTMLConfig  {
 		foreach(self::$mValueRenderers as $Renderer)
 			if($Renderer->renderNamedValue($name, $value, $label))
 				return;
-		echo $value ? (htmlspecialchars($value)) : '&nbsp;';
+		echo $value !== null ? (($value)) : '&nbsp;';
 	}
 }
