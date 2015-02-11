@@ -98,6 +98,8 @@ class RouteBuilder {
         } else {
             unset($this->mRoutes[$this->mGroupKey]);
         }
+
+//	    $this->mRoutes = array(); // clear hack
     }
 
     public function writeRoute($prefix, $target, $_arg=null) {

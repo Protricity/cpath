@@ -31,12 +31,12 @@ class HTMLConfig  {
 	 * Render a named html value
 	 * @param String $name
 	 * @param String $value
-	 * @param null $label
+	 * @param null $arg1
 	 * @return void|string
 	 */
-	static function renderNamedValue($name, $value, $label=null) {
+	static function renderNamedValue($name, $value, $arg1=null) {
 		foreach(self::$mValueRenderers as $Renderer)
-			if($Renderer->renderNamedValue($name, $value, $label))
+			if($Renderer->renderNamedValue($name, $value, $arg1))
 				return;
 		echo $value !== null ? (($value)) : '&nbsp;';
 	}

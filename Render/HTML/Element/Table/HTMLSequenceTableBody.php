@@ -67,6 +67,7 @@ class HTMLSequenceTableBody extends HTMLElement implements ISequenceMapper, IKey
 	 * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
 	 * @param String $key
 	 * @param String|Array|IKeyMap|ISequenceMap $value
+	 * @param null $_arg
 	 * @return bool true to stop or any other value to continue
 	 */
 	function map($key, $value, $_arg=null) {

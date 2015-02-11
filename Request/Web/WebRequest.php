@@ -87,9 +87,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	function getQueryStringValue($paramName) {
 		$values = $this->getAllFormValues();
-		if(isset($values[$paramName]))
-			return $values[$paramName];
-		return null;
+		return $this->getNamedRequestValue($paramName, $values);
 	}
 
 	/**
@@ -257,7 +255,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 
 	public function offsetGet($offset) {
 		$value = parent::offsetGet($offset);
-		return htmlspecialchars(is_string($value) ? htmlspecialchars($value) : $value);
+		return is_string($value) ? htmlspecialchars($value) : $value;
 	}
 
 }

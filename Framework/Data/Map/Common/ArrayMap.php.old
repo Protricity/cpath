@@ -20,7 +20,7 @@ class ArrayMap implements IKeyMap, IMappableKeys {
         }
     }
 
-    /**
+	/**
      * Returns an associative array of keys and data
      * @return Array associative array
      */

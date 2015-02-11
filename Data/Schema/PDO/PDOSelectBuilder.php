@@ -30,7 +30,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		if($format)
 			$column = sprintf($format, $column, $alias);
 		if($alias !== null)
-			$column .= " as " . $alias;
+			$column .= " as `" . $alias . '`';
 
 		if ($this->mSelectSQL) {
 			$this->mSelectSQL .= ', ' . $column;
@@ -95,7 +95,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		if(!$row)
 			return false;
 		foreach($this->mRowCallbacks as $callback)
-			$callback($row);
+			$row = $callback($row) ?: $row;
 		return $row;
 	}
 
@@ -142,7 +142,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		$stmt->execute();
 		while($row = $stmt->fetch()) {
 			foreach($this->mRowCallbacks as $callback)
-				$callback($row);
+				$row = $callback($row) ?: $row;
 			$ret = $Map->mapNext($row, $i++);
 			if($ret === true)
 				break;

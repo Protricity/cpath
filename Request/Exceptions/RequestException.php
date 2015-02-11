@@ -25,7 +25,7 @@ class RequestException extends \Exception implements IResponse, IResponseHeaders
     function __construct($message, $statusCode=null, \Exception $previous=null) {
         static $handlerSet = false;
         if(!$handlerSet) {
-            //set_exception_handler(__CLASS__ . '::handleException');
+            set_exception_handler(__CLASS__ . '::handleException');
             $handlerSet = true;
         }
         parent::__construct($message, $statusCode ?: static::DEFAULT_HTTP_CODE, $previous);
@@ -66,5 +66,12 @@ class RequestException extends \Exception implements IResponse, IResponseHeaders
 	function mapKeys(IKeyMapper $Map) {
 		$Renderer = new ExceptionResponse($this);
 		$Renderer->mapKeys($Map);
+	}
+
+	// Static
+
+	static function handleException(\Exception $Ex) {
+		header("HTTP/1.1 " . $Ex->getCode() . " " . preg_replace('/[^\w -]/', '', $Ex->getMessage()));
+		echo $Ex;
 	}
 }

@@ -7,11 +7,7 @@
  */
 namespace CPath\Render\HTML\Element\Table;
 
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\IKeyMapper;
-use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Data\Map\ISequenceMap;
-use CPath\Data\Map\ISequenceMapper;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;

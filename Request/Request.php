@@ -60,21 +60,38 @@ class Request implements IRequest
 		return $this->mPath;
 	}
 
+	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null) {foreach($array as $key => $item) {
+			if($prefix)
+				$key = $prefix . '[' . $key . ']';
+
+			if(strpos($fullParameterName, $key) !== 0)
+				continue;
+
+			if($fullParameterName === $key)
+				return $item;
+
+			if(is_scalar($item))
+				return $item;
+
+			$value = $this->getNamedRequestValue($fullParameterName, $item, $key);
+			if($value !== null)
+				return $value;
+		}
+
+		return null;
+	}
 
 	/**
 	 * @param $paramName
 	 * @return String|null
 	 */
 	function getRequestValue($paramName) {
-		in_array($paramName, $this->mRequestedParams)
-			?: $this->mRequestedParams[] = $paramName;
-		return $this->getParameterValue($paramName);
+		return $this->getNamedRequestValue($paramName, $this->mRequestedParams)
+			?: $this->getParameterValue($paramName);
 	}
 
 	function getParameterValue($paramName) {
-		return isset($this->mParameters[$paramName])
-			? $this->mParameters[$paramName]
-			: null;
+		return $this->getNamedRequestValue($paramName, $this->mParameters);
 	}
 
 	function getParameterValues() {

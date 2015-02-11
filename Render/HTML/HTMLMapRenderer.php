@@ -7,8 +7,6 @@
  */
 namespace CPath\Render\HTML;
 
-use CPath\Data\Map\IKeyMap;
-use CPath\Data\Map\ISequenceMap;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\Map\AbstractMapRenderer;
 use CPath\Request\IRequest;

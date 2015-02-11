@@ -76,6 +76,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 					return null;
 			}
 		}
+//		return $this->getNamedRequestValue($fieldName, $Request);
 		return isset($Request[$fieldName]) ? $Request[$fieldName] : null;
 	}
 
