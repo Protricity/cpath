@@ -48,7 +48,7 @@ class HTMLPDOQueryTableBody implements IHTMLElement
 					)
 				);
 			} else {
-				foreach ($row as $key => $value)
+				foreach ((array)$row as $key => $value)
 					$columns[ucwords(preg_replace('/[_-]/', ' ', $key))] = $key;
 			}
 			$this->columns = $columns;
