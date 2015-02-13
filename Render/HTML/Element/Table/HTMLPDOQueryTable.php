@@ -95,7 +95,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 					)
 				);
 			} else {
-				foreach ($row as $key => $value)
+				foreach ((array)$row as $key => $value)
 					$columns[$key] = $key;
 			}
 			$this->columns = $columns;
@@ -110,7 +110,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 		echo RI::ni(), "<tr>";
 		echo RI::ai(1);
 
-		foreach ($columns as $fieldName => $columnName) {
+		foreach ((array)$columns as $fieldName => $columnName) {
 			echo RI::ni(), "<th>";
 			$title = ucwords(preg_replace('/[_-]/', ' ', $fieldName));
 
@@ -152,7 +152,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 			}
 
 			if( is_array($row)) {
-				foreach($columns as $fieldName => $columnName) {
+				foreach((array)$columns as $fieldName => $columnName) {
 					echo RI::ni(), "<td>";
 
 					if(isset($row[$columnName])) {
@@ -195,7 +195,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 			echo RI::ni(), "<tr>";
 			echo RI::ai(1);
 
-			foreach ($columns as $fieldName => $columnName) {
+			foreach ((array)$columns as $fieldName => $columnName) {
 				echo RI::ni(), "<td>";
 
 				if(isset($this->searchColumn[$fieldName])) {
