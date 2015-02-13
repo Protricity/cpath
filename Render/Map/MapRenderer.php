@@ -9,6 +9,8 @@ namespace CPath\Render\Map;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
+use CPath\Data\Map\ArrayKeyMap;
+use CPath\Data\Map\ArraySequence;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Render\HTML\Attribute\IAttributes;
@@ -41,6 +43,13 @@ class MapRenderer implements IRenderAll, IBuildable, IRoutable
 	 * @internal param IRequest $Request
 	 */
 	public function __construct($Map) {
+		if(is_array($Map)) {
+			if(is_numeric(key($Map))) {
+				$Map = new ArraySequence($Map);
+			} else {
+				$Map = new ArrayKeyMap($Map);
+			}
+		}
 		$this->mMap = $Map;
 	}
 

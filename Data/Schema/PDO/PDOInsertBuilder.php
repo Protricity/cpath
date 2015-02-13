@@ -11,6 +11,7 @@ class PDOInsertBuilder extends AbstractPDOQueryBuilder
 {
 	private $mInsertSQL = null;
 	private $mValuesSQL = null;
+	private $mUpdateSQL = null;
 
 	public function insert($fields, $_field=null) {
 		if(is_array($fields) || $_field !==null) {
@@ -47,19 +48,29 @@ class PDOInsertBuilder extends AbstractPDOQueryBuilder
 		return $this;
 	}
 
-//
+	public function onDuplicateKeyUpdate($fieldName, $fieldValue) {
+		if($this->mUpdateSQL) {
+			$this->mUpdateSQL .= ',';
+
+		} else {
+			$this->mUpdateSQL = "\n\tON DUPLICATE KEY\n\t\tUPDATE ";
+		}
+		$this->mUpdateSQL .= "\n\t" . $fieldName . " = ?";
+		$this->bindValue($fieldValue);
+		return $this;
+	}
+
 //	public function execValues($value, $_value=null) {
 //		$values = is_array($value) ? $value : func_get_args();
 //		$this->values($values);
 //		return $this->execute();
 //	}
 
-
 	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
 		if(!$this->mInsertSQL)
-			throw new \InvalidArgumentException("Update not set");
+			throw new \InvalidArgumentException("Insert not set");
 
 		if($this->mFormat)
 			return sprintf($this->mFormat, $this->mTableSQL, $this->mInsertSQL, $this->mValuesSQL);
@@ -67,6 +78,7 @@ class PDOInsertBuilder extends AbstractPDOQueryBuilder
 		return "INSERT INTO "
 			. ($this->mTableSQL)
 			. ($this->mInsertSQL)
-			. ($this->mValuesSQL);
+			. ($this->mValuesSQL)
+			. $this->mUpdateSQL;
 	}
 }

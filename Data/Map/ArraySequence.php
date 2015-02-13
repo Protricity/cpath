@@ -11,9 +11,17 @@ class ArraySequence implements ISequenceMap
 {
     private $mArr;
 
-    public function __construct(Array $array) {
+    public function __construct(Array $array=array()) {
         $this->mArr = $array;
     }
+
+	public function addKeyPair($key, $value) {
+		$this->mArr[$key] = $value;
+	}
+
+	public function add($value) {
+		$this->mArr[] = $value;
+	}
 
 	/**
 	 * Map sequential data to the map
