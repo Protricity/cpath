@@ -9,8 +9,8 @@ namespace CPath\Render\HTML\Element\Table;
 
 use CPath\Data\Map\ISequenceMap;
 use CPath\Render\HTML\Attribute\IAttributes;
-use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;
+use CPath\Render\HTML\Element\IHTMLElement;
 use CPath\Render\HTML\Element\Table;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
@@ -49,7 +49,7 @@ class HTMLTable extends HTMLElement
 		$Render = $Content;
 
 		$type = null;
-		if ($Content instanceof AbstractHTMLElement)
+		if ($Content instanceof IHTMLElement)
 			$type = $Content->getElementType();
 
 		switch($type) {
@@ -65,12 +65,12 @@ class HTMLTable extends HTMLElement
 				break;
 
 			default:
-//				$Render = new HTMLElement('tr');
-//				$TD = new HTMLElement('td');
-//				$Render->addContent($TD);
-//				$TD->addContent($Content);
-				$this->mapNext($Content);
-				break;
+				$Render = new HTMLElement('tr');
+				$TD = new HTMLElement('td');
+				$Render->addContent($TD);
+				$TD->addContent($Content);
+//				$this->addContent($Content);
+//				break;
 		}
 
 		$Render->renderHTML($Request, $ContentAttr, $this);

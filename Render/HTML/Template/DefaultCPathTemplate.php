@@ -13,6 +13,7 @@ use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\HTMLContainer;
+use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\HTMLResponseBody;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;

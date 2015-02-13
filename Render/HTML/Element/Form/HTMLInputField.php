@@ -11,6 +11,7 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\AbstractHTMLElement;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+use CPath\Render\HTML\HTMLConfig;
 use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\Form\IFormRequest;
@@ -40,6 +41,8 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 	 */
     public function __construct($name = null, $value = null, $type = null, $classList=null, $_content = null) {
         parent::__construct(static::NODE_TYPE);
+
+	    $classList !== null ?: $classList = HTMLConfig::$DefaultInputClass;
 
 	    if(static::INPUT_TYPE)
 		    $this->setType(static::INPUT_TYPE);
@@ -82,6 +85,11 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 
 	public function getInputValue()                     { return $this->getAttribute('value'); }
 	public function setInputValue($value)               { $this->setAttribute('value', $value); }
+
+	public function setInputValueFromRequest(IRequest $Request) {
+		if(isset($Request[$this->getFieldName()]))
+			$this->setInputValue($Request[$this->getFieldName()]);
+	}
 
 	public function getFieldName()                      { return $this->getAttribute('name'); }
 	public function setFieldName($name)                 { $this->setAttribute('name', $name); }

@@ -12,6 +12,22 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 	protected $mWhereSQL = null;
 	protected $mLimitSQL = null;
 
+	/**
+	 * @param $whereColumn
+	 * @param null $whereValue
+	 * @param string $compare
+	 * @return $this
+	 */
+	public function orWhere($whereColumn, $whereValue = null, $compare = '=?') {
+		return $this->where($whereColumn, $whereValue, $compare, 'OR');
+	}
+
+	/**
+	 * @param $whereColumn
+	 * @param null $whereValue
+	 * @param string $compare
+	 * @return $this
+	 */
 	public function where($whereColumn, $whereValue = null, $compare = '=?', $logic = 'AND') {
 		if (is_array($whereColumn)) {
 			foreach ($whereColumn as $k => $v)
@@ -49,7 +65,8 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 			if (strcasecmp($logic, "AND") === 0) {
 				$this->mWhereSQL .= "\n\t" . $logic . ' ' . $whereColumn;
 			} else {
-				$this->mWhereSQL = "\n\t(" . $this->mWhereSQL . "\n\t) " . $logic . ' ' . $whereColumn;
+				list(, $sql) = explode(' ', $this->mWhereSQL, 2);
+				$this->mWhereSQL = "\n\tWHERE (" . $sql . "\n\t) " . $logic . ' ' . $whereColumn;
 			}
 		} else {
 			$this->mWhereSQL = "\n\tWHERE " . $whereColumn;

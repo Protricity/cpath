@@ -136,7 +136,8 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 	 */
 	function mapSequence(ISequenceMapper $Map, $offset=0, $limit=100) {
 //		$limit = "LIMIT {$offset} {$limit}";
-		$this->limit($limit, $offset);
+		if(!$this->mLimitSQL)
+			$this->limit($limit, $offset);
 		$stmt = $this->prepare();
 		$i = $offset;
 		$stmt->execute();

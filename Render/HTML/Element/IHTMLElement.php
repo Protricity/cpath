@@ -7,12 +7,10 @@
  */
 namespace CPath\Render\HTML\Element;
 
-use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IHTMLContainer;
 use CPath\Render\HTML\IRenderHTML;
-use CPath\Response\IResponse;
 
-interface IHTMLElement extends IAttributes, IResponse, IRenderHTML
+interface IHTMLElement extends IRenderHTML
 {
 	/**
 	 * Return element parent or null

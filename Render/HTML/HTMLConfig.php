@@ -11,6 +11,9 @@ class HTMLConfig  {
 	/** @var IHTMLValueRenderer[] */
 	private static $mValueRenderers = array() ;
 
+	static $DefaultClass = null;
+	static $DefaultInputClass = 'input';
+
 	static function addValueRenderer(IHTMLValueRenderer $Renderer) {
 		self::$mValueRenderers[] = $Renderer;
 	}

@@ -8,7 +8,6 @@
 namespace CPath\Render\HTML\Element\Table;
 
 use CPath\Data\Map\ArrayKeyMap;
-use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
@@ -28,6 +27,7 @@ class HTMLSequenceTableBody extends HTMLElement implements ISequenceMapper, IKey
 	private $mMap;
 	private $mRowCount = 0;
 	private $mRequest;
+
 	/**
 	 * @param ISequenceMap $Map
 	 * @param null $classList
@@ -91,25 +91,14 @@ class HTMLSequenceTableBody extends HTMLElement implements ISequenceMapper, IKey
 	 * @return bool true to stop or any other value to continue
 	 */
 	function mapNext($value, $_arg = null) {
+		echo RI::ai(1);
+
 		echo RI::ni(), "<tr>";
 		echo RI::ai(1);
 		if(is_array($value))
 			$value = new ArrayKeyMap($value);
 
 		if ($value instanceof IKeyMap) {
-			if($this->mRowCount === 0) {
-				$value->mapKeys(
-					new CallbackKeyMapper(
-						function($key) {
-							echo RI::ni(), "<th>", ucwords(preg_replace('/[_-]/', ' ', $key)), "</th>";
-						}
-					)
-				);
-				echo RI::ai(-1);
-				echo RI::ni(), "</tr>";
-				echo RI::ni(), "<tr>";
-				echo RI::ai(1);
-			}
 			$value->mapKeys($this);
 
 		} else {
@@ -117,6 +106,9 @@ class HTMLSequenceTableBody extends HTMLElement implements ISequenceMapper, IKey
 		}
 		echo RI::ai(-1);
 		echo RI::ni(), "</tr>";
+
+		echo RI::ai(-1);
 		$this->mRowCount++;
 	}
 }
+
