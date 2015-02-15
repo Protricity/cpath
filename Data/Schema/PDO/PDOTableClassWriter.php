@@ -51,6 +51,8 @@ class PDOTableClassWriter implements IWritableSchema
 				'SELECT_COLUMNS' => null,
 				'UPDATE_COLUMNS' => null,
 				'INSERT_COLUMNS' => null,
+				'SEARCH_COLUMNS' => null,
+				'SORT_COLUMNS' => null,
 			);
 
 			$primaryKeyColumn = null;
@@ -58,7 +60,7 @@ class PDOTableClassWriter implements IWritableSchema
 				list($columnName, $columnArgs, $columnComment) = $columnInfo;
 				if (!$primaryKeyColumn && strpos($columnArgs, 'PRIMARY') !== false)
 					$primaryKeyColumn = $columnName;
-				if(preg_match_all('/^\s+\*\s+@(select|update|insert)\s(\w+)?/m', $columnComment, $matches)) {
+				if(preg_match_all('/^\s+\*\s+@(select|update|insert|search|sort)\s(\w+)?/m', $columnComment, $matches)) {
 					foreach($matches[1] as $i => $match) {
 						$key = strtoupper($match) . '_COLUMNS';
 						$c = $constList[$key];
@@ -66,6 +68,13 @@ class PDOTableClassWriter implements IWritableSchema
 					}
 				}
 			}
+
+//			foreach($this->mIndexes as $indexInfo) {
+//				list($indexName, $columns, $indexArgs, $indexComment) = $indexInfo;
+//				$constList['INDEXED_COLUMNS'] .=
+//					( $constList['INDEXED_COLUMNS'] ? ';' : '')
+//					. $columns;
+//			}
 
 			$methodDocs = '';
 			if($primaryKeyColumn) {

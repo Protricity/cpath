@@ -34,18 +34,18 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 		$this->Query = $Query;
 	}
 
-	public function addColumn($columnName, $fieldName) {
-		$this->columns[$fieldName] = $columnName;
+	public function addColumn($columnName, $fieldName=null) {
+		$this->columns[$fieldName ?: $columnName] = $columnName;
 		return $this;
 	}
 
-	public function addSearchColumn($columnName, $fieldName) {
-		$this->searchColumn[$fieldName] = $columnName;
+	public function addSearchColumn($columnName, $fieldName=null) {
+		$this->searchColumn[$fieldName ?: $columnName] = $columnName;
 		return $this;
 	}
 
-	public function addSortColumn($columnName, $fieldName) {
-		$this->sortColumn[$fieldName] = $columnName;
+	public function addSortColumn($columnName, $fieldName=null) {
+		$this->sortColumn[$fieldName ?: $columnName] = $columnName;
 		return $this;
 	}
 
