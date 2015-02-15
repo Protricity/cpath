@@ -13,7 +13,7 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 {
 	private $mUpdateSQL = null;
 
-	public function update($fieldName, $fieldValue=null) {
+	public function update($fieldName, $fieldValue=null, $set = '=?') {
 		if (is_array($fieldName)) {
 			foreach ($fieldName as $k => $v)
 				$this->update(is_int($k) ? $v : $k, $v);
@@ -21,7 +21,10 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 		}
 
 		if($fieldName !== null) {
-			$fieldName = $fieldName . ' = ?';
+			if(strpos($set, '%') !== false)
+				$fieldName = sprintf($set, $fieldName);
+			else
+				$fieldName .= $set;
 			$this->bindValue($fieldValue);
 		}
 

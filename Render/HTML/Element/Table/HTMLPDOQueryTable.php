@@ -200,7 +200,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 
 				if(isset($this->searchColumn[$fieldName])) {
 					$searchColumnName = $this->searchColumn[$fieldName];
-					$Input = new HTMLInputField('select-' . $fieldName,
+					$Input = new HTMLInputField('search-' . $fieldName,
 						new Attributes('placeholder', 'Search ' . $searchColumnName),
 						new Attributes('size', 16),
 						new ClassAttributes('input search transparent')
