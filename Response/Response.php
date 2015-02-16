@@ -45,8 +45,14 @@ class Response implements IResponse, IResponseHeaders {
 		if(headers_sent())
 			return false;
 
-		header("HTTP/1.1 " . $this->getCode() . " " . preg_replace('/[^\w -]/', '', $this->getMessage()));
-		header("MainContent-Type: " . $mimeType);
+		$msg = $this->getMessage();
+		$msg =  preg_replace('/[^\w -]/', '', $msg);
+		if(strlen($msg) > 64)
+			$msg = substr($msg, 0, 64) . '...';
+
+		http_response_code($this->getCode());
+		header("HTTP/1.1 " . $this->getCode() . " " . $msg);
+		header("Content-Type: " . $mimeType);
 
 		foreach($this->mHeaders as $name => $value)
 			switch($name) {

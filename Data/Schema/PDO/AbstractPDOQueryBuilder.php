@@ -89,7 +89,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 		} catch (\PDOException $ex) {
 			$statement = null;
-			if (stripos($ex->getMessage(), 'Duplicate') !== false)
+			if (preg_match('/(duplicate|unique)/i', $ex->getMessage(), $matches))
 				throw new PDODuplicateRowException($this, $ex->getMessage(), null, $ex);
 
 			if($this->tryRepairTable($ex)) {
@@ -124,8 +124,8 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 				$this->mValues = array();
 			}
 		} catch (\PDOException $ex) {
-			if (preg_match('/column (.*) is not unique/i', $ex->getMessage(), $matches))
-				throw new PDODuplicateRowException($this, $matches[1], $ex->getMessage(), null, $ex);
+			if (preg_match('/duplicate/i', $ex->getMessage()))
+				throw new PDODuplicateRowException($this, $ex->getMessage(), null, $ex);
 
 			if($this->tryRepairTable($ex)) {
 				$statement = $this->prepare($Request);

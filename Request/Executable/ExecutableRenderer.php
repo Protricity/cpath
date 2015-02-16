@@ -90,7 +90,9 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * @return bool returns true if the headers were sent, false otherwise
 	 */
 	function sendHeaders(IRequest $Request, $mimeType = null) {
+
 		$Response = $this->getResponse($Request);
+
 		if(!$Response instanceof IResponseHeaders)
 			$Response = new ResponseRenderer($Response);
 		return $Response->sendHeaders($Request, $mimeType);

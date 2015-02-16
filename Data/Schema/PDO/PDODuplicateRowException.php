@@ -7,16 +7,14 @@
  */
 namespace CPath\Data\Schema\PDO;
 
+use CPath\Response\IResponse;
+
 class PDODuplicateRowException extends PDOQueryException
 {
-	private $mColumnName;
-	function __construct(AbstractPDOQueryBuilder $Query, $columnName=null, $message=null, $statusCode = null, \Exception $previous = null) {
-		parent::__construct($Query, $message, $statusCode, $previous);
-		$this->mColumnName = $columnName;
-	}
+	const DEFAULT_HTTP_CODE = IResponse::HTTP_CONFLICT;
 
-	public function getColumnName() {
-		return $this->mColumnName;
+	function __construct(AbstractPDOQueryBuilder $Query, $message=null, $statusCode = null, \Exception $previous = null) {
+		parent::__construct($Query, $message, $statusCode, $previous);
 	}
 }
 

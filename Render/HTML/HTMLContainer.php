@@ -174,7 +174,7 @@ class HTMLContainer extends AbstractHTMLContainer
 			return $this->mContent;
 
 		if (!isset($this->mContent[$key]))
-			throw new \InvalidArgumentException("MainContent at '{$key}'' was not found");
+			throw new \InvalidArgumentException("Content at '{$key}'' was not found");
 
 		return $this[$key];
 	}

@@ -24,7 +24,7 @@ class WebFormRequest extends WebRequest implements IFormRequest
 		if ($this->mValueSource !== null)
 			return $this->mValueSource;
 
-		list($type) = explode(';', $this->getHeader('MainContent-Type'), 2);
+		list($type) = explode(';', $this->getHeader('Content-Type'), 2);
 		if (strcasecmp($type, 'application/json') === 0) {
 			$input = file_get_contents('php://input');
 			$this->mValueSource = json_decode($input, true);

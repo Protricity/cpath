@@ -71,7 +71,12 @@ class RequestException extends \Exception implements IResponse, IResponseHeaders
 	// Static
 
 	static function handleException(\Exception $Ex) {
-		header("HTTP/1.1 " . $Ex->getCode() . " " . preg_replace('/[^\w -]/', '', $Ex->getMessage()));
+		$msg = $Ex->getMessage();
+		$msg =  preg_replace('/[^\w -]/', '', $msg);
+		if(strlen($msg) > 64)
+			$msg = substr($msg, 0, 64) . '...';
+
+		header("HTTP/1.1 " . $Ex->getCode() . " " . $msg);
 		echo $Ex;
 	}
 }
