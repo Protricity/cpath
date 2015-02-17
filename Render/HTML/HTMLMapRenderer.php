@@ -17,11 +17,11 @@ class HTMLMapRenderer extends AbstractMapRenderer
 		parent::__construct($Request, $Map);
 	}
 
-	protected function renderNamedValue($name, $value) {
+	protected function renderNamedValue($name, $value, $_arg=null) {
 		echo RI::ni(), "<dt>", $name, "</dt>";
 		echo RI::ni(), "<dd>";
 		if(is_scalar($value)) {
-			HTMLConfig::renderNamedValue($name, $value);
+			HTMLConfig::renderNamedValue($name, $value, $_arg);
 			$ret = true;
 
 		} else if ($value instanceof IRenderHTML) {

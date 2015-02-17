@@ -151,9 +151,10 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 	 * Map a value to a key in the map. If method returns true, the sequence should abort and no more values should be mapped
 	 * @param String $key
 	 * @param String|Array|IKeyMap|ISequenceMap $value
+	 * @param null $_arg
 	 * @return bool true to stop or any other value to continue
 	 */
-	function map($key, $value) {
+	function map($key, $value, $_arg=null) {
 		$this->mCount++;
 
 		if ($this->mIsArray === null) {
@@ -162,7 +163,7 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 		}
 
 		try {
-			$this->renderNamedValue($key, $value);
+			$this->renderNamedValue($key, $value, $_arg);
 		} catch (\Exception $ex) {
 			$this->renderNamedValue($key, $ex->getMessage());
 		}
