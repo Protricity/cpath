@@ -20,6 +20,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 
 	private $mOrderBy = null;
 	private $mGroupBy = null;
+	private $mJoinSQL = null;
 
 	public function select($column, $alias=null, $format=null) {
 		if (is_array($column)) {
@@ -41,6 +42,24 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		return $this;
 	}
 
+	public function join($table, $sourceColumn=null, $targetColumn=null, $compare=' = ') {
+		list($thisTable) = explode(' ', $this->mTableSQL);
+
+		if($targetColumn)
+			$sourceColumn = $thisTable . '.' . $sourceColumn
+				. $compare
+				. $table . '.' . $targetColumn;
+
+		if($sourceColumn)
+			$table = $table . "\n\t\tON " . $sourceColumn;
+
+		if(!preg_match('/(join)/i', $table))
+			$table = "\n\tJOIN " . $table;
+
+		$this->mJoinSQL .= $table;
+		return $this;
+	}
+
 	protected function getSQL() {
 		if(!$this->mTableSQL)
 			throw new \InvalidArgumentException("Table not set");
@@ -51,6 +70,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 			return sprintf($this->mFormat,
 				$this->mSelectSQL,
 				$this->mTableSQL,
+				$this->mJoinSQL,
 				$this->mWhereSQL,
 				$this->mOrderBy,
 				$this->mGroupBy,
@@ -59,6 +79,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		return
 			($this->mSelectSQL ?: "SELECT * ")
 			. ("\n\tFROM " . $this->mTableSQL)
+			. ($this->mJoinSQL)
 			. ($this->mWhereSQL)
 			. ($this->mOrderBy)
 			. ($this->mGroupBy)

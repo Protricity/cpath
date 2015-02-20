@@ -63,6 +63,10 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 					$value .= '%';
 				$this->Query->where($columnName, $value, ' LIKE ?');
 			}
+			if(!empty($Request['sort-' . $fieldName])) {
+				$order = $Request['sort-' . $fieldName];
+				$this->Query->orderBy($columnName, $order);
+			}
 		}
 		foreach($this->sortColumn as $fieldName => $columnName) {
 			if(!empty($Request['sort-' . $fieldName])) {
@@ -114,8 +118,16 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 			echo RI::ni(), "<th>";
 			$title = ucwords(preg_replace('/[_-]/', ' ', $fieldName));
 
-			if(isset($this->sortColumn[$fieldName])) {
-				echo "<a href='?sort-", $fieldName, "=DESC'>{$title}</a>";
+			$ASC = 'DESC';
+			if(isset($Request['sort-' . $fieldName])
+				&& $Request['sort-' . $fieldName] === $ASC)
+				$ASC = 'ASC';
+
+			if(isset($this->searchColumn[$fieldName])) {
+				echo "<a href='?sort-", $fieldName, "={$ASC}'>{$title}</a>";
+
+			} else if(isset($this->sortColumn[$fieldName])) {
+				echo "<a href='?sort-", $fieldName, "={$ASC}'>{$title}</a>";
 
 			} else {
 				echo $title;
