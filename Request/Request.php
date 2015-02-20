@@ -60,7 +60,11 @@ class Request implements IRequest
 		return $this->mPath;
 	}
 
-	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null) {foreach($array as $key => $item) {
+	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null) {
+		if(isset($array[$fullParameterName]))
+			return $array[$fullParameterName];
+		
+		foreach($array as $key => $item) {
 			if($prefix)
 				$key = $prefix . '[' . $key . ']';
 
