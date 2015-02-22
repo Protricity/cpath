@@ -185,10 +185,11 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		return $this;
 	}
 
-	function delete($whereColumn, $whereValue = null, $compare = '=?', $logic = 'AND') {
+	function delete($whereColumn=null, $whereValue = null, $compare = '=?', $logic = 'AND') {
 		$Delete = new PDODeleteBuilder($this->getDatabase());
 		$Delete->table(static::TABLE_NAME);
-		$Delete->where($whereColumn, $whereValue, $compare, $logic);
+        if($whereColumn !== null)
+		    $Delete->where($whereColumn, $whereValue, $compare, $logic);
 		return $Delete;
 	}
 

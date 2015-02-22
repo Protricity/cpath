@@ -28,8 +28,15 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 				$this->select($v, is_int($k) ? null : $k, $format);
 			return $this;
 		}
-		if($format)
-			$column = sprintf($format, $column, $alias);
+
+//        if(strpos($column, '.') === false) {
+//            list($tableName, $tableAlias) = explode(' as ', $this->mTableSQL) + array(null, null);
+//            $column = ($tableAlias ?: $tableName) . '.' . $column;
+//        }
+
+		if($format) {
+            $column = sprintf($format, $column, $alias);
+        }
 		if($alias !== null)
 			$column .= " as `" . $alias . '`';
 
@@ -43,12 +50,24 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 	}
 
 	public function join($table, $sourceColumn=null, $targetColumn=null, $compare=' = ') {
-		list($thisTable) = explode(' ', $this->mTableSQL);
+		list($thisTable) = explode(' as ', $this->mTableSQL);
+
+//        if(strpos($sourceColumn, '.') === false) {
+//            $sourceColumn = ($table) . '.' . $sourceColumn;
+//        }
+//
+//        if(strpos($targetColumn, '.') === false) {
+//            list($tableName, $tableAlias) = explode(' as ', $this->mTableSQL) + array(null, null);
+//            $column = ($tableAlias ?: $tableName) . '.' . $sourceColumn;
+//        }
 
 		if($targetColumn)
-			$sourceColumn = $thisTable . '.' . $sourceColumn
+			$sourceColumn =
+			// $thisTable . '.'
+                $sourceColumn
 				. $compare
-				. $table . '.' . $targetColumn;
+//				. $table . '.' .
+                . $targetColumn;
 
 		if($sourceColumn)
 			$table = $table . "\n\t\tON " . $sourceColumn;
