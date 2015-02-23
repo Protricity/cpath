@@ -9,6 +9,7 @@ namespace CPath\Data\Schema\PDO;
 
 use CPath\Autoloader;
 use CPath\Build\Code\IConstructorArgs;
+use CPath\Build\BuildConfig;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 
@@ -37,6 +38,9 @@ class PDOTableClassWriter implements IWritableSchema
 
 
 	public function commit() {
+        if(!BuildConfig::$BUILD_FILES)
+            return false;
+
 		if ($this->mTableInfo !== null) {
 			list($Schema, $tableName, $tableArgs, $oldTableComment) = $this->mTableInfo;
 			$this->mTableInfo = null;
@@ -208,6 +212,8 @@ PHP
 		$this->mTableInfo = null;
 		$this->mColumns   = array();
 		$this->mIndexes   = array();
+
+        return true;
 	}
 
 	/**
