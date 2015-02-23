@@ -87,7 +87,8 @@ class HTMLSelectField extends HTMLInputField implements ISequenceMap
 
 	public function addOption($value, $description=null, $selected=false) {
 		if($description) {
-			$this->mValues[$description] = $value;
+            if(!in_array($value, $this->mValues))
+			    $this->mValues[$description] = $value;
 		} else {
 			if(!in_array($value, $this->mValues))
 				$this->mValues[] = $value;

@@ -35,6 +35,9 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 
 			return $this;
 		}
+//        $bindName = ':where_' . $whereColumn;
+//        if(strpos($compare, '?') !== false)
+//            $compare = str_replace('?', ':' . $whereColumn, $compare);
 
 		if($whereValue instanceof PDOSelectBuilder) {
 			$sql = $whereValue->getSQL();

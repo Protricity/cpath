@@ -92,7 +92,8 @@ class HTMLForm extends HTMLElement implements ILogListener
 	function getFormField($fieldName) {
 		foreach($this->getContentRecursive() as $Content)
 			if ($Content instanceof IHTMLFormField)
-				if ($fieldName === $Content->getFieldName())
+				if ($fieldName === $Content->getFieldName()
+                || $fieldName . '[]' === $Content->getFieldName())
 					return $Content;
 		throw new \InvalidArgumentException("Form field not found in form: " . $fieldName);
 	}

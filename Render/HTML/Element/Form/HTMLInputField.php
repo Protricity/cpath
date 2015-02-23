@@ -42,8 +42,6 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
     public function __construct($name = null, $value = null, $type = null, $classList=null, $_content = null) {
         parent::__construct(static::NODE_TYPE);
 
-	    $classList !== null ?: $classList = HTMLConfig::$DefaultInputClass;
-
 	    if(static::INPUT_TYPE)
 		    $this->setType(static::INPUT_TYPE);
 	    is_scalar($name)        ? $this->setFieldName($name)    : $this->addVarArg($name);
@@ -53,6 +51,9 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 
 	    for($i=4; $i<func_num_args(); $i++)
 		    $this->addVarArg(func_get_arg($i));
+
+        if(sizeof($this->getClasses()) === 0)
+            $this->addClass(HTMLConfig::$DefaultInputClass);
     }
 
 	protected function addVarArg($arg, $allowHTMLAttributeString=false) {
@@ -70,7 +71,7 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 	 * @return mixed|null
 	 */
 	public function getRequestValue(IRequest $Request) {
-		$fieldName = $this->getFieldName();
+		$fieldName = rtrim($this->getFieldName(), '[]');
 		if($this->getForm()) {
 			switch(strtoupper($this->getForm()->getMethod())) {
 				case 'POST':

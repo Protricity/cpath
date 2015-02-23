@@ -19,14 +19,15 @@ class PDOUpdateBuilder extends PDOWhereBuilder
 				$this->update(is_int($k) ? $v : $k, $v);
 			return $this;
 		}
+//
+//        if(strpos($set, '?') !== false)
+//            $set = str_replace('?', ':' . $fieldName, $set);
 
-		if($fieldName !== null) {
-			if(strpos($set, '%') !== false)
-				$fieldName = sprintf($set, $fieldName);
-			else
-				$fieldName .= $set;
-			$this->bindValue($fieldValue);
-		}
+        $this->bindValue($fieldValue); // , ':' . $fieldName);
+        if(strpos($set, '%') !== false)
+            $fieldName = sprintf($set, $fieldName);
+        else
+            $fieldName .= $set;
 
 		if ($this->mUpdateSQL) {
 			$this->mUpdateSQL .= ', ' . $fieldName;

@@ -39,9 +39,10 @@ class HTMLPagination implements IRenderHTML
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
 		$url = null;
-		foreach($Request as $key=>$value)
-			if($key !== 'page' && $value !== '' && $value !== null)
-				$url = ($url ? $url . '&' : '?') . $key . '=' . urlencode($value);
+		foreach($Request as $key => $value)
+
+			if($key !== 'page' && is_scalar($value))
+				$url = ($url ? $url . '&' : '?') . $key . '=' . $value;
 		$url = ($url ? $url . '&' : '?') . 'page=';
 		$url = $Request->getDomainPath() . ltrim($Request->getPath(), '/') . $url;
 

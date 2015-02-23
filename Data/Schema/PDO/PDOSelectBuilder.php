@@ -49,7 +49,11 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 		return $this;
 	}
 
-	public function join($table, $sourceColumn=null, $targetColumn=null, $compare=' = ') {
+    public function leftJoin($table, $sourceColumn=null, $targetColumn=null, $compare=' = ') {
+        return $this->join($table, $sourceColumn, $targetColumn, $compare, "LEFT JOIN");
+    }
+
+    public function join($table, $sourceColumn=null, $targetColumn=null, $compare=' = ', $joinType = 'JOIN') {
 		list($thisTable) = explode(' as ', $this->mTableSQL);
 
 //        if(strpos($sourceColumn, '.') === false) {
@@ -73,7 +77,7 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 			$table = $table . "\n\t\tON " . $sourceColumn;
 
 		if(!preg_match('/(join)/i', $table))
-			$table = "\n\tJOIN " . $table;
+			$table = "\n\t" . $joinType . " " . $table;
 
 		$this->mJoinSQL .= $table;
 		return $this;

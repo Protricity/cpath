@@ -165,10 +165,11 @@ abstract class AbstractPDOTable implements ISequenceMap, IReadableSchema, ILogLi
 		return $Select;
 	}
 
-	function update($fieldName, $fieldValue=null, $set='=?') {
+	function update($fieldName=null, $fieldValue=null, $set='=?') {
 		$Update = new PDOUpdateBuilder($this->getDatabase());
 		$Update->table(static::TABLE_NAME);
-		$Update->update($fieldName, $fieldValue, $set);
+        if($fieldName !== null)
+		    $Update->update($fieldName, $fieldValue, $set);
 		return $Update;
 	}
 
