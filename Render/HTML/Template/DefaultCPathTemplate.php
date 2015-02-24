@@ -109,9 +109,11 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
 			$ResponseRenderer->sendHeaders($Request);
 		}
 
-		header('Cache-Control: private, max-age=0, no-cache, must-revalidate, no-store, proxy-revalidate');
-		if(isset($_SERVER['REQUEST_URI']))
-            header('X-Location: ' . $_SERVER['REQUEST_URI']);
+        if(!headers_sent()) {
+            header('Cache-Control: private, max-age=0, no-cache, must-revalidate, no-store, proxy-revalidate');
+            if (isset($_SERVER['REQUEST_URI']))
+                header('X-Location: ' . $_SERVER['REQUEST_URI']);
+        }
 
 		$Template->mHeaderTitle->addAll(
 			$Request->getMethodName() . ' ' . $Request->getPath()
