@@ -16,12 +16,13 @@ class FormRequest extends Request implements IFormRequest
 		parent::__construct($method, $path, $parameters, $MimeType);
 	}
 
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed|null the form field value or null if not found
-	 */
-	function getFormFieldValue($fieldName) {
-		return parent::getRequestValue($fieldName);
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param bool|int $filter
+     * @return mixed|null the form field value or null if not found
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
+		return parent::getRequestValue($fieldName, $filter);
 	}
 }

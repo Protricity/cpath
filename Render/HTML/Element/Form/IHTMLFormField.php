@@ -19,13 +19,14 @@ interface IHTMLFormField
 	 */
 	function getForm();
 
-	/**
-	 * Get the request value from the IRequest
-	 * @param IRequest $Request
-	 * @throws RequestException if the parameter failed validated
-	 * @return mixed
-	 */
-	public function getRequestValue(IRequest $Request);
+    /**
+     * Get the request value from the IRequest
+     * @param IRequest $Request
+     * @param int $filter
+     * @internal param bool $sanitizeValue
+     * @return mixed
+     */
+	public function getRequestValue(IRequest $Request, $filter = FILTER_SANITIZE_SPECIAL_CHARS);
 
 	/**
 	 * Get parameter name

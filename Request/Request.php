@@ -59,10 +59,12 @@ class Request implements IRequest
 		return $this->mPath;
 	}
 
-	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null) {
-		if(isset($array[$fullParameterName]))
-			return $array[$fullParameterName];
-		
+	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
+		if(isset($array[$fullParameterName])) {
+            $value = $array[$fullParameterName];
+            return is_scalar($value) ? filter_var($value, $filter) : $value;
+        }
+
 		foreach($array as $key => $item) {
 			if($prefix)
 				$key = $prefix . '[' . $key . ']';
@@ -70,11 +72,11 @@ class Request implements IRequest
 			if(strpos($fullParameterName, $key) !== 0)
 				continue;
 
-			if($fullParameterName === $key)
-				return $item;
-
 			if(is_scalar($item))
-				return $item;
+                return filter_var($item, $filter);
+
+            if($fullParameterName === $key)
+                return $item;
 
 			$value = $this->getNamedRequestValue($fullParameterName, $item, $key);
 			if($value !== null)
@@ -84,17 +86,18 @@ class Request implements IRequest
 		return null;
 	}
 
-	/**
-	 * @param $paramName
-	 * @return String|null
-	 */
-	function getRequestValue($paramName) {
-		return $this->getNamedRequestValue($paramName, $this->mRequestedParams)
-			?: $this->getParameterValue($paramName);
+    /**
+     * @param $paramName
+     * @param int $filter
+     * @return String|null
+     */
+	function getRequestValue($paramName, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
+		return $this->getNamedRequestValue($paramName, $this->mRequestedParams, null, $filter)
+			?: $this->getParameterValue($paramName, $filter);
 	}
 
-	function getParameterValue($paramName) {
-		return $this->getNamedRequestValue($paramName, $this->mParameters);
+	function getParameterValue($paramName, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
+		return $this->getNamedRequestValue($paramName, $this->mParameters, null, $filter);
 	}
 
 	function getParameterValues() {
@@ -282,22 +285,24 @@ class Request implements IRequest
 		return $this->getRequestValue($offset) !== null;
 	}
 
-	/**
-	 * (PHP 5 &gt;= 5.0.0)<br/>
-	 * Offset to retrieve
-	 * @link http://php.net/manual/en/arrayaccess.offsetget.php
-	 * @param mixed $offset <p>
-	 * The offset to retrieve.
-	 * </p>
-	 * @return mixed Can return all value types.
-	 */
-	public function offsetGet($offset) {
+    /**
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Offset to retrieve
+     * @link http://php.net/manual/en/arrayaccess.offsetget.php
+     * @param mixed $offset <p>
+     * The offset to retrieve.
+     * </p>
+     * @param int $filter
+     * @throws Validation\Exceptions\ValidationException
+     * @return mixed Can return all value types.
+     */
+	public function offsetGet($offset, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
 		if($offset[strlen($offset)-1] === '?') {
-			$value = $this->getRequestValue(substr($offset, 0, -1));
+			$value = $this->getRequestValue(substr($offset, 0, -1), $filter);
 			return $value;
 		}
 
-		$value = $this->getRequestValue($offset);
+		$value = $this->getRequestValue($offset, $filter);
 
 		if($value === null) {
 			static $onlyOnce = false;

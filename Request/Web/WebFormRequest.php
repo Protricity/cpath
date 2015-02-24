@@ -41,30 +41,32 @@ class WebFormRequest extends WebRequest implements IFormRequest
 		return $this->mValueSource = $_POST;
 	}
 
-	/**
-	 * Return a request parameter (GET) value
-	 * @param String $paramName
-	 * @return mixed|null the request parameter value or null if not found
-	 */
+    /**
+     * Return a request parameter (GET) value
+     * @param String $paramName
+     * @param int $filter
+     * @return mixed|null the request parameter value or null if not found
+     */
 
-	function getRequestValue($paramName) {
-		$value = parent::getRequestValue($paramName);
+	function getRequestValue($paramName, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
+		$value = parent::getRequestValue($paramName, $filter);
 		if($value !== null)
 			return $value;
 
 		$values = $this->getAllFormValues();
-		return $this->getNamedRequestValue($paramName, $values);
+		return $this->getNamedRequestValue($paramName, $values, null, $filter);
 	}
 
 
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed the form field value
-	 */
-	function getFormFieldValue($fieldName) {
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param bool|int $filter
+     * @return mixed the form field value
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
 		$values = $this->getAllFormValues();
-		return $this->getNamedRequestValue($fieldName, $values);
+		return $this->getNamedRequestValue($fieldName, $values, null, $filter);
 	}
 
 }

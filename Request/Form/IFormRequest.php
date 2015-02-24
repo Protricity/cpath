@@ -11,10 +11,11 @@ use CPath\Request\IRequest;
 
 interface IFormRequest extends IRequest
 {
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed|null the form field value or null if not found
-	 */
-	function getFormFieldValue($fieldName);
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param int $filter
+     * @return mixed|null the form field value or null if not found
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS);
 }

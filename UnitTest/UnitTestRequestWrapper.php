@@ -157,13 +157,16 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 		$this->mTestParameters[$name] = $value;
 	}
 
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed|null the form field value or null if not found
-	 */
-	function getFormFieldValue($fieldName) {
-		return $this->offsetGet($fieldName);
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param bool|int $filter
+     * @return mixed|null the form field value or null if not found
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
+        $value = $this->offsetGet($fieldName);
+        if($filter)
+            $value = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
 	}
 
 	/**

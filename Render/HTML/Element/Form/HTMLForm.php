@@ -166,9 +166,7 @@ class HTMLForm extends HTMLElement implements ILogListener
 		}
 	}
 
-	public function validateField(IRequest $Request, $fieldName, HTMLForm $ThrowForm=null) {
-		if(!$ThrowForm)
-			$ThrowForm = $this;
+	public function validateField(IRequest $Request, $fieldName) {
 		$Field = $this->getFormField($fieldName);
 		$value = $Field->getRequestValue($Request);
 
@@ -178,7 +176,7 @@ class HTMLForm extends HTMLElement implements ILogListener
 
 			} catch (\Exception $ex) {
 				if(!$ex instanceof ValidationException)
-					$ex = new ValidationException($ThrowForm, $ex);
+					$ex = new ValidationException($this, $ex);
 				else
 					$ex->setForm($this);
 				$this->log($ex->getMessage(), $this::ERROR);

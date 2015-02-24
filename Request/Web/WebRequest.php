@@ -85,20 +85,21 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 		return $path;
 	}
 
-	function getQueryStringValue($paramName) {
+	function getQueryStringValue($paramName, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
 		$values = $this->getAllFormValues();
-		return $this->getNamedRequestValue($paramName, $values);
+		return $this->getNamedRequestValue($paramName, $values, null, $filter);
 	}
 
-	/**
-	 * Return a request parameter (GET) value
-	 * @param String $paramName
-	 * @return mixed|null the request parameter value or null if not found
-	 */
+    /**
+     * Return a request parameter (GET) value
+     * @param String $paramName
+     * @param int $filter
+     * @return mixed|null the request parameter value or null if not found
+     */
 
-	function getRequestValue($paramName) {
-		return parent::getRequestValue($paramName)
-			?: $this->getQueryStringValue($paramName);
+	function getRequestValue($paramName, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
+		return parent::getRequestValue($paramName, $filter)
+			?: $this->getQueryStringValue($paramName, $filter);
 	}
 
 	/**

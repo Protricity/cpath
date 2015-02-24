@@ -55,12 +55,13 @@ class CLIRequest extends Request implements IPrompt, IFormRequest
         return $line;
     }
 
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed the form field value
-	 */
-	function getFormFieldValue($fieldName) {
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param bool|int $filter
+     * @return mixed the form field value
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
 		return $this[$fieldName];
 	}
 }

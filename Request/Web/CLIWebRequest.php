@@ -25,12 +25,13 @@ class CLIWebRequest extends WebRequest implements IFormRequest
         parent::__construct('CLI', $path, $args, new TextMimeType($flags));
     }
 
-	/**
-	 * Return a request value
-	 * @param $fieldName
-	 * @return mixed the form field value
-	 */
-	function getFormFieldValue($fieldName) {
+    /**
+     * Return a request value
+     * @param $fieldName
+     * @param bool|int $filter
+     * @return mixed the form field value
+     */
+	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
 		// TODO: unfinished
 		return $this[$fieldName];
 	}

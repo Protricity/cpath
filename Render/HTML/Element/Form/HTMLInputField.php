@@ -65,23 +65,24 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 		parent::addVarArg($arg, $allowHTMLAttributeString);
 	}
 
-	/**
-	 * Get the request value from the IRequest
-	 * @param IRequest $Request
-	 * @return mixed|null
-	 */
-	public function getRequestValue(IRequest $Request) {
+    /**
+     * Get the request value from the IRequest
+     * @param IRequest $Request
+     * @param int $filter
+     * @return mixed
+     */
+    public function getRequestValue(IRequest $Request, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
 		$fieldName = rtrim($this->getFieldName(), '[]');
 		if($this->getForm()) {
 			switch(strtoupper($this->getForm()->getMethod())) {
 				case 'POST':
 					if($Request instanceof IFormRequest)
-						return $Request->getFormFieldValue($fieldName);
+						return $Request->getFormFieldValue($fieldName, $filter);
 					return null;
 			}
 		}
 //		return $this->getNamedRequestValue($fieldName, $Request);
-		return isset($Request[$fieldName]) ? $Request[$fieldName] : null;
+		return $Request->offsetExists($fieldName) ? $Request->offsetGet($fieldName, $filter) : null;
 	}
 
 	public function getInputValue()                     { return $this->getAttribute('value'); }
