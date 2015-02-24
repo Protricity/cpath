@@ -110,18 +110,18 @@ class Request implements IRequest
 	 */
     function match($routePrefix, $flags=0) {
 
-	    if($flags) {
-		    if($flags & IRequest::MATCH_NO_SESSION) {
-			    if($this instanceof ISessionRequest
-				    && $this->hasSessionCookie())
-				    return false;
-		    }
-		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
-			    if(!$this instanceof ISessionRequest
-				    || !$this->hasSessionCookie())
-				    return false;
-		    }
-	    }
+//	    if($flags) {
+//		    if($flags & IRequest::MATCH_NO_SESSION) {
+//			    if($this instanceof ISessionRequest
+//				    && $this->hasSessionCookie())
+//				    return false;
+//		    }
+//		    elseif($flags & IRequest::MATCH_SESSION_ONLY) {
+//			    if(!$this instanceof ISessionRequest
+//				    || !$this->hasSessionCookie())
+//				    return false;
+//		    }
+//	    }
 
 	    if(strpos($routePrefix, ' ') !== false)
             list($routeMethod, $path) = explode(' ', $routePrefix, 2);
