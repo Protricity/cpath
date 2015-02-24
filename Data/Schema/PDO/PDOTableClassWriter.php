@@ -8,8 +8,8 @@
 namespace CPath\Data\Schema\PDO;
 
 use CPath\Autoloader;
-use CPath\Build\Code\IConstructorArgs;
 use CPath\Build\BuildConfig;
+use CPath\Build\Code\IConstructorArgs;
 use CPath\Data\Schema\IReadableSchema;
 use CPath\Data\Schema\IWritableSchema;
 

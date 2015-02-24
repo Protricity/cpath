@@ -11,7 +11,6 @@ use CPath\Render\HTML\Element\Form\HTMLForm;
 use CPath\Render\HTML\Element\Form\HTMLInputField;
 use CPath\Request\Log\ILogListener;
 use CPath\Request\MimeType\IRequestedMimeType;
-use CPath\Request\Session\ISessionRequest;
 use CPath\Request\Web\CLIWebRequest;
 use CPath\Request\Web\WebFormRequest;
 use CPath\Request\Web\WebRequest;
