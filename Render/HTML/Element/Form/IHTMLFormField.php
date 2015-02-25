@@ -7,7 +7,6 @@
  */
 namespace CPath\Render\HTML\Element\Form;
 
-use CPath\Request\Exceptions\RequestException;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
 
