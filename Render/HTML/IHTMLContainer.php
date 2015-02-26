@@ -19,7 +19,7 @@ interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 	 * @param IHTMLSupportHeaders $Headers
 	 * @return void
 	 */
-	function addSupportHeaders(IHTMLSupportHeaders $Headers);
+	//function addSupportHeaders(IHTMLSupportHeaders $Headers);
 
 	/**
 	 * Get meta tag content or return null
