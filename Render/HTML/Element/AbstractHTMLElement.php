@@ -22,7 +22,7 @@ use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;
 use CPath\Response\IResponse;
 
-abstract class AbstractHTMLElement extends Attributes implements IResponse, IHTMLElement, IHTMLSupportHeaders, IHTMLHeaderContainer, IHTMLContainerItem
+abstract class AbstractHTMLElement extends Attributes implements IResponse, IHTMLElement, IHTMLSupportHeaders, IHTMLHeaderContainer
 {
 	const FLAG_SKIP_INDENTS = 0x01;
 	const FLAG_SKIP_NEWLINE = 0x02;
