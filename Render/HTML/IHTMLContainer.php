@@ -68,7 +68,7 @@ interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr
 	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
+	// function renderContent(IRequest $Request, IAttributes $ContentAttr = null);
 }
 
 
