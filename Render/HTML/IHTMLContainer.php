@@ -41,6 +41,12 @@ interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 	 */
 	public function getContent($key = null);
 
+    /**
+     * Return content recursively
+     * @return IRenderHTML[]
+     */
+    public function getContentRecursive();
+
 	/**
 	 * Add IRenderHTML MainContent
 	 * @param IRenderHTML $Render

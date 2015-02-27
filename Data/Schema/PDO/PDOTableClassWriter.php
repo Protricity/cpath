@@ -108,17 +108,17 @@ PHP;
 			$useList        .= "\nuse " . $this->mPDOClass . ' as DB;';
 			$useList        .= "\nuse " . $fetchClass . ' as Entry;';
 			$useList        .= "\nuse " . get_class($Schema) . ';';
-			if($Schema instanceof IConstructorArgs) {
-				$useList    .= "\nuse " . IReadableSchema::interfaceName . ';';
-			}
+//			if($Schema instanceof IConstructorArgs) {
+//				$useList    .= "\nuse " . IReadableSchema::interfaceName . ';';
+//			}
 			//$Use            .= "\nuse " . IWritableSchema . ';';
 
 			$className = $this->mClassName;
 			$baseClassName = basename($className);
 //			$constComment = $tableComment ? "\n\t * " . $tableComment : '';
 			$Implements = null;
-			if($Schema instanceof IConstructorArgs)
-				$Implements = ' implements ' . basename(IReadableSchema);
+//			if($Schema instanceof IConstructorArgs)
+//				$Implements = ' implements ' . basename(IReadableSchema);
 
 			if(strpos($oldTableComment, '/**') === false) {
 			}

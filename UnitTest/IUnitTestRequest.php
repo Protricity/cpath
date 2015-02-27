@@ -8,8 +8,9 @@
 namespace CPath\UnitTest;
 
 use CPath\Request\IRequest;
+use CPath\Request\Session\ISessionRequest;
 
-interface IUnitTestRequest extends IRequest, IUnitTestMockMethod //, IFlaggedRequest
+interface IUnitTestRequest extends IRequest, IUnitTestMockMethod, ISessionRequest //, IFlaggedRequest
 {
     //const USE_DEFAULTS = 0x2;
 
