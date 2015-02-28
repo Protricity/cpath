@@ -62,7 +62,7 @@ class HTMLForm extends HTMLElement implements ILogListener
 		if(!$domainPath)
 			return $action;
 		if(strpos($action, $domainPath) === false)
-			return $domainPath . ltrim($action, '/');
+			return rtrim($domainPath, '/') . '/' . ltrim($action, '/');
 		return $action;
 	}
 
