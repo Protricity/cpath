@@ -103,7 +103,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 		foreach ($this->mModes as $mode)
 			if(isset($mode[1]))
-				$statement->setFetchMode($mode[0], $mode[1], $mode[2]);
+				$statement->setFetchMode($mode[0], $mode[1], isset($mode[2]) ? $mode[2] : null);
 			else
 				$statement->setFetchMode($mode[0]);
 

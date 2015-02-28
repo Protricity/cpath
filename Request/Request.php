@@ -62,6 +62,8 @@ class Request implements IRequest
 	protected function getNamedRequestValue($fullParameterName, $array, $prefix=null, $filter=FILTER_SANITIZE_SPECIAL_CHARS) {
 		if(isset($array[$fullParameterName])) {
             $value = $array[$fullParameterName];
+            if(!$filter)
+                return $value;
             return is_scalar($value) ? filter_var($value, $filter) : $value;
         }
 
@@ -227,13 +229,6 @@ class Request implements IRequest
      * @return String
      */
     function getDomainPath($withDomain=false) {
-        if($withDomain) {
-            $protocol = 'http';
-            if(isset($_SERVER['HTTPS']))
-                $protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
-
-            return $protocol . "://" . $_SERVER['SERVER_NAME'];
-        }
         return '';
     }
 

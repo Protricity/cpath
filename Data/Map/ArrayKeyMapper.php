@@ -22,7 +22,17 @@ class ArrayKeyMapper implements IKeyMapper
 	 * @return bool true to stop or any other value to continue
 	 */
 	function map($key, $value) {
-		$this->mArray[$key] = $value;
+        if(is_array($value)) {
+            $this->mArray[$key] = $value;
+
+        } elseif ($value instanceof IKeyMap) {
+            $this->mArray[$key] = self::mapToArray($value);
+
+        } else {
+            $this->mArray[$key] = $value;
+
+
+        }
 
 		return true;
 	}

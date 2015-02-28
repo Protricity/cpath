@@ -7,60 +7,6 @@
  */
 namespace CPath\Request\Session;
 
-class SocketSessionRequest implements ISessionRequest {
-
-	/**
-	 * Return a referenced array representing the request session
-	 * @return array
-	 * @throws SessionRequestException if no session was started yet
-	 */
-	function &getSession() {
-		// TODO: Implement getSession() method.
-	}
-
-	/**
-	 * Start a new session
-	 * @internal param bool $reset if true, session will be reset
-	 * @return bool true if session was started, otherwise false
-	 */
-	function startSession() {
-		// TODO: Implement startSession() method.
-	}
-
-	/**
-	 * End session
-	 * @return bool true if session was ended, otherwise false
-	 * @throws SessionRequestException if session wasn't active
-	 */
-	function endSession() {
-		// TODO: Implement endSession() method.
-	}
-
-	/**
-	 * Destroy session data
-	 * @return bool true if session was destroyed, otherwise false
-	 * @throws SessionRequestException if session wasn't active
-	 */
-	function destroySession() {
-		// TODO: Implement destroySession() method.
-	}
-
-	/**
-	 * Returns true if the session is active, false if inactive
-	 * @return bool
-	 */
-	function hasSessionCookie() {
-		// TODO: Implement hasSessionCookie() method.
-	}
-
-	/**
-	 * Returns true if the session has started
-	 * @return bool
-	 */
-	function isStarted() {
-		// TODO: Implement isStarted() method.
-	}
-}
 
 class SessionRequest implements ISessionRequest
 {

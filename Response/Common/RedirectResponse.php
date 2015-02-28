@@ -116,10 +116,10 @@ HTML;
 	 * @return void
 	 */
 	function mapKeys(IKeyMapper $Map) {
-		$Map->map(IResponse::STR_MESSAGE, $this->getMessage());
-		$Map->map(IResponse::STR_CODE, $this->getCode());
+        parent::mapKeys($Map);
 		$Map->map(static::STR_REDIRECT, new RouteLink($this->mRedirectURL, $this->mRedirectURL));
 		if($this->mTimeout !== null)
 			$Map->map(static::STR_TIMEOUT, $this->mTimeout);
 	}
+
 }

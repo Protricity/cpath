@@ -13,6 +13,7 @@ use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\HTMLContainer;
+use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLResponseBody;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
@@ -90,8 +91,10 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $RouteRenderer=null, $args=array()) {
-		$Template = new DefaultCPathTemplate();
+        if(!$Request->getMimeType() instanceof HTMLMimeType)
+            return false;
 
+		$Template = new DefaultCPathTemplate();
 
 		$Object = reset($Previous);
 		if($RouteRenderer instanceof RouteRenderer) {

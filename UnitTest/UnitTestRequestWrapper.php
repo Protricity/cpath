@@ -14,7 +14,7 @@ use CPath\Request\Session\ISessionRequest;
 use CPath\Request\Session\SessionRequestException;
 use CPath\UnitTest\Exceptions\UnitTestException;
 
-class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest, ISessionRequest, IFormRequest
+class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTestRequest, IFormRequest
 {
     private $mFlags;
 	private $mAssertionCount = 0;
@@ -87,13 +87,12 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	 * @throws \InvalidArgumentException
 	 * @return array
 	 */
-	function &getSession($key = null) {
-		if($key === null)
-			return $this->mTestSession;
-        if(!isset($this->mTestSession[$key]))
-	        $this->mTestSession[$key] = array();
-
-        return $this->mTestSession[$key];
+	function &getSession() {
+		return $this->mTestSession;
+//        if(!isset($this->mTestSession[$key]))
+//	        $this->mTestSession[$key] = array();
+//
+//        return $this->mTestSession[$key];
 //
 //		$Request = $this->getWrappedRequest();
 //		if($Request instanceof ISessionRequest)
@@ -165,8 +164,9 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
      */
 	function getFormFieldValue($fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
         $value = $this->offsetGet($fieldName);
-        if($filter)
+        if($filter && is_scalar($value))
             $value = filter_var($value, FILTER_SANITIZE_SPECIAL_CHARS);
+        return $value;
 	}
 
 	/**

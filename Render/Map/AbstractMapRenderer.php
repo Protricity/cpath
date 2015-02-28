@@ -40,6 +40,14 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 		$this->flush();
 	}
 
+    protected function renderString($string) {
+        echo $string;
+    }
+
+    protected function renderNull() {
+        echo NULL;
+    }
+
 	function flush() {
 		if($this->mFinished)
 			return;
@@ -109,7 +117,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			unset($Mapper);
 
 		} elseif (is_string($value)) {
-			echo $value ? nl2br(htmlspecialchars($value)) : '&nbsp;';
+            $this->renderString($value ? nl2br(htmlspecialchars($value)) : '&nbsp;');
+        } elseif (is_null($value)) {
+            $this->renderNull();
 
 		} else {
 			echo var_export($value, true);
@@ -137,6 +147,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 
 		} elseif (is_string($value)) {
 			echo $value ? nl2br(htmlspecialchars($value)) : '&nbsp;';
+
+        } elseif (is_null($value)) {
+            $this->renderNull();
 
 		} else {
 			echo var_export($value, true);
