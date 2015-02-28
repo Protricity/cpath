@@ -80,7 +80,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 			if(isset($_SERVER['HTTPS']))
 				$protocol = ($_SERVER['HTTPS'] && $_SERVER['HTTPS'] != "off") ? "https" : "http";
 
-			$path = $protocol . "://" . $_SERVER['SERVER_NAME'] . $path;
+			$path = $protocol . "://" . $_SERVER['SERVER_NAME'] . ltrim($path, '/');
 		}
 		return $path;
 	}

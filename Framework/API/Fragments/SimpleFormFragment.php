@@ -37,7 +37,7 @@ class SimpleFormFragment extends AbstractFormFragment{
             throw new \Exception("API Not routable");
         $Route = $API->loadRoute();
 
-        $domainPath = Config::getDomainPath();
+        $domainPath = $Request->getDomainPath();
         $route = $Route->getPrefix();
         list($method, $path) = explode(' ', $route, 2);
         $path = rtrim($domainPath, '/') . $path;

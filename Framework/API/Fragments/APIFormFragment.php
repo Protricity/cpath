@@ -45,7 +45,7 @@ class APIFormFragment extends AbstractFormFragment{
         if($method == 'ANY') // TODO: Is this a hack?
             $method = 'GET';
         $num = 1;
-        $absPath = rtrim(Config::getDomainPath(), '/') . $path;
+        $absPath = rtrim($Request->getDomainPath(), '/') . $path;
 
         $Util = new HTMLRenderUtil($Request);
 
