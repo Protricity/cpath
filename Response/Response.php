@@ -65,7 +65,8 @@ class Response implements IResponse, IResponseHeaders, IKeyMap,  \ArrayAccess, \
 		if(strlen($msg) > 64)
 			$msg = substr($msg, 0, 64) . '...';
 
-		http_response_code($this->getCode());
+        $code = is_numeric($this->getCode()) ? (int)$this->getCode() : 400;
+		http_response_code($code);
 		header("HTTP/1.1 " . $this->getCode() . " " . $msg);
 		header("Content-Type: " . $mimeType);
 
