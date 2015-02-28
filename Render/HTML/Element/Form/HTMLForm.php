@@ -166,9 +166,9 @@ class HTMLForm extends HTMLElement implements ILogListener
 		}
 	}
 
-	public function validateField(IRequest $Request, $fieldName) {
+	public function validateField(IRequest $Request, $fieldName, $filter = FILTER_SANITIZE_SPECIAL_CHARS) {
 		$Field = $this->getFormField($fieldName);
-		$value = $Field->getRequestValue($Request);
+		$value = $Field->getRequestValue($Request, $filter);
 
 		if ($Field instanceof IValidation)
 			try {
