@@ -14,6 +14,7 @@ use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Attribute\StyleAttributes;
 use CPath\Render\HTML\Element\Form\HTMLInputField;
 use CPath\Render\HTML\Element\Form\HTMLSelectField;
 use CPath\Render\HTML\HTMLConfig;
@@ -105,7 +106,10 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 			$this->columns = $columns;
 		}
 
-		echo RI::ni(), "<table>";
+		echo RI::ni(), "<table";
+        if($Attr)
+            $Attr->renderHTMLAttributes($Request);
+        echo ">";
 		echo RI::ai(1);
 
 		echo RI::ni(), "<thead>";
@@ -214,7 +218,8 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 					$searchColumnName = $this->searchColumn[$fieldName];
 					$Input = new HTMLInputField('search-' . $fieldName,
 						new Attributes('placeholder', 'Search ' . $searchColumnName),
-						new Attributes('size', 16),
+//						new Attributes('size', 16),
+                        new StyleAttributes('width', '100%'),
 						new ClassAttributes('input search transparent')
 					);
 					$Input->setInputValueFromRequest($Request);
