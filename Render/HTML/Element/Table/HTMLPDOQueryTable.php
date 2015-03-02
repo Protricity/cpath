@@ -25,7 +25,7 @@ use CPath\Request\Validation\IRequestValidation;
 
 class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 {
-	private $Query;
+	protected $Query;
 	private $columns;
 	private $searchColumn = array();
 	private $sortColumn = array();
@@ -49,6 +49,18 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 		$this->sortColumn[$fieldName ?: $columnName] = $columnName;
 		return $this;
 	}
+
+    public function setPagination() {
+
+        $page = 0;
+        $total = null;
+        $row_count = 5;
+        if(isset($Request[self::PARAM_PAGE]))
+            $page = $Request[self::PARAM_PAGE];
+        $offset = $page * $row_count;
+
+        $Pagination = new HTMLPagination($row_count, $page, $total);
+    }
 
 	/**
 	 * Validate the request
@@ -160,7 +172,14 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 				$row->mapKeys(
 					new CallbackKeyMapper(
 						function($key, $value, $_arg=null) use ($Request, &$array) {
-							$array[$key] = $_arg ? func_get_args() : $value;
+                            if($_arg) {
+                                $array[$key][] = func_get_args();
+                            } else {
+                                if(isset($array[$key]))
+                                    $array[$key] .= ', ' . $value;
+                                else
+                                    $array[$key] = $value;
+                            }
 						}
 					)
 				);

@@ -89,24 +89,27 @@ class PDOSelectBuilder extends PDOWhereBuilder implements ISequenceMap, \Iterato
 //		if(!$this->mSelectSQL)
 //			throw new \InvalidArgumentException("Select not set");
 
+
 		if($this->mFormat)
-			return sprintf($this->mFormat,
+            $sql = sprintf($this->mFormat,
 				$this->mSelectSQL,
 				$this->mTableSQL,
 				$this->mJoinSQL,
 				$this->mWhereSQL,
-				$this->mOrderBy,
 				$this->mGroupBy,
+                $this->mOrderBy,
 				$this->mLimitSQL);
 
-		return
-			($this->mSelectSQL ?: "SELECT * ")
+		else $sql =
+            ($this->mSelectSQL ?: "SELECT * ")
 			. ("\n\tFROM " . $this->mTableSQL)
 			. ($this->mJoinSQL)
 			. ($this->mWhereSQL)
-			. ($this->mOrderBy)
 			. ($this->mGroupBy)
+            . ($this->mOrderBy)
 			. ($this->mLimitSQL);
+
+        return $sql;
 	}
 
 	public function addRowCallback(Callable $callback) {

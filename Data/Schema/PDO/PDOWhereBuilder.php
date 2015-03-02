@@ -79,6 +79,9 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 	}
 
 	public function limit($limit, $offset = null) {
+        if(!$limit)
+            throw new \InvalidArgumentException("Invalid Limit");
+
 		if ($offset !== null)
 			$limit = "{$offset}, {$limit}";
 

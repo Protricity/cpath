@@ -7,6 +7,8 @@
  * Date: 4/06/11 */
 namespace CPath\Render\HTML;
 
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
+
 class HTMLConfig  {
 	/** @var IHTMLValueRenderer[] */
 	private static $mValueRenderers = array() ;
@@ -17,6 +19,20 @@ class HTMLConfig  {
 	static function addValueRenderer(IHTMLValueRenderer $Renderer) {
 		self::$mValueRenderers[] = $Renderer;
 	}
+
+    /**
+     * Return value renderer support headers
+     * @return IHTMLSupportHeaders[]
+     */
+    static function getSupportHeaders() {
+        $headers = array();
+        foreach(self::$mValueRenderers as $Headers) {
+            if($Headers instanceof IHTMLSupportHeaders) {
+                $headers[] = $Headers;
+            }
+        }
+        return $headers;
+    }
 
 	/**
 	 * Render an html value
