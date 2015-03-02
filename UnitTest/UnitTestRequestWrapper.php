@@ -229,4 +229,10 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 		$callback = $this->mMethodMocks[$key];
 		return call_user_func_array($callback, $args);
 	}
+
+    public function getIterator() {
+        return new \ArrayIterator($this->mTestParameters);
+    }
+
+
 }
