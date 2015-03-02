@@ -10,7 +10,6 @@ namespace CPath\UnitTest;
 use CPath\Request\AbstractRequestWrapper;
 use CPath\Request\Form\IFormRequest;
 use CPath\Request\IRequest;
-use CPath\Request\Session\ISessionRequest;
 use CPath\Request\Session\SessionRequestException;
 use CPath\UnitTest\Exceptions\UnitTestException;
 

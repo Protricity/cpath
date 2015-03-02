@@ -16,7 +16,6 @@ use CPath\Render\HTML\Header\IHTMLHeaderContainer;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLHeaderContainer;
 use CPath\Render\HTML\IHTMLContainer;
-use CPath\Render\HTML\IHTMLContainerItem;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Log\ILogListener;

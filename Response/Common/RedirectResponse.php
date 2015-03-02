@@ -13,7 +13,6 @@ use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
-use CPath\Response\IResponse;
 use CPath\Response\Response;
 use CPath\Response\ResponseRenderer;
 use CPath\Route\RouteLink;
