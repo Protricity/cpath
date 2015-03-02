@@ -119,7 +119,7 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 	 * @return String|void always returns void
 	 */
 	function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null, $sendHeaders = null) {
-		$sendHeaders !== null ?: $sendHeaders = headers_sent();
+		$sendHeaders !== null ?: $sendHeaders = !headers_sent();
         if ($sendHeaders)
 			$this->sendHeaders($Request);
 
