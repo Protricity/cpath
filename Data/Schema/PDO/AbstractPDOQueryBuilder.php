@@ -85,7 +85,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 		try {
 			$statement = $DB->prepare($sql);
-			$this->log($sql, $this::VERBOSE);
+//			$this->log($sql, $this::VERBOSE);
 
 		} catch (\PDOException $ex) {
 			$statement = null;
@@ -94,7 +94,7 @@ abstract class AbstractPDOQueryBuilder implements ILogListener
 
 			if($this->tryRepairTable($ex)) {
 				$statement = $DB->prepare($sql);
-				$this->log($sql, $this::VERBOSE);
+//				$this->log($sql, $this::VERBOSE);
 
 			} else {
 				throw new \PDOException($ex->getMessage() . ' - ' . $this->getSQL(), intval($ex->getCode()), $ex);
