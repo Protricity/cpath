@@ -9,12 +9,17 @@ namespace CPath\Render\HTML\Template;
 
 use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
+use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\HTMLMetaTag;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLResponseBody;
+use CPath\Render\IRenderAll;
+use CPath\Render\Map\MapRenderer;
+use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
@@ -91,8 +96,26 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
 	 * If an object is returned, it is passed along to the next handler
 	 */
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $RouteRenderer=null, $args=array()) {
-        if(!$Request->getMimeType() instanceof HTMLMimeType)
-            return false;
+        if(!$Request->getMimeType() instanceof HTMLMimeType) {
+            $Object = $Previous[0];
+            if($Object instanceof IExecutable)
+                $Object = $Object->execute($Request);
+
+            if(!$Object instanceof IRenderAll) {
+                if($Object instanceof IKeyMap || $Object instanceof ISequenceMap)
+                    $Object = new MapRenderer($Object);
+                elseif($Object instanceof IResponse)
+                    $Object = new ResponseRenderer($Object);
+            }
+
+            if($Object instanceof IRenderAll) {
+                $Object->render($Request, true);
+                return true;
+            }
+
+            echo "Could not render: ", get_class($Object);
+            return true;
+        }
 
 		$Template = new DefaultCPathTemplate();
 

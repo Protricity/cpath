@@ -14,13 +14,11 @@ use CPath\Request\IRequest;
 class JSONMapRenderer extends AbstractMapRenderer
 {
     const DELIMIT = ', ';
-    private $count = 0;
 	public function __construct(IRequest $Request, $Map) {
 		parent::__construct($Request, $Map);
 	}
 
     public function __clone() {
-        $this->count = 0;
         parent::__clone();
     }
 
@@ -32,14 +30,14 @@ class JSONMapRenderer extends AbstractMapRenderer
         echo '""';
     }
 
+//    protected function renderDelimiter() {
+//        echo self::DELIMIT;
+//    }
+
 	protected function renderNamedValue($name, $value) {
-        if ($this->count > 0) {
-            echo self::DELIMIT;
-        }
 		echo json_encode($name), ':';
 		$ret = parent::renderNamedValue($name, $value);
 
-        $this->count++;
 		return $ret;
 	}
 

@@ -21,6 +21,8 @@ use CPath\Request\IRequest;
 
 abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRenderAll, IKeyMapper, ISequenceMapper
 {
+    const DELIMIT = null;
+
 	private $mIsArray = null;
 	private $mMap;
 	private $mCount = 0;
@@ -91,6 +93,10 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 	protected function getMap() {
 		return $this->mMap;
 	}
+
+    protected function renderDelimiter() {
+        echo static::DELIMIT;
+    }
 
 	protected function renderNamedValue($name, $value) {
 		if (is_array($value))
@@ -175,6 +181,9 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			$this->renderStart($this->mIsArray);
 		}
 
+        if($this->mCount > 1)
+            $this->renderDelimiter();
+
 		try {
 			$this->renderNamedValue($key, $value, $_arg);
 		} catch (\Exception $ex) {
@@ -196,7 +205,10 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			$this->renderStart($this->mIsArray);
 		}
 
-		try {
+        if($this->mCount > 1)
+            $this->renderDelimiter();
+
+        try {
 			return $this->renderValue($value);
 
 		} catch (\Exception $ex) {

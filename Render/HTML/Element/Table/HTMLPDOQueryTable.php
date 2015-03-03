@@ -9,6 +9,8 @@ namespace CPath\Render\HTML\Element\Table;
 
 use CPath\Data\Map\CallbackKeyMapper;
 use CPath\Data\Map\IKeyMap;
+use CPath\Data\Map\ISequenceMap;
+use CPath\Data\Map\ISequenceMapper;
 use CPath\Data\Schema\PDO\PDOSelectBuilder;
 use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\Attributes;
@@ -22,8 +24,9 @@ use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\Text\IRenderText;
 use CPath\Request\IRequest;
 use CPath\Request\Validation\IRequestValidation;
+use CPath\Response\IResponse;
 
-class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
+class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation, ISequenceMap, IResponse
 {
 	protected $Query;
 	private $columns;
@@ -173,7 +176,7 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 					new CallbackKeyMapper(
 						function($key, $value, $_arg=null) use ($Request, &$array) {
                             if($_arg) {
-                                $array[$key][] = func_get_args();
+                                $array[$key] = func_get_args();
                             } else {
                                 if(isset($array[$key]))
                                     $array[$key] .= ', ' . $value;
@@ -271,4 +274,32 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation
 
 		//echo $this->Query->prepare($Request)->queryString, "<br/>";
 	}
+
+    /**
+     * Map sequential data to the map
+     * @param ISequenceMapper $Map
+     */
+    function mapSequence(ISequenceMapper $Map) {
+        $this->Query->rewind();
+        $stmt = $this->Query->prepare();
+        while($row = $stmt->fetch()) {
+            $Map->mapNext($row);
+        }
+    }
+
+    /**
+     * Get the request status code
+     * @return int
+     */
+    function getCode() {
+        return 200;
+    }
+
+    /**
+     * Get the IResponse Message
+     * @return String
+     */
+    function getMessage() {
+        return __CLASS__;
+    }
 }

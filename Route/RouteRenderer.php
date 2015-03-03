@@ -137,7 +137,7 @@ final class RouteRenderer implements IRouteMapper, IRouteMap
         return false;
     }
 
-	protected function tryHandlers(IRequest $Request, Array $Handlers, Array $Previous) {
+	protected function tryHandlers(IRequest $Request, Array $Handlers, Array &$Previous) {
 
 		foreach($Handlers as $i => $Handler) {
 			/** @var IRoutable $Handler */
