@@ -40,7 +40,7 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
 	    }
 	    $root = dirname($_SERVER['SCRIPT_NAME']);
 	    if (stripos($path, $root) === 0) {
-		    $this->mPrefixPath = substr($path, 0, strlen($root)) . '/';
+		    $this->mPrefixPath = ltrim(substr($path, 0, strlen($root)), '/') . '/';
 		    $path = substr($path, strlen($root));
 	    }
 
