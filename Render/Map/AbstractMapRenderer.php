@@ -55,12 +55,14 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			return;
 		$this->mFinished = true;
 
-		if ($this->mIsArray === false) {
-			$this->renderEnd($this->mIsArray);
+		if ($this->mIsArray === null) {
+            $this->mIsArray = true;
+            $this->renderStart($this->mIsArray);
+            $this->renderEnd($this->mIsArray);
 
-		} else if ($this->mIsArray === true) {
-			$this->renderEnd($this->mIsArray);
-		}
+        } else  {
+            $this->renderEnd($this->mIsArray);
+        }
 	}
 
 	function __clone() {
