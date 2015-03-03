@@ -114,7 +114,7 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	 * @return bool true if session was started, otherwise false
 	 */
 	function startSession() {
-		$this->mTestSession = array();
+//		$this->mTestSession = array();
 		return true;
 	}
 
@@ -124,7 +124,7 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 	 * @return bool true if session was started, otherwise false
 	 */
 	function endSession() {
-		$this->mTestSession = array();
+//		$this->mTestSession = array();
 		return true;
 	}
 

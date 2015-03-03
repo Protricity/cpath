@@ -59,7 +59,7 @@ class TestRequestHandler implements IRoutable, IBuildable, IExecutable
     }
 
 	const CACHE_FILE = '.cache';
-	const CACHE_EXPIRE = 3600;
+	const CACHE_EXPIRE = 300;
 
     /**
      * Handle this request and render any content
