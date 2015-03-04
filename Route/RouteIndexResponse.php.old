@@ -46,14 +46,14 @@ class RouteIndexResponse implements IResponse, ISequenceMap
 	 */
     function mapSequence(ISequenceMapper $Map) {
         $match = $this->mMatch;
-        $this->mRoutes->mapRoutes(new RouteCallback(function ($prefix, $target) use ($Map, $match) {
+        $this->mRoutes->mapRoutes(, new RouteCallback(, function ($prefix, $target) use ($Map, $match) {
             list($matchMethod, $matchPath) = explode(' ', $match, 2);
             list($routeMethod, $routePath) = explode(' ', $prefix, 2);
 
             if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod == $matchMethod)
                 return false;
 
-            if(strpos($routePath, $matchPath) !== 0)
+            if (strpos($routePath, $matchPath) !== 0)
                 return false;
 
             return $Map->mapNext(new RouteLink($prefix, $target));

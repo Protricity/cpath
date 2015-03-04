@@ -49,43 +49,45 @@ class HTMLRouteNavigator implements IRenderHTML
 //			$this->renderRoute($Request, $Request->getMethodName() . ' ' . dirname($curPath), '..');
 
 		$THIS = $this;
-		$Route->mapRoutes(
-			new RouteCallback(
-				function($prefix, $target, $flags = 0, $title=null) use ($Request, $THIS, $match) {
-					if(is_int($flags)) {
-						if(!($flags & IRequest::NAVIGATION_ROUTE)) {
-							return false;
-						}
-						if($flags & IRequest::MATCH_NO_SESSION) {
-							if($Request instanceof ISessionRequest
-								&& $Request->hasSessionCookie())
-								return false;
-						}
-						elseif($flags & IRequest::MATCH_SESSION_ONLY) {
-							if(!$Request instanceof ISessionRequest
-								|| !$Request->hasSessionCookie())
-								return false;
-						}
-					}
+		$Route->mapRoutes($Request,
+            new RouteCallback($Request,
+                function ($prefix, $target, $flags = 0, $title = null) use ($Request, $THIS, $match) {
+                    if (is_int($flags)) {
+                        if (!($flags & IRequest::NAVIGATION_ROUTE)) {
+                            return false;
+                        }
+                        if ($flags & IRequest::MATCH_NO_SESSION) {
+                            if ($Request instanceof ISessionRequest
+                                && $Request->hasSessionCookie()
+                            )
+                                return false;
+                        } elseif ($flags & IRequest::MATCH_SESSION_ONLY) {
+                            if (!$Request instanceof ISessionRequest
+                                || !$Request->hasSessionCookie()
+                            )
+                                return false;
+                        }
+                    }
 
-					$matchPath = $match;
-					$matchMethod = 'GET';
-					if(strpos($matchPath, ' ') !== false)
-						list($matchMethod, $matchPath) = explode(' ', $matchPath, 2);
-					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
-					if ($routeMethod !== 'ANY'
-						&& $matchMethod !== 'ANY'
-						&& $routeMethod !== $matchMethod)
+                    $matchPath = $match;
+                    $matchMethod = 'GET';
+                    if (strpos($matchPath, ' ') !== false)
+                        list($matchMethod, $matchPath) = explode(' ', $matchPath, 2);
+                    list($routeMethod, $routePath) = explode(' ', $prefix, 2);
+                    if ($routeMethod !== 'ANY'
+                        && $matchMethod !== 'ANY'
+                        && $routeMethod !== $matchMethod
+                    )
 //						&& substr_count($routePath, '/') > 2)
-						return false;
+                        return false;
 
 
-					if(strpos($routePath, '*') !== false)
-						return false;
+                    if (strpos($routePath, '*') !== false)
+                        return false;
 
-					return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath, $title);
-				}
-			)
+                    return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath, $title);
+                }
+            )
 		);
 	}
 

@@ -59,7 +59,8 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 			$Request = new NonFormRequestWrapper($Request);
 
 		try {
-			$Response = $this->mExecutable->execute($Request)
+			$Response = $this->mResponse
+            ?: $this->mExecutable->execute($Request)
 			?: new Response("No Response", IResponse::HTTP_ERROR);
 
 		} catch (\Exception $ex) {

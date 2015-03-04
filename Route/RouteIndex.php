@@ -11,6 +11,7 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\IKeyMapper;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Data\Map\ISequenceMapper;
+use CPath\Request\IRequest;
 
 class RouteIndex implements ISequenceMap, IKeyMap
 {
@@ -21,11 +22,13 @@ class RouteIndex implements ISequenceMap, IKeyMap
 	private $mRoutes;
 	private $mRoutePrefix;
 	private $mArgs = null;
+    private $mRequest;
 
-	public function __construct(IRouteMap $Routes, $routePrefix = 'GET /') {
+    public function __construct(IRequest $Request, IRouteMap $Routes, $routePrefix = 'GET /') {
 		$this->mRoutes      = $Routes;
 		$this->mRoutePrefix = $routePrefix;
-	}
+        $this->mRequest     = $Request;
+    }
 
 	/**
 	 * Map sequential data to the map
@@ -36,23 +39,23 @@ class RouteIndex implements ISequenceMap, IKeyMap
 	function mapSequence(ISequenceMapper $Map) {
 		$args = & $this->mArgs;
 		$matchPrefix = $this->mRoutePrefix;
-		$this->mRoutes->mapRoutes(
-			new RouteCallback(
-				function ($prefix, $target) use ($Map, &$args, $matchPrefix) {
-					list($matchMethod, $matchPath) = explode(' ', $matchPrefix, 2);
-					list($routeMethod, $routePath) = explode(' ', $prefix, 2);
-					if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
-						return false;
+		$this->mRoutes->mapRoutes($this->mRequest,
+            new RouteCallback($this->mRequest,
+                function ($prefix, $target) use ($Map, &$args, $matchPrefix) {
+                    list($matchMethod, $matchPath) = explode(' ', $matchPrefix, 2);
+                    list($routeMethod, $routePath) = explode(' ', $prefix, 2);
+                    if ($routeMethod !== 'ANY' && $matchMethod !== 'ANY' && $routeMethod !== $matchMethod)
+                        return false;
 
-					$routePath = str_replace('\\', '/', $routePath);
-					if (strpos($routePath, $matchPath) !== 0)
-						return false;
+                    $routePath = str_replace('\\', '/', $routePath);
+                    if (strpos($routePath, $matchPath) !== 0)
+                        return false;
 
-					$Route = new RouteLink($prefix, $target);
-					$Map->mapNext($Route);
-					return false;
-				}
-			)
+                    $Route = new RouteLink($prefix, $target);
+                    $Map->mapNext($Route);
+                    return false;
+                }
+            )
 		);
 	}
 

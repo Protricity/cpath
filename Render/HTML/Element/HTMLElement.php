@@ -31,8 +31,10 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 
 	/** @var IHTMLContainer */
 	private $mItemTemplate = null;
+    /** @var IRenderHTML[] */
+    private $mSpecial = array();
 
-	/**
+    /**
 	 * @param string $elmType
 	 * @param String|null $classList a list of class elements
 	 * @param String|null|Array|IAttributes|IValidation $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
@@ -90,7 +92,15 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @return void always returns void
 	 */
 	function addContent(IRenderHTML $Render, $key=null) {
-		$this->getContainer()->addContent($Render, $key);
+        switch($key) {
+            case IHTMLContainer::KEY_RENDER_CONTENT_BEFORE:
+            case IHTMLContainer::KEY_RENDER_CONTENT_AFTER:
+                $this->mSpecial[$key] = $Render;
+                break;
+            default:
+                $this->getContainer()->addContent($Render, $key);
+                break;
+        }
 	}
 
 	/**
@@ -171,6 +181,9 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
 		$this->mContent->writeHeaders($Request, $Head);
+        foreach($this->mSpecial as $Special)
+            if($Special instanceof IHTMLSupportHeaders)
+                $Special->writeHeaders($Request, $Head);
 
 		parent::writeHeaders($Request, $Head);
 
@@ -184,7 +197,15 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 //		}
 	}
 
-	/**
+    function renderHTML(IRequest $Request, IAttributes $Attr = null, IRenderHTML $Parent = null) {
+        if(isset($this->mSpecial[IHTMLContainer::KEY_RENDER_CONTENT_BEFORE]))
+            $this->mSpecial[IHTMLContainer::KEY_RENDER_CONTENT_BEFORE]->renderHTML($Request);
+        parent::renderHTML($Request, $Attr, $Parent);
+        if(isset($this->mSpecial[IHTMLContainer::KEY_RENDER_CONTENT_AFTER]))
+            $this->mSpecial[IHTMLContainer::KEY_RENDER_CONTENT_AFTER]->renderHTML($Request);
+    }
+
+    /**
 	 * Render element content
 	 * @param IRequest $Request
 	 * @param IAttributes $ContentAttr

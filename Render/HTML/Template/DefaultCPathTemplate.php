@@ -122,7 +122,7 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
 		$Object = reset($Previous);
 		if($RouteRenderer instanceof RouteRenderer) {
 			if(!$Object)
-				$Object = new RouteIndex($RouteRenderer);
+				$Object = new RouteIndex($Request, $RouteRenderer);
 			$Template->mNavBar->addContent(new HTMLRouteNavigator($RouteRenderer));
 		}
 

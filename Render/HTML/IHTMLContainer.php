@@ -14,6 +14,9 @@ use CPath\Response\IResponse;
 
 interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 {
+    const KEY_RENDER_CONTENT_BEFORE = ':before';
+    const KEY_RENDER_CONTENT_AFTER = ':after';
+
 	/**
 	 * Add support headers to content
 	 * @param IHTMLSupportHeaders $Headers

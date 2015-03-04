@@ -7,12 +7,19 @@
  */
 namespace CPath\Route;
 
+use CPath\Request\IRequest;
+
 class RouteCallback implements IRouteMapper
 {
     private $mCallback;
+    /**
+     * @var IRequest
+     */
+    private $mRequest;
 
-    public function __construct(\Closure $Callback) {
+    public function __construct(IRequest $Request, \Closure $Callback) {
         $this->mCallback = $Callback;
+        $this->mRequest = $Request;
     }
 
     /**
@@ -26,7 +33,7 @@ class RouteCallback implements IRouteMapper
         $call = $this->mCallback;
 
 	    if($target instanceof IRouteMap) {
-		    return $target->mapRoutes($this);
+		    return $target->mapRoutes($this->mRequest, $this);
 	    }
         return call_user_func_array($call, func_get_args());
     }

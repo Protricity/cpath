@@ -46,7 +46,7 @@ final class RouteRenderer implements IRouteMapper, IRouteMap
     function renderRoutes(IRouteMap $Map) {
 	    $this->mActiveMaps[] = $Map;
 	    $this->mPrevious = array();
-        if($Map->mapRoutes($this))
+        if($Map->mapRoutes($this->mRequest, $this))
 	        return true;
 
 	    $c = sizeof($this->mPrevious);
@@ -90,7 +90,7 @@ final class RouteRenderer implements IRouteMapper, IRouteMap
             return false;
 
         if($target instanceof IRouteMap) {
-            return $target->mapRoutes($this);
+            return $target->mapRoutes($this->mRequest, $this);
         }
 
         $args = array($this->mRequest, &$this->mPrevious, $this, array());
@@ -156,16 +156,17 @@ final class RouteRenderer implements IRouteMapper, IRouteMap
 		return false;
 	}
 
-	/**
-	 * Maps all routes to the route map. Returns true if the route prefix was matched
-	 * @param IRouteMapper $Mapper
-	 * @return bool true if the route mapper should stop mapping, otherwise false to continue
-	 * @build routes --disable 0
-	 * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
-	 */
-	function mapRoutes(IRouteMapper $Mapper) {
+    /**
+     * Maps all routes to the route map. Returns true if the route prefix was matched
+     * @param IRequest $Request
+     * @param IRouteMapper $Mapper
+     * @return bool true if the route mapper should stop mapping, otherwise false to continue
+     * @build routes --disable 0
+     * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
+     */
+	function mapRoutes(IRequest $Request, IRouteMapper $Mapper) {
 		foreach($this->mActiveMaps as $Map)
-			if($Map->mapRoutes($Mapper))
+			if($Map->mapRoutes($Request, $Mapper))
 				return true;
 		return false;
 	}
