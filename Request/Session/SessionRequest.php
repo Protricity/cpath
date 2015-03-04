@@ -40,6 +40,9 @@ class SessionRequest implements ISessionRequest
 		if(isset($_SESSION))
 			throw new SessionRequestException("Session already active");
 
+        if(headers_sent($file, $line))
+            throw new SessionRequestException("Headers already sent {$file}:{$line}");
+
 		if(!session_start())
 			throw new SessionRequestException("Session did not start");
 
