@@ -20,30 +20,30 @@ class CPathMap implements IRouteMap
     /**
      * Maps all routes to the route map. Returns true if the route prefix was matched
      * @param IRequest $Request
-     * @param IRouteMapper $Mapper
+     * @param IRouteMapper $Map
      * @return bool if true the route prefix was matched, otherwise false
      * @build routes --disable 0
      * Note: Set --disable 1 or remove doc tag to stop code auto-generation on build for this method
      */
-    function mapRoutes(IRequest $Request, IRouteMapper $Mapper) {
+    function mapRoutes(IRequest $Request, IRouteMapper $Map) {
 		return
 			// @group CPath\Build\Handlers\BuildRequestHandler
-			$Mapper->route('CLI /cpath/build', 'CPath\\Build\\Handlers\\BuildRequestHandler') ||
+			$Map->route('CLI /cpath/build', 'CPath\\Build\\Handlers\\BuildRequestHandler') ||
 
 			// @group CPath\UnitTest\Handlers\TestRequestHandler
-			$Mapper->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
+			$Map->route('CLI /cpath/test', 'CPath\\UnitTest\\Handlers\\TestRequestHandler') ||
 
 			// @group __executable
-			$Mapper->route('ANY *', 'CPath\\Request\\Executable\\ExecutableRenderer') ||
+			$Map->route('ANY *', 'CPath\\Request\\Executable\\ExecutableRenderer') ||
 
 			// @group __map
-			$Mapper->route('ANY *', 'CPath\\Render\\Map\\MapRenderer') ||
+			$Map->route('ANY *', 'CPath\\Render\\Map\\MapRenderer') ||
 
 			// @group __response
-			$Mapper->route('ANY *', 'CPath\\Response\\ResponseRenderer') ||
+			$Map->route('ANY *', 'CPath\\Response\\ResponseRenderer') ||
 
 			// @group _default_template
-			$Mapper->route('ANY *', 'CPath\\Render\\HTML\\Template\\DefaultCPathTemplate');
+			$Map->route('ANY *', 'CPath\\Render\\HTML\\Template\\DefaultCPathTemplate');
 	}
 
     // Static
