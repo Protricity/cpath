@@ -17,7 +17,8 @@ use CPath\Route\RouteCallback;
 
 class HTMLRouteNavigator implements IRenderHTML
 {
-	private $mRoute;
+    const CLASS_CURRENT_ROUTE = 'focus';
+    private $mRoute;
 	private $mMatch;
 	private $mPathNames = array();
 
@@ -116,6 +117,8 @@ class HTMLRouteNavigator implements IRenderHTML
 			$title = rtrim($routePath, '/');
 
 		$Anchor = new HTMLAnchor($routePath, $title);
+        if(strpos($Request->getPath(), $routePath) === 0)
+            $Anchor->addClass(self::CLASS_CURRENT_ROUTE);
 		$Anchor->renderHTML($Request);
 
 		return false;
