@@ -58,14 +58,10 @@ class HTMLRouteNavigator implements IRenderHTML
                             return false;
                         }
                         if ($flags & IRequest::MATCH_NO_SESSION) {
-                            if ($Request instanceof ISessionRequest
-                                && $Request->hasSessionCookie()
-                            )
+                            if ($Request instanceof ISessionRequest && $Request->getSessionID())
                                 return false;
                         } elseif ($flags & IRequest::MATCH_SESSION_ONLY) {
-                            if (!$Request instanceof ISessionRequest
-                                || !$Request->hasSessionCookie()
-                            )
+                            if (!$Request instanceof ISessionRequest || !$Request->getSessionID())
                                 return false;
                         }
                     }

@@ -110,7 +110,6 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 
 	/**
 	 * Start a new session
-	 * @internal param bool $reset if true, session will be reset
 	 * @return bool true if session was started, otherwise false
 	 */
 	function startSession() {
@@ -137,12 +136,12 @@ class UnitTestRequestWrapper extends AbstractRequestWrapper implements IUnitTest
 		$this->mTestSession = array();
 	}
 
-	/**
-	 * Returns true if the session is active, false if inactive
-	 * @return bool
-	 */
-	function hasSessionCookie() {
-		return true;
+    /**
+     * Returns the session id or false if inactive
+     * @return string|bool
+     */
+	function getSessionID() {
+		return 'test-session-id';
 	}
 
 

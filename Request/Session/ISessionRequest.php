@@ -38,10 +38,10 @@ interface ISessionRequest
 	function destroySession();
 
 	/**
-	 * Returns true if the session is active, false if inactive
-	 * @return bool
+	 * Returns the session id or false if inactive
+	 * @return string|bool
 	 */
-	function hasSessionCookie();
+	function getSessionID();
 
 	/**
 	 * Returns true if the session has started

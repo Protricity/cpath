@@ -174,12 +174,12 @@ class WebRequest extends Request implements ISessionRequest, ICookieRequest
         return null;
     }
 
-	/**
-	 * Returns true if the session is active, false if inactive
-	 * @return bool
-	 */
-	function hasSessionCookie() {
-		return (isset($_COOKIE[session_name()]));
+    /**
+     * Returns the session id or false if inactive
+     * @return string|bool
+     */
+	function getSessionID() {
+        return isset($_COOKIE[session_name()]) ? $_COOKIE[session_name()] : session_id();
 	}
 
 
