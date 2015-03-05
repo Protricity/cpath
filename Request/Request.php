@@ -74,7 +74,10 @@ class Request implements IRequest
 			if(strpos($fullParameterName, $key) !== 0)
 				continue;
 
-			if(is_scalar($item))
+            if(is_null($item))
+                return $item;
+
+            if(is_scalar($item))
                 return filter_var($item, $filter);
 
             if($fullParameterName === $key)

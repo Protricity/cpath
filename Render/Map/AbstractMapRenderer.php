@@ -125,7 +125,8 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			unset($Mapper);
 
 		} elseif (is_string($value)) {
-            $this->renderString($value ? nl2br(htmlspecialchars($value)) : '&nbsp;');
+            $this->renderString($value ? (htmlspecialchars($value)) : '&nbsp;');
+
         } elseif (is_null($value)) {
             $this->renderNull();
 
@@ -154,7 +155,7 @@ abstract class AbstractMapRenderer extends AbstractRequestWrapper implements IRe
 			unset($Mapper);
 
 		} elseif (is_string($value)) {
-			echo $value ? nl2br(htmlspecialchars($value)) : '&nbsp;';
+			echo $value ? htmlspecialchars($value) : '&nbsp;';
 
         } elseif (is_null($value)) {
             $this->renderNull();

@@ -38,6 +38,10 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation, ISequenceMap
 		$this->Query = $Query;
 	}
 
+    public function getQuery() {
+        return $this->Query;
+    }
+
 	public function addColumn($columnName, $fieldName=null) {
 		$this->columns[$fieldName ?: $columnName] = $columnName;
 		return $this;

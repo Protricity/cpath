@@ -54,7 +54,7 @@ abstract class PDOWhereBuilder extends AbstractPDOQueryBuilder
 				$i=0;
 				foreach($whereValue as $value) {
 					$this->bindValue($value);
-					$whereColumn .= ($i ? ', ' : '') . '?';
+					$whereColumn .= ($i++ ? ', ' : '') . '?';
 				}
 				$whereColumn .= ')';
 
