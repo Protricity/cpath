@@ -11,9 +11,10 @@ use CPath\Request\Log\ILogListener;
 
 interface IRequest extends ILogListener, \ArrayAccess, \IteratorAggregate
 {
-	const MATCH_SESSION_ONLY = 0x010;
-	const MATCH_NO_SESSION   = 0x020;
-
+	const NAVIGATION_LOGIN_ONLY = 0x010;
+    const NAVIGATION_LOGIN_ONLY_CLASS = 'login-only';
+    const NAVIGATION_NO_LOGIN   = 0x020;
+    const NAVIGATION_NO_LOGIN_CLASS = 'no-login';
 	const NAVIGATION_ROUTE   = 0x100;
 
 	/**

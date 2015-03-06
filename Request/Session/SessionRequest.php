@@ -73,6 +73,7 @@ class SessionRequest implements ISessionRequest
 			throw new SessionRequestException("No active session");
 
 		session_start();
+        session_regenerate_id();
 		if(!session_destroy())
 			throw new SessionRequestException("Could not destroy session");
 

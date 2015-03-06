@@ -7,6 +7,8 @@
  */
 namespace CPath\Route\HTML;
 
+use CPath\Render\Helpers\RenderIndents as RI;
+use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLAnchor;
 use CPath\Render\HTML\IRenderHTML;
@@ -15,7 +17,7 @@ use CPath\Request\Session\ISessionRequest;
 use CPath\Route\IRouteMap;
 use CPath\Route\RouteCallback;
 
-class HTMLRouteNavigator implements IRenderHTML
+class HTMLRouteNavigator extends Attributes implements IRenderHTML
 {
     const CLASS_CURRENT_ROUTE = 'focus';
     private $mRoute;
@@ -45,6 +47,9 @@ class HTMLRouteNavigator implements IRenderHTML
 			$match = $Request->getMethodName() . ' ' . $curPath;
 		$match = str_replace('\\', '/', $match);
 
+
+        echo RI::ni(), "<div", $this->renderHTMLAttributes($Request), $Attr ? $Attr->renderHTMLAttributes($Request) : null, '>';
+
 //		$this->renderRoute($Request, $Request->getMethodName() . ' ' . $curPath, '.');
 //		if(dirname($curPath))
 //			$this->renderRoute($Request, $Request->getMethodName() . ' ' . dirname($curPath), '..');
@@ -53,16 +58,15 @@ class HTMLRouteNavigator implements IRenderHTML
 		$Route->mapRoutes($Request,
             new RouteCallback($Request,
                 function ($prefix, $target, $flags = 0, $title = null) use ($Request, $THIS, $match) {
+                    $class = '';
                     if (is_int($flags)) {
                         if (!($flags & IRequest::NAVIGATION_ROUTE)) {
                             return false;
                         }
-                        if ($flags & IRequest::MATCH_NO_SESSION) {
-                            if ($Request instanceof ISessionRequest && $Request->getSessionID())
-                                return false;
-                        } elseif ($flags & IRequest::MATCH_SESSION_ONLY) {
-                            if (!$Request instanceof ISessionRequest || !$Request->getSessionID())
-                                return false;
+                        if ($flags & IRequest::NAVIGATION_LOGIN_ONLY) {
+                            $class = IRequest::NAVIGATION_LOGIN_ONLY_CLASS;
+                        } elseif ($flags & IRequest::NAVIGATION_NO_LOGIN) {
+                            $class = IRequest::NAVIGATION_NO_LOGIN_CLASS;
                         }
                     }
 
@@ -82,14 +86,17 @@ class HTMLRouteNavigator implements IRenderHTML
                     if (strpos($routePath, '*') !== false)
                         return false;
 
-                    return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath, $title);
+                    return $THIS->renderRoute($Request, $routeMethod . ' ' . $routePath, $title, $class);
                 }
             )
 		);
-	}
+
+        echo RI::ni(), "</div>";
+
+    }
 
 
-	function renderRoute(IRequest $Request, $prefix, $title=null) {
+	function renderRoute(IRequest $Request, $prefix, $title=null, $class=null) {
 		list($routeMethod, $routePath) = explode(' ', $prefix, 2);
 //		$pathLevel = $this->mSubPathLevel;
 //		if(strpos($Request->getPath(), $routePath) === 0)
@@ -115,6 +122,8 @@ class HTMLRouteNavigator implements IRenderHTML
 		$Anchor = new HTMLAnchor($routePath, $title);
         if(strpos($Request->getPath(), $routePath) === 0)
             $Anchor->addClass(self::CLASS_CURRENT_ROUTE);
+        if($class)
+            $Anchor->addClass($class);
 		$Anchor->renderHTML($Request);
 
 		return false;

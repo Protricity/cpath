@@ -20,7 +20,7 @@ interface IAttributes {
 	/**
 	 * Render or returns html attributes
 	 * @param IRequest $Request
-	 * @return void
+	 * @return void|string always returns void
 	 */
 	function renderHTMLAttributes(IRequest $Request=null);
 

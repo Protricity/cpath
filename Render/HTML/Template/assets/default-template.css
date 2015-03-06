@@ -72,6 +72,11 @@ section, div.section {
     max-width: 14em;
 }
 
+.navbar .no-login a.login-only,
+.navbar .login-only a.no-login {
+    display: none;
+}
+
 .navbar a {
     display: block;
     text-decoration: none;
