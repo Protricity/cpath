@@ -177,6 +177,8 @@ class HTMLInputField extends AbstractHTMLElement implements IHTMLFormField, IVal
 	 */
 	function validate(IRequest $Request, $value = null, $fieldName = null) {
 		$value = $value ?: $this->getRequestValue($Request);
+        if($value === null)
+            $value = $this->getInputValue();
 		$fieldName = $fieldName ?: $this->getFieldName();
 
 		$Exs = array();
