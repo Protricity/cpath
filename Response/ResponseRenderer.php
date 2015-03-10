@@ -309,7 +309,14 @@ final class ResponseRenderer implements IKeyMap, IRenderAll, IResponseHeaders, I
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
 		if(sizeof($Previous) === 0)
 			return false;
-		if($Previous[0] instanceof IRenderAll || !$Previous[0] instanceof IResponse)
+
+		if($Previous[0] instanceof IRenderAll)
+            return false;
+
+        if($Previous[0] instanceof IRenderHTML && $Request->getMimeType() instanceof HTMLMimeType)
+            return false;
+
+        if(!$Previous[0] instanceof IResponse)
 			return false;
 
 		$Previous[0] = new ResponseRenderer($Previous[0]);

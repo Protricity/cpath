@@ -11,16 +11,20 @@ use CPath\Build\IBuildable;
 use CPath\Build\IBuildRequest;
 use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
+use CPath\Render\HTML\Common\HTMLText;
 use CPath\Render\HTML\Element\HTMLElement;
 use CPath\Render\HTML\Header\HeaderConfig;
 use CPath\Render\HTML\Header\HTMLMetaTag;
+use CPath\Render\HTML\HTMLConfig;
 use CPath\Render\HTML\HTMLContainer;
 use CPath\Render\HTML\HTMLMimeType;
 use CPath\Render\HTML\HTMLResponseBody;
+use CPath\Render\HTML\IHTMLValueRenderer;
 use CPath\Render\IRenderAll;
 use CPath\Render\Map\MapRenderer;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
+use CPath\Request\Session\ISessionRequest;
 use CPath\Response\IResponse;
 use CPath\Response\IResponseHeaders;
 use CPath\Response\ResponseRenderer;
@@ -34,35 +38,25 @@ use CPath\Route\RouteRenderer;
 class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildable {
 
 	const META_PATH = 'path';
-	const META_SESSION = 'session';
-	const META_SESSION_ID = 'session-id';
 	const META_DOMAIN_PATH = 'domain-path';
 
-	/** @var HTMLElement */
-	private $mHeader;
-	/** @var HTMLElement */
-	private $mHeaderTitle;
-	/** @var HTMLElement */
-	private $mNavBar;
-
 	public function __construct($_content=null) {
-
 		$Render = new HTMLResponseBody(
-			$this->mHeader = new HTMLElement('section', 'header',
-				$this->mHeaderTitle = new HTMLElement('h1', 'header-title')
+            new HTMLElement('section', 'header',
+                new HTMLElement('h1', 'header-title')
 			),
-			$this->mNavBar = new HTMLElement('section', 'navbar',
-				$NavBarTitle = new HTMLElement('h3', 'navbar-title')
-			),
-			$Content = new HTMLElement('section', 'content'
+			$Content = new HTMLElement('section', 'content',
+                new HTMLElement('div', 'navbar'
+                )
 			),
 			$Footer = new HTMLElement('section', 'footer'
 			)
 		);
 
 		parent::__construct($Render);
-		$this->setContainer($Content);
-		$Render->addSupportHeaders($this);
+        $this->setContainer($Content);
+
+        $Render->addSupportHeaders($this);
 		$this->addHeaderScript(HeaderConfig::$JQueryPath);
 		$this->addHeaderScript(__DIR__ . '/assets/default-template.js');
 		$this->addHeaderStyleSheet(__DIR__ . '/assets/default-template.css');
@@ -117,15 +111,23 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
             return true;
         }
 
+        static $CustomLoader = null;
+        $CustomLoader ?: HTMLConfig::addValueRenderer($CustomLoader = new CustomHTMLValueRenderer($Request));
+
 		$Template = new DefaultCPathTemplate();
+        $Template->matchContainer('.navbar')
+            ->addContent(new HTMLElement('h3', 'navbar-title', $Request->getPath()));
 
 		$Object = reset($Previous);
-		if($RouteRenderer instanceof RouteRenderer) {
+		if($RouteRenderer instanceof RouteRenderer && $Request instanceof ISessionRequest) {
 			if(!$Object)
 				$Object = new RouteIndex($Request, $RouteRenderer);
-			$Template->mNavBar->addContent(new HTMLRouteNavigator($RouteRenderer));
+            $Navigator = new HTMLRouteNavigator($RouteRenderer);
+//            $Navigator->addClass($Request->getSessionID() ? IRequest::NAVIGATION_NO_SESSION_CLASS : IRequest::NAVIGATION_SESSION_ONLY_CLASS);
+            $Template
+                ->matchContainer('.navbar')
+                ->addContent($Navigator);
 		}
-
 
 		if ($Object instanceof IResponseHeaders) {
 			$Object->sendHeaders($Request);
@@ -141,20 +143,67 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
                 header('X-Location: ' . $_SERVER['REQUEST_URI']);
         }
 
-		$Template->mHeaderTitle->addAll(
-			$Request->getMethodName() . ' ' . $Request->getPath()
-		);
+        $Template
+            ->matchContainer('.header')
+            ->addContent(new HTMLText($Request->getMethodName() . ' ' . $Request->getPath()));
 
 		$Template->addMetaTag(HTMLMetaTag::META_CONTENT_TYPE, 'text/html; charset=utf-8');
 		$Template->addMetaTag(self::META_PATH, $Request->getPath());
 		$Template->addMetaTag(self::META_DOMAIN_PATH, $Request->getDomainPath(false));
 
-		$Template->addAll($Object);
-
-		for($i=1; $i<sizeof($Previous); $i++)
+		for($i=0; $i<sizeof($Previous); $i++)
 			$Template->addAll($Previous[$i]);
 
 		$Template->renderHTML($Request);
 		return true;
 	}
+
+}
+
+class CustomHTMLValueRenderer implements IHTMLValueRenderer {
+    private $Request;
+
+    function __construct(IRequest $Request) {
+        $this->Request = $Request;
+    }
+
+
+    /**
+     * @param $key
+     * @param $value
+     * @param null $arg1
+     * @return bool if true, the value has been rendered, otherwise false
+     */
+    function renderNamedValue($key, $value, $arg1=null) {
+        switch($key) {
+            case 'trace':
+                $value = nl2br($value);
+                echo $value;
+                return true;
+
+            case 'description':
+                if(strlen($value) > 32)
+                    $value = substr($value, 0, 29) . '...';
+                echo $value;
+                return true;
+
+            case 'url':
+                $href = $value;
+                $domain = $this->Request->getDomainPath();
+                if(strpos($href, $domain) !== 0)
+                    $href = rtrim($domain, '/') . '/' . ltrim($href, '/');
+                echo "<a href='{$href}'>", $arg1 ?: '[link]', "</a>";
+                return true;
+        }
+        return false;
+    }
+
+    /**
+     * @param $value
+     * @return bool if true, the value has been rendered, otherwise false
+     */
+    function renderValue($value) {
+        return false;
+    }
+
 }

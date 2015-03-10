@@ -11,6 +11,7 @@ use CPath\Build\ClassDocBlock;
 use CPath\Build\Code\IConstructorArgs;
 use CPath\Build\PropertyDocBlock;
 use CPath\Request\CLI\CommandString;
+use Site\DB\DBConfig;
 
 class TableSchema implements IReadableSchema, IConstructorArgs
 {
@@ -34,6 +35,9 @@ class TableSchema implements IReadableSchema, IConstructorArgs
     }
 
     public function writeSchema(IWritableSchema $DB) {
+        if(!DBConfig::$DB_WRITE_TABLES)
+            return;
+
         $ClassDoc = new ClassDocBlock($this->mClass);
         $tableName = null;
         $tableTagValue = null;

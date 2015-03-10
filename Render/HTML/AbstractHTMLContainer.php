@@ -11,6 +11,8 @@ use CPath\Data\Map\IKeyMap;
 use CPath\Data\Map\ISequenceMap;
 use CPath\Render\Handler\RenderHandler;
 use CPath\Render\HTML\Common\HTMLText;
+use CPath\Render\HTML\Element\Form\IHTMLFormField;
+use CPath\Render\HTML\Element\IHTMLElement;
 use CPath\Render\HTML\Header\IHeaderWriter;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\Map\MapRenderer;
@@ -18,9 +20,10 @@ use CPath\Request\Executable\ExecutableRenderer;
 use CPath\Request\Executable\IExecutable;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
+use Exception;
 use Traversable;
 
-abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerItem, \ArrayAccess, \IteratorAggregate
+abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerItem
 {
 	private $mHeaders = null;
 
@@ -101,7 +104,51 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerIt
 		$this->getSupportHeaders()->writeHeaders($Request, $Head);
 	}
 
-	/**
+    /**
+     * Match the first HTML Element by selector or throws an exception
+     * @param $selector
+     * @return IHTMLElement
+     */
+    function matchElement($selector) {
+        $Matches = $this->matchElements($selector);
+        if(!empty($Matches[0]))
+            throw new \InvalidArgumentException("Selector did not match any elements: " . $selector);
+        return $Matches[0];
+    }
+
+    /**
+     * Match the first HTML Element by selector or throws an exception
+     * @param $selector
+     * @return IHTMLElement|IHTMLContainer
+     */
+    function matchContainer($selector) {
+        foreach($this->matchElements($selector) as $Match) {
+            if($Match instanceof IHTMLContainer) {
+                return $Match;
+            }
+        }
+        throw new \InvalidArgumentException("Selector did not match any elements: " . $selector);
+    }
+
+    /**
+     * Match HTML Elements by selector
+     * @param $selector
+     * @return IHTMLElement[]
+     */
+    function matchElements($selector) {
+        /** @var IHTMLElement[] $Matched */
+        $Matched = array();
+        foreach($this->getContentRecursive() as $Content) {
+            if($Content instanceof IHTMLElement) {
+                if($Content->matchesSelector($selector)) {
+                    $Matched[] = $Content;
+                }
+            }
+        }
+        return $Matched;
+    }
+
+    /**
 	 * (PHP 5 &gt;= 5.0.0)<br/>
 	 * Retrieve an external iterator
 	 * @link http://php.net/manual/en/iteratoraggregate.getiterator.php
@@ -188,3 +235,4 @@ abstract class AbstractHTMLContainer implements IHTMLContainer, IHTMLContainerIt
 		//unset($this->mContent[$offset]);
 	}
 }
+

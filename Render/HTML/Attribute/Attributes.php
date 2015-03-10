@@ -34,7 +34,8 @@ class Attributes implements IAttributes {
 	    }
     }
 
-	/**
+
+    /**
 	 * Add an attribute to the collection
 	 * @param String $attrName the attribute name. If null is provided, the attribute is not added
 	 * @param String|null $value the attribute value. If null is provided,

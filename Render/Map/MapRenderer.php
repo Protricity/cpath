@@ -160,10 +160,14 @@ class MapRenderer implements IRenderAll, IBuildable, IRoutable
 	 */
 	static function routeRequestStatic(IRequest $Request, Array &$Previous = array(), $_arg = null) {
 		$Object = reset($Previous);
-		if($Object instanceof ISequenceMap || $Object instanceof IKeyMap) {
-			$Renderer = new MapRenderer($Object);
-			return $Renderer;
-		}
-		return false;
+        if($Previous[0] instanceof IRenderHTML && $Request->getMimeType() instanceof HTMLMimeType)
+            return false;
+
+		if($Object instanceof ISequenceMap)
+            $Previous[0] = new MapRenderer($Previous[0]);
+        else if($Object instanceof IKeyMap)
+            $Previous[0] = new MapRenderer($Object);
+
+        return false;
 	}
 }

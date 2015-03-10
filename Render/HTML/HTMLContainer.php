@@ -9,6 +9,7 @@ namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Attribute\ClassAttributes;
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\IHTMLElement;
 use CPath\Render\HTML\Header\HTMLHeaderScript;
 use CPath\Render\HTML\Header\HTMLHeaderStyleSheet;
 use CPath\Render\HTML\Header\HTMLMetaTag;
@@ -19,9 +20,10 @@ use CPath\Request\IRequest;
 class HTMLContainer extends AbstractHTMLContainer
 {
 	const CSS_CONTENT_CLASS = null;
+    const DEFAULT_CONTAINER_KEY = '#default';
 
-	/** @var HTMLContainer */
-	private $mTargetContainer = null;
+    /** @var IHTMLContainer[] */
+	private $mContainers = array();
 
 	/** @var IRenderHTML[] */
 	private $mContent = array();
@@ -36,11 +38,15 @@ class HTMLContainer extends AbstractHTMLContainer
 		$this->addAll(func_get_args());
 	}
 
-	public function setContainer(IHTMLContainer $Container) {
-		$Contents = $this->getContentRecursive();
-		if(!in_array($Container, $Contents, true))
-			throw new \InvalidArgumentException("Container not found recursively: " . static::toString($Container));
-		$this->mTargetContainer = $Container;
+	public function setContainer(IHTMLContainer $Container, $key = self::DEFAULT_CONTAINER_KEY) {
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        foreach($this->getContentRecursive() as $Content) {
+            if($Container === $Content) {
+                $this->mContainers[$key] = $Content;
+                return;
+            }
+        }
+        throw new \InvalidArgumentException("Container not found: " . get_class($Container));
 	}
 
 	public function addMetaTag($name, $content) {
@@ -48,23 +54,6 @@ class HTMLContainer extends AbstractHTMLContainer
 		$this->addSupportHeaders($MetaTag);
 		return $MetaTag;
 	}
-//
-//	public function getMetaTagContent($name) {
-//		foreach($this->getSupportHeaders() as $Header) {
-//			if($Header instanceof HTMLMetaTag) {
-//				if($Header->getName() === $name) {
-//					return $Header->getContent();
-//				}
-//			}
-//		}
-//
-//		foreach($this->getContent() as $Content)
-//			if($Content instanceof IHTMLHeaderContainer)
-//				if($content = $Content->getMetaTagContent($name))
-//					return $content;
-//
-//		return null;
-//	}
 
 	public function addHeaderScript($path, $defer = false, $charset = null) {
 		$this->addSupportHeaders(new HTMLHeaderScript($path, $defer, $charset));
@@ -77,6 +66,19 @@ class HTMLContainer extends AbstractHTMLContainer
 	public function setItemTemplate(IHTMLContainer $Template) {
 		$this->mItemTemplate = $Template;
 	}
+
+    /**
+     * Get a named container by key name
+     * @param $key
+     * @return IHTMLContainer
+     */
+    public function getContainer($key=null) {
+        if(isset($this->mContainers[$key]))
+            return $this->mContainers[$key];
+        if($key === self::DEFAULT_CONTAINER_KEY)
+            return $this;
+        throw new \InvalidArgumentException("Named Container '$key' is not set");
+    }
 
 	/**
 	 * Write all support headers used by this IView inst
@@ -107,52 +109,37 @@ class HTMLContainer extends AbstractHTMLContainer
 		}
 	}
 
-	/**
-	 * Add IRenderHTML MainContent
-	 * @param IRenderHTML $Render
-	 * @param null $key if provided, add/replace content by key
-	 * @return void
-	 */
+    /**
+     * Add IRenderHTML MainContent
+     * @param IRenderHTML $Render
+     * @param string $key if provided, passes content to a named container
+     * @return void
+     */
 	function addContent(IRenderHTML $Render, $key = null) {
-		if($this->mTargetContainer) {
-			$this->mTargetContainer->addContent($Render, $key);
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        if(isset($this->mContainers[$key])) {
+            $this->getContainer($key)->addContent($Render, $key);
 			return;
 		}
 
-		if ($key !== null) {
-			$this->mContent[$key] = $Render;
-		} else {
+//		if ($key !== null) {
+//			$this->mContent[$key] = $Render;
+//		} else {
 			$this->mContent[] = $Render;
-		}
+//		}
 		if($Render instanceof IHTMLContainerItem)
 			$Render->onContentAdded($this);
 	}
 
-	/**
-	 * Add IRenderHTML MainContent
-	 * @param IRenderHTML $Render
-	 * @param null $key if provided, add/replace content by key
-	 * @return void
-	 */
-	function prependContent(IRenderHTML $Render, $key = null) {
-		if($this->mTargetContainer)
-			$this->mTargetContainer->prependContent($Render);
-		else if ($key !== null)
-			$this->mContent = array($key => $Render) + $this->mContent;
-		else
-			array_unshift($this->mContent, $Render);
-		if($Render instanceof IHTMLContainerItem)
-			$Render->onContentAdded($this);
-	}
-
-	/**
-	 * Returns true if content is available and should render
-	 * @param null $key if provided, returns true if content at this key index exists
-	 * @return bool
-	 */
+    /**
+     * Returns true if content is available and should render
+     * @param null|string $key if provided, returns true if content at this key index exists
+     * @return bool
+     */
 	function hasContent($key = null) {
-		if($this->mTargetContainer)
-			return $this->mTargetContainer->hasContent($key);
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        if(isset($this->mContainers[$key]))
+			return $this->getContainer($key)->hasContent($key);
 
 		if ($key === null)
 			return sizeof($this->mContent) > 0;
@@ -160,17 +147,17 @@ class HTMLContainer extends AbstractHTMLContainer
 		return isset($this->mContent[$key]);
 	}
 
-	/**
-	 * Returns an array of IRenderHTML content
-	 * @param null $key if provided, get content by key
-	 * @return IRenderHTML[]|IRenderHTML
-	 * @throws \InvalidArgumentException if content at $key was not found
-	 */
+    /**
+     * Returns an array of IRenderHTML content
+     * @param null|string $key if provided, get content by key
+     * @return IRenderHTML[]|IRenderHTML
+     */
 	public function getContent($key = null) {
-		if($this->mTargetContainer)
-			return $this->mTargetContainer->getContent($key);
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        if(isset($this->mContainers[$key]))
+            return $this->getContainer($key)->getContent();
 
-		if ($key === null)
+		if ($key === self::DEFAULT_CONTAINER_KEY)
 			return $this->mContent;
 
 		if (!isset($this->mContent[$key]))
@@ -180,11 +167,13 @@ class HTMLContainer extends AbstractHTMLContainer
 	}
 
 	public function getContentRecursive(IHTMLContainer $Container=null) {
-		if(!$Container)
-			$Container = $this; // $this->mTargetContainer ?:
+		if($Container)
+			$ContentList = $Container->getContent();
+        else
+            $ContentList = $this->mContent;
 		$array = array();
 
-		foreach($Container->getContent() as $Content) {
+		foreach($ContentList as $Content) {
 			$array[] = $Content;
 			if($Content instanceof IHTMLContainer) {
 				foreach($this->getContentRecursive($Content) as $C)
@@ -195,14 +184,15 @@ class HTMLContainer extends AbstractHTMLContainer
 		return $array;
 	}
 
-	/**
-	 * Remove template content
-	 * @param null $key if provided, removes content at key, if exists
-	 * @return int the number of items removed
-	 */
+    /**
+     * Remove template content
+     * @param null|string $key if provided, removes content at key, if exists
+     * @return int the number of items removed
+     */
 	function removeContent($key = null) {
-		if($this->mTargetContainer)
-			return $this->mTargetContainer->removeContent($key);
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        if(isset($this->mContainers[$key]))
+			return $this->mContainers[$key]->removeContent($key);
 
 		if($key !== null) {
 			if(isset($this->mContent[$key])) {
@@ -228,26 +218,26 @@ class HTMLContainer extends AbstractHTMLContainer
 		$ContentAttr = null;
 		if(static::CSS_CONTENT_CLASS !== null)
 			$ContentAttr = new ClassAttributes(static::CSS_CONTENT_CLASS);
-		$this->renderContent($Request, $ContentAttr);
+		$this->renderContent($Request, $ContentAttr, $Parent);
 	}
 
-	/**
-	 * Render element content
-	 * @param IRequest $Request
-	 * @param IAttributes $ContentAttr
-	 * @param \CPath\Render\HTML\IHTMLContainer $Parent
-	 */
-	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IHTMLContainer $Parent = null) {
+    /**
+     * Render element content
+     * @param IRequest $Request
+     * @param IAttributes $ContentAttr
+     * @param IHTMLContainer|IRenderHTML $Parent
+     */
+	function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 		foreach($this->mContent as $ContentItem) {
-			$this->renderContentItem($Request, $ContentItem, $ContentAttr);
+			$this->renderContentItem($Request, $ContentItem, $ContentAttr, $Parent);
 		}
 	}
 
-	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null) {
-		$Content->renderHTML($Request, $ContentAttr, $this);
+	protected function renderContentItem(IRequest $Request, IRenderHTML $Content, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
+		$Content->renderHTML($Request, $ContentAttr, $Parent);
 	}
 
-	// Static
+    // Static
 
 	protected static function toString(IHTMLContainer $Container) {
 		return get_class($Container);

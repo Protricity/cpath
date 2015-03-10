@@ -8,11 +8,12 @@
 namespace CPath\Render\HTML;
 
 use CPath\Render\HTML\Attribute\IAttributes;
+use CPath\Render\HTML\Element\IHTMLElement;
 use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 use CPath\Response\IResponse;
 
-interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
+interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders, \ArrayAccess, \IteratorAggregate
 {
     const KEY_RENDER_CONTENT_BEFORE = ':before';
     const KEY_RENDER_CONTENT_AFTER = ':after';
@@ -42,7 +43,7 @@ interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 	 * @return IRenderHTML[]
 	 * @throws \InvalidArgumentException if content at $key was not found
 	 */
-	public function getContent($key = null);
+	public function getContent();
 
     /**
      * Return content recursively
@@ -71,6 +72,13 @@ interface IHTMLContainer extends IRenderHTML, IResponse, IHTMLSupportHeaders
 	 * @return int the number of items removed
 	 */
 	function removeContent($key = null);
+
+    /**
+     * Match HTML Elements by selector
+     * @param $selector
+     * @return IHTMLElement[]
+     */
+    function matchElements($selector);
 
 	/**
 	 * Render element content

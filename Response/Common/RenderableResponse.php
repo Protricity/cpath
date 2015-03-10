@@ -58,12 +58,11 @@ class RenderableResponse extends Response implements IHTMLContainer
 
 	/**
 	 * Returns an array of IRenderHTML content
-	 * @param null $key if provided, get content by key
 	 * @return IRenderHTML[]
 	 * @throws \InvalidArgumentException if content at $key was not found
 	 */
-	public function getContent($key = null) {
-		return $this->mContainer->getContent($key);
+	public function getContent() {
+		return $this->mContainer->getContent();
 	}
 
 	/**

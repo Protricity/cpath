@@ -231,7 +231,24 @@ abstract class AbstractHTMLElement extends Attributes implements IResponse, IHTM
 		return $this->mLogListeners;
 	}
 
-	function __toString() {
+    /**
+     * Returns true if attributes match the given selector
+     * @param String $selector
+     * @return bool
+     */
+    function matchesSelector($selector) {
+        if($this->getElementType() === $selector)
+            return true;
+        foreach($this->getClasses() as $class) {
+            if($selector === '.' . $class)
+                return true;
+            if($selector === $this->getElementType() . '.' . $class)
+                return true;
+        }
+        return false;
+    }
+
+    function __toString() {
 		return "<" . $this->getElementType() . $this->getHTMLAttributeString() . ($this->isOpenTag() ? '>' : '/>');
 	}
 }

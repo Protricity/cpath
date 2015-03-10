@@ -24,4 +24,11 @@ interface IHTMLElement extends IHTMLContainerItem, IRenderHTML
 	 * @return String
 	 */
 	function getElementType();
+
+    /**
+     * Returns true if attributes match the given selector
+     * @param String $selector
+     * @return bool
+     */
+    function matchesSelector($selector);
 }

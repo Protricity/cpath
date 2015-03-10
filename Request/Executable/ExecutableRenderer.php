@@ -282,19 +282,14 @@ class ExecutableRenderer implements IResponse, IResponseHeaders, IRenderAll, IHT
 		if(sizeof($Previous) === 0)
 			return false;
 
-        if($Previous[0] instanceof ExecutableRenderer) {
-            $Response = $Previous[0]->execute($Request);
-//            $Previous[0] = $Response;
-            return $Response;
-        }
+        if(!$Previous[0] instanceof IExecutable)
+            return false;
 
         if($Previous[0] instanceof IRenderAll)
             return false;
 
-        if(!$Previous[0] instanceof IExecutable)
-            return false;
-
         $Previous[0] = new ExecutableRenderer($Previous[0], true);
+        $Previous[0] = $Previous[0]->execute($Request);
 		return false;
 	}
 }

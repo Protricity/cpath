@@ -19,15 +19,13 @@ use CPath\Request\IRequest;
 use CPath\Request\Validation\IValidation;
 use Traversable;
 
-class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \IteratorAggregate, \ArrayAccess
+class HTMLElement extends AbstractHTMLElement implements IHTMLContainer
 {
 	const ALLOW_CLOSED_TAG = true;
+    const DEFAULT_CONTAINER_KEY = '#default';
 
-	/** @var HTMLContainer */
-	private $mContent;
-
-	/** @var HTMLContainer */
-	private $mContainer;
+	/** @var HTMLContainer[] */
+	private $mContainers = array();
 
 	/** @var IHTMLContainer */
 	private $mItemTemplate = null;
@@ -40,10 +38,9 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @param String|null|Array|IAttributes|IValidation $_content [varargs] attribute html as string, array, or IValidation || IAttributes instance
 	 */
     public function __construct($elmType, $classList = null, $_content = null) {
-	    parent::__construct($elmType);
-
-	    $this->mContent = new HTMLContainer();
-	    $this->mContent->onContentAdded($this);
+	    $this->mContainers[self::DEFAULT_CONTAINER_KEY] = new HTMLContainer();
+        $this->mContainers[self::DEFAULT_CONTAINER_KEY]->onContentAdded($this);
+        parent::__construct($elmType);
 
 	    is_scalar($classList)   ? $this->addClass($classList) : $this->addVarArg($classList);
 
@@ -66,26 +63,54 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		}
 	}
 
-	public function getContainer() {
-		return $this->mContainer
-			?: $this->mContent;
+    /**
+     * @param string $key
+     * @return IHTMLContainer
+     */
+	public function getContainer($key = null) {
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        if(isset($this->mContainers[$key]))
+            return $this->mContainers[$key];
+        throw new \InvalidArgumentException("Container not found: " . $key);
 	}
 
-	public function setContainer(IHTMLContainer $Container) {
+	public function setContainer(IHTMLContainer $Container, $key = self::DEFAULT_CONTAINER_KEY) {
 		foreach($this->getContainer()->getContentRecursive() as $Content) {
 			if($Container === $Content) {
-				$this->mContainer = $Content;
+				$this->mContainers[$key] = $Content;
 				return;
 			}
 		}
 		throw new \InvalidArgumentException("Container not found: " . get_class($Container));
 	}
 
+
 	public function setItemTemplate(IHTMLContainer $Template) {
 		$this->mItemTemplate = $Template;
 	}
 
-	/**
+    /**
+     * @param $selector
+     * @param string $key
+     * @return IHTMLElement[]
+     */
+    function matchElements($selector, $key=null) {
+        return $this->getContainer($key)->matchElements($selector);
+    }
+
+    /**
+     * @param $selector
+     * @param string $key
+     * @return IHTMLElement
+     */
+    function matchElement($selector, $key=null) {
+        $Matches = $this->matchElements($selector, $key);
+        if(!empty($Matches[0]))
+            throw new \InvalidArgumentException("Selector did not match any elements: " . $selector);
+        return $Matches[0];
+    }
+
+    /**
 	 * Add renderable content
 	 * @param IRenderHTML $Render
 	 * @param null $key if provided, add/replace content by key
@@ -102,24 +127,6 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
                 break;
         }
 	}
-
-	/**
-	 * Prepend renderable content
-	 * @param IRenderHTML $Render
-	 * @param null $key if provided, add/replace content by key
-	 * @return void always returns void
-	 */
-	protected function prependContent(IRenderHTML $Render, $key=null) {
-		$this->getContainer()->prependContent($Render, $key);
-	}
-
-//	/**
-//	 * Add header content
-//	 * @param IHTMLSupportHeaders $Headers
-//	 */
-//	public function addHeaders(IHTMLSupportHeaders $Headers) {
-//		$this->addContent(new HTMLHeaders($Headers));
-//	}
 
 	/**
 	 * Add any kind of content
@@ -146,14 +153,14 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 		return $this->getContainer()->hasContent($key);
 	}
 
-	/**
-	 * Returns an array of IRenderHTML content
-	 * @param null $key if provided, get content by key
-	 * @return IRenderHTML[]
-	 * @throws \InvalidArgumentException if content at $key was not found
-	 */
+    /**
+     * Returns an array of IRenderHTML content
+     * @param null|string $key if provided, get content by key
+     * @return IRenderHTML[]
+     */
 	public function getContent($key=null) {
-		return $this->getContainer()->getContent($key);
+        $key ?: $key = self::DEFAULT_CONTAINER_KEY;
+        return $this->getContainer($key)->getContent();
 	}
 	/**
 	 * Returns a single dimension array containing all content
@@ -180,7 +187,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @return void always returns void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
-		$this->mContent->writeHeaders($Request, $Head);
+        $this->getContainer()->writeHeaders($Request, $Head);
         foreach($this->mSpecial as $Special)
             if($Special instanceof IHTMLSupportHeaders)
                 $Special->writeHeaders($Request, $Head);
@@ -214,7 +221,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
     function renderContent(IRequest $Request, IAttributes $ContentAttr = null, IRenderHTML $Parent = null) {
 	    RI::ai(1);
 
-	    $Content = $this->mContent->getContent();
+	    $Content = $this->getContainer()->getContent();
         foreach($Content as $index => $ContentItem)
 	        $this->renderContentItem($Request, $index, $ContentItem, $ContentAttr);
 
@@ -246,7 +253,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
 	 * @return bool
 	 */
 	protected function isOpenTag() {
-		return !self::ALLOW_CLOSED_TAG || sizeof($this->mContent) > 0;
+		return !self::ALLOW_CLOSED_TAG || sizeof($this->getContainer()) > 0;
 	}
 
     /**
@@ -301,7 +308,7 @@ class HTMLElement extends AbstractHTMLElement implements IHTMLContainer, \Iterat
      * </p>
      * @return void
      */
-    public function offsetSet($offset, $value) {
+    public function     offsetSet($offset, $value) {
 	    $this->getContainer()->offsetSet($offset, $value);
     }
 

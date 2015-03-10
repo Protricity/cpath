@@ -11,13 +11,15 @@ use CPath\Render\Helpers\RenderIndents as RI;
 use CPath\Render\HTML\Attribute\Attributes;
 use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Element\HTMLAnchor;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Request\IRequest;
 use CPath\Request\Session\ISessionRequest;
 use CPath\Route\IRouteMap;
 use CPath\Route\RouteCallback;
 
-class HTMLRouteNavigator extends Attributes implements IRenderHTML
+class HTMLRouteNavigator extends Attributes implements IRenderHTML, IHTMLSupportHeaders
 {
     const CLASS_CURRENT_ROUTE = 'focus';
     private $mRoute;
@@ -128,4 +130,15 @@ class HTMLRouteNavigator extends Attributes implements IRenderHTML
 
 		return false;
 	}
+
+    /**
+     * Write all support headers used by this renderer
+     * @param IRequest $Request
+     * @param IHeaderWriter $Head the writer inst to use
+     * @return void
+     */
+    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+//        $Head->writeScript(__DIR__ . '/assets/navigator.js');
+        $Head->writeStyleSheet(__DIR__ . '/assets/navigator.css');
+    }
 }
