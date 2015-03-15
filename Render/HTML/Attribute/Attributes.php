@@ -199,13 +199,19 @@ class Attributes implements IAttributes {
 	 * @return string|void always returns void
 	 */
 	function renderHTMLAttributes(IRequest $Request=null) {
+        $attrList = $this->mAttributes;
 		foreach($this->mAttributes as $value) {
 			if($value instanceof IAttributes) {
-				$value->renderHTMLAttributes($Request);
+                if($value instanceof ClassAttributes) {
+                    foreach($value->getClasses() as $class)
+                        $attrList['class'] = (isset($attrList['class']) ? $attrList['class'] . ' ' : '') . $class;
+                } else {
+    				$value->renderHTMLAttributes($Request);
+                }
 			}
 		}
 
-		foreach($this->mAttributes as $name => $value)
+		foreach($attrList as $name => $value)
 			if(is_string($name)) {
 				if(strpos($value, '"') !== false) {
 					if(strpos($value, "'") !== false) {
