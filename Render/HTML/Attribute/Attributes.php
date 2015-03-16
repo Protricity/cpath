@@ -8,9 +8,11 @@
 namespace CPath\Render\HTML\Attribute;
 
 use CPath\Render\HTML\Attribute;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Request\IRequest;
 
-class Attributes implements IAttributes {
+class Attributes implements IAttributes, IHTMLSupportHeaders {
     private $mAttributes = array();
 
     function __construct($attrName=null, $attrValue=null, $_attrName=null, $_attrValue=null) {
@@ -63,6 +65,7 @@ class Attributes implements IAttributes {
 		foreach(func_get_args() as $Attributes) {
 			$this->mAttributes[] = $Attributes;
 		}
+        return $this;
 	}
 
 	/**
@@ -93,9 +96,13 @@ class Attributes implements IAttributes {
 	 * @throws \InvalidArgumentException
 	 */
 	function addAttributeHTML($htmlAttr) {
-		if(preg_match_all('/([a-z0-9_]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
+		if(preg_match_all('/([a-z0-9_-]+)\s*=\s*[\"\'](.*?)[\"\']/is', $htmlAttr, $matches)) {
 			foreach($matches[1] as $i => $name) {
-				$this->setAttribute($name, $matches[2][$i]) ;
+                switch($name) {
+                    case 'class': $this->addClass($matches[2][$i]); break;
+                    case 'style': $this->setStyle($matches[2][$i]); break;
+                    default: $this->setAttribute($name, $matches[2][$i]); break;
+                }
 			}
 
 		} else {
@@ -156,7 +163,14 @@ class Attributes implements IAttributes {
 	 * @param $value
 	 * @return $this
 	 */
-    function setStyle($name, $value) {
+    function setStyle($name, $value=null) {
+        if($value === null && strpos($name, ':') !== false) {
+            foreach(explode(';', $name) as $style) {
+                list($name, $value) = explode(':', $style, 2);
+                $this->setStyle(trim($name), trim($value));
+            }
+            return $this;
+        }
 	    $styles = $this->getStyle();
 	    $styles[$name] = $value;
 	    $styleList = array();
@@ -199,32 +213,29 @@ class Attributes implements IAttributes {
 	 * @return string|void always returns void
 	 */
 	function renderHTMLAttributes(IRequest $Request=null) {
-        $attrList = $this->mAttributes;
-		foreach($this->mAttributes as $value) {
-			if($value instanceof IAttributes) {
-                if($value instanceof ClassAttributes) {
-                    foreach($value->getClasses() as $class)
-                        $attrList['class'] = (isset($attrList['class']) ? $attrList['class'] . ' ' : '') . $class;
-                } else {
-    				$value->renderHTMLAttributes($Request);
-                }
-			}
-		}
+        $oldAttr = $this->mAttributes;
+        foreach ($this->mAttributes as $value) {
+            if ($value instanceof IAttributes) {
+                $this->addAttributeHTML($value->getHTMLAttributeString());
+            }
+        }
 
-		foreach($attrList as $name => $value)
-			if(is_string($name)) {
-				if(strpos($value, '"') !== false) {
-					if(strpos($value, "'") !== false) {
-						echo ' ', $name, "='", str_replace('"', '`', str_replace("'", '`', $value)), "'";
-					} else {
-						echo ' ', $name, "='", str_replace("'", '"', $value), "'";
-					}
-				} else if(strpos($value, "'") !== false) {
-					echo ' ', $name, '="', str_replace('"', "'", $value), '"';
-				} else {
-					echo ' ', $name, '="', $value, '"';
-				}
-			}
+        foreach ($this->mAttributes as $name => $value) {
+            if (is_string($name)) {
+                if (strpos($value, '"') !== false) {
+                    if (strpos($value, "'") !== false) {
+                        echo ' ', $name, "='", str_replace('"', '`', str_replace("'", '`', $value)), "'";
+                    } else {
+                        echo ' ', $name, "='", str_replace("'", '"', $value), "'";
+                    }
+                } else if (strpos($value, "'") !== false) {
+                    echo ' ', $name, '="', str_replace('"', "'", $value), '"';
+                } else {
+                    echo ' ', $name, '="', $value, '"';
+                }
+            }
+        }
+        $this->mAttributes = $oldAttr;
 	}
 
 	/**
@@ -260,6 +271,20 @@ class Attributes implements IAttributes {
 		$this->mAttributes = $oldAttr;
 		return $content;
 	}
+
+    /**
+     * Write all support headers used by this renderer
+     * @param IRequest $Request
+     * @param IHeaderWriter $Head the writer inst to use
+     * @return void
+     */
+    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+        foreach($this->mAttributes as $Attr) {
+            if($Attr instanceof IHTMLSupportHeaders) {
+                $Attr->writeHeaders($Request, $Head);
+            }
+        }
+    }
 
 	function __toString() {
 		return $this->getHTMLAttributeString();

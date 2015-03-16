@@ -163,6 +163,7 @@ abstract class AbstractHTMLElement extends Attributes implements IResponse, IHTM
 	 * @return void
 	 */
 	function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+        parent::writeHeaders($Request, $Head);
 		$this->getSupportHeaders()->writeHeaders($Request, $Head);
 	}
 
