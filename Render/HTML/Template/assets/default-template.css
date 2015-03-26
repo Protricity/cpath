@@ -6,27 +6,21 @@ body {
 
 /** Page Layout **/
 
-section, div.section {
-    /*padding: 3pt 0;*/
+section, .section {
     margin: 0 1.5pt 1pt 1.5pt;
     border: 1pt solid #ccc;
     background-color: #eee;
-/*     overflow: hidden; */
-
+    padding: 15pt;
 }
 
 .header {
-    padding: 0.5em 2em 2em;
+    /*padding: 0.5em 2em 2em;*/
 }
 
-
 .content {
-    padding: 15pt;
 }
 
 .footer {
-    padding: 15pt;
-
 }
 
 
