@@ -166,8 +166,8 @@ class Attributes implements IAttributes, IHTMLSupportHeaders {
     function setStyle($name, $value=null) {
         if($value === null && strpos($name, ':') !== false) {
             foreach(explode(';', $name) as $style) {
-                list($name, $value) = explode(':', $style, 2);
-                $this->setStyle(trim($name), trim($value));
+                list($key, $value) = explode(':', $style, 2);
+                $this->setStyle(trim($key), trim($value));
             }
             return $this;
         }
