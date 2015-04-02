@@ -1,0 +1,46 @@
+
+/** Tables **/
+
+table {
+    /*border-collapse: collapse;*/
+
+    border-spacing: 0;
+    border-radius: 4px;
+    border: 2pt solid #ccc;
+    /*margin: 0 0.2em 0.5em 0;*/
+    vertical-align: top;
+    margin: 0.5em;
+    /*padding: 0.5em;*/
+}
+
+th, td {
+    padding: 0.25rem;
+    border: 1px solid #ccc;
+}
+
+td a
+th a {
+    text-decoration: none;
+}
+
+th a {
+    color: #CCC;
+}
+
+th,
+tr:hover {
+    background: #666;
+    color: #CCC;
+}
+td:hover {
+    background: #ccc;
+    color: #666;
+}
+
+tr.highlight {
+    background: #599;
+}
+
+td a:hover {
+    text-decoration: underline;
+}

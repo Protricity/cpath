@@ -166,8 +166,8 @@ class Attributes implements IAttributes, IHTMLSupportHeaders {
     function setStyle($name, $value=null) {
         if($value === null && strpos($name, ':') !== false) {
             foreach(explode(';', $name) as $style) {
-                list($name, $value) = explode(':', $style, 2);
-                $this->setStyle(trim($name), trim($value));
+                list($key, $value) = explode(':', $style, 2) + array(null, null);
+                $this->setStyle(trim($key), trim($value));
             }
             return $this;
         }
@@ -194,8 +194,9 @@ class Attributes implements IAttributes, IHTMLSupportHeaders {
 		$stylesList = explode(';', $this->mAttributes['style']);
 		$styles = array();
 		foreach($stylesList as &$style) {
-			list($name, $value) = explode(':', $style, 2);
-			$styles[trim($name)] = trim($value);
+			list($key, $value) = explode(':', $style, 2) + array(null, null);
+            if($value !== null)
+			    $styles[trim($key)] = trim($value);
 		}
 		if($name === null)
 			return $styles;
@@ -203,7 +204,7 @@ class Attributes implements IAttributes, IHTMLSupportHeaders {
 		if(!isset($styles[$name]))
 			return null;
 
-		return $this->mAttributes['style'][$name];
+		return $styles[$name];
 	}
 
 	/**

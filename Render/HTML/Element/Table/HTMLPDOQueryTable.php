@@ -19,6 +19,8 @@ use CPath\Render\HTML\Attribute\IAttributes;
 use CPath\Render\HTML\Attribute\StyleAttributes;
 use CPath\Render\HTML\Element\Form\HTMLInputField;
 use CPath\Render\HTML\Element\Form\HTMLSelectField;
+use CPath\Render\HTML\Header\IHeaderWriter;
+use CPath\Render\HTML\Header\IHTMLSupportHeaders;
 use CPath\Render\HTML\HTMLConfig;
 use CPath\Render\HTML\IRenderHTML;
 use CPath\Render\Text\IRenderText;
@@ -26,7 +28,7 @@ use CPath\Request\IRequest;
 use CPath\Request\Validation\IRequestValidation;
 use CPath\Response\IResponse;
 
-class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation, ISequenceMap, IResponse
+class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation, ISequenceMap, IResponse, IHTMLSupportHeaders
 {
 	protected $Query;
 	private $columns;
@@ -305,5 +307,15 @@ class HTMLPDOQueryTable implements IRenderHTML, IRequestValidation, ISequenceMap
      */
     function getMessage() {
         return __CLASS__;
+    }
+
+    /**
+     * Write all support headers used by this renderer
+     * @param IRequest $Request
+     * @param IHeaderWriter $Head the writer inst to use
+     * @return void
+     */
+    function writeHeaders(IRequest $Request, IHeaderWriter $Head) {
+        $Head->writeStyleSheet(__DIR__ . '/assets/table.css');
     }
 }
