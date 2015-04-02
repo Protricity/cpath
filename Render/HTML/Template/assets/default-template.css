@@ -1,103 +1,77 @@
-/** Body **/
-
-body {
-    font-family: monospace;
-}
-
-/** Page Layout **/
-
-section, .section {
-    margin: 0 1.5pt 1pt 1.5pt;
-    border: 1pt solid #ccc;
-    background-color: #eee;
-    padding: 15pt;
-}
-
-.header {
-    /*padding: 0.5em 2em 2em;*/
-}
-
-.content {
-}
-
-.footer {
-}
-
-
 /** Data **/
 
-dl, ul, ol
-{
+/*dl, ul, ol*/
+/*{*/
     /*display: inline-block;*/
-}
+/*}*/
 
-dl > dt
-{
-    float: left;
+/*dl > dt*/
+/*{*/
+    /*float: left;*/
 /*     clear: left; */
-    min-width: 7em;
-    margin: 0 15px 0 0;
-    text-align: right;
-    font-weight: bold;
-    color: #999;
+    /*min-width: 7em;*/
+    /*margin: 0 15px 0 0;*/
+    /*text-align: right;*/
+    /*font-weight: bold;*/
+    /*color: #999;*/
 
-    line-height: 1em;
-    overflow-y: hidden;
-    padding: 3pt 0 0;
-}
+    /*line-height: 1em;*/
+    /*overflow-y: hidden;*/
+    /*padding: 3pt 0 0;*/
+/*}*/
 
-dl > dd
-{
-    line-height: 1em;
-    overflow-y: hidden;
-    padding: 3pt 0 0;
+/*dl > dd*/
+/*{*/
+    /*line-height: 1em;*/
+    /*overflow-y: hidden;*/
+    /*padding: 3pt 0 0;*/
 
-    margin: 0 0 0 70pt;
+    /*margin: 0 0 0 70pt;*/
 
-    min-height: 12pt;
-}
+    /*min-height: 12pt;*/
+/*}*/
 
-ul > li
-{
-    list-style-type: none;
-}
+/*ul > li*/
+/*{*/
+    /*list-style-type: none;*/
+/*}*/
 
 /** Form **/
 
-form {
-    font-family: monospace;
-}
+/*form {*/
+    /*font-family: monospace;*/
+/*}*/
 
-form > legend,
-fieldset > legend {
-    padding: 0 3pt;
+/*form > legend,*/
+/*fieldset > legend {*/
+    /*padding: 0 3pt;*/
     /*margin-bottom: .5em;*/
-    font-weight: bold;
-}
+    /*font-weight: bold;*/
+/*}*/
 
-form > legend {
-    font-size: 1.5em;
-    margin-bottom: 1em;
-}
+/*form > legend {*/
+    /*font-size: 1.5em;*/
+    /*margin-bottom: 1em;*/
+/*}*/
 
-fieldset {
-    border-radius: 4px;
-    border: 2pt solid #ccc;
+/*fieldset {*/
+    /*border-radius: 4px;*/
+    /*border: 2pt solid #ccc;*/
     /* vertical-align: top; */
-}
+/*}*/
 
-fieldset.inline {
-    display: inline-block;
-    margin-bottom: 0.5em;
-}
+/*fieldset.inline {*/
+    /*display: inline-block;*/
+    /*margin-bottom: 0.5em;*/
+/*}*/
 
-form .input {
-    border: 1px outset #708B20;
-    padding: 5pt 5pt;
-    border-radius: 4pt;
-    font-weight: bold;
-}
+/*form .input {*/
+    /*border: 1px outset #708B20;*/
+    /*padding: 5pt 5pt;*/
+    /*border-radius: 4pt;*/
+    /*font-weight: bold;*/
+/*}*/
 
-form button {
-    cursor: pointer;
-}
+/*form button {*/
+    /*cursor: pointer;*/
+/*}*/

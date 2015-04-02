@@ -57,9 +57,9 @@ class DefaultCPathTemplate extends HTMLContainer implements IRoutable, IBuildabl
         $this->setContainer($Content);
 
         $Render->addSupportHeaders($this);
-		$this->addHeaderScript(HeaderConfig::$JQueryPath);
-		$this->addHeaderScript(__DIR__ . '/assets/default-template.js');
-		$this->addHeaderStyleSheet(__DIR__ . '/assets/default-template.css');
+//		$this->addHeaderScript(HeaderConfig::$JQueryPath);
+//		$this->addHeaderScript(__DIR__ . '/assets/default-template.js');
+//		$this->addHeaderStyleSheet(__DIR__ . '/assets/default-template.css');
 
 		$this->addAll(func_get_args());
 	}
